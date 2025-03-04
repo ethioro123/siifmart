@@ -3,297 +3,1062 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Futuristic Coming Soon</title>
+    <meta name="description" content="SiifMart - Ethiopia's Fresh Grocery Store opening soon. Sign up for updates about our fresh produce, quality meats, and household supplies.">
+    <title>SiifMart - Ethiopia's Fresh Grocery Store</title>
+    
+    <!-- Preload assets for better performance -->
+    <link rel="preload" href="#" as="font" type="font/woff2" crossorigin>
+    
     <style>
         :root {
-            --primary: #00ff9d;
-            --secondary: #0066ff;
-            --bg: #0a0a16;
-            --text: #ffffff;
-            --card-bg: rgba(10, 10, 22, 0.8);
-            --glow: rgba(0, 255, 157, 0.2);
+            --primary-color: #0a2540;
+            --secondary-color: #2d8a6f;
+            --accent-color: #7cd6b5;
+            --light-color: #f8f9fa;
+            --dark-color: #121212;
+            --text-color: #333;
+            --dark-text-color: #f0f0f0;
+            --font-primary: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            --transition: all 0.3s ease;
+            
+            /* Setting RGB values for opacity calculations */
+            --primary-color-rgb: 10, 37, 64;
+            --secondary-color-rgb: 45, 138, 111;
+            --accent-color-rgb: 124, 214, 181;
+            --text-color-rgb: 51, 51, 51;
         }
 
-        [data-theme="light"] {
-            --primary: #0066ff;
-            --secondary: #00ff9d;
-            --bg: #f0f9ff;
-            --text: #0a0a16;
-            --card-bg: rgba(255, 255, 255, 0.9);
-            --glow: rgba(0, 102, 255, 0.2);
+        /* Auto dark mode based on system preference */
+        @media (prefers-color-scheme: dark) {
+            :root:not([data-theme="light"]) {
+                --primary-color: #13385e;
+                --secondary-color: #1a6755;
+                --accent-color: #50b498;
+                --text-color: #f0f0f0;
+                --light-color: #1e1e1e;
+                --dark-color: #f8f9fa;
+            }
+        }
+
+        [data-theme="dark"] {
+            --primary-color: #13385e;
+            --secondary-color: #1a6755;
+            --accent-color: #50b498;
+            --text-color: #f0f0f0;
+            --light-color: #1e1e1e;
+            --dark-color: #f8f9fa;
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', system-ui, sans-serif;
+            font-family: var(--font-primary);
         }
 
         body {
-            min-height: 100vh;
-            background: var(--bg);
-            color: var(--text);
-            transition: all 0.5s ease;
+            background-color: var(--light-color);
+            color: var(--text-color);
             overflow-x: hidden;
+            transition: var(--transition);
+            line-height: 1.6;
         }
 
         .container {
-            position: relative;
+            width: 100%;
             max-width: 1200px;
             margin: 0 auto;
-            padding: 2rem;
-            min-height: 100vh;
+            padding: 0 20px;
+        }
+
+        header {
+            padding: 20px 0;
+            position: relative;
+        }
+
+        .nav-content {
             display: flex;
-            flex-direction: column;
-            justify-content: center;
+            justify-content: space-between;
             align-items: center;
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, var(--secondary-color), var(--accent-color));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            position: relative;
+            z-index: 1;
+        }
+
+        .logo::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: var(--accent-color);
+            border-radius: 50%;
+            z-index: -1;
+            opacity: 0.3;
+            top: 5px;
+            right: -5px;
+            animation: pulse 3s infinite;
+        }
+
+        .lang-selector {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .lang-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-color);
+            opacity: 0.7;
+            transition: var(--transition);
+            padding: 5px;
+        }
+
+        .lang-btn:hover, .lang-btn.active {
+            opacity: 1;
+            transform: translateY(-2px);
         }
 
         .theme-toggle {
-            position: fixed;
-            top: 2rem;
-            right: 2rem;
-            width: 50px;
-            height: 50px;
-            border: none;
-            background: var(--card-bg);
-            border-radius: 50%;
             cursor: pointer;
-            backdrop-filter: blur(10px);
-            transition: all 0.3s ease;
+            font-size: 1.5rem;
+            margin-left: 15px;
+            transition: var(--transition);
+            color: var(--text-color);
+            background: none;
+            border: none;
             display: flex;
-            justify-content: center;
             align-items: center;
+            justify-content: center;
+            width: auto;
+            height: auto;
+        }
+
+        .theme-toggle::before {
+            content: '🌙';
+            position: static;
+            transform: none;
+            transition: var(--transition);
+        }
+
+        [data-theme="dark"] .theme-toggle::before {
+            content: '☀️';
         }
 
         .theme-toggle:hover {
-            transform: scale(1.1);
-            box-shadow: 0 0 20px var(--glow);
+            transform: scale(1.15);
         }
 
-        .floating {
-            animation: float 6s ease-in-out infinite;
+        .theme-toggle::after {
+            display: none;
+        }
+
+        .theme-toggle .toggle-circle {
+            display: none;
+        }
+
+        main {
+            padding: 20px 0;
+        }
+
+        .hero {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            margin: 40px 0;
+        }
+
+        .hero-title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-subtitle {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            color: var(--secondary-color);
+        }
+
+        .coming-soon {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin: 20px 0;
+            position: relative;
+            display: inline-block;
+        }
+
+        .coming-soon::before {
+            content: '';
+            position: absolute;
+            height: 3px;
+            width: 70%;
+            background: linear-gradient(90deg, transparent, var(--accent-color), transparent);
+            bottom: -10px;
+            left: 15%;
+            border-radius: 3px;
+        }
+
+        .hero-description {
+            max-width: 700px;
+            margin: 20px auto;
+        }
+
+        .features {
+            margin: 60px 0;
+        }
+
+        .feature {
+            padding: 25px;
+            border-radius: 10px;
+            background-color: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            transition: var(--transition);
+            border: 1px solid rgba(var(--secondary-color-rgb), 0.1);
+            position: relative;
+            overflow: hidden;
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+
+        .feature:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .feature::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: linear-gradient(180deg, var(--secondary-color), transparent);
+        }
+
+        .feature-title {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            color: var(--secondary-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .feature-icon {
+            font-size: 1.5rem;
+        }
+
+        .locations {
+            margin: 60px 0;
+        }
+
+        .locations-title {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 1.8rem;
+            position: relative;
+            display: inline-block;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .locations-title::after {
+            content: '';
+            position: absolute;
+            width: 50px;
+            height: 3px;
+            background: var(--accent-color);
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 3px;
+        }
+
+        .location-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+        }
+
+        .location-card {
+            border-radius: 10px;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            transition: var(--transition);
+            border: 1px solid rgba(var(--secondary-color-rgb), 0.1);
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+
+        .location-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .location-name {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: var(--secondary-color);
+        }
+
+        .signup-section {
+            margin: 60px 0;
+            padding: 40px;
+            border-radius: 15px;
+            background: linear-gradient(135deg, rgba(var(--primary-color-rgb), 0.05), rgba(var(--secondary-color-rgb), 0.05));
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .signup-section::before {
+            content: '';
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            border-radius: 50%;
+            background: radial-gradient(circle, var(--accent-color) 0%, transparent 70%);
+            opacity: 0.1;
+            top: -250px;
+            left: -250px;
+        }
+
+        .signup-title {
+            font-size: 1.8rem;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .signup-form {
+            max-width: 600px;
+            margin: 0 auto;
+            display: grid;
+            gap: 20px;
+        }
+
+        .form-group {
+            display: grid;
+            gap: 5px;
+        }
+
+        .form-group label {
+            font-weight: 500;
+        }
+
+        input, textarea, select {
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid rgba(var(--text-color-rgb), 0.2);
+            background-color: rgba(255, 255, 255, 0.05);
+            color: var(--text-color);
+            font-size: 1rem;
+            width: 100%;
+            transition: var(--transition);
+            -webkit-appearance: none;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 3px rgba(var(--secondary-color-rgb), 0.2);
+        }
+
+        button.submit-btn {
+            padding: 14px 25px;
+            background: linear-gradient(135deg, var(--secondary-color), var(--accent-color));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        button.submit-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+            z-index: -1;
+        }
+
+        button.submit-btn:hover::before {
+            left: 100%;
+        }
+
+        button.submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(var(--secondary-color-rgb), 0.3);
+        }
+
+        footer {
+            padding: 40px 0;
+            text-align: center;
+            position: relative;
+        }
+
+        .footer-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 20px;
+            margin: 20px 0;
+            justify-content: center;
+        }
+
+        .social-link {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--primary-color);
+            color: white;
+            transition: var(--transition);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .social-link svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .social-link:hover {
+            transform: translateY(-5px);
+            background-color: var(--secondary-color);
+        }
+
+        .tagline {
+            font-size: 1.2rem;
+            font-weight: 500;
+            margin-top: 10px;
+        }
+
+        /* Animated elements */
+        .grocery-animation {
+            position: relative;
+            width: 100%;
+            height: 80px;
+            margin: 30px 0;
+            display: flex;
+            justify-content: center;
+            perspective: 1000px;
+        }
+
+        .grocery-item {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            border-radius: 10px;
+            background-color: var(--accent-color);
+            opacity: 0.8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            transform-style: preserve-3d;
+            animation: float 6s infinite ease-in-out;
+        }
+
+        .grocery-item:nth-child(1) {
+            animation-delay: 0s;
+            left: calc(50% - 150px);
+        }
+
+        .grocery-item:nth-child(2) {
+            animation-delay: 2s;
+            left: calc(50% - 50px);
+        }
+
+        .grocery-item:nth-child(3) {
+            animation-delay: 4s;
+            left: calc(50% + 50px);
         }
 
         @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-20px); }
+            0% {
+                transform: translateY(0) rotateY(0);
+            }
+            25% {
+                transform: translateY(-20px) rotateY(90deg);
+            }
+            50% {
+                transform: translateY(0) rotateY(180deg);
+            }
+            75% {
+                transform: translateY(20px) rotateY(270deg);
+            }
+            100% {
+                transform: translateY(0) rotateY(360deg);
+            }
         }
 
-        .hologram-card {
-            background: var(--card-bg);
-            padding: 3rem;
-            border-radius: 20px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 0 50px var(--glow);
-            position: relative;
-            overflow: hidden;
-            margin: 2rem 0;
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 0.3;
+            }
+            50% {
+                transform: scale(1.5);
+                opacity: 0.1;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 0.3;
+            }
         }
 
-        .hologram-card::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(45deg, 
-                transparent,
-                var(--primary),
-                var(--secondary),
-                transparent);
-            animation: rotate 4s linear infinite;
-            opacity: 0.1;
+        /* Responsive styles */
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2rem;
+            }
+            
+            .coming-soon {
+                font-size: 1.5rem;
+            }
+            
+            .features, .location-cards {
+                grid-template-columns: 1fr;
+            }
+            
+            .signup-section {
+                padding: 30px 20px;
+            }
         }
 
-        @keyframes rotate {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        @media (max-width: 480px) {
+            .lang-selector {
+                gap: 8px;
+            }
+            
+            .lang-btn {
+                font-size: 0.85rem;
+                padding: 3px;
+            }
+            
+            .hero-title {
+                font-size: 1.8rem;
+            }
+            
+            .signup-section {
+                padding: 25px 15px;
+            }
         }
 
-        h1 {
-            font-size: 4rem;
-            text-transform: uppercase;
-            letter-spacing: 4px;
-            background: linear-gradient(45deg, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 2rem;
-            text-shadow: 0 0 30px var(--glow);
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
-        .countdown {
-            display: flex;
-            gap: 2rem;
-            margin: 2rem 0;
+        .feature:nth-child(1), .location-card:nth-child(1) {
+            animation-delay: 0.1s;
         }
 
-        .countdown-item {
-            text-align: center;
-            padding: 1rem;
+        .feature:nth-child(2), .location-card:nth-child(2) {
+            animation-delay: 0.3s;
         }
 
-        .countdown-number {
-            font-size: 3rem;
-            font-weight: bold;
-            background: linear-gradient(45deg, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-shadow: 0 0 20px var(--glow);
+        .feature:nth-child(3), .location-card:nth-child(3) {
+            animation-delay: 0.5s;
         }
 
-        .subscribe-form {
-            display: flex;
-            gap: 1rem;
-            margin-top: 2rem;
-        }
-
-        input {
-            padding: 1rem;
-            border: none;
-            border-radius: 50px;
-            background: var(--card-bg);
-            color: var(--text);
-            width: 300px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        button {
-            padding: 1rem 2rem;
-            border: none;
-            border-radius: 50px;
-            background: linear-gradient(45deg, var(--primary), var(--secondary));
-            color: var(--bg);
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 0 30px var(--glow);
-        }
-
-        .particles {
+        /* Add page loading animation */
+        .page-transition {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            pointer-events: none;
-            z-index: -1;
+            background-color: var(--light-color);
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.5s ease-out;
         }
-
-        @media (max-width: 768px) {
-            h1 {
-                font-size: 2.5rem;
+        
+        .page-transition.fade-out {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .loader {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 3px solid rgba(var(--secondary-color-rgb), 0.2);
+            border-left-color: var(--secondary-color);
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
             }
-
-            .countdown {
-                flex-wrap: wrap;
+            100% {
+                transform: rotate(360deg);
             }
         }
     </style>
 </head>
 <body>
-    <div class="particles" id="particles"></div>
-    
-    <button class="theme-toggle" onclick="toggleTheme()">
-        <svg width="24" height="24" viewBox="0 0 24 24">
-            <path fill="currentColor" d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12c0-2.42-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 0 12z"/>
-        </svg>
-    </button>
-
-    <div class="container">
-        <div class="hologram-card floating">
-            <h1>Coming Soon</h1>
-            <p>Prepare for the next dimension of innovation</p>
-            
-            <div class="countdown">
-                <div class="countdown-item">
-                    <div class="countdown-number" id="days">00</div>
-                    <div class="countdown-label">Days</div>
-                </div>
-                <div class="countdown-item">
-                    <div class="countdown-number" id="hours">00</div>
-                    <div class="countdown-label">Hours</div>
-                </div>
-                <div class="countdown-item">
-                    <div class="countdown-number" id="minutes">00</div>
-                    <div class="countdown-label">Minutes</div>
-                </div>
-                <div class="countdown-item">
-                    <div class="countdown-number" id="seconds">00</div>
-                    <div class="countdown-label">Seconds</div>
-                </div>
-            </div>
-
-            <form class="subscribe-form">
-                <input type="email" placeholder="Enter your email for updates" required>
-                <button type="submit">Notify Me</button>
-            </form>
-        </div>
+    <!-- Page loading transition -->
+    <div class="page-transition">
+        <div class="loader"></div>
     </div>
 
+    <header>
+        <div class="container">
+            <div class="nav-content">
+                <div class="logo">SiifMart</div>
+                <div class="lang-selector">
+                    <button class="lang-btn active" data-lang="en">English</button>
+                    <button class="lang-btn" data-lang="am">አማርኛ</button>
+                    <button class="lang-btn" data-lang="or">Afaan Oromoo</button>
+                    <div class="theme-toggle" id="themeToggle">
+                        <div class="toggle-circle"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="container">
+                <h1 class="hero-title">Ethiopia's Fresh Grocery Store</h1>
+                <h2 class="hero-subtitle">Your Neighborhood Grocery Store</h2>
+                
+                <div class="grocery-animation">
+                    <div class="grocery-item">🍎</div>
+                    <div class="grocery-item">🥦</div>
+                    <div class="grocery-item">🥛</div>
+                </div>
+                
+                <div class="coming-soon">Opening Soon!</div>
+                <p>Fresh Produce & Everyday Essentials</p>
+                
+                <div class="hero-description">
+                    <p>Experience a new way of grocery shopping in Ethiopia. Our stores offer fresh produce, quality meats, pantry essentials, and household supplies. Shop with us in-store or order online for convenient delivery!</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="features">
+            <div class="container">
+                <h2 style="text-align: center; margin-bottom: 30px;">What Makes Us Different?</h2>
+                
+                <div class="features-wrapper">
+                    <div class="feature">
+                        <h3 class="feature-title"><span class="feature-icon">🌱</span> Fresh Local Produce</h3>
+                        <p>We partner with local farmers to bring you the freshest fruits and vegetables, supporting Ethiopian agriculture.</p>
+                    </div>
+                    
+                    <div class="feature">
+                        <h3 class="feature-title"><span class="feature-icon">🚚</span> Online Grocery Delivery</h3>
+                        <p>Order your groceries with our mobile app or website, and we'll deliver everything to your doorstep within hours.</p>
+                    </div>
+                    
+                    <div class="feature">
+                        <h3 class="feature-title"><span class="feature-icon">🏷️</span> Weekly Special Offers</h3>
+                        <p>Enjoy weekly promotions and discounts on seasonal items, helping you save on your grocery shopping.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="locations">
+            <div class="container">
+                <h2 class="locations-title">Our Locations</h2>
+                
+                <div class="location-cards">
+                    <div class="location-card">
+                        <h3 class="location-name">Addis Ababa - Bole</h3>
+                        <p>Full grocery store with fresh produce section</p>
+                    </div>
+                    
+                    <div class="location-card">
+                        <h3 class="location-name">Adama</h3>
+                        <p>Fresh market featuring local farm produce</p>
+                    </div>
+                    
+                    <div class="location-card">
+                        <h3 class="location-name">Dire Dawa</h3>
+                        <p>Express grocery store with delivery service</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="signup-section">
+            <div class="container">
+                <h2 class="signup-title">Be the First to Experience Our Store!</h2>
+                <p style="text-align: center; margin-bottom: 20px;">Grand opening dates will be announced soon<br>Opening Day Specials – Sign up to receive discounts and early access promotions!</p>
+                
+                <form class="signup-form">
+                    <div class="form-group">
+                        <label for="name">Full Name</label>
+                        <input type="text" id="name" placeholder="Enter your full name" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input type="email" id="email" placeholder="Enter your email address" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="phone">Mobile Phone</label>
+                        <input type="tel" id="phone" placeholder="Enter your mobile number">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="city">City</label>
+                        <input type="text" id="city" placeholder="Enter your city">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="preferences">What products would you like to see in our store?</label>
+                        <textarea id="preferences" rows="3" placeholder="Share your grocery preferences with us"></textarea>
+                    </div>
+                    
+                    <button type="submit" class="submit-btn">Get Opening Updates</button>
+                </form>
+                
+                <p style="text-align: center; margin-top: 20px;">Follow us on social media for special offers, recipes, and grocery tips.</p>
+                
+                <div class="social-links">
+                    <a href="#" class="social-link" aria-label="Facebook">
+                        <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
+                    </a>
+                    <a href="#" class="social-link" aria-label="Instagram">
+                        <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+                    </a>
+                    <a href="#" class="social-link" aria-label="TikTok">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"></path></svg>
+                    </a>
+                    <a href="#" class="social-link" aria-label="X (Twitter)">
+                        <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M16.99 2L2 22h8l-4 8 20-20h-8l6-8z"/></svg>
+                    </a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="logo">SiifMart</div>
+                <p class="tagline">Fresh, Convenient, Local. Your new grocery destination awaits!</p>
+            </div>
+        </div>
+    </footer>
+
     <script>
-        // Theme Toggle
-        function toggleTheme() {
-            document.body.dataset.theme = 
-                document.body.dataset.theme === 'light' ? 'dark' : 'light';
-            localStorage.setItem('theme', document.body.dataset.theme);
-        }
-
-        // Set saved theme
-        const savedTheme = localStorage.getItem('theme') || 'dark';
-        document.body.dataset.theme = savedTheme;
-
-        // Countdown Timer
-        const countDownDate = new Date('Jan 1, 2025 00:00:00').getTime();
-
-        function updateCountdown() {
-            const now = new Date().getTime();
-            const distance = countDownDate - now;
-
-            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-            document.getElementById('days').innerHTML = days.toString().padStart(2, '0');
-            document.getElementById('hours').innerHTML = hours.toString().padStart(2, '0');
-            document.getElementById('minutes').innerHTML = minutes.toString().padStart(2, '0');
-            document.getElementById('seconds').innerHTML = seconds.toString().padStart(2, '0');
-        }
-
-        setInterval(updateCountdown, 1000);
-        updateCountdown();
-
-        // Particles
-        function createParticles() {
-            const particles = document.getElementById('particles');
-            for (let i = 0; i < 50; i++) {
-                const particle = document.createElement('div');
-                particle.style.position = 'absolute';
-                particle.style.width = '2px';
-                particle.style.height = '2px';
-                particle.style.background = 'var(--primary)';
-                particle.style.borderRadius = '50%';
-                particle.style.left = Math.random() * 100 + '%';
-                particle.style.top = Math.random() * 100 + '%';
-                particle.style.animation = `float ${5 + Math.random() * 10}s infinite`;
-                particles.appendChild(particle);
+        // Language translations
+        const translations = {
+            en: {
+                title: "Ethiopia's Fresh Grocery Store",
+                subtitle: "Your Neighborhood Grocery Store",
+                openingSoon: "Opening Soon!",
+                tagline: "Fresh Produce & Everyday Essentials",
+                description: "Experience a new way of grocery shopping in Ethiopia. Our stores offer fresh produce, quality meats, pantry essentials, and household supplies. Shop with us in-store or order online for convenient delivery!",
+                
+                differentTitle: "What Makes Us Different?",
+                feature1Title: "Fresh Local Produce",
+                feature1Desc: "We partner with local farmers to bring you the freshest fruits and vegetables, supporting Ethiopian agriculture.",
+                feature2Title: "Online Grocery Delivery",
+                feature2Desc: "Order your groceries with our mobile app or website, and we'll deliver everything to your doorstep within hours.",
+                feature3Title: "Weekly Special Offers",
+                feature3Desc: "Enjoy weekly promotions and discounts on seasonal items, helping you save on your grocery shopping.",
+                
+                locationsTitle: "Our Locations",
+                location1: "Addis Ababa - Bole",
+                location1Desc: "Full grocery store with fresh produce section",
+                location2: "Adama",
+                location2Desc: "Fresh market featuring local farm produce",
+                location3: "Dire Dawa",
+                location3Desc: "Express grocery store with delivery service",
+                
+                signupTitle: "Be the First to Experience Our Store!",
+                signupDesc1: "Grand opening dates will be announced soon",
+                signupDesc2: "Opening Day Specials – Sign up to receive discounts and early access promotions!",
+                
+                fullName: "Full Name",
+                fullNamePlaceholder: "Enter your full name",
+                email: "Email Address",
+                emailPlaceholder: "Enter your email address",
+                phone: "Mobile Phone",
+                phonePlaceholder: "Enter your mobile number",
+                city: "City",
+                cityPlaceholder: "Enter your city",
+                preferences: "What products would you like to see in our store?",
+                preferencesPlaceholder: "Share your grocery preferences with us",
+                submitButton: "Get Opening Updates",
+                
+                socialMediaText: "Follow us on social media for special offers, recipes, and grocery tips.",
+                footerTagline: "Fresh, Convenient, Local. Your new grocery destination awaits!"
+            },
+            am: {
+                title: "የኢትዮጵያ ታዛ የሸቀጣሸቀጥ መደብር",
+                subtitle: "የአካባቢዎ የአትክልት መደብር",
+                openingSoon: "በቅርቡ ይከፈታል!",
+                tagline: "ታዛ ምርቶች እና የዕለት ተዕለት አስፈላጊ ነገሮች",
+                description: "በኢትዮጵያ የአዲስ የግሮሰሪ ሾፒንግ መንገድን ይሞክሩ። መደብሮቻችን ታዛ ምርቶችን፣ ጥራት ያላቸውን ስጋዎችን፣ የማከማቻ ዕቃዎችን እና የቤት ውስጥ አቅርቦቶችን ይሰጣሉ። ከኛ ጋር በመደብር ይግዙ ወይም ለምቹ አቅርቦት በመስመር ላይ ይዘዙ!",
+                
+                differentTitle: "የሚለየን ምንድን ነው?",
+                feature1Title: "ታዛ የአካባቢ ምርቶች",
+                feature1Desc: "የኢትዮጵያን ግብርና በመደገፍ በጣም ታዛ ፍራፍሬዎችን እና አትክልቶችን እንዲያገኙ ከአካባቢው አርሶአደሮች ጋር እንተባበራለን።",
+                feature2Title: "የመስመር ላይ ግሮሰሪ ማድረስ",
+                feature2Desc: "ግሮሰሪዎችዎን በሞባይል መተግበሪያችን ወይም ድህረ ገጽ ላይ ይዘዙ እና ሁሉንም ነገር በሰዓታት ውስጥ ወደ ደጃፍዎ እናደርሳለን።",
+                feature3Title: "የሳምንታዊ ልዩ ቅናሾች",
+                feature3Desc: "በግሮሰሪ ሾፒንግዎ ላይ እንዲቆጥቡ በየወቅቱ ምርቶች ላይ የሳምንታዊ ማስተዋወቂያዎችን እና ቅናሾችን ይደሰቱ።",
+                
+                locationsTitle: "የእኛ ቦታዎች",
+                location1: "አዲስ አበባ - ቦሌ",
+                location1Desc: "ሙሉ የግሮሰሪ መደብር ከታዛ ምርት ክፍል ጋር",
+                location2: "አዳማ",
+                location2Desc: "የአካባቢ እርሻ ምርቶችን የሚያቀርብ ታዛ ገበያ",
+                location3: "ድሬዳዋ",
+                location3Desc: "ፈጣን የግሮሰሪ መደብር ከአቅርቦት አገልግሎት ጋር",
+                
+                signupTitle: "መደብራችንን የመጀመሪያ ለመሞከር ይመዝገቡ!",
+                signupDesc1: "ታላቁ የመክፈቻ ቀናት በቅርቡ ይገለጻሉ",
+                signupDesc2: "የመክፈቻ ቀን ልዩ ቅናሾች - ቅናሾችን እና የቅድሚያ መግቢያ ማስተዋወቂያዎችን ለመቀበል ይመዝገቡ!",
+                
+                fullName: "ሙሉ ስም",
+                fullNamePlaceholder: "ሙሉ ስምዎን ያስገቡ",
+                email: "የኢሜይል አድራሻ",
+                emailPlaceholder: "የኢሜይል አድራሻዎን ያስገቡ",
+                phone: "የሞባይል ስልክ",
+                phonePlaceholder: "የሞባይል ቁጥርዎን ያስገቡ",
+                city: "ከተማ",
+                cityPlaceholder: "ከተማዎን ያስገቡ",
+                preferences: "በመደብራችን ውስጥ ምን ዓይነት ምርቶችን ማየት ይፈልጋሉ?",
+                preferencesPlaceholder: "የግሮሰሪ ምርጫዎችዎን ያጋሩን",
+                submitButton: "የመክፈቻ አዳዲስ መረጃዎችን ያግኙ",
+                
+                socialMediaText: "ለልዩ ቅናሾች፣ ለምግብ አሰራር ዘዴዎች እና የግሮሰሪ ምክሮች በማህበራዊ ሚዲያ ይከተሉን።",
+                footerTagline: "ታዛ፣ ምቹ፣ አካባቢያዊ። አዲሱ የግሮሰሪ መድረሻዎ በሚጠባበቅዎት ላይ ነው!"
+            },
+            or: {
+                title: "Suuqii Nyaataa Haaraa Itoophiyaa",
+                subtitle: "Suuqii Nyaataa Ollaa Keessanii",
+                openingSoon: "Dhiyeenyatti Ni Banamaa!",
+                tagline: "Meshaaalee Haaraa fi Meeshaalee Guyyaa-Guyyaan Barbaachisan",
+                description: "Karaa haaraa bittaa nyaataa Itoophiyaa keessatti muuxannoo argadhaa. Suuqiin keenya meshaaalee haaraa, foon qulqullina qabu, meeshaalee mana keessaa, fi dhiyeessiiwwan maatiif barbaachisan ni dhiyeessa. Suuqii keenyatti bitaa ykn online irratti ajajaa fi bilisaan geeffama argadhaa!",
+                
+                differentTitle: "Maaltu Nu Adda Baasa?",
+                feature1Title: "Meshaaalee Haaraa Naannoo",
+                feature1Desc: "Qonnaan bultoota naannoo waliin hojjennee, kuduraalee fi muduraalee haaraa isinii fidna, qonnaa Itoophiyaa deeggaruun.",
+                feature2Title: "Geeffama Nyaataa Online",
+                feature2Desc: "Nyaata keessan appii moobaayilii keenya ykn website irra ajajaa, waan hunda sa'aatii muraasa keessatti balbala keessan geessina.",
+                feature3Title: "Dhiyeessiiwwan Addaa Torbee",
+                feature3Desc: "Dhiyeessiiwwan torbee fi hir'ina gatii meshaaalee yeroo irratti gammachuun fayyadamaa, bittaa nyaataa keessan irratti akka qusattan gargaara.",
+                
+                locationsTitle: "Bakkeewwan Keenya",
+                location1: "Finfinnee - Boolee",
+                location1Desc: "Suuqii nyaataa guutuu kutaa meshaaalee haaraa waliin",
+                location2: "Adaamaa",
+                location2Desc: "Gabaa haaraa meshaaalee qonnaa naannoo kan agarsiisu",
+                location3: "Dirree Dhawaa",
+                location3Desc: "Suuqii nyaataa ariifachiisaa tajaajila geeffamaa waliin",
+                
+                signupTitle: "Jalqaba Suuqii Keenya Muuxadhaa!",
+                signupDesc1: "Guyyoota banuu gurguddoo dhiyeenyatti beeksifamu",
+                signupDesc2: "Dhiyeessiiwwan Guyyaa Banuu – Dhimmisuuwwan fi dhiyeessiiwwan dursaa argachuuf galmaa'aa!",
+                
+                fullName: "Maqaa Guutuu",
+                fullNamePlaceholder: "Maqaa keessan guutuu galchaa",
+                email: "Teessoo Imeelii",
+                emailPlaceholder: "Teessoo imeelii keessan galchaa",
+                phone: "Bilbila Moobaayilii",
+                phonePlaceholder: "Lakkoofsa moobaayilii keessan galchaa",
+                city: "Magaalaa",
+                cityPlaceholder: "Magaalaa keessan galchaa",
+                preferences: "Suuqii keenya keessatti meshaaalee akkamii arguu barbaaddu?",
+                preferencesPlaceholder: "Filannoo nyaataa keessan nu waliin qooddadhaa",
+                submitButton: "Odeeffannoo Banuu Argadhaa",
+                
+                socialMediaText: "Dhiyeessiiwwan addaa, seera nyaataa, fi gorsa nyaataa argachuuf miidiyaa hawaasaa irratti nu hordofaa.",
+                footerTagline: "Haaraa, Mijataa, Naannoo. Bakki nyaataa haaraan keessan isin eegaa jira!"
             }
+        };
+
+        // Function to update all text based on selected language
+        function updateLanguage(lang) {
+            // Save selected language
+            localStorage.setItem('language', lang);
+            
+            // Update title & subtitle
+            document.querySelector('.hero-title').textContent = translations[lang].title;
+            document.querySelector('.hero-subtitle').textContent = translations[lang].subtitle;
+            document.querySelector('.coming-soon').textContent = translations[lang].openingSoon;
+            document.querySelector('.hero p').textContent = translations[lang].tagline;
+            document.querySelector('.hero-description p').textContent = translations[lang].description;
+            
+            // Update features
+            document.querySelector('.features h2').textContent = translations[lang].differentTitle;
+            
+            const features = document.querySelectorAll('.feature');
+            features[0].querySelector('.feature-title').innerHTML = `<span class="feature-icon">🌱</span> ${translations[lang].feature1Title}`;
+            features[0].querySelector('p').textContent = translations[lang].feature1Desc;
+            
+            features[1].querySelector('.feature-title').innerHTML = `<span class="feature-icon">🚚</span> ${translations[lang].feature2Title}`;
+            features[1].querySelector('p').textContent = translations[lang].feature2Desc;
+            
+            features[2].querySelector('.feature-title').innerHTML = `<span class="feature-icon">🏷️</span> ${translations[lang].feature3Title}`;
+            features[2].querySelector('p').textContent = translations[lang].feature3Desc;
+            
+            // Update locations
+            document.querySelector('.locations-title').textContent = translations[lang].locationsTitle;
+            
+            const locations = document.querySelectorAll('.location-card');
+            locations[0].querySelector('.location-name').textContent = translations[lang].location1;
+            locations[0].querySelector('p').textContent = translations[lang].location1Desc;
+            
+            locations[1].querySelector('.location-name').textContent = translations[lang].location2;
+            locations[1].querySelector('p').textContent = translations[lang].location2Desc;
+            
+            locations[2].querySelector('.location-name').textContent = translations[lang].location3;
+            locations[2].querySelector('p').textContent = translations[lang].location3Desc;
+            
+            // Update signup section
+            document.querySelector('.signup-title').textContent = translations[lang].signupTitle;
+            const signupDesc = document.querySelector('.signup-section > .container > p');
+            signupDesc.innerHTML = `${translations[lang].signupDesc1}<br>${translations[lang].signupDesc2}`;
+            
+            // Update form
+            const formLabels = document.querySelectorAll('.form-group label');
+            formLabels[0].textContent = translations[lang].fullName;
+            formLabels[1].textContent = translations[lang].email;
+            formLabels[2].textContent = translations[lang].phone;
+            formLabels[3].textContent = translations[lang].city;
+            formLabels[4].textContent = translations[lang].preferences;
+            
+            const formInputs = document.querySelectorAll('.form-group input, .form-group textarea');
+            formInputs[0].placeholder = translations[lang].fullNamePlaceholder;
+            formInputs[1].placeholder = translations[lang].emailPlaceholder;
+            formInputs[2].placeholder = translations[lang].phonePlaceholder;
+            formInputs[3].placeholder = translations[lang].cityPlaceholder;
+            formInputs[4].placeholder = translations[lang].preferencesPlaceholder;
+            
+            document.querySelector('button.submit-btn').textContent = translations[lang].submitButton;
+            
+            // Update social media text and footer
+            document.querySelector('.signup-section > .container > p:last-of-type').textContent = translations[lang].socialMediaText;
+            document.querySelector('.tagline').textContent = translations[lang].footerTagline;
         }
 
-        createParticles();
+        // Theme toggle functionality with system preference detection
+        const themeToggle = document.getElementById('themeToggle');
+        const body = document.body;
+        
+        // Check for saved theme preference or use system preference
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+            body.setAttribute('data-theme', savedTheme);
+        } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            body.setAttribute('data-theme', 'dark');
+        }
+        
+        // Listen for system preference changes
+        if (window.matchMedia) {
+            const colorSchemeQuery = window.matchMedia('(prefers-color-scheme: dark)');
+            colorSchemeQuery.addEventListener('change', (e) => {
+                if (!localStorage.getItem('theme')) {
+                    if (e.matches) {
+                        body.setAttribute('data-theme', 'dark');
+                    } else {
+                        body.removeAttribute('data-theme');
+                    }
+                }
+            });
+        }
+        
+        themeToggle.addEventListener('click', () => {
+            if (body.getAttribute('data-theme') === 'dark') {
+                body.setAttribute('data-theme', 'light');
+                localStorage.setItem('theme', 'light');
+            } else {
+                body.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        });
+        
+        // Language selector functionality
+        const langButtons = document.querySelectorAll('.lang-btn');
+        
+        // Check for saved language preference
+        const savedLanguage = localStorage.getItem('language') || 'en';
+        
+        // Set initial language
+        updateLanguage(savedLanguage);
+        
+        // Update active language button
+        langButtons.forEach(btn => {
+            if (btn.getAttribute('data-lang') === savedLanguage) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+        
+        langButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Remove active class from all buttons
+                langButtons.forEach(b => b.classList.remove('active'));
+                // Add active class to clicked button
+                btn.classList.add('active');
+                
+                // Update language
+                const lang = btn.getAttribute('data-lang');
+                updateLanguage(lang);
+            });
+        });
+
+        // Page loading animation
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.querySelector('.page-transition').classList.add('fade-out');
+            }, 500);
+        });
     </script>
 </body>
-</html>
+</html> 
