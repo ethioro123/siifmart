@@ -1,0 +1,11 @@
+name = "siifmart"
+type = "webpack"
+account_id = ""
+workers_dev = true
+route = ""
+zone_id = ""
+compatibility_date = "2024-03-04"
+
+[site]
+bucket = "./"
+entry-point = "workers-site" 

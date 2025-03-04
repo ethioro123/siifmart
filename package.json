@@ -1,0 +1,17 @@
+{
+  "name": "siifmart-coming-soon",
+  "version": "1.0.0",
+  "description": "Coming soon page for SiifMart grocery store in Ethiopia",
+  "main": "index.html",
+  "scripts": {
+    "deploy": "wrangler deploy"
+  },
+  "keywords": [
+    "grocery",
+    "ethiopia",
+    "coming-soon",
+    "multilingual"
+  ],
+  "author": "",
+  "license": "MIT"
+} 
