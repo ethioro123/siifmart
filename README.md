@@ -1,30 +1,34 @@
 # SiifMart Coming Soon Page
 
-A futuristic, clean coming soon page for SiifMart, Ethiopia's Fresh Grocery Store.
+A modern, responsive "Coming Soon" landing page for SiifMart, Ethiopia's fresh grocery store.
 
 ## Features
 
-- Responsive design optimized for mobile devices
-- Clean and futuristic UI without neon colors
-- Grocery-themed animations
-- Dark/light mode toggle
-- Language selection (English, Amharic, Afaan Oromoo)
-- Email signup form for opening updates
+- Clean, modern design with fluid animations
+- Responsive layout that works on all device sizes
+- Theme toggle between light and dark modes
+- Multilingual support (English, Amharic, and Afaan Oromoo)
+- Animated grocery elements
+- Newsletter signup form
 - Location information
 - Social media links
-
-## Setup
-
-Simply open `index.html` in your web browser to view the coming soon page.
 
 ## Technologies Used
 
 - HTML5
-- CSS3 (embedded)
-- JavaScript (embedded)
+- CSS3 with modern features (Grid, Flexbox, CSS Variables)
+- Vanilla JavaScript
+- Local Storage for theme and language preferences
 
-## Design Philosophy
+## Deployment
 
-The design focuses on a futuristic yet clean aesthetic, using subtle animations and transformations to create a modern feel. The color palette uses calming greens and blues reminiscent of fresh produce without resorting to neon colors.
+The site is deployed using GitHub Pages and can be viewed at: [shukriidriss.github.io/siifmart-coming-soon](https://shukriidriss.github.io/siifmart-coming-soon)
 
-The layout is optimized for mobile devices with a responsive design that works well on screens of all sizes. 
+## Local Development
+
+To run this project locally:
+
+1. Clone the repository
+2. Open `index.html` in your browser
+
+No build tools or dependencies required! 
