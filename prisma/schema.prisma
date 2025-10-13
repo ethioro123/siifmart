@@ -1,0 +1,104 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Note: SQLite connector does not support enums or Decimal native type.
+// We use strings for enum-like fields and integer cents for money.
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String
+  passwordHash String
+  role         String   @default("CASHIER") // ADMIN | MANAGER | CASHIER
+  createdAt    DateTime @default(now())
+  sales        Sale[]
+}
+
+model Product {
+  id             String   @id @default(cuid())
+  name           String
+  sku            String?  @unique
+  barcode        String?  @unique
+  category       String?
+  unit           String   @default("unit")
+  costCents      Int      @default(0)
+  priceCents     Int      @default(0)
+  taxRateBps     Int      @default(0) // basis points (1% = 100)
+  stockQuantity  Int      @default(0)
+  reorderLevel   Int      @default(0)
+  imageUrl       String?
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  saleItems      SaleItem[]
+  purchaseItems  PurchaseOrderItem[]
+  adjustments    InventoryAdjustment[]
+}
+
+model Supplier {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  email     String?
+  phone     String?
+  address   String?
+  createdAt DateTime @default(now())
+  orders    PurchaseOrder[]
+}
+
+model PurchaseOrder {
+  id             String               @id @default(cuid())
+  supplier       Supplier             @relation(fields: [supplierId], references: [id])
+  supplierId     String
+  status         String               @default("DRAFT") // DRAFT | ORDERED | RECEIVED | CANCELLED
+  totalCostCents Int                  @default(0)
+  createdAt      DateTime             @default(now())
+  items          PurchaseOrderItem[]
+}
+
+model PurchaseOrderItem {
+  id              String        @id @default(cuid())
+  purchase        PurchaseOrder @relation(fields: [purchaseOrderId], references: [id])
+  purchaseOrderId String
+  product         Product       @relation(fields: [productId], references: [id])
+  productId       String
+  quantity        Int
+  costCents       Int
+  subtotalCents   Int
+}
+
+model Sale {
+  id            String        @id @default(cuid())
+  user          User          @relation(fields: [userId], references: [id])
+  userId        String
+  totalCents    Int           @default(0)
+  paymentMethod String        // CASH | CARD | MOBILE | OTHER
+  createdAt     DateTime      @default(now())
+  items         SaleItem[]
+}
+
+model SaleItem {
+  id           String  @id @default(cuid())
+  sale         Sale    @relation(fields: [saleId], references: [id])
+  saleId       String
+  product      Product @relation(fields: [productId], references: [id])
+  productId    String
+  quantity     Int
+  priceCents   Int
+  subtotalCents Int
+}
+
+model InventoryAdjustment {
+  id        String   @id @default(cuid())
+  product   Product  @relation(fields: [productId], references: [id])
+  productId String
+  change    Int
+  reason    String
+  reference String?
+  createdAt DateTime @default(now())
+}
