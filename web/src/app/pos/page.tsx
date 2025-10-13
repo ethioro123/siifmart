@@ -9,24 +9,20 @@ export default function POS() {
 
   const total = useMemo(() => items.reduce((s, i) => s + i.price * i.qty, 0), [items]);
 
-  const addScan = useCallback(() => {
+  const addScan = useCallback(async () => {
     const code = scan.trim();
     if (!code) return;
-    // For demo, map MILK-1L and BREAD-STD
-    const map: Record<string, { name: string; price: number }> = {
-      "MILK-1L": { name: "Milk 1L", price: 30 },
-      "BREAD-STD": { name: "Bread Loaf", price: 20 },
-    };
-    const meta = map[code];
-    if (!meta) return setScan("");
+    const res = await fetch(`/api/pos/lookup?code=${encodeURIComponent(code)}`);
+    const data = await res.json();
+    if (!data.found) return setScan("");
     setItems((prev) => {
-      const idx = prev.findIndex((i) => i.sku === code);
+      const idx = prev.findIndex((i) => i.sku === data.product.sku);
       if (idx >= 0) {
         const copy = [...prev];
         copy[idx] = { ...copy[idx], qty: copy[idx].qty + 1 };
         return copy;
       }
-      return [...prev, { sku: code, name: meta.name, price: meta.price, qty: 1 }];
+      return [...prev, { sku: data.product.sku, name: data.product.name, price: Number(data.product.price), qty: 1 }];
     });
     setScan("");
   }, [scan]);
@@ -39,10 +35,25 @@ export default function POS() {
     return () => window.removeEventListener("keydown", onKey);
   }, [addScan]);
 
-  function checkout() {
-    alert(`Paid ${total.toFixed(2)}`);
-    setItems([]);
-    router.push("/dashboard");
+  async function checkout() {
+    if (!items.length) return;
+    // TODO: fetch current user id from session on server; for now, seed admin id is unknown here
+    const res = await fetch("/api/pos/checkout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        cashierId: "seed-admin", // TODO: resolve from session
+        items: items.map((i) => ({
+          sku: i.sku,
+          quantity: i.qty,
+          price: i.price,
+        })),
+      }),
+    });
+    if (res.ok) {
+      setItems([]);
+      router.push("/dashboard");
+    }
   }
 
   return (
