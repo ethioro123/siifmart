@@ -1,13 +1,15 @@
-import { PrismaAdapter } from "@next-auth/prisma-adapter";
-import NextAuth from "next-auth";
+import { PrismaAdapter } from "@auth/prisma-adapter";
 import Credentials from "next-auth/providers/credentials";
-import type { AuthOptions as NextAuthConfig } from "next-auth";
+import type { NextAuthOptions, Session, User } from "next-auth";
+import type { AdapterUser } from "next-auth/adapters";
+import type { JWT } from "next-auth/jwt";
 import bcrypt from "bcrypt";
 import { prisma } from "./prisma";
 
-export const authConfig = {
+export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   session: { strategy: "jwt" },
+  pages: { signIn: "/signin" },
   providers: [
     Credentials({
       name: "Credentials",
@@ -26,17 +28,15 @@ export const authConfig = {
     }),
   ],
   callbacks: {
-    async jwt({ token, user }: { token: { role?: string } & Record<string, unknown>; user?: { role?: string } | null }) {
-      if (user) {
-        token.role = user.role;
+    async jwt({ token, user }: { token: JWT; user?: User | AdapterUser | null }) {
+      if (user && (user as User & { role?: string }).role) {
+        (token as JWT & { role?: string }).role = (user as User & { role?: string }).role;
       }
       return token;
     },
-    async session({ session, token }: { session: { role?: string } & Record<string, unknown>; token: { role?: string } & Record<string, unknown> }) {
-      session.role = token.role;
+    async session({ session, token }: { session: Session; token: JWT }) {
+      (session as Session & { role?: string }).role = (token as JWT & { role?: string }).role;
       return session;
     },
   },
-} satisfies NextAuthConfig;
-
-export const { auth, handlers, signIn, signOut } = NextAuth(authConfig);
+};

@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
 export default function POS() {
@@ -9,17 +9,7 @@ export default function POS() {
 
   const total = useMemo(() => items.reduce((s, i) => s + i.price * i.qty, 0), [items]);
 
-  useEffect(() => {
-    function onKey(e: KeyboardEvent) {
-      if (e.key === "Enter") {
-        addScan();
-      }
-    }
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [scan]);
-
-  function addScan() {
+  const addScan = useCallback(() => {
     const code = scan.trim();
     if (!code) return;
     // For demo, map MILK-1L and BREAD-STD
@@ -39,7 +29,15 @@ export default function POS() {
       return [...prev, { sku: code, name: meta.name, price: meta.price, qty: 1 }];
     });
     setScan("");
-  }
+  }, [scan]);
+
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Enter") addScan();
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [addScan]);
 
   function checkout() {
     alert(`Paid ${total.toFixed(2)}`);
