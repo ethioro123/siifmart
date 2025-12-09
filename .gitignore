@@ -1,0 +1,33 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Android App (optional - can be kept in repo or excluded)
+# android-app/
+
+# API Keys and Secrets
+docs/OPENROUTER_API_KEY.md
+docs/*_API_KEY.md
+.env.local
+.env.*.local

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Barcode Test - Shipping Label</title>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
+    <style>
+        @media print {
+            @page { size: 4in 6in; margin: 0; }
+            body { margin: 0; padding: 0; }
+            .no-print { display: none; }
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .label { width: 4in; height: 6in; border: 2px solid #000; padding: 15px; box-sizing: border-box; margin: 20px auto; }
+        .header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 15px; }
+        .company { font-size: 20px; font-weight: bold; }
+        .barcode-container { text-align: center; margin: 15px 0; padding: 10px; background: #fff; border: 1px solid #ccc; }
+        .tracking-text { font-size: 18px; font-weight: bold; letter-spacing: 2px; margin-top: 8px; text-align: center; }
+        .section { margin: 12px 0; }
+        .section-title { font-size: 11px; font-weight: bold; color: #666; margin-bottom: 4px; }
+        .section-content { font-size: 14px; font-weight: bold; }
+        .details { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+        .detail-item { border: 1px solid #ccc; padding: 8px; }
+        .detail-label { font-size: 10px; color: #666; }
+        .detail-value { font-size: 14px; font-weight: bold; }
+        .no-print { text-align: center; margin: 20px; }
+        button { padding: 12px 40px; margin: 10px; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold; }
+        .print-btn { background: #00ff9d; }
+        .close-btn { background: #666; color: white; }
+    </style>
+</head>
+<body>
+    <div class="no-print">
+        <h1>Shipping Label Test</h1>
+        <p>This is a test page to verify the barcode generates correctly.</p>
+        <button class="print-btn" onclick="window.print()">🖨️ Print Label</button>
+        <button class="close-btn" onclick="window.close()">✕ Close</button>
+    </div>
+    
+    <div class="label">
+        <div class="header">
+            <div class="company">SiifMart Logistics</div>
+            <div style="font-size: 12px; color: #666;">Express Delivery Service</div>
+        </div>
+        
+        <div class="barcode-container">
+            <svg id="barcode"></svg>
+            <div class="tracking-text">TRK-TEST123</div>
+        </div>
+        
+        <div class="section">
+            <div class="section-title">CARRIER</div>
+            <div class="section-content">SiifMart Logistics</div>
+        </div>
+        
+        <div class="section">
+            <div class="section-title">SERVICE LEVEL</div>
+            <div class="section-content">Express Delivery</div>
+        </div>
+        
+        <div class="details">
+            <div class="detail-item">
+                <div class="detail-label">BOX SIZE</div>
+                <div class="detail-value">Medium</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">WEIGHT</div>
+                <div class="detail-value">2.5 kg</div>
+            </div>
+        </div>
+        
+        <div style="margin-top: 15px; padding-top: 12px; border-top: 1px dashed #ccc; text-align: center; font-size: 9px; color: #999;">
+            Generated: Test Label
+        </div>
+    </div>
+    
+    <script>
+        // Wait for JsBarcode library to load, then generate barcode
+        function generateBarcode() {
+            console.log('Attempting to generate barcode...');
+            console.log('JsBarcode available:', typeof JsBarcode !== 'undefined');
+            
+            if (typeof JsBarcode !== 'undefined') {
+                try {
+                    JsBarcode("#barcode", "TRK-TEST123", {
+                        format: "CODE128",
+                        width: 2,
+                        height: 60,
+                        displayValue: false,
+                        margin: 5
+                    });
+                    console.log('✅ Barcode generated successfully!');
+                } catch (error) {
+                    console.error('❌ Error generating barcode:', error);
+                }
+            } else {
+                console.error('❌ JsBarcode library not loaded, retrying...');
+                // Retry after a short delay
+                setTimeout(generateBarcode, 100);
+            }
+        }
+        
+        // Generate barcode when page is fully loaded
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', generateBarcode);
+        } else {
+            generateBarcode();
+        }
+    </script>
+</body>
+</html>

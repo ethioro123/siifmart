@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- SIIFMART Cyber Theme Colors - Matching Web App -->
+    
+    <!-- Primary Colors -->
+    <color name="cyber_primary">#00FF9D</color>
+    <color name="cyber_accent">#00CC7D</color>
+    
+    <!-- Background Colors -->
+    <color name="cyber_black">#050505</color>
+    <color name="cyber_dark">#111111</color>
+    <color name="cyber_gray">#1A1A1A</color>
+    <color name="cyber_glass">#1A1A1A99</color>
+    
+    <!-- Text Colors -->
+    <color name="text_base">#E5E5E5</color>
+    <color name="text_secondary">#A0A0A0</color>
+    <color name="text_muted">#666666</color>
+    
+    <!-- Border Colors -->
+    <color name="border_primary">#00FF9D33</color>
+    <color name="border_secondary">#FFFFFF1A</color>
+    <color name="border_tertiary">#FFFFFF0D</color>
+    
+    <!-- Status Colors -->
+    <color name="status_success">#00FF9D</color>
+    <color name="status_error">#FF4444</color>
+    <color name="status_warning">#FFAA00</color>
+    <color name="status_info">#00AAFF</color>
+    
+    <!-- Role Colors (matching web app) -->
+    <color name="role_super_admin">#EF4444</color>
+    <color name="role_admin">#A855F7</color>
+    <color name="role_manager">#3B82F6</color>
+    <color name="role_hr">#EC4899</color>
+    <color name="role_warehouse_manager">#F97316</color>
+    <color name="role_dispatcher">#F59E0B</color>
+    <color name="role_pos">#10B981</color>
+    <color name="role_picker">#EAB308</color>
+    <color name="role_driver">#06B6D4</color>
+    
+    <!-- Standard Android Colors -->
+    <color name="black">#000000</color>
+    <color name="white">#FFFFFF</color>
+    <color name="transparent">#00000000</color>
+</resources>
+

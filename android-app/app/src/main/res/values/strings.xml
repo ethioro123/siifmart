@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">SIIFMART</string>
+    <string name="app_description">Retail &amp; Warehouse Operations System</string>
+    <string name="loading">Loading...</string>
+    <string name="error_network">No internet connection. Please check your network.</string>
+    <string name="error_load_failed">Failed to load page. Please try again.</string>
+</resources>
+

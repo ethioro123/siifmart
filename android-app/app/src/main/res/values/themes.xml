@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- SIIFMART Dark Theme - Matching Web App -->
+    <style name="Theme.SIIFMART" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Primary Colors -->
+        <item name="colorPrimary">@color/cyber_primary</item>
+        <item name="colorPrimaryVariant">@color/cyber_accent</item>
+        <item name="colorOnPrimary">@color/cyber_black</item>
+
+        <!-- Background Colors -->
+        <item name="android:colorBackground">@color/cyber_black</item>
+        <item name="colorSurface">@color/cyber_dark</item>
+        <item name="colorSurfaceVariant">@color/cyber_gray</item>
+
+        <!-- Text Colors -->
+        <item name="android:textColorPrimary">@color/text_base</item>
+        <item name="android:textColorSecondary">@color/text_secondary</item>
+
+        <!-- Status Bar -->
+        <item name="android:statusBarColor">@color/cyber_black</item>
+        <item name="android:windowLightStatusBar">false</item>
+
+        <!-- Navigation Bar -->
+        <item name="android:navigationBarColor">@color/cyber_black</item>
+        <item name="android:windowLightNavigationBar">false</item>
+
+        <!-- Window -->
+        <item name="android:windowBackground">@color/cyber_black</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+    </style>
+
+    <!-- Dark Theme Variant -->
+    <style name="Theme.SIIFMART_Dark" parent="Theme.SIIFMART">
+        <item name="android:forceDarkAllowed">true</item>
+    </style>
+
+    <!-- Splash Screen Theme -->
+    <style name="Theme.App.Starting" parent="Theme.SIIFMART_Dark">
+        <item name="android:windowBackground">@drawable/splash_background</item>
+    </style>
+</resources>
+

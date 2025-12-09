@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Barcode Size Showcase - SIIFMART</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 40px;
+            font-size: 1.1rem;
+        }
+
+        .size-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .size-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .size-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .size-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .size-name {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .size-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-tiny {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge-small {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .badge-medium {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .badge-large {
+            background: #fce7f3;
+            color: #9f1239;
+        }
+
+        .badge-xlarge {
+            background: #e0e7ff;
+            color: #3730a3;
+        }
+
+        .size-specs {
+            margin-bottom: 16px;
+            font-size: 0.85rem;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .spec-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+        }
+
+        .spec-label {
+            font-weight: 600;
+            color: #444;
+        }
+
+        .barcode-container {
+            text-align: center;
+            padding: 16px;
+            background: #f9fafb;
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+
+        .use-cases {
+            margin-top: 16px;
+            padding: 12px;
+            background: #f0f9ff;
+            border-left: 4px solid #3b82f6;
+            border-radius: 4px;
+        }
+
+        .use-cases-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #1e40af;
+            margin-bottom: 8px;
+        }
+
+        .use-cases-list {
+            font-size: 0.8rem;
+            color: #1e3a8a;
+            line-height: 1.5;
+        }
+
+        .use-cases-list li {
+            margin-left: 20px;
+            margin-bottom: 4px;
+        }
+
+        .controls {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            margin: 0 8px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.12.1/dist/JsBarcode.all.min.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🏷️ SIIFMART Barcode Sizing System</h1>
+        <p class="subtitle">Standardized barcode sizes for consistent rendering across the application</p>
+
+        <div class="size-grid" id="barcodeGrid"></div>
+
+        <div class="controls">
+            <button class="btn btn-primary" onclick="regenerateAll()">🔄 Regenerate All SKUs</button>
+            <button class="btn btn-secondary" onclick="window.print()">🖨️ Print This Page</button>
+        </div>
+    </div>
+
+    <script>
+        const BARCODE_SIZES = {
+            tiny: {
+                width: 1,
+                height: 25,
+                fontSize: 8,
+                margin: 0,
+                displayValue: false,
+                badge: 'badge-tiny',
+                useCases: [
+                    'Inventory list item previews',
+                    'Product cards in grid view',
+                    'Quick reference in tables'
+                ]
+            },
+            small: {
+                width: 1,
+                height: 35,
+                fontSize: 10,
+                margin: 2,
+                displayValue: true,
+                badge: 'badge-small',
+                useCases: [
+                    'Modal previews',
+                    'Compact labels (2" x 1")',
+                    'Mobile displays'
+                ]
+            },
+            medium: {
+                width: 1.5,
+                height: 50,
+                fontSize: 12,
+                margin: 4,
+                displayValue: true,
+                badge: 'badge-medium',
+                useCases: [
+                    'Standard product labels (4" x 2")',
+                    'Receipt printing',
+                    'General purpose labels'
+                ]
+            },
+            large: {
+                width: 2,
+                height: 70,
+                fontSize: 14,
+                margin: 6,
+                displayValue: true,
+                badge: 'badge-large',
+                useCases: [
+                    'Warehouse bin labels',
+                    'Shipping labels',
+                    'Pallet labels'
+                ]
+            },
+            xlarge: {
+                width: 3,
+                height: 100,
+                fontSize: 16,
+                margin: 8,
+                displayValue: true,
+                badge: 'badge-xlarge',
+                useCases: [
+                    'Warehouse signage',
+                    'Large format posters',
+                    'High-visibility identification'
+                ]
+            }
+        };
+
+        function generateSKU() {
+            const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+            return `SM-HQ-ELE-${random}`;
+        }
+
+        function renderBarcode(canvasId, sku, config) {
+            const canvas = document.getElementById(canvasId);
+            JsBarcode(canvas, sku, {
+                format: 'CODE128',
+                width: config.width,
+                height: config.height,
+                displayValue: config.displayValue,
+                fontSize: config.fontSize,
+                margin: config.margin,
+                background: '#ffffff',
+                lineColor: '#000000'
+            });
+        }
+
+        function createSizeCard(sizeName, config) {
+            const sku = generateSKU();
+            const canvasId = `barcode-${sizeName}`;
+
+            return `
+        <div class="size-card">
+          <div class="size-header">
+            <div class="size-name">${sizeName.toUpperCase()}</div>
+            <div class="size-badge ${config.badge}">${sizeName}</div>
+          </div>
+          
+          <div class="size-specs">
+            <div class="spec-row">
+              <span class="spec-label">Width:</span>
+              <span>${config.width}px</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-label">Height:</span>
+              <span>${config.height}px</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-label">Font Size:</span>
+              <span>${config.fontSize}px</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-label">Margin:</span>
+              <span>${config.margin}px</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-label">Display Value:</span>
+              <span>${config.displayValue ? 'Yes' : 'No'}</span>
+            </div>
+          </div>
+          
+          <div class="barcode-container">
+            <canvas id="${canvasId}"></canvas>
+          </div>
+          
+          <div class="use-cases">
+            <div class="use-cases-title">📋 Use Cases:</div>
+            <ul class="use-cases-list">
+              ${config.useCases.map(useCase => `<li>${useCase}</li>`).join('')}
+            </ul>
+          </div>
+        </div>
+      `;
+        }
+
+        function initializePage() {
+            const grid = document.getElementById('barcodeGrid');
+            grid.innerHTML = Object.keys(BARCODE_SIZES)
+                .map(size => createSizeCard(size, BARCODE_SIZES[size]))
+                .join('');
+
+            // Render all barcodes
+            Object.keys(BARCODE_SIZES).forEach(size => {
+                const sku = generateSKU();
+                renderBarcode(`barcode-${size}`, sku, BARCODE_SIZES[size]);
+            });
+        }
+
+        function regenerateAll() {
+            Object.keys(BARCODE_SIZES).forEach(size => {
+                const sku = generateSKU();
+                renderBarcode(`barcode-${size}`, sku, BARCODE_SIZES[size]);
+            });
+        }
+
+        // Initialize on load
+        initializePage();
+    </script>
+</body>
+
+</html>
