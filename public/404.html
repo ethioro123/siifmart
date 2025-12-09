@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SIIFMART | Retail & Warehouse System</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap"
+    rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            cyber: {
+              black: 'var(--bg-app)',
+              dark: 'var(--bg-panel)',
+              gray: 'var(--bg-card)',
+              primary: 'var(--color-primary)',
+              accent: 'var(--color-accent)',
+              glass: 'rgba(26, 26, 26, 0.6)',
+            }
+          },
+          animation: {
+            'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    :root {
+      /* Default Dark (Cyberpunk) */
+      --bg-app: #050505;
+      --bg-panel: #111111;
+      --bg-card: #1a1a1a;
+      --color-primary: #00ff9d;
+      --color-accent: #00cc7d;
+      --text-base: #e5e5e5;
+      --border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    [data-theme="light"] {
+      /* Corporate Light */
+      --bg-app: #f3f4f6;
+      --bg-panel: #ffffff;
+      --bg-card: #ffffff;
+      --color-primary: #059669;
+      /* Emerald 600 */
+      --color-accent: #10b981;
+      /* Emerald 500 */
+      --text-base: #111827;
+      --border-color: #e5e7eb;
+    }
+
+    body {
+      background-color: var(--bg-app);
+      color: var(--text-base);
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--bg-panel);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #333;
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--color-primary);
+    }
+
+    /* Input & Border transitions */
+    div,
+    button,
+    input,
+    aside,
+    header {
+      transition: background-color 0.3s ease, border-color 0.3s ease;
+    }
+
+    /* Light mode specific adjustments for text contrast */
+    [data-theme="light"] .text-gray-400 {
+      color: #6b7280;
+    }
+
+    [data-theme="light"] .text-gray-300 {
+      color: #4b5563;
+      /* Gray 600 */
+    }
+
+    [data-theme="light"] .text-gray-500 {
+      color: #6b7280;
+      /* Gray 500 */
+    }
+
+    [data-theme="light"] .text-white {
+      color: #111827;
+    }
+
+    /* Fix Accent Colors in Light Mode (Make them darker) */
+    [data-theme="light"] .text-blue-400 {
+      color: #2563eb;
+    }
+
+    /* Blue 600 */
+    [data-theme="light"] .text-green-400 {
+      color: #16a34a;
+    }
+
+    /* Green 600 */
+    [data-theme="light"] .text-red-400 {
+      color: #dc2626;
+    }
+
+    /* Red 600 */
+    [data-theme="light"] .text-yellow-400 {
+      color: #d97706;
+    }
+
+    /* Amber 600 */
+    [data-theme="light"] .text-purple-400 {
+      color: #9333ea;
+    }
+
+    /* Purple 600 */
+    [data-theme="light"] .text-orange-400 {
+      color: #ea580c;
+    }
+
+    /* Orange 600 */
+    [data-theme="light"] .text-cyan-400 {
+      color: #0891b2;
+    }
+
+    /* Cyan 600 */
+    [data-theme="light"] .text-lime-400 {
+      color: #65a30d;
+    }
+
+    /* Lime 600 */
+    [data-theme="light"] .text-pink-400 {
+      color: #db2777;
+    }
+
+    /* Pink 600 */
+    [data-theme="light"] .text-indigo-400 {
+      color: #4f46e5;
+    }
+
+    /* Indigo 600 */
+    [data-theme="light"] .text-violet-400 {
+      color: #7c3aed;
+    }
+
+    /* Violet 600 */
+    [data-theme="light"] .text-fuchsia-400 {
+      color: #c026d3;
+    }
+
+    /* Fuchsia 600 */
+    [data-theme="light"] .text-rose-400 {
+      color: #e11d48;
+    }
+
+    /* Rose 600 */
+    [data-theme="light"] .text-sky-400 {
+      color: #0284c7;
+    }
+
+    /* Sky 600 */
+    [data-theme="light"] .text-emerald-400 {
+      color: #059669;
+    }
+
+    /* Emerald 600 */
+    [data-theme="light"] .text-amber-400 {
+      color: #d97706;
+    }
+
+    /* Amber 600 */
+
+    [data-theme="light"] .border-white\/5,
+    [data-theme="light"] .border-white\/10 {
+      border-color: #e5e7eb;
+    }
+
+    [data-theme="light"] .bg-white\/5,
+    [data-theme="light"] .bg-white\/10 {
+      background-color: #f9fafb;
+    }
+
+    [data-theme="light"] .bg-black\/20,
+    [data-theme="light"] .bg-black\/30,
+    [data-theme="light"] .bg-black\/40 {
+      background-color: #f3f4f6;
+    }
+
+    [data-theme="light"] input {
+      color: #111827;
+      background-color: #ffffff;
+      border-color: #d1d5db;
+    }
+  </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.554.0",
+    "recharts": "https://aistudiocdn.com/recharts@^3.4.1",
+    "react-router-dom": "https://aistudiocdn.com/react-router-dom@^7.9.6",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0"
+  }
+}
+</script>
+  <link rel="stylesheet" href="/index.css">
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+
+</html>
