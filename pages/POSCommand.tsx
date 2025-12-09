@@ -7,7 +7,7 @@ import {
 import {
   ShoppingCart, CreditCard, Clock, Lock, LogOut, Printer,
   TrendingUp, DollarSign, Archive, RotateCcw, Package, Scan,
-  Truck, Plus, Minus, AlertTriangle, CheckCircle, RefreshCcw, Search, List
+  Truck, Plus, Minus, AlertTriangle, CheckCircle, RefreshCcw, Search, List, Users
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { CURRENCY_SYMBOL } from '../constants';
