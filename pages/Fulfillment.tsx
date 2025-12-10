@@ -898,13 +898,22 @@ export default function WarehouseOperations() {
         return (
             <div className="fixed inset-0 z-50 bg-black flex flex-col">
                 {/* Header */}
-                <div className="p-4 bg-gray-900 flex justify-between items-center border-b border-gray-800">
-                    <div className="text-white">
-                        <h2 className="font-bold text-lg">{selectedJob.type} {formatJobId(selectedJob)}</h2>
-                        <p className="text-xs text-gray-400">{selectedJob.lineItems.length} {t('warehouse.items')} • {selectedJob.lineItems.filter(i => i.status === 'Pending').length} {t('warehouse.remaining')}</p>
+                {/* Header */}
+                <div className="p-4 bg-gray-900 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-gray-800">
+                    <div className="text-white w-full md:w-auto">
+                        <div className="flex justify-between items-start">
+                            <div>
+                                <h2 className="font-bold text-lg">{selectedJob.type} {formatJobId(selectedJob)}</h2>
+                                <p className="text-xs text-gray-400">{selectedJob.lineItems.length} {t('warehouse.items')} • {selectedJob.lineItems.filter(i => i.status === 'Pending').length} {t('warehouse.remaining')}</p>
+                            </div>
+                            {/* Mobile Exit Button */}
+                            <button onClick={() => setIsScannerMode(false)} className="md:hidden text-gray-400 p-2">
+                                <X size={20} />
+                            </button>
+                        </div>
                         {/* Store Information */}
                         {(selectedJob.sourceSiteId || selectedJob.destSiteId) && (
-                            <div className="flex items-center gap-3 mt-1 text-[10px]">
+                            <div className="flex flex-wrap items-center gap-3 mt-2 text-[10px]">
                                 {selectedJob.sourceSiteId && (
                                     <div className="flex items-center gap-1">
                                         <span className="text-gray-500">{t('warehouse.from')}:</span>
@@ -924,11 +933,11 @@ export default function WarehouseOperations() {
                             </div>
                         )}
                     </div>
-                    <div className="flex gap-4">
-                        <button onClick={() => setShowList(!showList)} className="text-blue-400 font-bold text-sm">
+                    <div className="flex gap-4 w-full md:w-auto mt-2 md:mt-0">
+                        <button onClick={() => setShowList(!showList)} className="flex-1 md:flex-none py-3 md:py-0 text-center bg-gray-800 md:bg-transparent rounded-lg md:rounded-none text-blue-400 font-bold text-sm border border-gray-700 md:border-none">
                             {showList ? t('warehouse.scanView') : t('warehouse.viewList')}
                         </button>
-                        <button onClick={() => setIsScannerMode(false)} className="text-red-400 font-bold text-sm">{t('warehouse.exit')}</button>
+                        <button onClick={() => setIsScannerMode(false)} className="hidden md:block text-red-400 font-bold text-sm">{t('warehouse.exit')}</button>
                     </div>
                 </div>
 
@@ -1123,7 +1132,7 @@ export default function WarehouseOperations() {
                                                     aria-label={t('warehouse.bin')}
                                                     value={selectedBin}
                                                     onChange={(e) => setSelectedBin(e.target.value)}
-                                                    className="w-full bg-gray-800 border border-gray-700 rounded-lg p-3 text-white font-mono text-lg focus:border-blue-500 outline-none"
+                                                    className="w-full bg-gray-800 border border-gray-700 rounded-lg p-4 text-white font-mono text-lg focus:border-blue-500 outline-none"
                                                 >
                                                     {Array.from({ length: 20 }, (_, i) => {
                                                         const num = String(i + 1).padStart(2, '0');
@@ -1139,7 +1148,7 @@ export default function WarehouseOperations() {
                                                         const location = generateLocation(selectedZone, selectedAisle, selectedBin);
                                                         handleLocationSelect(location);
                                                     }}
-                                                    className="w-full py-3 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-lg transition-colors"
+                                                    className="w-full py-4 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-lg transition-colors"
                                                 >
                                                     {t('warehouse.selectLocation')}
                                                 </button>
@@ -2798,6 +2807,7 @@ export default function WarehouseOperations() {
                                     Pick Queue
                                 </h3>
                                 <p className="text-gray-500 text-sm mt-1">Select a job to start picking items</p>
+                                <p className="md:hidden text-cyber-primary text-xs font-bold mt-2 animate-pulse">Tap a card to start scanner</p>
                             </div>
 
                             {/* Quick Stats */}
@@ -2824,7 +2834,7 @@ export default function WarehouseOperations() {
                                 j.status !== 'Completed' &&
                                 (!j.assignedTo || j.assignedTo === user?.name || ['admin', 'manager', 'super_admin'].includes(user?.role || ''))
                             ).length > 0 ? (
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pb-20 md:pb-0">
                                     {filteredJobs.filter(j =>
                                         j.type === 'PICK' &&
                                         j.status !== 'Completed' &&
@@ -2839,7 +2849,7 @@ export default function WarehouseOperations() {
                                             <div
                                                 key={job.id}
                                                 onClick={() => handleStartJob(job)}
-                                                className={`group relative bg-gradient-to-br from-white/5 to-white/[0.02] rounded-2xl border transition-all duration-300 cursor-pointer overflow-hidden hover:scale-[1.02] hover:shadow-xl hover:shadow-cyber-primary/10 ${job.status === 'In-Progress'
+                                                className={`group relative bg-gradient-to-br from-white/5 to-white/[0.02] rounded-2xl border transition-all duration-300 cursor-pointer overflow-hidden hover:scale-[1.02] hover:shadow-xl hover:shadow-cyber-primary/10 min-h-[140px] flex flex-col justify-between ${job.status === 'In-Progress'
                                                     ? 'border-blue-500/50 shadow-lg shadow-blue-500/20'
                                                     : 'border-white/10 hover:border-cyber-primary/50'
                                                     }`}
@@ -2851,11 +2861,11 @@ export default function WarehouseOperations() {
                                                     </div>
                                                 )}
 
-                                                <div className="p-5">
+                                                <div className="p-5 flex-1 flex flex-col">
                                                     {/* Job Header */}
                                                     <div className="flex items-start justify-between mb-4">
                                                         <div>
-                                                            <p className="text-cyber-primary font-mono font-bold text-sm">
+                                                            <p className="text-cyber-primary font-mono font-bold text-base md:text-sm">
                                                                 {formatJobId(job)}
                                                             </p>
                                                             <p className="text-gray-500 text-xs mt-1">
@@ -2905,7 +2915,7 @@ export default function WarehouseOperations() {
                                                     </div>
 
                                                     {/* Footer */}
-                                                    <div className="flex items-center justify-between">
+                                                    <div className="mt-auto flex items-center justify-between">
                                                         <div className="flex items-center gap-2">
                                                             {job.assignedTo ? (
                                                                 <>
@@ -2918,10 +2928,16 @@ export default function WarehouseOperations() {
                                                                 <span className="text-xs text-gray-600 italic">Unassigned</span>
                                                             )}
                                                         </div>
-                                                        <button className="px-4 py-2 bg-cyber-primary/20 hover:bg-cyber-primary text-cyber-primary hover:text-black text-xs font-bold rounded-lg transition-all duration-300 group-hover:px-5">
+                                                        <button className="hidden md:block px-4 py-2 bg-cyber-primary/20 hover:bg-cyber-primary text-cyber-primary hover:text-black text-xs font-bold rounded-lg transition-all duration-300 group-hover:px-5">
                                                             {job.status === 'In-Progress' ? t('warehouse.continueArrow') : t('warehouse.startArrow')}
                                                         </button>
                                                     </div>
+                                                </div>
+
+                                                {/* Mobile Tap Cue */}
+                                                <div className="md:hidden p-3 bg-white/5 border-t border-white/5 flex items-center justify-center text-cyber-primary">
+                                                    <span className="text-xs font-bold uppercase tracking-wider">Tap to Start Picking</span>
+                                                    <ArrowRight size={14} className="ml-1" />
                                                 </div>
                                             </div>
                                         );
@@ -3489,7 +3505,7 @@ export default function WarehouseOperations() {
                                                     <button
                                                         key={type}
                                                         onClick={() => setAssignJobFilter(type as any)}
-                                                        className={`px-3 py-1 text-xs rounded font-bold transition-colors ${assignJobFilter === type
+                                                        className={`px-4 py-3 md:px-3 md:py-1 text-sm md:text-xs rounded-lg font-bold transition-colors ${assignJobFilter === type
                                                             ? 'bg-cyber-primary text-black'
                                                             : 'text-gray-400 hover:text-white'
                                                             }`}
@@ -3508,7 +3524,7 @@ export default function WarehouseOperations() {
                                                     <button
                                                         key={priority}
                                                         onClick={() => setDispatchPriorityFilter(priority as any)}
-                                                        className={`px-3 py-1 text-xs rounded font-bold transition-colors ${dispatchPriorityFilter === priority
+                                                        className={`px-4 py-3 md:px-3 md:py-1 text-sm md:text-xs rounded-lg font-bold transition-colors ${dispatchPriorityFilter === priority
                                                             ? 'bg-cyber-primary text-black'
                                                             : priority === 'Critical' ? 'text-red-400' :
                                                                 priority === 'High' ? 'text-orange-400' :
@@ -3525,7 +3541,7 @@ export default function WarehouseOperations() {
                                         <div className="flex-1 min-w-[200px]">
                                             <input
                                                 type="text"
-                                                                placeholder={t('warehouse.searchJobsByID')}
+                                                placeholder={t('warehouse.searchJobsByID')}
                                                 value={dispatchSearch}
                                                 onChange={(e) => setDispatchSearch(e.target.value)}
                                                 className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-1.5 text-white text-xs focus:border-cyber-primary outline-none"
@@ -3534,7 +3550,7 @@ export default function WarehouseOperations() {
                                     </div>
                                 </div>
 
-                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-96">
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[600px] md:h-96">
                                     {/* Pending Jobs */}
                                     <div className="bg-black/20 rounded-xl border border-white/5 flex flex-col overflow-hidden">
                                         <div className="p-3 border-b border-white/5 bg-white/5 font-bold text-xs text-gray-400 uppercase flex justify-between items-center">
@@ -4493,7 +4509,7 @@ export default function WarehouseOperations() {
                                         <div className="flex items-center gap-2 shrink-0">
                                             <span className="text-xs text-gray-400 font-bold hidden md:inline">{t('warehouse.status')}:</span>
                                             <div className="flex bg-white/5 rounded-lg p-1">
-                                                {[{label: t('warehouse.allStatus'), value: 'All'}, {label: t('warehouse.pending'), value: 'Pending'}, {label: t('warehouse.inProgress'), value: 'In-Progress'}].map(status => (
+                                                {[{ label: t('warehouse.allStatus'), value: 'All' }, { label: t('warehouse.pending'), value: 'Pending' }, { label: t('warehouse.inProgress'), value: 'In-Progress' }].map(status => (
                                                     <button
                                                         key={status.value}
                                                         onClick={() => setPutawayStatusFilter(status.value as any)}
@@ -5822,7 +5838,7 @@ export default function WarehouseOperations() {
                                                                                 aria-label="Return Quantity"
                                                                                 min="1"
                                                                                 max={item.quantity}
-                                                                                className="w-full bg-black border border-white/10 rounded p-2 text-white text-sm"
+                                                                                className="w-full bg-black border border-white/10 rounded p-3 text-white text-sm"
                                                                                 value={returnItem.quantity}
                                                                                 onChange={(e) => {
                                                                                     const qty = Math.min(Math.max(1, parseInt(e.target.value) || 1), item.quantity);
@@ -5834,7 +5850,7 @@ export default function WarehouseOperations() {
                                                                             <label className="text-[10px] text-gray-500 uppercase font-bold block mb-1">Reason</label>
                                                                             <select
                                                                                 aria-label="Return Reason"
-                                                                                className="w-full bg-black border border-white/10 rounded p-2 text-white text-sm"
+                                                                                className="w-full bg-black border border-white/10 rounded p-3 text-white text-sm"
                                                                                 value={returnItem.reason}
                                                                                 onChange={(e) => setReturnItems(returnItems.map(ri => ri.productId === item.id ? { ...ri, reason: e.target.value } : ri))}
                                                                             >
@@ -5848,7 +5864,7 @@ export default function WarehouseOperations() {
                                                                             <label className="text-[10px] text-gray-500 uppercase font-bold block mb-1">Condition</label>
                                                                             <select
                                                                                 aria-label="Return Condition"
-                                                                                className="w-full bg-black border border-white/10 rounded p-2 text-white text-sm"
+                                                                                className="w-full bg-black border border-white/10 rounded p-3 text-white text-sm"
                                                                                 value={returnItem.condition}
                                                                                 onChange={(e) => setReturnItems(returnItems.map(ri => ri.productId === item.id ? { ...ri, condition: e.target.value } : ri))}
                                                                             >
@@ -5861,7 +5877,7 @@ export default function WarehouseOperations() {
                                                                             <label className="text-[10px] text-gray-500 uppercase font-bold block mb-1">Action</label>
                                                                             <select
                                                                                 aria-label="Return Action"
-                                                                                className="w-full bg-black border border-white/10 rounded p-2 text-white text-sm"
+                                                                                className="w-full bg-black border border-white/10 rounded p-3 text-white text-sm"
                                                                                 value={returnItem.action}
                                                                                 onChange={(e) => setReturnItems(returnItems.map(ri => ri.productId === item.id ? { ...ri, action: e.target.value } : ri))}
                                                                             >
