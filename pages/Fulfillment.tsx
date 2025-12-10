@@ -899,7 +899,7 @@ export default function WarehouseOperations() {
             <div className="fixed inset-0 z-50 bg-black flex flex-col">
                 {/* Header */}
                 {/* Header */}
-                <div className="p-4 bg-gray-900 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-gray-800">
+                <div className="p-4 bg-gray-900 flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4 border-b border-gray-800">
                     <div className="text-white w-full md:w-auto">
                         <div className="flex justify-between items-start">
                             <div>
@@ -933,7 +933,7 @@ export default function WarehouseOperations() {
                             </div>
                         )}
                     </div>
-                    <div className="flex gap-4 w-full md:w-auto mt-2 md:mt-0">
+                    <div className="flex flex-wrap gap-2 md:gap-4 w-full md:w-auto mt-2 md:mt-0">
                         <button onClick={() => setShowList(!showList)} className="flex-1 md:flex-none py-3 md:py-0 text-center bg-gray-800 md:bg-transparent rounded-lg md:rounded-none text-blue-400 font-bold text-sm border border-gray-700 md:border-none">
                             {showList ? t('warehouse.scanView') : t('warehouse.viewList')}
                         </button>
@@ -955,7 +955,7 @@ export default function WarehouseOperations() {
                 )}
 
                 {/* Main Content */}
-                <div className="flex-1 p-6 flex flex-col items-center justify-center overflow-hidden relative">
+                <div className="flex-1 p-4 md:p-6 flex flex-col items-center justify-center overflow-hidden relative">
 
                     {/* Item Completion Overlay */}
                     {lastCompletedItem && (
@@ -1044,8 +1044,8 @@ export default function WarehouseOperations() {
                                         item.status === 'Short' ? 'bg-red-900/20 border-red-500/50' :
                                             'bg-green-900/20 border-green-500/50'
                                         }`}>
-                                        <div className="flex-1">
-                                            <p className="text-white font-bold">{item.name}</p>
+                                        <div className="flex-1 min-w-0 pr-2">
+                                            <p className="text-white font-bold truncate">{item.name}</p>
                                             <p className="text-xs text-gray-400">{t('warehouse.sku')}: {item.sku || t('warehouse.nA')}</p>
                                             {/* Show location for PICK jobs */}
                                             {selectedJob.type === 'PICK' && (
@@ -1085,8 +1085,8 @@ export default function WarehouseOperations() {
                                     </div>
 
                                     {/* Location Selector */}
-                                    <div className="bg-gray-900 rounded-xl border border-gray-800 p-6">
-                                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                                    <div className="bg-gray-900 rounded-xl border border-gray-800 p-4 md:p-6">
+                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                                             {/* Zone Selector */}
                                             <div>
                                                 <label className="text-xs text-gray-400 uppercase font-bold mb-2 block">{t('warehouse.zone')}</label>
@@ -1353,7 +1353,7 @@ export default function WarehouseOperations() {
                                     {/* Location Grid Preview */}
                                     <div className="bg-gray-900 rounded-xl border border-gray-800 p-6">
                                         <h3 className="text-sm font-bold text-gray-400 uppercase mb-4">Quick View - Zone {selectedZone}, Aisle {selectedAisle}</h3>
-                                        <div className="grid grid-cols-10 gap-2">
+                                        <div className="grid grid-cols-5 md:grid-cols-10 gap-2">
                                             {Array.from({ length: 20 }, (_, i) => {
                                                 const binNum = String(i + 1).padStart(2, '0');
                                                 const location = generateLocation(selectedZone, selectedAisle, binNum);
@@ -1474,7 +1474,7 @@ export default function WarehouseOperations() {
                                                 <Scan className="text-cyber-primary" size={20} />
                                                 <p className="text-xs text-cyber-primary uppercase font-bold">{t('warehouse.scanProductBarcode')}</p>
                                             </div>
-                                            <div className="flex gap-2">
+                                            <div className="flex gap-2 min-w-0">
                                                 <input
                                                     type="text"
                                                     value={scannedItem}
@@ -2132,7 +2132,7 @@ export default function WarehouseOperations() {
                                                             return (
                                                                 <div
                                                                     key={item.productId || idx}
-                                                                    className="flex items-center justify-between p-4 rounded-xl border bg-black/20 border-white/5 hover:border-cyber-primary/30 transition-colors"
+                                                                    className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between p-4 rounded-xl border bg-black/20 border-white/5 hover:border-cyber-primary/30 transition-colors"
                                                                 >
                                                                     <div className="flex-1">
                                                                         <div className="flex items-center gap-2">
@@ -2162,7 +2162,7 @@ export default function WarehouseOperations() {
                                                                                 setReceivingPO(po);
                                                                                 setShowPrintSuccess(false);
                                                                             }}
-                                                                            className="px-4 py-2 bg-cyber-primary text-black font-bold rounded-lg text-sm hover:bg-cyber-accent transition-colors flex items-center gap-2"
+                                                                            className="w-full md:w-auto justify-center px-4 py-2 bg-cyber-primary text-black font-bold rounded-lg text-sm hover:bg-cyber-accent transition-colors flex items-center gap-2"
                                                                         >
                                                                             <Box size={16} />
                                                                             Receive {remainingQty}
@@ -2200,7 +2200,7 @@ export default function WarehouseOperations() {
                                                                         return (
                                                                             <div
                                                                                 key={item.productId || idx}
-                                                                                className="flex items-center justify-between p-4 rounded-xl border bg-green-500/5 border-green-500/10"
+                                                                                className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between p-4 rounded-xl border bg-green-500/5 border-green-500/10"
                                                                             >
                                                                                 <div className="flex-1">
                                                                                     <div className="flex items-center gap-2">
@@ -2239,7 +2239,7 @@ export default function WarehouseOperations() {
                                                 {
                                                     allItemsReceived && (
                                                         <div className="p-4 bg-green-500/5 border-t border-green-500/20">
-                                                            <div className="flex items-center justify-between">
+                                                            <div className="flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">
                                                                 <div className="flex items-center gap-2 text-green-400">
                                                                     <CheckCircle size={20} />
                                                                     <span className="font-bold">All products received!</span>
@@ -2249,7 +2249,7 @@ export default function WarehouseOperations() {
                                                                         setReviewPO(po);
                                                                         setShowReviewModal(true);
                                                                     }}
-                                                                    className="px-4 py-2 bg-green-500 text-white font-bold rounded-lg text-sm hover:bg-green-600 transition-colors"
+                                                                    className="w-full md:w-auto justify-center px-4 py-2 bg-green-500 text-white font-bold rounded-lg text-sm hover:bg-green-600 transition-colors"
                                                                 >
                                                                     Review & Complete
                                                                 </button>
