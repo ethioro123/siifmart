@@ -22,6 +22,7 @@ import { Protected, ProtectedButton } from '../components/Protected';
 import { filterBySite } from '../utils/locationAccess';
 import { native } from '../utils/native';
 import { generateUniqueSKU, isSKUUnique } from '../utils/skuUtils';
+import { generateInternalBarcode } from '../utils/barcodeNumberGenerator';
 
 type Tab = 'overview' | 'stock' | 'zones' | 'movements';
 
@@ -95,6 +96,7 @@ export default function Inventory() {
 
     // Form State
     const [skuInput, setSkuInput] = useState('');
+    const [barcodeInput, setBarcodeInput] = useState('');
     const [adjustQty, setAdjustQty] = useState<string>('');
     const [adjustReason, setAdjustReason] = useState<string>('Stock Correction');
     const [adjustType, setAdjustType] = useState<'IN' | 'OUT'>('IN');
@@ -164,6 +166,7 @@ export default function Inventory() {
     const handleOpenEditProduct = (product: Product) => {
         setEditingProduct(product);
         setSkuInput(product.sku);
+        setBarcodeInput(product.barcode || '');
         setIsProductModalOpen(true);
     };
 
@@ -177,6 +180,13 @@ export default function Inventory() {
 
         const generated = generateUniqueSKU(siteName, category, products);
         setSkuInput(generated);
+    };
+
+    const handleGenerateBarcode = () => {
+        // Generate a valid EAN-13 barcode for internal use (200 prefix)
+        const generated = generateInternalBarcode(products);
+        setBarcodeInput(generated);
+        addNotification('success', `Generated internal barcode: ${generated}`);
     };
 
     const handleSaveProduct = (e: React.FormEvent<HTMLFormElement>) => {
@@ -205,6 +215,8 @@ export default function Inventory() {
             siteId: activeSite?.id || user?.siteId || 'WH-001',
             name: name,
             sku: skuInput,
+            barcode: barcodeInput || undefined, // External barcode from supplier
+            barcodeType: barcodeInput ? (formData.get('barcodeType') as 'EAN-13' | 'UPC-A' | 'CODE128' | 'CODE39' | 'QR' | 'OTHER') : undefined,
             category: formData.get('category') as string,
             price: price,
             stock: parseInt(formData.get('stock') as string) || 0,
@@ -220,6 +232,7 @@ export default function Inventory() {
         setIsProductModalOpen(false);
         setEditingProduct(null);
         setSkuInput('');
+        setBarcodeInput('');
     };
 
     const handleDeleteProduct = (id: string) => {
@@ -786,7 +799,55 @@ export default function Inventory() {
                 <form onSubmit={handleSaveProduct} className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                         <div><label className="text-xs text-gray-400 uppercase font-bold">Product Name</label><input aria-label="Product Name" name="name" defaultValue={editingProduct?.name} required className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:border-cyber-primary" /></div>
-                        <div><label className="text-xs text-gray-400 uppercase font-bold">SKU / Barcode</label><div className="flex gap-2"><input aria-label="SKU" name="sku" value={skuInput} onChange={(e) => setSkuInput(e.target.value)} placeholder="Scan..." required className="flex-1 bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:border-cyber-primary font-mono" /><button type="button" onClick={handleGenerateSKU} className="px-3 bg-cyber-primary/20 text-cyber-primary rounded-lg" aria-label="Generate SKU"><Barcode size={16} /></button></div></div>
+                        <div><label className="text-xs text-gray-400 uppercase font-bold">Internal SKU</label><div className="flex gap-2"><input aria-label="SKU" name="sku" value={skuInput} onChange={(e) => setSkuInput(e.target.value)} placeholder="Internal SKU..." required className="flex-1 bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:border-cyber-primary font-mono" /><button type="button" onClick={handleGenerateSKU} className="px-3 bg-cyber-primary/20 text-cyber-primary rounded-lg" aria-label="Generate SKU" title="Generate SKU"><Barcode size={16} /></button></div></div>
+                    </div>
+                    {/* Barcode Fields - Supports both supplier barcodes AND internal generation */}
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="text-xs text-gray-400 uppercase font-bold">Barcode</label>
+                            <div className="flex gap-2">
+                                <input
+                                    aria-label="External Barcode"
+                                    name="barcode"
+                                    value={barcodeInput}
+                                    onChange={(e) => setBarcodeInput(e.target.value)}
+                                    placeholder="Scan or enter barcode..."
+                                    className="flex-1 bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:border-cyber-primary font-mono"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={handleGenerateBarcode}
+                                    className="px-3 bg-blue-500/20 text-blue-400 rounded-lg hover:bg-blue-500/30 transition-colors"
+                                    aria-label="Generate Barcode"
+                                    title="Generate Internal Barcode (EAN-13)"
+                                >
+                                    <Barcode size={16} />
+                                </button>
+                            </div>
+                            <p className="text-[10px] text-gray-500 mt-1">
+                                {barcodeInput?.startsWith('200')
+                                    ? '🏷️ Internal barcode (generated)'
+                                    : 'Scan supplier barcode or click button to generate'
+                                }
+                            </p>
+                        </div>
+                        <div>
+                            <label className="text-xs text-gray-400 uppercase font-bold">Barcode Type</label>
+                            <select
+                                aria-label="Barcode Type"
+                                name="barcodeType"
+                                defaultValue={editingProduct?.barcodeType || 'EAN-13'}
+                                className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white text-sm"
+                                disabled={!barcodeInput}
+                            >
+                                <option value="EAN-13">EAN-13</option>
+                                <option value="UPC-A">UPC-A</option>
+                                <option value="CODE128">CODE128</option>
+                                <option value="CODE39">CODE39</option>
+                                <option value="QR">QR Code</option>
+                                <option value="OTHER">Other</option>
+                            </select>
+                        </div>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                         <div><label className="text-xs text-gray-400 uppercase font-bold">Price ({CURRENCY_SYMBOL})</label><input aria-label="Price" name="price" type="number" defaultValue={editingProduct?.price} required className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:border-cyber-primary font-mono" /></div>

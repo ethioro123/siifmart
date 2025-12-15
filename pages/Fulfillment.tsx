@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import {
     ClipboardList, Box, Search, CheckCircle, Truck, AlertTriangle, RotateCcw,
     Thermometer, Calendar, Scan, ArrowRight, Package, Layers,
@@ -7,18 +7,20 @@ import {
     StopCircle, PauseCircle, Shield, ShoppingBag, Snowflake, Sun,
     Droplet, Anchor, Map, FileText, X, Clock, ClipboardCheck,
     AlertOctagon, ArrowDown, Camera, ArrowLeft, MapPin, LayoutList, Zap, User, Plus, Minus,
-    Download, Upload, Navigation, Phone, QrCode
+    Download, Upload, Navigation, Phone, QrCode, Smartphone
 } from 'lucide-react';
 import { WMSJob, JobItem, PurchaseOrder, ReceivingItem } from '../types';
+import { playBeep } from '../utils/audioUtils';
 import { Protected, ProtectedButton } from '../components/Protected';
 import Modal from '../components/Modal';
+
 import { useStore } from '../contexts/CentralStore';
 import { useLanguage } from '../contexts/LanguageContext';
 import { LanguageSwitcher } from '../components/LanguageSwitcher';
 import { QRScanner } from '../components/QRScanner';
 import { useData } from '../contexts/DataContext';
 import { CURRENCY_SYMBOL } from '../constants';
-import { wmsJobsService, purchaseOrdersService } from '../services/supabase.service';
+import { wmsJobsService, purchaseOrdersService, productsService } from '../services/supabase.service';
 import { filterBySite } from '../utils/locationAccess';
 import { generateQRCodeLabelHTML, generateQRCode, generateQRCodeImage } from '../utils/qrCodeGenerator';
 import { generateBarcodeSVG, generateBarcodeLabelHTML, generateBatchBarcodeLabelsHTML, generateBarcodeImage } from '../utils/barcodeGenerator';
@@ -29,7 +31,7 @@ import { formatJobId, formatOrderRef, formatTransferId } from '../utils/jobIdFor
 
 type OpTab = 'DOCKS' | 'RECEIVE' | 'PUTAWAY' | 'PICK' | 'PACK' | 'REPLENISH' | 'COUNT' | 'WASTE' | 'RETURNS' | 'ASSIGN' | 'TRANSFER';
 
-// Tab-level role permissions - defines which roles can access which tabs
+// Tab-level role permissions-defines which roles can access which tabs
 const TAB_PERMISSIONS: Record<OpTab, string[]> = {
     DOCKS: ['super_admin', 'warehouse_manager', 'dispatcher'],
     RECEIVE: ['super_admin', 'warehouse_manager', 'dispatcher', 'inventory_specialist'],
@@ -72,14 +74,7 @@ export default function WarehouseOperations() {
     const isHQ = activeSite ? ['Administration', 'Administrative', 'Central Operations'].includes(activeSite.type) : 'N/A';
     const needsSiteSelection = isMultiSiteRole && (!activeSite || ['Administration', 'Administrative', 'Central Operations'].includes(activeSite.type));
 
-    console.log('🔍 DEBUG ACCESS:', {
-        role: user?.role,
-        isMultiSiteRole,
-        activeSite: activeSite,
-        activeSiteType: activeSite?.type,
-        isHQ: isHQ,
-        needsSiteSelection: needsSiteSelection
-    });
+
 
     const filteredJobs = useMemo(() => {
         // If Global View (needsSiteSelection), show ALL jobs (or filter as needed)
@@ -135,8 +130,41 @@ export default function WarehouseOperations() {
     // --- SCANNER STATE ---
     const [isScannerMode, setIsScannerMode] = useState(false);
     const [scannerStep, setScannerStep] = useState<'NAV' | 'SCAN' | 'CONFIRM'>('NAV');
+
+    // Derived state for scanner
+    const currentItem = useMemo(() => selectedJob?.lineItems.find(i => i.status === 'Pending'), [selectedJob]);
+
     const [scannedBin, setScannedBin] = useState('');
     const [scannedItem, setScannedItem] = useState('');
+    const locationInputRef = useRef<HTMLInputElement>(null);
+    const itemInputRef = useRef<HTMLInputElement>(null);
+
+    // Auto-focus management
+    useEffect(() => {
+        if (isScannerMode) {
+            // Slight delay to ensure DOM is ready
+            const timer = setTimeout(() => {
+                if (scannerStep === 'NAV' && locationInputRef.current) {
+                    locationInputRef.current.focus();
+                } else if (scannerStep === 'SCAN' && itemInputRef.current) {
+                    itemInputRef.current.focus();
+                }
+            }, 100);
+            return () => clearTimeout(timer);
+        }
+    }, [isScannerMode, scannerStep, currentItem]);
+
+    // Keep focus on input if user clicks away (unless clicking specific buttons)
+    const handleBlur = (e: React.FocusEvent) => {
+        // Only re-focus if we're still in scanner mode and specific step
+        // We use a small timeout to allow button clicks to register first
+        setTimeout(() => {
+            if (isScannerMode && document.activeElement?.tagName !== 'INPUT' && document.activeElement?.tagName !== 'BUTTON') {
+                if (scannerStep === 'NAV') locationInputRef.current?.focus();
+                if (scannerStep === 'SCAN') itemInputRef.current?.focus();
+            }
+        }, 200);
+    };
     const [pickQty, setPickQty] = useState(0);
     const [isQRScannerOpen, setIsQRScannerOpen] = useState(false);
     const [qrScannerMode, setQRScannerMode] = useState<'location' | 'product'>('product');
@@ -239,7 +267,7 @@ export default function WarehouseOperations() {
     const [reprintSize, setReprintSize] = useState<'Tiny' | 'Small' | 'Medium' | 'Large'>('Medium');
     const [reprintFormat, setReprintFormat] = useState<'QR' | 'Barcode' | 'Both'>('Barcode');
 
-    // Pack Job Reprint State (uses same size/format as above) - Rich data for detailed labels
+    // Pack Job Reprint State (uses same size/format as above)-Rich data for detailed labels
     const [packReprintJob, setPackReprintJob] = useState<PackLabelData & { id: string } | null>(null);
 
     // --- LOADING STATES (prevent double-clicking) ---
@@ -443,7 +471,7 @@ export default function WarehouseOperations() {
             // Extract zone letter from locked zone (e.g., "A-01" -> "A")
             const zoneLetter = lockedZone.split('-')[0];
             // Check if location contains the zone letter
-            if (locationUpper.includes(zoneLetter) || locationUpper.includes(`ZONE ${zoneLetter}`)) {
+            if (locationUpper.includes(zoneLetter) || locationUpper.includes(`ZONE ${zoneLetter} `)) {
                 return true;
             }
         }
@@ -487,13 +515,13 @@ export default function WarehouseOperations() {
                 for (let i = 0; i < 3; i++) {
                     const newAisle = String(Math.max(1, Math.min(20, aisleNum + i))).padStart(2, '0');
                     const newBin = String(Math.max(1, Math.min(20, binNum + i))).padStart(2, '0');
-                    suggestions.push(`${zone}-${newAisle}-${newBin}`);
+                    suggestions.push(`${zone} -${newAisle} -${newBin} `);
                 }
             }
         } else {
             // Suggest locations in recommended zone
             for (let i = 1; i <= 3; i++) {
-                suggestions.push(`${recommendedZone}-01-${String(i).padStart(2, '0')}`);
+                suggestions.push(`${recommendedZone}-01 - ${String(i).padStart(2, '0')} `);
             }
         }
 
@@ -608,15 +636,15 @@ export default function WarehouseOperations() {
             return;
         }
 
-        // Just set the job - user will click "Start Picking" button in modal to open scanner
+        // Just set the job-user will click "Start Picking" button in modal to open scanner
         setSelectedJob(optimizedJob);
-        // Don't set scanner mode here - let user preview job details first
+        // Don't set scanner mode here-let user preview job details first
         setIsScannerMode(false);
     };
 
     const handleBinScan = (e: React.FormEvent) => {
         e.preventDefault();
-        // Mock validation: accepts any bin starting with 'A', 'B', 'C'
+        // Mock validation:accepts any bin starting with 'A', 'B', 'C'
         if (scannedBin.length > 2) {
             setScannerStep('SCAN');
         } else {
@@ -626,7 +654,7 @@ export default function WarehouseOperations() {
 
     // Generate location from zone/aisle/bin selection
     const generateLocation = (zone: string, aisle: string, bin: string) => {
-        return `${zone}-${aisle}-${bin}`;
+        return `${zone} -${aisle} -${bin} `;
     };
 
     // Get occupied locations from products
@@ -635,9 +663,9 @@ export default function WarehouseOperations() {
     };
 
     // Check if location is available (for PUTAWAY, locations can always be used even if occupied)
-    // This is informational only - shows if other items exist at this location
+    // This is informational only-shows if other items exist at this location
     const isLocationAvailable = (location: string) => {
-        // For PUTAWAY operations, always allow - multiple items can share a bin
+        // For PUTAWAY operations, always allow-multiple items can share a bin
         // This just indicates if the location already has items (informational)
         return true; // Always available for putaway
     };
@@ -658,6 +686,7 @@ export default function WarehouseOperations() {
         setShowLocationPicker(false);
         setScannerStep('SCAN');
         addNotification('success', t('warehouse.locationSelected').replace('{location}', location));
+        playBeep('success');
     };
 
     const handleItemScan = async (actualQty?: number) => {
@@ -686,7 +715,7 @@ export default function WarehouseOperations() {
 
                         // If productId is null, auto-create the product first
                         if (!productId) {
-                            console.log(`🆕 Product ID is null. Auto-creating product: ${item.name}`);
+                            console.log(`🆕 Product ID is null.Auto - creating product: ${item.name} `);
 
                             // Determine product category (fallback to 'General' if not available)
                             const productCategory = 'General'; // Can be enhanced to extract from context if available
@@ -716,7 +745,7 @@ export default function WarehouseOperations() {
 
                             if (newProduct) {
                                 productId = newProduct.id;
-                                console.log(`✅ Created product with SKU: ${generatedSKU}, ID: ${productId}`);
+                                console.log(`✅ Created product with SKU: ${generatedSKU}, ID: ${productId} `);
                             } else {
                                 throw new Error('Failed to create product');
                             }
@@ -726,19 +755,21 @@ export default function WarehouseOperations() {
                         }
 
                         // Add stock to inventory (increases the stock count)
-                        console.log(`📦 PUTAWAY: Adding ${qtyToAdd} units of ${item.name} to inventory at ${scannedBin}`);
+                        console.log(`📦 PUTAWAY: Adding ${qtyToAdd} units of ${item.name} to inventory at ${scannedBin} `);
                         await adjustStock(
                             productId,
                             qtyToAdd,
                             'IN',
-                            `PUTAWAY from PO - stored at ${scannedBin}`,
+                            `PUTAWAY from PO - stored at ${scannedBin} `,
                             user?.name || 'WMS Worker'
                         );
 
-                        addNotification('success', `✅ Added ${qtyToAdd}x ${item.name} to inventory at ${scannedBin}`);
+                        addNotification('success', `✅ Added ${qtyToAdd}x ${item.name} to inventory at ${scannedBin} `);
+                        playBeep('success');
                     } catch (error) {
                         console.error('Putaway Error:', error);
                         addNotification('alert', 'Failed to complete putaway operation. Please try again.');
+                        playBeep('error');
                         return; // Stop execution if putaway fails
                     }
                 }
@@ -758,10 +789,12 @@ export default function WarehouseOperations() {
                             user?.name || 'Picker'
                         );
 
-                        addNotification('success', `✅ Picked ${qtyToDeduct}x ${item.name}`);
+                        addNotification('success', `✅ Picked ${qtyToDeduct}x ${item.name} `);
+                        playBeep('success');
                     } catch (error) {
                         console.error('Pick Error:', error);
                         addNotification('alert', 'Failed to deduct stock. Please try again.');
+                        playBeep('error');
                         return; // Stop execution if pick fails
                     }
                 }
@@ -780,13 +813,13 @@ export default function WarehouseOperations() {
                 updatedJob.lineItems[itemIndex] = { ...item, status: statusToRecord, pickedQty: qtyToRecord };
                 setSelectedJob(updatedJob);
 
-                // Check if job is truly complete - ALL items must be processed
+                // Check if job is truly complete-ALL items must be processed
                 const allItemsProcessed = updatedJob.lineItems.every(i =>
                     i.status === 'Picked' || i.status === 'Short'
                 );
 
                 if (allItemsProcessed) {
-                    console.log(`✅ Job ${selectedJob.jobNumber || selectedJob.id} - All items processed, completing job`);
+                    console.log(`✅ Job ${selectedJob.jobNumber || selectedJob.id} -All items processed, completing job`);
                     await completeJob(selectedJob.id, user?.name || 'Worker', true); // skipValidation=true since we already verified
 
                     // Find next pending job of the same type
@@ -823,6 +856,8 @@ export default function WarehouseOperations() {
             setIsProcessingScan(false);
         }
     };
+
+
 
     // --- RENDERERS ---
 
@@ -907,7 +942,7 @@ export default function WarehouseOperations() {
                                 <p className="text-xs text-gray-400">{selectedJob.lineItems.length} {t('warehouse.items')} • {selectedJob.lineItems.filter(i => i.status === 'Pending').length} {t('warehouse.remaining')}</p>
                             </div>
                             {/* Mobile Exit Button */}
-                            <button onClick={() => setIsScannerMode(false)} className="md:hidden text-gray-400 p-2">
+                            <button onClick={() => setIsScannerMode(false)} className="md:hidden text-gray-400 p-2" aria-label="Close scanner">
                                 <X size={20} />
                             </button>
                         </div>
@@ -964,7 +999,7 @@ export default function WarehouseOperations() {
                                 <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center animate-pulse">
                                     <CheckCircle size={48} className="text-white" />
                                 </div>
-                                <h3 className="text-2xl font-bold text-white mb-2">Item Picked!</h3>
+                                <h3 className="text-2xl font-bold text-white mb-2">{t('warehouse.picked')}</h3>
                                 <p className="text-green-400 font-bold text-lg mb-1">{lastCompletedItem.qty}x {lastCompletedItem.name}</p>
                                 <div className="mt-4 flex items-center justify-center gap-2 text-gray-400">
                                     <span className="text-sm">
@@ -977,7 +1012,7 @@ export default function WarehouseOperations() {
                                         style={{ width: `${(selectedJob.lineItems.filter(i => i.status === 'Picked' || i.status === 'Short').length / selectedJob.lineItems.length) * 100}%` }}
                                     />
                                 </div>
-                                <p className="text-xs text-gray-500 mt-3 animate-pulse">Loading next item...</p>
+                                <p className="text-xs text-gray-500 mt-3 animate-pulse">{t('warehouse.loadingNextItem')}</p>
                             </div>
                         </div>
                     )}
@@ -1030,7 +1065,7 @@ export default function WarehouseOperations() {
                                                 setIsProcessingScan(false);
                                             }
                                         }}
-                                        className={`flex items-center gap-2 px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-xs font-bold text-cyber-primary transition-colors mb-2 ${isProcessingScan ? 'opacity-50 cursor-not-allowed' : 'hover:bg-white/10'}`}
+                                        className={`flex items-center gap-2 px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-xs font-bold text-cyber-primary transition-colors mb-2 ${isProcessingScan ? 'opacity-50 cursor-not-allowed' : 'hover:bg-white/10'} `}
                                     >
                                         {isProcessingScan ? <RefreshCw size={14} className="animate-spin" /> : <CheckCircle size={14} />}
                                         {isProcessingScan ? t('warehouse.processing') : t('warehouse.pickAllAdmin')}
@@ -1043,7 +1078,7 @@ export default function WarehouseOperations() {
                                     <div key={idx} className={`p-4 rounded-xl border flex justify-between items-center ${item.status === 'Pending' ? 'bg-white/5 border-white/10' :
                                         item.status === 'Short' ? 'bg-red-900/20 border-red-500/50' :
                                             'bg-green-900/20 border-green-500/50'
-                                        }`}>
+                                        } `}>
                                         <div className="flex-1 min-w-0 pr-2">
                                             <p className="text-white font-bold truncate">{item.name}</p>
                                             <p className="text-xs text-gray-400">{t('warehouse.sku')}: {item.sku || t('warehouse.nA')}</p>
@@ -1051,7 +1086,7 @@ export default function WarehouseOperations() {
                                             {selectedJob.type === 'PICK' && (
                                                 <div className="flex items-center gap-2 mt-1">
                                                     <span className="text-xs text-gray-500">📍</span>
-                                                    <span className={`text-xs font-mono font-bold ${itemProduct?.location ? 'text-blue-400' : 'text-yellow-500'}`}>
+                                                    <span className={`text-xs font-mono font-bold ${itemProduct?.location ? 'text-blue-400' : 'text-yellow-500'} `}>
                                                         {itemProduct?.location || 'No Location'}
                                                     </span>
                                                 </div>
@@ -1061,7 +1096,7 @@ export default function WarehouseOperations() {
                                             <span className={`text-xs font-bold px-2 py-1 rounded ${item.status === 'Pending' ? 'bg-yellow-500/10 text-yellow-400' :
                                                 item.status === 'Short' ? 'bg-red-500/10 text-red-400' :
                                                     'bg-green-500/10 text-green-400'
-                                                }`}>
+                                                } `}>
                                                 {item.status === 'Pending' ? t('warehouse.pending') : item.status === 'Short' ? t('warehouse.short') : t('warehouse.picked')}
                                             </span>
                                             <p className="text-xs text-gray-500 mt-1">{item.pickedQty || 0}/{item.expectedQty}</p>
@@ -1218,6 +1253,8 @@ export default function WarehouseOperations() {
                                                             }
                                                         }
                                                     }}
+                                                    ref={locationInputRef}
+                                                    onBlur={handleBlur}
                                                     autoFocus
                                                 />
                                                 <button
@@ -1305,8 +1342,8 @@ export default function WarehouseOperations() {
                                                                         className={`px-4 py-2 rounded-lg border font-mono text-sm font-bold transition-colors ${!isLocationOccupied(loc)
                                                                             ? 'bg-green-500/20 text-green-400 border-green-500/50 hover:bg-green-500/30'
                                                                             : 'bg-blue-500/20 text-blue-400 border-blue-500/50 hover:bg-blue-500/30'
-                                                                            }`}
-                                                                        title={!isLocationOccupied(loc) ? `Use ${loc} (Empty)` : `Use ${loc} (Has items)`}
+                                                                            } `}
+                                                                        title={!isLocationOccupied(loc) ? t('warehouse.useLocationEmpty').replace('{loc}', loc) : t('warehouse.useLocationOccupied').replace('{loc}', loc)}
                                                                     >
                                                                         {loc} {!isLocationOccupied(loc) && '⭐'}
                                                                     </button>
@@ -1318,7 +1355,7 @@ export default function WarehouseOperations() {
                                                     {similarLocations.length > 0 && (
                                                         <div>
                                                             <label className="text-xs text-gray-400 uppercase font-bold mb-3 block">
-                                                                📍 Similar Products ({product.category})
+                                                                📍 {t('warehouse.similarProducts')} ({product.category})
                                                             </label>
                                                             <div className="flex flex-wrap gap-2">
                                                                 {similarLocations.filter((loc): loc is string => !smartSuggestions.includes(loc)).map(loc => (
@@ -1336,8 +1373,8 @@ export default function WarehouseOperations() {
                                                                         className={`px-4 py-2 rounded-lg border font-mono text-sm font-bold transition-colors ${!isLocationOccupied(String(loc))
                                                                             ? 'bg-purple-500/20 text-purple-400 border-purple-500/50 hover:bg-purple-500/30'
                                                                             : 'bg-blue-500/20 text-blue-400 border-blue-500/50 hover:bg-blue-500/30'
-                                                                            }`}
-                                                                        title={!isLocationOccupied(String(loc)) ? `Use ${loc} (Empty)` : `Use ${loc} (Has items)`}
+                                                                            } `}
+                                                                        title={!isLocationOccupied(String(loc)) ? t('warehouse.useLocationEmpty').replace('{loc}', String(loc)) : t('warehouse.useLocationOccupied').replace('{loc}', String(loc))}
                                                                     >
                                                                         {loc}
                                                                     </button>
@@ -1352,7 +1389,7 @@ export default function WarehouseOperations() {
 
                                     {/* Location Grid Preview */}
                                     <div className="bg-gray-900 rounded-xl border border-gray-800 p-6">
-                                        <h3 className="text-sm font-bold text-gray-400 uppercase mb-4">Quick View - Zone {selectedZone}, Aisle {selectedAisle}</h3>
+                                        <h3 className="text-sm font-bold text-gray-400 uppercase mb-4">{t('warehouse.quickViewZone').replace('{zone}', selectedZone).replace('{aisle}', selectedAisle)}</h3>
                                         <div className="grid grid-cols-5 md:grid-cols-10 gap-2">
                                             {Array.from({ length: 20 }, (_, i) => {
                                                 const binNum = String(i + 1).padStart(2, '0');
@@ -1372,8 +1409,8 @@ export default function WarehouseOperations() {
                                                             : occupied
                                                                 ? 'bg-gray-800 border-gray-700 text-blue-400 hover:border-blue-500 hover:bg-gray-750'
                                                                 : 'bg-gray-800 border-gray-700 text-green-400 hover:border-green-500 hover:bg-gray-750'
-                                                            }`}
-                                                        title={occupied ? `Has items: ${location}` : `Empty: ${location}`}
+                                                            } `}
+                                                        title={occupied ? `Has items: ${location} ` : `Empty: ${location} `}
                                                     >
                                                         {binNum}
                                                     </button>
@@ -1400,35 +1437,37 @@ export default function WarehouseOperations() {
 
                             {/* Step 2: Item Scan */}
                             {scannerStep === 'SCAN' && currentItem && (
-                                <div className="text-center space-y-6 w-full max-w-md overflow-y-auto">
-                                    <div className="relative inline-block">
-                                        <img src={currentItem.image} className="w-48 h-48 rounded-xl border-4 border-gray-800 object-cover" alt="" />
-                                        {settings.fefoRotation && selectedJob.type === 'PICK' && (
-                                            <div className="absolute -top-4 -right-4 bg-yellow-500 text-black font-bold px-3 py-1 rounded-full animate-pulse shadow-lg border-2 border-white">
-                                                FEFO: PICK OLD
-                                            </div>
-                                        )}
-                                    </div>
+                                <div className="text-center space-y-6 w-full max-w-md overflow-y-auto px-4 md:px-0 pb-20 md:pb-0 h-[calc(100vh-140px)] md:h-auto flex flex-col justify-between md:justify-start">
+                                    <div className="flex-1 flex flex-col items-center justify-center space-y-4">
+                                        <div className="relative inline-block shrink-0">
+                                            <img src={currentItem.image} className="w-32 h-32 md:w-48 md:h-48 rounded-xl border-4 border-gray-800 object-cover" alt="" />
+                                            {settings.fefoRotation && selectedJob.type === 'PICK' && (
+                                                <div className="absolute -top-4 -right-4 bg-yellow-500 text-black font-bold px-3 py-1 rounded-full animate-pulse shadow-lg border-2 border-white text-xs md:text-base">
+                                                    FEFO: PICK OLD
+                                                </div>
+                                            )}
+                                        </div>
 
-                                    <div>
-                                        <h2 className="text-2xl font-bold text-white">{currentItem.name}</h2>
-                                        <div className="flex justify-center gap-4 mt-4">
-                                            <MetricBadge label={t('warehouse.qty')} value={currentItem.expectedQty} color="border-blue-500 text-blue-400 bg-blue-500" />
-                                            <MetricBadge label={t('warehouse.stock')} value={product?.stock || 0} color="border-gray-500 text-gray-400 bg-gray-500" />
+                                        <div>
+                                            <h2 className="text-xl md:text-2xl font-bold text-white line-clamp-2">{currentItem.name}</h2>
+                                            <div className="flex justify-center gap-4 mt-4">
+                                                <MetricBadge label={t('warehouse.qty')} value={currentItem.expectedQty} color="border-blue-500 text-blue-400 bg-blue-500" />
+                                                <MetricBadge label={t('warehouse.stock')} value={product?.stock || 0} color="border-gray-500 text-gray-400 bg-gray-500" />
+                                            </div>
                                         </div>
                                     </div>
 
                                     {settings.fefoRotation && product?.expiryDate && selectedJob.type === 'PICK' && (
-                                        <div className={`p-4 rounded-xl border flex items-center justify-center gap-3 ${expiry.color === 'text-red-500' ? 'bg-red-900/20 border-red-500' : 'bg-gray-800 border-gray-700'}`}>
+                                        <div className={`p-4 rounded-xl border flex items-center justify-center gap-3 ${expiry.color === 'text-red-500' ? 'bg-red-900/20 border-red-500' : 'bg-gray-800 border-gray-700'} `}>
                                             <AlertTriangle size={24} className={expiry.color} />
                                             <div className="text-left">
                                                 <p className="text-xs text-gray-400 uppercase">{t('warehouse.checkExpiry')}</p>
-                                                <p className={`font-bold ${expiry.color}`}>{product.expiryDate} ({expiry.label})</p>
+                                                <p className={`font-bold ${expiry.color} `}>{product.expiryDate} ({expiry.label})</p>
                                             </div>
                                         </div>
                                     )}
 
-                                    {/* PICK Job - Show item location */}
+                                    {/* PICK Job-Show item location */}
                                     {selectedJob.type === 'PICK' && product?.location && (
                                         <div className="p-4 rounded-xl bg-blue-900/30 border-2 border-blue-500 flex flex-col items-center animate-pulse">
                                             <p className="text-xs text-blue-400 uppercase font-bold mb-2">{t('warehouse.goToLocation')}</p>
@@ -1437,7 +1476,7 @@ export default function WarehouseOperations() {
                                         </div>
                                     )}
 
-                                    {/* PICK Job - No location assigned */}
+                                    {/* PICK Job-No location assigned */}
                                     {selectedJob.type === 'PICK' && !product?.location && (
                                         <div className="p-4 rounded-xl bg-yellow-900/20 border border-yellow-500/50 flex items-center justify-center gap-3">
                                             <AlertTriangle size={24} className="text-yellow-500" />
@@ -1467,7 +1506,7 @@ export default function WarehouseOperations() {
                                         </div>
                                     )}
 
-                                    {/* Barcode Scanner Input - Critical for Operations */}
+                                    {/* Barcode Scanner Input-Critical for Operations */}
                                     <div className="w-full space-y-3">
                                         <div className="bg-gray-900 rounded-xl border-2 border-cyber-primary/50 p-4">
                                             <div className="flex items-center gap-2 mb-2">
@@ -1478,80 +1517,59 @@ export default function WarehouseOperations() {
                                                 <input
                                                     type="text"
                                                     value={scannedItem}
+                                                    className={`flex-1 bg-black/50 border-2 border-cyber-primary/30 rounded-lg p-4 text-white font-mono text-lg text-center focus:border-cyber-primary focus:outline-none focus:ring-2 focus:ring-cyber-primary/50 ${isProcessingScan ? 'opacity-50 cursor-not-allowed' : ''} `}
+                                                    ref={itemInputRef}
+                                                    onBlur={handleBlur}
+                                                    autoFocus
+                                                    disabled={isProcessingScan}
+                                                    onKeyDown={(e) => {
+                                                        // Priority: Enter key (standard scanner terminology)
+                                                        if (e.key === 'Enter' && scannedItem.trim()) {
+                                                            e.preventDefault();
+                                                            // Clear any pending debounce
+                                                            if ((window as any).scanTimeout) clearTimeout((window as any).scanTimeout);
+
+                                                            handleItemScan();
+                                                        }
+                                                    }}
                                                     onChange={(e) => {
                                                         const value = e.target.value;
                                                         setScannedItem(value);
 
-                                                        // Auto-detect barcode scanner input (rapid entry, ends with Enter)
-                                                        // Barcode scanners typically send data very quickly followed by Enter
-                                                        if (value.length > 3) {
-                                                            // Check if this matches the expected product SKU or ID
-                                                            const matchedProduct = filteredProducts.find(p =>
-                                                                p.sku?.toUpperCase() === value.toUpperCase() ||
-                                                                p.id.toUpperCase() === value.toUpperCase() ||
-                                                                p.id.replace(/[^A-Z0-9]/gi, '').toUpperCase() === value.replace(/[^A-Z0-9]/gi, '').toUpperCase()
-                                                            );
+                                                        // Debounce logic for scanners that don't send Enter or fast processing
+                                                        if ((window as any).scanTimeout) clearTimeout((window as any).scanTimeout);
 
-                                                            if (matchedProduct && matchedProduct.id === currentItem?.productId) {
-                                                                // Correct product scanned - auto-confirm after brief delay
-                                                                setTimeout(() => {
-                                                                    if (scannedItem === value) { // Ensure value hasn't changed
-                                                                        handleItemScan();
-                                                                        setScannedItem('');
-                                                                    }
-                                                                }, 100);
-                                                            }
-                                                        }
-                                                    }}
-                                                    onKeyPress={(e) => {
-                                                        // Handle Enter key (barcode scanner typically sends Enter after scan)
-                                                        if (e.key === 'Enter' && scannedItem.trim()) {
-                                                            e.preventDefault();
-                                                            const scannedValue = scannedItem.trim().toUpperCase();
+                                                        if (value.length > 2) {
+                                                            (window as any).scanTimeout = setTimeout(() => {
+                                                                // Check for exact match to auto-submit
+                                                                // This helps when users scan but the scanner doesn't hit Enter
+                                                                if (value === scannedItem) return; // Value changed, abort (handled by closure usually, but here checking ref would be better if we had one)
 
-                                                            // Validate scanned barcode matches expected product
-                                                            const expectedProduct = filteredProducts.find(p => p.id === currentItem?.productId);
-                                                            let scannedProduct;
+                                                                // Re-validate against current value in closure? No, e.target.value is stale in timeout?
+                                                                // We rely on the fact that if a new char comes, we cleared the timeout.
+                                                                // So if this executes, no new char has come for 200ms.
 
-                                                            if (selectedJob?.type === 'PUTAWAY') {
-                                                                // Strict SKU validation for Putaway
-                                                                scannedProduct = filteredProducts.find(p => p.sku?.toUpperCase() === scannedValue);
-                                                                // Fallback: Check if job item SKU matches directly
-                                                                if (!scannedProduct && currentItem?.sku?.toUpperCase() === scannedValue) {
-                                                                    scannedProduct = expectedProduct;
-                                                                }
-                                                            } else {
-                                                                // Standard loose validation for other job types
-                                                                scannedProduct = filteredProducts.find(p =>
-                                                                    p.sku?.toUpperCase() === scannedValue ||
-                                                                    p.id.toUpperCase() === scannedValue ||
-                                                                    p.id.replace(/[^A-Z0-9]/gi, '').toUpperCase() === scannedValue.replace(/[^A-Z0-9]/gi, '')
+                                                                const upperValue = value.toUpperCase();
+                                                                const match = filteredProducts.find(p =>
+                                                                    p.sku?.toUpperCase() === upperValue ||
+                                                                    p.barcode?.toUpperCase() === upperValue ||
+                                                                    p.id.toUpperCase() === upperValue
                                                                 );
-                                                            }
 
-                                                            if (scannedProduct && expectedProduct && scannedProduct.id === expectedProduct.id) {
-                                                                // Correct product - proceed with scan
-                                                                handleItemScan();
-                                                                setScannedItem('');
-                                                                addNotification('success', t('warehouse.productVerified'));
-                                                            } else {
-                                                                // Wrong product scanned
-                                                                addNotification('alert', t('warehouse.wrongProduct').replace('{expected}', expectedProduct?.sku || expectedProduct?.id || '').replace('{scanned}', scannedValue));
-                                                                setScannedItem('');
-                                                            }
+                                                                // Only auto-submit if strongly matched and we are sure it's the intended item
+                                                                if (match && match.id === currentItem?.productId) {
+                                                                    handleItemScan();
+                                                                }
+                                                            }, 200);
                                                         }
                                                     }}
-                                                    placeholder={isProcessingScan ? t('warehouse.processing') : t('warehouse.scanBarcodeOrEnterSKU')}
-                                                    className={`flex-1 bg-black/50 border-2 border-cyber-primary/30 rounded-lg p-4 text-white font-mono text-lg text-center focus:border-cyber-primary focus:outline-none focus:ring-2 focus:ring-cyber-primary/50 ${isProcessingScan ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                                    autoFocus
-                                                    disabled={isProcessingScan}
                                                 />
                                                 <button
                                                     onClick={() => {
                                                         setQRScannerMode('product');
                                                         setIsQRScannerOpen(true);
                                                     }}
-                                                    className={`px-4 py-4 bg-blue-500/20 border-2 border-blue-500/30 text-blue-400 font-bold rounded-lg flex items-center gap-2 transition-colors ${isProcessingScan ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-500/30'}`}
+                                                    className={`px-4 py-4 bg-blue-500/20 border-2 border-blue-500/30 text-blue-400 font-bold rounded-lg flex items-center gap-2 transition-colors ${isProcessingScan ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-500/30'} `}
                                                     title={t('warehouse.scanProductWithCamera')}
                                                     disabled={isProcessingScan}
                                                 >
@@ -1586,17 +1604,17 @@ export default function WarehouseOperations() {
                                                     (input === expectedProductSku && expectedProductSku !== '');
 
                                                 if (!isValid) {
-                                                    addNotification('alert', `Incorrect SKU. Expected: ${expectedSku || expectedProductSku}`);
+                                                    addNotification('alert', `Incorrect SKU.Expected: ${expectedSku || expectedProductSku} `);
                                                     setScannedItem('');
                                                     return;
                                                 }
                                             }
                                             handleItemScan();
                                         }}
-                                        className={`w-full py-6 bg-green-500 text-black font-bold text-xl rounded-2xl shadow-[0_0_30px_rgba(34,197,94,0.4)] flex items-center justify-center gap-3 ${isProcessingScan ? 'opacity-50 cursor-not-allowed' : 'hover:bg-green-400'}`}
+                                        className={`w-full py-6 bg-green-500 text-black font-bold text-xl rounded-2xl shadow-[0_0_30px_rgba(34, 197, 94, 0.4)] flex items-center justify-center gap-3 ${isProcessingScan ? 'opacity-50 cursor-not-allowed' : 'hover:bg-green-400'} `}
                                     >
                                         {isProcessingScan ? <RefreshCw size={28} className="animate-spin" /> : <Scan size={28} />}
-                                        {isProcessingScan ? t('warehouse.processing') : `${t('warehouse.confirm')} ${selectedJob.type}`}
+                                        {isProcessingScan ? t('warehouse.processing') : `${t('warehouse.confirm')} ${selectedJob.type} `}
                                     </button>
 
                                     {/* Exception Handling Controls */}
@@ -1615,7 +1633,7 @@ export default function WarehouseOperations() {
                                                     addNotification('info', t('warehouse.itemSkipped'));
                                                 }
                                             }}
-                                            className={`py-4 bg-gray-800 text-white font-bold rounded-xl border border-gray-600 flex flex-col items-center justify-center gap-1 ${isProcessingScan ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-700'}`}
+                                            className={`py-4 bg-gray-800 text-white font-bold rounded-xl border border-gray-600 flex flex-col items-center justify-center gap-1 ${isProcessingScan ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-700'} `}
                                         >
                                             <ArrowRight size={20} className="text-yellow-400" />
                                             <span className="text-sm">{t('warehouse.skipItem')}</span>
@@ -1624,12 +1642,12 @@ export default function WarehouseOperations() {
                                         <button
                                             disabled={isProcessingScan}
                                             onClick={() => {
-                                                // SHORT PICK LOGIC - Open custom modal
+                                                // SHORT PICK LOGIC-Open custom modal
                                                 setShortPickMaxQty(currentItem.expectedQty);
                                                 setShortPickQuantity('');
                                                 setShowShortPickModal(true);
                                             }}
-                                            className={`py-4 bg-red-900/30 text-red-400 font-bold rounded-xl border border-red-500/30 flex flex-col items-center justify-center gap-1 ${isProcessingScan ? 'opacity-50 cursor-not-allowed' : 'hover:bg-red-900/50'}`}
+                                            className={`py-4 bg-red-900/30 text-red-400 font-bold rounded-xl border border-red-500/30 flex flex-col items-center justify-center gap-1 ${isProcessingScan ? 'opacity-50 cursor-not-allowed' : 'hover:bg-red-900/50'} `}
                                         >
                                             <AlertTriangle size={20} />
                                             <span className="text-sm">{t('warehouse.shortPick')}</span>
@@ -1644,7 +1662,7 @@ export default function WarehouseOperations() {
         );
     };
 
-    // 🚚 DRIVER INTERFACE - Phase 5
+    // 🚚 DRIVER INTERFACE-Phase 5
     // Simplified view for drivers showing only their assigned jobs
     if (user?.role === 'driver') {
         const myJobs = filteredJobs.filter(j => j.assignedTo === user.name || j.assignedTo === user.id);
@@ -1671,13 +1689,13 @@ export default function WarehouseOperations() {
                             <div key={job.id} className="bg-cyber-gray border border-white/5 rounded-xl p-5 hover:border-cyber-primary/50 transition-colors group relative overflow-hidden">
                                 <div className={`absolute left-0 top-0 bottom-0 w-1 ${job.status === 'Completed' ? 'bg-green-500' :
                                     job.status === 'In-Progress' ? 'bg-blue-500' : 'bg-yellow-500'
-                                    }`} />
+                                    } `} />
 
                                 <div className="flex justify-between items-start mb-3 pl-2">
                                     <span className="font-mono text-lg font-bold text-white">{formatJobId(job)}</span>
                                     <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase ${job.status === 'Completed' ? 'bg-green-500/20 text-green-400' :
                                         job.status === 'In-Progress' ? 'bg-blue-500/20 text-blue-400' : 'bg-yellow-500/20 text-yellow-400'
-                                        }`}>{job.status}</span>
+                                        } `}>{job.status}</span>
                                 </div>
 
                                 <div className="space-y-2 pl-2 mb-4">
@@ -1727,19 +1745,24 @@ export default function WarehouseOperations() {
     // If we are in Global View, we simply fall through to the main UI.
     // Filter logic below handles what data is shown.
 
+
+
+
+
     return (
         <Protected permission="ACCESS_WAREHOUSE" showMessage>
-            <div className="h-full flex flex-col gap-6">
+            <div className="h-full flex flex-col gap-4 md:gap-6 p-2 md:p-0">
                 {isScannerMode && <ScannerInterface />}
 
                 {/* Header Tabs */}
-                <div className="flex items-center gap-2 overflow-x-auto pb-2 bg-cyber-gray p-2 rounded-xl border border-white/5 shrink-0 no-scrollbar">
-                    <div className="flex-1 flex gap-2">
+                {/* Header Tabs-Scrollable on Mobile */}
+                <div className="flex items-center gap-2 overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-0 md:pb-0 bg-cyber-gray md:bg-transparent rounded-none md:rounded-xl border-y md:border border-white/5 shrink-0 no-scrollbar touch-pan-x">
+                    <div className="flex gap-2 min-w-max">
                         {visibleTabs.map((tab) => (
                             <button
                                 key={tab}
                                 onClick={() => setActiveTab(tab as OpTab)}
-                                className={`px-4 py-3 md:py-2 rounded-lg text-sm md:text-xs font-bold transition-all whitespace-nowrap min-h-[44px] md:min-h-0 ${activeTab === tab
+                                className={`px-4 py-3 md:py-2 rounded-lg text-sm md:text-xs font-bold transition-all whitespace-nowrap min-h-[44px] md:min-h-0 select-none ${activeTab === tab
                                     ? 'bg-cyber-primary text-black shadow-[0_0_10px_rgba(0,255,157,0.3)]'
                                     : 'text-gray-400 hover:bg-white/5'
                                     }`}
@@ -1748,7 +1771,10 @@ export default function WarehouseOperations() {
                             </button>
                         ))}
                     </div>
-                    <LanguageSwitcher />
+
+                    <div className="ml-auto pl-2 sticky right-0 bg-cyber-gray md:bg-transparent">
+                        <LanguageSwitcher />
+                    </div>
                 </div>
 
                 {/* --- DOCKS TAB --- */}
@@ -1763,24 +1789,24 @@ export default function WarehouseOperations() {
                                     className={`px-6 py-2 rounded-lg text-sm font-bold transition-all ${dockTab === tab
                                         ? 'bg-cyber-primary text-black shadow-lg shadow-cyber-primary/20'
                                         : 'text-gray-400 hover:text-white hover:bg-white/5'
-                                        }`}
+                                        } `}
                                 >
                                     {tab === 'INBOUND' && (
                                         <div className="flex items-center gap-2">
                                             <Download size={16} />
-                                            <span>Incoming (Inbound)</span>
+                                            <span>{t('warehouse.docks.incoming')}</span>
                                         </div>
                                     )}
                                     {tab === 'OUTBOUND' && (
                                         <div className="flex items-center gap-2">
                                             <Upload size={16} />
-                                            <span>Outgoing (Outbound)</span>
+                                            <span>{t('warehouse.docks.outgoing')}</span>
                                         </div>
                                     )}
                                     {tab === 'DRIVER' && (
                                         <div className="flex items-center gap-2">
                                             <Truck size={16} />
-                                            <span>Driver Portal</span>
+                                            <span>{t('warehouse.docks.driver')}</span>
                                         </div>
                                     )}
                                 </button>
@@ -1790,13 +1816,13 @@ export default function WarehouseOperations() {
                         {dockTab === 'INBOUND' && (
                             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 flex-1 overflow-y-auto md:overflow-hidden">
                                 <div className="lg:col-span-2 bg-cyber-gray border border-white/5 rounded-2xl p-4 md:p-6">
-                                    <h3 className="font-bold text-white mb-6 flex items-center gap-2"><Download className="text-cyber-primary" /> Inbound Docks (Receiving)</h3>
+                                    <h3 className="font-bold text-white mb-6 flex items-center gap-2"><Download className="text-cyber-primary" /> {t('warehouse.docks.inboundTitle')}</h3>
                                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
                                         {Object.entries(dockStatus).filter(([k]) => ['D1', 'D2'].includes(k)).map(([dock, status]) => (
                                             <div key={dock} className={`aspect-square rounded-xl border-2 flex flex-col items-center justify-center gap-2 relative group cursor-pointer transition-all active:scale-95 ${status === 'Empty' ? 'border-green-500/30 bg-green-500/5 hover:bg-green-500/10' :
                                                 status === 'Occupied' ? 'border-red-500/30 bg-red-500/5 hover:bg-red-500/10' :
                                                     'border-yellow-500/30 bg-yellow-500/5 hover:bg-yellow-500/10'
-                                                }`}>
+                                                } `}>
                                                 <span className="absolute top-2 left-3 font-bold text-white opacity-50">{dock}</span>
                                                 {status === 'Occupied' && <Truck size={40} className="text-red-400 md:w-10 md:h-10 w-12 h-12" />}
                                                 {status === 'Empty' && <div className="w-12 h-12 md:w-10 md:h-10 rounded-full border-2 border-green-500/30 border-dashed" />}
@@ -1804,7 +1830,7 @@ export default function WarehouseOperations() {
                                                 <span className={`text-xs font-bold uppercase px-2 py-1 rounded ${status === 'Empty' ? 'text-green-400 bg-green-500/10' :
                                                     status === 'Occupied' ? 'text-red-400 bg-red-500/10' :
                                                         'text-yellow-400 bg-yellow-500/10'
-                                                    }`}>{status === 'Empty' ? t('warehouse.empty') : status === 'Occupied' ? t('warehouse.occupied') : t('warehouse.maintenance')}</span>
+                                                    } `}>{status === 'Empty' ? t('warehouse.docks.empty') : status === 'Occupied' ? t('warehouse.docks.occupied') : t('warehouse.docks.maintenance')}</span>
                                             </div>
                                         ))}
                                         {/* Placeholder Docks */}
@@ -1816,19 +1842,19 @@ export default function WarehouseOperations() {
                                 </div>
                                 <div className="bg-cyber-gray border border-white/5 rounded-2xl p-4 md:p-6 flex flex-col">
                                     <div className="flex justify-between items-center mb-4">
-                                        <h3 className="font-bold text-white">Inbound Queue</h3>
-                                        <span className="bg-blue-500/20 text-blue-400 text-xs font-bold px-2 py-1 rounded">3 Trucks</span>
+                                        <h3 className="font-bold text-white">{t('warehouse.docks.inboundQueue')}</h3>
+                                        <span className="bg-blue-500/20 text-blue-400 text-xs font-bold px-2 py-1 rounded">{t('warehouse.docks.trucks').replace('{count}', '3')}</span>
                                     </div>
                                     <div className="flex-1 overflow-y-auto space-y-3">
                                         {[1, 2, 3].map(i => (
                                             <div key={i} className="p-4 md:p-3 bg-white/5 rounded-xl border border-white/5 flex justify-between items-center min-h-[60px] md:min-h-0">
                                                 <div>
                                                     <p className="text-base md:text-sm font-bold text-white">Incoming #{100 + i}</p>
-                                                    <p className="text-sm md:text-xs text-gray-500">Supplier: Neo-Tokyo</p>
+                                                    <p className="text-sm md:text-xs text-gray-500">{t('warehouse.docks.supplier').replace('{name}', 'Neo-Tokyo')}</p>
                                                 </div>
                                                 <div className="flex flex-col items-end">
                                                     <span className="text-sm md:text-xs text-orange-400 font-mono">00:{15 + i * 5}m</span>
-                                                    <button className="text-[10px] bg-green-500/20 text-green-400 px-2 py-0.5 rounded mt-1 hover:bg-green-500/30 transition-colors uppercase font-bold">Assign Dock</button>
+                                                    <button className="text-[10px] bg-green-500/20 text-green-400 px-2 py-0.5 rounded mt-1 hover:bg-green-500/30 transition-colors uppercase font-bold">{t('warehouse.docks.assignDock')}</button>
                                                 </div>
                                             </div>
                                         ))}
@@ -1840,13 +1866,13 @@ export default function WarehouseOperations() {
                         {dockTab === 'OUTBOUND' && (
                             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 flex-1 overflow-y-auto md:overflow-hidden">
                                 <div className="lg:col-span-2 bg-cyber-gray border border-white/5 rounded-2xl p-4 md:p-6">
-                                    <h3 className="font-bold text-white mb-6 flex items-center gap-2"><Upload className="text-cyber-primary" /> Outbound Docks (Shipping/Dispatch)</h3>
+                                    <h3 className="font-bold text-white mb-6 flex items-center gap-2"><Upload className="text-cyber-primary" /> {t('warehouse.docks.outboundTitle')}</h3>
                                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
                                         {Object.entries(dockStatus).filter(([k]) => ['D3', 'D4'].includes(k)).map(([dock, status]) => (
                                             <div key={dock} className={`aspect-square rounded-xl border-2 flex flex-col items-center justify-center gap-2 relative group cursor-pointer transition-all active:scale-95 ${status === 'Empty' ? 'border-green-500/30 bg-green-500/5 hover:bg-green-500/10' :
                                                 status === 'Occupied' ? 'border-red-500/30 bg-red-500/5 hover:bg-red-500/10' :
                                                     'border-yellow-500/30 bg-yellow-500/5 hover:bg-yellow-500/10'
-                                                }`}>
+                                                } `}>
                                                 <span className="absolute top-2 left-3 font-bold text-white opacity-50">{dock}</span>
                                                 {status === 'Occupied' && <Truck size={40} className="text-red-400 md:w-10 md:h-10 w-12 h-12" />}
                                                 {status === 'Empty' && <div className="w-12 h-12 md:w-10 md:h-10 rounded-full border-2 border-green-500/30 border-dashed" />}
@@ -1854,13 +1880,13 @@ export default function WarehouseOperations() {
                                                 <span className={`text-xs font-bold uppercase px-2 py-1 rounded ${status === 'Empty' ? 'text-green-400 bg-green-500/10' :
                                                     status === 'Occupied' ? 'text-red-400 bg-red-500/10' :
                                                         'text-yellow-400 bg-yellow-500/10'
-                                                    }`}>{status === 'Empty' ? t('warehouse.empty') : status === 'Occupied' ? 'Loading' : t('warehouse.maintenance')}</span>
+                                                    } `}>{status === 'Empty' ? t('warehouse.docks.empty') : status === 'Occupied' ? 'Loading' : t('warehouse.docks.maintenance')}</span>
                                             </div>
                                         ))}
                                     </div>
 
                                     <div className="mt-8">
-                                        <h4 className="font-bold text-white mb-4 flex items-center gap-2"><Package className="text-orange-400" /> Staging Area (Ready to Load)</h4>
+                                        <h4 className="font-bold text-white mb-4 flex items-center gap-2"><Package className="text-orange-400" /> {t('warehouse.docks.stagingArea')}</h4>
                                         <div className="bg-black/20 rounded-xl p-4 border border-white/5">
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                                 {[1, 2].map(i => (
@@ -1887,9 +1913,9 @@ export default function WarehouseOperations() {
 
                                 <div className="bg-cyber-gray border border-white/5 rounded-2xl p-4 md:p-6 flex flex-col">
                                     <div className="flex justify-between items-center mb-4">
-                                        <h3 className="font-bold text-white">Outbound Schedule</h3>
+                                        <h3 className="font-bold text-white">{t('warehouse.docks.outboundSchedule')}</h3>
                                         <button className="bg-cyber-primary text-black text-xs font-bold px-2 py-1 rounded flex items-center gap-1">
-                                            <Plus size={12} /> New Shipment
+                                            <Plus size={12} /> {t('warehouse.docks.newShipment')}
                                         </button>
                                     </div>
                                     <div className="flex-1 overflow-y-auto space-y-3">
@@ -1898,7 +1924,7 @@ export default function WarehouseOperations() {
                                                 <span className="text-xs bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded font-bold">14:00 PM</span>
                                                 <span className="text-xs text-gray-500">Pending</span>
                                             </div>
-                                            <p className="text-sm font-bold text-white">Weekly Restock - North</p>
+                                            <p className="text-sm font-bold text-white">Weekly Restock-North</p>
                                             <p className="text-xs text-gray-500 mt-1">Driver: John Doe (T-1000)</p>
                                         </div>
                                     </div>
@@ -1914,13 +1940,13 @@ export default function WarehouseOperations() {
                                             <div className="p-2 bg-cyber-primary text-black rounded-lg">
                                                 <Truck size={24} />
                                             </div>
-                                            Driver Dashboard
+                                            {t('warehouse.docks.driverDashboard')}
                                         </h2>
-                                        <p className="text-sm text-gray-400 mt-1">Welcome, {user?.name || 'Driver'}</p>
+                                        <p className="text-sm text-gray-400 mt-1">{t('warehouse.docks.welcome').replace('{name}', user?.name || 'Driver')}</p>
                                     </div>
                                     <div className="text-right hidden md:block">
                                         <p className="text-2xl font-mono font-bold text-cyber-primary">08:42 AM</p>
-                                        <p className="text-xs text-gray-500">Shift Started: 06:00 AM</p>
+                                        <p className="text-xs text-gray-500">{t('warehouse.docks.shiftStarted').replace('{time}', '06:00 AM')}</p>
                                     </div>
                                 </div>
 
@@ -1935,26 +1961,26 @@ export default function WarehouseOperations() {
                                             <div className="relative z-10">
                                                 <div className="flex items-center gap-2 mb-4">
                                                     <span className="animate-pulse w-3 h-3 rounded-full bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]"></span>
-                                                    <span className="text-green-400 font-bold text-sm tracking-wider">EN ROUTE TO DESTINATION</span>
+                                                    <span className="text-green-400 font-bold text-sm tracking-wider">{t('warehouse.docks.enRoute')}</span>
                                                 </div>
                                                 <h3 className="text-3xl font-bold text-white mb-2">Downtown Store #104</h3>
                                                 <p className="text-xl text-gray-300 mb-6">123 Cyber Avenue, Neo-Tokyo</p>
 
                                                 <div className="grid grid-cols-2 gap-4 mb-6">
                                                     <div className="bg-black/40 rounded-xl p-3 border border-white/10">
-                                                        <p className="text-xs text-gray-500 uppercase">Distance</p>
+                                                        <p className="text-xs text-gray-500 uppercase">{t('warehouse.docks.distance')}</p>
                                                         <p className="text-lg font-mono font-bold text-white">4.2 km</p>
                                                     </div>
                                                     <div className="bg-black/40 rounded-xl p-3 border border-white/10">
-                                                        <p className="text-xs text-gray-500 uppercase">ETA</p>
+                                                        <p className="text-xs text-gray-500 uppercase">{t('warehouse.docks.eta')}</p>
                                                         <p className="text-lg font-mono font-bold text-white">14 mins</p>
                                                     </div>
                                                     <div className="bg-black/40 rounded-xl p-3 border border-white/10">
-                                                        <p className="text-xs text-gray-500 uppercase">Items</p>
+                                                        <p className="text-xs text-gray-500 uppercase">{t('warehouse.docks.items')}</p>
                                                         <p className="text-lg font-mono font-bold text-white">124 Pcs</p>
                                                     </div>
                                                     <div className="bg-black/40 rounded-xl p-3 border border-white/10">
-                                                        <p className="text-xs text-gray-500 uppercase">Order Ref</p>
+                                                        <p className="text-xs text-gray-500 uppercase">{t('warehouse.docks.orderRef')}</p>
                                                         <p className="text-lg font-mono font-bold text-white">#TR-8821</p>
                                                     </div>
                                                 </div>
@@ -1962,11 +1988,11 @@ export default function WarehouseOperations() {
                                                 <div className="flex gap-4">
                                                     <button className="flex-1 py-4 bg-cyber-primary text-black font-bold rounded-xl hover:bg-cyber-accent transition-colors flex items-center justify-center gap-2 shadow-lg shadow-cyber-primary/20">
                                                         <Navigation size={20} />
-                                                        Start Navigation
+                                                        {t('warehouse.docks.startNavigation')}
                                                     </button>
                                                     <button className="flex-1 py-4 bg-white/10 text-white font-bold rounded-xl hover:bg-white/20 transition-colors flex items-center justify-center gap-2 border border-white/10">
                                                         <Phone size={20} />
-                                                        Call Store
+                                                        {t('warehouse.docks.callStore')}
                                                     </button>
                                                 </div>
                                             </div>
@@ -2035,7 +2061,7 @@ export default function WarehouseOperations() {
                                                 <div>
                                                     <div className="flex justify-between text-sm mb-1">
                                                         <span className="text-gray-400">Deliveries Completed</span>
-                                                        <span className="text-white font-bold">12 / 18</span>
+                                                        <span className="text-white font-bold">12/18</span>
                                                     </div>
                                                     <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
                                                         <div className="w-[66%] h-full bg-blue-500 rounded-full"></div>
@@ -2057,38 +2083,30 @@ export default function WarehouseOperations() {
                             {/* Header */}
                             <div className="flex justify-between items-center">
                                 <div>
-                                    <h2 className="text-lg font-bold text-white">Receiving</h2>
-                                    <p className="text-xs text-gray-400">Receive products one at a time from approved POs</p>
+                                    <h2 className="text-lg font-bold text-white">{t('warehouse.receivingQueue')}</h2>
+                                    <p className="text-xs text-gray-400">{t('warehouse.approvedPOsWillAppear')}</p>
                                 </div>
                             </div>
 
-                            {/* Approved POs - Each product is a separate receiving task */}
+                            {/* Approved POs-Each product is a separate receiving task */}
                             {orders.filter(o => o.status === 'Approved').length === 0 ? (
                                 <div className="text-center py-12 border border-dashed border-white/10 rounded-xl">
                                     <Package size={48} className="text-gray-600 mx-auto mb-4" />
-                                    <p className="text-gray-400 font-bold">No approved POs to receive</p>
-                                    <p className="text-gray-600 text-sm mt-2">Approved purchase orders will appear here</p>
+                                    <p className="text-gray-400 font-bold">{t('warehouse.noApprovedPOs')}</p>
+                                    <p className="text-gray-600 text-sm mt-2">{t('warehouse.approvedPOsWillAppear')}</p>
                                 </div>
                             ) : (
                                 <div className="space-y-4">
                                     {orders.filter(o => o.status === 'Approved').map(po => {
-                                        // Calculate received quantities for this PO from existing jobs
+                                        // Calculate received quantities
                                         const poJobs = jobs.filter(j => j.orderRef === po.id);
                                         const receivedMap: Record<string, number> = {};
-                                        const jobSkuMap: Record<string, string> = {}; // Map productId to SKU from jobs
-                                        const jobTimestampMap: Record<string, string> = {}; // Map productId to job created_at
+                                        const jobSkuMap: Record<string, string> = {};
 
                                         poJobs.forEach(job => {
                                             job.lineItems.forEach(item => {
                                                 receivedMap[item.productId] = (receivedMap[item.productId] || 0) + item.expectedQty;
-                                                // Store the SKU from the job (this is the finalized SKU)
-                                                if (item.sku) {
-                                                    jobSkuMap[item.productId] = item.sku;
-                                                }
-                                                // Store the job timestamp for sorting
-                                                if (job.created_at) {
-                                                    jobTimestampMap[item.productId] = job.created_at;
-                                                }
+                                                if (item.sku) jobSkuMap[item.productId] = item.sku;
                                             });
                                         });
 
@@ -2098,9 +2116,19 @@ export default function WarehouseOperations() {
                                             return received >= item.quantity;
                                         }) || false;
 
+                                        // Sort items: Pending first, then Completed
+                                        const sortedItems = [...(po.lineItems || [])].sort((a, b) => {
+                                            const receivedA = receivedMap[a.productId] || 0;
+                                            const receivedB = receivedMap[b.productId] || 0;
+                                            const isCompleteA = receivedA >= a.quantity;
+                                            const isCompleteB = receivedB >= b.quantity;
+                                            if (isCompleteA === isCompleteB) return 0;
+                                            return isCompleteA ? 1 : -1; // Pending first
+                                        });
+
                                         return (
                                             <div key={po.id} className="bg-white/5 border border-white/10 rounded-xl overflow-hidden">
-                                                {/* PO Header - Always visible */}
+                                                {/* PO Header */}
                                                 <div className="p-4 flex justify-between items-center border-b border-white/5">
                                                     <div className="flex items-center gap-4">
                                                         <div className="p-2 bg-cyber-primary/10 rounded-lg">
@@ -2113,47 +2141,69 @@ export default function WarehouseOperations() {
                                                     </div>
                                                     <div className={`px-3 py-1 rounded-full text-xs font-bold ${allItemsReceived
                                                         ? 'bg-green-500/20 text-green-400 border border-green-500/30'
-                                                        : 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'}`}>
+                                                        : 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
+                                                        } `}>
                                                         {allItemsReceived ? 'FULLY RECEIVED' : 'IN PROGRESS'}
                                                     </div>
                                                 </div>
 
-                                                <div className="p-4 space-y-6">
-                                                    {/* Pending Items */}
-                                                    <div className="space-y-3">
-                                                        {po.lineItems?.filter(item => (receivedMap[item.productId] || 0) < item.quantity).length === 0 && (
-                                                            <div className="text-center py-4 text-gray-500 italic text-sm">No pending items</div>
-                                                        )}
-                                                        {po.lineItems?.filter(item => (receivedMap[item.productId] || 0) < item.quantity).map((item, idx) => {
-                                                            const receivedQty = receivedMap[item.productId] || 0;
-                                                            const remainingQty = Math.max(0, item.quantity - receivedQty);
-                                                            const product = products.find(p => p.id === item.productId);
+                                                <div className="p-4 space-y-3">
+                                                    {sortedItems.map((item, idx) => {
+                                                        const receivedQty = receivedMap[item.productId] || 0;
+                                                        const remainingQty = Math.max(0, item.quantity - receivedQty);
+                                                        const isComplete = receivedQty >= item.quantity;
+                                                        const product = products.find(p => p.id === item.productId);
 
-                                                            return (
-                                                                <div
-                                                                    key={item.productId || idx}
-                                                                    className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between p-4 rounded-xl border bg-black/20 border-white/5 hover:border-cyber-primary/30 transition-colors"
-                                                                >
-                                                                    <div className="flex-1">
-                                                                        <div className="flex items-center gap-2">
-                                                                            <p className="font-bold text-white">{item.productName}</p>
-                                                                        </div>
-                                                                        <p className="text-xs text-gray-400 font-mono mt-1">
-                                                                            SKU: {product?.sku || item.sku || 'Will be assigned'}
+                                                        return (
+                                                            <div
+                                                                key={item.productId || idx}
+                                                                className={`flex flex-col md:flex-row gap-4 items-start md:items-center justify-between p-4 rounded-xl border transition-all duration-500 ${isComplete
+                                                                    ? 'bg-green-500/5 border-green-500/10'
+                                                                    : 'bg-black/20 border-white/5 hover:border-cyber-primary/30'
+                                                                    } `}
+                                                            >
+                                                                <div className="flex-1">
+                                                                    <div className="flex items-center gap-2">
+                                                                        <p className={`font-bold ${isComplete ? 'text-gray-300 line-through decoration-green-500/50' : 'text-white'} `}>
+                                                                            {item.productName}
                                                                         </p>
-                                                                        <div className="flex items-center gap-4 mt-2">
-                                                                            <span className="text-xs text-gray-500">Expected: {item.quantity}</span>
+                                                                        {isComplete && <CheckCircle size={16} className="text-green-400" />}
+                                                                    </div>
+                                                                    <p className="text-xs text-gray-400 font-mono mt-1">
+                                                                        SKU: {jobSkuMap[item.productId || ''] || finalizedSkus[item.productId || ''] || product?.sku || item.sku || 'N/A'}
+                                                                    </p>
+                                                                    <div className="flex items-center gap-4 mt-2">
+                                                                        <span className="text-xs text-gray-500">Expected: {item.quantity}</span>
+                                                                        {!isComplete && (
                                                                             <span className="text-xs text-yellow-400">
                                                                                 Remaining: {remainingQty}
                                                                             </span>
-                                                                        </div>
+                                                                        )}
                                                                     </div>
+                                                                </div>
 
+                                                                {isComplete ? (
+                                                                    <div className="flex items-center gap-2">
+                                                                        <button
+                                                                            onClick={() => {
+                                                                                const sku = jobSkuMap[item.productId || ''] || finalizedSkus[item.productId || ''] || product?.sku || item.sku || 'UNKNOWN';
+                                                                                setReprintItem({ sku, name: item.productName, qty: receivedQty });
+                                                                            }}
+                                                                            className="px-3 py-1 bg-white/10 hover:bg-white/20 text-white rounded-lg text-xs font-bold border border-white/10 flex items-center gap-1"
+                                                                            title="Reprint labels"
+                                                                        >
+                                                                            <Printer size={12} /> Reprint
+                                                                        </button>
+                                                                        <span className="px-3 py-1 bg-green-500/10 text-green-400 rounded-lg text-xs font-bold border border-green-500/20">
+                                                                            Completed ({receivedQty})
+                                                                        </span>
+                                                                    </div>
+                                                                ) : (
                                                                     <Protected permission="RECEIVE_PO">
                                                                         <button
                                                                             onClick={() => {
                                                                                 setFocusedItem({
-                                                                                    id: item.id, // Pass ID for robust matching
+                                                                                    id: item.id,
                                                                                     productId: item.productId,
                                                                                     productName: item.productName || '',
                                                                                     expectedQty: item.quantity,
@@ -2168,95 +2218,32 @@ export default function WarehouseOperations() {
                                                                             Receive {remainingQty}
                                                                         </button>
                                                                     </Protected>
-                                                                </div>
-                                                            );
-                                                        })}
-                                                    </div>
-
-                                                    {/* Complete Items */}
-                                                    {po.lineItems?.filter(item => (receivedMap[item.productId] || 0) >= item.quantity).length > 0 && (
-                                                        <div>
-                                                            <div className="flex items-center gap-2 mb-3 mt-2">
-                                                                <div className="h-px flex-1 bg-white/10"></div>
-                                                                <span className="text-[10px] font-bold text-gray-500 uppercase flex items-center gap-1">
-                                                                    <CheckCircle size={10} /> Recently Completed
-                                                                </span>
-                                                                <div className="h-px flex-1 bg-white/10"></div>
+                                                                )}
                                                             </div>
-                                                            <div className="space-y-3 opacity-60 hover:opacity-100 transition-opacity">
-                                                                {po.lineItems
-                                                                    ?.filter(item => (receivedMap[item.productId] || 0) >= item.quantity)
-                                                                    .sort((a, b) => {
-                                                                        // Sort by job timestamp (newest first)
-                                                                        const timeA = jobTimestampMap[a.productId || ''] || '';
-                                                                        const timeB = jobTimestampMap[b.productId || ''] || '';
-                                                                        return timeB.localeCompare(timeA);
-                                                                    })
-                                                                    .slice(0, 50) // Limit to 50 most recent items
-                                                                    .map((item, idx) => {
-                                                                        const receivedQty = receivedMap[item.productId] || 0;
-                                                                        const product = products.find(p => p.id === item.productId);
-
-                                                                        return (
-                                                                            <div
-                                                                                key={item.productId || idx}
-                                                                                className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between p-4 rounded-xl border bg-green-500/5 border-green-500/10"
-                                                                            >
-                                                                                <div className="flex-1">
-                                                                                    <div className="flex items-center gap-2">
-                                                                                        <p className="font-bold text-gray-300 line-through decoration-green-500/50">{item.productName}</p>
-                                                                                        <CheckCircle size={16} className="text-green-400" />
-                                                                                    </div>
-                                                                                    <p className="text-xs text-gray-500 font-mono mt-1">
-                                                                                        SKU: {jobSkuMap[item.productId || ''] || finalizedSkus[item.productId || ''] || product?.sku || item.sku || 'N/A'}
-                                                                                    </p>
-                                                                                </div>
-                                                                                <div className="flex items-center gap-2">
-                                                                                    <button
-                                                                                        onClick={() => {
-                                                                                            // Use jobSkuMap first (matches Putaway job), then fallbacks
-                                                                                            const sku = jobSkuMap[item.productId || ''] || finalizedSkus[item.productId || ''] || product?.sku || item.sku || 'UNKNOWN';
-                                                                                            setReprintItem({ sku, name: item.productName, qty: receivedQty });
-                                                                                        }}
-                                                                                        className="px-3 py-1 bg-white/10 hover:bg-white/20 text-white rounded-lg text-xs font-bold border border-white/10 flex items-center gap-1"
-                                                                                        title="Reprint labels for this item"
-                                                                                    >
-                                                                                        <Printer size={12} /> Reprint
-                                                                                    </button>
-                                                                                    <span className="px-3 py-1 bg-green-500/10 text-green-400 rounded-lg text-xs font-bold border border-green-500/20">
-                                                                                        Completed ({receivedQty})
-                                                                                    </span>
-                                                                                </div>
-                                                                            </div>
-                                                                        );
-                                                                    })}
-                                                            </div>
-                                                        </div>
-                                                    )}
+                                                        );
+                                                    })}
                                                 </div>
 
                                                 {/* PO Completion Action */}
-                                                {
-                                                    allItemsReceived && (
-                                                        <div className="p-4 bg-green-500/5 border-t border-green-500/20">
-                                                            <div className="flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">
-                                                                <div className="flex items-center gap-2 text-green-400">
-                                                                    <CheckCircle size={20} />
-                                                                    <span className="font-bold">All products received!</span>
-                                                                </div>
-                                                                <button
-                                                                    onClick={() => {
-                                                                        setReviewPO(po);
-                                                                        setShowReviewModal(true);
-                                                                    }}
-                                                                    className="w-full md:w-auto justify-center px-4 py-2 bg-green-500 text-white font-bold rounded-lg text-sm hover:bg-green-600 transition-colors"
-                                                                >
-                                                                    Review & Complete
-                                                                </button>
+                                                {allItemsReceived && (
+                                                    <div className="p-4 bg-green-500/5 border-t border-green-500/20">
+                                                        <div className="flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">
+                                                            <div className="flex items-center gap-2 text-green-400">
+                                                                <CheckCircle size={20} />
+                                                                <span className="font-bold">All products received!</span>
                                                             </div>
+                                                            <button
+                                                                onClick={() => {
+                                                                    setReviewPO(po);
+                                                                    setShowReviewModal(true);
+                                                                }}
+                                                                className="w-full md:w-auto justify-center px-4 py-2 bg-green-500 text-white font-bold rounded-lg text-sm hover:bg-green-600 transition-colors"
+                                                            >
+                                                                Review & Complete
+                                                            </button>
                                                         </div>
-                                                    )
-                                                }
+                                                    </div>
+                                                )}
                                             </div>
                                         );
                                     })}
@@ -2284,10 +2271,10 @@ export default function WarehouseOperations() {
                             )}
                         </div>
 
-                        {/* Receiving Modal - Opens when clicking Receive on a product */}
+                        {/* Receiving Modal-Opens when clicking Receive on a product */}
                         {focusedItem && receivingPO && (
-                            <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-                                <div className="bg-[#1a1a1a] border border-white/10 rounded-2xl w-full max-w-md p-6 shadow-2xl">
+                            <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-end md:items-center justify-center p-0 md:p-4 z-50">
+                                <div className="bg-[#1a1a1a] border-t md:border border-white/10 rounded-t-2xl md:rounded-2xl w-full max-w-md p-6 shadow-2xl max-h-[85vh] md:h-auto overflow-y-auto">
                                     {!showPrintSuccess ? (
                                         <>
                                             <div className="flex justify-between items-start mb-6">
@@ -2364,7 +2351,7 @@ export default function WarehouseOperations() {
                                                                     }));
                                                                 }}
                                                                 className={`w-full bg-black border rounded-xl p-3 pr-10 text-white font-mono font-bold focus:outline-none ${scannedSkus[focusedItem.productId] ? 'border-cyber-primary' : 'border-white/20'
-                                                                    }`}
+                                                                    } `}
                                                                 placeholder="Scan or enter supplier barcode..."
                                                             />
                                                             {scannedSkus[focusedItem.productId] && (
@@ -2485,7 +2472,7 @@ export default function WarehouseOperations() {
                                                                 setIsReceiving(false);
                                                             }
                                                         }}
-                                                        className={`flex-1 py-3 bg-cyber-primary text-black font-bold rounded-xl transition-colors flex flex-col items-center justify-center leading-none ${isReceiving ? 'opacity-50 cursor-not-allowed' : 'hover:bg-cyber-accent'}`}
+                                                        className={`flex-1 py-3 bg-cyber-primary text-black font-bold rounded-xl transition-colors flex flex-col items-center justify-center leading-none ${isReceiving ? 'opacity-50 cursor-not-allowed' : 'hover:bg-cyber-accent'} `}
                                                     >
                                                         {isReceiving ? (
                                                             <>
@@ -2539,7 +2526,7 @@ export default function WarehouseOperations() {
                                                             setIsPrinting(false);
                                                         }
                                                     }}
-                                                    className={`flex-1 py-3 bg-white/10 text-white font-bold rounded-xl border border-white/10 flex items-center justify-center gap-2 ${isPrinting ? 'opacity-50 cursor-not-allowed' : 'hover:bg-white/20'}`}
+                                                    className={`flex-1 py-3 bg-white/10 text-white font-bold rounded-xl border border-white/10 flex items-center justify-center gap-2 ${isPrinting ? 'opacity-50 cursor-not-allowed' : 'hover:bg-white/20'} `}
                                                 >
                                                     {isPrinting ? <RefreshCw size={18} className="animate-spin" /> : <Printer size={18} />}
                                                     {isPrinting ? 'Generating...' : 'Print Labels'}
@@ -2586,8 +2573,8 @@ export default function WarehouseOperations() {
 
                         {/* Reprint Options Modal */}
                         {reprintItem && (
-                            <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-                                <div className="bg-[#1a1a1a] border border-white/10 rounded-2xl w-full max-w-md p-6 shadow-2xl">
+                            <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-end md:items-center justify-center p-0 md:p-4 z-50">
+                                <div className="bg-[#1a1a1a] border-t md:border border-white/10 rounded-t-2xl md:rounded-2xl w-full max-w-md p-6 shadow-2xl max-h-[85vh] md:max-h-auto overflow-y-auto">
                                     <div className="flex items-center justify-between mb-6">
                                         <h3 className="text-xl font-bold text-white flex items-center gap-2">
                                             <Printer className="text-cyber-primary" size={24} />
@@ -2615,17 +2602,17 @@ export default function WarehouseOperations() {
                                                     className={`py-2 px-3 rounded-lg text-sm font-bold transition-all ${reprintSize === s
                                                         ? 'bg-cyber-primary text-black'
                                                         : 'bg-white/5 text-white hover:bg-white/10 border border-white/10'
-                                                        }`}
+                                                        } `}
                                                 >
                                                     {s}
                                                 </button>
                                             ))}
                                         </div>
                                         <p className="text-xs text-gray-500 mt-1">
-                                            {reprintSize === 'Tiny' && '1.25" × 1" - SKU Tags'}
-                                            {reprintSize === 'Small' && '2.25" × 1.25" - Multipurpose'}
-                                            {reprintSize === 'Medium' && '3" × 2" - Shelf Labels'}
-                                            {reprintSize === 'Large' && '4" × 3" - Carton Tags'}
+                                            {reprintSize === 'Tiny' && '1.25" × 1"-SKU Tags'}
+                                            {reprintSize === 'Small' && '2.25" × 1.25"-Multipurpose'}
+                                            {reprintSize === 'Medium' && '3" × 2"-Shelf Labels'}
+                                            {reprintSize === 'Large' && '4" × 3"-Carton Tags'}
                                         </p>
                                     </div>
 
@@ -2640,7 +2627,7 @@ export default function WarehouseOperations() {
                                                     className={`py-2 px-3 rounded-lg text-sm font-bold transition-all ${reprintFormat === f
                                                         ? 'bg-cyber-primary text-black'
                                                         : 'bg-white/5 text-white hover:bg-white/10 border border-white/10'
-                                                        }`}
+                                                        } `}
                                                 >
                                                     {f === 'QR' && '📱 QR'}
                                                     {f === 'Barcode' && '▮▯▮ Barcode'}
@@ -2661,7 +2648,7 @@ export default function WarehouseOperations() {
                                         <button
                                             disabled={isPrinting}
                                             onClick={handleReprintLabels}
-                                            className={`flex-1 py-3 bg-cyber-primary text-black font-bold rounded-xl flex items-center justify-center gap-2 ${isPrinting ? 'opacity-50 cursor-not-allowed' : 'hover:bg-cyber-accent'}`}
+                                            className={`flex-1 py-3 bg-cyber-primary text-black font-bold rounded-xl flex items-center justify-center gap-2 ${isPrinting ? 'opacity-50 cursor-not-allowed' : 'hover:bg-cyber-accent'} `}
                                         >
                                             {isPrinting ? <RefreshCw size={18} className="animate-spin" /> : <Printer size={18} />}
                                             {isPrinting ? 'Generating...' : `Print ${reprintItem.qty} Labels`}
@@ -2674,8 +2661,8 @@ export default function WarehouseOperations() {
 
                         {/* Review & Complete Modal */}
                         {showReviewModal && reviewPO && (
-                            <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-                                <div className="bg-[#1a1a1a] border border-white/10 rounded-2xl w-full max-w-2xl p-6 shadow-2xl flex flex-col max-h-[90vh]">
+                            <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-end md:items-center justify-center p-0 md:p-4 z-50">
+                                <div className="bg-[#1a1a1a] border-t md:border border-white/10 rounded-t-2xl md:rounded-2xl w-full max-w-2xl p-6 shadow-2xl flex flex-col max-h-[90vh]">
                                     <h3 className="text-xl font-bold text-white mb-4">Review & Print Labels</h3>
 
                                     <p className="text-gray-400 mb-6 text-sm">Review received items and configure labels before finalizing.</p>
@@ -2760,7 +2747,7 @@ export default function WarehouseOperations() {
                                                     }
                                                 }
                                             }}
-                                            className={`px-6 py-3 bg-green-600/20 text-green-400 border border-green-500/30 font-bold rounded-xl transition-colors flex items-center gap-2 ${isCompleting ? 'opacity-50 cursor-not-allowed' : 'hover:bg-green-600/30'}`}
+                                            className={`px-6 py-3 bg-green-600/20 text-green-400 border border-green-500/30 font-bold rounded-xl transition-colors flex items-center gap-2 ${isCompleting ? 'opacity-50 cursor-not-allowed' : 'hover:bg-green-600/30'} `}
                                         >
                                             {isCompleting ? <RefreshCw size={18} className="animate-spin" /> : null}
                                             {isCompleting ? t('warehouse.processing') : t('warehouse.completeOnly')}
@@ -2782,7 +2769,7 @@ export default function WarehouseOperations() {
                                                     setReviewPO(null);
                                                 }
                                             }}
-                                            className={`flex-1 px-6 py-3 bg-cyber-primary text-black font-bold rounded-xl transition-colors flex items-center justify-center gap-2 ${isCompleting ? 'opacity-50 cursor-not-allowed' : 'hover:bg-cyber-accent'}`}
+                                            className={`flex-1 px-6 py-3 bg-cyber-primary text-black font-bold rounded-xl transition-colors flex items-center justify-center gap-2 ${isCompleting ? 'opacity-50 cursor-not-allowed' : 'hover:bg-cyber-accent'} `}
                                         >
                                             {isCompleting ? <RefreshCw size={18} className="animate-spin" /> : <Printer size={18} />}
                                             {isCompleting ? t('warehouse.processing') : t('warehouse.completeAndPrintLabels')}
@@ -2806,8 +2793,8 @@ export default function WarehouseOperations() {
                                     </div>
                                     Pick Queue
                                 </h3>
-                                <p className="text-gray-500 text-sm mt-1">Select a job to start picking items</p>
-                                <p className="md:hidden text-cyber-primary text-xs font-bold mt-2 animate-pulse">Tap a card to start scanner</p>
+                                <p className="text-gray-500 text-sm mt-1">{t('warehouse.selectJobToAssign')}</p>
+                                <p className="md:hidden text-cyber-primary text-xs font-bold mt-2 animate-pulse">{t('warehouse.tapToScan')}</p>
                             </div>
 
                             {/* Quick Stats */}
@@ -2849,10 +2836,10 @@ export default function WarehouseOperations() {
                                             <div
                                                 key={job.id}
                                                 onClick={() => handleStartJob(job)}
-                                                className={`group relative bg-gradient-to-br from-white/5 to-white/[0.02] rounded-2xl border transition-all duration-300 cursor-pointer overflow-hidden hover:scale-[1.02] hover:shadow-xl hover:shadow-cyber-primary/10 min-h-[140px] flex flex-col justify-between ${job.status === 'In-Progress'
+                                                className={`group relative bg-gradient-to-br from-white/5 to-white/[0.02] rounded-2xl border transition-all duration-300 cursor-pointer overflow-hidden hover:scale-[1.02] hover:shadow-xl hover:shadow-cyber-primary/10 min-h-auto md:min-h-[140px] flex flex-col justify-between ${job.status === 'In-Progress'
                                                     ? 'border-blue-500/50 shadow-lg shadow-blue-500/20'
                                                     : 'border-white/10 hover:border-cyber-primary/50'
-                                                    }`}
+                                                    } `}
                                             >
                                                 {/* Priority Ribbon */}
                                                 {job.priority === 'Critical' && (
@@ -2861,23 +2848,23 @@ export default function WarehouseOperations() {
                                                     </div>
                                                 )}
 
-                                                <div className="p-5 flex-1 flex flex-col">
+                                                <div className="p-4 md:p-5 flex-1 flex flex-col">
                                                     {/* Job Header */}
-                                                    <div className="flex items-start justify-between mb-4">
-                                                        <div>
-                                                            <p className="text-cyber-primary font-mono font-bold text-base md:text-sm">
+                                                    <div className="flex items-start justify-between gap-2 mb-4">
+                                                        <div className="min-w-0">
+                                                            <p className="text-cyber-primary font-mono font-bold text-base md:text-sm truncate">
                                                                 {formatJobId(job)}
                                                             </p>
-                                                            <p className="text-gray-500 text-xs mt-1">
+                                                            <p className="text-gray-500 text-xs mt-1 truncate">
                                                                 {job.orderRef?.startsWith('TRF') ? 'Transfer Pick' : 'Order Pick'}
                                                             </p>
                                                         </div>
-                                                        <span className={`text-[10px] px-2.5 py-1 rounded-full font-bold ${job.status === 'In-Progress'
-                                                            ? 'bg-blue-500/20 text-blue-400 animate-pulse'
+                                                        <span className={`text-[10px] px-2.5 py-1 rounded-full font-bold whitespace-nowrap shrink-0 ${job.status === 'In-Progress'
+                                                            ? 'bg-blue-500/20 text-blue-400 md:animate-pulse'
                                                             : job.priority === 'High'
                                                                 ? 'bg-orange-500/20 text-orange-400'
                                                                 : 'bg-gray-500/20 text-gray-400'
-                                                            }`}>
+                                                            } `}>
                                                             {job.status === 'In-Progress' ? '● ACTIVE' : job.priority}
                                                         </span>
                                                     </div>
@@ -2909,7 +2896,7 @@ export default function WarehouseOperations() {
                                                         <div className="h-1.5 bg-black/40 rounded-full overflow-hidden">
                                                             <div
                                                                 className="h-full bg-gradient-to-r from-cyber-primary to-blue-400 rounded-full transition-all duration-500"
-                                                                style={{ width: `${progress}%` }}
+                                                                style={{ width: `${progress}% ` }}
                                                             />
                                                         </div>
                                                     </div>
@@ -2949,9 +2936,9 @@ export default function WarehouseOperations() {
                                     <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center mb-6 border border-white/5">
                                         <Package size={32} className="text-gray-600" />
                                     </div>
-                                    <h4 className="text-white font-bold text-lg mb-2">No Pick Jobs Available</h4>
+                                    <h4 className="text-white font-bold text-lg mb-2">{t('warehouse.noPendingJobs')}</h4>
                                     <p className="text-gray-500 text-sm text-center max-w-sm">
-                                        Pick jobs are created automatically when orders are placed or transfers are approved.
+                                        {t('warehouse.jobsAppearAfterReceive')}
                                     </p>
                                 </div>
                             )}
@@ -2997,44 +2984,44 @@ export default function WarehouseOperations() {
                                             <Package size={28} className="text-gray-300" />
                                         </div>
                                         <div>
-                                            <h2 className="text-xl font-bold text-white">Packing Station</h2>
-                                            <p className="text-sm text-gray-400">Pack orders for delivery</p>
+                                            <h2 className="text-xl font-bold text-white">{t('warehouse.tabs.pack')}</h2>
+                                            <p className="text-sm text-gray-400">{t('warehouse.packDesc')}</p>
                                         </div>
                                     </div>
-                                    <div className="flex gap-3">
+                                    <div className="grid grid-cols-3 gap-2 md:flex md:gap-3 overflow-x-auto pb-2 md:pb-0">
                                         <div
                                             onClick={() => setPackJobFilter(packJobFilter === 'pending' ? 'all' : 'pending')}
-                                            className={`px-4 py-2 rounded-lg border transition-all cursor-pointer ${packJobFilter === 'pending'
+                                            className={`px-2 md:px-4 py-2 rounded-lg border transition-all cursor-pointer flex-1 min-w-[80px] ${packJobFilter === 'pending'
                                                 ? 'bg-yellow-500/20 border-yellow-500 shadow-[0_0_15px_rgba(234,179,8,0.3)]'
                                                 : 'bg-black/20 border-white/5 hover:bg-white/10'
-                                                }`}
+                                                } `}
                                         >
-                                            <p className={`text-xs font-bold uppercase ${packJobFilter === 'pending' ? 'text-yellow-400' : 'text-gray-500'}`}>Pending</p>
-                                            <p className={`text-xl font-mono font-bold ${packJobFilter === 'pending' ? 'text-yellow-400' : 'text-white'}`}>
+                                            <p className={`text-[10px] md:text-xs font-bold uppercase truncate ${packJobFilter === 'pending' ? 'text-yellow-400' : 'text-gray-500'} `}>Pending</p>
+                                            <p className={`text-lg md:text-xl font-mono font-bold ${packJobFilter === 'pending' ? 'text-yellow-400' : 'text-white'} `}>
                                                 {filteredJobs.filter(j => j.type === 'PACK' && j.status === 'Pending').length}
                                             </p>
                                         </div>
                                         <div
                                             onClick={() => setPackJobFilter(packJobFilter === 'in-progress' ? 'all' : 'in-progress')}
-                                            className={`px-4 py-2 rounded-lg border transition-all cursor-pointer ${packJobFilter === 'in-progress'
+                                            className={`px-2 md:px-4 py-2 rounded-lg border transition-all cursor-pointer flex-1 min-w-[80px] ${packJobFilter === 'in-progress'
                                                 ? 'bg-blue-500/20 border-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.3)]'
                                                 : 'bg-black/20 border-white/5 hover:bg-white/10'
-                                                }`}
+                                                } `}
                                         >
-                                            <p className={`text-xs font-bold uppercase ${packJobFilter === 'in-progress' ? 'text-blue-400' : 'text-gray-500'}`}>In Progress</p>
-                                            <p className={`text-xl font-mono font-bold ${packJobFilter === 'in-progress' ? 'text-blue-400' : 'text-blue-400'}`}>
+                                            <p className={`text-[10px] md:text-xs font-bold uppercase truncate ${packJobFilter === 'in-progress' ? 'text-blue-400' : 'text-gray-500'} `}>In Progress</p>
+                                            <p className={`text-lg md:text-xl font-mono font-bold ${packJobFilter === 'in-progress' ? 'text-blue-400' : 'text-blue-400'} `}>
                                                 {filteredJobs.filter(j => j.type === 'PACK' && j.status === 'In-Progress').length}
                                             </p>
                                         </div>
                                         <div
                                             onClick={() => setPackJobFilter(packJobFilter === 'completed' ? 'all' : 'completed')}
-                                            className={`px-4 py-2 rounded-lg border transition-all cursor-pointer ${packJobFilter === 'completed'
+                                            className={`px-2 md:px-4 py-2 rounded-lg border transition-all cursor-pointer flex-1 min-w-[80px] ${packJobFilter === 'completed'
                                                 ? 'bg-green-500/20 border-green-500 shadow-[0_0_15px_rgba(34,197,94,0.3)]'
                                                 : 'bg-black/20 border-white/5 hover:bg-white/10'
-                                                }`}
+                                                } `}
                                         >
-                                            <p className={`text-xs font-bold uppercase ${packJobFilter === 'completed' ? 'text-green-400' : 'text-gray-500'}`}>Done Today</p>
-                                            <p className="text-xl font-mono font-bold text-green-400">
+                                            <p className={`text-[10px] md:text-xs font-bold uppercase truncate ${packJobFilter === 'completed' ? 'text-green-400' : 'text-gray-500'} `}>Done Today</p>
+                                            <p className="text-lg md:text-xl font-mono font-bold text-green-400">
                                                 {filteredJobs.filter(j => j.type === 'PACK' && j.status === 'Completed').length}
                                             </p>
                                         </div>
@@ -3100,6 +3087,7 @@ export default function WarehouseOperations() {
                                                             <button
                                                                 onClick={() => setSelectedPackJob(null)}
                                                                 className="p-2 hover:bg-white/10 rounded-lg transition-colors text-gray-400 hover:text-white"
+                                                                aria-label="Back to job list"
                                                             >
                                                                 <ArrowLeft size={20} />
                                                             </button>
@@ -3113,13 +3101,13 @@ export default function WarehouseOperations() {
                                                             <div className="flex bg-white/5 rounded-lg p-1">
                                                                 <button
                                                                     onClick={() => setPackScanMode(false)}
-                                                                    className={`px-3 py-1 text-xs rounded font-bold transition-colors ${!packScanMode ? 'bg-white/20 text-white' : 'text-gray-500'}`}
+                                                                    className={`px-3 py-1 text-xs rounded font-bold transition-colors ${!packScanMode ? 'bg-white/20 text-white' : 'text-gray-500'} `}
                                                                 >
                                                                     Manual
                                                                 </button>
                                                                 <button
                                                                     onClick={() => setPackScanMode(true)}
-                                                                    className={`px-3 py-1 text-xs rounded font-bold transition-colors ${packScanMode ? 'bg-cyber-primary text-black' : 'text-gray-500'}`}
+                                                                    className={`px-3 py-1 text-xs rounded font-bold transition-colors ${packScanMode ? 'bg-cyber-primary text-black' : 'text-gray-500'} `}
                                                                 >
                                                                     Scanner
                                                                 </button>
@@ -3147,12 +3135,12 @@ export default function WarehouseOperations() {
                                                                         const item = currentPackJob.lineItems[matchingItemIndex];
                                                                         if (item.status !== 'Picked') {
                                                                             updateJobItem(currentPackJob.id, matchingItemIndex, 'Picked', item.expectedQty);
-                                                                            addNotification('success', `Packed: ${item.name}`);
+                                                                            addNotification('success', `Packed: ${item.name} `);
                                                                         } else {
-                                                                            addNotification('info', `Already packed: ${item.name}`);
+                                                                            addNotification('info', `Already packed: ${item.name} `);
                                                                         }
                                                                     } else {
-                                                                        addNotification('alert', `Item not found: ${packScanInput}`);
+                                                                        addNotification('alert', `Item not found: ${packScanInput} `);
                                                                     }
                                                                     setPackScanInput('');
                                                                 }}
@@ -3164,7 +3152,7 @@ export default function WarehouseOperations() {
                                                                     value={packScanInput}
                                                                     onChange={(e) => setPackScanInput(e.target.value)}
                                                                     placeholder="Scan item SKU or barcode..."
-                                                                    className="w-full pl-10 pr-4 py-3 bg-black/40 border border-white/10 rounded-xl text-white outline-none focus:border-cyber-primary transition-colors"
+                                                                    className="w-full pl-10 pr-4 py-3 bg-black/40 border border-white/10 rounded-xl text-white outline-none focus:border-cyber-primary transition-colors text-base"
                                                                     autoFocus
                                                                 />
                                                             </form>
@@ -3198,10 +3186,10 @@ export default function WarehouseOperations() {
                                                                         }
                                                                     }}
                                                                     className={`p-3 rounded-xl border transition-all cursor-pointer flex items-center gap-4 ${isPacked ? 'bg-green-500/5 border-green-500/20' : 'bg-white/5 border-white/5 hover:bg-white/10'
-                                                                        }`}
+                                                                        } `}
                                                                 >
                                                                     <div className={`w-6 h-6 rounded-full border flex items-center justify-center transition-colors ${isPacked ? 'bg-green-500 border-green-500' : 'border-gray-600'
-                                                                        }`}>
+                                                                        } `}>
                                                                         {isPacked && <CheckCircle size={14} className="text-black" />}
                                                                     </div>
 
@@ -3214,7 +3202,7 @@ export default function WarehouseOperations() {
                                                                     )}
 
                                                                     <div className="flex-1">
-                                                                        <p className={`font-medium ${isPacked ? 'text-gray-400 line-through' : 'text-white'}`}>{item.name}</p>
+                                                                        <p className={`font-medium ${isPacked ? 'text-gray-400 line-through' : 'text-white'} `}>{item.name}</p>
                                                                         <div className="flex gap-2 text-xs text-gray-500 mt-0.5">
                                                                             <span>Qty: {item.expectedQty}</span>
                                                                             <span>•</span>
@@ -3240,7 +3228,7 @@ export default function WarehouseOperations() {
                                                             <span className="text-xl font-mono font-bold text-white">{Math.round(progress)}%</span>
                                                         </div>
                                                         <div className="h-2 bg-black/40 rounded-full overflow-hidden">
-                                                            <div className="h-full bg-cyber-primary transition-all duration-300" style={{ width: `${progress}%` }} />
+                                                            <div className="h-full bg-cyber-primary transition-all duration-300" style={{ width: `${progress}% ` }} />
                                                         </div>
                                                         <p className="text-xs text-gray-500 mt-2 text-center">{packedCount} of {totalItems} items packed</p>
                                                     </div>
@@ -3248,16 +3236,17 @@ export default function WarehouseOperations() {
                                                     {/* Packaging Settings */}
                                                     <div className="bg-cyber-gray border border-white/5 rounded-2xl p-5 space-y-4">
                                                         <div>
-                                                            <label className="text-xs text-gray-500 font-bold uppercase mb-2 block">Box Configuration</label>
+                                                            <label className="text-xs text-gray-500 font-bold uppercase mb-2 block">{t('warehouse.boxConfiguration')}</label>
                                                             <select
+                                                                aria-label="Box Configuration"
                                                                 value={boxSize}
                                                                 onChange={(e) => setBoxSize(e.target.value as any)}
-                                                                className="w-full bg-black/30 border border-white/10 rounded-lg p-2.5 text-white text-sm outline-none focus:border-cyber-primary"
+                                                                className="w-full bg-black/30 border border-white/10 rounded-lg p-2.5 text-white text-base md:text-sm outline-none focus:border-cyber-primary"
                                                             >
-                                                                <option value="Small">Small (10x10x10)</option>
-                                                                <option value="Medium">Medium (20x20x20)</option>
-                                                                <option value="Large">Large (30x30x30)</option>
-                                                                <option value="Extra Large">XL (40x40x40)</option>
+                                                                <option value="Small">{t('warehouse.boxSmall')}</option>
+                                                                <option value="Medium">{t('warehouse.boxMedium')}</option>
+                                                                <option value="Large">{t('warehouse.boxLarge')}</option>
+                                                                <option value="Extra Large">{t('warehouse.boxXL')}</option>
                                                             </select>
                                                         </div>
 
@@ -3265,15 +3254,15 @@ export default function WarehouseOperations() {
                                                         {hasFragileItems && (
                                                             <div className="pt-2 border-t border-white/5">
                                                                 <p className="text-xs text-red-400 font-bold uppercase mb-2 flex items-center gap-1">
-                                                                    <AlertTriangle size={10} /> Fragile Items
+                                                                    <AlertTriangle size={10} /> {t('warehouse.fragileItems')}
                                                                 </p>
                                                                 <label className="flex items-center gap-2 mb-2 cursor-pointer">
                                                                     <input type="checkbox" checked={packingMaterials.bubbleWrap} onChange={e => setPackingMaterials({ ...packingMaterials, bubbleWrap: e.target.checked })} className="accent-cyber-primary" />
-                                                                    <span className="text-sm text-gray-300">Bubble Wrap</span>
+                                                                    <span className="text-sm text-gray-300">{t('warehouse.bubbleWrap')}</span>
                                                                 </label>
                                                                 <label className="flex items-center gap-2 cursor-pointer">
                                                                     <input type="checkbox" checked={packingMaterials.fragileStickers} onChange={e => setPackingMaterials({ ...packingMaterials, fragileStickers: e.target.checked })} className="accent-cyber-primary" />
-                                                                    <span className="text-sm text-gray-300">"Fragile" Stickers</span>
+                                                                    <span className="text-sm text-gray-300">{t('warehouse.fragileStickers')}</span>
                                                                 </label>
                                                             </div>
                                                         )}
@@ -3281,11 +3270,11 @@ export default function WarehouseOperations() {
                                                         {hasColdItems && (
                                                             <div className="pt-2 border-t border-white/5">
                                                                 <p className="text-xs text-blue-400 font-bold uppercase mb-2 flex items-center gap-1">
-                                                                    <Snowflake size={10} /> Cold Items
+                                                                    <Snowflake size={10} /> {t('warehouse.coldItems')}
                                                                 </p>
                                                                 <label className="flex items-center gap-2 cursor-pointer">
                                                                     <input type="checkbox" checked={hasIcePack} onChange={e => setHasIcePack(e.target.checked)} className="accent-cyber-primary" />
-                                                                    <span className="text-sm text-gray-300">Ice Packs Added</span>
+                                                                    <span className="text-sm text-gray-300">{t('warehouse.icePacksAdded')}</span>
                                                                 </label>
                                                             </div>
                                                         )}
@@ -3296,8 +3285,8 @@ export default function WarehouseOperations() {
                                                         <div className="mb-4">
                                                             <label className="text-xs text-gray-500 font-bold uppercase mb-2 block">Label Format</label>
                                                             <div className="flex bg-black/30 rounded-lg p-1">
-                                                                <button onClick={() => setLabelFormat('BARCODE')} className={`flex-1 py-1.5 text-xs rounded font-bold ${labelFormat === 'BARCODE' ? 'bg-white/20 text-white' : 'text-gray-500'}`}>Barcode</button>
-                                                                <button onClick={() => setLabelFormat('QR')} className={`flex-1 py-1.5 text-xs rounded font-bold ${labelFormat === 'QR' ? 'bg-white/20 text-white' : 'text-gray-500'}`}>QR Code</button>
+                                                                <button onClick={() => setLabelFormat('BARCODE')} className={`flex-1 py-1.5 text-xs rounded font-bold ${labelFormat === 'BARCODE' ? 'bg-white/20 text-white' : 'text-gray-500'} `}>Barcode</button>
+                                                                <button onClick={() => setLabelFormat('QR')} className={`flex-1 py-1.5 text-xs rounded font-bold ${labelFormat === 'QR' ? 'bg-white/20 text-white' : 'text-gray-500'} `}>QR Code</button>
                                                             </div>
                                                         </div>
 
@@ -3363,7 +3352,7 @@ export default function WarehouseOperations() {
                                                                     // packedItems set removed, no need to clear
                                                                 } catch (err: any) {
                                                                     console.error('Pack completion failed:', err);
-                                                                    addNotification('alert', `Failed to complete packing: ${err?.message || 'Unknown error'}`);
+                                                                    addNotification('alert', `Failed to complete packing: ${err?.message || 'Unknown error'} `);
                                                                 } finally {
                                                                     setLoadingActions(prev => ({ ...prev, [currentPackJob.id]: false }));
                                                                 }
@@ -3372,7 +3361,7 @@ export default function WarehouseOperations() {
                                                             className={`w-full py-4 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg transition-all ${packedCount === totalItems && !loadingActions[currentPackJob.id]
                                                                 ? 'bg-cyber-primary text-black hover:bg-cyber-accent shadow-cyber-primary/20'
                                                                 : 'bg-white/5 text-gray-500 cursor-not-allowed'
-                                                                }`}
+                                                                } `}
                                                         >
                                                             {loadingActions[currentPackJob.id] ? (
                                                                 <>
@@ -3422,7 +3411,7 @@ export default function WarehouseOperations() {
                                                                 <div className="flex items-center gap-2 mt-1">
                                                                     <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${job.priority === 'Critical' ? 'bg-red-500/20 text-red-400' :
                                                                         job.priority === 'High' ? 'bg-orange-500/20 text-orange-400' : 'bg-blue-500/20 text-blue-400'
-                                                                        }`}>
+                                                                        } `}>
                                                                         {job.priority}
                                                                     </span>
                                                                     <span className="text-xs text-gray-500">{new Date().toLocaleDateString()}</span>
@@ -3508,7 +3497,7 @@ export default function WarehouseOperations() {
                                                         className={`px-4 py-3 md:px-3 md:py-1 text-sm md:text-xs rounded-lg font-bold transition-colors ${assignJobFilter === type
                                                             ? 'bg-cyber-primary text-black'
                                                             : 'text-gray-400 hover:text-white'
-                                                            }`}
+                                                            } `}
                                                     >
                                                         {type}
                                                     </button>
@@ -3529,7 +3518,7 @@ export default function WarehouseOperations() {
                                                             : priority === 'Critical' ? 'text-red-400' :
                                                                 priority === 'High' ? 'text-orange-400' :
                                                                     'text-gray-400 hover:text-white'
-                                                            }`}
+                                                            } `}
                                                     >
                                                         {priority}
                                                     </button>
@@ -3615,18 +3604,18 @@ export default function WarehouseOperations() {
                                                                 : jobZoneLocked
                                                                     ? 'bg-red-500/10 border-red-500/30'
                                                                     : 'bg-white/5 border-white/5 hover:bg-white/10'
-                                                                }`}
+                                                                } `}
                                                         >
                                                             <div className="flex justify-between items-start mb-2">
                                                                 <div className="flex-1">
                                                                     <div className="flex items-center gap-2 mb-1">
-                                                                        <span className={`text-xs font-bold px-2 py-0.5 rounded ${job.type === 'PICK' ? 'bg-blue-500/20 text-blue-400' : job.type === 'PACK' ? 'bg-green-500/20 text-green-400' : 'bg-purple-500/20 text-purple-400'}`}>
+                                                                        <span className={`text-xs font-bold px-2 py-0.5 rounded ${job.type === 'PICK' ? 'bg-blue-500/20 text-blue-400' : job.type === 'PACK' ? 'bg-green-500/20 text-green-400' : 'bg-purple-500/20 text-purple-400'} `}>
                                                                             {job.type}
                                                                         </span>
                                                                         <span className={`text-[10px] px-2 py-0.5 rounded font-bold ${job.priority === 'Critical' ? 'bg-red-500/20 text-red-400' :
                                                                             job.priority === 'High' ? 'bg-orange-500/20 text-orange-400' :
                                                                                 'bg-blue-500/20 text-blue-400'
-                                                                            }`}>
+                                                                            } `}>
                                                                             {job.priority}
                                                                         </span>
                                                                         {jobZoneLocked && (
@@ -3638,7 +3627,7 @@ export default function WarehouseOperations() {
                                                                     <span className="text-xs text-gray-500 font-mono">{formatJobId(job)}</span>
                                                                 </div>
                                                                 {bestMatchEmployee && bestMatchEmployee.workload < 3 && !jobZoneLocked && (
-                                                                    <span className="text-[10px] text-green-400 bg-green-500/10 px-2 py-0.5 rounded border border-green-500/30" title={`${t('warehouse.suggested')}: ${bestMatchEmployee.employee.name}`}>
+                                                                    <span className="text-[10px] text-green-400 bg-green-500/10 px-2 py-0.5 rounded border border-green-500/30" title={`${t('warehouse.suggested')}: ${bestMatchEmployee.employee.name} `}>
                                                                         💡 {t('warehouse.match')}
                                                                     </span>
                                                                 )}
@@ -3701,7 +3690,7 @@ export default function WarehouseOperations() {
                                                         className={`px-2 py-0.5 text-[10px] rounded font-bold transition-colors ${dispatchEmployeeFilter === role
                                                             ? 'bg-cyber-primary text-black'
                                                             : 'text-gray-400 hover:text-white'
-                                                            }`}
+                                                            } `}
                                                     >
                                                         {role === 'ALL' ? 'ALL' : role.toUpperCase()}
                                                     </button>
@@ -3725,7 +3714,7 @@ export default function WarehouseOperations() {
                                                     return false;
                                                 };
 
-                                                // Sort by: role match first, then by workload
+                                                // Sort by:role match first, then by workload
                                                 filtered.sort((a, b) => {
                                                     const aMatch = getRoleMatch(a, selectedJob);
                                                     const bMatch = getRoleMatch(b, selectedJob);
@@ -3759,7 +3748,7 @@ export default function WarehouseOperations() {
                                                         <div key={employee.id} className={`flex items-center justify-between p-3 rounded-lg border transition-all ${roleMatch && selectedJob
                                                             ? 'bg-blue-500/10 border-blue-500/50'
                                                             : 'bg-white/5 border-white/5'
-                                                            }`}>
+                                                            } `}>
                                                             <div className="flex items-center gap-3 flex-1">
                                                                 <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyber-primary to-cyber-accent flex items-center justify-center text-xs font-bold text-black">
                                                                     {employee.name.charAt(0)}
@@ -3779,7 +3768,7 @@ export default function WarehouseOperations() {
                                                                             <span className={`text-[10px] px-1.5 py-0.5 rounded ${isOverloaded
                                                                                 ? 'bg-red-500/20 text-red-400'
                                                                                 : 'bg-yellow-500/20 text-yellow-400'
-                                                                                }`}>
+                                                                                } `}>
                                                                                 {workloadCount} {t('warehouse.active')}
                                                                             </span>
                                                                         )}
@@ -3793,10 +3782,10 @@ export default function WarehouseOperations() {
                                                             </div>
                                                             <Protected permission="ASSIGN_TASKS">
                                                                 <button
-                                                                    disabled={!selectedJob || isOverloaded || (selectedJob && isZoneLocked(selectedJob.location || '')) || (selectedJob && loadingActions[`assign_${selectedJob.id}_${employee.id}`])}
+                                                                    disabled={!selectedJob || isOverloaded || (selectedJob && isZoneLocked(selectedJob.location || '')) || (selectedJob && loadingActions[`assign_${selectedJob.id}_${employee.id} `])}
                                                                     onClick={async () => {
                                                                         if (selectedJob) {
-                                                                            const actionKey = `assign_${selectedJob.id}_${employee.id}`;
+                                                                            const actionKey = `assign_${selectedJob.id}_${employee.id} `;
                                                                             if (loadingActions[actionKey]) return;
 
                                                                             // Check if zone is locked before assigning
@@ -3808,7 +3797,7 @@ export default function WarehouseOperations() {
                                                                             setLoadingActions(prev => ({ ...prev, [actionKey]: true }));
                                                                             try {
                                                                                 await assignJob(selectedJob.id, employee.id);
-                                                                                addNotification('success', `Job assigned to ${employee.name}`);
+                                                                                addNotification('success', `Job assigned to ${employee.name} `);
                                                                                 setSelectedJob(null);
                                                                             } catch (e) {
                                                                                 console.error('Assign error:', e);
@@ -3822,7 +3811,7 @@ export default function WarehouseOperations() {
                                                                             ? 'bg-cyber-primary text-black hover:bg-cyber-accent'
                                                                             : 'bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 border border-blue-500/50'
                                                                         : 'bg-white/5 text-gray-500 cursor-not-allowed'
-                                                                        }`}
+                                                                        } `}
                                                                     title={
                                                                         isOverloaded
                                                                             ? 'Employee has max workload (3 jobs)'
@@ -3835,7 +3824,7 @@ export default function WarehouseOperations() {
                                                                                         : 'Assign job to this employee (role match)'
                                                                     }
                                                                 >
-                                                                    {selectedJob && loadingActions[`assign_${selectedJob.id}_${employee.id}`] ? (
+                                                                    {selectedJob && loadingActions[`assign_${selectedJob.id}_${employee.id} `] ? (
                                                                         <>
                                                                             <RefreshCw className="animate-spin" size={10} />
                                                                             Assigning...
@@ -3873,7 +3862,7 @@ export default function WarehouseOperations() {
                                                         <span className="px-2 py-1 bg-white/10 rounded text-xs font-mono text-gray-400">{selectedJob.id}</span>
                                                     </div>
                                                     <p className="text-gray-400 text-sm mt-1 flex items-center gap-2">
-                                                        <span className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold border ${selectedJob.type === 'TRANSFER' ? 'border-cyber-primary/30 text-cyber-primary bg-cyber-primary/10' : 'border-white/10 text-gray-400'}`}>{selectedJob.type}</span>
+                                                        <span className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold border ${selectedJob.type === 'TRANSFER' ? 'border-cyber-primary/30 text-cyber-primary bg-cyber-primary/10' : 'border-white/10 text-gray-400'} `}>{selectedJob.type}</span>
                                                         <span>•</span>
                                                         <span className="text-white">{selectedJob.status}</span>
                                                     </p>
@@ -4023,7 +4012,7 @@ export default function WarehouseOperations() {
                                                                     <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${job.type === 'PICK' ? 'bg-blue-500/20 text-blue-400' :
                                                                         job.type === 'PACK' ? 'bg-green-500/20 text-green-400' :
                                                                             'bg-purple-500/20 text-purple-400'
-                                                                        }`}>
+                                                                        } `}>
                                                                         {job.type}
                                                                     </span>
                                                                     <span className="text-[10px] text-gray-500 font-mono">{formatJobId(job)}</span>
@@ -4049,23 +4038,23 @@ export default function WarehouseOperations() {
                                     <h3 className="font-bold text-white mb-6 flex items-center gap-2"><Printer size={20} className="text-cyber-primary" /> Label Printing Hub</h3>
 
                                     <div className="flex gap-4 mb-6">
-                                        <button onClick={() => setLabelMode('PRODUCT')} className={`flex-1 py-3 rounded-xl border font-bold text-sm ${labelMode === 'PRODUCT' ? 'bg-cyber-primary/20 text-cyber-primary border-cyber-primary' : 'border-white/10 text-gray-400'}`}>Product Labels</button>
-                                        <button onClick={() => setLabelMode('BIN')} className={`flex-1 py-3 rounded-xl border font-bold text-sm ${labelMode === 'BIN' ? 'bg-cyber-primary/20 text-cyber-primary border-cyber-primary' : 'border-white/10 text-gray-400'}`}>Rack Labels</button>
+                                        <button onClick={() => setLabelMode('PRODUCT')} className={`flex-1 py-3 rounded-xl border font-bold text-sm ${labelMode === 'PRODUCT' ? 'bg-cyber-primary/20 text-cyber-primary border-cyber-primary' : 'border-white/10 text-gray-400'} `}>Product Labels</button>
+                                        <button onClick={() => setLabelMode('BIN')} className={`flex-1 py-3 rounded-xl border font-bold text-sm ${labelMode === 'BIN' ? 'bg-cyber-primary/20 text-cyber-primary border-cyber-primary' : 'border-white/10 text-gray-400'} `}>Rack Labels</button>
                                     </div>
 
-                                    {/* Format Selection - Secondary Option */}
+                                    {/* Format Selection-Secondary Option */}
                                     <div className="mb-4 p-3 bg-black/20 rounded-lg border border-white/5">
                                         <label className="text-xs text-gray-400 uppercase font-bold mb-2 block">Label Format</label>
                                         <div className="flex gap-2">
                                             <button
                                                 onClick={() => setLabelFormat('BARCODE')}
-                                                className={`flex-1 py-2 rounded-lg border text-xs font-bold transition-all ${labelFormat === 'BARCODE' ? 'bg-white/10 text-white border-white/20' : 'border-white/5 text-gray-500 hover:bg-white/5'}`}
+                                                className={`flex-1 py-2 rounded-lg border text-xs font-bold transition-all ${labelFormat === 'BARCODE' ? 'bg-white/10 text-white border-white/20' : 'border-white/5 text-gray-500 hover:bg-white/5'} `}
                                             >
                                                 📊 Barcode (Default)
                                             </button>
                                             <button
                                                 onClick={() => setLabelFormat('QR')}
-                                                className={`flex-1 py-2 rounded-lg border text-xs font-bold transition-all ${labelFormat === 'QR' ? 'bg-blue-500/20 text-blue-400 border-blue-500/30' : 'border-white/5 text-gray-500 hover:bg-white/5'}`}
+                                                className={`flex-1 py-2 rounded-lg border text-xs font-bold transition-all ${labelFormat === 'QR' ? 'bg-blue-500/20 text-blue-400 border-blue-500/30' : 'border-white/5 text-gray-500 hover:bg-white/5'} `}
                                             >
                                                 📱 QR Code
                                             </button>
@@ -4094,7 +4083,7 @@ export default function WarehouseOperations() {
                                                         className={`flex-1 py-2 rounded text-xs font-bold transition-all ${labelSize === size
                                                             ? 'bg-cyber-primary text-black shadow-[0_0_10px_rgba(0,255,157,0.3)]'
                                                             : 'bg-white/5 text-gray-400 hover:bg-white/10'
-                                                            }`}
+                                                            } `}
                                                     >
                                                         {size}
                                                     </button>
@@ -4127,7 +4116,7 @@ export default function WarehouseOperations() {
                                                     const binLocations: string[] = [];
                                                     for (let bin = binStart; bin <= binEnd; bin++) {
                                                         const binStr = String(bin).padStart(2, '0');
-                                                        binLocations.push(`${zone}-${aisle}-${binStr}`);
+                                                        binLocations.push(`${zone} -${aisle} -${binStr} `);
                                                     }
 
                                                     // Define label dimensions based on size
@@ -4164,7 +4153,7 @@ export default function WarehouseOperations() {
                                                                             .replace('</body>', '')
                                                                             .replace('</html>', '') +
                                                                         (idx < labelsHTML.length - 1
-                                                                            ? '<div style="page-break-after: always;"></div>'
+                                                                            ? '<div style="page-break-after:always;"></div>'
                                                                             : '')
                                                                     )
                                                                     .join('') + '</body></html>';
@@ -4182,11 +4171,11 @@ export default function WarehouseOperations() {
                                                         // Generate barcode labels for all bin locations using npm-based generator (no CDN)
                                                         const labels = binLocations.map(loc => ({
                                                             value: loc,
-                                                            label: `Warehouse Location ${loc}`
+                                                            label: `Warehouse Location ${loc} `
                                                         }));
 
                                                         const barcodeLabelHTML = generateBatchBarcodeLabelsHTML(labels, {
-                                                            paperSize: `${sizeConfig.width} ${sizeConfig.height}`,
+                                                            paperSize: `${sizeConfig.width} ${sizeConfig.height} `,
                                                             width: labelSize === 'TINY' ? 1 : (labelSize === 'XL' ? 3 : 2),
                                                             height: labelSize === 'TINY' ? 30 : (labelSize === 'XL' ? 150 : 50),
                                                             fontSize: parseInt(sizeConfig.fontSize)
@@ -4223,7 +4212,7 @@ export default function WarehouseOperations() {
                                                         className={`flex-1 py-2 rounded text-xs font-bold transition-all ${labelSize === size
                                                             ? 'bg-cyber-primary text-black shadow-[0_0_10px_rgba(0,255,157,0.3)]'
                                                             : 'bg-white/5 text-gray-400 hover:bg-white/10'
-                                                            }`}
+                                                            } `}
                                                     >
                                                         {size}
                                                     </button>
@@ -4252,7 +4241,7 @@ export default function WarehouseOperations() {
                                                             const labelHTML = await generateQRCodeLabelHTML(
                                                                 sku,
                                                                 product?.name || 'Product',
-                                                                `SKU: ${sku}`,
+                                                                `SKU: ${sku} `,
                                                                 labelSize === 'TINY' ? 100 : 150,
                                                                 sizeConfig.width,
                                                                 sizeConfig.height
@@ -4298,14 +4287,14 @@ export default function WarehouseOperations() {
                                                                 });
 
                                                                 const labelHTML = `
-                                                            <div class="label-container">
-                                                                <div class="product-name" style="font-size: ${parseInt(sizeConfig.fontSize) + 2}px; font-weight: bold; margin-bottom: 5px;">${product?.name || 'Product'}</div>
+    < div class="label-container" >
+                                                                <div class="product-name" style="font-size: ${parseInt(sizeConfig.fontSize) + 2}px; font-weight:bold; margin-bottom: 5px;">${product?.name || 'Product'}</div>
                                                                 <div class="barcode-container">
                                                                     ${barcodeSVG}
                                                                 </div>
                                                                 <div class="sku" style="font-size: ${sizeConfig.fontSize}; margin-top: 5px;">SKU: ${sku} | Unit: ${unitNumber}/${qty}</div>
-                                                            </div>
-                                                        `;
+                                                            </div >
+    `;
 
                                                                 labelPromises.push(Promise.resolve(labelHTML));
                                                             }
@@ -4313,41 +4302,41 @@ export default function WarehouseOperations() {
                                                                 const labelHTMLs = await Promise.all(labelPromises);
 
                                                                 const barcodeLabelHTML = `
-                                                                <!DOCTYPE html>
-                                                                <html>
-                                                                <head>
-                                                                    <title>Product Labels</title>
-                                                                    <style>
-                                                                        @page { size: auto; margin: 10mm; }
-                                                                        body { margin: 0; padding: 10px; font-family: Arial; display: flex; flex-wrap: wrap; gap: 10px; }
-                                                                        .label-container {
-                                                                            width: ${sizeConfig.width};
-                                                                            height: ${sizeConfig.cssHeight};
-                                                                            border: 2px solid black;
-                                                                            padding: ${sizeConfig.padding};
-                                                                            box-sizing: border-box;
-                                                                            display: flex;
-                                                                            flex-direction: column;
-                                                                            justify-content: center;
-                                                                            align-items: center;
-                                                                            page-break-inside: avoid;
-                                                                            background: white;
-                                                                            text-align: center;
+    < !DOCTYPE html >
+        <html>
+            <head>
+                <title>Product Labels</title>
+                <style>
+                    @page {size:auto; margin: 10mm; }
+                    body {margin: 0; padding: 10px; font-family: Arial; display:flex; flex-wrap:wrap; gap: 10px; }
+                    .label-container {
+                        width: ${sizeConfig.width};
+                    height: ${sizeConfig.cssHeight};
+                    border: 2px solid black;
+                    padding: ${sizeConfig.padding};
+                    box-sizing:border-box;
+                    display:flex;
+                    flex-direction:column;
+                    justify-content:center;
+                    align-items:center;
+                    page-break-inside:avoid;
+                    background:white;
+                    text-align:center;
                                                                         }
-                                                                        .no-print { display: block; position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 1000; background: white; padding: 10px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.2); }
-                                        svg { max-width: 100%; height: auto; }
-                                        @media print { .no-print { display: none !important; } body { padding: 0; } }
-                                    </style>
-                                                                </head>
-                                                                <body>
-                                                                    <div class="no-print">
-                                                                        <button onclick="window.print()" style="padding: 12px 40px; background: #00ff9d; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold; margin: 10px;">🖨️ Print All Labels (${qty})</button>
-                                                                        <button onclick="window.close()" style="padding: 12px 40px; background: #666; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold; margin: 10px;">✕ Close</button>
-                                                                    </div>
-                                                                    ${labelHTMLs.join('')}
-                                                                </body>
-                                                                </html>
-                                                            `;
+                    .no-print {display:block; position:fixed; top: 20px; left: 50%; transform:translateX(-50%); z-index: 1000; background:white; padding: 10px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.2); }
+                    svg {max-width: 100%; height:auto; }
+                    @media print { .no-print {display:none !important; } body {padding: 0; } }
+                </style>
+            </head>
+            <body>
+                <div class="no-print">
+                    <button onclick="window.print()" style="padding: 12px 40px; background: #00ff9d; border:none; border-radius: 8px; cursor:pointer; font-size: 16px; font-weight:bold; margin: 10px;">🖨️ Print All Labels (${qty})</button>
+                    <button onclick="window.close()" style="padding: 12px 40px; background: #666; color:white; border:none; border-radius: 8px; cursor:pointer; font-size: 16px; font-weight:bold; margin: 10px;">✕ Close</button>
+                </div>
+                ${labelHTMLs.join('')}
+            </body>
+        </html>
+`;
 
                                                                 const printWindow = window.open('', '_blank');
                                                                 if (printWindow) {
@@ -4386,7 +4375,7 @@ export default function WarehouseOperations() {
                                                 <div key={aisle} className={`flex justify-between items-center p-3 rounded-xl border transition-all ${isLocked
                                                     ? 'bg-red-500/10 border-red-500/30'
                                                     : 'bg-white/5 border-white/5'
-                                                    }`}>
+                                                    } `}>
                                                     <div className="flex-1">
                                                         <div className="flex items-center gap-2">
                                                             <span className="text-sm text-white font-bold">{aisle}</span>
@@ -4516,7 +4505,7 @@ export default function WarehouseOperations() {
                                                         className={`px-4 py-2 md:px-3 md:py-1 text-sm md:text-xs rounded font-bold transition-colors min-h-[36px] md:min-h-0 ${putawayStatusFilter === status.value
                                                             ? 'bg-cyber-primary text-black'
                                                             : 'text-gray-400 hover:text-white'
-                                                            }`}
+                                                            } `}
                                                     >
                                                         {status.label}
                                                     </button>
@@ -4539,7 +4528,7 @@ export default function WarehouseOperations() {
                                                         className={`px-4 py-2 md:px-3 md:py-1 text-sm md:text-xs rounded font-bold transition-colors min-h-[36px] md:min-h-0 ${putawaySortBy === sort.value
                                                             ? 'bg-cyber-primary text-black'
                                                             : 'text-gray-400 hover:text-white'
-                                                            }`}
+                                                            } `}
                                                     >
                                                         {sort.label}
                                                     </button>
@@ -4617,7 +4606,7 @@ export default function WarehouseOperations() {
                                                             <span className={`text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-wider ${job.priority === 'Critical' ? 'bg-red-500/20 text-red-400 border border-red-500/30' :
                                                                 job.priority === 'High' ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30' :
                                                                     'bg-blue-500/20 text-blue-400 border border-blue-500/30'
-                                                                }`}>
+                                                                } `}>
                                                                 {job.priority}
                                                             </span>
                                                             <span className={`text-[10px] text-gray-400`}>
@@ -4629,7 +4618,7 @@ export default function WarehouseOperations() {
                                                     {/* Progress Bar (if In-Progress) */}
                                                     {job.status === 'In-Progress' && progress > 0 && (
                                                         <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
-                                                            <div className="h-full bg-cyber-primary transition-all duration-500" style={{ width: `${progress}%` }} />
+                                                            <div className="h-full bg-cyber-primary transition-all duration-500" style={{ width: `${progress}% ` }} />
                                                         </div>
                                                     )}
 
@@ -4785,7 +4774,7 @@ export default function WarehouseOperations() {
 
                                                 try {
                                                     const replenishJob: WMSJob = {
-                                                        id: `REP-${Date.now()}-${created}`,
+                                                        id: `REP - ${Date.now()} - ${created} `,
                                                         siteId: activeSite?.id || '',
                                                         site_id: activeSite?.id,
                                                         sourceSiteId: activeSite?.id || '',
@@ -4807,7 +4796,7 @@ export default function WarehouseOperations() {
                                                             pickedQty: 0,
                                                             status: 'Pending'
                                                         }],
-                                                        orderRef: `REPLENISH-${product.sku}`
+                                                        orderRef: `REPLENISH - ${product.sku} `
                                                     };
                                                     await wmsJobsService.create(replenishJob);
                                                     created++;
@@ -4824,7 +4813,7 @@ export default function WarehouseOperations() {
                                         className={`text-xs px-4 py-2 rounded-lg font-bold transition-colors ${selectedReplenishItems.size > 0
                                             ? 'bg-cyber-primary text-black hover:bg-cyber-accent'
                                             : 'bg-white/5 text-gray-500 cursor-not-allowed'
-                                            }`}
+                                            } `}
                                         disabled={selectedReplenishItems.size === 0}
                                     >
                                         Generate {selectedReplenishItems.size > 0 ? `${selectedReplenishItems.size} ` : ''}Tasks
@@ -4895,7 +4884,7 @@ export default function WarehouseOperations() {
                                         {filteredProducts
                                             .filter(p => p.stock < (p.minStock || 10) * 2)
                                             .sort((a, b) => {
-                                                // Sort by urgency: out of stock first, then low stock
+                                                // Sort by urgency:out of stock first, then low stock
                                                 if (a.stock === 0 && b.stock !== 0) return -1;
                                                 if (b.stock === 0 && a.stock !== 0) return 1;
                                                 const aMinStock = a.minStock || 10;
@@ -4928,15 +4917,15 @@ export default function WarehouseOperations() {
                                                     priorityColor = 'bg-yellow-500/20 text-yellow-400';
                                                 }
 
-                                                // Determine bulk storage location (simulated - based on category)
-                                                const bulkLocation = p.category ? `BULK-${p.category.substring(0, 3).toUpperCase()}-${Math.floor(Math.random() * 10) + 1}` : 'BULK-GEN-1';
+                                                // Determine bulk storage location (simulated-based on category)
+                                                const bulkLocation = p.category ? `BULK - ${p.category.substring(0, 3).toUpperCase()} -${Math.floor(Math.random() * 10) + 1} ` : 'BULK-GEN-1';
 
                                                 return (
-                                                    <tr key={p.id} className={`hover:bg-white/5 ${isChecked ? 'bg-cyber-primary/5' : ''}`}>
+                                                    <tr key={p.id} className={`hover:bg-white/5 ${isChecked ? 'bg-cyber-primary/5' : ''} `}>
                                                         <td className="p-3">
                                                             <input
                                                                 type="checkbox"
-                                                                aria-label={`Select ${p.name}`}
+                                                                aria-label={`Select ${p.name} `}
                                                                 className="w-4 h-4 rounded bg-black border-white/20"
                                                                 checked={isChecked}
                                                                 onChange={(e) => {
@@ -4951,7 +4940,7 @@ export default function WarehouseOperations() {
                                                             />
                                                         </td>
                                                         <td className="p-3">
-                                                            <span className={`text-[10px] px-2 py-1 rounded font-bold uppercase ${priorityColor}`}>
+                                                            <span className={`text-[10px] px-2 py-1 rounded font-bold uppercase ${priorityColor} `}>
                                                                 {priority}
                                                             </span>
                                                         </td>
@@ -4974,7 +4963,7 @@ export default function WarehouseOperations() {
                                                             <span className={`font-bold font-mono ${p.stock === 0 ? 'text-red-400' :
                                                                 p.stock < minStock ? 'text-orange-400' :
                                                                     'text-yellow-400'
-                                                                }`}>
+                                                                } `}>
                                                                 {p.stock}
                                                             </span>
                                                         </td>
@@ -4998,7 +4987,7 @@ export default function WarehouseOperations() {
                                                                 onClick={async () => {
                                                                     try {
                                                                         const replenishJob: WMSJob = {
-                                                                            id: `REP-${Date.now()}`,
+                                                                            id: `REP - ${Date.now()} `,
                                                                             siteId: activeSite?.id || '',
                                                                             site_id: activeSite?.id,
                                                                             sourceSiteId: activeSite?.id || '',
@@ -5020,7 +5009,7 @@ export default function WarehouseOperations() {
                                                                                 pickedQty: 0,
                                                                                 status: 'Pending'
                                                                             }],
-                                                                            orderRef: `REPLENISH-${p.sku}`
+                                                                            orderRef: `REPLENISH - ${p.sku} `
                                                                         };
                                                                         await wmsJobsService.create(replenishJob);
                                                                         addNotification('success', `Replenishment job created for ${p.name}`);
@@ -5076,13 +5065,13 @@ export default function WarehouseOperations() {
                                         <div className="flex bg-black/30 rounded-lg p-1 border border-white/10">
                                             <button
                                                 onClick={() => setCountViewMode('Operations')}
-                                                className={`px-4 py-2 rounded-md text-xs font-bold transition-all ${countViewMode === 'Operations' ? 'bg-cyber-primary text-black shadow-lg shadow-cyber-primary/20' : 'text-gray-400 hover:text-white'}`}
+                                                className={`px-4 py-2 rounded-md text-xs font-bold transition-all ${countViewMode === 'Operations' ? 'bg-cyber-primary text-black shadow-lg shadow-cyber-primary/20' : 'text-gray-400 hover:text-white'} `}
                                             >
                                                 Operations
                                             </button>
                                             <button
                                                 onClick={() => setCountViewMode('Reports')}
-                                                className={`px-4 py-2 rounded-md text-xs font-bold transition-all ${countViewMode === 'Reports' ? 'bg-cyber-primary text-black shadow-lg shadow-cyber-primary/20' : 'text-gray-400 hover:text-white'}`}
+                                                className={`px-4 py-2 rounded-md text-xs font-bold transition-all ${countViewMode === 'Reports' ? 'bg-cyber-primary text-black shadow-lg shadow-cyber-primary/20' : 'text-gray-400 hover:text-white'} `}
                                             >
                                                 Reports
                                             </button>
@@ -5422,7 +5411,7 @@ export default function WarehouseOperations() {
                                                                         <td className="p-4 text-gray-300">{new Date(m.date).toLocaleDateString()}</td>
                                                                         <td className="p-4 font-bold text-white">{product?.name || 'Unknown'}</td>
                                                                         <td className="p-4">
-                                                                            <span className={`px-2 py-1 rounded text-xs font-bold ${m.type === 'IN' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
+                                                                            <span className={`px-2 py-1 rounded text-xs font-bold ${m.type === 'IN' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'} `}>
                                                                                 {m.type}
                                                                             </span>
                                                                         </td>
@@ -5470,13 +5459,13 @@ export default function WarehouseOperations() {
                                     <div className="flex bg-black/30 rounded-lg p-1 border border-white/10">
                                         <button
                                             onClick={() => setWasteViewMode('Log')}
-                                            className={`px-4 py-2 rounded-md text-xs font-bold transition-all ${wasteViewMode === 'Log' ? 'bg-red-500 text-white shadow-lg shadow-red-500/20' : 'text-gray-400 hover:text-white'}`}
+                                            className={`px-4 py-2 rounded-md text-xs font-bold transition-all ${wasteViewMode === 'Log' ? 'bg-red-500 text-white shadow-lg shadow-red-500/20' : 'text-gray-400 hover:text-white'} `}
                                         >
                                             Log Waste
                                         </button>
                                         <button
                                             onClick={() => setWasteViewMode('History')}
-                                            className={`px-4 py-2 rounded-md text-xs font-bold transition-all ${wasteViewMode === 'History' ? 'bg-red-500 text-white shadow-lg shadow-red-500/20' : 'text-gray-400 hover:text-white'}`}
+                                            className={`px-4 py-2 rounded-md text-xs font-bold transition-all ${wasteViewMode === 'History' ? 'bg-red-500 text-white shadow-lg shadow-red-500/20' : 'text-gray-400 hover:text-white'} `}
                                         >
                                             History
                                         </button>
@@ -5617,7 +5606,7 @@ export default function WarehouseOperations() {
                                                             }, 0);
 
                                                             if (totalValue > 100) {
-                                                                if (!confirm(`High value waste (${CURRENCY_SYMBOL}${totalValue.toFixed(2)}). Are you sure? This will be flagged for review.`)) return;
+                                                                if (!confirm(`High value waste(${CURRENCY_SYMBOL}${totalValue.toFixed(2)}).Are you sure ? This will be flagged for review.`)) return;
                                                             } else {
                                                                 if (!confirm('Confirm disposal of these items?')) return;
                                                             }
@@ -5628,7 +5617,7 @@ export default function WarehouseOperations() {
                                                                     item.productId,
                                                                     item.quantity,
                                                                     'OUT',
-                                                                    `Waste: ${item.reason} ${item.notes ? `(${item.notes})` : ''}`,
+                                                                    `Waste: ${item.reason} ${item.notes ? `(${item.notes})` : ''} `,
                                                                     user?.name || 'WMS'
                                                                 );
                                                             }
@@ -5637,7 +5626,7 @@ export default function WarehouseOperations() {
                                                             addNotification('success', 'Waste log submitted successfully');
                                                         }}
                                                         disabled={wasteBasket.length === 0}
-                                                        className={`w-full py-3 font-bold rounded-xl transition-all flex items-center justify-center gap-2 ${wasteBasket.length > 0 ? 'bg-red-500 hover:bg-red-600 text-white shadow-lg shadow-red-500/20' : 'bg-gray-600 text-gray-400 cursor-not-allowed'}`}
+                                                        className={`w-full py-3 font-bold rounded-xl transition-all flex items-center justify-center gap-2 ${wasteBasket.length > 0 ? 'bg-red-500 hover:bg-red-600 text-white shadow-lg shadow-red-500/20' : 'bg-gray-600 text-gray-400 cursor-not-allowed'} `}
                                                     >
                                                         <AlertTriangle size={18} /> Confirm Disposal
                                                     </button>
@@ -5721,10 +5710,10 @@ export default function WarehouseOperations() {
                                             const isActive = i <= currentIndex;
                                             return (
                                                 <div key={step} className="flex items-center">
-                                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${isActive ? 'bg-blue-500 text-white' : 'bg-white/5 text-gray-500'}`}>
+                                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${isActive ? 'bg-blue-500 text-white' : 'bg-white/5 text-gray-500'} `}>
                                                         {i + 1}
                                                     </div>
-                                                    {i < 3 && <div className={`w-8 h-0.5 mx-1 ${isActive ? 'bg-blue-500' : 'bg-white/5'}`} />}
+                                                    {i < 3 && <div className={`w-8 h-0.5 mx-1 ${isActive ? 'bg-blue-500' : 'bg-white/5'} `} />}
                                                 </div>
                                             );
                                         })}
@@ -5802,7 +5791,7 @@ export default function WarehouseOperations() {
                                                 const returnItem = returnItems.find(ri => ri.productId === item.id);
 
                                                 return (
-                                                    <div key={idx} className={`p-4 rounded-xl border transition-all ${isSelected ? 'bg-blue-500/10 border-blue-500/50' : 'bg-white/5 border-white/5'}`}>
+                                                    <div key={idx} className={`p-4 rounded-xl border transition-all ${isSelected ? 'bg-blue-500/10 border-blue-500/50' : 'bg-white/5 border-white/5'} `}>
                                                         <div className="flex items-start gap-4">
                                                             <input
                                                                 type="checkbox"
@@ -5909,7 +5898,7 @@ export default function WarehouseOperations() {
                                             <button
                                                 disabled={returnItems.length === 0}
                                                 onClick={() => setReturnStep('Review')}
-                                                className={`px-8 py-3 rounded-xl font-bold flex items-center gap-2 ${returnItems.length > 0 ? 'bg-blue-500 hover:bg-blue-600 text-white shadow-lg shadow-blue-500/20' : 'bg-gray-600 text-gray-400 cursor-not-allowed'}`}
+                                                className={`px-8 py-3 rounded-xl font-bold flex items-center gap-2 ${returnItems.length > 0 ? 'bg-blue-500 hover:bg-blue-600 text-white shadow-lg shadow-blue-500/20' : 'bg-gray-600 text-gray-400 cursor-not-allowed'} `}
                                             >
                                                 Review Return <ArrowRight size={18} />
                                             </button>
@@ -5945,7 +5934,7 @@ export default function WarehouseOperations() {
                                                                         </td>
                                                                         <td className="p-4 text-gray-300">{ri.reason}</td>
                                                                         <td className="p-4">
-                                                                            <span className={`text-xs px-2 py-1 rounded font-bold ${ri.action === 'Restock' ? 'bg-green-500/20 text-green-400' : ri.action === 'Discard' ? 'bg-red-500/20 text-red-400' : 'bg-yellow-500/20 text-yellow-400'}`}>
+                                                                            <span className={`text-xs px-2 py-1 rounded font-bold ${ri.action === 'Restock' ? 'bg-green-500/20 text-green-400' : ri.action === 'Discard' ? 'bg-red-500/20 text-red-400' : 'bg-yellow-500/20 text-yellow-400'} `}>
                                                                                 {ri.action}
                                                                             </span>
                                                                         </td>
@@ -6006,7 +5995,7 @@ export default function WarehouseOperations() {
                                                                 // Stock Adjustments
                                                                 for (const item of returnItems) {
                                                                     if (item.action === 'Restock') {
-                                                                        await adjustStock(item.productId, item.quantity, 'IN', `RMA Restock: ${foundSale.id}`, user?.name || 'WMS');
+                                                                        await adjustStock(item.productId, item.quantity, 'IN', `RMA Restock: ${foundSale.id} `, user?.name || 'WMS');
                                                                     } else if (item.action === 'Discard') {
                                                                         // Log waste automatically? Or just don't add back.
                                                                         // For now, we just don't add it back.
@@ -6041,7 +6030,7 @@ export default function WarehouseOperations() {
                                         </div>
                                         <div className="text-center space-y-2">
                                             <h2 className="text-2xl font-bold text-white">{t('warehouse.returnProcessedSuccessfully')}</h2>
-                                            <p className="text-gray-400">{t('warehouse.rmaGenerated').replace('{rma}', `RMA-${Date.now().toString().slice(-6)}`)}</p>
+                                            <p className="text-gray-400">{t('warehouse.rmaGenerated').replace('{rma}', `RMA - ${Date.now().toString().slice(-6)} `)}</p>
                                         </div>
 
                                         <div className="flex gap-4">
@@ -6123,7 +6112,7 @@ export default function WarehouseOperations() {
                                             </div>
                                         </div>
 
-                                        {/* Transfer Stats - Complete Workflow */}
+                                        {/* Transfer Stats-Complete Workflow */}
                                         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
                                             {[
                                                 { label: t('warehouse.requested'), value: filteredJobs.filter(j => j.type === 'TRANSFER' && j.transferStatus === 'Requested').length, color: 'text-yellow-400 bg-yellow-500/10 border-yellow-500/20' },
@@ -6133,7 +6122,7 @@ export default function WarehouseOperations() {
                                                 { label: t('warehouse.delivered'), value: filteredJobs.filter(j => j.type === 'TRANSFER' && j.transferStatus === 'Delivered').length, color: 'text-cyan-400 bg-cyan-500/10 border-cyan-500/20' },
                                                 { label: t('warehouse.received'), value: filteredJobs.filter(j => j.type === 'TRANSFER' && j.transferStatus === 'Received').length, color: 'text-green-400 bg-green-500/10 border-green-500/20' },
                                             ].map(stat => (
-                                                <div key={stat.label} className={`rounded-lg p-3 border ${stat.color}`}>
+                                                <div key={stat.label} className={`rounded-lg p-3 border ${stat.color} `}>
                                                     <p className="text-[10px] uppercase font-bold opacity-70">{stat.label}</p>
                                                     <p className="text-xl font-mono font-bold">{stat.value}</p>
                                                 </div>
@@ -6150,7 +6139,7 @@ export default function WarehouseOperations() {
                                                 className={`px-4 py-2 rounded-lg text-xs font-bold transition-colors ${transferStatusFilter === status
                                                     ? 'bg-cyber-primary text-black'
                                                     : 'bg-white/5 text-gray-400 hover:bg-white/10'
-                                                    }`}
+                                                    } `}
                                             >
                                                 {status === 'Picking' ? '📦 Picking' :
                                                     status === 'Packed' ? '📤 Packed' :
@@ -6188,13 +6177,13 @@ export default function WarehouseOperations() {
                                                     };
 
                                                     return (
-                                                        <div key={transfer.id} className="bg-white/5 rounded-xl border border-white/10 p-4 hover:bg-white/10 transition-colors">
-                                                            <div className="flex flex-col md:flex-row justify-between gap-4">
+                                                        <div key={transfer.id} className="bg-white/5 rounded-xl border border-white/10 p-3 md:p-4 hover:bg-white/10 transition-colors">
+                                                            <div className="flex flex-col md:flex-row justify-between gap-3 md:gap-4">
                                                                 {/* Left: Transfer Info (Simple Row) */}
-                                                                <div className="flex-1 flex flex-col md:flex-row md:items-center gap-4">
-                                                                    <div className="flex items-center gap-3 min-w-[150px]">
+                                                                <div className="flex-1 flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
+                                                                    <div className="flex items-center gap-3 min-w-[150px] justify-between md:justify-start">
                                                                         <span className="text-sm font-mono font-bold text-white">{formatTransferId(transfer)}</span>
-                                                                        <span className={`text-[10px] px-2 py-0.5 rounded font-bold uppercase border ${statusColors[transfer.transferStatus || 'Requested']}`}>
+                                                                        <span className={`text-[10px] px-2 py-0.5 rounded font-bold uppercase border ${statusColors[transfer.transferStatus || 'Requested']} `}>
                                                                             {transfer.transferStatus || 'Requested'}
                                                                         </span>
                                                                     </div>
@@ -6230,12 +6219,12 @@ export default function WarehouseOperations() {
                                                                                         throw new Error('Missing Source Site ID on Transfer');
                                                                                     }
 
-                                                                                    const pickJobId = `PICK-TRF-${Date.now()}`;
+                                                                                    const pickJobId = `PICK - TRF - ${Date.now()} `;
 
                                                                                     // Get lineItems from either camelCase or snake_case
                                                                                     const transferLineItems = transfer.lineItems || transfer.line_items || [];
-                                                                                    console.log('📦 Transfer lineItems:', transferLineItems);
-                                                                                    console.log('📦 Full transfer object:', transfer);
+                                                                                    // console.log('📦 Transfer lineItems:', transferLineItems);
+                                                                                    // console.log('📦 Full transfer object:', transfer);
 
                                                                                     if (transferLineItems.length === 0) {
                                                                                         throw new Error('Transfer has no items to pick. Please add products to the transfer first.');
@@ -6261,7 +6250,7 @@ export default function WarehouseOperations() {
                                                                                             pickedQty: 0
                                                                                         })),
                                                                                         orderRef: transfer.id,
-                                                                                        jobNumber: `PICK-${formatTransferId(transfer).replace('TRF-', '')}`
+                                                                                        jobNumber: `PICK - ${formatTransferId(transfer).replace('TRF-', '')} `
                                                                                     };
 
                                                                                     await wmsJobsService.create(pickJob);
@@ -6317,7 +6306,7 @@ export default function WarehouseOperations() {
                                                                             className={`px-3 py-1.5 rounded-lg text-xs font-bold border flex items-center gap-1.5 ${shippingTransferId === transfer.id
                                                                                 ? 'bg-purple-500/10 text-purple-300 border-purple-500/20 cursor-wait'
                                                                                 : 'bg-purple-500/20 text-purple-400 hover:bg-purple-500/30 border-purple-500/30'
-                                                                                }`}
+                                                                                } `}
                                                                         >
                                                                             {shippingTransferId === transfer.id ? (
                                                                                 <>
@@ -6359,7 +6348,7 @@ export default function WarehouseOperations() {
                                                                             className={`px-3 py-1.5 rounded-lg text-xs font-bold border flex items-center gap-1.5 ${loadingActions[transfer.id]
                                                                                 ? 'bg-cyan-500/10 text-cyan-300 border-cyan-500/20 cursor-wait'
                                                                                 : 'bg-cyan-500/20 text-cyan-400 hover:bg-cyan-500/30 border-cyan-500/30'
-                                                                                }`}
+                                                                                } `}
                                                                         >
                                                                             {loadingActions[transfer.id] ? (
                                                                                 <>
@@ -6399,7 +6388,7 @@ export default function WarehouseOperations() {
 
                                                                     <button
                                                                         onClick={() => {
-                                                                            // View transfer details - could expand or open modal
+                                                                            // View transfer details-could expand or open modal
                                                                             setSelectedJob(transfer);
                                                                         }}
                                                                         className="px-3 py-1.5 bg-white/5 text-gray-400 rounded-lg text-xs font-bold hover:bg-white/10"
@@ -6444,7 +6433,7 @@ export default function WarehouseOperations() {
                                             const isDiscrepancy = item.receivedQty !== item.expectedQty;
 
                                             return (
-                                                <div key={idx} className={`p-4 rounded-xl border transition-all ${isDiscrepancy ? 'bg-yellow-500/5 border-yellow-500/30' : 'bg-white/5 border-white/5'}`}>
+                                                <div key={idx} className={`p-4 rounded-xl border transition-all ${isDiscrepancy ? 'bg-yellow-500/5 border-yellow-500/30' : 'bg-white/5 border-white/5'} `}>
                                                     <div className="flex flex-col md:flex-row gap-4 items-center">
                                                         <div className="flex-1">
                                                             <h4 className="font-bold text-white">{product?.name || 'Unknown Product'}</h4>
@@ -6473,7 +6462,7 @@ export default function WarehouseOperations() {
                                                                     <input
                                                                         type="number"
                                                                         aria-label="Received Quantity"
-                                                                        className={`w-16 bg-black border rounded-lg p-2 text-center font-mono font-bold ${isDiscrepancy ? 'text-yellow-400 border-yellow-500/50' : 'text-green-400 border-green-500/50'}`}
+                                                                        className={`w-16 bg-black border rounded-lg p-2 text-center font-mono font-bold ${isDiscrepancy ? 'text-yellow-400 border-yellow-500/50' : 'text-green-400 border-green-500/50'} `}
                                                                         value={item.receivedQty}
                                                                         onChange={(e) => {
                                                                             const val = parseInt(e.target.value) || 0;
@@ -6539,7 +6528,7 @@ export default function WarehouseOperations() {
                                                         discrepancies: transferReceiveItems.filter(i => i.receivedQty !== i.expectedQty)
                                                     });
 
-                                                    // 2. Update Inventory for RECEIVED items - find or create products at destination site
+                                                    // 2. Update Inventory for RECEIVED items-find or create products at destination site
                                                     const destSiteId = activeTransferJob.destSiteId || activeTransferJob.dest_site_id || activeSite?.id;
 
                                                     for (const item of transferReceiveItems) {
@@ -6560,7 +6549,7 @@ export default function WarehouseOperations() {
                                                             );
 
                                                             if (destProduct) {
-                                                                // Product exists at destination - update its stock
+                                                                // Product exists at destination-update its stock
                                                                 await adjustStock(
                                                                     destProduct.id,
                                                                     item.receivedQty,
@@ -6568,9 +6557,9 @@ export default function WarehouseOperations() {
                                                                     `Transfer Received: ${formatJobId(activeTransferJob)} (${item.condition})`,
                                                                     user?.name || 'System'
                                                                 );
-                                                                console.log(`📥 Added ${item.receivedQty} of ${destProduct.name} to ${destProduct.id}`);
+                                                                console.log(`📥 Added ${item.receivedQty} of ${destProduct.name} to ${destProduct.id} `);
                                                             } else {
-                                                                // Product doesn't exist at destination - create it
+                                                                // Product doesn't exist at destination-create it
                                                                 try {
                                                                     await addProduct({
                                                                         siteId: destSiteId,
@@ -6625,11 +6614,11 @@ export default function WarehouseOperations() {
                                                     Finalize Receipt
                                                 </>
                                             )}
-                                        </button>
-                                    </div>
-                                </div>
+                                        </button >
+                                    </div >
+                                </div >
                             )}
-                        </div>
+                        </div >
                     )
                 }
 
@@ -6651,8 +6640,6 @@ export default function WarehouseOperations() {
                                             <X size={20} />
                                         </button>
                                     </div>
-
-                                    {/* Progress Steps */}
                                     <div className="flex items-center gap-2 text-xs">
                                         <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full font-bold ${transferSourceSite ? 'bg-green-500/20 text-green-400' : 'bg-white/5 text-gray-500'}`}>
                                             <span className="w-5 h-5 rounded-full bg-current/20 flex items-center justify-center text-[10px]">1</span>
@@ -6890,7 +6877,7 @@ export default function WarehouseOperations() {
                                                     )}
                                                 </div>
 
-                                                {/* Add Product - Show products from SOURCE site, or all if none found */}
+                                                {/* Add Product-Show products from SOURCE site, or all if none found */}
                                                 <div className="mt-3">
                                                     {(() => {
                                                         // First try to get site-specific products
@@ -6932,7 +6919,7 @@ export default function WarehouseOperations() {
                                                                 </select>
                                                                 <p className={`text-[10px] mt-1 text-center ${isFallback ? 'text-yellow-500' : 'text-gray-600'}`}>
                                                                     {isFallback
-                                                                        ? '⚠️ No products assigned to this warehouse - showing all available products'
+                                                                        ? '⚠️ No products assigned to this warehouse-showing all available products'
                                                                         : siteProducts.length > 0
                                                                             ? `Showing ${siteProducts.length} products from ${sites.find(s => s.id === transferSourceSite)?.name}`
                                                                             : 'Select products to transfer'
@@ -7031,12 +7018,12 @@ export default function WarehouseOperations() {
                                                     transferStatus: 'Requested',
                                                     requestedBy: user?.name || 'System'
                                                 };
-                                                console.log('📦 Creating Transfer Job:', transferJob);
-                                                console.log('📦 Transfer Items:', transferItems);
-                                                console.log('📦 Line Items:', transferJob.lineItems);
+                                                // console.log('📦 Creating Transfer Job:', transferJob);
+                                                // console.log('📦 Transfer Items:', transferItems);
+                                                // console.log('📦 Line Items:', transferJob.lineItems);
 
                                                 const createdJob = await wmsJobsService.create(transferJob);
-                                                console.log('✅ Transfer Job Created:', createdJob);
+                                                // console.log('✅ Transfer Job Created:', createdJob);
 
                                                 addNotification('success', t('warehouse.transferRequestCreated'));
 
@@ -7073,1155 +7060,1159 @@ export default function WarehouseOperations() {
                                         )}
                                     </button>
                                 </div>
+
+
                             </div>
                         </div>
                     )
                 }
 
-            </div >
 
-            {/* QR Scanner Modal */}
-            {
-                isQRScannerOpen && (
-                    <QRScanner
-                        onScan={(data) => {
-                            if (qrScannerMode === 'location') {
-                                // Handle location scan
-                                const upperData = data.toUpperCase();
-                                if (/^[A-Z]-\d{2}-\d{2}$/.test(upperData)) {
-                                    handleLocationSelect(upperData);
-                                    setLocationSearch('');
-                                } else {
-                                    addNotification('alert', 'Invalid location format. Expected: A-01-01');
-                                }
-                            } else {
-                                // Handle product scan
-                                setScannedItem(data);
-                                // Get current item from selected job
-                                const currentItem = selectedJob?.lineItems.find(i => i.status === 'Pending');
-
-                                // Trigger the same validation logic as manual entry
-                                const scannedValue = data.trim().toUpperCase();
-                                const expectedProduct = filteredProducts.find(p => p.id === currentItem?.productId);
-                                const scannedProduct = filteredProducts.find(p =>
-                                    p.sku?.toUpperCase() === scannedValue ||
-                                    p.id.toUpperCase() === scannedValue ||
-                                    p.id.replace(/[^A-Z0-9]/gi, '').toUpperCase() === scannedValue.replace(/[^A-Z0-9]/gi, '')
-                                );
-
-                                if (scannedProduct && expectedProduct && scannedProduct.id === expectedProduct.id) {
-                                    handleItemScan();
-                                    setScannedItem('');
-                                    addNotification('success', '✓ Product verified!');
-                                } else {
-                                    addNotification('alert', `⚠️ Wrong product! Expected: ${expectedProduct?.sku || expectedProduct?.id}, Scanned: ${scannedValue}`);
-                                    setScannedItem('');
-                                }
-                            }
-                            setIsQRScannerOpen(false);
-                        }}
-                        onClose={() => setIsQRScannerOpen(false)}
-                        title={qrScannerMode === 'location' ? 'Scan Location Barcode/QR' : 'Scan Product Barcode/QR'}
-                        description={qrScannerMode === 'location' ? 'Position the location barcode within the frame' : 'Position the product barcode within the frame'}
-                    />
-                )
-            }
-
-            {/* ========== CUSTOM MODALS ========== */}
-
-            {/* Short Pick Quantity Modal */}
-            {
-                showShortPickModal && selectedJob?.lineItems.find(i => i.status === 'Pending') && (
-                    <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[9999] p-4" onClick={() => setShowShortPickModal(false)}>
-                        <div className="bg-cyber-gray border border-cyber-primary/30 rounded-2xl p-6 max-w-md w-full shadow-[0_0_50px_rgba(0,255,157,0.3)]" onClick={(e) => e.stopPropagation()}>
-                            <div className="flex items-center gap-3 mb-4">
-                                <div className="p-3 bg-red-500/20 rounded-lg">
-                                    <AlertTriangle className="text-red-400" size={24} />
-                                </div>
-                                <div>
-                                    <h3 className="text-xl font-bold text-white">{t('warehouse.shortPickTitle')}</h3>
-                                    <p className="text-sm text-gray-400">{t('warehouse.enterActualQuantityPicked')}</p>
-                                </div>
-                            </div>
-
-                            <div className="mb-4 p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
-                                <p className="text-sm text-yellow-400">
-                                    <strong>{t('warehouse.expected')}:</strong> {shortPickMaxQty} {t('common.quantity')}
-                                </p>
-                                <p className="text-xs text-gray-400 mt-1">
-                                    {t('warehouse.enterActualQuantity')}
-                                </p>
-                            </div>
-
-                            <input
-                                type="number"
-                                min="0"
-                                max={shortPickMaxQty}
-                                value={shortPickQuantity}
-                                onChange={(e) => setShortPickQuantity(e.target.value)}
-                                placeholder={t('warehouse.enterQuantity')}
-                                className="w-full bg-black/50 border-2 border-cyber-primary/30 rounded-lg p-4 text-white text-center text-2xl font-bold focus:border-cyber-primary focus:outline-none mb-4"
-                                autoFocus
-                                onKeyPress={(e) => {
-                                    if (e.key === 'Enter') {
-                                        const actualQty = parseInt(shortPickQuantity);
-                                        if (!isNaN(actualQty) && actualQty >= 0 && actualQty < shortPickMaxQty) {
-                                            handleItemScan(actualQty);
-                                            addNotification('alert', t('warehouse.shortPickRecorded').replace('{actual}', actualQty.toString()).replace('{expected}', shortPickMaxQty.toString()));
-                                            setShowShortPickModal(false);
-                                        } else if (actualQty >= shortPickMaxQty) {
-                                            handleItemScan();
-                                            setShowShortPickModal(false);
-                                        } else {
-                                            addNotification('alert', t('warehouse.invalidQuantity'));
-                                        }
+                {/* QR Scanner Modal */}
+                {
+                    isQRScannerOpen && (
+                        <QRScanner
+                            onScan={(data) => {
+                                if (qrScannerMode === 'location') {
+                                    // Handle location scan
+                                    const upperData = data.toUpperCase();
+                                    if (/^[A-Z]-\d{2}-\d{2}$/.test(upperData)) {
+                                        handleLocationSelect(upperData);
+                                        setLocationSearch('');
+                                    } else {
+                                        addNotification('alert', 'Invalid location format. Expected: A-01-01');
                                     }
-                                }}
-                            />
+                                } else {
+                                    // Handle product scan
+                                    setScannedItem(data);
+                                    // Get current item from selected job
+                                    const currentItem = selectedJob?.lineItems.find(i => i.status === 'Pending');
 
-                            <div className="flex gap-3">
-                                <button
-                                    disabled={isProcessingScan}
-                                    onClick={() => setShowShortPickModal(false)}
-                                    className={`flex-1 py-3 bg-gray-700 text-white font-bold rounded-lg transition-colors ${isProcessingScan ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-600'}`}
-                                >
-                                    {t('common.cancel')}
-                                </button>
-                                <button
-                                    disabled={isProcessingScan}
-                                    onClick={() => {
-                                        if (isProcessingScan) return;
-                                        const actualQty = parseInt(shortPickQuantity);
-                                        if (!isNaN(actualQty) && actualQty >= 0 && actualQty < shortPickMaxQty) {
-                                            handleItemScan(actualQty);
-                                            addNotification('alert', t('warehouse.shortPickRecorded').replace('{actual}', actualQty.toString()).replace('{expected}', shortPickMaxQty.toString()));
-                                            setShowShortPickModal(false);
-                                        } else if (actualQty >= shortPickMaxQty) {
-                                            handleItemScan();
-                                            setShowShortPickModal(false);
-                                        } else {
-                                            addNotification('alert', t('warehouse.invalidQuantity'));
+                                    // Trigger the same validation logic as manual entry
+                                    const scannedValue = data.trim().toUpperCase();
+                                    const expectedProduct = filteredProducts.find(p => p.id === currentItem?.productId);
+                                    const scannedProduct = filteredProducts.find(p =>
+                                        p.sku?.toUpperCase() === scannedValue ||
+                                        p.id.toUpperCase() === scannedValue ||
+                                        p.id.replace(/[^A-Z0-9]/gi, '').toUpperCase() === scannedValue.replace(/[^A-Z0-9]/gi, '')
+                                    );
+
+                                    if (scannedProduct && expectedProduct && scannedProduct.id === expectedProduct.id) {
+                                        handleItemScan();
+                                        setScannedItem('');
+                                        addNotification('success', '✓ Product verified!');
+                                    } else {
+                                        addNotification('alert', `⚠️ Wrong product! Expected: ${expectedProduct?.sku || expectedProduct?.id}, Scanned: ${scannedValue}`);
+                                        setScannedItem('');
+                                    }
+                                }
+                                setIsQRScannerOpen(false);
+                            }}
+                            onClose={() => setIsQRScannerOpen(false)}
+                            title={qrScannerMode === 'location' ? 'Scan Location Barcode/QR' : 'Scan Product Barcode/QR'}
+                            description={qrScannerMode === 'location' ? 'Position the location barcode within the frame' : 'Position the product barcode within the frame'}
+                        />
+                    )
+                }
+
+                {/* ========== CUSTOM MODALS ========== */}
+
+                {/* Short Pick Quantity Modal */}
+                {
+                    showShortPickModal && selectedJob?.lineItems.find(i => i.status === 'Pending') && (
+                        <div className="fixed inset-0 bg-black/80 flex items-end md:items-center justify-center z-[9999] p-0 md:p-4" onClick={() => setShowShortPickModal(false)}>
+                            <div className="bg-cyber-gray border-t md:border border-cyber-primary/30 rounded-t-2xl md:rounded-2xl p-6 max-w-md w-full shadow-[0_0_50px_rgba(0,255,157,0.3)]" onClick={(e) => e.stopPropagation()}>
+                                <div className="flex items-center gap-3 mb-4">
+                                    <div className="p-3 bg-red-500/20 rounded-lg">
+                                        <AlertTriangle className="text-red-400" size={24} />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-xl font-bold text-white">{t('warehouse.shortPickTitle')}</h3>
+                                        <p className="text-sm text-gray-400">{t('warehouse.enterActualQuantityPicked')}</p>
+                                    </div>
+                                </div>
+
+                                <div className="mb-4 p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
+                                    <p className="text-sm text-yellow-400">
+                                        <strong>{t('warehouse.expected')}:</strong> {shortPickMaxQty} {t('common.quantity')}
+                                    </p>
+                                    <p className="text-xs text-gray-400 mt-1">
+                                        {t('warehouse.enterActualQuantity')}
+                                    </p>
+                                </div>
+
+                                <input
+                                    type="number"
+                                    min="0"
+                                    max={shortPickMaxQty}
+                                    value={shortPickQuantity}
+                                    onChange={(e) => setShortPickQuantity(e.target.value)}
+                                    placeholder={t('warehouse.enterQuantity')}
+                                    className="w-full bg-black/50 border-2 border-cyber-primary/30 rounded-lg p-4 text-white text-center text-2xl font-bold focus:border-cyber-primary focus:outline-none mb-4"
+                                    autoFocus
+                                    onKeyPress={(e) => {
+                                        if (e.key === 'Enter') {
+                                            const actualQty = parseInt(shortPickQuantity);
+                                            if (!isNaN(actualQty) && actualQty >= 0 && actualQty < shortPickMaxQty) {
+                                                handleItemScan(actualQty);
+                                                addNotification('alert', t('warehouse.shortPickRecorded').replace('{actual}', actualQty.toString()).replace('{expected}', shortPickMaxQty.toString()));
+                                                setShowShortPickModal(false);
+                                            } else if (actualQty >= shortPickMaxQty) {
+                                                handleItemScan();
+                                                setShowShortPickModal(false);
+                                            } else {
+                                                addNotification('alert', t('warehouse.invalidQuantity'));
+                                            }
                                         }
                                     }}
-                                    className={`flex-1 py-3 bg-cyber-primary text-black font-bold rounded-lg transition-colors flex items-center justify-center gap-2 ${isProcessingScan ? 'opacity-50 cursor-not-allowed' : 'hover:bg-cyber-accent'}`}
-                                >
-                                    {isProcessingScan && <RefreshCw size={18} className="animate-spin" />}
-                                    {isProcessingScan ? t('warehouse.processing') : t('common.confirm')}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                )
-            }
+                                />
 
-            {/* Zone Lock Reason Modal */}
-            {
-                showZoneLockModal && (
-                    <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[9999] p-4" onClick={() => setShowZoneLockModal(false)}>
-                        <div className="bg-cyber-gray border border-yellow-500/30 rounded-2xl p-6 max-w-md w-full shadow-[0_0_50px_rgba(255,193,7,0.3)]" onClick={(e) => e.stopPropagation()}>
-                            <div className="flex items-center gap-3 mb-4">
-                                <div className="p-3 bg-yellow-500/20 rounded-lg">
-                                    <Lock className="text-yellow-400" size={24} />
-                                </div>
-                                <div>
-                                    <h3 className="text-xl font-bold text-white">{t('warehouse.lockZone').replace('{zone}', zoneToLock)}</h3>
-                                    <p className="text-sm text-gray-400">{t('warehouse.enterReasonLocking')}</p>
-                                </div>
-                            </div>
-
-                            <textarea
-                                value={zoneLockReason}
-                                onChange={(e) => setZoneLockReason(e.target.value)}
-                                placeholder={t('warehouse.describeDamage')}
-                                className="w-full bg-black/50 border-2 border-yellow-500/30 rounded-lg p-4 text-white focus:border-yellow-500 focus:outline-none mb-4 min-h-[100px]"
-                                autoFocus
-                            />
-
-                            <div className="flex gap-3">
-                                <button
-                                    onClick={() => {
-                                        setShowZoneLockModal(false);
-                                        setZoneLockReason('');
-                                    }}
-                                    className="flex-1 py-3 bg-gray-700 hover:bg-gray-600 text-white font-bold rounded-lg transition-colors"
-                                >
-                                    {t('common.cancel')}
-                                </button>
-                                <button
-                                    onClick={() => {
-                                        setLockedZones(prev => new Set(prev).add(zoneToLock));
-                                        if (zoneLockReason.trim()) {
-                                            setZoneMaintenanceReasons(prev => ({
-                                                ...prev,
-                                                [zoneToLock]: zoneLockReason.trim()
-                                            }));
-                                        }
-                                        addNotification('warning', t('warehouse.zoneLockedNotification').replace('{zone}', zoneToLock).replace('{reason}', zoneLockReason.trim() ? `: ${zoneLockReason.trim()}` : t('warehouse.forMaintenance')));
-                                        setShowZoneLockModal(false);
-                                        setZoneLockReason('');
-                                    }}
-                                    className="flex-1 py-3 bg-yellow-500 hover:bg-yellow-400 text-black font-bold rounded-lg transition-colors"
-                                >
-                                    {t('warehouse.lockZoneButton')}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                )
-            }
-
-            {/* Labels Not Printed Confirmation Modal */}
-            {
-                showLabelsNotPrintedModal && (
-                    <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[9999] p-4">
-                        <div className="bg-cyber-gray border border-red-500/30 rounded-2xl p-6 max-w-lg w-full shadow-[0_0_50px_rgba(239,68,68,0.3)]" onClick={(e) => e.stopPropagation()}>
-                            <div className="flex items-center gap-3 mb-4">
-                                <div className="p-3 bg-red-500/20 rounded-lg">
-                                    <AlertTriangle className="text-red-400 animate-pulse" size={32} />
-                                </div>
-                                <div>
-                                    <h3 className="text-2xl font-bold text-red-400">{t('warehouse.stop')}</h3>
-                                    <p className="text-sm text-gray-400">{t('warehouse.labelsRequired')}</p>
-                                </div>
-                            </div>
-
-                            <div className="mb-6 space-y-3">
-                                <p className="text-white font-medium">
-                                    {t('warehouse.mustPrintLabels')}
-                                </p>
-                                <p className="text-gray-400 text-sm">
-                                    {t('warehouse.mandatoryStep')}
-                                </p>
-                            </div>
-
-                            <div className="flex gap-3">
-                                <button
-                                    onClick={() => {
-                                        setShowLabelsNotPrintedModal(false);
-                                        setPendingReceiveAction(null);
-                                        addNotification('info', t('warehouse.pleasePrintLabels'));
-                                    }}
-                                    className="w-full py-3 bg-cyber-primary text-black font-bold rounded-lg transition-colors"
-                                >
-                                    {t('warehouse.goBackPrintLabels')}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                )
-            }
-
-            {/* Incomplete Packing Confirmation Modal */}
-            {
-                showIncompletePackingModal && (
-                    (() => {
-                        const activeJob = jobs.find(j => j.id === selectedPackJob);
-                        const packedCount = activeJob?.lineItems.filter(i => i.status === 'Picked' || i.status === 'Completed').length || 0;
-                        const totalItems = activeJob?.lineItems.length || 0;
-                        return (
-                            <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[9999] p-4">
-                                <div className="bg-cyber-gray border border-yellow-500/30 rounded-2xl p-6 max-w-md w-full shadow-[0_0_50px_rgba(255,193,7,0.3)]" onClick={(e) => e.stopPropagation()}>
-                                    <div className="flex items-center gap-3 mb-4">
-                                        <div className="p-3 bg-yellow-500/20 rounded-lg">
-                                            <AlertTriangle className="text-yellow-400" size={24} />
-                                        </div>
-                                        <div>
-                                            <h3 className="text-xl font-bold text-white">{t('warehouse.incompletePacking')}</h3>
-                                            <p className="text-sm text-gray-400">{t('warehouse.notAllItemsPacked')}</p>
-                                        </div>
-                                    </div>
-
-                                    <div className="mb-6">
-                                        <p className="text-white font-medium mb-2">
-                                            {t('warehouse.sureCompleteOrder')}
-                                        </p>
-                                        <p className="text-gray-400 mb-4">
-                                            {t('warehouse.onlyPackedOfTotal').replace('{packed}', packedCount.toString()).replace('{total}', totalItems.toString())}
-                                        </p>
-                                        <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-3">
-                                            <p className="text-xs text-yellow-200">
-                                                ⚠️ {t('warehouse.unpackedMarkedMissing')}
-                                            </p>
-                                        </div>
-                                    </div>
-
-                                    <div className="flex gap-3">
-                                        <button
-                                            onClick={() => {
-                                                setShowIncompletePackingModal(false);
-                                                setPendingPackAction(null);
-                                            }}
-                                            className="flex-1 py-3 bg-gray-700 hover:bg-gray-600 text-white font-bold rounded-lg transition-colors"
-                                        >
-                                            {t('warehouse.goBack')}
-                                        </button>
-                                        <button
-                                            onClick={async () => {
-                                                setShowIncompletePackingModal(false);
-                                                if (pendingPackAction) {
-                                                    await pendingPackAction();
-                                                    setPendingPackAction(null);
-                                                }
-                                            }}
-                                            className="flex-1 py-3 bg-yellow-500 hover:bg-yellow-400 text-black font-bold rounded-lg transition-colors"
-                                        >
-                                            {t('warehouse.continue')}
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        );
-                    })()
-                )
-            }
-
-            {/* Missing Ice Packs Confirmation Modal */}
-            {
-                showMissingIcePacksModal && (
-                    <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[9999] p-4">
-                        <div className="bg-cyber-gray border border-blue-500/30 rounded-2xl p-6 max-w-md w-full shadow-[0_0_50px_rgba(59,130,246,0.3)]" onClick={(e) => e.stopPropagation()}>
-                            <div className="flex items-center gap-3 mb-4">
-                                <div className="p-3 bg-blue-500/20 rounded-lg">
-                                    <Snowflake className="text-blue-400" size={24} />
-                                </div>
-                                <div>
-                                    <h3 className="text-xl font-bold text-white">{t('warehouse.missingIcePacks')}</h3>
-                                    <p className="text-sm text-gray-400">{t('warehouse.coldItemsDetected')}</p>
-                                </div>
-                            </div>
-
-                            <p className="text-white mb-2">
-                                {t('warehouse.orderContainsColdItems')}
-                            </p>
-                            <p className="text-gray-400 text-sm mb-6">
-                                {t('warehouse.continueAnyway')}
-                            </p>
-
-                            <div className="flex gap-3">
-                                <button
-                                    onClick={() => {
-                                        setShowMissingIcePacksModal(false);
-                                        setPendingPackAction(null);
-                                    }}
-                                    className="flex-1 py-3 bg-gray-700 hover:bg-gray-600 text-white font-bold rounded-lg transition-colors"
-                                >
-                                    {t('warehouse.goBack')}
-                                </button>
-                                <button
-                                    onClick={async () => {
-                                        setShowMissingIcePacksModal(false);
-                                        if (pendingPackAction) {
-                                            await pendingPackAction();
-                                            setPendingPackAction(null);
-                                        }
-                                    }}
-                                    className="flex-1 py-3 bg-blue-500 hover:bg-blue-400 text-white font-bold rounded-lg transition-colors"
-                                >
-                                    {t('warehouse.continue')}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                )
-            }
-
-            {/* Missing Protective Materials Confirmation Modal */}
-            {
-                showMissingProtectiveModal && (
-                    <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[9999] p-4">
-                        <div className="bg-cyber-gray border border-orange-500/30 rounded-2xl p-6 max-w-md w-full shadow-[0_0_50px_rgba(249,115,22,0.3)]" onClick={(e) => e.stopPropagation()}>
-                            <div className="flex items-center gap-3 mb-4">
-                                <div className="p-3 bg-orange-500/20 rounded-lg">
-                                    <Package className="text-orange-400" size={24} />
-                                </div>
-                                <div>
-                                    <h3 className="text-xl font-bold text-white">{t('warehouse.missingProtectiveMaterials')}</h3>
-                                    <p className="text-sm text-gray-400">{t('warehouse.fragileItemsDetected')}</p>
-                                </div>
-                            </div>
-
-                            <p className="text-white mb-2">
-                                {t('warehouse.orderContainsFragileItems')}
-                            </p>
-                            <p className="text-gray-400 text-sm mb-6">
-                                {t('warehouse.continueAnyway')}
-                            </p>
-
-                            <div className="flex gap-3">
-                                <button
-                                    onClick={() => {
-                                        setShowMissingProtectiveModal(false);
-                                        setPendingPackAction(null);
-                                    }}
-                                    className="flex-1 py-3 bg-gray-700 hover:bg-gray-600 text-white font-bold rounded-lg transition-colors"
-                                >
-                                    Go Back
-                                </button>
-                                <button
-                                    onClick={async () => {
-                                        setShowMissingProtectiveModal(false);
-                                        if (pendingPackAction) {
-                                            await pendingPackAction();
-                                            setPendingPackAction(null);
-                                        }
-                                    }}
-                                    className="flex-1 py-3 bg-orange-500 hover:bg-orange-400 text-white font-bold rounded-lg transition-colors"
-                                >
-                                    Continue
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                )
-            }
-
-            {/* Bulk Distribution Modal - Wave Transfer to Multiple Stores */}
-            {
-                showBulkDistributionModal && (
-                    <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4" onClick={() => setShowBulkDistributionModal(false)}>
-                        <div className="bg-gray-900 rounded-2xl border border-white/10 max-w-4xl w-full max-h-[90vh] overflow-hidden" onClick={(e) => e.stopPropagation()}>
-                            {/* Header */}
-                            <div className="p-6 border-b border-white/10 flex justify-between items-center">
-                                <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                                    <Layers className="text-blue-500" />
-                                    {t('warehouse.bulkDistributionTitle')}
-                                </h3>
-                                <button onClick={() => setShowBulkDistributionModal(false)} className="text-gray-400 hover:text-white" aria-label="Close Modal">
-                                    <X size={20} />
-                                </button>
-                            </div>
-
-                            <div className="p-6 overflow-y-auto max-h-[calc(90vh-200px)]">
-                                {/* Info Banner */}
-                                <div className="mb-6 p-4 bg-blue-500/10 border border-blue-500/30 rounded-xl">
-                                    <div className="flex items-center gap-3">
-                                        <Zap className="text-blue-500" size={20} />
-                                        <div>
-                                            <p className="text-white font-bold">{t('warehouse.multiStoreDistribution')}</p>
-                                            <p className="text-xs text-gray-400">{t('warehouse.distributeToMultipleStores')}</p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Mode Toggle */}
-                                <div className="mb-6">
-                                    <label className="text-xs text-gray-500 uppercase font-bold block mb-2">{t('warehouse.distributionMode')}</label>
-                                    <div className="flex bg-white/5 rounded-lg p-1 w-fit">
-                                        <button
-                                            onClick={() => setBulkDistributionMode('single')}
-                                            className={`px-4 py-2 rounded-lg text-sm font-bold transition-colors ${bulkDistributionMode === 'single' ? 'bg-blue-500 text-white' : 'text-gray-400 hover:text-white'}`}
-                                        >
-                                            {t('warehouse.singleProduct')}
-                                        </button>
-                                        <button
-                                            onClick={() => setBulkDistributionMode('wave')}
-                                            className={`px-4 py-2 rounded-lg text-sm font-bold transition-colors ${bulkDistributionMode === 'wave' ? 'bg-blue-500 text-white' : 'text-gray-400 hover:text-white'}`}
-                                        >
-                                            Wave (Multiple Products)
-                                        </button>
-                                    </div>
-                                </div>
-
-                                {/* Source Warehouse */}
-                                <div className="mb-6">
-                                    <label className="text-xs text-gray-500 uppercase font-bold block mb-2">Source Warehouse</label>
-                                    <select
-                                        title={t('warehouse.selectSourceWarehouse')}
-                                        value={bulkDistributionSourceSite}
-                                        onChange={(e) => setBulkDistributionSourceSite(e.target.value)}
-                                        className="w-full bg-black/30 border border-white/10 rounded-lg p-3 text-white text-sm focus:border-blue-500 outline-none"
+                                <div className="flex gap-3">
+                                    <button
+                                        disabled={isProcessingScan}
+                                        onClick={() => setShowShortPickModal(false)}
+                                        className={`flex-1 py-3 bg-gray-700 text-white font-bold rounded-lg transition-colors ${isProcessingScan ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-600'}`}
                                     >
-                                        <option value="">Select warehouse...</option>
-                                        {sites.filter(s => s.status === 'Active' && (s.type === 'Warehouse' || s.type === 'Distribution Center')).map(site => (
-                                            <option key={site.id} value={site.id}>{site.name} ({site.type})</option>
-                                        ))}
-                                    </select>
+                                        {t('common.cancel')}
+                                    </button>
+                                    <button
+                                        disabled={isProcessingScan}
+                                        onClick={() => {
+                                            if (isProcessingScan) return;
+                                            const actualQty = parseInt(shortPickQuantity);
+                                            if (!isNaN(actualQty) && actualQty >= 0 && actualQty < shortPickMaxQty) {
+                                                handleItemScan(actualQty);
+                                                addNotification('alert', t('warehouse.shortPickRecorded').replace('{actual}', actualQty.toString()).replace('{expected}', shortPickMaxQty.toString()));
+                                                setShowShortPickModal(false);
+                                            } else if (actualQty >= shortPickMaxQty) {
+                                                handleItemScan();
+                                                setShowShortPickModal(false);
+                                            } else {
+                                                addNotification('alert', t('warehouse.invalidQuantity'));
+                                            }
+                                        }}
+                                        className={`flex-1 py-3 bg-cyber-primary text-black font-bold rounded-lg transition-colors flex items-center justify-center gap-2 ${isProcessingScan ? 'opacity-50 cursor-not-allowed' : 'hover:bg-cyber-accent'}`}
+                                    >
+                                        {isProcessingScan && <RefreshCw size={18} className="animate-spin" />}
+                                        {isProcessingScan ? t('warehouse.processing') : t('common.confirm')}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )
+                }
+
+                {/* Zone Lock Reason Modal */}
+                {
+                    showZoneLockModal && (
+                        <div className="fixed inset-0 bg-black/80 flex items-end md:items-center justify-center z-[9999] p-0 md:p-4" onClick={() => setShowZoneLockModal(false)}>
+                            <div className="bg-cyber-gray border-t md:border border-yellow-500/30 rounded-t-2xl md:rounded-2xl p-6 max-w-md w-full shadow-[0_0_50px_rgba(255,193,7,0.3)]" onClick={(e) => e.stopPropagation()}>
+                                <div className="flex items-center gap-3 mb-4">
+                                    <div className="p-3 bg-yellow-500/20 rounded-lg">
+                                        <Lock className="text-yellow-400" size={24} />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-xl font-bold text-white">{t('warehouse.lockZone').replace('{zone}', zoneToLock)}</h3>
+                                        <p className="text-sm text-gray-400">{t('warehouse.enterReasonLocking')}</p>
+                                    </div>
                                 </div>
 
-                                {bulkDistributionMode === 'single' ? (
-                                    // Single Product Mode
-                                    <>
-                                        <div className="mb-6">
-                                            <label className="text-xs text-gray-500 uppercase font-bold block mb-2">Select Product to Distribute</label>
-                                            <select
-                                                title={t('warehouse.selectProduct')}
-                                                value={bulkDistributionProductId}
-                                                onChange={(e) => {
-                                                    setBulkDistributionProductId(e.target.value);
-                                                    setBulkDistributionAllocations([]);
-                                                }}
-                                                className="w-full bg-black/30 border border-white/10 rounded-lg p-3 text-white text-sm focus:border-blue-500 outline-none"
-                                            >
-                                                <option value="">Select product...</option>
-                                                {filteredProducts.filter(p => p.stock > 0).map(p => (
-                                                    <option key={p.id} value={p.id}>{p.name} (Stock: {p.stock})</option>
-                                                ))}
-                                            </select>
-                                        </div>
+                                <textarea
+                                    value={zoneLockReason}
+                                    onChange={(e) => setZoneLockReason(e.target.value)}
+                                    placeholder={t('warehouse.describeDamage')}
+                                    className="w-full bg-black/50 border-2 border-yellow-500/30 rounded-lg p-4 text-white focus:border-yellow-500 focus:outline-none mb-4 min-h-[100px]"
+                                    autoFocus
+                                />
 
-                                        {bulkDistributionProductId && (() => {
-                                            const selectedProduct = products.find(p => p.id === bulkDistributionProductId);
-                                            const totalAllocated = bulkDistributionAllocations.reduce((sum, a) => sum + a.quantity, 0);
-                                            const remaining = (selectedProduct?.stock || 0) - totalAllocated;
+                                <div className="flex gap-3">
+                                    <button
+                                        onClick={() => {
+                                            setShowZoneLockModal(false);
+                                            setZoneLockReason('');
+                                        }}
+                                        className="flex-1 py-3 bg-gray-700 hover:bg-gray-600 text-white font-bold rounded-lg transition-colors"
+                                    >
+                                        {t('common.cancel')}
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            setLockedZones(prev => new Set(prev).add(zoneToLock));
+                                            if (zoneLockReason.trim()) {
+                                                setZoneMaintenanceReasons(prev => ({
+                                                    ...prev,
+                                                    [zoneToLock]: zoneLockReason.trim()
+                                                }));
+                                            }
+                                            addNotification('warning', t('warehouse.zoneLockedNotification').replace('{zone}', zoneToLock).replace('{reason}', zoneLockReason.trim() ? `: ${zoneLockReason.trim()}` : t('warehouse.forMaintenance')));
+                                            setShowZoneLockModal(false);
+                                            setZoneLockReason('');
+                                        }}
+                                        className="flex-1 py-3 bg-yellow-500 hover:bg-yellow-400 text-black font-bold rounded-lg transition-colors"
+                                    >
+                                        {t('warehouse.lockZoneButton')}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )
+                }
 
-                                            return (
-                                                <div className="space-y-4">
-                                                    {/* Product Info */}
-                                                    <div className="flex items-center gap-4 p-4 bg-blue-500/10 border border-blue-500/30 rounded-xl">
-                                                        <img src={selectedProduct?.image} alt="" className="w-16 h-16 rounded-lg object-cover" />
-                                                        <div className="flex-1">
-                                                            <p className="text-white font-bold">{selectedProduct?.name}</p>
-                                                            <p className="text-sm text-gray-400">SKU: {selectedProduct?.sku}</p>
-                                                        </div>
-                                                        <div className="text-right">
-                                                            <p className="text-xs text-gray-400">Available</p>
-                                                            <p className={`text-xl font-mono font-bold ${remaining < 0 ? 'text-red-400' : 'text-blue-500'}`}>{remaining}</p>
-                                                        </div>
-                                                    </div>
+                {/* Labels Not Printed Confirmation Modal */}
+                {
+                    showLabelsNotPrintedModal && (
+                        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[9999] p-4">
+                            <div className="bg-cyber-gray border border-red-500/30 rounded-2xl p-6 max-w-lg w-full shadow-[0_0_50px_rgba(239,68,68,0.3)]" onClick={(e) => e.stopPropagation()}>
+                                <div className="flex items-center gap-3 mb-4">
+                                    <div className="p-3 bg-red-500/20 rounded-lg">
+                                        <AlertTriangle className="text-red-400 animate-pulse" size={32} />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-2xl font-bold text-red-400">{t('warehouse.stop')}</h3>
+                                        <p className="text-sm text-gray-400">{t('warehouse.labelsRequired')}</p>
+                                    </div>
+                                </div>
 
-                                                    {/* Store Allocation */}
-                                                    <div>
-                                                        <div className="flex items-center justify-between mb-3">
-                                                            <h4 className="text-sm font-bold text-white">Allocate to Stores</h4>
-                                                            <button
-                                                                onClick={() => {
-                                                                    const storeIds = sites
-                                                                        .filter(s => s.status === 'Active' && s.type === 'Store' && s.id !== bulkDistributionSourceSite)
-                                                                        .map(s => s.id)
-                                                                        .filter(id => !bulkDistributionAllocations.find(a => a.storeId === id));
+                                <div className="mb-6 space-y-3">
+                                    <p className="text-white font-medium">
+                                        {t('warehouse.mustPrintLabels')}
+                                    </p>
+                                    <p className="text-gray-400 text-sm">
+                                        {t('warehouse.mandatoryStep')}
+                                    </p>
+                                </div>
 
-                                                                    if (storeIds.length > 0) {
-                                                                        setBulkDistributionAllocations([
-                                                                            ...bulkDistributionAllocations,
-                                                                            ...storeIds.map(id => ({ storeId: id, quantity: 0 }))
-                                                                        ]);
-                                                                    }
-                                                                }}
-                                                                className="text-xs text-blue-400 hover:text-blue-300 font-bold"
-                                                            >
-                                                                + Add All Stores
-                                                            </button>
-                                                        </div>
+                                <div className="flex gap-3">
+                                    <button
+                                        onClick={() => {
+                                            setShowLabelsNotPrintedModal(false);
+                                            setPendingReceiveAction(null);
+                                            addNotification('info', t('warehouse.pleasePrintLabels'));
+                                        }}
+                                        className="w-full py-3 bg-cyber-primary text-black font-bold rounded-lg transition-colors"
+                                    >
+                                        {t('warehouse.goBackPrintLabels')}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )
+                }
 
-                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-64 overflow-y-auto">
-                                                            {sites
-                                                                .filter(s => s.status === 'Active' && s.type === 'Store' && s.id !== bulkDistributionSourceSite)
-                                                                .map(store => {
-                                                                    const allocation = bulkDistributionAllocations.find(a => a.storeId === store.id);
-                                                                    return (
-                                                                        <div key={store.id} className={`p-3 rounded-lg border transition-colors ${allocation ? 'bg-blue-500/10 border-blue-500/30' : 'bg-white/5 border-white/10'}`}>
-                                                                            <div className="flex items-center justify-between">
-                                                                                <div>
-                                                                                    <p className="text-sm font-bold text-white">{store.name}</p>
-                                                                                    <p className="text-xs text-gray-400">{store.address}</p>
-                                                                                </div>
-                                                                                {allocation ? (
-                                                                                    <div className="flex items-center gap-2">
-                                                                                        <input
-                                                                                            title={`Allocation Quantity for ${store.name}`}
-                                                                                            placeholder="Qty"
-                                                                                            type="number"
-                                                                                            min="0"
-                                                                                            value={allocation.quantity}
-                                                                                            onChange={(e) => {
-                                                                                                setBulkDistributionAllocations(
-                                                                                                    bulkDistributionAllocations.map(a =>
-                                                                                                        a.storeId === store.id ? { ...a, quantity: parseInt(e.target.value) || 0 } : a
-                                                                                                    )
-                                                                                                );
-                                                                                            }}
-                                                                                            className="w-16 bg-black border border-white/20 rounded px-2 py-1 text-white text-sm text-center focus:border-blue-500 outline-none"
-                                                                                        />
-                                                                                        <button
-                                                                                            title={t('warehouse.removeAllocation')}
-                                                                                            onClick={() => setBulkDistributionAllocations(bulkDistributionAllocations.filter(a => a.storeId !== store.id))}
-                                                                                            className="text-red-400 hover:text-red-300"
-                                                                                        >
-                                                                                            <X size={16} />
-                                                                                        </button>
-                                                                                    </div>
-                                                                                ) : (
-                                                                                    <button
-                                                                                        onClick={() => setBulkDistributionAllocations([...bulkDistributionAllocations, { storeId: store.id, quantity: 0 }])}
-                                                                                        className="text-blue-500 hover:text-blue-400 text-xs font-bold"
-                                                                                    >
-                                                                                        + Add
-                                                                                    </button>
-                                                                                )}
-                                                                            </div>
-                                                                        </div>
-                                                                    );
-                                                                })}
-                                                        </div>
-                                                    </div>
-
-                                                    {/* Summary */}
-                                                    {bulkDistributionAllocations.filter(a => a.quantity > 0).length > 0 && (
-                                                        <div className="p-4 bg-black/30 rounded-xl border border-white/10">
-                                                            <h4 className="text-xs text-gray-400 uppercase font-bold mb-3">Distribution Summary</h4>
-                                                            <div className="grid grid-cols-2 gap-4">
-                                                                <div>
-                                                                    <p className="text-2xl font-mono font-bold text-blue-500">{bulkDistributionAllocations.filter(a => a.quantity > 0).length}</p>
-                                                                    <p className="text-xs text-gray-400">Stores</p>
-                                                                </div>
-                                                                <div>
-                                                                    <p className="text-2xl font-mono font-bold text-white">{totalAllocated}</p>
-                                                                    <p className="text-xs text-gray-400">Total Units</p>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            );
-                                        })()}
-                                    </>
-                                ) : (
-                                    // Wave Mode - Multiple Products
-                                    <div className="space-y-4">
-                                        <div className="p-4 bg-blue-500/10 border border-blue-500/30 rounded-xl">
-                                            <div className="flex items-center gap-3">
-                                                <Zap className="text-blue-500" size={20} />
-                                                <div>
-                                                    <p className="text-white font-bold">Wave Distribution Mode</p>
-                                                    <p className="text-xs text-gray-400">Add multiple products and allocate to stores. Each store will receive one consolidated transfer.</p>
-                                                </div>
+                {/* Incomplete Packing Confirmation Modal */}
+                {
+                    showIncompletePackingModal && (
+                        (() => {
+                            const activeJob = jobs.find(j => j.id === selectedPackJob);
+                            const packedCount = activeJob?.lineItems.filter(i => i.status === 'Picked' || i.status === 'Completed').length || 0;
+                            const totalItems = activeJob?.lineItems.length || 0;
+                            return (
+                                <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[9999] p-4">
+                                    <div className="bg-cyber-gray border border-yellow-500/30 rounded-2xl p-6 max-w-md w-full shadow-[0_0_50px_rgba(255,193,7,0.3)]" onClick={(e) => e.stopPropagation()}>
+                                        <div className="flex items-center gap-3 mb-4">
+                                            <div className="p-3 bg-yellow-500/20 rounded-lg">
+                                                <AlertTriangle className="text-yellow-400" size={24} />
+                                            </div>
+                                            <div>
+                                                <h3 className="text-xl font-bold text-white">{t('warehouse.incompletePacking')}</h3>
+                                                <p className="text-sm text-gray-400">{t('warehouse.notAllItemsPacked')}</p>
                                             </div>
                                         </div>
 
-                                        {/* Add Product to Wave */}
-                                        <div className="flex gap-2">
-                                            <select
-                                                title={t('warehouse.selectProductToAdd')}
-                                                value=""
-                                                onChange={(e) => {
-                                                    if (e.target.value && !waveProducts.find(wp => wp.productId === e.target.value)) {
-                                                        setWaveProducts([...waveProducts, { productId: e.target.value, allocations: [] }]);
+                                        <div className="mb-6">
+                                            <p className="text-white font-medium mb-2">
+                                                {t('warehouse.sureCompleteOrder')}
+                                            </p>
+                                            <p className="text-gray-400 mb-4">
+                                                {t('warehouse.onlyPackedOfTotal').replace('{packed}', packedCount.toString()).replace('{total}', totalItems.toString())}
+                                            </p>
+                                            <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-3">
+                                                <p className="text-xs text-yellow-200">
+                                                    ⚠️ {t('warehouse.unpackedMarkedMissing')}
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex gap-3">
+                                            <button
+                                                onClick={() => {
+                                                    setShowIncompletePackingModal(false);
+                                                    setPendingPackAction(null);
+                                                }}
+                                                className="flex-1 py-3 bg-gray-700 hover:bg-gray-600 text-white font-bold rounded-lg transition-colors"
+                                            >
+                                                {t('warehouse.goBack')}
+                                            </button>
+                                            <button
+                                                onClick={async () => {
+                                                    setShowIncompletePackingModal(false);
+                                                    if (pendingPackAction) {
+                                                        await pendingPackAction();
+                                                        setPendingPackAction(null);
                                                     }
                                                 }}
-                                                className="flex-1 bg-black/30 border border-white/10 rounded-lg p-3 text-white text-sm focus:border-blue-500 outline-none"
+                                                className="flex-1 py-3 bg-yellow-500 hover:bg-yellow-400 text-black font-bold rounded-lg transition-colors"
                                             >
-                                                <option value="">+ Add product to wave...</option>
-                                                {filteredProducts.filter(p => p.stock > 0 && !waveProducts.find(wp => wp.productId === p.id)).map(p => (
-                                                    <option key={p.id} value={p.id}>{p.name} (Stock: {p.stock})</option>
-                                                ))}
-                                            </select>
-                                        </div>
-
-                                        {/* Wave Products List */}
-                                        <div className="space-y-4 max-h-96 overflow-y-auto">
-                                            {waveProducts.map((wp, wpIdx) => {
-                                                const product = products.find(p => p.id === wp.productId);
-                                                const totalAllocated = wp.allocations.reduce((sum, a) => sum + a.quantity, 0);
-                                                return (
-                                                    <div key={wp.productId} className="bg-white/5 rounded-xl border border-white/10 overflow-hidden">
-                                                        <div className="p-3 bg-white/5 flex items-center justify-between">
-                                                            <div className="flex items-center gap-3">
-                                                                <img src={product?.image} alt="" className="w-10 h-10 rounded object-cover" />
-                                                                <div>
-                                                                    <p className="text-sm font-bold text-white">{product?.name}</p>
-                                                                    <p className="text-xs text-gray-400">Stock: {product?.stock} | Allocated: {totalAllocated}</p>
-                                                                </div>
-                                                            </div>
-                                                            <button
-                                                                title={t('warehouse.removeProduct')}
-                                                                onClick={() => setWaveProducts(waveProducts.filter((_, i) => i !== wpIdx))}
-                                                                className="text-red-400 hover:text-red-300"
-                                                            >
-                                                                <X size={16} />
-                                                            </button>
-                                                        </div>
-                                                        <div className="p-3 grid grid-cols-2 md:grid-cols-3 gap-2">
-                                                            {sites
-                                                                .filter(s => s.status === 'Active' && s.type === 'Store' && s.id !== bulkDistributionSourceSite)
-                                                                .map(store => {
-                                                                    const allocation = wp.allocations.find(a => a.storeId === store.id);
-                                                                    return (
-                                                                        <div key={store.id} className="flex items-center gap-2 p-2 bg-black/20 rounded-lg">
-                                                                            <span className="text-xs text-gray-400 flex-1 truncate">{store.name}</span>
-                                                                            <input
-                                                                                title={t('warehouse.waveAllocationQuantity')}
-                                                                                placeholder="Qty"
-                                                                                type="number"
-                                                                                min="0"
-                                                                                value={allocation?.quantity || 0}
-                                                                                onChange={(e) => {
-                                                                                    const qty = parseInt(e.target.value) || 0;
-                                                                                    setWaveProducts(waveProducts.map((w, i) => {
-                                                                                        if (i !== wpIdx) return w;
-                                                                                        const existing = w.allocations.find(a => a.storeId === store.id);
-                                                                                        if (existing) {
-                                                                                            return { ...w, allocations: w.allocations.map(a => a.storeId === store.id ? { ...a, quantity: qty } : a) };
-                                                                                        } else {
-                                                                                            return { ...w, allocations: [...w.allocations, { storeId: store.id, quantity: qty }] };
-                                                                                        }
-                                                                                    }));
-                                                                                }}
-                                                                                className="w-14 bg-black border border-white/20 rounded px-1 py-0.5 text-white text-xs text-center focus:border-blue-500 outline-none"
-                                                                            />
-                                                                        </div>
-                                                                    );
-                                                                })}
-                                                        </div>
-                                                    </div>
-                                                );
-                                            })}
+                                                {t('warehouse.continue')}
+                                            </button>
                                         </div>
                                     </div>
-                                )}
-                            </div>
+                                </div>
+                            );
+                        })()
+                    )
+                }
 
-                            {/* Footer */}
-                            <div className="p-6 border-t border-white/10 flex justify-end gap-3">
-                                <button
-                                    onClick={() => setShowBulkDistributionModal(false)}
-                                    className="px-6 py-2 bg-white/5 text-gray-400 rounded-lg font-bold hover:bg-white/10"
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    onClick={async () => {
-                                        if (!bulkDistributionSourceSite || isDistributing) {
-                                            if (!bulkDistributionSourceSite) addNotification('alert', 'Please select a source warehouse');
-                                            return;
-                                        }
+                {/* Missing Ice Packs Confirmation Modal */}
+                {
+                    showMissingIcePacksModal && (
+                        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[9999] p-4">
+                            <div className="bg-cyber-gray border border-blue-500/30 rounded-2xl p-6 max-w-md w-full shadow-[0_0_50px_rgba(59,130,246,0.3)]" onClick={(e) => e.stopPropagation()}>
+                                <div className="flex items-center gap-3 mb-4">
+                                    <div className="p-3 bg-blue-500/20 rounded-lg">
+                                        <Snowflake className="text-blue-400" size={24} />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-xl font-bold text-white">{t('warehouse.missingIcePacks')}</h3>
+                                        <p className="text-sm text-gray-400">{t('warehouse.coldItemsDetected')}</p>
+                                    </div>
+                                </div>
 
-                                        setIsDistributing(true);
-                                        try {
-                                            let createdJobs = 0;
+                                <p className="text-white mb-2">
+                                    {t('warehouse.orderContainsColdItems')}
+                                </p>
+                                <p className="text-gray-400 text-sm mb-6">
+                                    {t('warehouse.continueAnyway')}
+                                </p>
 
-                                            if (bulkDistributionMode === 'single') {
-                                                // Single product mode - create transfer for each store
-                                                const allocationsWithQty = bulkDistributionAllocations.filter(a => a.quantity > 0);
-
-                                                for (const allocation of allocationsWithQty) {
-                                                    const product = products.find(p => p.id === bulkDistributionProductId);
-                                                    const transferJob: WMSJob = {
-                                                        id: `TRF-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
-                                                        siteId: bulkDistributionSourceSite,
-                                                        site_id: bulkDistributionSourceSite,
-                                                        sourceSiteId: bulkDistributionSourceSite,
-                                                        source_site_id: bulkDistributionSourceSite,
-                                                        destSiteId: allocation.storeId,
-                                                        dest_site_id: allocation.storeId,
-                                                        type: 'TRANSFER',
-                                                        status: 'Pending',
-                                                        priority: 'Normal',
-                                                        location: 'Distribution',
-                                                        assignedTo: '',
-                                                        items: 1,
-                                                        lineItems: [{
-                                                            productId: bulkDistributionProductId,
-                                                            sku: product?.sku || '',
-                                                            name: product?.name || '',
-                                                            image: product?.image || '',
-                                                            expectedQty: allocation.quantity,
-                                                            pickedQty: 0,
-                                                            status: 'Pending'
-                                                        }],
-                                                        orderRef: `BULK-${Date.now()}`,
-                                                        transferStatus: 'Requested',
-                                                        requestedBy: user?.name || 'System',
-                                                        jobNumber: `DIST-${sites.find(s => s.id === allocation.storeId)?.code || 'XX'}`
-                                                    };
-
-                                                    await wmsJobsService.create(transferJob);
-                                                    createdJobs++;
-                                                }
-                                            } else {
-                                                // Wave mode - consolidate by store and create one transfer per store
-                                                const storeAllocations: Record<string, { productId: string; quantity: number }[]> = {};
-
-                                                for (const wp of waveProducts) {
-                                                    for (const alloc of wp.allocations) {
-                                                        if (alloc.quantity > 0) {
-                                                            if (!storeAllocations[alloc.storeId]) {
-                                                                storeAllocations[alloc.storeId] = [];
-                                                            }
-                                                            storeAllocations[alloc.storeId].push({ productId: wp.productId, quantity: alloc.quantity });
-                                                        }
-                                                    }
-                                                }
-
-                                                for (const [storeId, items] of Object.entries(storeAllocations)) {
-                                                    const transferJob: WMSJob = {
-                                                        id: `TRF-WAVE-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
-                                                        siteId: bulkDistributionSourceSite,
-                                                        site_id: bulkDistributionSourceSite,
-                                                        sourceSiteId: bulkDistributionSourceSite,
-                                                        source_site_id: bulkDistributionSourceSite,
-                                                        destSiteId: storeId,
-                                                        dest_site_id: storeId,
-                                                        type: 'TRANSFER',
-                                                        status: 'Pending',
-                                                        priority: 'Normal',
-                                                        location: 'Wave Distribution',
-                                                        assignedTo: '',
-                                                        items: items.length,
-                                                        lineItems: items.map(item => {
-                                                            const product = products.find(p => p.id === item.productId);
-                                                            return {
-                                                                productId: item.productId,
-                                                                sku: product?.sku || '',
-                                                                name: product?.name || '',
-                                                                image: product?.image || '',
-                                                                expectedQty: item.quantity,
-                                                                pickedQty: 0,
-                                                                status: 'Pending'
-                                                            };
-                                                        }),
-                                                        orderRef: `WAVE-${Date.now()}`,
-                                                        transferStatus: 'Requested',
-                                                        requestedBy: user?.name || 'System',
-                                                        jobNumber: `WAVE-${sites.find(s => s.id === storeId)?.code || 'XX'}`
-                                                    };
-
-                                                    await wmsJobsService.create(transferJob);
-                                                    createdJobs++;
-                                                }
+                                <div className="flex gap-3">
+                                    <button
+                                        onClick={() => {
+                                            setShowMissingIcePacksModal(false);
+                                            setPendingPackAction(null);
+                                        }}
+                                        className="flex-1 py-3 bg-gray-700 hover:bg-gray-600 text-white font-bold rounded-lg transition-colors"
+                                    >
+                                        {t('warehouse.goBack')}
+                                    </button>
+                                    <button
+                                        onClick={async () => {
+                                            setShowMissingIcePacksModal(false);
+                                            if (pendingPackAction) {
+                                                await pendingPackAction();
+                                                setPendingPackAction(null);
                                             }
-
-                                            addNotification('success', `Created ${createdJobs} distribution transfers! Products will be sorted to each store.`);
-                                            setShowBulkDistributionModal(false);
-                                            setBulkDistributionAllocations([]);
-                                            setWaveProducts([]);
-                                        } catch (e) {
-                                            console.error(e);
-                                            addNotification('error', 'Failed to create distribution jobs');
-                                        } finally {
-                                            setIsDistributing(false);
-                                        }
-                                    }}
-                                    disabled={isDistributing || (bulkDistributionMode === 'single'
-                                        ? (!bulkDistributionProductId || bulkDistributionAllocations.filter(a => a.quantity > 0).length === 0)
-                                        : (waveProducts.length === 0 || !waveProducts.some(wp => wp.allocations.some(a => a.quantity > 0))))
-                                    }
-                                    className={`px-6 py-2 rounded-lg font-bold transition-colors flex items-center gap-2 ${!isDistributing && ((bulkDistributionMode === 'single' && bulkDistributionProductId && bulkDistributionAllocations.filter(a => a.quantity > 0).length > 0) ||
-                                        (bulkDistributionMode === 'wave' && waveProducts.length > 0 && waveProducts.some(wp => wp.allocations.some(a => a.quantity > 0))))
-                                        ? 'bg-blue-500 text-white hover:bg-blue-400 shadow-lg shadow-blue-500/20'
-                                        : 'bg-white/5 text-gray-500 cursor-not-allowed'
-                                        }`}
-                                >
-                                    {isDistributing ? <RefreshCw size={16} className="animate-spin" /> : <Truck size={16} />}
-                                    Create Distribution
-                                </button>
+                                        }}
+                                        className="flex-1 py-3 bg-blue-500 hover:bg-blue-400 text-white font-bold rounded-lg transition-colors"
+                                    >
+                                        {t('warehouse.continue')}
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                )
-            }
+                    )
+                }
 
-            {/* Global Job Details Modal - Works from any tab (only show when NOT in scanner mode) */}
-            {
-                selectedJob && !isScannerMode && (
-                    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-                        <div className="bg-cyber-gray border border-white/10 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl shadow-cyber-primary/10 flex flex-col">
-                            {/* Header */}
-                            <div className="p-6 border-b border-white/10 flex justify-between items-start sticky top-0 bg-cyber-gray z-10">
-                                <div>
-                                    <div className="flex items-center gap-3">
-                                        <h2 className="text-xl font-bold text-white">Job Details</h2>
-                                        <span className="px-2 py-1 bg-white/10 rounded text-xs font-mono text-gray-400">{formatJobId(selectedJob)}</span>
+                {/* Missing Protective Materials Confirmation Modal */}
+                {
+                    showMissingProtectiveModal && (
+                        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[9999] p-4">
+                            <div className="bg-cyber-gray border border-orange-500/30 rounded-2xl p-6 max-w-md w-full shadow-[0_0_50px_rgba(249,115,22,0.3)]" onClick={(e) => e.stopPropagation()}>
+                                <div className="flex items-center gap-3 mb-4">
+                                    <div className="p-3 bg-orange-500/20 rounded-lg">
+                                        <Package className="text-orange-400" size={24} />
                                     </div>
-                                    <p className="text-gray-400 text-sm mt-1 flex items-center gap-2">
-                                        <span className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold border ${selectedJob.type === 'TRANSFER' ? 'border-purple-500/30 text-purple-400 bg-purple-500/10' : 'border-white/10 text-gray-400'}`}>{selectedJob.type}</span>
-                                        <span>•</span>
-                                        <span className={`${selectedJob.transferStatus === 'Received' ? 'text-green-400' : selectedJob.transferStatus === 'In-Transit' ? 'text-purple-400' : 'text-white'}`}>
-                                            {selectedJob.transferStatus || selectedJob.status}
-                                        </span>
-                                    </p>
+                                    <div>
+                                        <h3 className="text-xl font-bold text-white">{t('warehouse.missingProtectiveMaterials')}</h3>
+                                        <p className="text-sm text-gray-400">{t('warehouse.fragileItemsDetected')}</p>
+                                    </div>
                                 </div>
-                                <button onClick={() => setSelectedJob(null)} aria-label="Close" className="p-2 hover:bg-white/10 rounded-lg text-gray-400 hover:text-white transition-colors">
-                                    <X size={20} />
-                                </button>
-                            </div>
 
-                            {/* Body */}
-                            <div className="p-6 space-y-6 flex-1 overflow-y-auto">
-                                {/* Route/Info Grid */}
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    {/* Source/Dest */}
-                                    {(selectedJob.sourceSiteId || selectedJob.destSiteId) && (
-                                        <div className="bg-black/20 rounded-xl p-4 border border-white/5">
-                                            <p className="text-xs text-gray-500 uppercase font-bold mb-3">Route</p>
-                                            <div className="flex items-center gap-3">
-                                                <div className="flex-1">
-                                                    <p className="text-xs text-gray-400">From</p>
-                                                    <p className="font-bold text-white truncate">{sites.find(s => s.id === selectedJob.sourceSiteId)?.name || selectedJob.sourceSiteId || 'N/A'}</p>
+                                <p className="text-white mb-2">
+                                    {t('warehouse.orderContainsFragileItems')}
+                                </p>
+                                <p className="text-gray-400 text-sm mb-6">
+                                    {t('warehouse.continueAnyway')}
+                                </p>
+
+                                <div className="flex gap-3">
+                                    <button
+                                        onClick={() => {
+                                            setShowMissingProtectiveModal(false);
+                                            setPendingPackAction(null);
+                                        }}
+                                        className="flex-1 py-3 bg-gray-700 hover:bg-gray-600 text-white font-bold rounded-lg transition-colors"
+                                    >
+                                        Go Back
+                                    </button>
+                                    <button
+                                        onClick={async () => {
+                                            setShowMissingProtectiveModal(false);
+                                            if (pendingPackAction) {
+                                                await pendingPackAction();
+                                                setPendingPackAction(null);
+                                            }
+                                        }}
+                                        className="flex-1 py-3 bg-orange-500 hover:bg-orange-400 text-white font-bold rounded-lg transition-colors"
+                                    >
+                                        Continue
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )
+                }
+
+                {/* Bulk Distribution Modal-Wave Transfer to Multiple Stores */}
+                {
+                    showBulkDistributionModal && (
+                        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4" onClick={() => setShowBulkDistributionModal(false)}>
+                            <div className="bg-gray-900 rounded-2xl border border-white/10 max-w-4xl w-full max-h-[90vh] overflow-hidden" onClick={(e) => e.stopPropagation()}>
+                                {/* Header */}
+                                <div className="p-6 border-b border-white/10 flex justify-between items-center">
+                                    <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                                        <Layers className="text-blue-500" />
+                                        {t('warehouse.bulkDistributionTitle')}
+                                    </h3>
+                                    <button onClick={() => setShowBulkDistributionModal(false)} className="text-gray-400 hover:text-white" aria-label="Close Modal">
+                                        <X size={20} />
+                                    </button>
+                                </div>
+
+                                <div className="p-6 overflow-y-auto max-h-[calc(90vh-200px)]">
+                                    {/* Info Banner */}
+                                    <div className="mb-6 p-4 bg-blue-500/10 border border-blue-500/30 rounded-xl">
+                                        <div className="flex items-center gap-3">
+                                            <Zap className="text-blue-500" size={20} />
+                                            <div>
+                                                <p className="text-white font-bold">{t('warehouse.multiStoreDistribution')}</p>
+                                                <p className="text-xs text-gray-400">{t('warehouse.distributeToMultipleStores')}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Mode Toggle */}
+                                    <div className="mb-6">
+                                        <label className="text-xs text-gray-500 uppercase font-bold block mb-2">{t('warehouse.distributionMode')}</label>
+                                        <div className="flex bg-white/5 rounded-lg p-1 w-fit">
+                                            <button
+                                                onClick={() => setBulkDistributionMode('single')}
+                                                className={`px-4 py-2 rounded-lg text-sm font-bold transition-colors ${bulkDistributionMode === 'single' ? 'bg-blue-500 text-white' : 'text-gray-400 hover:text-white'}`}
+                                            >
+                                                {t('warehouse.singleProduct')}
+                                            </button>
+                                            <button
+                                                onClick={() => setBulkDistributionMode('wave')}
+                                                className={`px-4 py-2 rounded-lg text-sm font-bold transition-colors ${bulkDistributionMode === 'wave' ? 'bg-blue-500 text-white' : 'text-gray-400 hover:text-white'}`}
+                                            >
+                                                Wave (Multiple Products)
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    {/* Source Warehouse */}
+                                    <div className="mb-6">
+                                        <label className="text-xs text-gray-500 uppercase font-bold block mb-2">Source Warehouse</label>
+                                        <select
+                                            title={t('warehouse.selectSourceWarehouse')}
+                                            value={bulkDistributionSourceSite}
+                                            onChange={(e) => setBulkDistributionSourceSite(e.target.value)}
+                                            className="w-full bg-black/30 border border-white/10 rounded-lg p-3 text-white text-sm focus:border-blue-500 outline-none"
+                                        >
+                                            <option value="">Select warehouse...</option>
+                                            {sites.filter(s => s.status === 'Active' && (s.type === 'Warehouse' || s.type === 'Distribution Center')).map(site => (
+                                                <option key={site.id} value={site.id}>{site.name} ({site.type})</option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    {bulkDistributionMode === 'single' ? (
+                                        // Single Product Mode
+                                        <>
+                                            <div className="mb-6">
+                                                <label className="text-xs text-gray-500 uppercase font-bold block mb-2">Select Product to Distribute</label>
+                                                <select
+                                                    title={t('warehouse.selectProduct')}
+                                                    value={bulkDistributionProductId}
+                                                    onChange={(e) => {
+                                                        setBulkDistributionProductId(e.target.value);
+                                                        setBulkDistributionAllocations([]);
+                                                    }}
+                                                    className="w-full bg-black/30 border border-white/10 rounded-lg p-3 text-white text-sm focus:border-blue-500 outline-none"
+                                                >
+                                                    <option value="">Select product...</option>
+                                                    {filteredProducts.filter(p => p.stock > 0).map(p => (
+                                                        <option key={p.id} value={p.id}>{p.name} (Stock: {p.stock})</option>
+                                                    ))}
+                                                </select>
+                                            </div>
+
+                                            {bulkDistributionProductId && (() => {
+                                                const selectedProduct = products.find(p => p.id === bulkDistributionProductId);
+                                                const totalAllocated = bulkDistributionAllocations.reduce((sum, a) => sum + a.quantity, 0);
+                                                const remaining = (selectedProduct?.stock || 0) - totalAllocated;
+
+                                                return (
+                                                    <div className="space-y-4">
+                                                        {/* Product Info */}
+                                                        <div className="flex items-center gap-4 p-4 bg-blue-500/10 border border-blue-500/30 rounded-xl">
+                                                            <img src={selectedProduct?.image} alt="" className="w-16 h-16 rounded-lg object-cover" />
+                                                            <div className="flex-1">
+                                                                <p className="text-white font-bold">{selectedProduct?.name}</p>
+                                                                <p className="text-sm text-gray-400">SKU: {selectedProduct?.sku}</p>
+                                                            </div>
+                                                            <div className="text-right">
+                                                                <p className="text-xs text-gray-400">Available</p>
+                                                                <p className={`text-xl font-mono font-bold ${remaining < 0 ? 'text-red-400' : 'text-blue-500'}`}>{remaining}</p>
+                                                            </div>
+                                                        </div>
+
+                                                        {/* Store Allocation */}
+                                                        <div>
+                                                            <div className="flex items-center justify-between mb-3">
+                                                                <h4 className="text-sm font-bold text-white">Allocate to Stores</h4>
+                                                                <button
+                                                                    onClick={() => {
+                                                                        const storeIds = sites
+                                                                            .filter(s => s.status === 'Active' && s.type === 'Store' && s.id !== bulkDistributionSourceSite)
+                                                                            .map(s => s.id)
+                                                                            .filter(id => !bulkDistributionAllocations.find(a => a.storeId === id));
+
+                                                                        if (storeIds.length > 0) {
+                                                                            setBulkDistributionAllocations([
+                                                                                ...bulkDistributionAllocations,
+                                                                                ...storeIds.map(id => ({ storeId: id, quantity: 0 }))
+                                                                            ]);
+                                                                        }
+                                                                    }}
+                                                                    className="text-xs text-blue-400 hover:text-blue-300 font-bold"
+                                                                >
+                                                                    + Add All Stores
+                                                                </button>
+                                                            </div>
+
+                                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-64 overflow-y-auto">
+                                                                {sites
+                                                                    .filter(s => s.status === 'Active' && s.type === 'Store' && s.id !== bulkDistributionSourceSite)
+                                                                    .map(store => {
+                                                                        const allocation = bulkDistributionAllocations.find(a => a.storeId === store.id);
+                                                                        return (
+                                                                            <div key={store.id} className={`p-3 rounded-lg border transition-colors ${allocation ? 'bg-blue-500/10 border-blue-500/30' : 'bg-white/5 border-white/10'}`}>
+                                                                                <div className="flex items-center justify-between">
+                                                                                    <div>
+                                                                                        <p className="text-sm font-bold text-white">{store.name}</p>
+                                                                                        <p className="text-xs text-gray-400">{store.address}</p>
+                                                                                    </div>
+                                                                                    {allocation ? (
+                                                                                        <div className="flex items-center gap-2">
+                                                                                            <input
+                                                                                                title={`Allocation Quantity for ${store.name}`}
+                                                                                                placeholder="Qty"
+                                                                                                type="number"
+                                                                                                min="0"
+                                                                                                value={allocation.quantity}
+                                                                                                onChange={(e) => {
+                                                                                                    setBulkDistributionAllocations(
+                                                                                                        bulkDistributionAllocations.map(a =>
+                                                                                                            a.storeId === store.id ? { ...a, quantity: parseInt(e.target.value) || 0 } : a
+                                                                                                        )
+                                                                                                    );
+                                                                                                }}
+                                                                                                className="w-16 bg-black border border-white/20 rounded px-2 py-1 text-white text-sm text-center focus:border-blue-500 outline-none"
+                                                                                            />
+                                                                                            <button
+                                                                                                title={t('warehouse.removeAllocation')}
+                                                                                                onClick={() => setBulkDistributionAllocations(bulkDistributionAllocations.filter(a => a.storeId !== store.id))}
+                                                                                                className="text-red-400 hover:text-red-300"
+                                                                                            >
+                                                                                                <X size={16} />
+                                                                                            </button>
+                                                                                        </div>
+                                                                                    ) : (
+                                                                                        <button
+                                                                                            onClick={() => setBulkDistributionAllocations([...bulkDistributionAllocations, { storeId: store.id, quantity: 0 }])}
+                                                                                            className="text-blue-500 hover:text-blue-400 text-xs font-bold"
+                                                                                        >
+                                                                                            + Add
+                                                                                        </button>
+                                                                                    )}
+                                                                                </div>
+                                                                            </div>
+                                                                        );
+                                                                    })}
+                                                            </div>
+                                                        </div>
+
+                                                        {/* Summary */}
+                                                        {bulkDistributionAllocations.filter(a => a.quantity > 0).length > 0 && (
+                                                            <div className="p-4 bg-black/30 rounded-xl border border-white/10">
+                                                                <h4 className="text-xs text-gray-400 uppercase font-bold mb-3">Distribution Summary</h4>
+                                                                <div className="grid grid-cols-2 gap-4">
+                                                                    <div>
+                                                                        <p className="text-2xl font-mono font-bold text-blue-500">{bulkDistributionAllocations.filter(a => a.quantity > 0).length}</p>
+                                                                        <p className="text-xs text-gray-400">Stores</p>
+                                                                    </div>
+                                                                    <div>
+                                                                        <p className="text-2xl font-mono font-bold text-white">{totalAllocated}</p>
+                                                                        <p className="text-xs text-gray-400">Total Units</p>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                );
+                                            })()}
+                                        </>
+                                    ) : (
+                                        // Wave Mode-Multiple Products
+                                        <div className="space-y-4">
+                                            <div className="p-4 bg-blue-500/10 border border-blue-500/30 rounded-xl">
+                                                <div className="flex items-center gap-3">
+                                                    <Zap className="text-blue-500" size={20} />
+                                                    <div>
+                                                        <p className="text-white font-bold">Wave Distribution Mode</p>
+                                                        <p className="text-xs text-gray-400">Add multiple products and allocate to stores. Each store will receive one consolidated transfer.</p>
+                                                    </div>
                                                 </div>
-                                                <ArrowRight className="text-cyber-primary opacity-50 flex-shrink-0" />
-                                                <div className="flex-1 text-right">
-                                                    <p className="text-xs text-gray-400">To</p>
-                                                    <p className="font-bold text-white truncate">{sites.find(s => s.id === selectedJob.destSiteId)?.name || selectedJob.destSiteId || 'N/A'}</p>
-                                                </div>
+                                            </div>
+
+                                            {/* Add Product to Wave */}
+                                            <div className="flex gap-2">
+                                                <select
+                                                    title={t('warehouse.selectProductToAdd')}
+                                                    value=""
+                                                    onChange={(e) => {
+                                                        if (e.target.value && !waveProducts.find(wp => wp.productId === e.target.value)) {
+                                                            setWaveProducts([...waveProducts, { productId: e.target.value, allocations: [] }]);
+                                                        }
+                                                    }}
+                                                    className="flex-1 bg-black/30 border border-white/10 rounded-lg p-3 text-white text-sm focus:border-blue-500 outline-none"
+                                                >
+                                                    <option value="">+ Add product to wave...</option>
+                                                    {filteredProducts.filter(p => p.stock > 0 && !waveProducts.find(wp => wp.productId === p.id)).map(p => (
+                                                        <option key={p.id} value={p.id}>{p.name} (Stock: {p.stock})</option>
+                                                    ))}
+                                                </select>
+                                            </div>
+
+                                            {/* Wave Products List */}
+                                            <div className="space-y-4 max-h-96 overflow-y-auto">
+                                                {waveProducts.map((wp, wpIdx) => {
+                                                    const product = products.find(p => p.id === wp.productId);
+                                                    const totalAllocated = wp.allocations.reduce((sum, a) => sum + a.quantity, 0);
+                                                    return (
+                                                        <div key={wp.productId} className="bg-white/5 rounded-xl border border-white/10 overflow-hidden">
+                                                            <div className="p-3 bg-white/5 flex items-center justify-between">
+                                                                <div className="flex items-center gap-3">
+                                                                    <img src={product?.image} alt="" className="w-10 h-10 rounded object-cover" />
+                                                                    <div>
+                                                                        <p className="text-sm font-bold text-white">{product?.name}</p>
+                                                                        <p className="text-xs text-gray-400">Stock: {product?.stock} | Allocated: {totalAllocated}</p>
+                                                                    </div>
+                                                                </div>
+                                                                <button
+                                                                    title={t('warehouse.removeProduct')}
+                                                                    onClick={() => setWaveProducts(waveProducts.filter((_, i) => i !== wpIdx))}
+                                                                    className="text-red-400 hover:text-red-300"
+                                                                >
+                                                                    <X size={16} />
+                                                                </button>
+                                                            </div>
+                                                            <div className="p-3 grid grid-cols-2 md:grid-cols-3 gap-2">
+                                                                {sites
+                                                                    .filter(s => s.status === 'Active' && s.type === 'Store' && s.id !== bulkDistributionSourceSite)
+                                                                    .map(store => {
+                                                                        const allocation = wp.allocations.find(a => a.storeId === store.id);
+                                                                        return (
+                                                                            <div key={store.id} className="flex items-center gap-2 p-2 bg-black/20 rounded-lg">
+                                                                                <span className="text-xs text-gray-400 flex-1 truncate">{store.name}</span>
+                                                                                <input
+                                                                                    title={t('warehouse.waveAllocationQuantity')}
+                                                                                    placeholder="Qty"
+                                                                                    type="number"
+                                                                                    min="0"
+                                                                                    value={allocation?.quantity || 0}
+                                                                                    onChange={(e) => {
+                                                                                        const qty = parseInt(e.target.value) || 0;
+                                                                                        setWaveProducts(waveProducts.map((w, i) => {
+                                                                                            if (i !== wpIdx) return w;
+                                                                                            const existing = w.allocations.find(a => a.storeId === store.id);
+                                                                                            if (existing) {
+                                                                                                return { ...w, allocations: w.allocations.map(a => a.storeId === store.id ? { ...a, quantity: qty } : a) };
+                                                                                            } else {
+                                                                                                return { ...w, allocations: [...w.allocations, { storeId: store.id, quantity: qty }] };
+                                                                                            }
+                                                                                        }));
+                                                                                    }}
+                                                                                    className="w-14 bg-black border border-white/20 rounded px-1 py-0.5 text-white text-xs text-center focus:border-blue-500 outline-none"
+                                                                                />
+                                                                            </div>
+                                                                        );
+                                                                    })}
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })}
                                             </div>
                                         </div>
                                     )}
-
-                                    {/* People/Dates */}
-                                    <div className="bg-black/20 rounded-xl p-4 border border-white/5 space-y-2 text-sm">
-                                        <div className="flex justify-between">
-                                            <span className="text-gray-400">Priority</span>
-                                            <span className={`font-bold ${selectedJob.priority === 'Critical' ? 'text-red-400' : selectedJob.priority === 'High' ? 'text-orange-400' : 'text-blue-400'}`}>{selectedJob.priority || 'Normal'}</span>
-                                        </div>
-                                        <div className="flex justify-between">
-                                            <span className="text-gray-400">Requested By</span>
-                                            <span className="text-white font-bold">{selectedJob.requestedBy || 'System'}</span>
-                                        </div>
-                                        {selectedJob.approvedBy && (
-                                            <div className="flex justify-between">
-                                                <span className="text-gray-400">Approved By</span>
-                                                <span className="text-green-400 font-bold">{selectedJob.approvedBy}</span>
-                                            </div>
-                                        )}
-                                        <div className="h-px bg-white/5 my-2" />
-                                        {selectedJob.shippedAt && (
-                                            <div className="flex justify-between">
-                                                <span className="text-gray-400">Shipped</span>
-                                                <span className="text-purple-400 font-mono">{new Date(selectedJob.shippedAt).toLocaleDateString()}</span>
-                                            </div>
-                                        )}
-                                        {selectedJob.receivedAt && (
-                                            <div className="flex justify-between">
-                                                <span className="text-gray-400">Received</span>
-                                                <span className="text-green-400 font-mono">{new Date(selectedJob.receivedAt).toLocaleDateString()}</span>
-                                            </div>
-                                        )}
-                                    </div>
                                 </div>
 
-                                {/* Items List */}
-                                <div>
-                                    <h3 className="font-bold text-white mb-3 flex items-center gap-2">
-                                        <Package size={16} className="text-cyber-primary" />
-                                        Items ({selectedJob.lineItems?.length || selectedJob.items || 0})
-                                    </h3>
-                                    <div className="bg-black/20 rounded-xl border border-white/5 overflow-hidden">
-                                        <table className="w-full text-sm text-left">
-                                            <thead className="text-xs text-gray-500 bg-white/5 uppercase font-bold">
-                                                <tr>
-                                                    <th className="p-3">Product</th>
-                                                    <th className="p-3 text-center">Qty</th>
-                                                    <th className="p-3 text-center">Status</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody className="divide-y divide-white/5">
-                                                {selectedJob.lineItems && selectedJob.lineItems.length > 0 ? selectedJob.lineItems.map((item: any, idx: number) => (
-                                                    <tr key={idx} className="hover:bg-white/5 transition-colors">
-                                                        <td className="p-3">
-                                                            <p className="text-white font-medium">{item.name}</p>
-                                                            <p className="text-xs text-gray-500">{item.sku}</p>
-                                                        </td>
-                                                        <td className="p-3 text-center font-mono text-white font-bold">{item.expectedQty}</td>
-                                                        <td className="p-3 text-center">
-                                                            <span className="text-[10px] px-2 py-1 rounded bg-white/10 text-gray-300">
-                                                                {item.status || 'Pending'}
-                                                            </span>
-                                                        </td>
-                                                    </tr>
-                                                )) : (
-                                                    <tr><td colSpan={3} className="p-4 text-center text-gray-500">No detailed item list available</td></tr>
-                                                )}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
+                                {/* Footer */}
+                                <div className="p-6 border-t border-white/10 flex justify-end gap-3">
+                                    <button
+                                        onClick={() => setShowBulkDistributionModal(false)}
+                                        className="px-6 py-2 bg-white/5 text-gray-400 rounded-lg font-bold hover:bg-white/10"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        onClick={async () => {
+                                            if (!bulkDistributionSourceSite || isDistributing) {
+                                                if (!bulkDistributionSourceSite) addNotification('alert', 'Please select a source warehouse');
+                                                return;
+                                            }
 
-                            {/* Footer */}
-                            <div className="p-6 border-t border-white/10 bg-black/20 flex justify-between rounded-b-2xl">
-                                <div>
-                                    {/* Show Start Picking button for PICK/PACK/PUTAWAY jobs that aren't completed */}
-                                    {['PICK', 'PACK', 'PUTAWAY', 'pick', 'pack', 'putaway'].includes(selectedJob.type) && selectedJob.status !== 'Completed' ? (
-                                        <button
-                                            type="button"
-                                            onClick={(e) => {
-                                                e.preventDefault();
-                                                e.stopPropagation();
-                                                console.log('🎯 Start Picking clicked!', selectedJob);
+                                            setIsDistributing(true);
+                                            try {
+                                                let createdJobs = 0;
 
-                                                // Normalize lineItems for the job
-                                                const jobLineItems = selectedJob.lineItems || (selectedJob as any).line_items || [];
-                                                const normalizedJob = { ...selectedJob, lineItems: jobLineItems };
+                                                if (bulkDistributionMode === 'single') {
+                                                    // Single product mode-create transfer for each store
+                                                    const allocationsWithQty = bulkDistributionAllocations.filter(a => a.quantity > 0);
 
-                                                // Sort items by bin location
-                                                const sortedItems = [...jobLineItems].sort((a: any, b: any) => {
-                                                    const prodA = products.find(p => p.id === a.productId);
-                                                    const prodB = products.find(p => p.id === b.productId);
-                                                    return (prodA?.location || '').localeCompare(prodB?.location || '');
-                                                });
+                                                    for (const allocation of allocationsWithQty) {
+                                                        const product = products.find(p => p.id === bulkDistributionProductId);
+                                                        const transferJob: WMSJob = {
+                                                            id: `TRF-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+                                                            siteId: bulkDistributionSourceSite,
+                                                            site_id: bulkDistributionSourceSite,
+                                                            sourceSiteId: bulkDistributionSourceSite,
+                                                            source_site_id: bulkDistributionSourceSite,
+                                                            destSiteId: allocation.storeId,
+                                                            dest_site_id: allocation.storeId,
+                                                            type: 'TRANSFER',
+                                                            status: 'Pending',
+                                                            priority: 'Normal',
+                                                            location: 'Distribution',
+                                                            assignedTo: '',
+                                                            items: 1,
+                                                            lineItems: [{
+                                                                productId: bulkDistributionProductId,
+                                                                sku: product?.sku || '',
+                                                                name: product?.name || '',
+                                                                image: product?.image || '',
+                                                                expectedQty: allocation.quantity,
+                                                                pickedQty: 0,
+                                                                status: 'Pending'
+                                                            }],
+                                                            orderRef: `BULK-${Date.now()}`,
+                                                            transferStatus: 'Requested',
+                                                            requestedBy: user?.name || 'System',
+                                                            jobNumber: `DIST-${sites.find(s => s.id === allocation.storeId)?.code || 'XX'}`
+                                                        };
 
-                                                const optimizedJob = {
-                                                    ...normalizedJob,
-                                                    lineItems: sortedItems,
-                                                    status: 'In-Progress' as const,
-                                                    assignedTo: selectedJob.assignedTo || user?.name
-                                                };
+                                                        await wmsJobsService.create(transferJob);
+                                                        createdJobs++;
+                                                    }
+                                                } else {
+                                                    // Wave mode-consolidate by store and create one transfer per store
+                                                    const storeAllocations: Record<string, { productId: string; quantity: number }[]> = {};
 
-                                                // Update job status if pending
-                                                if (selectedJob.status === 'Pending') {
-                                                    updateJobStatus(selectedJob.id, 'In-Progress');
+                                                    for (const wp of waveProducts) {
+                                                        for (const alloc of wp.allocations) {
+                                                            if (alloc.quantity > 0) {
+                                                                if (!storeAllocations[alloc.storeId]) {
+                                                                    storeAllocations[alloc.storeId] = [];
+                                                                }
+                                                                storeAllocations[alloc.storeId].push({ productId: wp.productId, quantity: alloc.quantity });
+                                                            }
+                                                        }
+                                                    }
+
+                                                    for (const [storeId, items] of Object.entries(storeAllocations)) {
+                                                        const transferJob: WMSJob = {
+                                                            id: `TRF-WAVE-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+                                                            siteId: bulkDistributionSourceSite,
+                                                            site_id: bulkDistributionSourceSite,
+                                                            sourceSiteId: bulkDistributionSourceSite,
+                                                            source_site_id: bulkDistributionSourceSite,
+                                                            destSiteId: storeId,
+                                                            dest_site_id: storeId,
+                                                            type: 'TRANSFER',
+                                                            status: 'Pending',
+                                                            priority: 'Normal',
+                                                            location: 'Wave Distribution',
+                                                            assignedTo: '',
+                                                            items: items.length,
+                                                            lineItems: items.map(item => {
+                                                                const product = products.find(p => p.id === item.productId);
+                                                                return {
+                                                                    productId: item.productId,
+                                                                    sku: product?.sku || '',
+                                                                    name: product?.name || '',
+                                                                    image: product?.image || '',
+                                                                    expectedQty: item.quantity,
+                                                                    pickedQty: 0,
+                                                                    status: 'Pending'
+                                                                };
+                                                            }),
+                                                            orderRef: `WAVE-${Date.now()}`,
+                                                            transferStatus: 'Requested',
+                                                            requestedBy: user?.name || 'System',
+                                                            jobNumber: `WAVE-${sites.find(s => s.id === storeId)?.code || 'XX'}`
+                                                        };
+
+                                                        await wmsJobsService.create(transferJob);
+                                                        createdJobs++;
+                                                    }
                                                 }
 
-                                                // Auto-assign if not assigned
-                                                if (!selectedJob.assignedTo && user) {
-                                                    assignJob(selectedJob.id, user.id || user.name);
-                                                }
-
-                                                // Open scanner
-                                                setSelectedJob(optimizedJob);
-                                                setIsScannerMode(true);
-                                                setScannerStep(selectedJob.type === 'PUTAWAY' ? 'NAV' : 'SCAN');
-                                                setScannedBin('');
-                                                setScannedItem('');
-                                                setPickQty(0);
-                                            }}
-                                            className="px-6 py-3 bg-gradient-to-r from-cyber-primary to-green-400 text-black rounded-xl font-bold transition-all duration-300 hover:shadow-lg hover:shadow-cyber-primary/30 flex items-center gap-2"
-                                        >
-                                            <Scan size={18} />
-                                            {selectedJob.type?.toUpperCase() === 'PICK' ? t('warehouse.startPicking') :
-                                                selectedJob.type?.toUpperCase() === 'PACK' ? t('warehouse.startPacking') :
-                                                    t('warehouse.startPutaway')}
-                                        </button>
-                                    ) : null}
-                                </div>
-                                <button
-                                    onClick={() => setSelectedJob(null)}
-                                    className="px-6 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg font-bold transition-colors"
-                                >
-                                    Close
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                )
-            }
-            {/* Pack Job Reprint Options Modal - Global Level */}
-            {packReprintJob && (
-                <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-                    <div className="bg-[#1a1a1a] border border-white/10 rounded-2xl w-full max-w-md p-6 shadow-2xl">
-                        <div className="flex items-center justify-between mb-6">
-                            <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                                <Printer className="text-green-400" size={24} />
-                                {t('warehouse.reprintPackLabel')}
-                            </h3>
-                            <button onClick={() => setPackReprintJob(null)} className="text-gray-400 hover:text-white" title="Close">
-                                <X size={24} />
-                            </button>
-                        </div>
-
-                        <div className="mb-4 p-3 bg-white/5 rounded-lg border border-white/10">
-                            <p className="font-bold text-white text-lg">{t('warehouse.orderColon')} {formatOrderRef(packReprintJob.orderRef)}</p>
-                            <div className="flex items-center gap-4 text-sm text-gray-400 mt-2">
-                                <span>📦 {packReprintJob.itemCount || 0} items</span>
-                                {packReprintJob.destSiteName && (
-                                    <span>→ {packReprintJob.destSiteName}</span>
-                                )}
-                            </div>
-                            <p className="text-xs text-gray-500 mt-1">Job: {formatJobId(packReprintJob)}</p>
-                        </div>
-
-                        {/* Size Selection */}
-                        <div className="mb-4">
-                            <label className="text-sm text-gray-400 mb-2 block">Label Size</label>
-                            <div className="grid grid-cols-4 gap-2">
-                                {(['Tiny', 'Small', 'Medium', 'Large'] as const).map(s => (
-                                    <button
-                                        key={s}
-                                        onClick={() => setReprintSize(s)}
-                                        className={`py-2 px-3 rounded-lg text-sm font-bold transition-all ${reprintSize === s
-                                            ? 'bg-green-500 text-black'
-                                            : 'bg-white/5 text-white hover:bg-white/10 border border-white/10'
-                                            }`}
-                                    >
-                                        {s}
-                                    </button>
-                                ))}
-                            </div>
-                            <p className="text-xs text-gray-500 mt-1">
-                                {reprintSize === 'Tiny' && '1.25" × 1" - SKU Tags'}
-                                {reprintSize === 'Small' && '2.25" × 1.25" - Multipurpose'}
-                                {reprintSize === 'Medium' && '3" × 2" - Shelf Labels'}
-                                {reprintSize === 'Large' && '4" × 3" - Carton Tags'}
-                            </p>
-                        </div>
-
-                        {/* Format Selection */}
-                        <div className="mb-6">
-                            <label className="text-sm text-gray-400 mb-2 block">Code Format</label>
-                            <div className="grid grid-cols-3 gap-2">
-                                {(['QR', 'Barcode', 'Both'] as const).map(f => (
-                                    <button
-                                        key={f}
-                                        onClick={() => setReprintFormat(f)}
-                                        className={`py-2 px-3 rounded-lg text-sm font-bold transition-all ${reprintFormat === f
-                                            ? 'bg-green-500 text-black'
-                                            : 'bg-white/5 text-white hover:bg-white/10 border border-white/10'
-                                            }`}
-                                    >
-                                        {f === 'QR' && '📱 QR'}
-                                        {f === 'Barcode' && '▮▯▮ Barcode'}
-                                        {f === 'Both' && '📱+▮ Both'}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* Action Buttons */}
-                        <div className="flex gap-3">
-                            <button
-                                onClick={() => setPackReprintJob(null)}
-                                className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-white font-bold rounded-xl border border-white/10"
-                            >
-                                {t('common.cancel')}
-                            </button>
-                            <button
-                                disabled={isPrinting}
-                                onClick={async () => {
-                                    if (!packReprintJob || isPrinting) return;
-                                    setIsPrinting(true);
-                                    try {
-                                        // Use the rich pack label generator
-                                        const html = await generatePackLabelHTML({
-                                            orderRef: packReprintJob.orderRef,
-                                            itemCount: packReprintJob.itemCount || 0,
-                                            destSiteName: packReprintJob.destSiteName,
-                                            packDate: new Date().toLocaleDateString(),
-                                            packerName: user?.name,
-                                            customerName: packReprintJob.customerName,
-                                            shippingAddress: packReprintJob.shippingAddress,
-                                            city: packReprintJob.city,
-                                            specialHandling: packReprintJob.specialHandling
-                                        }, {
-                                            size: reprintSize,
-                                            format: reprintFormat
-                                        });
-                                        const printWindow = window.open('', '_blank');
-                                        if (printWindow) {
-                                            printWindow.document.write(html);
-                                            setTimeout(() => {
-                                                printWindow.document.close();
-                                                printWindow.print();
-                                            }, 500);
-                                        } else {
-                                            addNotification('alert', 'Popup blocked. Allow popups to print.');
+                                                addNotification('success', `Created ${createdJobs} distribution transfers! Products will be sorted to each store.`);
+                                                setShowBulkDistributionModal(false);
+                                                setBulkDistributionAllocations([]);
+                                                setWaveProducts([]);
+                                            } catch (e) {
+                                                console.error(e);
+                                                addNotification('error', 'Failed to create distribution jobs');
+                                            } finally {
+                                                setIsDistributing(false);
+                                            }
+                                        }}
+                                        disabled={isDistributing || (bulkDistributionMode === 'single'
+                                            ? (!bulkDistributionProductId || bulkDistributionAllocations.filter(a => a.quantity > 0).length === 0)
+                                            : (waveProducts.length === 0 || !waveProducts.some(wp => wp.allocations.some(a => a.quantity > 0))))
                                         }
-                                    } catch (e) {
-                                        console.error(e);
-                                        addNotification('alert', 'Failed to generate label');
-                                    } finally {
-                                        setIsPrinting(false);
-                                        setPackReprintJob(null);
-                                    }
-                                }}
-                                className={`flex-1 py-3 bg-green-500 text-black font-bold rounded-xl flex items-center justify-center gap-2 ${isPrinting ? 'opacity-50 cursor-not-allowed' : 'hover:bg-green-400'}`}
-                            >
-                                {isPrinting ? <RefreshCw size={18} className="animate-spin" /> : <Printer size={18} />}
-                                {isPrinting ? t('warehouse.generating') : t('warehouse.printLabel')}
-                            </button>
+                                        className={`px-6 py-2 rounded-lg font-bold transition-colors flex items-center gap-2 ${!isDistributing && ((bulkDistributionMode === 'single' && bulkDistributionProductId && bulkDistributionAllocations.filter(a => a.quantity > 0).length > 0) ||
+                                            (bulkDistributionMode === 'wave' && waveProducts.length > 0 && waveProducts.some(wp => wp.allocations.some(a => a.quantity > 0))))
+                                            ? 'bg-blue-500 text-white hover:bg-blue-400 shadow-lg shadow-blue-500/20'
+                                            : 'bg-white/5 text-gray-500 cursor-not-allowed'
+                                            }`}
+                                    >
+                                        {isDistributing ? <RefreshCw size={16} className="animate-spin" /> : <Truck size={16} />}
+                                        Create Distribution
+                                    </button>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                </div>
-            )}
+                    )
+                }
+
+                {/* Global Job Details Modal-Works from any tab (only show when NOT in scanner mode) */}
+                {
+                    selectedJob && !isScannerMode && (
+                        <div className="fixed inset-0 z-[60] flex items-end md:items-center justify-center bg-black/80 backdrop-blur-sm p-0 md:p-4 animate-in fade-in duration-200">
+                            <div className="bg-cyber-gray border-t md:border border-white/10 rounded-t-2xl md:rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl shadow-cyber-primary/10 flex flex-col">
+                                {/* Header */}
+                                <div className="p-6 border-b border-white/10 flex justify-between items-start sticky top-0 bg-cyber-gray z-10">
+                                    <div>
+                                        <div className="flex items-center gap-3">
+                                            <h2 className="text-xl font-bold text-white">Job Details</h2>
+                                            <span className="px-2 py-1 bg-white/10 rounded text-xs font-mono text-gray-400">{formatJobId(selectedJob)}</span>
+                                        </div>
+                                        <p className="text-gray-400 text-sm mt-1 flex items-center gap-2">
+                                            <span className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold border ${selectedJob.type === 'TRANSFER' ? 'border-purple-500/30 text-purple-400 bg-purple-500/10' : 'border-white/10 text-gray-400'}`}>{selectedJob.type}</span>
+                                            <span>•</span>
+                                            <span className={`${selectedJob.transferStatus === 'Received' ? 'text-green-400' : selectedJob.transferStatus === 'In-Transit' ? 'text-purple-400' : 'text-white'}`}>
+                                                {selectedJob.transferStatus || selectedJob.status}
+                                            </span>
+                                        </p>
+                                    </div>
+                                    <button onClick={() => setSelectedJob(null)} aria-label="Close" className="p-2 hover:bg-white/10 rounded-lg text-gray-400 hover:text-white transition-colors">
+                                        <X size={20} />
+                                    </button>
+                                </div>
+
+                                {/* Body */}
+                                <div className="p-6 space-y-6 flex-1 overflow-y-auto">
+                                    {/* Route/Info Grid */}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        {/* Source/Dest */}
+                                        {(selectedJob.sourceSiteId || selectedJob.destSiteId) && (
+                                            <div className="bg-black/20 rounded-xl p-4 border border-white/5">
+                                                <p className="text-xs text-gray-500 uppercase font-bold mb-3">Route</p>
+                                                <div className="flex items-center gap-3">
+                                                    <div className="flex-1">
+                                                        <p className="text-xs text-gray-400">From</p>
+                                                        <p className="font-bold text-white truncate">{sites.find(s => s.id === selectedJob.sourceSiteId)?.name || selectedJob.sourceSiteId || 'N/A'}</p>
+                                                    </div>
+                                                    <ArrowRight className="text-cyber-primary opacity-50 flex-shrink-0" />
+                                                    <div className="flex-1 text-right">
+                                                        <p className="text-xs text-gray-400">To</p>
+                                                        <p className="font-bold text-white truncate">{sites.find(s => s.id === selectedJob.destSiteId)?.name || selectedJob.destSiteId || 'N/A'}</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* People/Dates */}
+                                        <div className="bg-black/20 rounded-xl p-4 border border-white/5 space-y-2 text-sm">
+                                            <div className="flex justify-between">
+                                                <span className="text-gray-400">Priority</span>
+                                                <span className={`font-bold ${selectedJob.priority === 'Critical' ? 'text-red-400' : selectedJob.priority === 'High' ? 'text-orange-400' : 'text-blue-400'}`}>{selectedJob.priority || 'Normal'}</span>
+                                            </div>
+                                            <div className="flex justify-between">
+                                                <span className="text-gray-400">Requested By</span>
+                                                <span className="text-white font-bold">{selectedJob.requestedBy || 'System'}</span>
+                                            </div>
+                                            {selectedJob.approvedBy && (
+                                                <div className="flex justify-between">
+                                                    <span className="text-gray-400">Approved By</span>
+                                                    <span className="text-green-400 font-bold">{selectedJob.approvedBy}</span>
+                                                </div>
+                                            )}
+                                            <div className="h-px bg-white/5 my-2" />
+                                            {selectedJob.shippedAt && (
+                                                <div className="flex justify-between">
+                                                    <span className="text-gray-400">Shipped</span>
+                                                    <span className="text-purple-400 font-mono">{new Date(selectedJob.shippedAt).toLocaleDateString()}</span>
+                                                </div>
+                                            )}
+                                            {selectedJob.receivedAt && (
+                                                <div className="flex justify-between">
+                                                    <span className="text-gray-400">Received</span>
+                                                    <span className="text-green-400 font-mono">{new Date(selectedJob.receivedAt).toLocaleDateString()}</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* Items List */}
+                                    <div>
+                                        <h3 className="font-bold text-white mb-3 flex items-center gap-2">
+                                            <Package size={16} className="text-cyber-primary" />
+                                            Items ({selectedJob.lineItems?.length || selectedJob.items || 0})
+                                        </h3>
+                                        <div className="bg-black/20 rounded-xl border border-white/5 overflow-hidden">
+                                            <table className="w-full text-sm text-left">
+                                                <thead className="text-xs text-gray-500 bg-white/5 uppercase font-bold">
+                                                    <tr>
+                                                        <th className="p-3">Product</th>
+                                                        <th className="p-3 text-center">Qty</th>
+                                                        <th className="p-3 text-center">Status</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody className="divide-y divide-white/5">
+                                                    {selectedJob.lineItems && selectedJob.lineItems.length > 0 ? selectedJob.lineItems.map((item: any, idx: number) => (
+                                                        <tr key={idx} className="hover:bg-white/5 transition-colors">
+                                                            <td className="p-3">
+                                                                <p className="text-white font-medium">{item.name}</p>
+                                                                <p className="text-xs text-gray-500">{item.sku}</p>
+                                                            </td>
+                                                            <td className="p-3 text-center font-mono text-white font-bold">{item.expectedQty}</td>
+                                                            <td className="p-3 text-center">
+                                                                <span className="text-[10px] px-2 py-1 rounded bg-white/10 text-gray-300">
+                                                                    {item.status || 'Pending'}
+                                                                </span>
+                                                            </td>
+                                                        </tr>
+                                                    )) : (
+                                                        <tr><td colSpan={3} className="p-4 text-center text-gray-500">No detailed item list available</td></tr>
+                                                    )}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Footer */}
+                                <div className="p-6 border-t border-white/10 bg-black/20 flex justify-between rounded-b-2xl">
+                                    <div>
+                                        {/* Show Start Picking button for PICK/PACK/PUTAWAY jobs that aren't completed */}
+                                        {['PICK', 'PACK', 'PUTAWAY', 'pick', 'pack', 'putaway'].includes(selectedJob.type) && selectedJob.status !== 'Completed' ? (
+                                            <button
+                                                type="button"
+                                                onClick={(e) => {
+                                                    e.preventDefault();
+                                                    e.stopPropagation();
+                                                    console.log('🎯 Start Picking clicked!', selectedJob);
+
+                                                    // Normalize lineItems for the job
+                                                    const jobLineItems = selectedJob.lineItems || (selectedJob as any).line_items || [];
+                                                    const normalizedJob = { ...selectedJob, lineItems: jobLineItems };
+
+                                                    // Sort items by bin location
+                                                    const sortedItems = [...jobLineItems].sort((a: any, b: any) => {
+                                                        const prodA = products.find(p => p.id === a.productId);
+                                                        const prodB = products.find(p => p.id === b.productId);
+                                                        return (prodA?.location || '').localeCompare(prodB?.location || '');
+                                                    });
+
+                                                    const optimizedJob = {
+                                                        ...normalizedJob,
+                                                        lineItems: sortedItems,
+                                                        status: 'In-Progress' as const,
+                                                        assignedTo: selectedJob.assignedTo || user?.name
+                                                    };
+
+                                                    // Update job status if pending
+                                                    if (selectedJob.status === 'Pending') {
+                                                        updateJobStatus(selectedJob.id, 'In-Progress');
+                                                    }
+
+                                                    // Auto-assign if not assigned
+                                                    if (!selectedJob.assignedTo && user) {
+                                                        assignJob(selectedJob.id, user.id || user.name);
+                                                    }
+
+                                                    // Open scanner
+                                                    setSelectedJob(optimizedJob);
+                                                    setIsScannerMode(true);
+                                                    setScannerStep(selectedJob.type === 'PUTAWAY' ? 'NAV' : 'SCAN');
+                                                    setScannedBin('');
+                                                    setScannedItem('');
+                                                    setPickQty(0);
+                                                }}
+                                                className="px-6 py-3 bg-gradient-to-r from-cyber-primary to-green-400 text-black rounded-xl font-bold transition-all duration-300 hover:shadow-lg hover:shadow-cyber-primary/30 flex items-center gap-2"
+                                            >
+                                                <Scan size={18} />
+                                                {selectedJob.type?.toUpperCase() === 'PICK' ? t('warehouse.startPicking') :
+                                                    selectedJob.type?.toUpperCase() === 'PACK' ? t('warehouse.startPacking') :
+                                                        t('warehouse.startPutaway')}
+                                            </button>
+                                        ) : null}
+                                    </div>
+                                    <button
+                                        onClick={() => setSelectedJob(null)}
+                                        className="px-6 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg font-bold transition-colors"
+                                    >
+                                        Close
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )
+                }
+                {/* Pack Job Reprint Options Modal-Global Level */}
+                {
+                    packReprintJob && (
+                        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-end md:items-center justify-center p-0 md:p-4 z-50">
+                            <div className="bg-[#1a1a1a] border-t md:border border-white/10 rounded-t-2xl md:rounded-2xl w-full max-w-md p-6 shadow-2xl">
+                                <div className="flex items-center justify-between mb-6">
+                                    <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                                        <Printer className="text-green-400" size={24} />
+                                        {t('warehouse.reprintPackLabel')}
+                                    </h3>
+                                    <button onClick={() => setPackReprintJob(null)} className="text-gray-400 hover:text-white" title="Close">
+                                        <X size={24} />
+                                    </button>
+                                </div>
+
+                                <div className="mb-4 p-3 bg-white/5 rounded-lg border border-white/10">
+                                    <p className="font-bold text-white text-lg">{t('warehouse.orderColon')} {formatOrderRef(packReprintJob.orderRef)}</p>
+                                    <div className="flex items-center gap-4 text-sm text-gray-400 mt-2">
+                                        <span>📦 {packReprintJob.itemCount || 0} items</span>
+                                        {packReprintJob.destSiteName && (
+                                            <span>→ {packReprintJob.destSiteName}</span>
+                                        )}
+                                    </div>
+                                    <p className="text-xs text-gray-500 mt-1">Job: {formatJobId(packReprintJob)}</p>
+                                </div>
+
+                                {/* Size Selection */}
+                                <div className="mb-4">
+                                    <label className="text-sm text-gray-400 mb-2 block">Label Size</label>
+                                    <div className="grid grid-cols-4 gap-2">
+                                        {(['Tiny', 'Small', 'Medium', 'Large'] as const).map(s => (
+                                            <button
+                                                key={s}
+                                                onClick={() => setReprintSize(s)}
+                                                className={`py-2 px-3 rounded-lg text-sm font-bold transition-all ${reprintSize === s
+                                                    ? 'bg-green-500 text-black'
+                                                    : 'bg-white/5 text-white hover:bg-white/10 border border-white/10'
+                                                    }`}
+                                            >
+                                                {s}
+                                            </button>
+                                        ))}
+                                    </div>
+                                    <p className="text-xs text-gray-500 mt-1">
+                                        {reprintSize === 'Tiny' && '1.25" × 1"-SKU Tags'}
+                                        {reprintSize === 'Small' && '2.25" × 1.25"-Multipurpose'}
+                                        {reprintSize === 'Medium' && '3" × 2"-Shelf Labels'}
+                                        {reprintSize === 'Large' && '4" × 3"-Carton Tags'}
+                                    </p>
+                                </div>
+
+                                {/* Format Selection */}
+                                <div className="mb-6">
+                                    <label className="text-sm text-gray-400 mb-2 block">Code Format</label>
+                                    <div className="grid grid-cols-3 gap-2">
+                                        {(['QR', 'Barcode', 'Both'] as const).map(f => (
+                                            <button
+                                                key={f}
+                                                onClick={() => setReprintFormat(f)}
+                                                className={`py-2 px-3 rounded-lg text-sm font-bold transition-all ${reprintFormat === f
+                                                    ? 'bg-green-500 text-black'
+                                                    : 'bg-white/5 text-white hover:bg-white/10 border border-white/10'
+                                                    }`}
+                                            >
+                                                {f === 'QR' && '📱 QR'}
+                                                {f === 'Barcode' && '▮▯▮ Barcode'}
+                                                {f === 'Both' && '📱+▮ Both'}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Action Buttons */}
+                                <div className="flex gap-3">
+                                    <button
+                                        onClick={() => setPackReprintJob(null)}
+                                        className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-white font-bold rounded-xl border border-white/10"
+                                    >
+                                        {t('common.cancel')}
+                                    </button>
+                                    <button
+                                        disabled={isPrinting}
+                                        onClick={async () => {
+                                            if (!packReprintJob || isPrinting) return;
+                                            setIsPrinting(true);
+                                            try {
+                                                // Use the rich pack label generator
+                                                const html = await generatePackLabelHTML({
+                                                    orderRef: packReprintJob.orderRef,
+                                                    itemCount: packReprintJob.itemCount || 0,
+                                                    destSiteName: packReprintJob.destSiteName,
+                                                    packDate: new Date().toLocaleDateString(),
+                                                    packerName: user?.name,
+                                                    customerName: packReprintJob.customerName,
+                                                    shippingAddress: packReprintJob.shippingAddress,
+                                                    city: packReprintJob.city,
+                                                    specialHandling: packReprintJob.specialHandling
+                                                }, {
+                                                    size: reprintSize,
+                                                    format: reprintFormat
+                                                });
+                                                const printWindow = window.open('', '_blank');
+                                                if (printWindow) {
+                                                    printWindow.document.write(html);
+                                                    setTimeout(() => {
+                                                        printWindow.document.close();
+                                                        printWindow.print();
+                                                    }, 500);
+                                                } else {
+                                                    addNotification('alert', 'Popup blocked. Allow popups to print.');
+                                                }
+                                            } catch (e) {
+                                                console.error(e);
+                                                addNotification('alert', 'Failed to generate label');
+                                            } finally {
+                                                setIsPrinting(false);
+                                                setPackReprintJob(null);
+                                            }
+                                        }}
+                                        className={`flex-1 py-3 bg-green-500 text-black font-bold rounded-xl flex items-center justify-center gap-2 ${isPrinting ? 'opacity-50 cursor-not-allowed' : 'hover:bg-green-400'}`}
+                                    >
+                                        {isPrinting ? <RefreshCw size={18} className="animate-spin" /> : <Printer size={18} />}
+                                        {isPrinting ? t('warehouse.generating') : t('warehouse.printLabel')}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )
+                }
+            </div >
         </Protected >
     );
 }

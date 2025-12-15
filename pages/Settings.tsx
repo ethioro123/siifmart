@@ -225,7 +225,7 @@ export default function SettingsPage() {
                     manager: newSite.manager,
                     capacity: newSite.capacity,
                     terminalCount: newSite.terminalCount,
-                    code: newSite.name?.substring(0, 3).toUpperCase() || 'UNK'
+                    code: newSite.code || newSite.name?.substring(0, 3).toUpperCase() || 'UNK' // Use existing code if available
                 };
                 console.log('📝 Updating site:', siteData);
                 await updateSite(siteData, user?.name || 'Admin');
@@ -239,7 +239,7 @@ export default function SettingsPage() {
                     manager: newSite.manager,
                     capacity: newSite.capacity,
                     terminalCount: newSite.terminalCount,
-                    code: newSite.name?.substring(0, 3).toUpperCase() || 'UNK'
+                    code: newSite.code || newSite.name?.substring(0, 3).toUpperCase() || 'UNK'
                 };
                 console.log('➕ Creating new site:', siteData);
                 await addSite(siteData as Site, user?.name || 'Admin');
@@ -595,7 +595,12 @@ export default function SettingsPage() {
                                                 </div>
 
                                                 {/* Name & Type */}
-                                                <h4 className="text-white font-bold text-lg mb-1">{site.name}</h4>
+                                                <div className="flex justify-between items-start mb-2">
+                                                    <h4 className="text-white font-bold text-lg leading-tight pr-2">{site.name}</h4>
+                                                    <span className="font-mono text-[10px] font-bold px-2 py-1 rounded bg-black/40 border border-white/10 backdrop-blur-md tracking-widest text-cyber-primary shadow-[0_0_10px_rgba(0,255,157,0.15)] group-hover:shadow-[0_0_15px_rgba(0,255,157,0.3)] group-hover:border-cyber-primary/40 transition-all shrink-0">
+                                                        {site.code || 'N/A'}
+                                                    </span>
+                                                </div>
                                                 <p className="text-xs text-gray-500 uppercase font-bold mb-3">
                                                     {site.type === 'Administration' ? 'Administration Office' : site.type}
                                                 </p>
@@ -1412,6 +1417,23 @@ export default function SettingsPage() {
                                         />
                                     </div>
                                     <div>
+                                        <label className="text-xs text-gray-400 uppercase font-bold mb-1 block">Site Code (ID)</label>
+                                        <input
+                                            className="w-full bg-black/30 border border-white/10 rounded-lg px-4 py-3 text-white outline-none focus:border-cyber-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-mono"
+                                            placeholder="Auto-generated (e.g. ADD)"
+                                            value={newSite.code || ''}
+                                            onChange={(e) => {
+                                                // Only allow editing if it's a new site (no ID yet)
+                                                if (!newSite.id) {
+                                                    setNewSite({ ...newSite, code: e.target.value.toUpperCase().substring(0, 6) })
+                                                }
+                                            }}
+                                            disabled={!!newSite.id} // Immutable once created
+                                            aria-label="Site Code"
+                                        />
+                                        {newSite.id && <p className="text-[10px] text-yellow-500 mt-1 flex items-center gap-1"><Lock size={10} /> Immutable Identifier</p>}
+                                    </div>
+                                    <div>
                                         <label className="text-xs text-gray-400 uppercase font-bold mb-1 block">Storage Capacity (m²)</label>
                                         <input
                                             type="number"
@@ -1448,6 +1470,23 @@ export default function SettingsPage() {
                                             onChange={(e) => setNewSite({ ...newSite, manager: e.target.value })}
                                             aria-label="Store Manager"
                                         />
+                                    </div>
+                                    <div>
+                                        <label className="text-xs text-gray-400 uppercase font-bold mb-1 block">Site Code (ID)</label>
+                                        <input
+                                            className="w-full bg-black/30 border border-white/10 rounded-lg px-4 py-3 text-white outline-none focus:border-cyber-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-mono"
+                                            placeholder="Auto-generated (e.g. RET)"
+                                            value={newSite.code || ''}
+                                            onChange={(e) => {
+                                                // Only allow editing if it's a new site (no ID yet)
+                                                if (!newSite.id) {
+                                                    setNewSite({ ...newSite, code: e.target.value.toUpperCase().substring(0, 6) })
+                                                }
+                                            }}
+                                            disabled={!!newSite.id} // Immutable once created
+                                            aria-label="Site Code"
+                                        />
+                                        {newSite.id && <p className="text-[10px] text-yellow-500 mt-1 flex items-center gap-1"><Lock size={10} /> Immutable Identifier</p>}
                                     </div>
                                     <div>
                                         <label className="text-xs text-gray-400 uppercase font-bold mb-1 block">POS Terminals</label>

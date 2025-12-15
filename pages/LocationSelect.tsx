@@ -114,7 +114,10 @@ export default function LocationSelect() {
                                                     {site.name}
                                                 </h3>
                                                 <div className="flex items-center gap-1.5 text-xs text-gray-500 mt-1">
-                                                    <span className="bg-white/5 px-2 py-0.5 rounded border border-white/5">{site.id}</span>
+                                                    {/* Premium Site Code Badge */}
+                                                    <div className="absolute top-5 right-5 font-mono text-[10px] font-bold px-2 py-1 rounded bg-black/40 border border-white/10 backdrop-blur-md tracking-widest text-cyber-primary shadow-[0_0_10px_rgba(0,255,157,0.15)] group-hover:shadow-[0_0_15px_rgba(0,255,157,0.3)] group-hover:border-cyber-primary/40 transition-all">
+                                                        {site.code || site.id}
+                                                    </div>
                                                     <span className="w-1 h-1 bg-gray-600 rounded-full" />
                                                     <span>{site.type}</span>
                                                 </div>
@@ -178,7 +181,10 @@ export default function LocationSelect() {
                                                     {site.name}
                                                 </h3>
                                                 <div className="flex items-center gap-1.5 text-xs text-gray-500 mt-1">
-                                                    <span className="bg-white/5 px-2 py-0.5 rounded border border-white/5">{site.id}</span>
+                                                    {/* Premium Site Code Badge */}
+                                                    <div className="absolute top-5 right-5 font-mono text-[10px] font-bold px-2 py-1 rounded bg-black/40 border border-white/10 backdrop-blur-md tracking-widest text-blue-400 border-blue-500/20 shadow-[0_0_10px_rgba(59,130,246,0.15)] group-hover:shadow-[0_0_15px_rgba(59,130,246,0.3)] group-hover:border-blue-500/40 transition-all">
+                                                        {site.code || site.id}
+                                                    </div>
                                                     <span className="w-1 h-1 bg-gray-600 rounded-full" />
                                                     <span>{site.type}</span>
                                                 </div>

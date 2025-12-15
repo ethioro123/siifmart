@@ -275,13 +275,35 @@ export const TRANSLATIONS = {
         selectJobFirst: { en: 'Select a job first', am: 'በመጀመሪያ ስራ ይምረጡ', or: 'Dura hojii filadhu' },
         match: { en: 'Match', am: 'የሚዛመድ', or: 'Walgahu' },
         active: { en: 'active', am: 'ንቁ', or: 'jireenyaa' },
-        sort: { en: 'Sort', am: 'ደርድር', or: 'Rammisi' },
         searchJobsByID: { en: 'Search jobs by ID...', am: 'ስራዎችን በመለያ ፈልግ...', or: 'Hojiiwwan eenyummaan barbaadi...' },
         pendingJobs: { en: 'Pending Jobs', am: 'በመጠባበቅ ላይ ያሉ ስራዎች', or: 'Hojiiwwan Eegaa jiran' },
         moreItems: { en: 'more items', am: 'ተጨማሪ ዕቃዎች', or: 'mi\'oota dabalataa' },
         zoneLocked: { en: 'Zone is locked', am: 'ዞኑ ተፈርጋል', or: 'Zooniin cufameera' },
         zoneLockedLabel: { en: '🔒 Zone Locked', am: '🔒 ዞን ተፈርጋል', or: '🔒 Zooniin Cufameera' },
         suggested: { en: 'Suggested', am: 'የታሰበ', or: 'Yaadatame' },
+        tapToScan: { en: 'Tap a card to start scanner', am: 'ስካነር ለማስጀመር ካርድ ይንኩ', or: 'Iskaanaa eegaluuf kaardii tuqi' },
+        packDesc: { en: 'Pack orders for delivery', am: 'ለማድረስ ትዕዛዞችን አሽጉ', or: 'Ajajoota erguuf saami' },
+        approvedPOsWillAppear: { en: 'Approved purchase orders will appear here', am: 'የተጸድቁ የግዢ ትዕዛዞች እዚህ ይታያሉ', or: 'Ajajoota bittaa mirkaneeffaman asitti mulatu' },
+
+        // Docks Section
+        docks: {
+            incoming: { en: 'Incoming (Inbound)', am: 'ገቢ (መቀበያ)', or: 'Seensaa (Fudhannaa)' },
+            outgoing: { en: 'Outgoing (Outbound)', am: 'ወጪ (ማጓጓዣ)', or: 'Gadii (Ergaa)' },
+            driver: { en: 'Driver Portal', am: 'አሽከርካሪ ፖርታል', or: 'Poortaalii Konkolaachisaa' },
+            inboundTitle: { en: 'Inbound Docks (Receiving)', am: 'የገቢ መርከቦች (መቀበያ)', or: 'Buufata Seensaa (Fudhannaa)' },
+            outboundTitle: { en: 'Outbound Docks (Shipping)', am: 'የወጪ መርከቦች (ማጓጓዣ)', or: 'Buufata Gadii (Ergaa)' },
+            empty: { en: 'EMPTY', am: 'ባዶ', or: 'DUWWAA' },
+            occupied: { en: 'OCCUPIED', am: 'የተያዘ', or: 'QABAMEERA' },
+            maintenance: { en: 'MAINTENANCE', am: 'ጥገና', or: 'SUPHAAN' },
+            addDock: { en: 'ADD DOCK', am: 'መርከብ ጨምር', or: 'Buufata Ida\'i' },
+            supplier: { en: 'Supplier', am: 'አቅራቢ', or: 'Dhiyeessaa' },
+            assignDock: { en: 'Assign Dock', am: 'መርከብ መድብ', or: 'Buufata Ramadi' },
+        },
+
+        // General Warehouse Dashboard
+        totalItems: { en: 'Total Items', am: 'ጠቅላላ ዕቃዎች', or: 'Mi\'oota Walii Galaa' },
+        workersActive: { en: 'Workers Active', am: 'ንቁ ሰራተኞች', or: 'Hojjettoota Jireenyaa' },
+        priority: { en: 'Priority', am: 'ቅድሚያ', or: 'Dursa' },
 
         // Receiving Section
         noApprovedPOs: { en: 'No Approved Purchase Orders', am: 'ምንም የተጸድቁ የግዢ ትዕዛዞች የሉም', or: 'Ajajoota bittaa mirkaneeffaman hin jiran' },

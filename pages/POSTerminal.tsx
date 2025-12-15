@@ -194,11 +194,12 @@ export default function POS() {
     return { totalSpent, totalVisits };
   };
 
-  // Quick SKU Entry Handler
+  // Quick SKU/Barcode Entry Handler
   const handleQuickSKUEntry = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && quickSKU.trim()) {
       const product = filteredProducts.find(p =>
-        p.sku.toLowerCase() === quickSKU.toLowerCase()
+        p.sku.toLowerCase() === quickSKU.toLowerCase() ||
+        p.barcode?.toLowerCase() === quickSKU.toLowerCase() // Also search by barcode
       );
       if (product) {
         addToCart(product);
@@ -222,7 +223,11 @@ export default function POS() {
 
   const filteredProducts = useMemo(() => {
     return products.filter(p => {
-      const matchesSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase()) || p.sku.toLowerCase().includes(searchTerm.toLowerCase());
+      // Search by name, SKU, or barcode
+      const matchesSearch =
+        p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        p.sku.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        p.barcode?.toLowerCase().includes(searchTerm.toLowerCase()); // Search by barcode
       const matchesCategory = selectedCategory === 'All' || p.category === selectedCategory;
       const hasStock = p.stock > 0; // Only show products with available stock
 
@@ -524,9 +529,10 @@ export default function POS() {
 
   // --- POS Receiving Handlers ---
   const handleScanProduct = async (barcode: string) => {
-    // Find product by SKU or barcode
+    // Find product by SKU, barcode field, or ID
     const product = products.find(p =>
       p.sku.toLowerCase() === barcode.toLowerCase() ||
+      p.barcode?.toLowerCase() === barcode.toLowerCase() || // Search by external barcode
       p.id === barcode ||
       p.name.toLowerCase().includes(barcode.toLowerCase())
     );

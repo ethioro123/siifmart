@@ -4,6 +4,16 @@ import Barcode from 'react-barcode';
 import { Product } from '../types';
 import { getBarcodeProps } from '../utils/barcodeConfig';
 
+// Map internal barcode types to react-barcode formats
+const getBarcodeFormat = (type?: string): string => {
+    switch (type) {
+        case 'EAN-13': return 'EAN13';
+        case 'UPC-A': return 'UPC';
+        case 'CODE39': return 'CODE39';
+        case 'CODE128': default: return 'CODE128';
+    }
+};
+
 interface LabelData {
     product: Product;
     quantity: number;
@@ -70,9 +80,16 @@ export default function LabelPrintModal({ isOpen, onClose, labels, onPrint }: La
                                             <div>
                                                 <p className="font-bold text-white">{labelData.product.name}</p>
                                                 <div className="mt-1 bg-white p-1 rounded w-fit">
-                                                    <Barcode value={labelData.product.sku} {...getBarcodeProps('tiny')} />
+                                                    <Barcode
+                                                        value={labelData.product.barcode || labelData.product.sku}
+                                                        {...getBarcodeProps('tiny', {
+                                                            format: getBarcodeFormat(labelData.product.barcodeType)
+                                                        })}
+                                                    />
                                                 </div>
-                                                <p className="text-xs text-gray-400 mt-1">SKU: {labelData.product.sku}</p>
+                                                <p className="text-xs text-gray-400 mt-1">
+                                                    {labelData.product.barcode ? `Barcode: ${labelData.product.barcode}` : `SKU: ${labelData.product.sku}`}
+                                                </p>
                                             </div>
                                         </div>
                                         <div className="text-right">
@@ -165,8 +182,11 @@ export default function LabelPrintModal({ isOpen, onClose, labels, onPrint }: La
                                     {/* SKU - Prominent Barcode */}
                                     <div className="col-span-2 border border-gray-300 rounded p-2 flex flex-col items-center justify-center bg-white">
                                         <Barcode
-                                            value={labelData.product.sku}
-                                            {...getBarcodeProps('medium', { margin: 0 })}
+                                            value={labelData.product.barcode || labelData.product.sku}
+                                            {...getBarcodeProps('medium', {
+                                                margin: 0,
+                                                format: getBarcodeFormat(labelData.product.barcodeType)
+                                            })}
                                         />
                                     </div>
 

@@ -107,7 +107,9 @@ export interface Product {
   salePrice?: number; // Discounted Price
   isOnSale?: boolean;
   stock: number;
-  sku: string;
+  sku: string; // Internal SKU (generated or manual)
+  barcode?: string; // External barcode (EAN-13, UPC, supplier barcode)
+  barcodeType?: 'EAN-13' | 'UPC-A' | 'CODE128' | 'CODE39' | 'QR' | 'OTHER'; // Type of barcode
   image: string;
   status: 'active' | 'low_stock' | 'out_of_stock';
   location?: string;

@@ -11,6 +11,7 @@ export interface BarcodeConfig {
     fontSize: number;
     margin: number;
     displayValue: boolean;
+    format?: string;
 }
 
 /**
@@ -76,9 +77,9 @@ export const getBarcodeConfig = (size: BarcodeSize = 'medium'): BarcodeConfig =>
 export const getBarcodeProps = (size: BarcodeSize = 'medium', overrides?: Partial<BarcodeConfig>) => {
     const config = getBarcodeConfig(size);
     return {
+        format: 'CODE128', // Default format
         ...config,
         ...overrides,
-        format: 'CODE128' as const
     };
 };
 

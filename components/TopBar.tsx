@@ -312,6 +312,11 @@ export default function TopBar() {
                      <span className="text-xs font-bold uppercase tracking-wide">
                         {locationName}
                      </span>
+                     {finalSite?.code && (
+                        <span className={`ml-1 text-[10px] font-mono font-bold px-1.5 py-0.5 rounded border tracking-widest bg-black/20 ${isWarehouse ? 'border-blue-500/30 text-blue-300' : 'border-green-500/30 text-green-300'}`}>
+                           {finalSite.code}
+                        </span>
+                     )}
                   </div>
                );
             })()}

@@ -17,12 +17,14 @@ interface SidebarItemProps {
   to: string;
   icon: any;
   label: string;
+  onClick?: () => void;
 }
 
-const SidebarItem: React.FC<SidebarItemProps> = ({ to, icon: Icon, label }) => {
+const SidebarItem: React.FC<SidebarItemProps> = ({ to, icon: Icon, label, onClick }) => {
   return (
     <NavLink
       to={to}
+      onClick={onClick}
       className={({ isActive }) =>
         `flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group ${isActive
           ? 'bg-cyber-primary/10 text-cyber-primary border-r-2 border-cyber-primary'
@@ -205,7 +207,7 @@ export default function Sidebar() {
         <nav className="flex-1 px-4 space-y-2 overflow-y-auto custom-scrollbar">
           <p className="px-4 text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Menu</p>
           {navItems.map(item => (
-            <SidebarItem key={item.to} to={item.to} icon={item.icon} label={item.label} />
+            <SidebarItem key={item.to} to={item.to} icon={item.icon} label={item.label} onClick={toggleSidebar} />
           ))}
         </nav>
 

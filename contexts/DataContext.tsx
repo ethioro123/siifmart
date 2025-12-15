@@ -1021,16 +1021,34 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
             }
           } // Close outer if (!product && !targetProductId)
 
-          // ✅ SAVE THE SKU TO THE PRODUCT IN THE DATABASE
+          // ✅ SAVE THE SKU AND BARCODE TO THE PRODUCT IN THE DATABASE
           if (needsSkuUpdate && (product || targetProductId)) {
             const pidToUpdate = product?.id || targetProductId;
             if (pidToUpdate) {
               try {
-                console.log(`💾 Saving SKU ${productSku} to product ${pidToUpdate}...`);
-                await productsService.update(pidToUpdate, { sku: productSku });
+                // If the scanned SKU looks like a barcode (EAN-13, UPC, etc.), save it as barcode too
+                const updateData: any = { sku: productSku };
+
+                // Detect if scanned value is likely a barcode
+                if (scannedSku && scannedSku.trim() !== '') {
+                  const cleanScan = scannedSku.trim();
+                  // Check if it's numeric (EAN-13/UPC) or follows barcode patterns
+                  const isEAN = /^\d{12,13}$/.test(cleanScan); // EAN-13 or UPC-A
+                  const isUPC = /^\d{8,12}$/.test(cleanScan); // UPC variations
+                  const isCODE = /^[A-Z0-9]{6,20}$/i.test(cleanScan); // CODE128/CODE39
+
+                  if (isEAN || isUPC || isCODE) {
+                    updateData.barcode = cleanScan;
+                    updateData.barcodeType = isEAN ? 'EAN-13' : isUPC ? 'UPC-A' : 'CODE128';
+                    console.log(`📊 Saving barcode: ${cleanScan} (type: ${updateData.barcodeType})`);
+                  }
+                }
+
+                console.log(`💾 Saving SKU ${productSku} to product ${pidToUpdate}...`, updateData);
+                await productsService.update(pidToUpdate, updateData);
                 // Update local state
-                setAllProducts(prev => prev.map(p => p.id === pidToUpdate ? { ...p, sku: productSku } : p));
-                setProducts(prev => prev.map(p => p.id === pidToUpdate ? { ...p, sku: productSku } : p));
+                setAllProducts(prev => prev.map(p => p.id === pidToUpdate ? { ...p, ...updateData } : p));
+                setProducts(prev => prev.map(p => p.id === pidToUpdate ? { ...p, ...updateData } : p));
                 console.log(`✅ SKU ${productSku} saved to product ${productName}`);
               } catch (updateError) {
                 console.error(`❌ Failed to save SKU to product:`, updateError);
