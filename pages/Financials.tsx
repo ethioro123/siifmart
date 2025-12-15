@@ -1,4 +1,5 @@
 
+
 import React, { useState } from 'react';
 import {
    PieChart, Pie, Cell, Tooltip, ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid,
@@ -7,7 +8,7 @@ import {
 import {
    DollarSign, TrendingUp, CreditCard, FileText, Plus, Trash2,
    Filter, Download, Briefcase, Activity, AlertCircle, CheckCircle, Clock, Globe, Calculator,
-   PieChart as PieIcon, Target, ArrowUpRight, ArrowDownRight
+   PieChart as PieIcon, Target, ArrowUpRight, ArrowDownRight, Search
 } from 'lucide-react';
 import { CURRENCY_SYMBOL } from '../constants';
 import { ExpenseRecord } from '../types';
@@ -15,48 +16,9 @@ import Modal from '../components/Modal';
 import { useStore } from '../contexts/CentralStore';
 import { useData } from '../contexts/DataContext'; // Use Live Data
 
-// --- MOCK FINANCIAL DATA ---
-const CASHFLOW_DATA = [
-   { name: 'Week 1', income: 450000, expense: 150000 },
-   { name: 'Week 2', income: 520000, expense: 180000 },
-   { name: 'Week 3', income: 480000, expense: 160000 },
-   { name: 'Week 4', income: 600000, expense: 210000 },
-];
-
-const BUDGET_VS_ACTUALS = [
-   { month: 'Jan', budget: 500000, actual: 480000 },
-   { month: 'Feb', budget: 500000, actual: 520000 },
-   { month: 'Mar', budget: 550000, actual: 540000 },
-   { month: 'Apr', budget: 550000, actual: 510000 },
-   { month: 'May', budget: 600000, actual: 620000 },
-   { month: 'Jun', budget: 600000, actual: 590000 },
-];
-
-const FORECAST_DATA = [
-   { month: 'Jul (Est)', low: 580000, high: 650000, projection: 615000 },
-   { month: 'Aug (Est)', low: 600000, high: 680000, projection: 640000 },
-   { month: 'Sep (Est)', low: 620000, high: 710000, projection: 670000 },
-];
-
-const EXPENSE_BREAKDOWN = [
-   { name: 'Rent', value: 35 },
-   { name: 'Salaries', value: 40 },
-   { name: 'Utilities', value: 10 },
-   { name: 'Maintenance', value: 15 },
-];
-
-const DEPT_BUDGETS = [
-   { dept: 'Marketing', allocated: 150000, spent: 120000 },
-   { dept: 'Operations', allocated: 300000, spent: 295000 },
-   { dept: 'IT/Systems', allocated: 80000, spent: 45000 },
-   { dept: 'HR/Admin', allocated: 100000, spent: 90000 },
-];
-
-const COLORS = ['#00ff9d', '#3b82f6', '#f59e0b', '#ef4444'];
-
+// Regional Tax Configurations
 type FinanceTab = 'overview' | 'expenses' | 'payroll' | 'tax' | 'budget';
 
-// Regional Tax Configurations
 const TAX_REGIONS = {
    'ET': { name: 'Ethiopia', taxName: 'VAT', rate: 15, code: 'ETB' },
    'KE': { name: 'Kenya', taxName: 'VAT', rate: 16, code: 'KES' },
@@ -88,7 +50,90 @@ export default function Finance() {
       category: 'Other', status: 'Pending', date: new Date().toISOString().split('T')[0]
    });
 
-   // --- CALCULATIONS ---
+   // --- CALCULATIONS (REAL DATA) ---
+
+   // 1. Expense Breakdown (Pie Chart)
+   const expensesByCategory = expenses.reduce((acc: Record<string, number>, exp: any) => {
+      const cat = exp.category || 'Other';
+      acc[cat] = (acc[cat] || 0) + (Number(exp.amount) || 0);
+      return acc;
+   }, {} as Record<string, number>);
+
+   const totalRecordedExpenses = Object.values(expensesByCategory).reduce<number>((sum, val) => sum + (val as number), 0);
+   const expenseBreakdownData = Object.entries(expensesByCategory).map(([name, value]) => {
+      const val = value as number;
+      const total = totalRecordedExpenses as number;
+      return {
+         name,
+         value: total > 0 ? parseFloat(((val / total) * 100).toFixed(1)) : 0
+      };
+   });
+
+   // 2. Cashflow Data (Last 4 Weeks)
+   const getWeekNumber = (d: Date) => {
+      d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+      d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+      const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+      return Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1) / 7);
+   }
+
+   // Aggregate Sales by Week
+   const salesByWeek = sales.reduce((acc, s) => {
+      const date = new Date(s.created_at);
+      const week = `W${getWeekNumber(date)}`;
+      acc[week] = (acc[week] || 0) + s.total;
+      return acc;
+   }, {} as Record<string, number>);
+
+   // Aggregate Expenses by Week
+   const expensesByWeek = expenses.reduce((acc, e) => {
+      const date = new Date(e.date);
+      const week = `W${getWeekNumber(date)}`;
+      acc[week] = (acc[week] || 0) + e.amount;
+      return acc;
+   }, {} as Record<string, number>);
+
+   // Merge for Chart
+   const allWeeks = Array.from(new Set([...Object.keys(salesByWeek), ...Object.keys(expensesByWeek)])).sort();
+   const cashflowData = allWeeks.slice(-4).map(week => ({
+      name: week,
+      income: salesByWeek[week] || 0,
+      expense: expensesByWeek[week] || 0
+   }));
+
+   // --- PAYROLL FILTERS ---
+   const [payrollSearch, setPayrollSearch] = useState('');
+   const [payrollRoleFilter, setPayrollRoleFilter] = useState('All');
+   const [payrollSort, setPayrollSort] = useState<'name' | 'salary' | 'department'>('name');
+   const [payrollSortDir, setPayrollSortDir] = useState<'asc' | 'desc'>('asc');
+
+   const filteredEmployees = employees.filter(emp => {
+      const matchesSearch = emp.name.toLowerCase().includes(payrollSearch.toLowerCase()) ||
+         emp.role.toLowerCase().includes(payrollSearch.toLowerCase());
+      const matchesRole = payrollRoleFilter === 'All' || emp.role === payrollRoleFilter;
+      return matchesSearch && matchesRole;
+   }).sort((a, b) => {
+      let valA = a[payrollSort] || '';
+      let valB = b[payrollSort] || '';
+
+      if (payrollSort === 'salary') {
+         valA = a.salary || 0;
+         valB = b.salary || 0;
+      }
+
+      if (valA < valB) return payrollSortDir === 'asc' ? -1 : 1;
+      if (valA > valB) return payrollSortDir === 'asc' ? 1 : -1;
+      return 0;
+   });
+
+   const uniqueRoles = ['All', ...Array.from(new Set(employees.map(e => e.role)))];
+
+   // If no data, provide empty placeholder
+   if (cashflowData.length === 0) {
+      cashflowData.push({ name: 'Current', income: 0, expense: 0 });
+   }
+
+
    const totalRevenue = sales.reduce((sum, s) => sum + s.total, 0);
    const totalSalaries = employees.reduce((sum, e) => sum + (e.salary || 0), 0);
    const totalOpEx = expenses.reduce((sum, e) => sum + e.amount, 0);
@@ -103,6 +148,16 @@ export default function Finance() {
 
    const netProfit = totalRevenue - totalExpenses - netTaxPayable - totalRefunds;
    const profitMargin = totalRevenue > 0 ? (netProfit / totalRevenue) * 100 : 0;
+
+   // 3. Forecast Data (Simple Projection)
+   const avgMonthlyRevenue = totalRevenue / 12; // Simplified logic
+   const forecastData = [
+      { month: 'Next M1', low: avgMonthlyRevenue * 0.9, high: avgMonthlyRevenue * 1.1, projection: avgMonthlyRevenue * 1.05 },
+      { month: 'Next M2', low: avgMonthlyRevenue * 0.92, high: avgMonthlyRevenue * 1.15, projection: avgMonthlyRevenue * 1.08 },
+      { month: 'Next M3', low: avgMonthlyRevenue * 0.95, high: avgMonthlyRevenue * 1.2, projection: avgMonthlyRevenue * 1.12 },
+   ];
+
+   const COLORS = ['#00ff9d', '#3b82f6', '#f59e0b', '#ef4444', '#a855f7', '#ec4899'];
 
 
    // --- ACTIONS ---
@@ -185,7 +240,7 @@ export default function Finance() {
    const handleGenerateFiling = () => {
       addNotification('info', `Generating ${currentTaxConfig.taxName} Filing Report for ${currentTaxConfig.name}...`);
       setTimeout(() => {
-         addNotification('success', `Tax Report Generated! Net Payable: ${CURRENCY_SYMBOL} ${netTaxPayable.toLocaleString()}`);
+         addNotification('success', `Tax Report Generated! Net Payable: ${CURRENCY_SYMBOL} ${netTaxPayable.toLocaleString()} `);
       }, 1500);
    };
 
@@ -225,6 +280,7 @@ export default function Finance() {
                <div className="hidden md:flex items-center bg-black/30 border border-white/10 rounded-xl px-3 py-2 mr-2">
                   <Globe size={14} className="text-gray-400 mr-2" />
                   <select
+                     aria-label="Select Tax Region"
                      value={selectedRegion}
                      onChange={(e) => setSelectedRegion(e.target.value as any)}
                      className="bg-transparent border-none text-xs text-white outline-none uppercase font-bold cursor-pointer"
@@ -265,7 +321,7 @@ export default function Finance() {
                   <div className="bg-cyber-gray border border-white/5 rounded-2xl p-6">
                      <p className="text-gray-400 text-xs uppercase font-bold">Total Revenue</p>
                      <h3 className="text-2xl font-mono font-bold text-white mt-1">{CURRENCY_SYMBOL} {totalRevenue.toLocaleString()}</h3>
-                     <span className="text-green-400 text-xs flex items-center mt-2"><TrendingUp size={12} className="mr-1" /> +12.5%</span>
+                     {/* Placeholder for Trend: Could compare vs prev month if data existed */}
                   </div>
                   <div className="bg-cyber-gray border border-white/5 rounded-2xl p-6">
                      <p className="text-gray-400 text-xs uppercase font-bold">Total Expenses</p>
@@ -288,10 +344,10 @@ export default function Finance() {
                {/* Cashflow Chart */}
                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                   <div className="lg:col-span-2 bg-cyber-gray border border-white/5 rounded-2xl p-6">
-                     <h3 className="font-bold text-white mb-6">Cash Flow Analysis</h3>
+                     <h3 className="font-bold text-white mb-6">Cash Flow Analysis (Weekly)</h3>
                      <div className="h-[300px] w-full">
                         <ResponsiveContainer width="100%" height="100%" minHeight={0}>
-                           <AreaChart data={CASHFLOW_DATA}>
+                           <AreaChart data={cashflowData}>
                               <defs>
                                  <linearGradient id="colorInc" x1="0" y1="0" x2="0" y2="1">
                                     <stop offset="5%" stopColor="#00ff9d" stopOpacity={0.3} />
@@ -320,7 +376,7 @@ export default function Finance() {
                         <ResponsiveContainer width="100%" height="100%" minHeight={0}>
                            <PieChart>
                               <Pie
-                                 data={EXPENSE_BREAKDOWN}
+                                 data={expenseBreakdownData}
                                  cx="50%"
                                  cy="50%"
                                  innerRadius={60}
@@ -328,7 +384,7 @@ export default function Finance() {
                                  paddingAngle={5}
                                  dataKey="value"
                               >
-                                 {EXPENSE_BREAKDOWN.map((entry, index) => (
+                                 {expenseBreakdownData.map((entry, index) => (
                                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke="none" />
                                  ))}
                               </Pie>
@@ -337,7 +393,7 @@ export default function Finance() {
                         </ResponsiveContainer>
                      </div>
                      <div className="space-y-2 mt-4">
-                        {EXPENSE_BREAKDOWN.map((item, i) => (
+                        {expenseBreakdownData.map((item, i) => (
                            <div key={i} className="flex justify-between items-center text-sm">
                               <div className="flex items-center gap-2">
                                  <div className="w-2 h-2 rounded-full" style={{ backgroundColor: COLORS[i] }}></div>
@@ -361,14 +417,14 @@ export default function Finance() {
                      <h3 className="font-bold text-white mb-6">Budget Variance Analysis (YTD)</h3>
                      <div className="h-[300px]">
                         <ResponsiveContainer width="100%" height="100%" minHeight={0}>
-                           <ComposedChart data={BUDGET_VS_ACTUALS}>
+                           <ComposedChart data={cashflowData}> {/* Using cashflowData as proxy for now or need monthly aggregation */}
                               <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
-                              <XAxis dataKey="month" stroke="#666" fontSize={12} />
+                              <XAxis dataKey="name" stroke="#666" fontSize={12} />
                               <YAxis stroke="#666" fontSize={12} />
                               <Tooltip contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #333' }} />
                               <Legend />
-                              <Bar dataKey="budget" fill="#3b82f6" barSize={20} name="Budget Cap" />
-                              <Line type="monotone" dataKey="actual" stroke="#f59e0b" strokeWidth={2} name="Actual Spend" />
+                              <Bar dataKey="income" fill="#3b82f6" barSize={20} name="Revenue" />
+                              <Line type="monotone" dataKey="expense" stroke="#f59e0b" strokeWidth={2} name="Actual Spend" />
                            </ComposedChart>
                         </ResponsiveContainer>
                      </div>
@@ -378,31 +434,8 @@ export default function Finance() {
                   <div className="bg-cyber-gray border border-white/5 rounded-2xl p-6 flex flex-col">
                      <h3 className="font-bold text-white mb-4">Department Utilization</h3>
                      <div className="space-y-6 flex-1">
-                        {DEPT_BUDGETS.map((item, i) => {
-                           const percent = (item.spent / item.allocated) * 100;
-                           const isOver = percent > 100;
-                           return (
-                              <div key={i}>
-                                 <div className="flex justify-between text-xs mb-1">
-                                    <span className="text-white font-bold">{item.dept}</span>
-                                    <span className={isOver ? 'text-red-400' : 'text-gray-400'}>
-                                       {CURRENCY_SYMBOL} {item.spent.toLocaleString()} / {item.allocated.toLocaleString()}
-                                    </span>
-                                 </div>
-                                 <div className="w-full h-2 bg-black/50 rounded-full overflow-hidden">
-                                    <div
-                                       className={`h-full rounded-full ${isOver ? 'bg-red-500' : 'bg-cyber-primary'}`}
-                                       style={{ width: `${Math.min(percent, 100)}%` }}
-                                    />
-                                 </div>
-                                 <div className="text-right mt-1">
-                                    <span className={`text-[10px] ${isOver ? 'text-red-400 font-bold' : 'text-gray-500'}`}>
-                                       {percent.toFixed(1)}% Used {isOver && '(OVERRUN)'}
-                                    </span>
-                                 </div>
-                              </div>
-                           );
-                        })}
+                        {/* Dept Budgets Placeholder - Needs Dept Data Structure in Future */}
+                        <div className="text-center text-gray-500 py-10">Department budget tracking coming soon with new schema.</div>
                      </div>
                   </div>
                </div>
@@ -414,7 +447,7 @@ export default function Finance() {
                      <p className="text-xs text-gray-400 mb-6">Based on trailing 6-month revenue trends and seasonality factors.</p>
                      <div className="h-[250px]">
                         <ResponsiveContainer width="100%" height="100%" minHeight={0}>
-                           <AreaChart data={FORECAST_DATA}>
+                           <AreaChart data={forecastData}>
                               <defs>
                                  <linearGradient id="colorProj" x1="0" y1="0" x2="0" y2="1">
                                     <stop offset="5%" stopColor="#a855f7" stopOpacity={0.3} />
@@ -510,7 +543,7 @@ export default function Finance() {
                               <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase border ${exp.status === 'Paid' ? 'bg-green-500/10 text-green-400 border-green-500/20' :
                                  exp.status === 'Pending' ? 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' :
                                     'bg-red-500/10 text-red-400 border-red-500/20'
-                                 }`}>
+                                 } `}>
                                  {exp.status === 'Paid' && <CheckCircle size={10} />}
                                  {exp.status === 'Pending' && <Clock size={10} />}
                                  {exp.status === 'Overdue' && <AlertCircle size={10} />}
@@ -519,7 +552,7 @@ export default function Finance() {
                            </td>
                            <td className="p-4 text-xs text-gray-500">{exp.approvedBy}</td>
                            <td className="p-4 text-right">
-                              <button onClick={() => handleDeleteExpense(exp.id)} className="text-gray-600 hover:text-red-400">
+                              <button onClick={() => handleDeleteExpense(exp.id)} className="text-gray-600 hover:text-red-400" aria-label="Delete Expense">
                                  <Trash2 size={16} />
                               </button>
                            </td>
@@ -538,21 +571,60 @@ export default function Finance() {
                      <h3 className="font-bold text-white">Payroll Registry</h3>
                      <p className="text-xs text-gray-400 mt-1">Monthly compensation breakdown based on active employees.</p>
                   </div>
+
+                  {/* Registry Controls */}
+                  <div className="px-6 py-4 border-b border-white/5 flex flex-col md:flex-row gap-4">
+                     <div className="flex-1 relative">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                        <input
+                           type="text"
+                           placeholder="Search employees..."
+                           value={payrollSearch}
+                           onChange={(e) => setPayrollSearch(e.target.value)}
+                           className="w-full bg-black/30 border border-white/10 rounded-lg pl-10 pr-4 py-2 text-sm text-white focus:border-cyber-primary outline-none"
+                           aria-label="Search employees"
+                        />
+                     </div>
+                     <select
+                        value={payrollRoleFilter}
+                        onChange={(e) => setPayrollRoleFilter(e.target.value)}
+                        className="bg-black/30 border border-white/10 rounded-lg px-4 py-2 text-sm text-white outline-none focus:border-cyber-primary"
+                        aria-label="Filter by role"
+                     >
+                        {uniqueRoles.map(role => <option key={role} value={role}>{role}</option>)}
+                     </select>
+                  </div>
+
                   <table className="w-full text-left">
                      <thead className="bg-black/20 border-b border-white/5">
                         <tr>
-                           <th className="p-4 text-xs text-gray-500 uppercase">Employee</th>
+                           <th
+                              className="p-4 text-xs text-gray-500 uppercase cursor-pointer hover:text-white transition-colors"
+                              onClick={() => { setPayrollSort('name'); setPayrollSortDir(payrollSortDir === 'asc' ? 'desc' : 'asc'); }}
+                           >
+                              Employee {payrollSort === 'name' && (payrollSortDir === 'asc' ? '↑' : '↓')}
+                           </th>
                            <th className="p-4 text-xs text-gray-500 uppercase">Role</th>
-                           <th className="p-4 text-xs text-gray-500 uppercase">Department</th>
-                           <th className="p-4 text-xs text-gray-500 uppercase text-right">Salary</th>
+                           <th
+                              className="p-4 text-xs text-gray-500 uppercase cursor-pointer hover:text-white transition-colors"
+                              onClick={() => { setPayrollSort('department'); setPayrollSortDir(payrollSortDir === 'asc' ? 'desc' : 'asc'); }}
+                           >
+                              Department {payrollSort === 'department' && (payrollSortDir === 'asc' ? '↑' : '↓')}
+                           </th>
+                           <th
+                              className="p-4 text-xs text-gray-500 uppercase text-right cursor-pointer hover:text-white transition-colors"
+                              onClick={() => { setPayrollSort('salary'); setPayrollSortDir(payrollSortDir === 'asc' ? 'desc' : 'asc'); }}
+                           >
+                              Salary {payrollSort === 'salary' && (payrollSortDir === 'asc' ? '↑' : '↓')}
+                           </th>
                         </tr>
                      </thead>
                      <tbody className="divide-y divide-white/5">
-                        {employees.map(emp => (
+                        {filteredEmployees.map(emp => (
                            <tr key={emp.id} className="hover:bg-white/5">
                               <td className="p-4 flex items-center gap-3">
                                  <div className="w-8 h-8 rounded-full bg-black/50 overflow-hidden">
-                                    <img src={emp.avatar} className="w-full h-full object-cover" />
+                                    <img src={emp.avatar} alt={emp.name} className="w-full h-full object-cover" />
                                  </div>
                                  <span className="text-sm text-white font-bold">{emp.name}</span>
                               </td>
@@ -658,6 +730,7 @@ export default function Finance() {
                <div>
                   <label className="text-xs text-gray-400 uppercase font-bold mb-1 block">Description</label>
                   <input
+                     aria-label="Expense Description"
                      className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white outline-none focus:border-cyber-primary"
                      value={newExpData.description || ''}
                      onChange={e => setNewExpData({ ...newExpData, description: e.target.value })}
@@ -668,6 +741,7 @@ export default function Finance() {
                   <div>
                      <label className="text-xs text-gray-400 uppercase font-bold mb-1 block">Amount</label>
                      <input
+                        aria-label="Expense Amount"
                         type="number"
                         className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white outline-none focus:border-cyber-primary font-mono"
                         value={newExpData.amount || ''}
@@ -677,6 +751,7 @@ export default function Finance() {
                   <div>
                      <label className="text-xs text-gray-400 uppercase font-bold mb-1 block">Date</label>
                      <input
+                        aria-label="Expense Date"
                         type="date"
                         className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white outline-none focus:border-cyber-primary"
                         value={newExpData.date}
@@ -688,6 +763,7 @@ export default function Finance() {
                   <div>
                      <label className="text-xs text-gray-400 uppercase font-bold mb-1 block">Category</label>
                      <select
+                        aria-label="Expense Category"
                         className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white outline-none"
                         value={newExpData.category}
                         onChange={e => setNewExpData({ ...newExpData, category: e.target.value as any })}
@@ -703,6 +779,7 @@ export default function Finance() {
                   <div>
                      <label className="text-xs text-gray-400 uppercase font-bold mb-1 block">Status</label>
                      <select
+                        aria-label="Expense Status"
                         className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white outline-none"
                         value={newExpData.status}
                         onChange={e => setNewExpData({ ...newExpData, status: e.target.value as any })}

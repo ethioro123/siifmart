@@ -3,8 +3,8 @@ import Sidebar from './Sidebar';
 import TopBar from './TopBar';
 import EmployeeQuickAccess from './EmployeeQuickAccess';
 import NetworkStatusIndicator from './NetworkStatusIndicator';
-import { AIAssistant } from './AIAssistant';
-import { ProactiveSuggestions } from './ProactiveSuggestions';
+
+
 import { GhostModeBanner } from './GhostModeBanner';
 
 export default function Layout({ children }: { children?: React.ReactNode }) {
@@ -24,9 +24,9 @@ export default function Layout({ children }: { children?: React.ReactNode }) {
       {/* Employee Quick Access Floating Button - Available for ALL employees */}
       <EmployeeQuickAccess />
       {/* AI Navigation Assistant - Intelligent navigation for all users */}
-      <AIAssistant />
+
       {/* AI Proactive Suggestions - Intelligent alerts for super admins */}
-      <ProactiveSuggestions />
+
     </div>
   );
 }

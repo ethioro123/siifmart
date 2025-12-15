@@ -1782,7 +1782,7 @@ export default function WarehouseOperations() {
                         ))}
                     </div>
 
-                    <div className="ml-auto pl-2 sticky right-0 bg-cyber-gray md:bg-transparent">
+                    <div className="hidden md:block ml-auto pl-2 sticky right-0 bg-cyber-gray md:bg-transparent">
                         <LanguageSwitcher />
                     </div>
                 </div>

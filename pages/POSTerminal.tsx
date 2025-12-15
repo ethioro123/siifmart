@@ -279,7 +279,7 @@ export default function POS() {
     if (!miscItem.price) return;
     const price = parseFloat(miscItem.price);
     const newItem: CartItem = {
-      id: `MISC - ${Date.now()} `,
+      id: `MISC-${Date.now()}`,
       siteId: activeSite?.id || 'SITE-001',
       name: miscItem.name || 'Miscellaneous',
       price: price,
@@ -342,7 +342,7 @@ export default function POS() {
 
   const handleConfirmHoldOrder = () => {
     const order: HeldOrder = {
-      id: `HOLD - ${Date.now()} `,
+      id: `HOLD-${Date.now()}`,
       siteId: activeSite?.id || 'SITE-001',
       time: new Date().toLocaleTimeString(),
       items: [...cart],
@@ -749,7 +749,7 @@ export default function POS() {
   // --- Returns Handlers ---
 
   const handleSearchForReturn = () => {
-    const sale = sales.find(s => s.id === returnSearchId || s.receiptNumber === returnSearchId || s.id === `TX - ${returnSearchId} `);
+    const sale = sales.find(s => s.id === returnSearchId || s.receiptNumber === returnSearchId || s.id === `TX-${returnSearchId}`);
     if (sale) {
       setFoundSaleForReturn(sale);
       const initialConfig: Record<string, any> = {};
@@ -891,7 +891,9 @@ export default function POS() {
                 <ShoppingBag size={16} /> {t('pos.miscItem')}
               </button>
             </Protected>
-            <LanguageSwitcher />
+            <div className="hidden md:block">
+              <LanguageSwitcher />
+            </div>
           </div>
 
           {/* Quick SKU Entry */}

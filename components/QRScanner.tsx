@@ -104,10 +104,10 @@ export const QRScanner: React.FC<QRScannerProps> = ({
     }, [onScan, onClose, isScanning]);
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm">
-            <div className="relative w-full max-w-lg mx-4">
+        <div className="fixed inset-0 z-50 flex flex-col sm:items-center sm:justify-center bg-black sm:bg-black/90 sm:backdrop-blur-sm">
+            <div className="relative w-full h-full sm:h-auto sm:max-w-lg flex flex-col sm:block bg-black sm:bg-transparent">
                 {/* Header */}
-                <div className="bg-cyber-gray border border-white/10 rounded-t-2xl p-4 flex items-center justify-between">
+                <div className="bg-cyber-gray border-b sm:border border-white/10 sm:rounded-t-2xl p-4 flex items-center justify-between shrink-0 z-10">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-lg bg-cyber-primary/10 flex items-center justify-center">
                             <Camera className="text-cyber-primary" size={20} />
@@ -119,14 +119,14 @@ export const QRScanner: React.FC<QRScannerProps> = ({
                     </div>
                     <button
                         onClick={onClose}
-                        className="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center text-gray-400 hover:text-white transition-colors"
+                        className="w-10 h-10 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center text-gray-400 hover:text-white transition-colors"
                     >
-                        <X size={18} />
+                        <X size={20} />
                     </button>
                 </div>
 
                 {/* Camera View */}
-                <div className="bg-black border-x border-white/10 relative aspect-video overflow-hidden">
+                <div className="bg-black border-x border-white/10 relative flex-1 sm:flex-none sm:aspect-video overflow-hidden">
                     {error ? (
                         <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
                             <AlertCircle className="text-red-400 mb-4" size={48} />
@@ -147,26 +147,32 @@ export const QRScanner: React.FC<QRScannerProps> = ({
                             />
 
                             {/* Scanning Frame Overlay */}
-                            <div className="absolute inset-0 flex items-center justify-center">
-                                <div className="relative w-64 h-64">
+                            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                <div className="relative w-64 h-64 sm:w-64 sm:h-64 border border-white/10 rounded-xl bg-black/10 backdrop-blur-[2px]">
                                     {/* Corner brackets */}
-                                    <div className="absolute top-0 left-0 w-12 h-12 border-t-4 border-l-4 border-cyber-primary rounded-tl-lg"></div>
-                                    <div className="absolute top-0 right-0 w-12 h-12 border-t-4 border-r-4 border-cyber-primary rounded-tr-lg"></div>
-                                    <div className="absolute bottom-0 left-0 w-12 h-12 border-b-4 border-l-4 border-cyber-primary rounded-bl-lg"></div>
-                                    <div className="absolute bottom-0 right-0 w-12 h-12 border-b-4 border-r-4 border-cyber-primary rounded-br-lg"></div>
+                                    <div className="absolute top-0 left-0 w-12 h-12 border-t-4 border-l-4 border-cyber-primary rounded-tl-xl shadow-[0_0_15px_rgba(0,255,157,0.5)]"></div>
+                                    <div className="absolute top-0 right-0 w-12 h-12 border-t-4 border-r-4 border-cyber-primary rounded-tr-xl shadow-[0_0_15px_rgba(0,255,157,0.5)]"></div>
+                                    <div className="absolute bottom-0 left-0 w-12 h-12 border-b-4 border-l-4 border-cyber-primary rounded-bl-xl shadow-[0_0_15px_rgba(0,255,157,0.5)]"></div>
+                                    <div className="absolute bottom-0 right-0 w-12 h-12 border-b-4 border-r-4 border-cyber-primary rounded-br-xl shadow-[0_0_15px_rgba(0,255,157,0.5)]"></div>
 
                                     {/* Scanning line animation */}
-                                    <div className="absolute inset-0 overflow-hidden">
-                                        <div className="absolute w-full h-1 bg-gradient-to-r from-transparent via-cyber-primary to-transparent animate-scan-line"></div>
+                                    <div className="absolute inset-0 overflow-hidden rounded-xl">
+                                        <div className="absolute w-full h-1 bg-gradient-to-r from-transparent via-cyber-primary to-transparent animate-scan-line shadow-[0_0_20px_rgba(0,255,157,0.8)]"></div>
                                     </div>
+
+                                    {/* Crosshair guides */}
+                                    <div className="absolute top-1/2 left-0 w-4 h-[1px] bg-white/30"></div>
+                                    <div className="absolute top-1/2 right-0 w-4 h-[1px] bg-white/30"></div>
+                                    <div className="absolute top-0 left-1/2 w-[1px] h-4 bg-white/30"></div>
+                                    <div className="absolute bottom-0 left-1/2 w-[1px] h-4 bg-white/30"></div>
                                 </div>
                             </div>
 
                             {/* Status indicator */}
-                            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
-                                <div className="bg-black/70 backdrop-blur-sm border border-cyber-primary/30 rounded-full px-4 py-2 flex items-center gap-2">
-                                    <div className="w-2 h-2 rounded-full bg-cyber-primary animate-pulse"></div>
-                                    <span className="text-cyber-primary text-sm font-bold">Scanning...</span>
+                            <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 w-full px-6 flex justify-center">
+                                <div className="bg-black/70 backdrop-blur-md border border-cyber-primary/30 rounded-full px-6 py-3 flex items-center gap-3 shadow-lg">
+                                    <div className="w-2.5 h-2.5 rounded-full bg-cyber-primary animate-pulse shadow-[0_0_10px_rgba(0,255,157,0.8)]"></div>
+                                    <span className="text-cyber-primary text-sm font-bold tracking-wide uppercase">Searching for code...</span>
                                 </div>
                             </div>
                         </>
@@ -174,9 +180,9 @@ export const QRScanner: React.FC<QRScannerProps> = ({
                 </div>
 
                 {/* Footer */}
-                <div className="bg-cyber-gray border border-white/10 rounded-b-2xl p-4">
+                <div className="bg-cyber-gray border-t sm:border border-white/10 sm:rounded-b-2xl p-4 shrink-0 pb-safe z-10">
                     <p className="text-xs text-gray-400 text-center">
-                        Hold your device steady and align the code within the frame
+                        Align the QR code or Barcode within the frame to scan
                     </p>
                 </div>
             </div>

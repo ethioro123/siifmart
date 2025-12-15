@@ -406,7 +406,7 @@ export default function Inventory() {
     };
 
     const TabButton = ({ id, label, icon: Icon }: any) => (
-        <button onClick={() => setActiveTab(id)} className={`flex items - center space - x - 2 px - 4 py - 3 rounded - lg text - sm font - medium transition - all ${activeTab === id ? 'bg-cyber-primary text-black shadow-[0_0_15px_rgba(0,255,157,0.3)]' : 'text-gray-400 hover:text-white hover:bg-white/5'} `}>
+        <button onClick={() => setActiveTab(id)} className={`flex items-center space-x-2 px-4 py-3 rounded-lg text-sm font-medium transition-all ${activeTab === id ? 'bg-cyber-primary text-black shadow-[0_0_15px_rgba(0,255,157,0.3)]' : 'text-gray-400 hover:text-white hover:bg-white/5'} `}>
             <Icon size={16} /><span>{label}</span>
         </button>
     );
@@ -415,7 +415,7 @@ export default function Inventory() {
         <div className="bg-cyber-gray border border-white/5 rounded-2xl p-5 relative overflow-hidden group hover:border-white/10 transition-all">
             <div className="flex justify-between items-start mb-4">
                 <div className="p-3 rounded-xl bg-white/5 group-hover:bg-cyber-primary/10 transition-colors text-cyber-primary"><Icon size={20} /></div>
-                {trend && <span className={`text - [10px] font - bold px - 2 py - 1 rounded ${trend > 0 ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'} `}>{trend > 0 ? '+' : ''}{trend}%</span>}
+                {trend && <span className={`text-[10px] font-bold px-2 py-1 rounded ${trend > 0 ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'} `}>{trend > 0 ? '+' : ''}{trend}%</span>}
             </div>
             <div><p className="text-gray-400 text-xs font-bold uppercase tracking-wider">{title}</p><h3 className="text-2xl font-mono font-bold text-white mt-1">{value}</h3><p className="text-xs text-gray-500 mt-1">{sub}</p></div>
         </div>

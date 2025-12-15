@@ -53,8 +53,31 @@ export const sitesService = {
     },
 
     async create(site: Omit<Site, 'id' | 'created_at' | 'updated_at'>) {
+        // --- 1. GENERATE SEQUENTIAL SITE ID ---
+        const { data: allSites } = await supabase
+            .from('sites')
+            .select('code');
+
+        let nextId = 1;
+        if (allSites && allSites.length > 0) {
+            const maxId = allSites.reduce((max, s) => {
+                // Match SITE-XXXX or just look for numbers
+                const match = s.code?.match(/SITE-(\d+)/);
+                if (match) {
+                    const num = parseInt(match[1], 10);
+                    return num > max ? num : max;
+                }
+                return max;
+            }, 0);
+            nextId = maxId + 1;
+        }
+
+        const newCode = `SITE-${nextId.toString().padStart(4, '0')}`;
+        // --------------------------------------
+
         const dbSite = {
             name: site.name,
+            code: newCode, // Use auto-generated sequential code
             type: site.type,
             address: site.address,
             status: site.status,
@@ -72,14 +95,15 @@ export const sitesService = {
         return {
             ...data,
             terminalCount: data.terminal_count,
-            code: data.id?.substring(0, 8).toUpperCase() || 'UNK' // Generate code from ID
+            code: data.code // Return the real DB code
         };
     },
 
     async update(id: string, updates: Partial<Site>) {
         const dbUpdates: any = { ...updates };
         // Remove fields that don't exist in the database
-        delete dbUpdates.code; // code is generated from ID, not stored
+        // code cannot be updated manually usually
+        delete dbUpdates.code;
         if (updates.terminalCount !== undefined) {
             dbUpdates.terminal_count = updates.terminalCount;
             delete dbUpdates.terminalCount;
@@ -830,6 +854,7 @@ export const purchaseOrdersService = {
         // Generate simple sequential PO number if not provided
         let poNumber = po.poNumber;
         if (!poNumber) {
+
             try {
                 // Get the highest existing PO number
                 const { data: existingPOs, error: fetchError } = await supabase

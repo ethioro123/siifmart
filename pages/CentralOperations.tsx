@@ -69,7 +69,7 @@ const CyberClock = () => {
                 ))}
             </div>
             <div className="text-xs text-cyber-primary font-bold tracking-[0.2em] mt-1 opacity-80">
-                {formatDate(time)} • UTC {time.getUTCHours()}:{time.getUTCMinutes().toString().padStart(2, '0')}
+                {formatDate(time)}
             </div>
         </div>
     );
@@ -117,7 +117,6 @@ const SystemTicker = () => {
 };
 
 const SystemLoadWidget = () => {
-    // Mock system metrics
     const [load, setLoad] = useState({ cpu: 24, mem: 41, net: 68 });
 
     useEffect(() => {
@@ -131,59 +130,81 @@ const SystemLoadWidget = () => {
         return () => clearInterval(interval);
     }, []);
 
+    const metrics = [
+        { label: 'CPU CORE_01', value: load.cpu, color: 'cyan', text: 'text-cyan-400', bg: 'bg-cyan-500', from: 'from-cyan-600', to: 'to-cyan-400' },
+        { label: 'MEM_ALLOC', value: load.mem, color: 'purple', text: 'text-purple-400', bg: 'bg-purple-500', from: 'from-purple-600', to: 'to-purple-400' },
+        { label: 'NET_THROUGHPUT', value: load.net, unit: ' MB/s', color: 'green', text: 'text-green-400', bg: 'bg-green-500', from: 'from-green-600', to: 'to-green-400' }
+    ];
+
     return (
-        <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-3xl p-5 flex flex-col justify-center relative overflow-hidden group hover:bg-white/10 transition-colors">
-            <div className="flex items-center justify-between mb-3 relative z-10">
-                <div className="flex items-center gap-2">
-                    <Server className="text-cyan-400" size={20} />
-                    <span className="text-xs text-gray-500 font-bold uppercase">System Load</span>
-                </div>
-                <div className="flex gap-1">
-                    <span className="w-1 h-3 bg-cyan-500/50 rounded-full animate-pulse"></span>
-                    <span className="w-1 h-3 bg-cyan-500/30 rounded-full"></span>
-                    <span className="w-1 h-3 bg-cyan-500/10 rounded-full"></span>
-                </div>
-            </div>
-
-            <div className="space-y-3 relative z-10">
-                <div>
-                    <div className="flex justify-between text-[10px] text-gray-400 mb-1 font-mono">
-                        <span>CPU_CORE_01</span>
-                        <span className="text-cyan-400">{load.cpu}%</span>
+        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-5 flex flex-col justify-center relative overflow-hidden group hover:border-cyan-500/30 transition-all duration-500 hover:shadow-[0_0_30px_rgba(6,182,212,0.15)] h-full w-full min-w-0">
+            <div className="flex items-center justify-between mb-4 relative z-10 w-full">
+                <div className="flex items-center gap-2 min-w-0">
+                    <div className="p-1.5 rounded-lg bg-cyan-500/10 group-hover:bg-cyan-500/20 transition-colors shrink-0">
+                        <Server className="text-cyan-400" size={16} />
                     </div>
-                    <div className="w-full bg-black/30 h-1.5 rounded-full overflow-hidden">
-                        <div className="h-full bg-cyan-500 transition-all duration-1000 ease-out" style={{ width: `${load.cpu}%` }}></div>
+                    <div className="min-w-0 flex-1">
+                        <span className="text-[10px] text-white font-bold uppercase tracking-widest block truncate">Status</span>
+                        <span className="text-[9px] text-cyan-400 font-mono tracking-wider truncate block">OPTIMAL</span>
                     </div>
                 </div>
-                <div>
-                    <div className="flex justify-between text-[10px] text-gray-400 mb-1 font-mono">
-                        <span>MEM_ALLOC</span>
-                        <span className="text-purple-400">{load.mem}%</span>
-                    </div>
-                    <div className="w-full bg-black/30 h-1.5 rounded-full overflow-hidden">
-                        <div className="h-full bg-purple-500 transition-all duration-1000 ease-out" style={{ width: `${load.mem}%` }}></div>
-                    </div>
-                </div>
-                <div>
-                    <div className="flex justify-between text-[10px] text-gray-400 mb-1 font-mono">
-                        <span>NET_THROUGHPUT</span>
-                        <span className="text-green-400">{load.net} MB/s</span>
-                    </div>
-                    <div className="w-full bg-black/30 h-1.5 rounded-full overflow-hidden">
-                        <div className="h-full bg-green-500 transition-all duration-1000 ease-out" style={{ width: `${load.net}%` }}></div>
-                    </div>
+                <div className="flex gap-1.5">
+                    <span className="w-1.5 h-6 bg-cyan-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(6,182,212,0.5)]"></span>
+                    <span className="w-1.5 h-4 bg-cyan-500/40 rounded-full my-auto"></span>
+                    <span className="w-1.5 h-2 bg-cyan-500/20 rounded-full my-auto"></span>
                 </div>
             </div>
 
-            {/* Background Decoration */}
-            <div className="absolute right-0 top-0 w-32 h-full opacity-5 pointer-events-none">
-                <svg width="100%" height="100%">
-                    <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
-                        <path d="M 20 0 L 0 0 0 20" fill="none" stroke="currentColor" strokeWidth="1" />
-                    </pattern>
-                    <rect width="100%" height="100%" fill="url(#grid)" />
-                </svg>
+            <div className="space-y-5 relative z-10">
+                {metrics.map((m, i) => (
+                    <div key={i} className="group/bar">
+                        <div className="flex justify-between text-[10px] uppercase font-bold text-gray-400 mb-1.5 tracking-wider">
+                            <span>{m.label}</span>
+                            <span className={`${m.text} font-mono text-xs group-hover/bar:scale-110 transition-transform`}>
+                                {m.value}{m.unit || '%'}
+                            </span>
+                        </div>
+                        <div className="w-full bg-black/40 h-2 rounded-full overflow-hidden border border-white/5">
+                            <div
+                                className={`h-full bg-gradient-to-r ${m.from} ${m.to} shadow-[0_0_10px_rgba(0,0,0,0.5)] transition-all duration-1000 ease-out relative`}
+                                style={{ width: `${m.value}%` }}
+                            >
+                                <div className="absolute inset-0 bg-white/20 animate-pulse"></div>
+                            </div>
+                        </div>
+                    </div>
+                ))}
             </div>
+
+            {/* Premium Background FX */}
+            <div className="absolute -right-10 -top-10 w-40 h-40 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none group-hover:bg-cyan-500/20 transition-colors duration-700"></div>
+        </div>
+    );
+};
+
+// --- NEW COMPONENT: Stat Card ---
+const StatCard = ({ icon: Icon, title, value, color, delay }: any) => {
+    // Map color props to distinct Tailwind classes to ensure they exist/purge correctly
+    const colorStyles: any = {
+        blue: { icon: 'text-blue-400', bg: 'bg-blue-500/10', glow: 'bg-blue-500/20', hoverBorder: 'hover:border-blue-500/30' },
+        purple: { icon: 'text-purple-400', bg: 'bg-purple-500/10', glow: 'bg-purple-500/20', hoverBorder: 'hover:border-purple-500/30' },
+        orange: { icon: 'text-orange-400', bg: 'bg-orange-500/10', glow: 'bg-orange-500/20', hoverBorder: 'hover:border-orange-500/30' },
+        green: { icon: 'text-green-400', bg: 'bg-green-500/10', glow: 'bg-green-500/20', hoverBorder: 'hover:border-green-500/30' },
+    };
+
+    const style = colorStyles[color] || colorStyles.blue;
+
+    return (
+        <div className={`relative overflow-hidden bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-3 flex flex-col justify-center items-center text-center group hover:bg-white/10 transition-all duration-500 ${style.hoverBorder} hover:shadow-lg h-full w-full min-w-0`}>
+            <div className={`p-2.5 rounded-2xl ${style.bg} mb-2 group-hover:scale-110 group-hover:-translate-y-1 transition-all duration-300 relative shrink-0`}>
+                <Icon className={style.icon} size={20} />
+                <div className={`absolute inset-0 ${style.glow} blur-md rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
+            </div>
+            <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest mb-0.5 group-hover:text-gray-300 transition-colors w-full truncate px-1">{title}</p>
+            <p className="text-lg font-mono font-bold text-white group-hover:scale-105 transition-transform w-full truncate px-1">{value}</p>
+
+            {/* Hover Glow Effect */}
+            <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/0 to-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
         </div>
     );
 };
@@ -234,15 +255,12 @@ const TopProductsWidget = ({ products }: { products: any[] }) => {
         <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-3xl p-6 h-full relative overflow-hidden flex flex-col">
             <div className="flex justify-between items-center mb-4 relative z-10">
                 <h3 className="font-bold text-white flex items-center gap-2 text-sm">
-                    <Award className="text-yellow-400" size={16} />
-                    Top Performing Items
+                    <Zap className="text-yellow-400" size={16} />
+                    System Load
                 </h3>
-                <div className="px-2 py-0.5 rounded bg-yellow-500/10 border border-yellow-500/20 text-[10px] text-yellow-400 font-bold uppercase">
-                    Sales Vol
-                </div>
             </div>
 
-            <div className="space-y-4 relative z-10 overflow-y-auto custom-scrollbar pr-1">
+            <div className="space-y-2 relative z-10 overflow-y-auto custom-scrollbar pr-1">
                 {products.length === 0 ? (
                     <div className="text-xs text-gray-500 font-mono text-center py-4">NO SALES DATA</div>
                 ) : (
@@ -422,27 +440,27 @@ export default function CentralOperations() {
     const GlassKPICard = ({ title, value, icon: Icon, color, sub, route, trend }: GlassKPICardProps) => (
         <div
             onClick={() => route && navigate(route)}
-            className="group relative overflow-hidden bg-white/5 backdrop-blur-md border border-white/10 rounded-3xl p-6 cursor-pointer hover:bg-white/10 transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_0_30px_rgba(0,255,157,0.1)]"
+            className="group relative overflow-hidden bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 cursor-pointer hover:border-white/20 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_10px_40px_-10px_rgba(0,0,0,0.5)]"
         >
-            <div className={`absolute -right-6 -top-6 p-8 rounded-full ${color.replace('text-', 'bg-')}/5 blur-2xl group-hover:blur-3xl transition-all duration-500`}></div>
+            <div className={`absolute -right-10 -top-10 p-16 rounded-full ${color.replace('text-', 'bg-')}/10 blur-3xl group-hover:blur-[60px] transition-all duration-700`}></div>
 
-            <div className="flex justify-between items-start mb-4">
-                <div className={`p-3 rounded-2xl ${color.replace('text-', 'bg-')}/10 text-white border border-white/5`}>
+            <div className="flex justify-between items-start mb-4 relative z-10">
+                <div className={`p-3.5 rounded-2xl ${color.replace('text-', 'bg-')}/10 text-white border border-white/5 group-hover:scale-110 transition-transform duration-300`}>
                     <Icon size={24} className={color} />
                 </div>
                 {trend && (
-                    <span className="flex items-center text-xs font-bold text-green-400 bg-green-500/10 px-2 py-1 rounded-full border border-green-500/20">
-                        <TrendingUp size={12} className="mr-1" /> {trend}
+                    <span className={`flex items-center text-[10px] font-bold px-2 py-1 rounded-full border backdrop-blur-sm ${trend.startsWith('+') ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' : 'text-rose-400 bg-rose-500/10 border-rose-500/20'}`}>
+                        <TrendingUp size={10} className={`mr-1 ${trend.startsWith('-') ? 'rotate-180' : ''}`} /> {trend}
                     </span>
                 )}
             </div>
 
-            <div>
-                <p className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-1">{title}</p>
-                <h3 className="text-2xl lg:text-3xl font-mono font-bold text-white tracking-tight truncate">
+            <div className="relative z-10">
+                <p className="text-gray-400 text-[10px] font-bold uppercase tracking-wider mb-1">{title}</p>
+                <h3 className="text-2xl lg:text-3xl font-mono font-bold text-white tracking-tight truncate drop-shadow-sm">
                     {typeof value === 'number' ? formatCompactNumber(value) : value}
                 </h3>
-                {sub && <p className="text-xs text-gray-500 mt-2 font-medium">{sub}</p>}
+                {sub && <p className="text-[11px] text-gray-500 mt-2 font-medium flex items-center gap-1"><span className="w-1 h-1 rounded-full bg-gray-600"></span>{sub}</p>}
             </div>
         </div>
     );
@@ -541,7 +559,7 @@ export default function CentralOperations() {
                     </WidgetErrorBoundary>
                 </div>
                 {/* 2. MAIN CHART (Large Area) - Spans 3 cols */}
-                <div className="md:col-span-3 bg-white/5 backdrop-blur-lg border border-white/10 rounded-3xl p-6 h-[450px] relative overflow-hidden">
+                <div className="md:col-span-3 bg-gradient-to-b from-white/10 to-white/5 backdrop-blur-2xl border border-white/10 rounded-3xl p-8 h-[450px] relative overflow-hidden shadow-2xl shadow-black/50 group">
                     <WidgetErrorBoundary title="Revenue Chart">
                         {revenueBySiteData.length === 0 && <EmptyState message="No revenue data available" />}
 
@@ -699,7 +717,7 @@ export default function CentralOperations() {
                             <div className="overflow-y-auto custom-scrollbar pr-2">
                                 <div className="space-y-3">
                                     {sitePerformance.map((site) => (
-                                        <div key={site.id} className="flex items-center justify-between p-4 bg-black/20 rounded-2xl hover:bg-white/5 transition-colors border border-white/5 group">
+                                        <div key={site.id} className="flex items-center justify-between p-4 bg-white/5 hover:bg-white/10 rounded-2xl transition-all duration-300 border border-white/5 group hover:border-white/20 hover:shadow-lg hover:shadow-black/20 hover:-translate-x-1">
                                             <div className="flex items-center gap-4">
                                                 <div className={`p-2 rounded-lg ${site.type === 'Warehouse' ? 'bg-purple-500/20 text-purple-400' : 'bg-blue-500/20 text-blue-400'}`}>
                                                     <Package size={16} />
@@ -780,26 +798,35 @@ export default function CentralOperations() {
                     </div>
 
                     {/* Quick Stats Grid */}
-                    <div className="grid grid-cols-2 gap-4 h-full">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 lg:gap-4 h-full">
                         {/* REPLACED WMS Accuracy with SYSTEM LOAD WIDGET */}
-                        <SystemLoadWidget />
-
-                        <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-3xl p-5 flex flex-col justify-center items-center text-center hover:bg-white/10 transition-colors">
-                            <Clock className="text-blue-400 mb-2" size={24} />
-                            <p className="text-xs text-gray-500 font-bold uppercase">Cycle Time</p>
-                            <p className="text-xl font-mono font-bold text-white">{metrics?.avgCycleTime || '0m'}</p>
+                        <div className="sm:col-span-2 lg:col-span-1">
+                            <SystemLoadWidget />
                         </div>
 
-                        <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-3xl p-5 flex flex-col justify-center items-center text-center hover:bg-white/10 transition-colors">
-                            <Users className="text-purple-400 mb-2" size={24} />
-                            <p className="text-xs text-gray-500 font-bold uppercase">Active Staff</p>
-                            <p className="text-xl font-mono font-bold text-white">{metrics?.activeEmployees || 0}</p>
-                        </div>
-                        <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-3xl p-5 flex flex-col justify-center items-center text-center hover:bg-white/10 transition-colors">
-                            <Truck className="text-orange-400 mb-2" size={24} />
-                            <p className="text-xs text-gray-500 font-bold uppercase">Inbound POs</p>
-                            <p className="text-xl font-mono font-bold text-white">{metrics?.inboundPOs || 0}</p>
-                        </div>
+                        <StatCard
+                            icon={Clock}
+                            title="Cycle Time"
+                            value={metrics?.avgCycleTime || '0m'}
+                            color="blue"
+                            delay="0.1s"
+                        />
+
+                        <StatCard
+                            icon={Users}
+                            title="Active Staff"
+                            value={metrics?.activeEmployees || 0}
+                            color="purple"
+                            delay="0.2s"
+                        />
+
+                        <StatCard
+                            icon={Truck}
+                            title="Inbound POs"
+                            value={metrics?.inboundPOs || 0}
+                            color="orange"
+                            delay="0.3s"
+                        />
                     </div>
                 </div>
 

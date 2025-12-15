@@ -295,8 +295,9 @@ export default function TopBar() {
                   : user?.siteId;
 
                const finalSite = employeeSite || (siteId ? sites.find(s => s.id === siteId) : null);
-               const locationName = activeSite?.name || finalSite?.name || 'Administration';
-               const siteType = activeSite?.type || finalSite?.type;
+               const displaySite = activeSite || finalSite;
+               const locationName = displaySite?.name || 'Administration';
+               const siteType = displaySite?.type;
 
                if (!locationName) return null;
 
@@ -304,18 +305,21 @@ export default function TopBar() {
 
                // User sees static badge indicating current location context
                return (
-                  <div className={`hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full border ${isWarehouse
+                  <div className={`flex items-center gap-2 px-2 md:px-3 py-1 md:py-1.5 rounded-full border mx-auto md:mx-0 ${isWarehouse
                      ? 'bg-blue-900/20 border-blue-500/30 text-blue-400'
                      : 'bg-green-900/20 border-green-500/30 text-green-400'
                      }`}>
                      {isWarehouse ? <Building size={14} /> : <Store size={14} />}
-                     <span className="text-xs font-bold uppercase tracking-wide">
+                     <span className="text-[10px] md:text-xs font-bold uppercase tracking-wide whitespace-nowrap truncate max-w-[100px] md:max-w-none">
                         {locationName}
                      </span>
-                     {finalSite?.code && (
-                        <span className={`ml-1 text-[10px] font-mono font-bold px-1.5 py-0.5 rounded border tracking-widest bg-black/20 ${isWarehouse ? 'border-blue-500/30 text-blue-300' : 'border-green-500/30 text-green-300'}`}>
-                           {finalSite.code}
-                        </span>
+                     {displaySite?.code && (
+                        <div className={`ml-1 md:ml-2 flex items-center gap-1 md:gap-1.5 pl-2 border-l ${isWarehouse ? 'border-blue-500/30' : 'border-green-500/30'}`}>
+                           <span className="hidden sm:inline text-[10px] text-gray-500 font-bold uppercase tracking-wider">ID</span>
+                           <span className={`font-mono text-[10px] md:text-xs font-bold tracking-widest ${isWarehouse ? 'text-blue-200' : 'text-green-200'} shadow-sm`}>
+                              {displaySite.code}
+                           </span>
+                        </div>
                      )}
                   </div>
                );
@@ -324,11 +328,21 @@ export default function TopBar() {
 
          <div className="flex items-center space-x-4">
             {/* USER INFO */}
-            <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10">
-               <div className="w-6 h-6 rounded-full bg-gradient-to-br from-cyber-primary to-blue-500 flex items-center justify-center text-black text-xs font-bold">
-                  {user.name.charAt(0).toUpperCase()}
+            {/* USER INFO */}
+            <div className="hidden md:flex items-center gap-3 px-4 py-2 rounded-full bg-gradient-to-r from-white/5 to-transparent border border-white/10 hover:border-cyber-primary/50 transition-all duration-300 group cursor-pointer hover:shadow-[0_0_15px_rgba(0,255,157,0.1)]">
+               <div className="relative">
+                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-cyber-primary to-blue-600 flex items-center justify-center text-black font-black text-sm shadow-lg group-hover:scale-105 transition-transform">
+                     {user.name.charAt(0).toUpperCase()}
+                  </div>
+                  <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 border-2 border-black rounded-full animate-pulse"></div>
                </div>
-               <span className="text-xs font-medium text-white">{user.name}</span>
+
+               <div className="flex flex-col">
+                  <span className="text-sm font-bold text-white leading-none group-hover:text-cyber-primary transition-colors">{user.name}</span>
+                  <span className="text-[10px] font-mono text-gray-400 uppercase tracking-wider mt-0.5 leading-none">{user.role}</span>
+               </div>
+
+               <ChevronDown size={14} className="text-gray-500 group-hover:text-white transition-colors group-hover:rotate-180 duration-300" />
             </div>
 
             <button
@@ -339,10 +353,7 @@ export default function TopBar() {
                {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
             </button>
 
-            <div className="hidden sm:flex items-center space-x-2 px-3 py-1 rounded-full bg-green-900/20 border border-green-500/20 text-green-400 text-xs font-mono">
-               <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-               <span>{user.role.toUpperCase()} ACCESS</span>
-            </div>
+
 
             {/* NOTIFICATIONS */}
             <div className="relative">

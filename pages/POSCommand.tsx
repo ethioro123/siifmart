@@ -467,7 +467,7 @@ export default function POSDashboard() {
                       dataKey="value"
                     >
                       {paymentChartData.map((entry, index) => (
-                        <Cell key={`cell - ${index} `} fill={COLORS[index % COLORS.length]} stroke="none" />
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke="none" />
                       ))}
                     </Pie>
                   </PieChart>
@@ -650,7 +650,7 @@ export default function POSDashboard() {
                   <td className="p-4 text-xs text-gray-400">{sale.method}</td>
                   <td className="p-4 text-sm font-mono text-white text-right">{CURRENCY_SYMBOL} {sale.total.toLocaleString()}</td>
                   <td className="p-4 text-center">
-                    <span className={`px - 2 py - 1 rounded text - [10px] font - bold uppercase border ${sale.status === 'Completed' ? 'text-green-400 bg-green-400/10 border-green-400/20' : 'text-yellow-400 bg-yellow-400/10 border-yellow-400/20'
+                    <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase border ${sale.status === 'Completed' ? 'text-green-400 bg-green-400/10 border-green-400/20' : 'text-yellow-400 bg-yellow-400/10 border-yellow-400/20'
                       } `}>
                       {sale.status}
                     </span>
