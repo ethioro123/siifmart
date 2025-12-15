@@ -934,7 +934,7 @@ export default function WarehouseOperations() {
             <div className="fixed inset-0 z-50 bg-black flex flex-col">
                 {/* Header */}
                 {/* Header */}
-                <div className="p-4 bg-gray-900 flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4 border-b border-gray-800">
+                <div className="p-4 pt-[calc(1rem+env(safe-area-inset-top))] bg-gray-900 flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4 border-b border-gray-800">
                     <div className="text-white w-full md:w-auto">
                         <div className="flex justify-between items-start">
                             <div>
@@ -1404,15 +1404,21 @@ export default function WarehouseOperations() {
                                                             setSelectedBin(binNum);
                                                             handleLocationSelect(location);
                                                         }}
-                                                        className={`p-3 rounded-lg border-2 font-mono text-xs font-bold transition-all ${isSelected
-                                                            ? 'bg-blue-500 border-blue-400 text-white'
+                                                        className={`p-4 rounded-xl border-2 flex flex-col items-center justify-center gap-2 transition-all ${isSelected
+                                                            ? 'bg-blue-500 border-blue-400 text-white shadow-lg shadow-blue-500/20'
                                                             : occupied
                                                                 ? 'bg-gray-800 border-gray-700 text-blue-400 hover:border-blue-500 hover:bg-gray-750'
-                                                                : 'bg-gray-800 border-gray-700 text-green-400 hover:border-green-500 hover:bg-gray-750'
+                                                                : 'bg-gray-800 border-gray-700 text-white hover:border-green-500 hover:bg-gray-750'
                                                             } `}
                                                         title={occupied ? `Has items: ${location} ` : `Empty: ${location} `}
                                                     >
-                                                        {binNum}
+                                                        <span className="text-xl font-mono font-bold">{binNum}</span>
+                                                        {occupied && (
+                                                            <span className={`text-[10px] uppercase font-bold px-1.5 py-0.5 rounded ${isSelected ? 'bg-white/20 text-white' : 'bg-blue-500/20 text-blue-400'
+                                                                }`}>
+                                                                {t('warehouse.occupied')}
+                                                            </span>
+                                                        )}
                                                     </button>
                                                 );
                                             })}
@@ -1437,150 +1443,154 @@ export default function WarehouseOperations() {
 
                             {/* Step 2: Item Scan */}
                             {scannerStep === 'SCAN' && currentItem && (
-                                <div className="text-center space-y-6 w-full max-w-md overflow-y-auto px-4 md:px-0 pb-20 md:pb-0 h-[calc(100vh-140px)] md:h-auto flex flex-col justify-between md:justify-start">
-                                    <div className="flex-1 flex flex-col items-center justify-center space-y-4">
-                                        <div className="relative inline-block shrink-0">
-                                            <img src={currentItem.image} className="w-32 h-32 md:w-48 md:h-48 rounded-xl border-4 border-gray-800 object-cover" alt="" />
-                                            {settings.fefoRotation && selectedJob.type === 'PICK' && (
-                                                <div className="absolute -top-4 -right-4 bg-yellow-500 text-black font-bold px-3 py-1 rounded-full animate-pulse shadow-lg border-2 border-white text-xs md:text-base">
-                                                    FEFO: PICK OLD
+
+                                <>
+                                    <div className="text-center w-full max-w-md mx-auto space-y-6 pb-24 md:pb-0 px-4 md:px-0">
+                                        <div className="flex flex-col items-center justify-center space-y-4">
+                                            <div className="relative inline-block shrink-0">
+                                                <img src={currentItem.image} className="w-32 h-32 md:w-48 md:h-48 rounded-xl border-4 border-gray-800 object-cover" alt="" />
+                                                {settings.fefoRotation && selectedJob.type === 'PICK' && (
+                                                    <div className="absolute -top-4 -right-4 bg-yellow-500 text-black font-bold px-3 py-1 rounded-full animate-pulse shadow-lg border-2 border-white text-xs md:text-base">
+                                                        FEFO: PICK OLD
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            <div>
+                                                <h2 className="text-xl md:text-2xl font-bold text-white line-clamp-2">{currentItem.name}</h2>
+                                                <div className="flex justify-center gap-4 mt-4">
+                                                    <MetricBadge label={t('warehouse.qty')} value={currentItem.expectedQty} color="border-blue-500 text-blue-400 bg-blue-500" />
+                                                    <MetricBadge label={t('warehouse.stock')} value={product?.stock || 0} color="border-gray-500 text-gray-400 bg-gray-500" />
                                                 </div>
-                                            )}
-                                        </div>
-
-                                        <div>
-                                            <h2 className="text-xl md:text-2xl font-bold text-white line-clamp-2">{currentItem.name}</h2>
-                                            <div className="flex justify-center gap-4 mt-4">
-                                                <MetricBadge label={t('warehouse.qty')} value={currentItem.expectedQty} color="border-blue-500 text-blue-400 bg-blue-500" />
-                                                <MetricBadge label={t('warehouse.stock')} value={product?.stock || 0} color="border-gray-500 text-gray-400 bg-gray-500" />
                                             </div>
                                         </div>
-                                    </div>
 
-                                    {settings.fefoRotation && product?.expiryDate && selectedJob.type === 'PICK' && (
-                                        <div className={`p-4 rounded-xl border flex items-center justify-center gap-3 ${expiry.color === 'text-red-500' ? 'bg-red-900/20 border-red-500' : 'bg-gray-800 border-gray-700'} `}>
-                                            <AlertTriangle size={24} className={expiry.color} />
-                                            <div className="text-left">
-                                                <p className="text-xs text-gray-400 uppercase">{t('warehouse.checkExpiry')}</p>
-                                                <p className={`font-bold ${expiry.color} `}>{product.expiryDate} ({expiry.label})</p>
+                                        {settings.fefoRotation && product?.expiryDate && selectedJob.type === 'PICK' && (
+                                            <div className={`p-4 rounded-xl border flex items-center justify-center gap-3 ${expiry.color === 'text-red-500' ? 'bg-red-900/20 border-red-500' : 'bg-gray-800 border-gray-700'} `}>
+                                                <AlertTriangle size={24} className={expiry.color} />
+                                                <div className="text-left">
+                                                    <p className="text-xs text-gray-400 uppercase">{t('warehouse.checkExpiry')}</p>
+                                                    <p className={`font-bold ${expiry.color} `}>{product.expiryDate} ({expiry.label})</p>
+                                                </div>
                                             </div>
-                                        </div>
-                                    )}
+                                        )}
 
-                                    {/* PICK Job-Show item location */}
-                                    {selectedJob.type === 'PICK' && product?.location && (
-                                        <div className="p-4 rounded-xl bg-blue-900/30 border-2 border-blue-500 flex flex-col items-center animate-pulse">
-                                            <p className="text-xs text-blue-400 uppercase font-bold mb-2">{t('warehouse.goToLocation')}</p>
-                                            <p className="text-3xl text-white font-mono font-bold tracking-wider">{product.location}</p>
-                                            <p className="text-xs text-gray-400 mt-2">{t('warehouse.pickItem').replace('{qty}', currentItem.expectedQty.toString()).replace('{name}', currentItem.name)}</p>
-                                        </div>
-                                    )}
-
-                                    {/* PICK Job-No location assigned */}
-                                    {selectedJob.type === 'PICK' && !product?.location && (
-                                        <div className="p-4 rounded-xl bg-yellow-900/20 border border-yellow-500/50 flex items-center justify-center gap-3">
-                                            <AlertTriangle size={24} className="text-yellow-500" />
-                                            <div className="text-left">
-                                                <p className="text-xs text-yellow-400 uppercase font-bold">{t('warehouse.noLocationAssigned')}</p>
-                                                <p className="text-gray-400 text-sm">{t('warehouse.checkInventoryRecords')}</p>
+                                        {/* PICK Job-Show item location */}
+                                        {selectedJob.type === 'PICK' && product?.location && (
+                                            <div className="p-4 rounded-xl bg-blue-900/30 border-2 border-blue-500 flex flex-col items-center animate-pulse">
+                                                <p className="text-xs text-blue-400 uppercase font-bold mb-2">{t('warehouse.goToLocation')}</p>
+                                                <p className="text-3xl text-white font-mono font-bold tracking-wider">{product.location}</p>
+                                                <p className="text-xs text-gray-400 mt-2">{t('warehouse.pickItem').replace('{qty}', currentItem.expectedQty.toString()).replace('{name}', currentItem.name)}</p>
                                             </div>
-                                        </div>
-                                    )}
+                                        )}
 
-                                    {selectedJob.type === 'PUTAWAY' && scannedBin && (
-                                        <div className="p-4 rounded-xl bg-green-900/20 border border-green-500 flex flex-col items-center">
-                                            <p className="text-xs text-green-400 uppercase font-bold mb-2">{t('warehouse.selectedStorageLocation')}</p>
-                                            <p className="text-2xl text-white font-mono font-bold">{scannedBin}</p>
-                                            {isLocationOccupied(scannedBin) && (
-                                                <p className="text-xs text-blue-400 mt-2">{t('warehouse.thisLocationHasItems')}</p>
-                                            )}
-                                            <button
-                                                onClick={() => {
-                                                    setScannedBin('');
-                                                    setScannerStep('NAV');
-                                                }}
-                                                className="mt-3 text-xs text-blue-400 hover:text-blue-300 underline"
-                                            >
-                                                {t('warehouse.changeLocation')}
-                                            </button>
-                                        </div>
-                                    )}
-
-                                    {/* Barcode Scanner Input-Critical for Operations */}
-                                    <div className="w-full space-y-3">
-                                        <div className="bg-gray-900 rounded-xl border-2 border-cyber-primary/50 p-4">
-                                            <div className="flex items-center gap-2 mb-2">
-                                                <Scan className="text-cyber-primary" size={20} />
-                                                <p className="text-xs text-cyber-primary uppercase font-bold">{t('warehouse.scanProductBarcode')}</p>
+                                        {/* PICK Job-No location assigned */}
+                                        {selectedJob.type === 'PICK' && !product?.location && (
+                                            <div className="p-4 rounded-xl bg-yellow-900/20 border border-yellow-500/50 flex items-center justify-center gap-3">
+                                                <AlertTriangle size={24} className="text-yellow-500" />
+                                                <div className="text-left">
+                                                    <p className="text-xs text-yellow-400 uppercase font-bold">{t('warehouse.noLocationAssigned')}</p>
+                                                    <p className="text-gray-400 text-sm">{t('warehouse.checkInventoryRecords')}</p>
+                                                </div>
                                             </div>
-                                            <div className="flex gap-2 min-w-0">
-                                                <input
-                                                    type="text"
-                                                    value={scannedItem}
-                                                    className={`flex-1 bg-black/50 border-2 border-cyber-primary/30 rounded-lg p-4 text-white font-mono text-lg text-center focus:border-cyber-primary focus:outline-none focus:ring-2 focus:ring-cyber-primary/50 ${isProcessingScan ? 'opacity-50 cursor-not-allowed' : ''} `}
-                                                    ref={itemInputRef}
-                                                    onBlur={handleBlur}
-                                                    autoFocus
-                                                    disabled={isProcessingScan}
-                                                    onKeyDown={(e) => {
-                                                        // Priority: Enter key (standard scanner terminology)
-                                                        if (e.key === 'Enter' && scannedItem.trim()) {
-                                                            e.preventDefault();
-                                                            // Clear any pending debounce
-                                                            if ((window as any).scanTimeout) clearTimeout((window as any).scanTimeout);
+                                        )}
 
-                                                            handleItemScan();
-                                                        }
-                                                    }}
-                                                    onChange={(e) => {
-                                                        const value = e.target.value;
-                                                        setScannedItem(value);
-
-                                                        // Debounce logic for scanners that don't send Enter or fast processing
-                                                        if ((window as any).scanTimeout) clearTimeout((window as any).scanTimeout);
-
-                                                        if (value.length > 2) {
-                                                            (window as any).scanTimeout = setTimeout(() => {
-                                                                // Check for exact match to auto-submit
-                                                                // This helps when users scan but the scanner doesn't hit Enter
-                                                                if (value === scannedItem) return; // Value changed, abort (handled by closure usually, but here checking ref would be better if we had one)
-
-                                                                // Re-validate against current value in closure? No, e.target.value is stale in timeout?
-                                                                // We rely on the fact that if a new char comes, we cleared the timeout.
-                                                                // So if this executes, no new char has come for 200ms.
-
-                                                                const upperValue = value.toUpperCase();
-                                                                const match = filteredProducts.find(p =>
-                                                                    p.sku?.toUpperCase() === upperValue ||
-                                                                    p.barcode?.toUpperCase() === upperValue ||
-                                                                    p.id.toUpperCase() === upperValue
-                                                                );
-
-                                                                // Only auto-submit if strongly matched and we are sure it's the intended item
-                                                                if (match && match.id === currentItem?.productId) {
-                                                                    handleItemScan();
-                                                                }
-                                                            }, 200);
-                                                        }
-                                                    }}
-                                                />
+                                        {selectedJob.type === 'PUTAWAY' && scannedBin && (
+                                            <div className="p-4 rounded-xl bg-green-900/20 border border-green-500 flex flex-col items-center">
+                                                <p className="text-xs text-green-400 uppercase font-bold mb-2">{t('warehouse.selectedStorageLocation')}</p>
+                                                <p className="text-2xl text-white font-mono font-bold">{scannedBin}</p>
+                                                {isLocationOccupied(scannedBin) && (
+                                                    <p className="text-xs text-blue-400 mt-2">{t('warehouse.thisLocationHasItems')}</p>
+                                                )}
                                                 <button
                                                     onClick={() => {
-                                                        setQRScannerMode('product');
-                                                        setIsQRScannerOpen(true);
+                                                        setScannedBin('');
+                                                        setScannerStep('NAV');
                                                     }}
-                                                    className={`px-4 py-4 bg-blue-500/20 border-2 border-blue-500/30 text-blue-400 font-bold rounded-lg flex items-center gap-2 transition-colors ${isProcessingScan ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-500/30'} `}
-                                                    title={t('warehouse.scanProductWithCamera')}
-                                                    disabled={isProcessingScan}
+                                                    className="mt-3 text-xs text-blue-400 hover:text-blue-300 underline"
                                                 >
-                                                    <Camera size={24} />
+                                                    {t('warehouse.changeLocation')}
                                                 </button>
                                             </div>
-                                            <p className="text-[10px] text-gray-500 text-center mt-2">
-                                                {t('warehouse.expected')}: <span className="font-bold text-cyber-primary">{currentItem?.sku || currentItem?.productId}</span>
-                                                <span className="text-blue-400 ml-2">• {t('warehouse.orUseCamera')}</span>
-                                            </p>
+                                        )}
+
+                                        {/* Barcode Scanner Input-Critical for Operations */}
+                                        <div className="w-full space-y-3">
+                                            <div className="bg-gray-900 rounded-xl border-2 border-cyber-primary/50 p-4">
+                                                <div className="flex items-center gap-2 mb-2">
+                                                    <Scan className="text-cyber-primary" size={20} />
+                                                    <p className="text-xs text-cyber-primary uppercase font-bold">{t('warehouse.scanProductBarcode')}</p>
+                                                </div>
+                                                <div className="flex gap-2 min-w-0">
+                                                    <input
+                                                        type="text"
+                                                        value={scannedItem}
+                                                        className={`flex-1 bg-black/50 border-2 border-cyber-primary/30 rounded-lg p-4 text-white font-mono text-lg text-center focus:border-cyber-primary focus:outline-none focus:ring-2 focus:ring-cyber-primary/50 ${isProcessingScan ? 'opacity-50 cursor-not-allowed' : ''} `}
+                                                        ref={itemInputRef}
+                                                        onBlur={handleBlur}
+                                                        autoFocus
+                                                        disabled={isProcessingScan}
+                                                        onKeyDown={(e) => {
+                                                            // Priority: Enter key (standard scanner terminology)
+                                                            if (e.key === 'Enter' && scannedItem.trim()) {
+                                                                e.preventDefault();
+                                                                // Clear any pending debounce
+                                                                if ((window as any).scanTimeout) clearTimeout((window as any).scanTimeout);
+
+                                                                handleItemScan();
+                                                            }
+                                                        }}
+                                                        onChange={(e) => {
+                                                            const value = e.target.value;
+                                                            setScannedItem(value);
+
+                                                            // Debounce logic for scanners that don't send Enter or fast processing
+                                                            if ((window as any).scanTimeout) clearTimeout((window as any).scanTimeout);
+
+                                                            if (value.length > 2) {
+                                                                (window as any).scanTimeout = setTimeout(() => {
+                                                                    // Check for exact match to auto-submit
+                                                                    // This helps when users scan but the scanner doesn't hit Enter
+                                                                    if (value === scannedItem) return; // Value changed, abort (handled by closure usually, but here checking ref would be better if we had one)
+
+                                                                    // Re-validate against current value in closure? No, e.target.value is stale in timeout?
+                                                                    // We rely on the fact that if a new char comes, we cleared the timeout.
+                                                                    // So if this executes, no new char has come for 200ms.
+
+                                                                    const upperValue = value.toUpperCase();
+                                                                    const match = filteredProducts.find(p =>
+                                                                        p.sku?.toUpperCase() === upperValue ||
+                                                                        p.barcode?.toUpperCase() === upperValue ||
+                                                                        p.id.toUpperCase() === upperValue
+                                                                    );
+
+                                                                    // Only auto-submit if strongly matched and we are sure it's the intended item
+                                                                    if (match && match.id === currentItem?.productId) {
+                                                                        handleItemScan();
+                                                                    }
+                                                                }, 200);
+                                                            }
+                                                        }}
+                                                    />
+                                                    <button
+                                                        onClick={() => {
+                                                            setQRScannerMode('product');
+                                                            setIsQRScannerOpen(true);
+                                                        }}
+                                                        className={`px-4 py-4 bg-blue-500/20 border-2 border-blue-500/30 text-blue-400 font-bold rounded-lg flex items-center gap-2 transition-colors ${isProcessingScan ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-500/30'} `}
+                                                        title={t('warehouse.scanProductWithCamera')}
+                                                        disabled={isProcessingScan}
+                                                    >
+                                                        <Camera size={24} />
+                                                    </button>
+                                                </div>
+                                                <p className="text-[10px] text-gray-500 text-center mt-2">
+                                                    {t('warehouse.expected')}: <span className="font-bold text-cyber-primary">{currentItem?.sku || currentItem?.productId}</span>
+                                                    <span className="text-blue-400 ml-2">• {t('warehouse.orUseCamera')}</span>
+                                                </p>
+                                            </div>
                                         </div>
+
                                     </div>
 
                                     <button
@@ -1653,12 +1663,12 @@ export default function WarehouseOperations() {
                                             <span className="text-sm">{t('warehouse.shortPick')}</span>
                                         </button>
                                     </div>
-                                </div>
+                                </>
                             )}
                         </>
                     )}
                 </div>
-            </div>
+            </div >
         );
     };
 
@@ -7121,7 +7131,7 @@ export default function WarehouseOperations() {
                 {
                     showShortPickModal && selectedJob?.lineItems.find(i => i.status === 'Pending') && (
                         <div className="fixed inset-0 bg-black/80 flex items-end md:items-center justify-center z-[9999] p-0 md:p-4" onClick={() => setShowShortPickModal(false)}>
-                            <div className="bg-cyber-gray border-t md:border border-cyber-primary/30 rounded-t-2xl md:rounded-2xl p-6 max-w-md w-full shadow-[0_0_50px_rgba(0,255,157,0.3)]" onClick={(e) => e.stopPropagation()}>
+                            <div className="bg-cyber-gray border-t md:border border-cyber-primary/30 rounded-t-2xl md:rounded-2xl p-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] md:pb-6 max-w-md w-full shadow-[0_0_50px_rgba(0,255,157,0.3)]" onClick={(e) => e.stopPropagation()}>
                                 <div className="flex items-center gap-3 mb-4">
                                     <div className="p-3 bg-red-500/20 rounded-lg">
                                         <AlertTriangle className="text-red-400" size={24} />
@@ -7902,7 +7912,7 @@ export default function WarehouseOperations() {
                 {
                     selectedJob && !isScannerMode && (
                         <div className="fixed inset-0 z-[60] flex items-end md:items-center justify-center bg-black/80 backdrop-blur-sm p-0 md:p-4 animate-in fade-in duration-200">
-                            <div className="bg-cyber-gray border-t md:border border-white/10 rounded-t-2xl md:rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl shadow-cyber-primary/10 flex flex-col">
+                            <div className="bg-cyber-gray border-t md:border border-white/10 rounded-t-2xl md:rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl shadow-cyber-primary/10 flex flex-col pb-[env(safe-area-inset-bottom)] md:pb-0">
                                 {/* Header */}
                                 <div className="p-6 border-b border-white/10 flex justify-between items-start sticky top-0 bg-cyber-gray z-10">
                                     <div>
@@ -8087,7 +8097,7 @@ export default function WarehouseOperations() {
                 {
                     packReprintJob && (
                         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-end md:items-center justify-center p-0 md:p-4 z-50">
-                            <div className="bg-[#1a1a1a] border-t md:border border-white/10 rounded-t-2xl md:rounded-2xl w-full max-w-md p-6 shadow-2xl">
+                            <div className="bg-[#1a1a1a] border-t md:border border-white/10 rounded-t-2xl md:rounded-2xl w-full max-w-md p-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] md:pb-6 shadow-2xl">
                                 <div className="flex items-center justify-between mb-6">
                                     <h3 className="text-xl font-bold text-white flex items-center gap-2">
                                         <Printer className="text-green-400" size={24} />

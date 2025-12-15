@@ -1,13 +1,7 @@
-
 import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-    Search, Filter, Download, Plus, MoreVertical,
-    Map, ClipboardList, Box, Thermometer, Shield, Settings, Printer, RefreshCw, AlertTriangle,
-    Edit, Trash2, CheckCircle, XCircle, Calendar, Lock, Tag, Barcode, Layout,
-    TrendingUp, DollarSign, PieChart as PieIcon, Layers, ChevronDown, ChevronRight, Sliders,
-    Minus, Truck, Package
-} from 'lucide-react';
+import { Plus, Search, Filter, ArrowUpDown, MoreHorizontal, AlertTriangle, FileText, Download, Printer, Box, Trash2, Edit, RefreshCw, Truck, Map, TrendingUp, Layout, ClipboardList, Thermometer, Shield, XCircle, DollarSign, ChevronDown, Minus, Barcode, Package } from 'lucide-react';
+import { formatCompactNumber } from '../utils/formatting';
 import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
     PieChart, Pie, Cell
@@ -186,7 +180,7 @@ export default function Inventory() {
         // Generate a valid EAN-13 barcode for internal use (200 prefix)
         const generated = generateInternalBarcode(products);
         setBarcodeInput(generated);
-        addNotification('success', `Generated internal barcode: ${generated}`);
+        addNotification('success', `Generated internal barcode: ${generated} `);
     };
 
     const handleSaveProduct = (e: React.FormEvent<HTMLFormElement>) => {
@@ -211,7 +205,7 @@ export default function Inventory() {
         }
 
         const newProduct: Product = {
-            id: editingProduct ? editingProduct.id : `PROD-${Math.floor(Math.random() * 10000)}`,
+            id: editingProduct ? editingProduct.id : `PROD - ${Math.floor(Math.random() * 10000)} `,
             siteId: activeSite?.id || user?.siteId || 'WH-001',
             name: name,
             sku: skuInput,
@@ -327,7 +321,7 @@ export default function Inventory() {
         const targetSite = sites.find(s => s.id === transferTargetSite);
 
         const transfer: TransferRecord = {
-            id: `TR-${Date.now()}`,
+            id: `TR - ${Date.now()} `,
             sourceSiteId: activeSite?.id || '',
             sourceSiteName: activeSite?.name || '',
             destSiteId: transferTargetSite,
@@ -412,7 +406,7 @@ export default function Inventory() {
     };
 
     const TabButton = ({ id, label, icon: Icon }: any) => (
-        <button onClick={() => setActiveTab(id)} className={`flex items-center space-x-2 px-4 py-3 rounded-lg text-sm font-medium transition-all ${activeTab === id ? 'bg-cyber-primary text-black shadow-[0_0_15px_rgba(0,255,157,0.3)]' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>
+        <button onClick={() => setActiveTab(id)} className={`flex items - center space - x - 2 px - 4 py - 3 rounded - lg text - sm font - medium transition - all ${activeTab === id ? 'bg-cyber-primary text-black shadow-[0_0_15px_rgba(0,255,157,0.3)]' : 'text-gray-400 hover:text-white hover:bg-white/5'} `}>
             <Icon size={16} /><span>{label}</span>
         </button>
     );
@@ -421,7 +415,7 @@ export default function Inventory() {
         <div className="bg-cyber-gray border border-white/5 rounded-2xl p-5 relative overflow-hidden group hover:border-white/10 transition-all">
             <div className="flex justify-between items-start mb-4">
                 <div className="p-3 rounded-xl bg-white/5 group-hover:bg-cyber-primary/10 transition-colors text-cyber-primary"><Icon size={20} /></div>
-                {trend && <span className={`text-[10px] font-bold px-2 py-1 rounded ${trend > 0 ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'}`}>{trend > 0 ? '+' : ''}{trend}%</span>}
+                {trend && <span className={`text - [10px] font - bold px - 2 py - 1 rounded ${trend > 0 ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'} `}>{trend > 0 ? '+' : ''}{trend}%</span>}
             </div>
             <div><p className="text-gray-400 text-xs font-bold uppercase tracking-wider">{title}</p><h3 className="text-2xl font-mono font-bold text-white mt-1">{value}</h3><p className="text-xs text-gray-500 mt-1">{sub}</p></div>
         </div>
@@ -434,7 +428,7 @@ export default function Inventory() {
                 <div>
                     <h2 className="text-2xl font-bold text-white flex items-center gap-2">
                         <Box className="text-cyber-primary" />
-                        {isReadOnly ? 'Global Inventory (Read-Only)' : `Inventory Command: ${activeSite?.name || 'Loading...'}`}
+                        {isReadOnly ? 'Global Inventory (Read-Only)' : `Inventory Command: ${activeSite?.name || 'Loading...'} `}
                     </h2>
                     <p className="text-gray-400 text-sm">Real-time stock intelligence and control.</p>
                 </div>
@@ -472,7 +466,7 @@ export default function Inventory() {
                 <div className="space-y-6 animate-in fade-in">
                     {/* KPI Cards */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                        <MetricCard title="Total Asset Value" value={`${CURRENCY_SYMBOL} ${(totalInventoryValue / 1000000).toFixed(2)}M`} sub="Current Valuation" icon={DollarSign} trend={12} />
+                        <MetricCard title="Total Asset Value" value={formatCompactNumber(totalInventoryValue, { currency: CURRENCY_SYMBOL })} sub="Current Valuation" icon={DollarSign} trend={12} />
                         <MetricCard title="Stock Turn Rate" value="4.2x" sub="Annualized" icon={RefreshCw} trend={5} />
                         <MetricCard title="Low Stock SKUs" value={filteredProducts.filter(p => p.status === 'low_stock').length} sub="Requires Action" icon={AlertTriangle} trend={-2} />
                         <MetricCard title="Dead Stock Value" value={`${CURRENCY_SYMBOL} 45K`} sub="> 90 Days No Move" icon={XCircle} />
@@ -504,7 +498,7 @@ export default function Inventory() {
                                     <PieChart>
                                         <Pie data={abcData} cx="50%" cy="50%" innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value">
                                             {abcData.map((entry, index) => (
-                                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke="none" />
+                                                <Cell key={`cell - ${index} `} fill={COLORS[index % COLORS.length]} stroke="none" />
                                             ))}
                                         </Pie>
                                         <Tooltip contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #333' }} />
@@ -656,7 +650,7 @@ export default function Inventory() {
                                         const abc = getABCClass(product, totalInventoryValue);
                                         const isSelected = selectedIds.has(product.id);
                                         return (
-                                            <tr key={product.id} className={`hover:bg-white/5 transition-colors group ${isSelected ? 'bg-cyber-primary/5' : ''}`}>
+                                            <tr key={product.id} className={`hover: bg - white / 5 transition - colors group ${isSelected ? 'bg-cyber-primary/5' : ''} `}>
                                                 <td className="p-4"><input type="checkbox" aria-label="Select row" className="accent-cyber-primary" checked={isSelected} onChange={() => toggleSelection(product.id)} /></td>
                                                 <td className="p-4">
                                                     <div className="flex items-center space-x-3">
@@ -696,8 +690,8 @@ export default function Inventory() {
                                                     <span className={`text-sm font-bold font-mono px-3 py-1 rounded-lg ${product.stock === 0 ? 'bg-red-500/20 text-red-400 border border-red-500/50' : product.stock < 10 ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/50' : 'bg-green-500/20 text-green-400 border border-green-500/50'}`}>{product.stock}</span>
                                                 </td>
                                                 <td className="p-4 text-right">
-                                                    <div className="text-sm font-mono text-white font-bold">{CURRENCY_SYMBOL} {product.price.toLocaleString()}</div>
-                                                    <div className="text-[10px] text-gray-500 mt-0.5">Total: {CURRENCY_SYMBOL} {(product.price * product.stock).toLocaleString()}</div>
+                                                    <div className="text-sm font-mono text-white font-bold">{formatCompactNumber(product.price, { currency: CURRENCY_SYMBOL })}</div>
+                                                    <div className="text-[10px] text-gray-500 mt-0.5">Total: {formatCompactNumber(product.price * product.stock, { currency: CURRENCY_SYMBOL })}</div>
                                                 </td>
                                                 <td className="p-4 text-center">
                                                     <span className={`text-xs font-bold w-8 h-8 flex items-center justify-center rounded-full mx-auto border-2 ${abc === 'A' ? 'border-green-500 text-green-500 bg-green-500/10' : abc === 'B' ? 'border-blue-500 text-blue-500 bg-blue-500/10' : 'border-gray-500 text-gray-500 bg-gray-500/10'}`}>{abc}</span>
@@ -749,17 +743,17 @@ export default function Inventory() {
                             <div key={zone.id} className="bg-cyber-gray border border-white/5 rounded-2xl p-6 relative overflow-hidden group cursor-pointer hover:border-white/20 transition-all">
                                 <div className="flex justify-between items-start mb-6 relative z-10">
                                     <div className="flex items-center gap-3">
-                                        <div className={`p-3 rounded-xl ${zone.type === 'Cold' ? 'bg-blue-500/10 text-blue-400' : zone.type === 'Secure' ? 'bg-purple-500/10 text-purple-400' : 'bg-cyber-primary/10 text-cyber-primary'}`}>
+                                        <div className={`p - 3 rounded - xl ${zone.type === 'Cold' ? 'bg-blue-500/10 text-blue-400' : zone.type === 'Secure' ? 'bg-purple-500/10 text-purple-400' : 'bg-cyber-primary/10 text-cyber-primary'} `}>
                                             {zone.type === 'Cold' ? <Thermometer size={24} /> : zone.type === 'Secure' ? <Shield size={24} /> : <Box size={24} />}
                                         </div>
                                         <div><h3 className="font-bold text-white text-lg">{zone.name}</h3><p className="text-xs text-gray-500 uppercase tracking-wider">{zone.type} Storage</p></div>
                                     </div>
-                                    <div className="text-right"><span className={`text-2xl font-mono font-bold ${usagePercent > 90 ? 'text-red-400' : 'text-white'}`}>{usagePercent.toFixed(1)}%</span></div>
+                                    <div className="text-right"><span className={`text - 2xl font - mono font - bold ${usagePercent > 90 ? 'text-red-400' : 'text-white'} `}>{usagePercent.toFixed(1)}%</span></div>
                                 </div>
                                 <div className="relative z-10">
                                     <div className="w-full bg-black/50 rounded-full h-4 border border-white/10 overflow-hidden relative">
                                         {/* eslint-disable-next-line react-dom/no-unsafe-inline-styles */}
-                                        <div className={`h-full transition-all duration-1000 ${colorClass}`} style={{ width: `${usagePercent}%` }} />
+                                        <div className={`h - full transition - all duration - 1000 ${colorClass} `} style={{ width: `${usagePercent}% ` }} />
                                     </div>
                                     {zone.temperature && <div className="mt-4 flex items-center gap-2 text-blue-400 text-sm bg-blue-500/5 px-3 py-2 rounded-lg border border-blue-500/10 w-fit"><Thermometer size={14} /> <span>Current Temp: {zone.temperature}</span></div>}
                                 </div>
@@ -781,9 +775,9 @@ export default function Inventory() {
                                     <tr key={move.id} className="hover:bg-white/5">
                                         <td className="p-4 text-xs font-mono text-gray-400">{move.id}</td>
                                         <td className="p-4 text-xs text-white">{move.date}</td>
-                                        <td className="p-4"><span className={`text-[10px] font-bold px-2 py-1 rounded uppercase border ${move.type === 'IN' ? 'text-green-400 border-green-400/20 bg-green-400/5' : move.type === 'OUT' ? 'text-blue-400 border-blue-400/20 bg-blue-400/5' : 'text-yellow-400 border-yellow-400/20 bg-yellow-400/5'}`}>{move.type}</span></td>
+                                        <td className="p-4"><span className={`text - [10px] font - bold px - 2 py - 1 rounded uppercase border ${move.type === 'IN' ? 'text-green-400 border-green-400/20 bg-green-400/5' : move.type === 'OUT' ? 'text-blue-400 border-blue-400/20 bg-blue-400/5' : 'text-yellow-400 border-yellow-400/20 bg-yellow-400/5'} `}>{move.type}</span></td>
                                         <td className="p-4 text-sm text-white">{move.productName}</td>
-                                        <td className={`p-4 text-sm font-mono text-right font-bold ${move.type === 'IN' ? 'text-green-400' : 'text-white'}`}>{move.type === 'IN' ? '+' : ''}{move.quantity}</td>
+                                        <td className={`p - 4 text - sm font - mono text - right font - bold ${move.type === 'IN' ? 'text-green-400' : 'text-white'} `}>{move.type === 'IN' ? '+' : ''}{move.quantity}</td>
                                         <td className="p-4 text-xs text-gray-300">{move.performedBy}</td>
                                         <td className="p-4 text-xs text-gray-500 italic">{move.reason}</td>
                                     </tr>
@@ -862,7 +856,7 @@ export default function Inventory() {
             {/* Adjustment Modal */}
             <Modal isOpen={isAdjustModalOpen} onClose={() => setIsAdjustModalOpen(false)} title="Stock Adjustment">
                 <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-3"><button onClick={() => setAdjustType('IN')} className={`p-3 rounded-lg border text-sm font-bold flex items-center justify-center gap-2 ${adjustType === 'IN' ? 'bg-green-500/20 border-green-500 text-green-400' : 'bg-white/5 border-white/10 text-gray-400'}`}><Plus size={16} /> Add</button><button onClick={() => setAdjustType('OUT')} className={`p-3 rounded-lg border text-sm font-bold flex items-center justify-center gap-2 ${adjustType === 'OUT' ? 'bg-red-500/20 border-red-500 text-red-400' : 'bg-white/5 border-white/10 text-gray-400'}`}><Minus size={16} /> Remove</button></div>
+                    <div className="grid grid-cols-2 gap-3"><button onClick={() => setAdjustType('IN')} className={`p - 3 rounded - lg border text - sm font - bold flex items - center justify - center gap - 2 ${adjustType === 'IN' ? 'bg-green-500/20 border-green-500 text-green-400' : 'bg-white/5 border-white/10 text-gray-400'} `}><Plus size={16} /> Add</button><button onClick={() => setAdjustType('OUT')} className={`p - 3 rounded - lg border text - sm font - bold flex items - center justify - center gap - 2 ${adjustType === 'OUT' ? 'bg-red-500/20 border-red-500 text-red-400' : 'bg-white/5 border-white/10 text-gray-400'} `}><Minus size={16} /> Remove</button></div>
                     <input aria-label="Adjustment Quantity" type="number" value={adjustQty} onChange={(e) => setAdjustQty(e.target.value)} className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white text-lg font-mono focus:border-cyber-primary" placeholder="Quantity" />
                     <button onClick={handleSubmitAdjustment} className="w-full py-3 bg-cyber-primary text-black font-bold rounded-xl">Confirm</button>
                 </div>

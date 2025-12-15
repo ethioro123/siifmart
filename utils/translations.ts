@@ -363,7 +363,7 @@ export const TRANSLATIONS = {
         shortPickTitle: { en: 'Short Pick', am: 'አጭር ምረጥ', or: 'Filannoo Gababaa' },
         enterActualQuantityPicked: { en: 'Enter actual quantity picked', am: 'የተመረጠውን ትክክለኛ ብዛት ያስገቡ', or: 'Baay\'ina dhugaa filatame galchi' },
         expectedUnits: { en: 'Expected: {qty} units', am: 'የሚጠበቀው: {qty} ክፍሎች', or: 'Eegamu: {qty} yunitiin' },
-        enterActualQuantity: { en: 'Enter the actual quantity you were able to pick', am: 'የቻሉትን ትክክለኛ ብዛት ያስገቡ', am: 'Baay\'ina dhugaa dandeessan filachuu galchi' },
+        enterActualQuantityModal: { en: 'Enter the actual quantity you were able to pick', am: 'የቻሉትን ትክክለኛ ብዛት ያስገቡ', or: 'Baay\'ina dhugaa dandeessan filachuu galchi' },
         enterQuantity: { en: 'Enter quantity', am: 'ብዛት ያስገቡ', or: 'Baay\'ina Galchi' },
 
         // Zone Lock Modal

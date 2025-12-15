@@ -15,6 +15,7 @@ import {
 } from 'recharts';
 import { CURRENCY_SYMBOL } from '../constants';
 import { calculateMetrics, formatCurrency, METRIC_ROUTES, DashboardMetrics } from '../utils/metrics';
+import { formatCompactNumber } from '../utils/formatting';
 import WidgetErrorBoundary from '../components/WidgetErrorBoundary';
 import DashboardSkeleton from '../components/DashboardSkeleton';
 
@@ -438,7 +439,9 @@ export default function CentralOperations() {
 
             <div>
                 <p className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-1">{title}</p>
-                <h3 className="text-2xl lg:text-3xl font-mono font-bold text-white tracking-tight truncate">{value}</h3>
+                <h3 className="text-2xl lg:text-3xl font-mono font-bold text-white tracking-tight truncate">
+                    {typeof value === 'number' ? formatCompactNumber(value) : value}
+                </h3>
                 {sub && <p className="text-xs text-gray-500 mt-2 font-medium">{sub}</p>}
             </div>
         </div>
@@ -496,7 +499,7 @@ export default function CentralOperations() {
                     <WidgetErrorBoundary title="Total Revenue">
                         <GlassKPICard
                             title="Total Revenue"
-                            value={formatCurrency(metrics.totalNetworkRevenue)}
+                            value={formatCompactNumber(metrics.totalNetworkRevenue, { currency: CURRENCY_SYMBOL })}
                             trend="+12.5%"
                             sub="vs. Last Month"
                             icon={DollarSign}
@@ -507,7 +510,7 @@ export default function CentralOperations() {
                     <WidgetErrorBoundary title="Inventory Value">
                         <GlassKPICard
                             title="Inventory Value"
-                            value={formatCurrency(allProducts.reduce((sum, p) => sum + (p.costPrice || 0) * (p.stock || 0), 0))}
+                            value={formatCompactNumber(allProducts.reduce((sum, p) => sum + (p.costPrice || 0) * (p.stock || 0), 0), { currency: CURRENCY_SYMBOL })}
                             trend="+5.2%"
                             sub="Total Asset Valuation"
                             icon={Package}
@@ -529,7 +532,7 @@ export default function CentralOperations() {
                     <WidgetErrorBoundary title="Avg Order Value">
                         <GlassKPICard
                             title="Avg. Order Value"
-                            value={formatCurrency(allSales.length > 0 ? allSales.reduce((sum, s) => sum + s.total, 0) / allSales.length : 0)}
+                            value={formatCompactNumber(allSales.length > 0 ? allSales.reduce((sum, s) => sum + s.total, 0) / allSales.length : 0, { currency: CURRENCY_SYMBOL })}
                             trend="+8.1%"
                             sub="Per Transaction"
                             icon={Activity}
@@ -631,7 +634,7 @@ export default function CentralOperations() {
                     <WidgetErrorBoundary title="Net Profit">
                         <GlassKPICard
                             title="Net Profit"
-                            value={formatCurrency(metrics.netProfit)}
+                            value={formatCompactNumber(metrics.netProfit, { currency: CURRENCY_SYMBOL })}
                             trend={metrics.netProfit > 0 ? "+15%" : "-2%"}
                             sub="Net Earnings"
                             icon={Award}
@@ -655,7 +658,7 @@ export default function CentralOperations() {
                             title="Return Rate"
                             value={`${metrics.returnRate.toFixed(1)}%`}
                             trend={metrics.returnRate < 2 ? "-0.5%" : "+0.2%"} // Logic: Lower is better, so trend down is good (green?) - keep color neutral or handle trend logic elsewhere
-                            sub={`${formatCurrency(metrics.totalReturnedValue)} Refunded`}
+                            sub={`${formatCompactNumber(metrics.totalReturnedValue, { currency: CURRENCY_SYMBOL })} Refunded`}
                             icon={Undo}
                             color="text-rose-400"
                         />
@@ -674,7 +677,7 @@ export default function CentralOperations() {
                     <WidgetErrorBoundary title="Staff Efficiency">
                         <GlassKPICard
                             title="Staff Efficiency"
-                            value={formatCurrency(metrics.totalEmployees > 0 ? metrics.totalNetworkRevenue / metrics.totalEmployees : 0)}
+                            value={formatCompactNumber(metrics.totalEmployees > 0 ? metrics.totalNetworkRevenue / metrics.totalEmployees : 0, { currency: CURRENCY_SYMBOL })}
                             sub="Rev. Per Employee"
                             icon={Users}
                             color="text-pink-400"
@@ -707,7 +710,7 @@ export default function CentralOperations() {
                                                 </div>
                                             </div>
                                             <div className="text-right">
-                                                <p className="font-mono font-bold text-green-400 text-sm">{formatCurrency(site.revenue)}</p>
+                                                <p className="font-mono font-bold text-green-400 text-sm">{formatCompactNumber(site.revenue, { currency: CURRENCY_SYMBOL })}</p>
                                                 {site.lowStock > 0 && (
                                                     <p className="text-[10px] font-bold text-red-400 flex items-center justify-end gap-1">
                                                         <AlertTriangle size={10} /> {site.lowStock} Alerts
