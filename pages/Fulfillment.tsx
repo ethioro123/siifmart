@@ -62,7 +62,7 @@ export default function WarehouseOperations() {
     const { t } = useLanguage();
     const {
         jobs, orders, products, allProducts, settings, sales, processReturn, employees, jobAssignments, activeSite, sites, movements,
-        receivePO, assignJob, updateJobItem, completeJob, resetJob, adjustStock, relocateProduct, addNotification, updateJobStatus, addProduct, refreshData
+        receivePO, assignJob, updateJobItem, completeJob, resetJob, adjustStock, relocateProduct, addNotification, updateJobStatus, addProduct, refreshData, logSystemEvent
     } = useData();
 
 
@@ -640,6 +640,14 @@ export default function WarehouseOperations() {
         setSelectedJob(optimizedJob);
         // Don't set scanner mode here-let user preview job details first
         setIsScannerMode(false);
+
+        // EXPANDED LOGGING: Log that the user started a job
+        logSystemEvent(
+            'Job Started',
+            `Started ${job.type} job ${job.id} with ${optimizedJob.lineItems.length} items`,
+            user?.name || 'Worker',
+            'Inventory'
+        );
     };
 
     const handleBinScan = (e: React.FormEvent) => {
@@ -791,6 +799,16 @@ export default function WarehouseOperations() {
 
                         addNotification('success', `✅ Picked ${qtyToDeduct}x ${item.name} `);
                         playBeep('success');
+
+                        // EXPANDED LOGGING: Log that the user picked an item
+                        logSystemEvent(
+                            'Item Picked',
+                            `Picked ${qtyToDeduct}x ${item.name} for Job ${selectedJob.id}`,
+                            user?.name || 'Picker',
+                            'Inventory'
+                        );
+
+                        // Update UI State (for Job Progress)
                     } catch (error) {
                         console.error('Pick Error:', error);
                         addNotification('alert', 'Failed to deduct stock. Please try again.');
@@ -1009,6 +1027,7 @@ export default function WarehouseOperations() {
                                 <div className="mt-2 w-48 mx-auto h-2 bg-gray-700 rounded-full overflow-hidden">
                                     <div
                                         className="h-full bg-gradient-to-r from-green-500 to-emerald-400 rounded-full transition-all duration-500"
+                                        // eslint-disable-next-line
                                         style={{ width: `${(selectedJob.lineItems.filter(i => i.status === 'Picked' || i.status === 'Short').length / selectedJob.lineItems.length) * 100}%` }}
                                     />
                                 </div>
@@ -1782,7 +1801,7 @@ export default function WarehouseOperations() {
                         ))}
                     </div>
 
-                    <div className="hidden md:block ml-auto pl-2 sticky right-0 bg-cyber-gray md:bg-transparent">
+                    <div className="hidden md:block ml-auto pl-2">
                         <LanguageSwitcher />
                     </div>
                 </div>
@@ -2477,6 +2496,13 @@ export default function WarehouseOperations() {
                                                                 if (skus) {
                                                                     setFinalizedSkus(prev => ({ ...prev, ...skus }));
                                                                     setShowPrintSuccess(true);
+                                                                    // Log User Action
+                                                                    logSystemEvent(
+                                                                        'Stock Received',
+                                                                        `Received ${focusedItem.receivedQty}x ${focusedItem.productName} (PO: ${receivingPO.po_number || receivingPO.id})`,
+                                                                        user?.name || 'Receiver',
+                                                                        'Inventory'
+                                                                    );
                                                                 }
                                                             } finally {
                                                                 setIsReceiving(false);
@@ -2906,6 +2932,7 @@ export default function WarehouseOperations() {
                                                         <div className="h-1.5 bg-black/40 rounded-full overflow-hidden">
                                                             <div
                                                                 className="h-full bg-gradient-to-r from-cyber-primary to-blue-400 rounded-full transition-all duration-500"
+                                                                // eslint-disable-next-line
                                                                 style={{ width: `${progress}% ` }}
                                                             />
                                                         </div>
@@ -3158,6 +3185,8 @@ export default function WarehouseOperations() {
                                                             >
                                                                 <Scan size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
                                                                 <input
+                                                                    title="Pack Scanner Input"
+                                                                    aria-label="Pack Scanner Input"
                                                                     type="text"
                                                                     value={packScanInput}
                                                                     onChange={(e) => setPackScanInput(e.target.value)}
@@ -6832,6 +6861,8 @@ export default function WarehouseOperations() {
                                                                                             newItems[idx].quantity = Math.max(1, item.quantity - 1);
                                                                                             setTransferItems(newItems);
                                                                                         }}
+                                                                                        title="Decrease Quantity"
+                                                                                        aria-label="Decrease Quantity"
                                                                                         className="w-7 h-7 rounded-md bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors"
                                                                                     >-</button>
                                                                                     <input
@@ -6856,6 +6887,8 @@ export default function WarehouseOperations() {
                                                                                             newItems[idx].quantity = Math.min(item.quantity + 1, maxQty);
                                                                                             setTransferItems(newItems);
                                                                                         }}
+                                                                                        title="Increase Quantity"
+                                                                                        aria-label="Increase Quantity"
                                                                                         className="w-7 h-7 rounded-md bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors"
                                                                                     >+</button>
                                                                                 </div>
@@ -6864,6 +6897,7 @@ export default function WarehouseOperations() {
                                                                                     <div className="h-1 bg-black/50 rounded-full overflow-hidden">
                                                                                         <div
                                                                                             className={`h-full transition-all ${stockPercent > 80 ? 'bg-red-500' : stockPercent > 50 ? 'bg-yellow-500' : 'bg-green-500'}`}
+                                                                                            // eslint-disable-next-line
                                                                                             style={{ width: `${Math.min(stockPercent, 100)}%` }}
                                                                                         />
                                                                                     </div>

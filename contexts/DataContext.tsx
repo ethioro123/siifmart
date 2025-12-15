@@ -1153,7 +1153,18 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
         }
       }
 
-      return {}; // Return empty if no jobs created
+      // Log Successful Reception
+      const receivedCount = itemsToProcess.length;
+      if (receivedCount > 0) {
+        logSystemEvent(
+          'Stock Received',
+          `Received ${receivedCount} items for PO ${po.poNumber || poId}`,
+          user.name || 'Inventory Manager',
+          'Inventory'
+        );
+      }
+
+      return {}; // Return empty if no jobs created (but processed)
     } catch (error) {
       console.error('Error in receivePO:', error);
       addNotification('alert', 'Error processing reception');
@@ -1811,6 +1822,14 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
       console.log(`🔄 Local state updated for job ${jobId}`);
 
       addNotification('success', `Job ${job.jobNumber || jobId} completed!`);
+
+      // Log Job Completion
+      logSystemEvent(
+        'Job Completed',
+        `Completed ${job.type} job ${job.jobNumber || jobId}`,
+        employeeName || 'System',
+        'Inventory'
+      );
 
       // --- JOB CHAINING LOGIC ---
       if (job && job.type === 'PICK' && job.orderRef) {

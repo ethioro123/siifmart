@@ -444,6 +444,14 @@ export const TRANSLATIONS = {
         codeFormat: { en: 'Code Format', am: 'የኮድ ቅርጸት', or: 'Qaama Koodii' },
         generating: { en: 'Generating...', am: 'በመፍጠር ላይ...', or: 'Uumaa jira...' },
         printLabel: { en: 'Print Label', am: 'መለያ አትም', or: 'Mallattoo Maxxansi' },
+        printLabels: { en: 'Print Labels', am: 'መለያዎችን አትም', or: 'Mallattoolee Maxxansi' },
+        completeJob: { en: 'Complete Job', am: 'ስራ ጨርስ', or: 'Hojii Xumuri' },
+        boxConfiguration: { en: 'Box Configuration', am: 'የሳጥን ውቅር', or: 'Qindaa\'ina Saanduqaa' },
+        boxSmall: { en: 'Small Box', am: 'ትንሽ ሳጥን', or: 'Saanduqa Xiqqaa' },
+        boxMedium: { en: 'Medium Box', am: 'መካከለኛ ሳጥን', or: 'Saanduqa Giddugaleessaa' },
+        boxLarge: { en: 'Large Box', am: 'ትልቅ ሳጥን', or: 'Saanduqa Guddaa' },
+        labelFormat: { en: 'Label Format', am: 'የመለያ ቅርጸት', or: 'Qaama Mallattoo' },
+        barcode: { en: 'Barcode', am: 'ባርኮድ', or: 'Baarkoodii' },
 
         // Location Input Placeholders
         zonePlaceholder: { en: 'Zone (A)', am: 'ዞን (A)', or: 'Zoonii (A)' },
