@@ -629,7 +629,7 @@ export default function Inventory() {
                         )}
 
                         {/* Table */}
-                        <div className="flex-1 overflow-y-auto custom-scrollbar">
+                        <div className="flex-1 overflow-auto custom-scrollbar">
                             <table className="w-full text-left border-collapse">
                                 <thead className="sticky top-0 bg-black/90 backdrop-blur-sm z-10 border-b border-white/10">
                                     <tr>

@@ -1418,7 +1418,7 @@ export default function Employees() {
                   </div>
 
                   {/* Employee Table - Modern Row Design */}
-                  <div className="bg-cyber-gray border border-white/5 rounded-2xl overflow-hidden">
+                  <div className="bg-cyber-gray border border-white/5 rounded-2xl overflow-x-auto">
                      {/* Table Header */}
                      <div className="bg-black/30 border-b border-white/5 px-6 py-3 grid grid-cols-12 gap-4 items-center">
                         <div className="col-span-8 sm:col-span-6 lg:col-span-4">

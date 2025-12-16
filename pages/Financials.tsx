@@ -680,7 +680,7 @@ export default function Finance() {
 
          {/* --- EXPENSE LEDGER --- */}
          {activeTab === 'expenses' && (
-            <div className="bg-cyber-gray border border-white/5 rounded-2xl overflow-hidden animate-in fade-in">
+            <div className="bg-cyber-gray border border-white/5 rounded-2xl overflow-x-auto animate-in fade-in">
                <div className="p-4 border-b border-white/5 flex justify-between items-center">
                   <div className="flex items-center gap-4">
                      <h3 className="font-bold text-white">Operational Expenses</h3>
@@ -746,7 +746,7 @@ export default function Finance() {
          {/* --- PAYROLL --- */}
          {activeTab === 'payroll' && (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-in fade-in">
-               <div className="lg:col-span-2 bg-cyber-gray border border-white/5 rounded-2xl overflow-hidden">
+               <div className="lg:col-span-2 bg-cyber-gray border border-white/5 rounded-2xl overflow-x-auto">
                   <div className="p-6 border-b border-white/5">
                      <h3 className="font-bold text-white">Payroll Registry</h3>
                      <p className="text-xs text-gray-400 mt-1">Monthly compensation breakdown based on active employees.</p>

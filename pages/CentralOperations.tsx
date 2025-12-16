@@ -672,7 +672,7 @@ export default function CentralOperations() {
                                 <span className="text-xs font-mono text-gray-500 border border-white/10 px-2 py-1 rounded">Last 24h</span>
                             </div>
                         </div>
-                        <ResponsiveContainer width="100%" height="85%">
+                        <ResponsiveContainer width="100%" height="85%" minWidth={0} minHeight={0}>
                             <AreaChart data={revenueBySiteData}>
                                 <defs>
                                     <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
@@ -704,7 +704,7 @@ export default function CentralOperations() {
                                 Stock Health
                             </h3>
                             <div className="flex-1 w-full min-h-0 relative">
-                                <ResponsiveContainer width="100%" height="100%">
+                                <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
                                     <PieChart>
                                         <Pie
                                             data={stockStatusData}
@@ -875,7 +875,7 @@ export default function CentralOperations() {
                                 Category Sales
                             </h3>
                             <div className="flex-1 w-full min-h-0">
-                                <ResponsiveContainer width="100%" height="100%">
+                                <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
                                     <BarChart data={revenueByCategory} layout="vertical" margin={{ left: 0, right: 30, top: 0, bottom: 0 }}>
                                         <XAxis type="number" hide />
                                         <YAxis dataKey="name" type="category" width={80} tick={{ fill: chartAxisColor, fontSize: 10 }} axisLine={false} tickLine={false} />

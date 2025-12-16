@@ -1925,7 +1925,7 @@ export default function Procurement() {
                     </div>
 
                     {/* Suppliers Table */}
-                    <div className="bg-cyber-gray/30 border border-white/10 rounded-2xl overflow-hidden backdrop-blur-sm">
+                    <div className="bg-cyber-gray/30 border border-white/10 rounded-2xl overflow-x-auto backdrop-blur-sm">
                         <table className="w-full text-left border-collapse">
                             <thead>
                                 <tr className="bg-white/5 border-b border-white/10 text-xs text-gray-400 uppercase tracking-wider">

@@ -859,9 +859,8 @@ export default function POS() {
 
   return (
     <div className="h-[calc(100vh-140px)] flex flex-col lg:flex-row gap-6 relative">
-      {/* Left: Product Grid - Always visible on desktop, conditionally on mobile */}
-      <div className={`flex-1 flex flex-col bg-cyber-gray border border-white/5 rounded-2xl overflow-hidden ${isNativeApp && showCart ? 'hidden' : 'flex'
-        }`}>
+      {/* Left: Product Grid - Always visible, with bottom padding for mobile bar */}
+      <div className="flex-1 flex flex-col bg-cyber-gray border border-white/5 rounded-2xl overflow-hidden pb-20 lg:pb-0">
         <div className="p-4 border-b border-white/5 space-y-4">
           <div className="flex gap-4">
             <button
@@ -1003,21 +1002,23 @@ export default function POS() {
         </div>
       </div>
 
-      {/* Right: Cart Summary - Always visible on desktop, slide-up panel on mobile */}
-      <div className={`${isNativeApp
-        ? showCart
-          ? 'fixed inset-0 z-50 bg-cyber-black flex flex-col'
-          : 'hidden'
-        : 'w-full lg:w-[400px] bg-cyber-gray border border-white/5 rounded-2xl flex flex-col h-full'
-        }`}>
+
+
+      {/* Right: Cart Summary - Desktop: Side Panel, Mobile: Slide-up Bottom Sheet */}
+      <div className={`
+        fixed inset-0 z-50 bg-cyber-gray flex flex-col transition-transform duration-300 ease-in-out
+        lg:static lg:w-[400px] lg:border lg:border-white/5 lg:rounded-2xl lg:h-full lg:z-auto lg:transform-none lg:bg-cyber-gray
+        ${showCart ? 'translate-y-0' : 'translate-y-full lg:translate-y-0'}
+      `}>
         <div className="p-4 border-b border-white/5 flex items-center justify-between">
-          {isNativeApp && showCart && (
+          {showCart && (
             <button
               onClick={() => setShowCart(false)}
-              className="p-2 hover:bg-white/10 rounded-lg text-gray-400 hover:text-white transition-colors"
+              className="p-2 hover:bg-white/10 rounded-lg text-gray-400 hover:text-white transition-colors lg:hidden flex items-center gap-2"
               aria-label="Back to Products"
             >
               <ArrowLeft size={20} />
+              <span className="font-bold text-white">Back to Products</span>
             </button>
           )}
           <button
@@ -1177,21 +1178,28 @@ export default function POS() {
         </div>
       </div>
 
-      {/* Floating Cart Button - Only visible on mobile/native when cart is hidden */}
-      {isNativeApp && !showCart && (
-        <button
-          onClick={() => setShowCart(true)}
-          className="fixed bottom-6 right-6 z-40 w-16 h-16 bg-cyber-primary hover:bg-cyber-accent text-black rounded-full shadow-lg shadow-cyber-primary/50 flex items-center justify-center transition-all active:scale-95"
-          aria-label="View Cart"
-        >
-          <ShoppingBag size={24} />
-          {cart.length > 0 && (
-            <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-6 h-6 rounded-full flex items-center justify-center font-bold">
-              {cart.reduce((sum, item) => sum + item.quantity, 0)}
-            </span>
-          )}
-        </button>
-      )}
+      {/* Mobile Floating Checkout Bar - Visible when cart is closed */}
+      {
+        !showCart && cart.length > 0 && (
+          <div className="lg:hidden fixed bottom-4 left-4 right-4 z-40 animate-in slide-in-from-bottom-4 duration-300">
+            <button
+              onClick={() => setShowCart(true)}
+              className="w-full bg-cyber-primary text-black p-4 rounded-2xl shadow-[0_0_20px_rgba(0,255,157,0.3)] flex items-center justify-between font-bold active:scale-95 transition-transform"
+            >
+              <div className="flex items-center gap-3">
+                <div className="bg-black/20 w-8 h-8 rounded-full flex items-center justify-center text-sm">
+                  {cart.reduce((sum, item) => sum + item.quantity, 0)}
+                </div>
+                <span className="text-sm uppercase tracking-wider">View Order</span>
+              </div>
+              <div className="flex items-center gap-2 text-lg">
+                <span>{CURRENCY_SYMBOL} {total.toLocaleString()}</span>
+                <ArrowRight size={20} />
+              </div>
+            </button>
+          </div>
+        )
+      }
 
 
       {/* ... Modals unchanged from previous, keeping structure ... */}
