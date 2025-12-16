@@ -100,12 +100,18 @@ export default function App() {
                   }
 
                   const storeRoles = ['manager', 'pos', 'store_supervisor'];
-                  const warehouseRoles = ['warehouse_manager', 'dispatcher', 'picker', 'driver', 'inventory_specialist'];
+                  // Warehouse Roles: Managers get dashboard, Operators get Ops View
+                  const warehouseManagerRoles = ['warehouse_manager'];
+                  const warehouseOpRoles = ['picker', 'driver', 'inventory_specialist'];
+
+                  if (warehouseOpRoles.includes(user?.role || '')) {
+                    return <Navigate to="/wms-ops" replace />;
+                  }
 
                   if (storeRoles.includes(user?.role || '')) {
                     return <Navigate to="/pos-dashboard" replace />;
                   }
-                  if (warehouseRoles.includes(user?.role || '')) {
+                  if (warehouseManagerRoles.includes(user?.role || '')) {
                     return <Navigate to="/wms-dashboard" replace />;
                   }
 
@@ -214,9 +220,11 @@ export default function App() {
               </ProtectedRoute>
             } />
 
-            {/* Roadmap - Public/Dev */}
+            {/* Roadmap - Protected (Hidden from Pickers/Drivers) */}
             <Route path="/roadmap" element={
-              <Roadmap />
+              <ProtectedRoute module="admin">
+                <Roadmap />
+              </ProtectedRoute>
             } />
 
             {/* Employees - HR, Managers, Admins */}

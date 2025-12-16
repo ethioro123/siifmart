@@ -5,7 +5,7 @@ import {
    Calendar, Award, CheckCircle, Clock, AlertTriangle, DollarSign, ClipboardList,
    TrendingUp, User, Plus, Trash2, ArrowRight, ArrowLeft, MapPin, Upload, CreditCard,
    MessageSquare, Download, XCircle, Lock, UserCheck, Network, Layers, FileText,
-   Sun, Moon, Sunset, Building, Key
+   Sun, Moon, Sunset, Building, Key, Camera
 } from 'lucide-react';
 import {
    AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar
@@ -28,6 +28,8 @@ import {
 import EmployeeIDCard from '../components/EmployeeIDCard';
 import EmployeeRow from '../components/EmployeeRow';
 import { authService } from '../services/auth.service';
+import { systemLogsService } from '../services/systemLogs.service';
+import ImageCropper from '../components/ImageCropper';
 
 // --- TYPES & MOCKS ---
 type ViewMode = 'directory' | 'org' | 'shifts';
@@ -126,7 +128,7 @@ const SHIFT_TYPES = {
 
 export default function Employees() {
    const { user } = useStore();
-   const { employees, addEmployee, updateEmployee, deleteEmployee, activeSite, sites, addNotification } = useData();
+   const { employees, addEmployee, updateEmployee, deleteEmployee, activeSite, sites, addNotification, logSystemEvent } = useData();
 
    const [viewMode, setViewMode] = useState<ViewMode>('directory');
    const [tasks, setTasks] = useState<EmployeeTask[]>(MOCK_TASKS);
@@ -139,6 +141,7 @@ export default function Employees() {
    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
    const [activeProfileTab, setActiveProfileTab] = useState<ProfileTab>('overview');
    const [isTimeOffModalOpen, setIsTimeOffModalOpen] = useState(false);
+   const [photoRequests, setPhotoRequests] = useState<any[]>([]); // { id, userId, userName, newUrl, timestamp }
    const [timeOffRequests, setTimeOffRequests] = useState<Array<{
       id: string;
       employeeId: string;
@@ -291,9 +294,202 @@ export default function Employees() {
       ? employees
       : employees.filter(e => e.name === user?.name);
 
+   // --- PHOTO APPROVAL LOGIC ---
+   useEffect(() => {
+      loadPhotoRequests();
+   }, []);
+
+   const loadPhotoRequests = () => {
+      const logs = systemLogsService.getLogs({ category: 'HR' });
+
+      // Group logs by user
+      const userLogs: Record<string, any[]> = {};
+      logs.forEach(log => {
+         if (['PHOTO_CHANGE_REQUEST', 'PHOTO_CHANGE_PROCESSED', 'PHOTO_CHANGE_REJECTED'].includes(log.action)) {
+            if (!userLogs[log.userId]) userLogs[log.userId] = [];
+            userLogs[log.userId].push(log);
+         }
+      });
+
+      const pendingRequests: any[] = [];
+
+      Object.keys(userLogs).forEach(userId => {
+         // Sort by timestamp descending
+         const sorted = userLogs[userId].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+         const latest = sorted[0];
+
+         if (latest.action === 'PHOTO_CHANGE_REQUEST') {
+            pendingRequests.push({
+               id: latest.id,
+               userId: latest.userId,
+               userName: latest.userName,
+               newUrl: latest.metadata?.newUrl,
+               timestamp: latest.timestamp
+            });
+         }
+      });
+
+      setPhotoRequests(pendingRequests);
+   };
+
+   const profilePhotoInputRef = useRef<HTMLInputElement>(null);
+
+   const handleRequestPhotoChange = () => {
+      // Trigger file picker
+      profilePhotoInputRef.current?.click();
+   };
+
+   // ... (inside Employees component)
+
+   const [cropperOpen, setCropperOpen] = useState(false);
+   const [tempImageSrc, setTempImageSrc] = useState<string | null>(null);
+
+   const handleProfilePhotoSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+      const file = event.target.files?.[0];
+      if (!file) return;
+
+      if (!selectedEmployee) return;
+
+      // Validate Image
+      if (!file.type.startsWith('image/')) {
+         addNotification('alert', 'Please select a valid image file.');
+         return;
+      }
+
+      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+         addNotification('alert', 'File size too large. Max 5MB.');
+         return;
+      }
+
+      const reader = new FileReader();
+      reader.addEventListener('load', () => {
+         setTempImageSrc(reader.result?.toString() || null);
+         setCropperOpen(true);
+         // Clear input so same file can be selected again if needed
+         if (profilePhotoInputRef.current) profilePhotoInputRef.current.value = '';
+      });
+      reader.readAsDataURL(file);
+   };
+
+   const handleCropComplete = async (croppedImage: string) => {
+      if (!selectedEmployee) return;
+
+      const isPrivileged = ['super_admin', 'admin', 'hr'].includes(user?.role || '');
+
+      if (isPrivileged) {
+         // DIRECT UPDATE
+         try {
+            await updateEmployee(selectedEmployee.id, { avatar: croppedImage });
+
+            systemLogsService.log(
+               'HR',
+               'INFO',
+               'PHOTO_UPDATED',
+               `Photo updated for ${selectedEmployee.name} by ${user?.name}`,
+               { id: selectedEmployee.id, role: selectedEmployee.role, name: selectedEmployee.name },
+               { processed: true }
+            );
+
+            addNotification('success', 'Profile photo updated successfully.');
+         } catch (error) {
+            console.error(error);
+            addNotification('alert', 'Failed to update photo.');
+         }
+      } else {
+         // REQUEST APPROVAL
+         systemLogsService.logHR(
+            'PHOTO_CHANGE_REQUEST',
+            `Photo change requested by ${selectedEmployee.name}`,
+            { id: selectedEmployee.id, role: selectedEmployee.role, name: selectedEmployee.name },
+            'INFO'
+         );
+
+         systemLogsService.log(
+            'HR',
+            'INFO',
+            'PHOTO_CHANGE_REQUEST',
+            `Photo change requested by ${selectedEmployee.name}`,
+            { id: selectedEmployee.id, role: selectedEmployee.role, name: selectedEmployee.name },
+            { newUrl: croppedImage, processed: false }
+         );
+
+         addNotification('success', 'Photo change requested. Waiting for approval.');
+         loadPhotoRequests(); // Refresh
+      }
+
+      setCropperOpen(false);
+      setTempImageSrc(null);
+   };
+
+   // ... (in JSX return)
+
+   <input
+      type="file"
+   /* ... attributes ... */
+   />
+
+   {/* Image Cropper Modal */ }
+   {
+      tempImageSrc && (
+         <ImageCropper
+            open={cropperOpen}
+            imageSrc={tempImageSrc}
+            onCropComplete={handleCropComplete}
+            onCancel={() => {
+               setCropperOpen(false);
+               setTempImageSrc(null);
+            }}
+         />
+      )
+   }
+
+   const handleApprovePhoto = async (request: any) => {
+      try {
+         // 1. Update Employee
+         await updateEmployee(request.userId, { avatar: request.newUrl });
+
+         // 2. Mark as Processed (By logging a PROCESSED event that effectively cancels the other one in a real DB, 
+         // but here we just likely need to update the log entry itself or just ignore it. 
+         // Since SystemLogService doesn't allow updating logs easily, we will filter by checking if a PROCESSED event exists?
+         // No, simpler: We will just "hide" it from UI state locally or delete the log if possible?
+         // SystemLogsService doesn't have delete. 
+         // Workaround: We will rely on the UI state filtering for this session, or simplistic approach.
+         // Better: The 'loadPhotoRequests' filters logs. 
+         // Crucial: We need to PERSIST that it's done. 
+         // We will Log a 'PHOTO_CHANGE_PROCESSED' event.
+         // And update loadPhotoRequests to exclude requests that have a matching processed event?
+         // Yes: that's the robust audit-log-as-database way.
+
+         systemLogsService.logHR(
+            'PHOTO_CHANGE_PROCESSED',
+            `Approved photo change for ${request.userName}`,
+            { id: user?.id, role: user?.role, name: user?.name },
+            'INFO'
+         );
+
+         // Force local refresh (mocking the exclusion logic)
+         setPhotoRequests(prev => prev.filter(r => r.id !== request.id));
+         addNotification('success', 'Photo approved.');
+
+      } catch (err) {
+         console.error(err);
+         addNotification('alert', 'Failed to approve photo.');
+      }
+   };
+
+   const handleRejectPhoto = (request: any) => {
+      systemLogsService.logHR(
+         'PHOTO_CHANGE_REJECTED',
+         `Rejected photo change for ${request.userName}`,
+         { id: user?.id, role: user?.role, name: user?.name },
+         'INFO'
+      );
+      setPhotoRequests(prev => prev.filter(r => r.id !== request.id));
+      addNotification('info', 'Photo request rejected.');
+   };
+
    const filteredEmployees = useMemo(() => {
       return visibleEmployees.filter(emp => {
-         // Enhanced search - search across multiple fields
          const searchLower = searchTerm.toLowerCase();
          const matchesSearch = !searchTerm ||
             emp.name.toLowerCase().includes(searchLower) ||
@@ -509,8 +705,26 @@ export default function Employees() {
    };
 
    const handleResetPassword = (employee: Employee) => {
-      if (user?.role !== 'super_admin' && user?.role !== 'admin') {
-         addNotification('alert', "Access Denied: Only Super Admin or Admin can reset passwords.");
+      if (!user) return;
+
+      // Hierarchy Check
+      const userLevel = getRoleHierarchy(user.role);
+      const targetLevel = getRoleHierarchy(employee.role);
+      const isSuperAdmin = user.role === 'super_admin';
+
+      // Rule: Super Admin OR Higher Hierarchy can reset password
+      const canReset = isSuperAdmin || (userLevel > targetLevel);
+
+      if (!canReset) {
+         addNotification('alert', `Access Denied: You cannot reset the password for ${employee.role.replace('_', ' ')} roles.`);
+         return;
+      }
+
+      // 4. BLOCK DEMO DATA
+      // Check if ID is a valid UUID. If not (e.g. "EMP-WH-01"), it's demo data and cannot be reset.
+      const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(employee.id);
+      if (!isUUID) {
+         addNotification('info', `Demo Account Detected\n\nThis employee '${employee.name}' is part of the demo dataset (ID: ${employee.id}).\n\nDemo accounts are generated locally and do not exist in the secure authentication database, so their passwords cannot be reset.\n\nTo test this feature, please 'Add Employee' to create a real record.`);
          return;
       }
 
@@ -544,6 +758,16 @@ export default function Employees() {
          console.log('🔐 Calling resetEmployeePassword...');
          await resetEmployeePassword(passwordEmployee.id, passwordInput);
          console.log('✅ Password reset success!');
+
+         // Log the security event
+         if (user) {
+            logSystemEvent(
+               'Password Reset',
+               `Password changed for employee: ${passwordEmployee.name} (ID: ${passwordEmployee.code || 'N/A'}) by ${user.name}`,
+               user.name,
+               'Security'
+            );
+         }
 
          addNotification('success', `✅ Password Reset!\n\nNew password for ${passwordEmployee.name}:\n${passwordInput}\n\nThey can now login with:\nEmail: ${passwordEmployee.email}\nPassword: ${passwordInput}`);
          setIsPasswordModalOpen(false);
@@ -1105,14 +1329,14 @@ export default function Employees() {
 
                      {/* Filters Row */}
                      {canViewAll && (
-                        <div className="flex flex-wrap gap-3">
+                        <div className="flex flex-col sm:flex-row flex-wrap gap-3">
                            {/* Role Filter */}
-                           <div className="flex items-center gap-2">
+                           <div className="flex items-center gap-2 w-full sm:w-auto">
                               <Filter size={14} className="text-gray-400" />
                               <select
                                  value={filterRole}
                                  onChange={(e) => setFilterRole(e.target.value)}
-                                 className="bg-black/30 border border-white/10 rounded-lg px-3 py-1.5 text-sm text-white focus:border-cyber-primary focus:outline-none min-w-[140px]"
+                                 className="bg-black/30 border border-white/10 rounded-lg px-3 py-1.5 text-sm text-white focus:border-cyber-primary focus:outline-none w-full sm:w-auto sm:min-w-[140px]"
                                  aria-label="Filter by Role"
                                  title="Filter by Role"
                               >
@@ -1197,19 +1421,19 @@ export default function Employees() {
                   <div className="bg-cyber-gray border border-white/5 rounded-2xl overflow-hidden">
                      {/* Table Header */}
                      <div className="bg-black/30 border-b border-white/5 px-6 py-3 grid grid-cols-12 gap-4 items-center">
-                        <div className="col-span-4">
+                        <div className="col-span-8 sm:col-span-6 lg:col-span-4">
                            <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Employee</span>
                         </div>
-                        <div className="col-span-2">
+                        <div className="hidden sm:block sm:col-span-3 lg:col-span-2">
                            <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Role & Status</span>
                         </div>
-                        <div className="col-span-2">
+                        <div className="hidden lg:block lg:col-span-2">
                            <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Location</span>
                         </div>
-                        <div className="col-span-2">
+                        <div className="hidden lg:block lg:col-span-2">
                            <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Performance</span>
                         </div>
-                        <div className="col-span-2 text-right">
+                        <div className="col-span-4 sm:col-span-3 lg:col-span-2 text-right">
                            <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Actions</span>
                         </div>
                      </div>
@@ -1233,7 +1457,9 @@ export default function Employees() {
                                  onResetPassword={() => handleResetPassword(employee)}
                                  onDelete={() => handleDeleteEmployee(employee.id)}
                                  onApprove={() => handleApproveEmployee(employee.id, employee.name, employee.role)}
-                                 canResetPassword={user?.role === 'super_admin' || user?.role === 'admin'}
+                                 canResetPassword={
+                                    (user?.role === 'super_admin') || (user && getRoleHierarchy(user.role) > getRoleHierarchy(employee.role))
+                                 }
                                  canDelete={user?.role === 'super_admin'}
                                  canApprove={canApproveEmployees}
                                  isSuperAdmin={user?.role === 'super_admin'}
@@ -1412,6 +1638,14 @@ export default function Employees() {
          {/* WIZARD MODAL WITH SITE SELECTION */}
          <Modal isOpen={isAddModalOpen} onClose={resetWizard} title="Onboard Talent" size="lg">
             <div className="flex flex-col h-[500px]">
+               <input
+                  type="file"
+                  ref={profilePhotoInputRef}
+                  className="hidden"
+                  accept="image/*"
+                  onChange={handleProfilePhotoSelect}
+                  aria-label="Profile Photo Upload"
+               />
                {/* Stepper */}
                <div className="flex justify-between items-center mb-8 px-4">
                   {[1, 2, 3, 4].map(step => (
@@ -1810,7 +2044,16 @@ export default function Employees() {
                <div>
                   {/* Header Profile */}
                   <div className="flex items-center gap-4 mb-6 p-4 bg-white/5 rounded-xl border border-white/5">
-                     <img src={selectedEmployee.avatar} className="w-20 h-20 rounded-2xl object-cover border-2 border-cyber-primary" alt="" />
+                     <div className="relative group">
+                        <img src={selectedEmployee.avatar} className="w-20 h-20 rounded-2xl object-cover border-2 border-cyber-primary" alt="" />
+                        <button
+                           onClick={handleRequestPhotoChange}
+                           className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl cursor-pointer"
+                           title="Request New Photo"
+                        >
+                           <Camera size={24} className="text-white" />
+                        </button>
+                     </div>
                      <div className="flex-1">
                         <div className="flex justify-between items-start">
                            <div>
@@ -1827,17 +2070,45 @@ export default function Employees() {
                               </span>
                               <div className="flex gap-2">
                                  <button
-                                    onClick={() => setIdCardEmployee(selectedEmployee)}
+                                    onClick={() => {
+                                       setSelectedEmployee(null);
+                                       setIdCardEmployee(selectedEmployee);
+                                    }}
                                     className="flex items-center gap-2 text-xs text-cyber-primary hover:text-white transition-colors bg-cyber-primary/10 px-2 py-1 rounded border border-cyber-primary/20"
                                  >
                                     <CreditCard size={12} /> Generate ID
                                  </button>
                                  <button
-                                    onClick={() => handleSendMessage(selectedEmployee)}
+                                    onClick={() => {
+                                       setSelectedEmployee(null);
+                                       handleSendMessage(selectedEmployee);
+                                    }}
                                     className="flex items-center gap-2 text-xs text-cyber-primary hover:text-white transition-colors bg-cyber-primary/10 px-2 py-1 rounded border border-cyber-primary/20"
                                  >
                                     <MessageSquare size={12} /> Message
                                  </button>
+                                 {(() => {
+                                    const userLevel = user ? getRoleHierarchy(user.role) : 0;
+                                    const targetLevel = getRoleHierarchy(selectedEmployee.role);
+                                    const isSuperAdmin = user?.role === 'super_admin';
+
+                                    // Rule: Super Admin OR Higher Hierarchy
+                                    const canReset = isSuperAdmin || (userLevel > targetLevel);
+
+                                    if (!canReset) return null;
+
+                                    return (
+                                       <button
+                                          onClick={() => {
+                                             setSelectedEmployee(null);
+                                             handleResetPassword(selectedEmployee);
+                                          }}
+                                          className="flex items-center gap-2 text-xs text-yellow-400 hover:text-white transition-colors bg-yellow-400/10 px-2 py-1 rounded border border-yellow-400/20"
+                                       >
+                                          <Key size={12} /> Reset Password
+                                       </button>
+                                    );
+                                 })()}
                               </div>
                            </div>
                         </div>
@@ -2208,8 +2479,9 @@ export default function Employees() {
                      </div>
                   )}
                </div>
-            )}
-         </Modal>
+            )
+            }
+         </Modal >
 
          {/* ID Card Generator Modal */}
          {

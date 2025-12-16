@@ -255,25 +255,29 @@ export default function SettingsPage() {
                         <TabButton id="infrastructure" icon={Printer} label="Infrastructure" />
                     </Protected>
 
-                    <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-6 mb-4 px-2">Infrastructure</p>
-                    <Protected permission="MANAGE_ROLES">
-                        <TabButton id="roles" icon={Users} label="Roles & Access" />
-                    </Protected>
-                    <Protected permission="EDIT_SYSTEM_SETTINGS">
-                        <TabButton id="integrations" icon={CloudLightning} label="Integrations" />
-                    </Protected>
-                    <Protected permission="EDIT_SYSTEM_SETTINGS">
-                        <TabButton id="security" icon={Shield} label="Security" />
-                    </Protected>
-                    <Protected permission="VIEW_AUDIT_LOGS">
-                        <TabButton id="audit" icon={FileText} label="Audit Log" />
-                    </Protected>
-                    <Protected permission="ACCESS_SETTINGS">
-                        <TabButton id="notifications" icon={Bell} label="Notifications" />
-                    </Protected>
-                    <Protected permission="EDIT_SYSTEM_SETTINGS">
-                        <TabButton id="data" icon={Database} label="Data Mgmt" />
-                    </Protected>
+                    {user?.role === 'super_admin' && (
+                        <>
+                            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-6 mb-4 px-2">Infrastructure</p>
+                            <Protected permission="MANAGE_ROLES">
+                                <TabButton id="roles" icon={Users} label="Roles & Access" />
+                            </Protected>
+                            <Protected permission="EDIT_SYSTEM_SETTINGS">
+                                <TabButton id="integrations" icon={CloudLightning} label="Integrations" />
+                            </Protected>
+                            <Protected permission="EDIT_SYSTEM_SETTINGS">
+                                <TabButton id="security" icon={Shield} label="Security" />
+                            </Protected>
+                            <Protected permission="VIEW_AUDIT_LOGS">
+                                <TabButton id="audit" icon={FileText} label="Audit Log" />
+                            </Protected>
+                            <Protected permission="ACCESS_SETTINGS">
+                                <TabButton id="notifications" icon={Bell} label="Notifications" />
+                            </Protected>
+                            <Protected permission="EDIT_SYSTEM_SETTINGS">
+                                <TabButton id="data" icon={Database} label="Data Mgmt" />
+                            </Protected>
+                        </>
+                    )}
                 </div>
             </div>
 

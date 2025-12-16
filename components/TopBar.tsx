@@ -328,7 +328,6 @@ export default function TopBar() {
 
          <div className="flex items-center space-x-4">
             {/* USER INFO */}
-            {/* USER INFO */}
             <div className="hidden md:flex items-center gap-3 px-4 py-2 rounded-full bg-gradient-to-r from-white/5 to-transparent border border-white/10 hover:border-cyber-primary/50 transition-all duration-300 group cursor-pointer hover:shadow-[0_0_15px_rgba(0,255,157,0.1)]">
                <div className="relative">
                   <div className="w-9 h-9 rounded-full bg-gradient-to-br from-cyber-primary to-blue-600 flex items-center justify-center text-black font-black text-sm shadow-lg group-hover:scale-105 transition-transform">
@@ -352,7 +351,6 @@ export default function TopBar() {
             >
                {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
             </button>
-
 
 
             {/* NOTIFICATIONS */}
@@ -386,7 +384,7 @@ export default function TopBar() {
                                     </div>
                                     <div>
                                        <p className="text-sm text-gray-200">{notif.message}</p>
-                                       <p className="text-[10px] text-gray-500 mt-1">{notif.timestamp}</p>
+                                       <p className="text-xs text-gray-500 mt-1">{notif.timestamp}</p>
                                     </div>
                                  </div>
                               ))

@@ -26,9 +26,9 @@ export default function Logo({ className = "", size = 32, showText = true }: Log
             <path
               d="M 5 38 L 5 26 Q 5 17 16 17 L 19 17 L 19 12 L 29 21.5 L 19 31 L 19 26 L 16 26 Q 11 26 11 38 Z"
               fill="currentColor"
-              stroke="#808080"
-              strokeWidth="3"
-              strokeLinejoin="miter"
+              stroke="#00cc7d"
+              strokeWidth="4"
+              strokeLinejoin="round"
               style={{ paintOrder: 'stroke' }}
               className="transition-colors duration-300"
             />
@@ -45,15 +45,15 @@ export default function Logo({ className = "", size = 32, showText = true }: Log
               x="34"
               y="42"
               textAnchor="start"
-              fontFamily="'Arial Rounded MT Bold', 'Nunito', 'Quicksand', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
-              fontWeight="800"
+              fontFamily="'Fredoka', 'Arial Rounded MT Bold', 'Nunito', 'Quicksand', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+              fontWeight="700"
               fontSize="46"
               fill="currentColor"
-              stroke="#808080"
-              strokeWidth="3"
-              strokeLinejoin="miter"
+              stroke="#00cc7d"
+              strokeWidth="4"
+              strokeLinejoin="round"
               style={{ paintOrder: 'stroke' }}
-              letterSpacing="-0.5"
+              letterSpacing="0.5"
               className="transition-colors duration-300"
             >
               SiifMart

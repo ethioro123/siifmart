@@ -2,11 +2,12 @@ import React, { useMemo, useState, useEffect } from 'react';
 import { useData } from '../contexts/DataContext';
 import { useStore } from '../contexts/CentralStore';
 import { useNavigate } from 'react-router-dom';
+import { generateQuarterlyReport } from '../utils/reportGenerator';
 import {
     Users, TrendingUp, AlertTriangle, Map as MapIcon, DollarSign,
     ShoppingBag, Truck, Activity, ArrowRight, BarChart3, PieChart as PieChartIcon,
     Target, Award, ShoppingCart, Zap, Globe, Package, Box, Layers, Clock, ShieldCheck,
-    Cpu, Server, Radio, Terminal, Undo, UserPlus
+    Cpu, Server, Radio, Terminal, Undo, UserPlus, Download
 } from 'lucide-react';
 import {
     AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid,
@@ -289,25 +290,88 @@ const TopProductsWidget = ({ products }: { products: any[] }) => {
     );
 };
 
+// --- DATE TYPES ---
+type DateRangeOption = 'All Time' | 'This Month' | 'Last Month' | 'This Quarter' | 'This Year' | 'Last Year';
+
+import { Calendar } from 'lucide-react';
+import FiscalYearDeck from '../components/FiscalYearDeck';
+
 export default function CentralOperations() {
-    const { sites, employees, allSales, allOrders, allProducts, setActiveSite, jobs, systemLogs, activeSite } = useData(); // Added systemLogs & activeSite
-    const { loading, theme } = useStore(); // Access theme to adjust chart colors if needed
+    const { sites, employees, allSales, allOrders, allProducts, setActiveSite, jobs, systemLogs, activeSite } = useData();
+    const { loading, theme } = useStore();
     const navigate = useNavigate();
+
+    // --- REPORT GENERATION ---
+    const handleGenerateReport = () => {
+        generateQuarterlyReport(metrics, dateRange, 'Operations');
+    };
+
+    // --- DATE FILTERING STATE ---
+    const [dateRange, setDateRange] = useState<DateRangeOption>('This Quarter');
+
+    // --- DATE FILTERING LOGIC ---
+    const getQuarterInfo = (d = new Date()) => {
+        const q = Math.floor(d.getMonth() / 3) + 1;
+        const year = d.getFullYear();
+        const start = new Date(year, (q - 1) * 3, 1);
+        const end = new Date(year, q * 3, 0);
+        return { q, year, start, end };
+    };
+
+    const isWithinRange = (dateString: string) => {
+        if (dateRange === 'All Time') return true;
+        const date = new Date(dateString);
+        const now = new Date();
+        const { q, year } = getQuarterInfo(now);
+        const start = new Date(); // Reset below
+        start.setHours(0, 0, 0, 0);
+
+        switch (dateRange) {
+            case 'This Month':
+                start.setDate(1);
+                return date >= start && date <= now;
+            case 'Last Month':
+                start.setMonth(now.getMonth() - 1);
+                start.setDate(1);
+                const endLM = new Date(now.getFullYear(), now.getMonth(), 0);
+                return date >= start && date <= endLM;
+            case 'This Quarter':
+                const qStart = new Date(year, (q - 1) * 3, 1);
+                const qEnd = new Date(now);
+                qEnd.setHours(23, 59, 59, 999);
+                return date >= qStart && date <= qEnd;
+            case 'This Year':
+                const yStart = new Date(year, 0, 1);
+                return date >= yStart;
+            case 'Last Year':
+                const lyStart = new Date(year - 1, 0, 1);
+                const lyEnd = new Date(year - 1, 11, 31);
+                return date >= lyStart && date <= lyEnd;
+            default:
+                return true;
+        }
+    };
+
+    // --- FILTERED DATA ---
+    const filteredSales = useMemo(() => (allSales || []).filter(s => isWithinRange(s.date)), [allSales, dateRange]);
+    const filteredOrders = useMemo(() => (allOrders || []).filter(o => isWithinRange(o.createdAt)), [allOrders, dateRange]);
+
+
 
     // --- LOADING STATE ---
     if (loading) {
         return <DashboardSkeleton />;
     }
 
-    // --- AGGREGATED METRICS ---
+    // --- AGGREGATED METRICS (Using Filtered Data) ---
     const metrics: DashboardMetrics = useMemo(() => {
         try {
             return calculateMetrics(
-                allSales || [],
-                allProducts || [],
+                filteredSales,
+                allProducts || [], // Products are snapshot state, usually not filtered by transaction date unless "Inventory Movement"
                 jobs || [],
-                allOrders || [],
-                employees || [],
+                filteredOrders,
+                employees || [], // Employees are snapshot
                 [],
                 undefined
             ) as DashboardMetrics;
@@ -330,7 +394,7 @@ export default function CentralOperations() {
                 totalReturnedValue: 0
             } as unknown as DashboardMetrics;
         }
-    }, [allSales, allProducts, jobs, allOrders, employees]);
+    }, [filteredSales, allProducts, jobs, filteredOrders, employees]); // Deps updated
 
     const totalRevenue = metrics?.totalNetworkRevenue || 0;
     const totalEmployees = metrics?.totalEmployees || 0;
@@ -339,7 +403,7 @@ export default function CentralOperations() {
     const inventoryValue = metrics?.totalNetworkStockValue || 0;
     const avgOrderValue = metrics?.avgBasket || 0;
 
-    // Stock Status Data
+    // Stock Status Data (Snapshot - No Date Filter Needed)
     const stockStatusData = useMemo(() => {
         const goodStock = (allProducts || []).filter(p => p.stock >= 10 && p.status !== 'out_of_stock').length;
         const lowStock = (allProducts || []).filter(p => (p.stock < 10 && p.stock > 0) || p.status === 'low_stock').length;
@@ -352,16 +416,15 @@ export default function CentralOperations() {
         ].filter(d => d.value > 0);
     }, [allProducts, metrics]);
 
-    // --- SITE PERFORMANCE ---
-    // --- SITE PERFORMANCE ---
+    // --- SITE PERFORMANCE (Filtered) ---
     const sitePerformance: SitePerformance[] = useMemo(() => {
-        if (!sites || !allSales || !employees || !allProducts) return [];
+        if (!sites || !filteredSales || !employees || !allProducts) return [];
 
-        // Filter out Administration/HQ sites - they shouldn't appear in performance matrix
+        // Filter out Administration/HQ sites
         const operationalSites = sites.filter(s => s.type !== 'Administration' && s.type !== 'HQ' && s.type !== 'Administrative');
 
         return operationalSites.map(site => {
-            const siteSales = allSales.filter(s => s.siteId === site.id);
+            const siteSales = filteredSales.filter(s => s.siteId === site.id);
             const revenue = siteSales.reduce((sum, s) => sum + s.total, 0);
             const staffCount = employees.filter(e => e.siteId === site.id).length;
             const lowStock = allProducts.filter(p => p.siteId === site.id && p.status === 'low_stock').length;
@@ -374,12 +437,11 @@ export default function CentralOperations() {
                 transactionCount: siteSales.length
             };
         }).sort((a, b) => b.revenue - a.revenue);
-    }, [sites, allSales, employees, allProducts]);
+    }, [sites, filteredSales, employees, allProducts]);
 
-    // --- CHART DATA ---
+    // --- CHART DATA (Filtered) ---
     const revenueBySiteData = useMemo(() => {
         if (!sitePerformance) return [];
-        // Limit to Top 10 for readability regardless of network size
         return sitePerformance.slice(0, 10).map(site => ({
             name: site.name.length > 15 ? site.name.substring(0, 12) + '...' : site.name,
             revenue: site.revenue,
@@ -388,9 +450,9 @@ export default function CentralOperations() {
     }, [sitePerformance]);
 
     const revenueByCategory = useMemo(() => {
-        if (!allSales) return [];
+        if (!filteredSales) return [];
         const categoryData = new Map();
-        allSales.forEach(sale => {
+        filteredSales.forEach(sale => {
             (sale.items || []).forEach(item => {
                 const cat = item.category || 'Other';
                 const val = (item.price * item.quantity);
@@ -401,18 +463,15 @@ export default function CentralOperations() {
             .map(([name, value]) => ({ name, value }))
             .sort((a, b) => b.value - a.value)
             .slice(0, 6);
-    }, [allSales]);
+    }, [filteredSales]);
 
-    // --- TOP PRODUCTS ---
-    // New Feature: Leaderboard of top selling items
+    // --- TOP PRODUCTS (Filtered) ---
     const topProducts = useMemo(() => {
-        if (!allSales) return [];
+        if (!filteredSales) return [];
         const productStats = new Map<string, { name: string, sales: number, count: number }>();
 
-        allSales.forEach(sale => {
-            // Only count completed sales
+        filteredSales.forEach(sale => {
             if (sale.status !== 'Completed') return;
-
             (sale.items || []).forEach(item => {
                 const current = productStats.get(item.id) || { name: item.name, sales: 0, count: 0 };
                 productStats.set(item.id, {
@@ -426,7 +485,7 @@ export default function CentralOperations() {
         return Array.from(productStats.values())
             .sort((a, b) => b.sales - a.sales)
             .slice(0, 5);
-    }, [allSales]);
+    }, [filteredSales]);
 
     // --- COLORS & CHART STYLES ---
     const isDark = theme === 'dark';
@@ -494,20 +553,59 @@ export default function CentralOperations() {
                 </div>
 
                 <div className="flex items-end gap-6 mt-4 md:mt-0">
+                    {/* NEW DATE SELECTOR */}
+                    <div className="hidden md:flex items-center bg-black/30 border border-white/10 rounded-xl px-3 py-2 h-[42px]">
+                        <Calendar size={14} className="text-gray-400 mr-2" />
+                        <select
+                            aria-label="Filter Date Range"
+                            value={dateRange}
+                            onChange={(e) => setDateRange(e.target.value as DateRangeOption)}
+                            className="bg-transparent border-none text-xs text-white outline-none font-bold cursor-pointer hover:text-cyber-primary transition-colors"
+                        >
+                            <option value="This Quarter" className="text-black">This Quarter (Current)</option>
+                            <option value="This Month" className="text-black">This Month</option>
+                            <option value="Last Month" className="text-black">Last Month</option>
+                            <option value="This Year" className="text-black">This Year (YTD)</option>
+                            <option value="Last Year" className="text-black">Last Year (Saved)</option>
+                            <option value="All Time" className="text-black">All Time</option>
+                        </select>
+                    </div>
+
                     <CyberClock />
 
-                    <button className="hidden md:block px-6 py-3 bg-cyber-primary text-cyber-black font-bold rounded-xl hover:bg-cyber-primary/90 transition-colors shadow-[0_0_20px_rgba(0,255,157,0.3)]">
-                        Generate Report
-                    </button>
-                    <div className="text-right px-6 py-3 bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10">
-                        <p className="text-xs text-gray-500 font-bold uppercase">Active Sites</p>
-                        <p className="text-2xl font-mono font-bold text-white">{totalSites}</p>
+                    <div className="text-right px-6 py-2 bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 h-[42px] flex flex-col justify-center">
+                        <p className="text-[10px] text-gray-500 font-bold uppercase leading-none mb-0.5">Active Sites</p>
+                        <p className="text-lg font-mono font-bold text-white leading-none">{totalSites}</p>
                     </div>
+
+                    <button
+                        onClick={handleGenerateReport}
+                        className="hidden md:flex items-center gap-2 bg-cyber-primary text-black px-4 py-2.5 rounded-xl font-bold hover:bg-cyber-primary/90 transition-all shadow-[0_0_15px_rgba(0,255,157,0.3)] h-[42px]"
+                    >
+                        <Download size={18} />
+                        <span className="hidden lg:inline">Report</span>
+                    </button>
                 </div>
             </div>
 
             {/* --- SYSTEM TICKER --- */}
             <SystemTicker />
+
+            {/* --- FISCAL YEAR DECK (Condition: Year View) --- */}
+            {(dateRange === 'This Year' || dateRange === 'Last Year') && (
+                <div className="max-w-[1700px] mx-auto mb-6">
+                    <FiscalYearDeck
+                        year={dateRange === 'Last Year' ? new Date().getFullYear() - 1 : new Date().getFullYear()}
+                        currentQuarter={dateRange === 'Last Year' ? 4 : Math.floor(new Date().getMonth() / 3) + 1}
+                        metrics={{
+                            q1: { value: formatCompactNumber(filteredSales.filter(s => { const d = new Date(s.date); return d.getMonth() < 3 }).reduce((a, b) => a + b.total, 0), { currency: '$' }), label: 'Revenue', trend: '+10%' },
+                            q2: { value: formatCompactNumber(filteredSales.filter(s => { const d = new Date(s.date); return d.getMonth() >= 3 && d.getMonth() < 6 }).reduce((a, b) => a + b.total, 0), { currency: '$' }), label: 'Revenue' },
+                            q3: { value: formatCompactNumber(filteredSales.filter(s => { const d = new Date(s.date); return d.getMonth() >= 6 && d.getMonth() < 9 }).reduce((a, b) => a + b.total, 0), { currency: '$' }), label: 'Revenue' },
+                            q4: { value: formatCompactNumber(filteredSales.filter(s => { const d = new Date(s.date); return d.getMonth() >= 9 }).reduce((a, b) => a + b.total, 0), { currency: '$' }), label: 'Revenue' }
+                        }}
+                    />
+                </div>
+            )}
 
             {/* --- BENTO GRID LAYOUT --- */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 max-w-[1700px] mx-auto">
@@ -516,7 +614,7 @@ export default function CentralOperations() {
                 <div className="col-span-1 md:col-span-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                     <WidgetErrorBoundary title="Total Revenue">
                         <GlassKPICard
-                            title="Total Revenue"
+                            title={dateRange === 'All Time' ? "Total Revenue" : `${dateRange} Revenue`}
                             value={formatCompactNumber(metrics.totalNetworkRevenue, { currency: CURRENCY_SYMBOL })}
                             trend="+12.5%"
                             sub="vs. Last Month"

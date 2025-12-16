@@ -327,6 +327,8 @@ const PO_DESTINATION_SITE_TYPES = ['Warehouse', 'Distribution Center'] as const;
 
 type Tab = 'overview' | 'requests' | 'orders' | 'suppliers';
 type FilterStatus = 'All' | 'Pending' | 'Received' | 'Cancelled';
+type POStatus = 'Draft' | 'Pending' | 'Approved' | 'Rejected' | 'Ordered' | 'Received' | 'Partially Received';
+type DateRangeOption = 'All Time' | 'This Month' | 'Last Month' | 'This Quarter' | 'This Year' | 'Last Year';
 
 // --- CHART CONFIG ---
 const COLORS = ['#00ff9d', '#3b82f6', '#f59e0b', '#ec4899', '#8b5cf6'];
@@ -336,6 +338,8 @@ export default function Procurement() {
     const {
         allOrders, suppliers, products, createPO, updatePO, addSupplier, deletePO, activeSite, sites, addNotification, addProduct
     } = useData();
+    // --- REPORT GENERATOR ---
+    const { generateQuarterlyReport } = require('../utils/reportGenerator');
 
     // Use allOrders but rename to orders for consistency in the rest of the component
     const orders = allOrders;
@@ -410,7 +414,6 @@ export default function Procurement() {
     // Helper function to get valid PO destination sites (WAREHOUSES ONLY - sorted by type then name)
     const getValidPODestinationSites = () => {
         return sites
-            .filter(s => PO_DESTINATION_SITE_TYPES.includes(s.type as any))
             .sort((a, b) => {
                 // Sort by type first (Warehouse, then Distribution Center)
                 const typeOrder = { 'Warehouse': 1, 'Distribution Center': 2 };
@@ -419,6 +422,86 @@ export default function Procurement() {
                 // Then sort by name
                 return a.name.localeCompare(b.name);
             });
+    };
+
+    // --- DATE FILTERING STATE ---
+    const [dateRange, setDateRange] = useState<DateRangeOption>('This Quarter');
+
+    // --- DATE FILTERING LOGIC ---
+    const getQuarterInfo = (d = new Date()) => {
+        const q = Math.floor(d.getMonth() / 3) + 1;
+        const year = d.getFullYear();
+        const start = new Date(year, (q - 1) * 3, 1);
+        const end = new Date(year, q * 3, 0);
+        return { q, year, start, end };
+    };
+
+    const getDateRangeLabels = () => {
+        const { q, year, start, end } = getQuarterInfo();
+
+        switch (dateRange) {
+            case 'This Month':
+                return `Current Month (${new Date().toLocaleDateString('default', { month: 'short' })})`;
+            case 'Last Month':
+                return `Previous Month`;
+            case 'This Quarter':
+                return `Q${q} ${year} (${start.toLocaleDateString(undefined, { month: 'short' })} - ${end.toLocaleDateString(undefined, { month: 'short' })})`;
+            case 'This Year':
+                return `FY ${year}`;
+            case 'Last Year':
+                return `FY ${year - 1}`;
+            case 'All Time':
+            default:
+                return "All Available Data";
+        }
+    };
+
+    // Fiscal Progress
+    const getQuarterProgress = () => {
+        const now = new Date();
+        if (dateRange !== 'This Quarter') return 0;
+        const { start, end } = getQuarterInfo(now);
+        const totalDays = (end.getTime() - start.getTime()) / (1000 * 3600 * 24);
+        const daysPassed = (now.getTime() - start.getTime()) / (1000 * 3600 * 24);
+        return Math.min(100, Math.max(0, (daysPassed / totalDays) * 100));
+    };
+
+
+    // Filtering Helper
+    const isWithinRange = (dateString: string) => {
+        if (dateRange === 'All Time') return true;
+        const date = new Date(dateString);
+        const now = new Date();
+        const { q, year } = getQuarterInfo(now);
+        const start = new Date();
+
+        // Reset
+        start.setHours(0, 0, 0, 0);
+
+        switch (dateRange) {
+            case 'This Month':
+                start.setDate(1);
+                return date >= start && date <= now;
+            case 'Last Month':
+                start.setMonth(now.getMonth() - 1);
+                start.setDate(1);
+                const endLM = new Date(now.getFullYear(), now.getMonth(), 0);
+                return date >= start && date <= endLM;
+            case 'This Quarter':
+                const qStart = new Date(year, (q - 1) * 3, 1);
+                const qEnd = new Date(now);
+                qEnd.setHours(23, 59, 59, 999);
+                return date >= qStart && date <= qEnd;
+            case 'This Year':
+                const yStart = new Date(year, 0, 1);
+                return date >= yStart;
+            case 'Last Year':
+                const lyStart = new Date(year - 1, 0, 1);
+                const lyEnd = new Date(year - 1, 11, 31);
+                return date >= lyStart && date <= lyEnd;
+            default:
+                return true;
+        }
     };
 
 
@@ -461,13 +544,15 @@ export default function Procurement() {
 
     // --- ANALYTICS DATA ---
     const metrics = useMemo(() => {
-        const totalSpend = orders.reduce((sum, o) => sum + (o.status !== 'Cancelled' ? o.totalAmount : 0), 0);
-        const openPO = orders.filter(o => o.status === 'Pending').length;
-        const pendingValue = orders.filter(o => o.status === 'Pending').reduce((sum, o) => sum + o.totalAmount, 0);
+        const dateFilteredOrders = orders.filter(po => isWithinRange(po.date || new Date().toISOString()));
+
+        const totalSpend = dateFilteredOrders.reduce((sum, o) => sum + (o.status !== 'Cancelled' ? o.totalAmount : 0), 0);
+        const openPO = dateFilteredOrders.filter(o => o.status === 'Pending').length;
+        const pendingValue = dateFilteredOrders.filter(o => o.status === 'Pending').reduce((sum, o) => sum + o.totalAmount, 0);
 
         // Spend by Category (Mocked via Supplier Category)
         const categorySpend: Record<string, number> = {};
-        orders.forEach(o => {
+        dateFilteredOrders.forEach(o => {
             const sup = suppliers.find(s => s.id === o.supplierId);
             const cat = sup?.category || 'General';
             categorySpend[cat] = (categorySpend[cat] || 0) + o.totalAmount;
@@ -510,6 +595,17 @@ export default function Procurement() {
         const states: FilterStatus[] = ['All', 'Pending', 'Received', 'Cancelled'];
         const currentIndex = states.indexOf(statusFilter);
         setStatusFilter(states[(currentIndex + 1) % states.length]);
+    };
+
+
+
+    const handleGenerateReport = () => {
+        const reportMetrics = {
+            totalSpend: metrics.totalSpend,
+            openPO: metrics.openPO,
+            pendingValue: metrics.pendingValue,
+        };
+        generateQuarterlyReport(reportMetrics, getDateRangeLabels(), 'Procurement');
     };
 
     // --- EFFECTS ---
@@ -2016,6 +2112,14 @@ export default function Procurement() {
                             <button onClick={() => { setIsCustomItem(!isCustomItem); setCurrentProductToAdd(''); setCustomItemName(''); setSelectedMainCategory(''); setItemAttributes({}); setSelectedDescTemplate(''); }} className={`text-xs px-3 py-1.5 rounded-lg font-medium transition-all ${isCustomItem ? 'bg-green-500/20 text-green-400' : 'bg-white/10 text-gray-400 hover:bg-white/20'}`}>
                                 {isCustomItem ? '✏️ Custom Item' : '📦 From Catalog'}
                             </button>
+                            <div className="flex items-center gap-2">
+                                <button className="p-2 text-gray-400 hover:text-white transition-colors" title="Export PDF" onClick={handleGenerateReport}>
+                                    <Download size={20} />
+                                </button>
+                                <button onClick={() => { setIsCustomItem(!isCustomItem); setCurrentProductToAdd(''); setCustomItemName(''); setSelectedMainCategory(''); setItemAttributes({}); setSelectedDescTemplate(''); }} className={`text-xs px-3 py-1.5 rounded-lg font-medium transition-all ${isCustomItem ? 'bg-green-500/20 text-green-400' : 'bg-white/10 text-gray-400 hover:bg-white/20'}`}>
+                                    {isCustomItem ? '✏️ Custom Item' : '📦 From Catalog'}
+                                </button>
+                            </div>
                         </div>
 
                         {isCustomItem ? (

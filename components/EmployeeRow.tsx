@@ -47,7 +47,7 @@ export default function EmployeeRow({
             onClick={onSelect}
         >
             {/* Employee Info */}
-            <div className="col-span-4 flex items-center gap-3 min-w-0">
+            <div className="col-span-8 sm:col-span-6 lg:col-span-4 flex items-center gap-3 min-w-0">
                 <div className="relative shrink-0">
                     <img
                         src={employee.avatar}
@@ -77,9 +77,9 @@ export default function EmployeeRow({
             </div>
 
             {/* Role & Status */}
-            <div className="col-span-2">
+            <div className="hidden sm:block sm:col-span-3 lg:col-span-2">
                 <div className="flex flex-col gap-1.5">
-                    <span className={`text-[10px] uppercase font-bold px-2 py-1 rounded border w-fit ${roleConfig.styles.badge}`}>
+                    <span className={`text-[10px] uppercase font-bold px-2 py-1 rounded-full border w-fit ${roleConfig.styles.badge}`}>
                         {employee.role.replace('_', ' ')}
                     </span>
                     {employee.department && (
@@ -92,7 +92,7 @@ export default function EmployeeRow({
             </div>
 
             {/* Location */}
-            <div className="col-span-2">
+            <div className="hidden lg:block lg:col-span-2">
                 <div className="flex items-center gap-2">
                     <div className={`p-1.5 rounded ${employeeSite?.type === 'Store' || employeeSite?.type === 'Dark Store'
                         ? 'bg-green-500/20 text-green-400'
@@ -110,7 +110,7 @@ export default function EmployeeRow({
             </div>
 
             {/* Performance */}
-            <div className="col-span-2">
+            <div className="hidden lg:block lg:col-span-2">
                 {isPending ? (
                     <div className="flex items-center gap-2 text-yellow-500">
                         <Clock size={14} className="animate-pulse" />
@@ -131,7 +131,7 @@ export default function EmployeeRow({
             </div>
 
             {/* Actions */}
-            <div className="col-span-2 flex items-center justify-end gap-2">
+            <div className="col-span-4 sm:col-span-3 lg:col-span-2 flex items-center justify-end gap-2">
                 {isPending && canApprove ? (
                     <button
                         onClick={(e) => {

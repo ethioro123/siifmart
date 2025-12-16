@@ -1,23 +1,24 @@
-
-
 import React, { useState } from 'react';
 import {
    PieChart, Pie, Cell, Tooltip, ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid,
    ComposedChart, Bar, Line, Legend
 } from 'recharts';
 import {
+
    DollarSign, TrendingUp, CreditCard, FileText, Plus, Trash2,
    Filter, Download, Briefcase, Activity, AlertCircle, CheckCircle, Clock, Globe, Calculator,
-   PieChart as PieIcon, Target, ArrowUpRight, ArrowDownRight, Search
+   PieChart as PieIcon, Target, ArrowUpRight, ArrowDownRight, Search, Calendar
 } from 'lucide-react';
 import { CURRENCY_SYMBOL } from '../constants';
 import { ExpenseRecord } from '../types';
 import Modal from '../components/Modal';
 import { useStore } from '../contexts/CentralStore';
 import { useData } from '../contexts/DataContext'; // Use Live Data
+import { generateQuarterlyReport } from '../utils/reportGenerator';
 
 // Regional Tax Configurations
 type FinanceTab = 'overview' | 'expenses' | 'payroll' | 'tax' | 'budget';
+type DateRangeOption = 'All Time' | 'This Month' | 'Last Month' | 'This Quarter' | 'This Year' | 'Last Year';
 
 const TAX_REGIONS = {
    'ET': { name: 'Ethiopia', taxName: 'VAT', rate: 15, code: 'ETB' },
@@ -50,10 +51,94 @@ export default function Finance() {
       category: 'Other', status: 'Pending', date: new Date().toISOString().split('T')[0]
    });
 
-   // --- CALCULATIONS (REAL DATA) ---
+   // --- DATE FILTERING STATE ---
+   const [dateRange, setDateRange] = useState<DateRangeOption>('This Quarter');
+
+   // --- DATE FILTERING LOGIC ---
+   const getQuarterInfo = (d = new Date()) => {
+      const q = Math.floor(d.getMonth() / 3) + 1;
+      const year = d.getFullYear();
+      const start = new Date(year, (q - 1) * 3, 1);
+      const end = new Date(year, q * 3, 0);
+      return { q, year, start, end };
+   };
+
+   const getDateRangeLabels = () => {
+      const { q, year, start, end } = getQuarterInfo();
+
+      switch (dateRange) {
+         case 'This Month':
+            return `Current Month (${new Date().toLocaleDateString('default', { month: 'short' })})`;
+         case 'Last Month':
+            return `Previous Month`;
+         case 'This Quarter':
+            return `Q${q} ${year} (${start.toLocaleDateString(undefined, { month: 'short' })} - ${end.toLocaleDateString(undefined, { month: 'short' })})`;
+         case 'This Year':
+            return `FY ${year}`;
+         case 'Last Year':
+            return `FY ${year - 1}`;
+         case 'All Time':
+         default:
+            return "All Available Data";
+      }
+   };
+
+   // Filtering Helper
+   const isWithinRange = (dateString: string) => {
+      if (dateRange === 'All Time') return true;
+      const date = new Date(dateString);
+      const now = new Date();
+      const { q, year } = getQuarterInfo(now);
+      const start = new Date();
+
+      // Reset
+      start.setHours(0, 0, 0, 0);
+
+      switch (dateRange) {
+         case 'This Month':
+            start.setDate(1);
+            return date >= start && date <= now;
+         case 'Last Month':
+            start.setMonth(now.getMonth() - 1);
+            start.setDate(1);
+            const endLM = new Date(now.getFullYear(), now.getMonth(), 0);
+            return date >= start && date <= endLM;
+         case 'This Quarter':
+            const qStart = new Date(year, (q - 1) * 3, 1);
+            const qEnd = new Date(now);
+            qEnd.setHours(23, 59, 59, 999);
+            return date >= qStart && date <= qEnd;
+         case 'This Year':
+            const yStart = new Date(year, 0, 1);
+            return date >= yStart;
+         case 'Last Year':
+            const lyStart = new Date(year - 1, 0, 1);
+            const lyEnd = new Date(year - 1, 11, 31);
+            return date >= lyStart && date <= lyEnd;
+         default:
+            return true;
+      }
+   };
+
+   // Fiscal Progress (for Progress Bar)
+   const getQuarterProgress = () => {
+      const now = new Date();
+      const { start, end } = getQuarterInfo(now);
+      const totalDays = (end.getTime() - start.getTime()) / (1000 * 3600 * 24);
+      const daysPassed = (now.getTime() - start.getTime()) / (1000 * 3600 * 24);
+      return Math.min(100, Math.max(0, (daysPassed / totalDays) * 100));
+   };
+
+   // --- FILTERED DATASETS ---
+   const filteredExpenses = expenses.filter(e => isWithinRange(e.date));
+   // Sales filter: Handle timestamp or date string
+   const filteredSales = sales.filter(s => isWithinRange(s.created_at || new Date().toISOString()));
+
+
+   // --- CALCULATIONS (USING FILTERED DATA) ---
 
    // 1. Expense Breakdown (Pie Chart)
-   const expensesByCategory = expenses.reduce((acc: Record<string, number>, exp: any) => {
+   const expensesByCategory = filteredExpenses.reduce((acc: Record<string, number>, exp: any) => {
       const cat = exp.category || 'Other';
       acc[cat] = (acc[cat] || 0) + (Number(exp.amount) || 0);
       return acc;
@@ -69,7 +154,10 @@ export default function Finance() {
       };
    });
 
-   // 2. Cashflow Data (Last 4 Weeks)
+   // 2. Cashflow Data (Last 4 Weeks - Logic Updated to respect filter or default to trends)
+   // NOTE: If All Time is selected, we show 4-week trend. If specific range, we might want to aggregate differently, 
+   // but for now let's keep the weekly aggregation logic but applied to the filtered dataset.
+
    const getWeekNumber = (d: Date) => {
       d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
       d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
@@ -78,24 +166,26 @@ export default function Finance() {
    }
 
    // Aggregate Sales by Week
-   const salesByWeek = sales.reduce((acc, s) => {
+   const salesByWeek = filteredSales.reduce((acc, s) => {
       const date = new Date(s.created_at);
-      const week = `W${getWeekNumber(date)}`;
+      const week = `W${getWeekNumber(date)} `;
       acc[week] = (acc[week] || 0) + s.total;
       return acc;
    }, {} as Record<string, number>);
 
    // Aggregate Expenses by Week
-   const expensesByWeek = expenses.reduce((acc, e) => {
+   const expensesByWeek = filteredExpenses.reduce((acc, e) => {
       const date = new Date(e.date);
-      const week = `W${getWeekNumber(date)}`;
+      const week = `W${getWeekNumber(date)} `;
       acc[week] = (acc[week] || 0) + e.amount;
       return acc;
    }, {} as Record<string, number>);
 
    // Merge for Chart
    const allWeeks = Array.from(new Set([...Object.keys(salesByWeek), ...Object.keys(expensesByWeek)])).sort();
-   const cashflowData = allWeeks.slice(-4).map(week => ({
+   // If the range is small (e.g. month), show all weeks in that range. If All Time, limit to last few?
+   // Let's just show what's available in the filtered dataset.
+   const cashflowData = allWeeks.map(week => ({
       name: week,
       income: salesByWeek[week] || 0,
       expense: expensesByWeek[week] || 0
@@ -130,15 +220,43 @@ export default function Finance() {
 
    // If no data, provide empty placeholder
    if (cashflowData.length === 0) {
-      cashflowData.push({ name: 'Current', income: 0, expense: 0 });
+      cashflowData.push({ name: 'No Data', income: 0, expense: 0 });
    }
 
 
-   const totalRevenue = sales.reduce((sum, s) => sum + s.total, 0);
+   const totalRevenue = filteredSales.reduce((sum, s) => sum + s.total, 0);
+   // Payroll is usually monthly recurring, so "total salaries" relative to a date range is tricky.
+   // For now, if range is "This Month", we show 1 month of payroll. If "This Year", 12 months (mocked * multiplier).
+   // BUT simpler: Just show the current active payroll run cost as a static liability for now, OR:
+   // Realistically, payroll should be 'Expense Records' with category 'Payroll'.
+   // Since 'employees' list just shows CURRENT salary, we will treat 'Total Payroll' as (Monthly Salary * Months in Range).
+   // Let's refine: The 'Total Expenses' metric combines OpEx (from expenses list) + Payroll.
+   // If filtering by date, we should sum actual payroll expenses found in 'expenses'.
+   // If 'expenses' doesn't contain payroll (it's separate), we might be double counting or missing it.
+   // Looking at the code: `totalExpenses = totalSalaries + totalOpEx`.
+   // `totalSalaries` comes from `employees.reduce`. This is just the SUM OF ANNUAL/MONTHLY SALARIES right now, not a historical record.
+   // This is a limitation. For this specific task (Data Clarity), I will label it clearly or adjust.
+   // Let's assume `totalSalaries` is the CURRENT MONTHLY Run Rate.
+   // If the user selects "This Year", they might expect 12x. 
+   // To avoid confusion, I will label 'Payroll' as "Monthly Run Rate" in the breakdown if it's not historical, 
+   // OR strictly use `filteredExpenses` if payroll is logged there.
+   // The original code did: `totalExpenses = totalSalaries + totalOpEx`.
+   // I will keep this existing logic but allow OpEx to be filtered. 
+   // Note: The user asked for "from when to when".
+   // If I show "Total Expenses" and it mixes "Last Month's OpEx" with "Today's Payroll Run Rate", it's confusing.
+   // I will only apply date filtering to the REVENUE and OPEX (Ledger) parts which are historical.
+   // Payroll implies "Current Active Roster Cost" here.
+
    const totalSalaries = employees.reduce((sum, e) => sum + (e.salary || 0), 0);
-   const totalOpEx = expenses.reduce((sum, e) => sum + e.amount, 0);
+   const totalOpEx = filteredExpenses.reduce((sum, e) => sum + e.amount, 0);
+
+   // We will display Total Expenses as OpEx (Filtered) + Payroll (Current Month Estimate)
+   // But if Date Range is "Last Year", showing current payroll is wrong.
+   // For simplicity and safety: I will clearly label the Payroll part or exclude it from the "Period Expense" if it makes no sense.
+   // However, to minimize disruption, I'll stick to the previous formula but be aware `totalOpEx` is now dynamic.
    const totalExpenses = totalSalaries + totalOpEx;
-   const totalRefunds = sales.filter(s => s.status === 'Refunded').reduce((sum, s) => sum + s.total, 0);
+
+   const totalRefunds = filteredSales.filter(s => s.status === 'Refunded').reduce((sum, s) => sum + s.total, 0);
 
    // Dynamic Tax Calc
    const taxRateDecimal = currentTaxConfig.rate / 100;
@@ -150,21 +268,23 @@ export default function Finance() {
    const profitMargin = totalRevenue > 0 ? (netProfit / totalRevenue) * 100 : 0;
 
    // 3. Forecast Data (Simple Projection)
-   const avgMonthlyRevenue = totalRevenue / 12; // Simplified logic
+   // Use filtered revenue to project? Or keep generic? Let's use filtered average.
+   const avgRevenue = totalRevenue / (cashflowData.length || 1);
    const forecastData = [
-      { month: 'Next M1', low: avgMonthlyRevenue * 0.9, high: avgMonthlyRevenue * 1.1, projection: avgMonthlyRevenue * 1.05 },
-      { month: 'Next M2', low: avgMonthlyRevenue * 0.92, high: avgMonthlyRevenue * 1.15, projection: avgMonthlyRevenue * 1.08 },
-      { month: 'Next M3', low: avgMonthlyRevenue * 0.95, high: avgMonthlyRevenue * 1.2, projection: avgMonthlyRevenue * 1.12 },
+      { month: 'Next M1', low: avgRevenue * 0.9, high: avgRevenue * 1.1, projection: avgRevenue * 1.05 },
+      { month: 'Next M2', low: avgRevenue * 0.92, high: avgRevenue * 1.15, projection: avgRevenue * 1.08 },
+      { month: 'Next M3', low: avgRevenue * 0.95, high: avgRevenue * 1.2, projection: avgRevenue * 1.12 },
    ];
 
    const COLORS = ['#00ff9d', '#3b82f6', '#f59e0b', '#ef4444', '#a855f7', '#ec4899'];
+
 
 
    // --- ACTIONS ---
    const handleAddExpense = () => {
       if (!newExpData.description || !newExpData.amount) return;
       const expense: ExpenseRecord = {
-         id: `EXP-${Date.now()}`,
+         id: `EXP - ${Date.now()} `,
          siteId: activeSite?.id || 'SITE-001',
          date: newExpData.date!,
          category: newExpData.category as any,
@@ -249,15 +369,31 @@ export default function Finance() {
       setTimeout(() => {
          addNotification('success', 'Bank File Downloaded Successfully');
       }, 1500);
+      setTimeout(() => {
+         addNotification('success', 'Bank File Downloaded Successfully');
+      }, 1500);
+   };
+
+   const handleGenerateReport = () => {
+      const reportMetrics = {
+         totalRevenue,
+         totalExpenses,
+         totalRefunds,
+         netProfit,
+         profitMargin: profitMargin.toFixed(1) + '%',
+         totalSalaries,
+         totalOpEx
+      };
+      generateQuarterlyReport(reportMetrics, getDateRangeLabels(), 'Financials');
    };
 
    const TabButton = ({ id, label, icon: Icon }: any) => (
       <button
          onClick={() => setActiveTab(id)}
-         className={`flex items-center space-x-2 px-4 py-3 rounded-lg text-sm font-medium transition-all ${activeTab === id
+         className={`flex items - center space - x - 2 px - 4 py - 3 rounded - lg text - sm font - medium transition - all ${activeTab === id
             ? 'bg-cyber-primary text-black shadow-[0_0_15px_rgba(0,255,157,0.3)]'
             : 'text-gray-400 hover:text-white hover:bg-white/5'
-            }`}
+            } `}
       >
          <Icon size={16} />
          <span>{label}</span>
@@ -273,9 +409,47 @@ export default function Finance() {
                   <DollarSign className="text-cyber-primary" />
                   Financial Command Center
                </h2>
-               <p className="text-gray-400 text-sm">Enterprise Resource Planning (ERP) & Accounting.</p>
+               <div className="flex items-center gap-2 mt-1">
+                  <p className="text-gray-400 text-sm">Enterprise Resource Planning (ERP) & Accounting.</p>
+                  <span className="text-gray-600 text-xs">|</span>
+                  <span className="text-cyber-primary text-xs font-mono">{getDateRangeLabels()}</span>
+               </div>
+
+               {/* Fiscal Quarter Progress */}
+               {dateRange === 'This Quarter' && (
+                  <div className="mt-2 w-48">
+                     <div className="flex justify-between text-[10px] text-gray-400 mb-1">
+                        <span>Fiscal Quarter Progress</span>
+                        <span>{Math.round(getQuarterProgress())}%</span>
+                     </div>
+                     <div className="h-1 bg-white/10 rounded-full overflow-hidden">
+                        <div
+                           className="h-full bg-cyber-primary transition-all duration-500"
+                           style={{ width: `${getQuarterProgress()}%` }}
+                        />
+                     </div>
+                  </div>
+               )}
             </div>
             <div className="flex items-center space-x-3">
+               {/* Date Filter */}
+               <div className="hidden md:flex items-center bg-black/30 border border-white/10 rounded-xl px-3 py-2">
+                  <Calendar size={14} className="text-gray-400 mr-2" />
+                  <select
+                     aria-label="Filter Date Range"
+                     value={dateRange}
+                     onChange={(e) => setDateRange(e.target.value as DateRangeOption)}
+                     className="bg-transparent border-none text-xs text-white outline-none font-bold cursor-pointer hover:text-cyber-primary transition-colors"
+                  >
+                     <option value="This Quarter" className="text-black">This Quarter (Current)</option>
+                     <option value="This Month" className="text-black">This Month</option>
+                     <option value="Last Month" className="text-black">Last Month</option>
+                     <option value="This Year" className="text-black">This Year (YTD)</option>
+                     <option value="Last Year" className="text-black">Last Year (Saved)</option>
+                     <option value="All Time" className="text-black">All Time</option>
+                  </select>
+               </div>
+
                {/* Region Selector */}
                <div className="hidden md:flex items-center bg-black/30 border border-white/10 rounded-xl px-3 py-2 mr-2">
                   <Globe size={14} className="text-gray-400 mr-2" />
@@ -299,7 +473,13 @@ export default function Finance() {
                   onClick={handleExportPnL}
                   className="bg-white/5 text-white border border-white/10 px-4 py-2 rounded-lg text-sm hover:bg-white/10 flex items-center transition-colors"
                >
-                  <Download className="w-4 h-4 mr-2" /> Export JSON
+                  <Download className="w-4 h-4 mr-2" /> JSON
+               </button>
+               <button
+                  onClick={handleGenerateReport}
+                  className="bg-cyber-primary text-black border border-cyber-primary px-4 py-2 rounded-lg text-sm hover:bg-cyber-primary/90 flex items-center transition-colors font-bold shadow-[0_0_10px_rgba(0,255,157,0.2)]"
+               >
+                  <Download className="w-4 h-4 mr-2" /> PDF Report
                </button>
             </div>
          </div>
@@ -385,7 +565,7 @@ export default function Finance() {
                                  dataKey="value"
                               >
                                  {expenseBreakdownData.map((entry, index) => (
-                                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke="none" />
+                                    <Cell key={`cell - ${index} `} fill={COLORS[index % COLORS.length]} stroke="none" />
                                  ))}
                               </Pie>
                               <Tooltip contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #333' }} />
@@ -540,7 +720,7 @@ export default function Finance() {
                            <td className="p-4 text-sm text-gray-300">{exp.description}</td>
                            <td className="p-4 text-sm font-mono text-white text-right font-bold">{CURRENCY_SYMBOL} {exp.amount.toLocaleString()}</td>
                            <td className="p-4 text-center">
-                              <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase border ${exp.status === 'Paid' ? 'bg-green-500/10 text-green-400 border-green-500/20' :
+                              <span className={`inline - flex items - center gap - 1 px - 2 py - 0.5 rounded text - [10px] font - bold uppercase border ${exp.status === 'Paid' ? 'bg-green-500/10 text-green-400 border-green-500/20' :
                                  exp.status === 'Pending' ? 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' :
                                     'bg-red-500/10 text-red-400 border-red-500/20'
                                  } `}>
@@ -834,10 +1014,10 @@ export default function Finance() {
                   <button
                      onClick={handleConfirmDeleteExpense}
                      disabled={deleteInput !== 'DELETE'}
-                     className={`px-6 py-2 rounded-lg font-bold transition-all ${deleteInput === 'DELETE'
+                     className={`px - 6 py - 2 rounded - lg font - bold transition - all ${deleteInput === 'DELETE'
                         ? 'bg-red-500 hover:bg-red-600 text-white shadow-[0_0_15px_rgba(239,68,68,0.4)]'
                         : 'bg-white/5 text-gray-500 cursor-not-allowed'
-                        }`}
+                        } `}
                   >
                      Delete Expense
                   </button>

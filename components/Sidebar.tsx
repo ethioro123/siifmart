@@ -4,14 +4,16 @@ import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard, ShoppingCart, Package, Truck, Users,
   Briefcase, Map, MapPin, Settings, X, LogOut, FileText, ClipboardList, Tags, Eye,
-  DollarSign, Globe, Activity
+  DollarSign, Globe, Activity, Camera
 } from 'lucide-react';
 import { useStore } from '../contexts/CentralStore';
 import { useData } from '../contexts/DataContext';
 import { UserRole } from '../types';
 import { getAvailableSections } from '../services/auth.service';
 import { native } from '../utils/native';
+import { systemLogsService } from '../services/systemLogs.service';
 import Logo from './Logo';
+import ImageCropper from './ImageCropper';
 
 interface SidebarItemProps {
   to: string;
@@ -40,11 +42,22 @@ const SidebarItem: React.FC<SidebarItemProps> = ({ to, icon: Icon, label, onClic
 
 export default function Sidebar() {
   const { user, logout, isSidebarOpen, toggleSidebar } = useStore();
+  const photoInputRef = React.useRef<HTMLInputElement>(null);
+  const [cropperOpen, setCropperOpen] = React.useState(false);
+  const [tempImageSrc, setTempImageSrc] = React.useState<string | null>(null);
 
   if (!user) return null;
 
   // Get activeSite - it might be null during initial load
-  const { activeSite } = useData();
+  const { activeSite, addNotification, updateEmployee } = useData();
+
+  // Local state for immediate UI feedback on photo change
+  const [avatar, setAvatar] = React.useState(user.avatar);
+
+  // Sync with user prop if it changes externally
+  React.useEffect(() => {
+    setAvatar(user.avatar);
+  }, [user.avatar]);
 
   // Get available sections based on role AND site type
   const availableSections = getAvailableSections(user.role, activeSite?.type);
@@ -68,11 +81,11 @@ export default function Sidebar() {
       // INVENTORY
       { to: "/inventory", icon: Package, label: "Inventory", section: "inventory", roles: ['super_admin', 'manager', 'warehouse_manager', 'dispatcher', 'auditor', 'procurement_manager', 'inventory_specialist', 'store_supervisor', 'pos'] },
 
-      // NETWORK INVENTORY - All users can view
-      { to: "/network-inventory", icon: Globe, label: "Network View", section: "inventory", roles: ['super_admin', 'manager', 'warehouse_manager', 'dispatcher', 'pos', 'hr', 'auditor', 'driver', 'finance_manager', 'procurement_manager', 'store_supervisor', 'inventory_specialist', 'cs_manager', 'it_support'] },
+      // NETWORK INVENTORY - All users can view (Except low-level ops)
+      { to: "/network-inventory", icon: Globe, label: "Network View", section: "inventory", roles: ['super_admin', 'manager', 'warehouse_manager', 'dispatcher', 'pos', 'hr', 'auditor', 'finance_manager', 'procurement_manager', 'store_supervisor', 'inventory_specialist', 'cs_manager', 'it_support'] },
 
-      // WMS DASHBOARD - Overview
-      { to: "/wms-dashboard", icon: LayoutDashboard, label: "WMS Dashboard", section: "warehouse", roles: ['super_admin', 'warehouse_manager', 'dispatcher', 'picker', 'driver', 'inventory_specialist'] },
+      // WMS DASHBOARD - Overview (Managers Only)
+      { to: "/wms-dashboard", icon: LayoutDashboard, label: "WMS Dashboard", section: "warehouse", roles: ['super_admin', 'warehouse_manager', 'dispatcher', 'inventory_specialist'] },
 
       // FULFILLMENT (WMS) - Warehouse staff only
       { to: "/wms-ops", icon: ClipboardList, label: "Fulfillment", section: "warehouse", roles: ['warehouse_manager', 'dispatcher', 'picker', 'driver', 'inventory_specialist'] },
@@ -93,7 +106,7 @@ export default function Sidebar() {
       { to: "/employees", icon: Briefcase, label: "Employees", section: "employees", roles: ['super_admin', 'admin', 'hr', 'manager', 'store_supervisor'] },
 
       // ROADMAP
-      { to: "/roadmap", icon: Map, label: "Roadmap", section: "dashboard", roles: ['super_admin', 'admin', 'manager', 'warehouse_manager', 'dispatcher', 'pos', 'picker', 'hr', 'auditor', 'driver', 'finance_manager', 'procurement_manager', 'store_supervisor', 'inventory_specialist', 'cs_manager', 'it_support'] },
+      { to: "/roadmap", icon: Map, label: "Roadmap", section: "dashboard", roles: ['super_admin', 'admin', 'manager', 'warehouse_manager', 'dispatcher', 'pos', 'hr', 'auditor', 'finance_manager', 'procurement_manager', 'store_supervisor', 'inventory_specialist', 'cs_manager', 'it_support'] },
 
       // SETTINGS
       { to: "/settings", icon: Settings, label: "Settings", section: "settings", roles: ['super_admin', 'admin', 'hr', 'it_support'] },
@@ -170,8 +183,100 @@ export default function Sidebar() {
 
   const navItems = getNavItems(user.role);
 
+  const handleRequestPhotoChange = () => {
+    photoInputRef.current?.click();
+  };
+
+  const handlePhotoSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      addNotification('alert', 'Please select an image file.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.addEventListener('load', () => {
+      setTempImageSrc(reader.result?.toString() || null);
+      setCropperOpen(true);
+      // Clear input
+      if (photoInputRef.current) photoInputRef.current.value = '';
+    });
+    reader.readAsDataURL(file);
+  };
+
+  const handleCropComplete = async (croppedImage: string) => {
+    const isPrivileged = ['super_admin', 'admin', 'hr'].includes(user.role);
+
+    if (isPrivileged) {
+      // DIRECT UPDATE
+      try {
+        // Use updateEmployee(employee, user) but we only need to pass the updated fields really if the backend supports patch, 
+        // but checking DataContext, it likely wants a full object or at least the ID. 
+        // IMPORTANT: DataContext.tsx updateEmployee implementation (which acts on 'employees' state) expects: (employee: Employee, user: string)
+        // We can mock the employee object with just the ID and the new avatar if the service handles partials, 
+        // OR we should try to fetch the full object.
+        // Given limitations, let's assume updateEmployee handles partial updates or try to construct a minimal object.
+        // Actually, Supabase update usually just needs the ID. The 'updateEmployee' wrapper in DataContext might update the local state.
+        // Let's rely on the service directly? 'employeesService.update(id, { avatar })'
+        // But we imported 'employeesService'? No, we use 'useData'.
+        // Let's use `updateEmployee({ ...user, avatar: croppedImage } as any, user.name)` ??
+        // Wait, `user` object in context is `User` interface, not `Employee`.
+        // But it has `id`, `role`, `name`.
+        // Let's call updateEmployee with what we have.
+
+        await updateEmployee({ ...user, avatar: croppedImage } as any, user.name);
+        setAvatar(croppedImage); // Immediate UI update
+
+        systemLogsService.log(
+          'HR',
+          'INFO',
+          'PHOTO_UPDATED',
+          `Photo updated for ${user.name} by ${user.name}`,
+          { id: user.id, role: user.role, name: user.name },
+          { processed: true }
+        );
+
+        addNotification('success', 'Profile photo updated successfully.');
+      } catch (error) {
+        console.error(error);
+        addNotification('alert', 'Failed to update photo.');
+      }
+    } else {
+      // REQUEST APPROVAL
+      systemLogsService.log(
+        'HR',
+        'INFO',
+        'PHOTO_CHANGE_REQUEST',
+        `Photo change requested by ${user.name}`,
+        { id: user.id, role: user.role, name: user.name },
+        { newUrl: croppedImage, processed: false }
+      );
+
+      addNotification('success', 'Photo change requested. Waiting for approval.');
+    }
+
+    setCropperOpen(false);
+    setTempImageSrc(null);
+  };
+
   return (
     <>
+      <input type="file" ref={photoInputRef} className="hidden" accept="image/*" onChange={handlePhotoSelect} aria-label="Profile Photo Upload" />
+
+      {tempImageSrc && (
+        <ImageCropper
+          open={cropperOpen}
+          imageSrc={tempImageSrc}
+          onCropComplete={handleCropComplete}
+          onCancel={() => {
+            setCropperOpen(false);
+            setTempImageSrc(null);
+          }}
+        />
+      )}
+
       {/* Mobile Overlay */}
       <div
         className={`fixed inset-0 bg-black/80 z-40 transition-opacity ${isSidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
@@ -194,8 +299,13 @@ export default function Sidebar() {
 
         <div className="px-4 mb-6">
           <div className="bg-cyber-gray p-4 rounded-xl border border-white/5">
-            <div className="flex items-center space-x-3">
-              <img src={user.avatar} alt="User" className="w-10 h-10 rounded-full border-2 border-cyber-primary object-cover" />
+            <div className="flex items-center space-x-3 group relative cursor-pointer" onClick={handleRequestPhotoChange} title="Click to request photo change">
+              <div className="relative">
+                <img src={user.avatar} alt="User" className="w-10 h-10 rounded-full border-2 border-cyber-primary object-cover" />
+                <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  <Camera size={16} className="text-white" />
+                </div>
+              </div>
               <div>
                 <p className="text-sm font-bold text-white truncate w-32">{user.name}</p>
                 <p className="text-xs text-gray-400 truncate w-32">{user.title}</p>
