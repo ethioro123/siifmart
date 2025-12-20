@@ -234,7 +234,6 @@ export default function RoleSettings() {
                                             <div key={perm.id} className="p-4 flex items-center justify-between group hover:bg-white/5 transition-colors">
                                                 <div>
                                                     <div className="text-sm font-bold text-white mb-0.5">{perm.label}</div>
-                                                    <div className="text-[10px] text-gray-500 font-mono bg-white/5 px-1.5 py-0.5 rounded inline-block">{perm.id}</div>
                                                 </div>
                                                 <div className="flex items-center gap-3">
                                                     <span className={`text-[10px] uppercase font-bold ${perm[activeRole] ? 'text-green-400' : 'text-red-400'}`}>

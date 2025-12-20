@@ -16,11 +16,16 @@ import ManagerDashboardBanner from '../components/ManagerDashboardBanner';
 import ClickableKPICard from '../components/ClickableKPICard';
 import { calculateMetrics, METRIC_ROUTES } from '../utils/metrics';
 import { native } from '../utils/native';
+import WorkerPointsDisplay, { LeaderboardWidget } from '../components/WorkerPointsDisplay';
+import { Trophy, Target, Award, Crown } from 'lucide-react';
 
 export default function WMSDashboard() {
   const navigate = useNavigate();
   const { user } = useStore();
-  const { movements, sales, addNotification, jobs, products, orders, employees, activeSite } = useData(); // Live Data Connection
+  const { movements, sales, addNotification, jobs, products, orders, employees, activeSite, workerPoints } = useData(); // Live Data Connection
+
+  // Get current user points
+  const myPoints = workerPoints.find(wp => wp.employeeId === user?.id || wp.employeeName === user?.name);
 
   // Calculate metrics using shared utility
   const metrics = calculateMetrics(
@@ -87,6 +92,75 @@ export default function WMSDashboard() {
     <div className="space-y-6">
       {/* Manager Quick Access Banner */}
       <ManagerDashboardBanner />
+
+      {/* Personal Performance & Leaderboard Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* My Stats Card */}
+        <div className="lg:col-span-2">
+          {myPoints ? (
+            <div className="bg-gradient-to-br from-cyber-gray to-purple-900/10 border border-white/10 rounded-2xl p-6 h-full">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-xl bg-cyber-primary/20 flex items-center justify-center">
+                    <Trophy className="text-cyber-primary" size={24} />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-white leading-tight">Your Performance</h3>
+                    <p className="text-xs text-gray-400">Keep picking to reach the next tier!</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <span className="text-xs font-bold text-cyber-primary uppercase tracking-wider bg-cyber-primary/10 px-2 py-1 rounded">
+                    Rank #{myPoints.rank}
+                  </span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-black/30 p-4 rounded-xl border border-white/5">
+                  <p className="text-[10px] text-gray-500 uppercase font-black mb-1">Total Points</p>
+                  <p className="text-2xl font-black text-white">{myPoints.totalPoints.toLocaleString()}</p>
+                </div>
+                <div className="bg-black/30 p-4 rounded-xl border border-white/5">
+                  <p className="text-[10px] text-gray-500 uppercase font-black mb-1">Daily Achievement</p>
+                  <p className="text-2xl font-black text-cyber-primary">+{myPoints.todayPoints.toLocaleString()}</p>
+                </div>
+                <div className="bg-black/30 p-4 rounded-xl border border-white/5">
+                  <p className="text-[10px] text-gray-500 uppercase font-black mb-1">Current Level</p>
+                  <div className="flex items-baseline gap-2">
+                    <p className="text-2xl font-black text-purple-400">Lv. {myPoints.level}</p>
+                    <span className="text-[10px] text-gray-400 font-bold">{myPoints.levelTitle}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Level Progress */}
+              <div className="mt-6">
+                <div className="flex justify-between text-[10px] text-gray-400 mb-2 uppercase font-bold tracking-tighter">
+                  <span>Level {myPoints.level}</span>
+                  <span>Level {myPoints.level + 1}</span>
+                </div>
+                <div className="h-2 bg-black/50 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-cyber-primary to-purple-500 transition-all duration-1000 ease-out"
+                    style={{ width: '65%' }} // Simplified for demo, logic exists in WorkerPointsDisplay
+                  />
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="bg-cyber-gray border border-white/5 border-dashed rounded-2xl p-8 text-center flex flex-col items-center justify-center h-full">
+              <Award size={48} className="text-gray-600 mb-4 opacity-20" />
+              <p className="text-gray-500 font-medium">Start completing jobs to earn points and climb the ranks!</p>
+            </div>
+          )}
+        </div>
+
+        {/* Global Leaderboard Mini-Widget */}
+        <div className="lg:col-span-1">
+          <LeaderboardWidget workers={workerPoints} currentUserId={user?.id} />
+        </div>
+      </div>
 
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">

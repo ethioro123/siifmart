@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
-import { Printer, Scale, Scan, CreditCard, Wifi, Bluetooth, Usb, Plus, Settings2, RefreshCw, CheckCircle, XCircle, Power } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Printer, Scale, Scan, Wifi, Bluetooth, Usb, Plus, Settings2, RefreshCw, Power, Save } from 'lucide-react';
 import { useData } from '../../contexts/DataContext';
 import { useStore } from '../../contexts/CentralStore';
+import Button from '../shared/Button';
 
 // --- SUB-COMPONENTS ---
 const SectionHeader = ({ title, desc }: { title: string, desc: string }) => (
@@ -58,10 +59,40 @@ const DeviceCard = ({ device, onTest, onConfig }: any) => (
 
 export default function InfrastructureSettings() {
     const { user } = useStore();
-    const { settings, updateSettings } = useData();
+    const { settings, updateSettings, addNotification } = useData();
 
-    // Mock state for devices (usually from local hardware service)
-    const [devices, setDevices] = useState([
+    // Local State
+    const [hardware, setHardware] = useState({
+        scaleIpAddress: '',
+        scannerComPort: ''
+    });
+    const [isSaving, setIsSaving] = useState(false);
+
+    // Sync from settings
+    useEffect(() => {
+        if (settings) {
+            setHardware({
+                scaleIpAddress: settings.scaleIpAddress || '',
+                scannerComPort: settings.scannerComPort || ''
+            });
+        }
+    }, [settings]);
+
+    const handleSave = async () => {
+        setIsSaving(true);
+        try {
+            await updateSettings(hardware, user?.name || 'Admin');
+            addNotification('success', 'Hardware configuration saved successfully!');
+        } catch (err) {
+            console.error('Failed to save hardware settings:', err);
+            addNotification('alert', 'Failed to save hardware settings.');
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    // Mock state for devices
+    const [devices] = useState([
         { id: 1, name: 'Main Receipt Printer', model: 'Epson TM-T88VI', type: 'printer', connection: 'network', address: '192.168.1.200', status: 'online', icon: <Printer size={18} /> },
         { id: 2, name: 'Counter Scale 1', model: 'Datalogic Magellan', type: 'scale', connection: 'usb', address: 'COM3', status: 'offline', icon: <Scale size={18} /> },
         { id: 3, name: 'Handheld Scanner', model: 'Zebra DS2208', type: 'scanner', connection: 'bluetooth', address: 'BT-MAC-001', status: 'online', icon: <Scan size={18} /> }
@@ -110,9 +141,35 @@ export default function InfrastructureSettings() {
                 {/* QUICK ACTIONS & DRIVERS */}
                 <div className="space-y-6">
                     <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-3xl p-6">
-                        <SectionHeader title="Global Drivers" desc="Protocol settings" />
+                        <div className="mb-6 border-b border-white/5 pb-4">
+                            <h3 className="text-lg font-bold text-white">Device Settings</h3>
+                            <p className="text-xs text-gray-400 mt-1">Port and IP assignments</p>
+                        </div>
 
                         <div className="space-y-4">
+                            <div className="group">
+                                <label className="text-[10px] text-gray-500 uppercase font-bold mb-1 block">Counter Scale IP</label>
+                                <input
+                                    type="text"
+                                    value={hardware.scaleIpAddress}
+                                    onChange={(e) => setHardware(prev => ({ ...prev, scaleIpAddress: e.target.value }))}
+                                    placeholder="e.g. 192.168.1.50"
+                                    className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-cyber-primary"
+                                />
+                            </div>
+                            <div className="group">
+                                <label className="text-[10px] text-gray-500 uppercase font-bold mb-1 block">Scanner COM Port</label>
+                                <input
+                                    type="text"
+                                    value={hardware.scannerComPort}
+                                    onChange={(e) => setHardware(prev => ({ ...prev, scannerComPort: e.target.value }))}
+                                    placeholder="e.g. COM3"
+                                    className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-cyber-primary"
+                                />
+                            </div>
+
+                            <div className="h-px bg-white/5 my-2" />
+
                             <div className="flex items-center justify-between p-3 bg-black/20 rounded-xl border border-white/5">
                                 <div className="flex items-center gap-3">
                                     <Printer size={16} className="text-gray-400" />
@@ -120,13 +177,18 @@ export default function InfrastructureSettings() {
                                 </div>
                                 <span className="text-[10px] text-green-400 flex items-center gap-1 bg-green-500/10 px-2 py-0.5 rounded border border-green-500/20">Running</span>
                             </div>
-                            <div className="flex items-center justify-between p-3 bg-black/20 rounded-xl border border-white/5">
-                                <div className="flex items-center gap-3">
-                                    <Scale size={16} className="text-gray-400" />
-                                    <div className="text-sm text-gray-300">OPOS Bridge</div>
-                                </div>
-                                <span className="text-[10px] text-yellow-400 flex items-center gap-1 bg-yellow-500/10 px-2 py-0.5 rounded border border-yellow-500/20">Restarting</span>
-                            </div>
+                        </div>
+
+                        <div className="mt-8 pt-6 border-t border-white/5 flex justify-end">
+                            <Button
+                                onClick={handleSave}
+                                loading={isSaving}
+                                icon={<Save size={16} />}
+                                variant="primary"
+                                className="px-8"
+                            >
+                                Save Device Config
+                            </Button>
                         </div>
                     </div>
 

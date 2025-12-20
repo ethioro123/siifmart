@@ -32,11 +32,11 @@ async function runTest() {
         .select()
         .single();
 
-    if (prodError) {
+    if (prodError || !product) {
         console.error('❌ Failed to create product:', prodError);
         return;
     }
-    console.log('✅ Product Created:', product.id);
+    console.log('✅ Product Created:', (product as any).id);
 
     // 2. Create a PO (Draft)
     console.log('\n📝 Step 2: Creating Purchase Order (Draft)...');
@@ -61,11 +61,11 @@ async function runTest() {
         .select()
         .single();
 
-    if (poError) {
+    if (poError || !po) {
         console.error('❌ Failed to create PO:', poError);
         return;
     }
-    console.log('✅ PO Created:', po.po_number, po.id);
+    console.log('✅ PO Created:', (po as any).po_number, (po as any).id);
 
     // 2b. Add PO Items
     console.log('   Adding PO Items...');
@@ -156,22 +156,22 @@ async function runTest() {
         .select()
         .single();
 
-    if (jobError) {
+    if (jobError || !job) {
         console.error('❌ Failed to create WMS Job:', jobError);
         return;
     }
-    console.log('✅ Putaway Job Created:', job.id);
-    console.log('   Job Type:', job.type);
-    console.log('   Order Ref:', job.order_ref);
-    console.log('   Line Items:', JSON.stringify(job.line_items));
+    console.log('✅ Putaway Job Created:', (job as any).id);
+    console.log('   Job Type:', (job as any).type);
+    console.log('   Order Ref:', (job as any).order_ref);
+    console.log('   Line Items:', JSON.stringify((job as any).line_items));
 
     // 6. Verify Final State
     console.log('\n🔍 Step 6: Verifying Final State...');
 
     // Check PO Status
     const { data: finalPO } = await supabase.from('purchase_orders').select('status').eq('id', poId).single();
-    if (finalPO.status !== 'Received') {
-        console.error('❌ PO Status Mismatch:', finalPO.status);
+    if (!finalPO || (finalPO as any).status !== 'Received') {
+        console.error('❌ PO Status Mismatch:', finalPO?.status);
     } else {
         console.log('✅ PO Status is Received');
     }

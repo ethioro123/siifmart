@@ -261,8 +261,8 @@ export const AuditLogViewer: React.FC = () => {
                                     <span className="text-sm font-medium">{new Date(selectedLog.timestamp).toLocaleString()}</span>
                                 </div>
                                 <div className="p-3 bg-gray-50 rounded-lg">
-                                    <span className="text-xs text-gray-500 uppercase block mb-1">Log ID</span>
-                                    <span className="text-sm font-mono text-gray-600">{selectedLog.id}</span>
+                                    <span className="text-xs text-gray-500 uppercase block mb-1">Log Reference</span>
+                                    <span className="text-sm font-mono text-gray-600">LR-{selectedLog.id.substring(0, 8).toUpperCase()}</span>
                                 </div>
                             </div>
 
@@ -282,7 +282,7 @@ export const AuditLogViewer: React.FC = () => {
                                 <div className="flex justify-between items-center">
                                     <div>
                                         <div className="font-medium text-gray-900">{selectedLog.userName}</div>
-                                        <div className="text-sm text-gray-500">{selectedLog.userId}</div>
+                                        <div className="text-sm text-gray-500">UID-{selectedLog.userId.substring(0, 8).toUpperCase()}</div>
                                     </div>
                                     <span className="px-3 py-1 bg-white border rounded text-sm font-medium text-gray-600">
                                         {selectedLog.userRole}

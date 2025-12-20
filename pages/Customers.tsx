@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import {
    Users, Search, Gift, Star, Crown, Phone, Mail, ChevronRight,
    Plus, Filter, Edit2, Save, Trash2, MessageSquare, History, MapPin,
-   TrendingUp, DollarSign, FileText
+   TrendingUp, DollarSign, FileText, Loader2
 } from 'lucide-react';
 import { CURRENCY_SYMBOL } from '../constants';
 import { Customer } from '../types';
@@ -20,6 +20,7 @@ export default function Customers() {
    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
    const [customerToDelete, setCustomerToDelete] = useState<Customer | null>(null);
    const [deleteInput, setDeleteInput] = useState('');
+   const [isSubmitting, setIsSubmitting] = useState(false); // Loading state
 
    // Filter logic with safety check
    const filteredCustomers = (customers || []).filter(c =>
@@ -28,30 +29,41 @@ export default function Customers() {
       c.phone?.includes(searchTerm)
    );
 
-   const handleSaveCustomer = () => {
+   const handleSaveCustomer = async () => {
       if (!newCustomer.name || !newCustomer.phone) {
          addNotification('alert', "Name and Phone are required.");
          return;
       }
-      const customer: Customer = {
-         id: newCustomer.id || `CUST-${Date.now()}`,
-         name: newCustomer.name,
-         phone: newCustomer.phone,
-         email: newCustomer.email || '',
-         loyaltyPoints: newCustomer.loyaltyPoints || 0,
-         totalSpent: newCustomer.totalSpent || 0,
-         lastVisit: newCustomer.lastVisit || new Date().toISOString().split('T')[0],
-         tier: newCustomer.tier || 'Bronze',
-         notes: newCustomer.notes || ''
-      };
 
-      if (newCustomer.id) {
-         updateCustomer(customer);
-      } else {
-         addCustomer(customer);
+      setIsSubmitting(true);
+      try {
+         const customer: Customer = {
+            id: newCustomer.id || `CUST - ${Date.now()} `,
+            name: newCustomer.name,
+            phone: newCustomer.phone,
+            email: newCustomer.email || '',
+            loyaltyPoints: newCustomer.loyaltyPoints || 0,
+            totalSpent: newCustomer.totalSpent || 0,
+            lastVisit: newCustomer.lastVisit || new Date().toISOString().split('T')[0],
+            tier: newCustomer.tier || 'Bronze',
+            notes: newCustomer.notes || ''
+         };
+
+         if (newCustomer.id) {
+            await updateCustomer(customer);
+            addNotification('success', `Customer ${customer.name} updated.`);
+         } else {
+            await addCustomer(customer);
+            addNotification('success', `Customer ${customer.name} added.`);
+         }
+         setIsAddModalOpen(false);
+         setNewCustomer({});
+      } catch (error) {
+         console.error("Failed to save customer:", error);
+         addNotification('alert', "Failed to save customer.");
+      } finally {
+         setIsSubmitting(false);
       }
-      setIsAddModalOpen(false);
-      setNewCustomer({});
    };
 
    const handleEditCustomer = (customer: Customer) => {
@@ -68,7 +80,7 @@ export default function Customers() {
       }
    };
 
-   const handleConfirmDelete = () => {
+   const handleConfirmDelete = async () => {
       if (!customerToDelete) return;
 
       if (deleteInput !== "DELETE") {
@@ -76,13 +88,21 @@ export default function Customers() {
          return;
       }
 
-      deleteCustomer(customerToDelete.id);
-      if (selectedCustomer?.id === customerToDelete.id) setSelectedCustomer(null);
+      setIsSubmitting(true);
+      try {
+         await deleteCustomer(customerToDelete.id);
+         if (selectedCustomer?.id === customerToDelete.id) setSelectedCustomer(null);
 
-      addNotification('success', `Customer ${customerToDelete.name} deleted.`);
-      setIsDeleteModalOpen(false);
-      setCustomerToDelete(null);
-      setDeleteInput('');
+         addNotification('success', `Customer ${customerToDelete.name} deleted.`);
+         setIsDeleteModalOpen(false);
+         setCustomerToDelete(null);
+         setDeleteInput('');
+      } catch (error) {
+         console.error("Failed to delete customer:", error);
+         addNotification('alert', "Failed to delete customer.");
+      } finally {
+         setIsSubmitting(false);
+      }
    };
 
    return (
@@ -127,7 +147,7 @@ export default function Customers() {
                   <div
                      key={customer.id}
                      onClick={() => setSelectedCustomer(customer)}
-                     className={`bg-cyber-gray border rounded-2xl p-5 cursor-pointer transition-all hover:border-cyber-primary/30 group ${selectedCustomer?.id === customer.id ? 'border-cyber-primary bg-cyber-primary/5' : 'border-white/5'}`}
+                     className={`bg - cyber - gray border rounded - 2xl p - 5 cursor - pointer transition - all hover: border - cyber - primary / 30 group ${selectedCustomer?.id === customer.id ? 'border-cyber-primary bg-cyber-primary/5' : 'border-white/5'} `}
                   >
                      <div className="flex justify-between items-start mb-4">
                         <div className="flex items-center gap-3">
@@ -139,11 +159,11 @@ export default function Customers() {
                               <p className="text-xs text-gray-500">{customer.phone}</p>
                            </div>
                         </div>
-                        <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase border ${customer.tier === 'Platinum' ? 'text-purple-400 border-purple-500/30 bg-purple-500/10' :
+                        <span className={`px - 2 py - 1 rounded text - [10px] font - bold uppercase border ${customer.tier === 'Platinum' ? 'text-purple-400 border-purple-500/30 bg-purple-500/10' :
                            customer.tier === 'Gold' ? 'text-yellow-400 border-yellow-500/30 bg-yellow-500/10' :
                               customer.tier === 'Silver' ? 'text-gray-300 border-gray-500/30 bg-gray-500/10' :
                                  'text-orange-400 border-orange-500/30 bg-orange-500/10'
-                           }`}>
+                           } `}>
                            {customer.tier}
                         </span>
                      </div>
@@ -181,10 +201,10 @@ export default function Customers() {
                         <h3 className="text-2xl font-bold text-white">{selectedCustomer.name}</h3>
                         <p className="text-gray-400 text-sm mt-1">{selectedCustomer.email}</p>
                         <div className="flex justify-center gap-2 mt-4">
-                           <button onClick={() => addNotification('info', `Calling ${selectedCustomer.phone}...`)} className="p-2 bg-white/5 rounded-lg text-gray-400 hover:text-white hover:bg-white/10"><Phone size={18} /></button>
-                           <button onClick={() => addNotification('info', `Emailing ${selectedCustomer.email}...`)} className="p-2 bg-white/5 rounded-lg text-gray-400 hover:text-white hover:bg-white/10"><Mail size={18} /></button>
-                           <ProtectedButton permission="EDIT_CUSTOMER" onClick={() => handleEditCustomer(selectedCustomer)} className="p-2 bg-white/5 rounded-lg text-gray-400 hover:text-white hover:bg-white/10"><Edit2 size={18} /></ProtectedButton>
-                           <ProtectedButton permission="DELETE_CUSTOMER" onClick={() => handleDeleteCustomer(selectedCustomer.id)} className="p-2 bg-white/5 rounded-lg text-gray-400 hover:text-red-400 hover:bg-red-500/10"><Trash2 size={18} /></ProtectedButton>
+                           <button onClick={() => addNotification('info', `Calling ${selectedCustomer.phone}...`)} className="p-2 bg-white/5 rounded-lg text-gray-400 hover:text-white hover:bg-white/10" aria-label="Call Customer"><Phone size={18} /></button>
+                           <button onClick={() => addNotification('info', `Emailing ${selectedCustomer.email}...`)} className="p-2 bg-white/5 rounded-lg text-gray-400 hover:text-white hover:bg-white/10" aria-label="Email Customer"><Mail size={18} /></button>
+                           <ProtectedButton permission="EDIT_CUSTOMER" onClick={() => handleEditCustomer(selectedCustomer)} className="p-2 bg-white/5 rounded-lg text-gray-400 hover:text-white hover:bg-white/10" aria-label="Edit Customer"><Edit2 size={18} /></ProtectedButton>
+                           <ProtectedButton permission="DELETE_CUSTOMER" onClick={() => handleDeleteCustomer(selectedCustomer.id)} className="p-2 bg-white/5 rounded-lg text-gray-400 hover:text-red-400 hover:bg-red-500/10" aria-label="Delete Customer"><Trash2 size={18} /></ProtectedButton>
                         </div>
                      </div>
 
@@ -232,37 +252,45 @@ export default function Customers() {
             <div className="space-y-4">
                <div className="grid grid-cols-2 gap-4">
                   <div>
-                     <label className="text-xs text-gray-400 uppercase font-bold mb-1 block">Full Name</label>
+                     <label htmlFor="c-name" className="text-xs text-gray-400 uppercase font-bold mb-1 block">Full Name</label>
                      <input
+                        id="c-name"
                         className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white outline-none focus:border-cyber-primary"
                         value={newCustomer.name || ''}
                         onChange={e => setNewCustomer({ ...newCustomer, name: e.target.value })}
+                        disabled={isSubmitting}
                      />
                   </div>
                   <div>
-                     <label className="text-xs text-gray-400 uppercase font-bold mb-1 block">Phone Number</label>
+                     <label htmlFor="c-phone" className="text-xs text-gray-400 uppercase font-bold mb-1 block">Phone Number</label>
                      <input
+                        id="c-phone"
                         className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white outline-none focus:border-cyber-primary"
                         value={newCustomer.phone || ''}
                         onChange={e => setNewCustomer({ ...newCustomer, phone: e.target.value })}
+                        disabled={isSubmitting}
                      />
                   </div>
                </div>
                <div>
-                  <label className="text-xs text-gray-400 uppercase font-bold mb-1 block">Email Address</label>
+                  <label htmlFor="c-email" className="text-xs text-gray-400 uppercase font-bold mb-1 block">Email Address</label>
                   <input
+                     id="c-email"
                      className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white outline-none focus:border-cyber-primary"
                      value={newCustomer.email || ''}
                      onChange={e => setNewCustomer({ ...newCustomer, email: e.target.value })}
+                     disabled={isSubmitting}
                   />
                </div>
                <div className="grid grid-cols-2 gap-4">
                   <div>
-                     <label className="text-xs text-gray-400 uppercase font-bold mb-1 block">Tier</label>
+                     <label htmlFor="c-tier" className="text-xs text-gray-400 uppercase font-bold mb-1 block">Tier</label>
                      <select
+                        id="c-tier"
                         className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white outline-none"
                         value={newCustomer.tier || 'Bronze'}
                         onChange={e => setNewCustomer({ ...newCustomer, tier: e.target.value as any })}
+                        disabled={isSubmitting}
                      >
                         <option>Bronze</option>
                         <option>Silver</option>
@@ -271,29 +299,45 @@ export default function Customers() {
                      </select>
                   </div>
                   <div>
-                     <label className="text-xs text-gray-400 uppercase font-bold mb-1 block">Loyalty Points</label>
+                     <label htmlFor="c-points" className="text-xs text-gray-400 uppercase font-bold mb-1 block">Loyalty Points</label>
                      <input
+                        id="c-points"
                         type="number"
                         className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white outline-none"
                         value={newCustomer.loyaltyPoints || 0}
                         onChange={e => setNewCustomer({ ...newCustomer, loyaltyPoints: parseInt(e.target.value) })}
+                        disabled={isSubmitting}
                      />
                   </div>
                </div>
                <div>
-                  <label className="text-xs text-gray-400 uppercase font-bold mb-1 block">Notes</label>
+                  <label htmlFor="c-notes" className="text-xs text-gray-400 uppercase font-bold mb-1 block">Notes</label>
                   <textarea
+                     id="c-notes"
                      className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white outline-none h-24 resize-none focus:border-cyber-primary"
                      value={newCustomer.notes || ''}
                      onChange={e => setNewCustomer({ ...newCustomer, notes: e.target.value })}
+                     disabled={isSubmitting}
                   />
                </div>
-               <button
-                  onClick={handleSaveCustomer}
-                  className="w-full py-3 bg-cyber-primary text-black font-bold rounded-xl mt-2 hover:bg-cyber-accent transition-colors"
-               >
-                  Save Customer
-               </button>
+               <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-white/10">
+                  <button
+                     type="button"
+                     onClick={() => setIsAddModalOpen(false)}
+                     disabled={isSubmitting}
+                     className="px-4 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-colors"
+                  >
+                     Cancel
+                  </button>
+                  <button
+                     onClick={handleSaveCustomer}
+                     disabled={isSubmitting}
+                     className={`px-4 py-2 rounded-lg bg-cyber-primary text-black font-bold hover:bg-cyber-accent transition-colors flex items-center gap-2 ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  >
+                     {isSubmitting ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />}
+                     {isSubmitting ? (newCustomer.id ? 'Saving...' : 'Adding...') : (newCustomer.id ? 'Save Customer' : 'Add Customer')}
+                  </button>
+               </div>
             </div>
          </Modal>
 
@@ -320,24 +364,28 @@ export default function Customers() {
                   onChange={(e) => setDeleteInput(e.target.value)}
                   className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-white mb-6 focus:outline-none focus:border-red-500/50 transition-colors font-mono"
                   placeholder="Type DELETE to confirm"
+                  disabled={isSubmitting}
+                  aria-label="Confirm deletion input"
                />
 
                <div className="flex justify-end gap-3">
                   <button
                      onClick={() => setIsDeleteModalOpen(false)}
+                     disabled={isSubmitting}
                      className="px-4 py-2 text-gray-400 hover:text-white transition-colors"
                   >
                      Cancel
                   </button>
                   <button
                      onClick={handleConfirmDelete}
-                     disabled={deleteInput !== 'DELETE'}
-                     className={`px-6 py-2 rounded-lg font-bold transition-all ${deleteInput === 'DELETE'
+                     disabled={deleteInput !== 'DELETE' || isSubmitting}
+                     className={`px-6 py-2 rounded-lg font-bold transition-all flex items-center gap-2 ${deleteInput === 'DELETE' && !isSubmitting
                         ? 'bg-red-500 hover:bg-red-600 text-white shadow-[0_0_15px_rgba(239,68,68,0.4)]'
-                        : 'bg-white/5 text-gray-500 cursor-not-allowed'
+                        : 'bg-white/5 text-gray-500 cursor-not-allowed opacity-50'
                         }`}
                   >
-                     Delete Customer
+                     {isSubmitting ? <Loader2 className="animate-spin" size={18} /> : <Trash2 size={18} />}
+                     {isSubmitting ? 'Deleting...' : 'Delete Customer'}
                   </button>
                </div>
             </div>

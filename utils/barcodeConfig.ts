@@ -16,50 +16,51 @@ export interface BarcodeConfig {
 
 /**
  * Barcode size presets for different use cases
+ * Heights are optimized to fit within standard label dimensions
  */
 export const BARCODE_SIZES: Record<BarcodeSize, BarcodeConfig> = {
-    // Tiny: For inline display in lists, cards, or compact UI elements
+    // Tiny: For inline display in lists, cards, or compact UI elements (2" x 1" labels)
     tiny: {
-        width: 1,
-        height: 25,
-        fontSize: 8,
+        width: 0.8,
+        height: 15,
+        fontSize: 6,
         margin: 0,
         displayValue: false
     },
 
-    // Small: For modal previews, small labels, or secondary displays
+    // Small: For modal previews, small labels (2.25" x 1.25" labels)
     small: {
         width: 1,
+        height: 22,
+        fontSize: 7,
+        margin: 0,
+        displayValue: true
+    },
+
+    // Medium: For standard product labels (4" x 2" labels)
+    medium: {
+        width: 1.2,
         height: 35,
+        fontSize: 8,
+        margin: 0,
+        displayValue: true
+    },
+
+    // Large: For warehouse labels, shipping labels (4" x 3" labels)
+    large: {
+        width: 1.5,
+        height: 55,
         fontSize: 10,
         margin: 2,
         displayValue: true
     },
 
-    // Medium: For standard product labels and general printing
-    medium: {
-        width: 1.5,
-        height: 50,
+    // XLarge: For large format printing (4" x 6" labels)
+    xlarge: {
+        width: 2,
+        height: 90,
         fontSize: 12,
         margin: 4,
-        displayValue: true
-    },
-
-    // Large: For warehouse labels, shipping labels, and primary identification
-    large: {
-        width: 2,
-        height: 70,
-        fontSize: 14,
-        margin: 6,
-        displayValue: true
-    },
-
-    // XLarge: For large format printing, posters, or high-visibility applications
-    xlarge: {
-        width: 3,
-        height: 100,
-        fontSize: 16,
-        margin: 8,
         displayValue: true
     }
 };

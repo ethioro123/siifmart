@@ -20,7 +20,7 @@ export const QRScanner: React.FC<QRScannerProps> = ({
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const [error, setError] = useState<string>('');
     const [isScanning, setIsScanning] = useState(false);
-    const animationFrameRef = useRef<number>();
+    const animationFrameRef = useRef<number | null>(null);
 
     useEffect(() => {
         let stream: MediaStream | null = null;

@@ -18,7 +18,7 @@ import {
     type Permission
 } from './permissions.service';
 
-export type UserRole = 'super_admin' | 'admin' | 'manager' | 'warehouse_manager' | 'dispatcher' | 'pos' | 'picker' | 'hr' | 'auditor' | 'driver' | 'finance_manager' | 'procurement_manager' | 'store_supervisor' | 'inventory_specialist' | 'cs_manager' | 'it_support';
+export type UserRole = 'super_admin' | 'admin' | 'manager' | 'warehouse_manager' | 'dispatcher' | 'pos' | 'picker' | 'packer' | 'hr' | 'auditor' | 'driver' | 'finance_manager' | 'procurement_manager' | 'store_supervisor' | 'inventory_specialist' | 'cs_manager' | 'it_support';
 
 export interface UserProfile {
     id: string;
@@ -210,6 +210,19 @@ export const authService = {
     },
 
     /**
+     * Update user metadata
+     */
+    async updateUserMetadata(metadata: Record<string, any>) {
+        const { data, error } = await supabase.auth.updateUser({
+            data: metadata
+        });
+
+        if (error) throw error;
+
+        return data;
+    },
+
+    /**
      * Reset password via email
      */
     async resetPassword(email: string) {
@@ -322,49 +335,52 @@ export const authService = {
 export const ROLE_PERMISSIONS = {
     super_admin: ['*'], // CEO / Owner - Full Access to EVERYTHING
     admin: [
-        'dashboard', 'settings', 'employees'  // System admin - technical/IT access only
+        'dashboard', 'settings', 'employees', 'profile'  // System admin - technical/IT access only
     ],
     manager: [
-        'dashboard', 'pos', 'inventory', 'sales', 'customers', 'pricing'  // Store operations only (NO warehouse, NO procurement)
+        'dashboard', 'pos', 'inventory', 'sales', 'customers', 'pricing', 'profile'  // Store operations only (NO warehouse, NO procurement)
     ],
     warehouse_manager: [
-        'dashboard', 'inventory', 'warehouse', 'procurement'
+        'dashboard', 'inventory', 'warehouse', 'procurement', 'profile'
     ],
     dispatcher: [
-        'dashboard', 'inventory', 'warehouse', 'procurement'
+        'dashboard', 'inventory', 'warehouse', 'procurement', 'profile'
     ],
     finance_manager: [
-        'dashboard', 'finance', 'sales', 'procurement', 'employees'
+        'dashboard', 'finance', 'sales', 'procurement', 'employees', 'profile'
     ],
     procurement_manager: [
-        'dashboard', 'procurement', 'inventory', 'warehouse', 'finance'
+        'dashboard', 'procurement', 'inventory', 'warehouse', 'finance', 'profile'
     ],
     cs_manager: [
-        'dashboard', 'customers', 'sales'
+        'dashboard', 'customers', 'sales', 'profile'
     ],
     it_support: [
-        'dashboard', 'settings', 'employees'
+        'dashboard', 'settings', 'employees', 'profile'
     ],
     store_supervisor: [
-        'dashboard', 'pos', 'inventory', 'sales', 'customers'  // Added inventory
+        'dashboard', 'pos', 'inventory', 'sales', 'customers', 'profile'  // Added inventory
     ],
     inventory_specialist: [
-        'dashboard', 'inventory', 'warehouse'
+        'dashboard', 'inventory', 'warehouse', 'profile'
     ],
     pos: [
-        'dashboard', 'pos', 'customers', 'inventory'  // Added inventory (read-only)
+        'dashboard', 'pos', 'customers', 'inventory', 'profile'  // Added inventory (read-only)
     ],
     picker: [
-        'dashboard', 'warehouse', 'inventory'  // Added inventory (read-only)
+        'dashboard', 'warehouse', 'inventory', 'profile'  // Added inventory (read-only)
     ],
     hr: [
-        'dashboard', 'employees', 'finance'  // HR - employee and payroll management
+        'dashboard', 'employees', 'finance', 'profile'  // HR - employee and payroll management
     ],
     auditor: [
-        'dashboard', 'sales', 'inventory', 'finance'  // Auditor - read-only financial oversight
+        'dashboard', 'sales', 'inventory', 'finance', 'profile'  // Auditor - read-only financial oversight
     ],
     driver: [
-        'dashboard', 'warehouse'
+        'dashboard', 'warehouse', 'profile'
+    ],
+    packer: [
+        'dashboard', 'warehouse', 'inventory', 'profile'
     ]
 };
 

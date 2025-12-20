@@ -6,7 +6,7 @@ import {
     Trash2, RefreshCw, Activity, CheckCircle, AlertTriangle,
     Smartphone, Terminal, HardDrive, CloudLightning, Lock, CreditCard,
     FileText, Percent, Tag, Banknote, Keyboard, Link, Plug, Mail, MessageSquare,
-    Eye, EyeOff, List, Plus, Code, Briefcase, Users, DollarSign, MapPin, Building, Store, Sparkles, Truck
+    Eye, EyeOff, List, Plus, Code, Briefcase, Users, DollarSign, MapPin, Building, Store, Sparkles, Truck, Loader2, Trophy
 } from 'lucide-react';
 import { CURRENCY_SYMBOL } from '../constants';
 import Logo from '../components/Logo';
@@ -31,8 +31,10 @@ import NotificationSettings from '../components/settings/NotificationSettings';
 import AuditSettings from '../components/settings/AuditSettings';
 import DataSettings from '../components/settings/DataSettings';
 import RoleSettings from '../components/settings/RoleSettings';
+import GamificationSettings from '../components/settings/GamificationSettings';
+import DiscountCodesSettings from '../components/settings/DiscountCodesSettings';
 
-type SettingsTab = 'general' | 'inventory' | 'pos' | 'finance' | 'roles' | 'locations' | 'infrastructure' | 'integrations' | 'security' | 'notifications' | 'tax' | 'data' | 'audit';
+type SettingsTab = 'general' | 'inventory' | 'pos' | 'discounts' | 'finance' | 'roles' | 'locations' | 'infrastructure' | 'integrations' | 'security' | 'notifications' | 'tax' | 'data' | 'audit' | 'gamification';
 
 // --- REUSABLE COMPONENTS ---
 
@@ -112,6 +114,7 @@ export default function SettingsPage() {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [siteToDelete, setSiteToDelete] = useState<Site | null>(null);
     const [deleteConfirmText, setDeleteConfirmText] = useState('');
+    const [isDeleting, setIsDeleting] = useState(false);
 
     // Confirmation Modals
 
@@ -199,7 +202,7 @@ export default function SettingsPage() {
         setIsDeleteModalOpen(true);
     };
 
-    const confirmDeleteSite = () => {
+    const confirmDeleteSite = async () => {
         if (!siteToDelete) return;
 
         if (deleteConfirmText !== "DELETE") {
@@ -207,11 +210,19 @@ export default function SettingsPage() {
             return;
         }
 
-        deleteSite(siteToDelete.id, user?.name || 'Admin');
-        addNotification('success', `Location "${siteToDelete.name}" has been deleted`);
-        setIsDeleteModalOpen(false);
-        setSiteToDelete(null);
-        setDeleteConfirmText('');
+        setIsDeleting(true);
+        try {
+            await deleteSite(siteToDelete.id, user?.name || 'Admin');
+            addNotification('success', `Location "${siteToDelete.name}" has been deleted`);
+            setIsDeleteModalOpen(false);
+            setSiteToDelete(null);
+            setDeleteConfirmText('');
+        } catch (error) {
+            console.error('Error deleting site:', error);
+            addNotification('alert', 'Failed to delete location');
+        } finally {
+            setIsDeleting(false);
+        }
     };
 
     const TabButton = ({ id, icon: Icon, label }: { id: SettingsTab, icon: any, label: string }) => (
@@ -245,6 +256,9 @@ export default function SettingsPage() {
                     <Protected permission="EDIT_OPERATIONAL_SETTINGS">
                         <TabButton id="pos" icon={ShoppingCart} label="POS & Retail" />
                     </Protected>
+                    <Protected permission="EDIT_OPERATIONAL_SETTINGS">
+                        <TabButton id="discounts" icon={Tag} label="Discount Codes" />
+                    </Protected>
                     <Protected permission="ACCESS_FINANCE">
                         <TabButton id="finance" icon={DollarSign} label="Finance" />
                     </Protected>
@@ -276,6 +290,9 @@ export default function SettingsPage() {
                             <Protected permission="EDIT_SYSTEM_SETTINGS">
                                 <TabButton id="data" icon={Database} label="Data Mgmt" />
                             </Protected>
+                            <Protected permission="MANAGE_WAREHOUSE">
+                                <TabButton id="gamification" icon={Trophy} label="Gamification" />
+                            </Protected>
                         </>
                     )}
                 </div>
@@ -289,14 +306,6 @@ export default function SettingsPage() {
                     <div className="text-xs text-gray-500">
                         Configuration / <span className="text-white capitalize">{activeTab}</span>
                     </div>
-                    <button
-                        onClick={handleSave}
-                        disabled={isSaving}
-                        className="bg-cyber-primary text-black px-6 py-2 rounded-lg font-bold text-sm hover:bg-cyber-accent transition-all shadow-[0_0_15px_rgba(0,255,157,0.2)] flex items-center gap-2 disabled:opacity-70"
-                    >
-                        {isSaving ? <RefreshCw className="animate-spin w-4 h-4" /> : <Save className="w-4 h-4" />}
-                        {isSaving ? 'Saving...' : 'Save Changes'}
-                    </button>
                 </div>
 
                 <div className="p-8 overflow-y-auto custom-scrollbar flex-1">
@@ -455,6 +464,9 @@ export default function SettingsPage() {
                     {/* --- POS SETTINGS --- */}
                     {activeTab === 'pos' && <POSSettings />}
 
+                    {/* --- DISCOUNT CODES --- */}
+                    {activeTab === 'discounts' && <DiscountCodesSettings />}
+
                     {/* --- FINANCE SETTINGS --- */}
                     {activeTab === 'finance' && <FinanceSettings />}
 
@@ -484,6 +496,9 @@ export default function SettingsPage() {
 
                     {/* --- DATA MANAGEMENT --- */}
                     {activeTab === 'data' && <DataSettings />}
+
+                    {/* --- GAMIFICATION & BONUS SETTINGS --- */}
+                    {activeTab === 'gamification' && <GamificationSettings />}
                 </div >
             </div >
 
@@ -725,7 +740,7 @@ export default function SettingsPage() {
                         >
                             {isSavingSite ? (
                                 <>
-                                    <RefreshCw className="animate-spin" size={18} />
+                                    <Loader2 className="animate-spin" size={18} />
                                     Saving...
                                 </>
                             ) : (
@@ -783,11 +798,11 @@ export default function SettingsPage() {
                         </button>
                         <button
                             onClick={confirmDeleteSite}
-                            disabled={deleteConfirmText !== siteToDelete?.name}
+                            disabled={deleteConfirmText !== "DELETE" || isDeleting}
                             className="flex-1 py-3 bg-red-500 hover:bg-red-600 text-white font-bold rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                         >
-                            <Trash2 size={18} />
-                            Delete Permanently
+                            {isDeleting ? <Loader2 className="animate-spin" size={18} /> : <Trash2 size={18} />}
+                            {isDeleting ? 'Deleting...' : 'Delete Permanently'}
                         </button>
                     </div>
                 </div>

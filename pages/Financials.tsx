@@ -7,7 +7,7 @@ import {
 
    DollarSign, TrendingUp, CreditCard, FileText, Plus, Trash2,
    Filter, Download, Briefcase, Activity, AlertCircle, CheckCircle, Clock, Globe, Calculator,
-   PieChart as PieIcon, Target, ArrowUpRight, ArrowDownRight, Search, Calendar
+   PieChart as PieIcon, Target, ArrowUpRight, ArrowDownRight, Search, Calendar, Loader2
 } from 'lucide-react';
 import { CURRENCY_SYMBOL } from '../constants';
 import { ExpenseRecord } from '../types';
@@ -15,6 +15,7 @@ import Modal from '../components/Modal';
 import { useStore } from '../contexts/CentralStore';
 import { useData } from '../contexts/DataContext'; // Use Live Data
 import { generateQuarterlyReport } from '../utils/reportGenerator';
+import { formatCompactNumber } from '../utils/formatting';
 
 // Regional Tax Configurations
 type FinanceTab = 'overview' | 'expenses' | 'payroll' | 'tax' | 'budget';
@@ -31,10 +32,11 @@ const TAX_REGIONS = {
 
 export default function Finance() {
    const { user } = useStore();
-   const { employees, sales, expenses, addExpense, deleteExpense, processPayroll, activeSite, addNotification } = useData();
+   const { employees, sales, expenses, allProducts, addExpense, deleteExpense, processPayroll, activeSite, addNotification } = useData();
 
    const [activeTab, setActiveTab] = useState<FinanceTab>('overview');
    const [isAddExpenseOpen, setIsAddExpenseOpen] = useState(false);
+   const [isSubmitting, setIsSubmitting] = useState(false); // Loading state
 
    const [isDeleteExpenseModalOpen, setIsDeleteExpenseModalOpen] = useState(false);
    const [expenseToDelete, setExpenseToDelete] = useState<string | null>(null);
@@ -167,7 +169,7 @@ export default function Finance() {
 
    // Aggregate Sales by Week
    const salesByWeek = filteredSales.reduce((acc, s) => {
-      const date = new Date(s.created_at);
+      const date = new Date(s.created_at || s.date);
       const week = `W${getWeekNumber(date)} `;
       acc[week] = (acc[week] || 0) + s.total;
       return acc;
@@ -250,6 +252,11 @@ export default function Finance() {
    const totalSalaries = employees.reduce((sum, e) => sum + (e.salary || 0), 0);
    const totalOpEx = filteredExpenses.reduce((sum, e) => sum + e.amount, 0);
 
+   // Inventory Valuation at Cost
+   const totalInventoryValue = allProducts
+      .filter(p => (p.status || (p as any).status) !== 'archived')
+      .reduce((sum, p) => sum + (p.stock * (p.costPrice || p.price * 0.7)), 0);
+
    // We will display Total Expenses as OpEx (Filtered) + Payroll (Current Month Estimate)
    // But if Date Range is "Last Year", showing current payroll is wrong.
    // For simplicity and safety: I will clearly label the Payroll part or exclude it from the "Period Expense" if it makes no sense.
@@ -281,21 +288,28 @@ export default function Finance() {
 
 
    // --- ACTIONS ---
-   const handleAddExpense = () => {
+   const handleAddExpense = async () => {
       if (!newExpData.description || !newExpData.amount) return;
-      const expense: ExpenseRecord = {
-         id: `EXP - ${Date.now()} `,
-         siteId: activeSite?.id || 'SITE-001',
-         date: newExpData.date!,
-         category: newExpData.category as any,
-         description: newExpData.description,
-         amount: Number(newExpData.amount),
-         status: newExpData.status as any,
-         approvedBy: 'Admin'
-      };
-      addExpense(expense); // Use Global Context
-      setIsAddExpenseOpen(false);
-      setNewExpData({ category: 'Other', status: 'Pending', date: new Date().toISOString().split('T')[0] });
+      setIsSubmitting(true);
+      try {
+         const expense: ExpenseRecord = {
+            id: `EXP-${Date.now()}`,
+            siteId: activeSite?.id || 'SITE-001',
+            date: newExpData.date!,
+            category: newExpData.category as any,
+            description: newExpData.description,
+            amount: Number(newExpData.amount),
+            status: newExpData.status as any,
+            approvedBy: 'Admin'
+         };
+         await addExpense(expense); // Use Global Context
+         setIsAddExpenseOpen(false);
+         setNewExpData({ category: 'Other', status: 'Pending', date: new Date().toISOString().split('T')[0] });
+      } catch (error) {
+         console.error(error);
+      } finally {
+         setIsSubmitting(false);
+      }
    };
 
    const handleDeleteExpense = (id: string) => {
@@ -304,7 +318,7 @@ export default function Finance() {
       setIsDeleteExpenseModalOpen(true);
    };
 
-   const handleConfirmDeleteExpense = () => {
+   const handleConfirmDeleteExpense = async () => {
       if (!expenseToDelete) return;
 
       if (deleteInput !== "DELETE") {
@@ -312,11 +326,18 @@ export default function Finance() {
          return;
       }
 
-      deleteExpense(expenseToDelete);
-      addNotification('success', 'Expense record deleted.');
-      setIsDeleteExpenseModalOpen(false);
-      setExpenseToDelete(null);
-      setDeleteInput('');
+      setIsSubmitting(true);
+      try {
+         await deleteExpense(expenseToDelete);
+         addNotification('success', 'Expense record deleted.');
+         setIsDeleteExpenseModalOpen(false);
+         setExpenseToDelete(null);
+         setDeleteInput('');
+      } catch (error) {
+         console.error(error);
+      } finally {
+         setIsSubmitting(false);
+      }
    };
 
    const handleExportPnL = () => {
@@ -352,25 +373,33 @@ export default function Finance() {
       setIsPayrollModalOpen(true);
    };
 
-   const handleConfirmPayroll = () => {
-      processPayroll(activeSite?.id || 'SITE-001', user?.name || 'Admin');
-      setIsPayrollModalOpen(false);
+   const handleConfirmPayroll = async () => {
+      setIsSubmitting(true);
+      try {
+         await processPayroll(activeSite?.id || 'SITE-001', user?.name || 'Admin');
+         setIsPayrollModalOpen(false);
+      } catch (error) {
+         console.error(error);
+      } finally {
+         setIsSubmitting(false);
+      }
    };
 
    const handleGenerateFiling = () => {
+      setIsSubmitting(true);
       addNotification('info', `Generating ${currentTaxConfig.taxName} Filing Report for ${currentTaxConfig.name}...`);
       setTimeout(() => {
          addNotification('success', `Tax Report Generated! Net Payable: ${CURRENCY_SYMBOL} ${netTaxPayable.toLocaleString()} `);
+         setIsSubmitting(false);
       }, 1500);
    };
 
    const handleDownloadBankFile = () => {
+      setIsSubmitting(true);
       addNotification('info', 'Generating Bank Payment File (ABA/NACHA)...');
       setTimeout(() => {
          addNotification('success', 'Bank File Downloaded Successfully');
-      }, 1500);
-      setTimeout(() => {
-         addNotification('success', 'Bank File Downloaded Successfully');
+         setIsSubmitting(false);
       }, 1500);
    };
 
@@ -390,12 +419,12 @@ export default function Finance() {
    const TabButton = ({ id, label, icon: Icon }: any) => (
       <button
          onClick={() => setActiveTab(id)}
-         className={`flex items - center space - x - 2 px - 4 py - 3 rounded - lg text - sm font - medium transition - all ${activeTab === id
+         className={`flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${activeTab === id
             ? 'bg-cyber-primary text-black shadow-[0_0_15px_rgba(0,255,157,0.3)]'
             : 'text-gray-400 hover:text-white hover:bg-white/5'
             } `}
       >
-         <Icon size={16} />
+         <Icon size={16} className="flex-shrink-0" />
          <span>{label}</span>
       </button>
    );
@@ -423,6 +452,7 @@ export default function Finance() {
                         <span>{Math.round(getQuarterProgress())}%</span>
                      </div>
                      <div className="h-1 bg-white/10 rounded-full overflow-hidden">
+                        {/* eslint-disable-next-line */}
                         <div
                            className="h-full bg-cyber-primary transition-all duration-500"
                            style={{ width: `${getQuarterProgress()}%` }}
@@ -431,27 +461,27 @@ export default function Finance() {
                   </div>
                )}
             </div>
-            <div className="flex items-center space-x-3">
+            <div className="flex flex-wrap items-center gap-3">
                {/* Date Filter */}
-               <div className="hidden md:flex items-center bg-black/30 border border-white/10 rounded-xl px-3 py-2">
+               <div className="flex items-center bg-black/30 border border-white/10 rounded-xl px-3 h-10 transition-all hover:border-cyber-primary/50">
                   <Calendar size={14} className="text-gray-400 mr-2" />
                   <select
                      aria-label="Filter Date Range"
                      value={dateRange}
                      onChange={(e) => setDateRange(e.target.value as DateRangeOption)}
-                     className="bg-transparent border-none text-xs text-white outline-none font-bold cursor-pointer hover:text-cyber-primary transition-colors"
+                     className="bg-transparent border-none text-xs text-white outline-none font-bold cursor-pointer transition-colors"
                   >
-                     <option value="This Quarter" className="text-black">This Quarter (Current)</option>
+                     <option value="This Quarter" className="text-black">This Quarter</option>
                      <option value="This Month" className="text-black">This Month</option>
                      <option value="Last Month" className="text-black">Last Month</option>
                      <option value="This Year" className="text-black">This Year (YTD)</option>
-                     <option value="Last Year" className="text-black">Last Year (Saved)</option>
+                     <option value="Last Year" className="text-black">Last Year</option>
                      <option value="All Time" className="text-black">All Time</option>
                   </select>
                </div>
 
                {/* Region Selector */}
-               <div className="hidden md:flex items-center bg-black/30 border border-white/10 rounded-xl px-3 py-2 mr-2">
+               <div className="flex items-center bg-black/30 border border-white/10 rounded-xl px-3 h-10 transition-all hover:border-cyber-primary/50">
                   <Globe size={14} className="text-gray-400 mr-2" />
                   <select
                      aria-label="Select Tax Region"
@@ -464,28 +494,32 @@ export default function Finance() {
                      ))}
                   </select>
                </div>
-               <div className="px-4 py-2 bg-green-500/10 border border-green-500/20 rounded-xl flex items-center gap-2">
+
+               <div className="h-10 px-4 flex items-center gap-2 bg-green-500/10 border border-green-500/20 rounded-xl">
                   <TrendingUp size={16} className="text-green-500" />
-                  <span className="text-xs text-gray-400">Net Margin:</span>
+                  <span className="text-[10px] text-gray-400 uppercase font-bold">Net Margin:</span>
                   <span className="text-sm font-bold text-white font-mono">{profitMargin.toFixed(1)}%</span>
                </div>
-               <button
-                  onClick={handleExportPnL}
-                  className="bg-white/5 text-white border border-white/10 px-4 py-2 rounded-lg text-sm hover:bg-white/10 flex items-center transition-colors"
-               >
-                  <Download className="w-4 h-4 mr-2" /> JSON
-               </button>
-               <button
-                  onClick={handleGenerateReport}
-                  className="bg-cyber-primary text-black border border-cyber-primary px-4 py-2 rounded-lg text-sm hover:bg-cyber-primary/90 flex items-center transition-colors font-bold shadow-[0_0_10px_rgba(0,255,157,0.2)]"
-               >
-                  <Download className="w-4 h-4 mr-2" /> PDF Report
-               </button>
+
+               <div className="flex items-center gap-2 h-10">
+                  <button
+                     onClick={handleExportPnL}
+                     className="h-full bg-white/5 text-white border border-white/10 px-4 rounded-xl text-sm hover:bg-white/10 hover:border-white/20 flex items-center transition-all"
+                  >
+                     <Download className="w-4 h-4 mr-2" /> JSON
+                  </button>
+                  <button
+                     onClick={handleGenerateReport}
+                     className="h-full bg-cyber-primary text-black border border-cyber-primary px-4 rounded-xl text-sm hover:brightness-110 flex items-center transition-all font-bold shadow-[0_0_15px_rgba(0,255,157,0.2)]"
+                  >
+                     <Download className="w-4 h-4 mr-2" /> PDF Report
+                  </button>
+               </div>
             </div>
          </div>
 
          {/* Tabs */}
-         <div className="flex space-x-1 bg-cyber-gray p-1 rounded-xl border border-white/5 w-fit overflow-x-auto">
+         <div className="flex flex-wrap items-center gap-2 bg-cyber-gray/50 p-1.5 rounded-xl border border-white/5 w-fit">
             <TabButton id="overview" label="P&L Overview" icon={Activity} />
             <TabButton id="budget" label="Budget & Forecasting" icon={Target} />
             <TabButton id="expenses" label="Expense Ledger" icon={CreditCard} />
@@ -497,27 +531,61 @@ export default function Finance() {
          {activeTab === 'overview' && (
             <div className="space-y-6 animate-in fade-in">
                {/* Top Metrics */}
-               <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                  <div className="bg-cyber-gray border border-white/5 rounded-2xl p-6">
-                     <p className="text-gray-400 text-xs uppercase font-bold">Total Revenue</p>
-                     <h3 className="text-2xl font-mono font-bold text-white mt-1">{CURRENCY_SYMBOL} {totalRevenue.toLocaleString()}</h3>
-                     {/* Placeholder for Trend: Could compare vs prev month if data existed */}
+               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                  <div className="bg-cyber-gray border border-white/5 rounded-2xl p-5 flex flex-col justify-between min-h-[120px]">
+                     <div>
+                        <p className="text-gray-400 text-[10px] uppercase font-bold tracking-wider">Total Revenue</p>
+                        <h3 className="text-2xl font-mono font-bold text-white mt-1">{formatCompactNumber(totalRevenue, { currency: CURRENCY_SYMBOL })}</h3>
+                     </div>
+                     <div className="mt-2 flex items-center gap-1.5">
+                        <div className="w-1.5 h-1.5 rounded-full bg-cyber-primary anim-pulse"></div>
+                        <p className="text-[10px] text-gray-500 font-medium">Gross Inflow</p>
+                     </div>
                   </div>
-                  <div className="bg-cyber-gray border border-white/5 rounded-2xl p-6">
-                     <p className="text-gray-400 text-xs uppercase font-bold">Total Expenses</p>
-                     <h3 className="text-2xl font-mono font-bold text-red-400 mt-1">{CURRENCY_SYMBOL} {totalExpenses.toLocaleString()}</h3>
-                     <p className="text-gray-500 text-xs mt-2">OpEx + Payroll</p>
+
+                  <div className="bg-cyber-gray border border-white/5 rounded-2xl p-5 flex flex-col justify-between min-h-[120px]">
+                     <div>
+                        <p className="text-gray-400 text-[10px] uppercase font-bold tracking-wider">Total Expenses</p>
+                        <h3 className="text-2xl font-mono font-bold text-red-400 mt-1">{formatCompactNumber(totalExpenses, { currency: CURRENCY_SYMBOL })}</h3>
+                     </div>
+                     <div className="mt-2 flex items-center gap-1.5">
+                        <div className="w-1.5 h-1.5 rounded-full bg-red-500/50"></div>
+                        <p className="text-[10px] text-gray-500 font-medium">OpEx + Payroll</p>
+                     </div>
                   </div>
-                  <div className="bg-cyber-gray border border-white/5 rounded-2xl p-6">
-                     <p className="text-gray-400 text-xs uppercase font-bold">Total Refunds</p>
-                     <h3 className="text-2xl font-mono font-bold text-red-400 mt-1">{CURRENCY_SYMBOL} {totalRefunds.toLocaleString()}</h3>
-                     <p className="text-gray-500 text-xs mt-2">Deducted from Net</p>
+
+                  <div className="bg-cyber-gray border border-white/5 rounded-2xl p-5 flex flex-col justify-between min-h-[120px]">
+                     <div>
+                        <p className="text-gray-400 text-[10px] uppercase font-bold tracking-wider">Total Refunds</p>
+                        <h3 className="text-2xl font-mono font-bold text-red-400 mt-1">{formatCompactNumber(totalRefunds, { currency: CURRENCY_SYMBOL })}</h3>
+                     </div>
+                     <div className="mt-2 flex items-center gap-1.5">
+                        <div className="w-1.5 h-1.5 rounded-full bg-yellow-500/50"></div>
+                        <p className="text-[10px] text-gray-500 font-medium">Deducted from Net</p>
+                     </div>
                   </div>
-                  <div className="bg-cyber-gray border border-white/5 rounded-2xl p-6 relative overflow-hidden">
-                     <div className="absolute top-0 right-0 w-16 h-16 bg-cyber-primary/10 rounded-bl-full"></div>
-                     <p className="text-gray-400 text-xs uppercase font-bold">Net Income</p>
-                     <h3 className="text-2xl font-mono font-bold text-cyber-primary mt-1">{CURRENCY_SYMBOL} {netProfit.toLocaleString()}</h3>
-                     <p className="text-gray-500 text-xs mt-2">After Tax</p>
+
+                  <div className="bg-cyber-gray border border-white/5 rounded-2xl p-5 flex flex-col justify-between min-h-[120px]">
+                     <div>
+                        <p className="text-gray-400 text-[10px] uppercase font-bold tracking-wider">Inventory Value</p>
+                        <h3 className="text-2xl font-mono font-bold text-blue-400 mt-1">{formatCompactNumber(totalInventoryValue, { currency: CURRENCY_SYMBOL })}</h3>
+                     </div>
+                     <div className="mt-2 flex items-center gap-1.5">
+                        <div className="w-1.5 h-1.5 rounded-full bg-blue-500/50"></div>
+                        <p className="text-[10px] text-gray-500 font-medium">Valued at Cost</p>
+                     </div>
+                  </div>
+
+                  <div className="bg-cyber-gray border border-white/5 rounded-2xl p-5 flex flex-col justify-between min-h-[120px] relative overflow-hidden group">
+                     <div className="absolute top-0 right-0 w-16 h-16 bg-cyber-primary/5 rounded-bl-full transition-all group-hover:bg-cyber-primary/10"></div>
+                     <div>
+                        <p className="text-gray-400 text-[10px] uppercase font-bold tracking-wider">Net Income</p>
+                        <h3 className="text-2xl font-mono font-bold text-cyber-primary mt-1">{formatCompactNumber(netProfit, { currency: CURRENCY_SYMBOL })}</h3>
+                     </div>
+                     <div className="mt-2 flex items-center gap-1.5">
+                        <div className="w-1.5 h-1.5 rounded-full bg-cyber-primary shadow-[0_0_5px_rgba(0,255,157,0.5)]"></div>
+                        <p className="text-[10px] text-gray-500 font-medium">After Tax Liability</p>
+                     </div>
                   </div>
                </div>
 
@@ -552,37 +620,49 @@ export default function Finance() {
                   {/* Expense Distribution */}
                   <div className="bg-cyber-gray border border-white/5 rounded-2xl p-6">
                      <h3 className="font-bold text-white mb-6">Expense Breakdown</h3>
-                     <div className="h-[200px] w-full">
-                        <ResponsiveContainer width="100%" height="100%" minHeight={0}>
-                           <PieChart>
-                              <Pie
-                                 data={expenseBreakdownData}
-                                 cx="50%"
-                                 cy="50%"
-                                 innerRadius={60}
-                                 outerRadius={80}
-                                 paddingAngle={5}
-                                 dataKey="value"
-                              >
-                                 {expenseBreakdownData.map((entry, index) => (
-                                    <Cell key={`cell - ${index} `} fill={COLORS[index % COLORS.length]} stroke="none" />
-                                 ))}
-                              </Pie>
-                              <Tooltip contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #333' }} />
-                           </PieChart>
-                        </ResponsiveContainer>
-                     </div>
-                     <div className="space-y-2 mt-4">
-                        {expenseBreakdownData.map((item, i) => (
-                           <div key={i} className="flex justify-between items-center text-sm">
-                              <div className="flex items-center gap-2">
-                                 <div className="w-2 h-2 rounded-full" style={{ backgroundColor: COLORS[i] }}></div>
-                                 <span className="text-gray-300">{item.name}</span>
-                              </div>
-                              <span className="font-mono text-white">{item.value}%</span>
+                     {expenseBreakdownData.length > 0 && expenseBreakdownData.some(d => d.value > 0) ? (
+                        <>
+                           <div className="h-[200px] w-full">
+                              <ResponsiveContainer width="100%" height="100%" minHeight={0}>
+                                 <PieChart>
+                                    <Pie
+                                       data={expenseBreakdownData}
+                                       cx="50%"
+                                       cy="50%"
+                                       innerRadius={60}
+                                       outerRadius={80}
+                                       paddingAngle={5}
+                                       dataKey="value"
+                                    >
+                                       {expenseBreakdownData.map((entry, index) => (
+                                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke="none" />
+                                       ))}
+                                    </Pie>
+                                    <Tooltip
+                                       contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #333', borderRadius: '8px' }}
+                                       itemStyle={{ color: '#fff', fontSize: '12px' }}
+                                    />
+                                 </PieChart>
+                              </ResponsiveContainer>
                            </div>
-                        ))}
-                     </div>
+                           <div className="space-y-2 mt-4 max-h-[140px] overflow-y-auto pr-2 custom-scrollbar">
+                              {expenseBreakdownData.map((item, i) => (
+                                 <div key={i} className="flex justify-between items-center text-sm border-b border-white/5 pb-2 last:border-0 last:pb-0">
+                                    <div className="flex items-center gap-2">
+                                       <div className="w-2 h-2 rounded-full" style={{ backgroundColor: COLORS[i % COLORS.length] }}></div>
+                                       <span className="text-gray-300 text-xs">{item.name}</span>
+                                    </div>
+                                    <span className="font-mono text-white text-xs">{item.value}%</span>
+                                 </div>
+                              ))}
+                           </div>
+                        </>
+                     ) : (
+                        <div className="flex-1 flex flex-col items-center justify-center py-10 opacity-50">
+                           <PieIcon size={48} className="text-gray-600 mb-2" />
+                           <p className="text-xs text-gray-500 italic">No breakdown available</p>
+                        </div>
+                     )}
                   </div>
                </div>
             </div>
@@ -613,9 +693,14 @@ export default function Finance() {
                   {/* Department Budgets */}
                   <div className="bg-cyber-gray border border-white/5 rounded-2xl p-6 flex flex-col">
                      <h3 className="font-bold text-white mb-4">Department Utilization</h3>
-                     <div className="space-y-6 flex-1">
-                        {/* Dept Budgets Placeholder - Needs Dept Data Structure in Future */}
-                        <div className="text-center text-gray-500 py-10">Department budget tracking coming soon with new schema.</div>
+                     <div className="flex-1 flex flex-col items-center justify-center py-10">
+                        <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mb-4">
+                           <Target size={32} className="text-gray-600" />
+                        </div>
+                        <p className="text-sm text-gray-400 font-medium">Coming Soon</p>
+                        <p className="text-[10px] text-gray-500 text-center px-6 mt-1 italic">
+                           Live department tracking is being integrated with your new organizational schema.
+                        </p>
                      </div>
                   </div>
                </div>
@@ -709,35 +794,47 @@ export default function Finance() {
                      </tr>
                   </thead>
                   <tbody className="divide-y divide-white/5">
-                     {expenses.map(exp => (
-                        <tr key={exp.id} className="hover:bg-white/5 transition-colors group">
-                           <td className="p-4 text-xs text-white">{exp.date}</td>
-                           <td className="p-4">
-                              <span className="px-2 py-1 rounded text-[10px] font-bold uppercase border border-white/10 bg-white/5 text-gray-300">
-                                 {exp.category}
-                              </span>
-                           </td>
-                           <td className="p-4 text-sm text-gray-300">{exp.description}</td>
-                           <td className="p-4 text-sm font-mono text-white text-right font-bold">{CURRENCY_SYMBOL} {exp.amount.toLocaleString()}</td>
-                           <td className="p-4 text-center">
-                              <span className={`inline - flex items - center gap - 1 px - 2 py - 0.5 rounded text - [10px] font - bold uppercase border ${exp.status === 'Paid' ? 'bg-green-500/10 text-green-400 border-green-500/20' :
-                                 exp.status === 'Pending' ? 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' :
-                                    'bg-red-500/10 text-red-400 border-red-500/20'
-                                 } `}>
-                                 {exp.status === 'Paid' && <CheckCircle size={10} />}
-                                 {exp.status === 'Pending' && <Clock size={10} />}
-                                 {exp.status === 'Overdue' && <AlertCircle size={10} />}
-                                 {exp.status}
-                              </span>
-                           </td>
-                           <td className="p-4 text-xs text-gray-500">{exp.approvedBy}</td>
-                           <td className="p-4 text-right">
-                              <button onClick={() => handleDeleteExpense(exp.id)} className="text-gray-600 hover:text-red-400" aria-label="Delete Expense">
-                                 <Trash2 size={16} />
-                              </button>
+                     {filteredExpenses.length > 0 ? (
+                        filteredExpenses.map(exp => (
+                           <tr key={exp.id} className="hover:bg-white/5 transition-colors group">
+                              <td className="p-4 text-xs text-white">{exp.date}</td>
+                              <td className="p-4">
+                                 <span className="px-2 py-1 rounded text-[10px] font-bold uppercase border border-white/10 bg-white/5 text-gray-300">
+                                    {exp.category}
+                                 </span>
+                              </td>
+                              <td className="p-4 text-sm text-gray-300">{exp.description}</td>
+                              <td className="p-4 text-sm font-mono text-white text-right font-bold">{CURRENCY_SYMBOL} {exp.amount.toLocaleString()}</td>
+                              <td className="p-4 text-center">
+                                 <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase border ${exp.status === 'Paid' ? 'bg-green-500/10 text-green-400 border-green-500/20' :
+                                    exp.status === 'Pending' ? 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' :
+                                       'bg-red-500/10 text-red-400 border-red-500/20'
+                                    } `}>
+                                    {exp.status === 'Paid' && <CheckCircle size={10} />}
+                                    {exp.status === 'Pending' && <Clock size={10} />}
+                                    {exp.status === 'Overdue' && <AlertCircle size={10} />}
+                                    {exp.status}
+                                 </span>
+                              </td>
+                              <td className="p-4 text-xs text-gray-500">{exp.approvedBy}</td>
+                              <td className="p-4 text-right">
+                                 <button onClick={() => handleDeleteExpense(exp.id)} className="text-gray-600 hover:text-red-400" aria-label="Delete Expense">
+                                    <Trash2 size={16} />
+                                 </button>
+                              </td>
+                           </tr>
+                        ))
+                     ) : (
+                        <tr>
+                           <td colSpan={7} className="p-20 text-center">
+                              <div className="opacity-30 flex flex-col items-center">
+                                 <CreditCard size={48} className="mb-4 text-gray-400" />
+                                 <p className="text-sm font-medium">No expense records found for this period.</p>
+                                 <p className="text-xs mt-1">Try changing the date filter or logging a new expense.</p>
+                              </div>
                            </td>
                         </tr>
-                     ))}
+                     )}
                   </tbody>
                </table>
             </div>
@@ -801,16 +898,28 @@ export default function Finance() {
                      </thead>
                      <tbody className="divide-y divide-white/5">
                         {filteredEmployees.map(emp => (
-                           <tr key={emp.id} className="hover:bg-white/5">
+                           <tr key={emp.id} className="hover:bg-white/5 group transition-colors">
                               <td className="p-4 flex items-center gap-3">
-                                 <div className="w-8 h-8 rounded-full bg-black/50 overflow-hidden">
-                                    <img src={emp.avatar} alt={emp.name} className="w-full h-full object-cover" />
+                                 <div className="w-8 h-8 rounded-full bg-black/50 border border-white/10 overflow-hidden flex-shrink-0">
+                                    {emp.avatar ? (
+                                       <img src={emp.avatar} alt={emp.name} className="w-full h-full object-cover" />
+                                    ) : (
+                                       <div className="w-full h-full flex items-center justify-center bg-cyber-primary/10 text-cyber-primary text-[10px] font-bold">
+                                          {emp.name.split(' ').map((n: string) => n[0]).join('').toUpperCase()}
+                                       </div>
+                                    )}
                                  </div>
-                                 <span className="text-sm text-white font-bold">{emp.name}</span>
+                                 <span className="text-sm text-white font-bold truncate">{emp.name}</span>
                               </td>
-                              <td className="p-4 text-xs text-gray-400 uppercase">{emp.role}</td>
-                              <td className="p-4 text-xs text-gray-400">{emp.department}</td>
-                              <td className="p-4 text-sm font-mono text-white text-right">{CURRENCY_SYMBOL} {emp.salary?.toLocaleString()}</td>
+                              <td className="p-4">
+                                 <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase border border-white/5 bg-white/5 text-gray-400 tracking-tighter">
+                                    {emp.role}
+                                 </span>
+                              </td>
+                              <td className="p-4 text-[11px] text-gray-500 font-medium">{emp.department}</td>
+                              <td className="p-4 text-sm font-mono text-white text-right font-bold">
+                                 {CURRENCY_SYMBOL} {(emp.salary || 0).toLocaleString()}
+                              </td>
                            </tr>
                         ))}
                      </tbody>
@@ -830,8 +939,8 @@ export default function Finance() {
                   >
                      <CheckCircle size={18} /> Process Run
                   </button>
-                  <button onClick={handleDownloadBankFile} className="w-full py-3 bg-white/5 hover:bg-white/10 text-white font-bold rounded-xl text-sm border border-white/10">
-                     Download Bank File
+                  <button onClick={handleDownloadBankFile} disabled={isSubmitting} className="w-full py-3 bg-white/5 hover:bg-white/10 text-white font-bold rounded-xl text-sm border border-white/10 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                     {isSubmitting ? <Loader2 className="animate-spin" size={16} /> : null} {isSubmitting ? 'Downloading...' : 'Download Bank File'}
                   </button>
                </div>
             </div>
@@ -872,9 +981,10 @@ export default function Finance() {
 
                   <button
                      onClick={handleGenerateFiling}
-                     className="w-full mt-6 py-3 bg-white/5 hover:bg-white/10 text-white font-bold rounded-xl border border-white/10 flex items-center justify-center gap-2"
+                     disabled={isSubmitting}
+                     className="w-full mt-6 py-3 bg-white/5 hover:bg-white/10 text-white font-bold rounded-xl border border-white/10 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                     <FileText size={16} /> Generate Filing Report
+                     {isSubmitting ? <Loader2 className="animate-spin" size={16} /> : <FileText size={16} />} {isSubmitting ? 'Generating Report...' : 'Generate Filing Report'}
                   </button>
                </div>
 
@@ -972,9 +1082,10 @@ export default function Finance() {
                </div>
                <button
                   onClick={handleAddExpense}
-                  className="w-full py-3 bg-cyber-primary text-black font-bold rounded-xl mt-2 hover:bg-cyber-accent transition-colors"
+                  disabled={isSubmitting}
+                  className="w-full py-3 bg-cyber-primary text-black font-bold rounded-xl mt-2 hover:bg-cyber-accent transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                >
-                  Save Record
+                  {isSubmitting ? <Loader2 className="animate-spin" size={20} /> : null} {isSubmitting ? 'Saving...' : 'Save Record'}
                </button>
             </div>
          </Modal>
@@ -1013,13 +1124,13 @@ export default function Finance() {
                   </button>
                   <button
                      onClick={handleConfirmDeleteExpense}
-                     disabled={deleteInput !== 'DELETE'}
-                     className={`px - 6 py - 2 rounded - lg font - bold transition - all ${deleteInput === 'DELETE'
+                     disabled={deleteInput !== 'DELETE' || isSubmitting}
+                     className={`px-6 py-2 rounded-lg font-bold transition-all flex items-center gap-2 ${deleteInput === 'DELETE'
                         ? 'bg-red-500 hover:bg-red-600 text-white shadow-[0_0_15px_rgba(239,68,68,0.4)]'
                         : 'bg-white/5 text-gray-500 cursor-not-allowed'
-                        } `}
+                        }`}
                   >
-                     Delete Expense
+                     {isSubmitting ? <Loader2 className="animate-spin" size={16} /> : null} {isSubmitting ? 'Deleting...' : 'Delete Expense'}
                   </button>
                </div>
             </div>
@@ -1046,19 +1157,22 @@ export default function Finance() {
                <div className="flex justify-end gap-3">
                   <button
                      onClick={() => setIsPayrollModalOpen(false)}
+                     disabled={isSubmitting}
                      className="px-4 py-2 text-gray-400 hover:text-white transition-colors"
                   >
                      Cancel
                   </button>
                   <button
                      onClick={handleConfirmPayroll}
-                     className="px-6 py-2 bg-cyber-primary hover:bg-cyber-accent text-black font-bold rounded-lg transition-colors"
+                     disabled={isSubmitting}
+                     className="px-6 py-2 bg-cyber-primary hover:bg-cyber-accent text-black font-bold rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                     Confirm & Process
+                     {isSubmitting ? <Loader2 className="animate-spin" size={16} /> : null} {isSubmitting ? 'Processing...' : 'Confirm & Process'}
                   </button>
                </div>
             </div>
          </Modal>
       </div>
+
    );
 }

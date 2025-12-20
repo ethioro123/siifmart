@@ -82,7 +82,7 @@ export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
     warehouse_manager: [
         // Warehouse operations manager
         'dashboard.view',
-        'inventory.view', 'inventory.count', 'inventory.transfer',
+        'inventory.view', 'inventory.create', 'inventory.edit', 'inventory.adjust', 'inventory.count', 'inventory.transfer',
         'warehouse.view', 'warehouse.receive', 'warehouse.pick', 'warehouse.pack', 'warehouse.dispatch', 'warehouse.putaway', 'warehouse.count',
         'procurement.view', 'procurement.create_po', 'procurement.edit_po', 'procurement.receive',
         'employees.view', 'employees.manage_attendance'
@@ -182,6 +182,13 @@ export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
         // Delivery driver
         'dashboard.view',
         'warehouse.view', 'warehouse.dispatch'
+    ],
+
+    packer: [
+        // Warehouse packer
+        'dashboard.view',
+        'warehouse.view', 'warehouse.pack',
+        'inventory.view'
     ]
 };
 

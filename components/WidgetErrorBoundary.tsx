@@ -1,4 +1,4 @@
-import React, { Component, ErrorInfo, ReactNode } from 'react';
+import React, { ErrorInfo, ReactNode } from 'react';
 import { AlertTriangle, RotateCcw } from 'lucide-react';
 
 interface Props {
@@ -12,13 +12,14 @@ interface State {
     error: Error | null;
 }
 
-export default class WidgetErrorBoundary extends Component<Props, State> {
+export default class WidgetErrorBoundary extends React.Component<Props, State> {
+    state: State = {
+        hasError: false,
+        error: null
+    };
+
     constructor(props: Props) {
         super(props);
-        this.state = {
-            hasError: false,
-            error: null
-        };
     }
 
     static getDerivedStateFromError(error: Error): State {

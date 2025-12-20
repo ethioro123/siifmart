@@ -1,6 +1,42 @@
 
 import { Product, SaleRecord, User, WarehouseZone, StockMovement, WMSJob, Supplier, PurchaseOrder, Customer, Employee, Promotion, PricingRule, EmployeeTask, ExpenseRecord, Site } from './types';
 
+// ═══════════════════════════════════════════════════════════════
+// COMPREHENSIVE PRODUCT CATEGORIES (SHARED ACROSS ALL MODULES)
+// Used by: Inventory, Procurement, Merchandising
+// ═══════════════════════════════════════════════════════════════
+export const GROCERY_CATEGORIES: Record<string, string[]> = {
+  'Fresh Produce': ['Fruits', 'Vegetables', 'Herbs & Spices', 'Organic Produce', 'Salad Mixes', 'Exotic Fruits'],
+  'Meat & Seafood': ['Fresh Meat', 'Poultry', 'Seafood', 'Deli Meats', 'Frozen Meat', 'Sausages & Bacon'],
+  'Dairy & Eggs': ['Milk', 'Cheese', 'Yogurt', 'Butter & Margarine', 'Eggs', 'Cream', 'Plant-Based Dairy'],
+  'Bakery': ['Bread', 'Pastries', 'Cakes', 'Cookies', 'Donuts', 'Tortillas & Wraps', 'Buns & Rolls'],
+  'Beverages': ['Soft Drinks', 'Juices', 'Water', 'Coffee & Tea', 'Energy Drinks', 'Alcohol', 'Sports Drinks'],
+  'Pantry Staples': ['Rice & Grains', 'Pasta', 'Flour & Baking', 'Cooking Oil', 'Canned Goods', 'Sauces & Condiments', 'Spices & Seasonings', 'Jams & Spreads'],
+  'Snacks & Sweets': ['Chips & Crisps', 'Chocolate', 'Candy', 'Nuts & Seeds', 'Popcorn', 'Biscuits', 'Crackers', 'Dried Fruit'],
+  'Frozen Foods': ['Ice Cream', 'Frozen Vegetables', 'Frozen Meals', 'Frozen Pizza', 'Frozen Desserts', 'Frozen Fruit'],
+  'Health & Wellness': ['Vitamins & Supplements', 'First Aid', 'Personal Care', 'Baby Products', 'Pharmacy', 'Sports Nutrition'],
+  'Household': ['Cleaning Supplies', 'Paper Products', 'Laundry', 'Kitchen Supplies', 'Air Fresheners', 'Pest Control'],
+  'Personal Care': ['Bath & Body', 'Hair Care', 'Oral Care', 'Cosmetics', 'Hygiene Products', 'Shaving & Grooming'],
+  'Pet Supplies': ['Pet Food', 'Pet Treats', 'Pet Accessories', 'Pet Grooming'],
+  'International Foods': ['Asian Foods', 'Mediterranean', 'Latin American', 'African Foods', 'Indian Foods', 'European Foods'],
+  'Organic & Natural': ['Organic Produce', 'Natural Foods', 'Gluten-Free', 'Vegan Products', 'Superfoods'],
+  'Baby & Kids': ['Baby Food', 'Diapers', 'Baby Care', 'Kids Snacks', 'Toys', 'Baby Gear'],
+  'Office & Stationery': ['Office Supplies', 'School Supplies', 'Writing Materials', 'Paper', 'Ink & Toner', 'Office Furniture'],
+  'Electronics': ['Phone Accessories', 'Batteries', 'Small Electronics', 'Computers', 'Peripherals', 'Cables & Chargers'],
+  'Home & Garden': ['Gardening', 'Home Decor', 'Tools', 'Lighting', 'Hardware', 'Outdoor Living'],
+  'Automotive': ['Car Care', 'Fluids', 'Accessories', 'Tools'],
+  'Industrial': ['Safety Gear', 'Packaging Materials', 'Warehouse Supplies', 'Maintenance'],
+  'Other': ['Miscellaneous', 'General Merchandise', 'Seasonal']
+};
+
+export const COMMON_UNITS = [
+  'piece', 'kg', 'g', 'liter', 'ml', 'box', 'pack', 'carton',
+  'bag', 'bottle', 'can', 'jar', 'dozen', 'bundle', 'tray'
+];
+
+// Get all categories as flat list for simple dropdowns
+export const ALL_CATEGORY_OPTIONS = Object.entries(GROCERY_CATEGORIES).flatMap(([main, subs]) => [main, ...subs]);
+
 export const MOCK_USERS: User[] = [
   // ============================================================================
   // CENTRAL OPS (ADMIN-001) - NOT an operational site
@@ -790,16 +826,16 @@ export const MOCK_TASKS: EmployeeTask[] = [
 
 export const MOCK_PRODUCTS: Product[] = [
   // WAREHOUSE PRODUCTS
-  { id: '1', siteId: 'WH-001', name: 'Neon Energy Drink', category: 'Beverages', price: 450, costPrice: 250, isOnSale: false, stock: 1200, sku: 'BV-001-W', image: 'https://picsum.photos/200/200?random=1', status: 'active', location: 'A-01-04', expiryDate: '2024-12-01', shelfPosition: 'Eye Level', competitorPrice: 480, salesVelocity: 'High' },
-  { id: '2', siteId: 'WH-001', name: 'Cyber Chipset v2', category: 'Electronics', price: 15000, costPrice: 9000, isOnSale: true, salePrice: 13500, stock: 150, sku: 'EL-099-W', image: 'https://picsum.photos/200/200?random=2', status: 'active', location: 'S-02-01', shelfPosition: 'Secure', competitorPrice: 14500, salesVelocity: 'Medium' },
-  { id: '3', siteId: 'WH-001', name: 'Quantum Cereal', category: 'Food', price: 850, costPrice: 500, isOnSale: false, stock: 2000, sku: 'FD-102-W', image: 'https://picsum.photos/200/200?random=3', status: 'active', location: 'A-03-12', expiryDate: '2024-08-15', shelfPosition: 'Top Shelf', competitorPrice: 800, salesVelocity: 'Medium' },
-  { id: '4', siteId: 'WH-001', name: 'Holo-Projector', category: 'Electronics', price: 45000, costPrice: 30000, isOnSale: false, stock: 50, sku: 'EL-200-W', image: 'https://picsum.photos/200/200?random=4', status: 'active', location: 'S-01-01', shelfPosition: 'Secure', competitorPrice: 46000, salesVelocity: 'Low' },
+  { id: '1', siteId: 'WH-001', name: 'Neon Energy Drink 500ml', category: 'Energy Drinks', price: 450, costPrice: 250, isOnSale: false, stock: 1200, sku: 'BV-001-W', image: 'https://picsum.photos/200/200?random=1', status: 'active', location: 'A-01-04', expiryDate: '2024-12-01', shelfPosition: 'Eye Level', competitorPrice: 480, salesVelocity: 'High' },
+  { id: '2', siteId: 'WH-001', name: 'Cyber Chipset v2', category: 'Small Electronics', price: 15000, costPrice: 9000, isOnSale: true, salePrice: 13500, stock: 150, sku: 'EL-099-W', image: 'https://picsum.photos/200/200?random=2', status: 'active', location: 'S-02-01', shelfPosition: 'Secure', competitorPrice: 14500, salesVelocity: 'Medium' },
+  { id: '3', siteId: 'WH-001', name: 'Quantum Cereal 500g', category: 'Rice & Grains', price: 850, costPrice: 500, isOnSale: false, stock: 2000, sku: 'FD-102-W', image: 'https://picsum.photos/200/200?random=3', status: 'active', location: 'A-03-12', expiryDate: '2024-08-15', shelfPosition: 'Top Shelf', competitorPrice: 800, salesVelocity: 'Medium' },
+  { id: '4', siteId: 'WH-001', name: 'Holo-Projector', category: 'Small Electronics', price: 45000, costPrice: 30000, isOnSale: false, stock: 50, sku: 'EL-200-W', image: 'https://picsum.photos/200/200?random=4', status: 'active', location: 'S-01-01', shelfPosition: 'Secure', competitorPrice: 46000, salesVelocity: 'Low' },
 
   // STORE PRODUCTS
-  { id: '5', siteId: 'ST-001', name: 'Neon Energy Drink', category: 'Beverages', price: 450, costPrice: 250, isOnSale: false, stock: 120, sku: 'BV-001', image: 'https://picsum.photos/200/200?random=1', status: 'active', location: 'A-01-04', expiryDate: '2024-12-01', shelfPosition: 'Eye Level', competitorPrice: 480, salesVelocity: 'High' },
-  { id: '6', siteId: 'ST-001', name: 'Synth-Fruit Basket', category: 'Fresh', price: 1200, costPrice: 600, isOnSale: true, salePrice: 999, stock: 45, sku: 'FR-005', image: 'https://picsum.photos/200/200?random=5', status: 'active', location: 'C-01-02', expiryDate: '2023-11-05', shelfPosition: 'End Cap', competitorPrice: 1100, salesVelocity: 'High' },
-  { id: '7', siteId: 'ST-001', name: 'Data Cable 3M', category: 'Accessories', price: 300, costPrice: 50, isOnSale: false, stock: 0, sku: 'AC-999', image: 'https://picsum.photos/200/200?random=6', status: 'out_of_stock', location: 'B-05-05', shelfPosition: 'Bottom Shelf', competitorPrice: 350, salesVelocity: 'Low' },
-  { id: '8', siteId: 'ST-001', name: 'Smart Water', category: 'Beverages', price: 100, costPrice: 40, isOnSale: false, stock: 500, sku: 'BV-002', image: 'https://picsum.photos/200/200?random=8', status: 'active', location: 'A-01-02', expiryDate: '2025-01-01', shelfPosition: 'Checkout', competitorPrice: 90, salesVelocity: 'High' },
+  { id: '5', siteId: 'ST-001', name: 'Neon Energy Drink 500ml', category: 'Energy Drinks', price: 450, costPrice: 250, isOnSale: false, stock: 120, sku: 'BV-001', image: 'https://picsum.photos/200/200?random=1', status: 'active', location: 'A-01-04', expiryDate: '2024-12-01', shelfPosition: 'Eye Level', competitorPrice: 480, salesVelocity: 'High' },
+  { id: '6', siteId: 'ST-001', name: 'Fresh Fruit Basket', category: 'Fruits', price: 1200, costPrice: 600, isOnSale: true, salePrice: 999, stock: 45, sku: 'FR-005', image: 'https://picsum.photos/200/200?random=5', status: 'active', location: 'C-01-02', expiryDate: '2023-11-05', shelfPosition: 'End Cap', competitorPrice: 1100, salesVelocity: 'High' },
+  { id: '7', siteId: 'ST-001', name: 'Data Cable 3M', category: 'Cables & Chargers', price: 300, costPrice: 50, isOnSale: false, stock: 0, sku: 'AC-999', image: 'https://picsum.photos/200/200?random=6', status: 'out_of_stock', location: 'B-05-05', shelfPosition: 'Bottom Shelf', competitorPrice: 350, salesVelocity: 'Low' },
+  { id: '8', siteId: 'ST-001', name: 'Smart Water 1L', category: 'Water', price: 100, costPrice: 40, isOnSale: false, stock: 500, sku: 'BV-002', image: 'https://picsum.photos/200/200?random=8', status: 'active', location: 'A-01-02', expiryDate: '2025-01-01', shelfPosition: 'Checkout', competitorPrice: 90, salesVelocity: 'High' },
 ];
 
 export const MOCK_PROMOTIONS: Promotion[] = [
@@ -809,15 +845,15 @@ export const MOCK_PROMOTIONS: Promotion[] = [
 ];
 
 export const MOCK_PRICING_RULES: PricingRule[] = [
-  { id: 'R-01', name: 'Clearance for Old Stock', targetCategory: 'Beverages', condition: 'Expiry < X Days', threshold: 30, action: 'Decrease Price %', value: 25, isActive: true },
+  { id: 'R-01', name: 'Clearance for Old Stock', targetCategory: 'Fresh Produce', condition: 'Expiry < X Days', threshold: 30, action: 'Decrease Price %', value: 25, isActive: true },
   { id: 'R-02', name: 'High Demand Markup', targetCategory: 'Electronics', condition: 'Stock > X', threshold: 5, action: 'Increase Price %', value: 10, isActive: false },
 ];
 
 export const MOCK_ZONES: WarehouseZone[] = [
-  { id: 'Z1', name: 'Zone A (General)', capacity: 1000, occupied: 750, type: 'Dry' },
-  { id: 'Z2', name: 'Zone B (Small Items)', capacity: 5000, occupied: 1200, type: 'Dry' },
-  { id: 'Z3', name: 'Zone C (Cold Chain)', capacity: 500, occupied: 450, temperature: '-4°C', type: 'Cold' },
-  { id: 'Z4', name: 'Zone S (Secure)', capacity: 100, occupied: 25, type: 'Secure' },
+  { id: 'Z1', name: 'Zone A (General)', capacity: 1000, occupied: 750, siteId: 'WH-001', type: 'Dry' },
+  { id: 'Z2', name: 'Zone B (Small Items)', capacity: 5000, occupied: 1200, siteId: 'WH-001', type: 'Dry' },
+  { id: 'Z3', name: 'Zone C (Cold Chain)', capacity: 500, occupied: 450, siteId: 'WH-001', temperature: '-4°C', type: 'Cold' },
+  { id: 'Z4', name: 'Zone S (Secure)', capacity: 100, occupied: 25, siteId: 'WH-001', type: 'Secure' },
 ];
 
 export const MOCK_MOVEMENTS: StockMovement[] = [

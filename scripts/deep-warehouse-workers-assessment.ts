@@ -47,7 +47,7 @@ async function deepAssessment() {
   // 1. DATABASE STATE ANALYSIS
   console.log('📊 STEP 1: DATABASE STATE ANALYSIS');
   console.log('─'.repeat(120));
-  
+
   const { data: sites } = await supabase
     .from('sites')
     .select('*')
@@ -59,9 +59,9 @@ async function deepAssessment() {
     .in('role', WAREHOUSE_ROLES)
     .order('role', { ascending: true });
 
-  const warehouseSites = sites?.filter(s => 
-    s.type === 'Warehouse' || 
-    s.type === 'Distribution Center' || 
+  const warehouseSites = sites?.filter(s =>
+    s.type === 'Warehouse' ||
+    s.type === 'Distribution Center' ||
     s.type === 'Storage Facility'
   ) || [];
 
@@ -93,7 +93,7 @@ async function deepAssessment() {
 
   if (employees) {
     for (const emp of employees) {
-      const assessment = await assessEmployee(emp, sites, warehouseSites);
+      const assessment = await assessEmployee(emp, sites || [], warehouseSites);
       assessments.push(assessment);
 
       console.log(`   ${'─'.repeat(100)}`);
@@ -150,7 +150,7 @@ async function deepAssessment() {
   // 4. SITE-BASED FILTERING VERIFICATION
   console.log('🔒 STEP 4: SITE-BASED FILTERING VERIFICATION');
   console.log('─'.repeat(120));
-  
+
   const filteringChecks = verifySiteFiltering(employees || [], warehouseSites);
   filteringChecks.forEach(check => {
     const status = check.passed ? '✅' : '❌';
@@ -164,7 +164,7 @@ async function deepAssessment() {
   // 5. PERMISSION ENFORCEMENT VERIFICATION
   console.log('🛡️  STEP 5: PERMISSION ENFORCEMENT VERIFICATION');
   console.log('─'.repeat(120));
-  
+
   const permissionChecks = verifyPermissionEnforcement();
   permissionChecks.forEach(check => {
     const status = check.passed ? '✅' : '⚠️ ';
@@ -207,15 +207,15 @@ async function deepAssessment() {
   // Recommendations
   console.log('💡 RECOMMENDATIONS:');
   console.log('─'.repeat(120));
-  
+
   if (totalIssues > 0) {
     console.log('   1. Fix critical issues identified above');
   }
-  
+
   if (codeIssues > 0) {
     console.log('   2. Review and fix code-level access control issues');
   }
-  
+
   if (filteringIssues > 0) {
     console.log('   3. Verify site-based filtering is working correctly');
   }
@@ -399,7 +399,7 @@ async function verifyCodeLevelAccess(): Promise<Array<{ name: string; passed: bo
     const usesFilteredJobs = content.includes('filteredJobs');
     const usesFilterBySite = content.includes('filterBySite');
     const hasDirectJobsAccess = content.match(/jobs\.filter|jobs\.map|jobs\.find/g)?.length || 0;
-    
+
     checks.push({
       name: 'WarehouseOperations uses filteredJobs',
       passed: usesFilteredJobs,
@@ -433,7 +433,7 @@ async function verifyCodeLevelAccess(): Promise<Array<{ name: string; passed: bo
     const content = readFileSync(locationAccessPath, 'utf-8');
     const hasFilterBySite = content.includes('filterBySite');
     const hasSingleSiteRoles = content.includes('SINGLE_SITE_ROLES');
-    
+
     checks.push({
       name: 'locationAccess.ts has filterBySite function',
       passed: hasFilterBySite,
@@ -453,7 +453,7 @@ async function verifyCodeLevelAccess(): Promise<Array<{ name: string; passed: bo
     const content = readFileSync(permissionsPath, 'utf-8');
     const hasWarehousePermissions = content.includes('ACCESS_WAREHOUSE');
     const hasPickerPermissions = content.includes('picker');
-    
+
     checks.push({
       name: 'permissions.ts defines warehouse permissions',
       passed: hasWarehousePermissions,
@@ -469,14 +469,14 @@ function verifySiteFiltering(employees: any[], warehouseSites: any[]): Array<{ n
 
   // Check if all pickers are at warehouse sites
   const pickers = employees.filter(e => e.role === 'picker');
-  const pickersAtWarehouses = pickers.filter(p => 
+  const pickersAtWarehouses = pickers.filter(p =>
     warehouseSites.some(ws => ws.id === p.site_id)
   );
 
   checks.push({
     name: 'All pickers assigned to warehouse sites',
     passed: pickers.length === pickersAtWarehouses.length,
-    details: pickers.length === pickersAtWarehouses.length 
+    details: pickers.length === pickersAtWarehouses.length
       ? `All ${pickers.length} pickers at warehouse sites`
       : `${pickers.length - pickersAtWarehouses.length} picker(s) not at warehouse sites`
   });
@@ -496,13 +496,13 @@ function verifySiteFiltering(employees: any[], warehouseSites: any[]): Array<{ n
   });
 
   // Check for orphaned employees (no valid site)
-  const orphaned = employees.filter(e => !warehouseSites.some(ws => ws.id === e.site_id) && 
+  const orphaned = employees.filter(e => !warehouseSites.some(ws => ws.id === e.site_id) &&
     !['Store', 'Dark Store'].includes(warehouseSites.find(s => s.id === e.site_id)?.type || ''));
-  
+
   checks.push({
     name: 'No orphaned warehouse workers',
     passed: orphaned.length === 0,
-    details: orphaned.length === 0 
+    details: orphaned.length === 0
       ? 'All workers have valid site assignments'
       : `${orphaned.length} worker(s) at invalid sites`
   });
@@ -517,13 +517,13 @@ function verifyPermissionEnforcement(): Array<{ name: string; passed: boolean; d
   const protectedRoutePath = join(process.cwd(), 'components/ProtectedRoute.tsx');
   if (existsSync(protectedRoutePath)) {
     const content = readFileSync(protectedRoutePath, 'utf-8');
-    const bypassesChecks = content.includes('temporarily bypassing') || 
-                          content.includes('skip all role-based');
-    
+    const bypassesChecks = content.includes('temporarily bypassing') ||
+      content.includes('skip all role-based');
+
     checks.push({
       name: 'Route-level permission checks enabled',
       passed: !bypassesChecks,
-      details: bypassesChecks 
+      details: bypassesChecks
         ? '⚠️  ProtectedRoute is bypassing permission checks - only checking authentication'
         : 'Route-level permission checks are active'
     });
@@ -534,11 +534,11 @@ function verifyPermissionEnforcement(): Array<{ name: string; passed: boolean; d
   if (existsSync(sidebarPath)) {
     const content = readFileSync(sidebarPath, 'utf-8');
     const hasRoleFiltering = content.includes('getNavItems') && content.includes('roles.includes');
-    
+
     checks.push({
       name: 'Sidebar filters modules by role',
       passed: hasRoleFiltering,
-      details: hasRoleFiltering 
+      details: hasRoleFiltering
         ? 'Sidebar filters modules based on user role'
         : 'Sidebar may not filter modules by role'
     });

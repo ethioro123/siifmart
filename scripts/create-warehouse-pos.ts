@@ -4,8 +4,8 @@ import * as dotenv from 'dotenv';
 dotenv.config({ path: '.env.local' });
 
 const supabase = createClient(
-    process.env.VITE_SUPABASE_URL,
-    process.env.VITE_SUPABASE_SERVICE_ROLE_KEY
+    process.env.VITE_SUPABASE_URL!,
+    process.env.VITE_SUPABASE_SERVICE_ROLE_KEY!
 );
 
 async function createWarehousePOs() {
@@ -167,7 +167,7 @@ async function createWarehousePOs() {
         console.log('   4. Receive goods in WMS Operations → RECEIVE tab');
         console.log('   5. Test the complete fulfillment workflow!');
 
-    } catch (error) {
+    } catch (error: any) {
         console.error('\n❌ Error:', error.message);
         process.exit(1);
     }

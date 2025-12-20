@@ -10,8 +10,8 @@ import { APP_CONFIG } from '../config/app.config';
  * - Visibility API integration
  */
 export function useSessionManager(onSessionWarning?: (minutesLeft: number) => void) {
-    const refreshIntervalRef = useRef<NodeJS.Timeout>();
-    const expirationCheckRef = useRef<NodeJS.Timeout>();
+    const refreshIntervalRef = useRef<NodeJS.Timeout | null>(null);
+    const expirationCheckRef = useRef<NodeJS.Timeout | null>(null);
     const [hasWarned, setHasWarned] = useState(false);
     const hasCheckedRef = useRef(false);
 

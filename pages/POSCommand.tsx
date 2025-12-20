@@ -7,7 +7,7 @@ import {
 import {
   ShoppingCart, CreditCard, Clock, Lock, LogOut, Printer,
   TrendingUp, DollarSign, Archive, RotateCcw, Package, Scan,
-  Truck, Plus, Minus, AlertTriangle, CheckCircle, RefreshCcw, Search, List, Users
+  Truck, Plus, Minus, AlertTriangle, CheckCircle, RefreshCcw, Search, List, Users, Loader2
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { CURRENCY_SYMBOL } from '../constants';
@@ -15,6 +15,8 @@ import { useStore } from '../contexts/CentralStore';
 import { useData } from '../contexts/DataContext'; // Use Live Data
 import Modal from '../components/Modal';
 import { Product } from '../types';
+import { LeaderboardWidget } from '../components/WorkerPointsDisplay';
+import { Target, Trophy, Award, Zap, Star } from 'lucide-react';
 
 const KPICard = ({ title, value, sub, icon: Icon, color, onClick }: any) => (
   <div
@@ -43,7 +45,7 @@ const COLORS = ['#00ff9d', '#3b82f6', '#a855f7'];
 
 export default function POSDashboard() {
   const { user, logout } = useStore();
-  const { sales, addNotification, products, updateProduct, activeSite, transfers, sites, refreshData, shifts, startShift } = useData(); // Live Data
+  const { sales, addNotification, products, updateProduct, activeSite, transfers, sites, refreshData, shifts, startShift, workerPoints } = useData(); // Live Data
   const navigate = useNavigate();
   const [isLocked, setIsLocked] = useState(false);
   const [pin, setPin] = useState('');
@@ -77,6 +79,7 @@ export default function POSDashboard() {
     notes: string;
   }>>([]);
   const [isConfirmingReceive, setIsConfirmingReceive] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // --- STOCK LIST STATE ---
   const [isStockListOpen, setIsStockListOpen] = useState(false);
@@ -127,7 +130,7 @@ export default function POSDashboard() {
     }
 
     if (!belongsToValidTransfer) {
-      addNotification('error', `SECURITY ALERT: ${product.name} is not part of any incoming transfer to this store.`);
+      addNotification('alert', `SECURITY ALERT: ${product.name} is not part of any incoming transfer to this store.`);
       return;
     }
 
@@ -159,6 +162,7 @@ export default function POSDashboard() {
     }
 
     try {
+      setIsSubmitting(true);
       // Update each product with posReceivedAt timestamp and who received it
       for (const item of receivedItems) {
         await updateProduct({
@@ -177,6 +181,8 @@ export default function POSDashboard() {
     } catch (error) {
       console.error('Error confirming receiving:', error);
       addNotification('alert', 'Failed to confirm receiving. Please try again.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -266,6 +272,10 @@ export default function POSDashboard() {
   const personalSales = sales.filter(s => s.cashierName === user?.name).reduce((sum, s) => sum + s.total, 0);
   const txCount = sales.length;
   const returnCount = sales.filter(s => s.status === 'Refunded').length;
+
+  // Site-specific points and worker performance
+  const siteWorkerPoints = workerPoints.filter(wp => wp.siteId === activeSite?.id);
+  const myPoints = workerPoints.find(wp => wp.employeeId === user?.id);
 
   // Chart Data Preparation
   const methodStats = sales.reduce((acc: any, curr) => {
@@ -390,6 +400,68 @@ export default function POSDashboard() {
         </div>
       </div>
 
+      {/* Motivation & Performance Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Store Performance Card */}
+        <div className="lg:col-span-2">
+          <div className="bg-gradient-to-br from-cyber-gray to-blue-900/10 border border-white/10 rounded-2xl p-6 h-full">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center">
+                  <Star className="text-blue-400" size={24} />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-white leading-tight">Team Performance</h3>
+                  <p className="text-xs text-gray-400">Collaborate to reach higher bonus tiers!</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <span className="text-xs font-bold text-blue-400 uppercase tracking-wider bg-blue-500/10 px-2 py-1 rounded border border-blue-500/20">
+                  Site: {activeSite?.name}
+                </span>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+              <div className="bg-black/30 p-4 rounded-xl border border-white/5">
+                <p className="text-[10px] text-gray-500 uppercase font-black mb-1">Total Sales</p>
+                <p className="text-2xl font-black text-white">{CURRENCY_SYMBOL} {totalRevenue.toLocaleString()}</p>
+              </div>
+              <div className="bg-black/30 p-4 rounded-xl border border-white/5">
+                <p className="text-[10px] text-gray-500 uppercase font-black mb-1">Your Contribution</p>
+                <p className="text-2xl font-black text-green-400">{CURRENCY_SYMBOL} {personalSales.toLocaleString()}</p>
+              </div>
+              <div className="bg-black/30 p-4 rounded-xl border border-white/5">
+                <p className="text-[10px] text-gray-500 uppercase font-black mb-1">Member Rank</p>
+                <div className="flex items-baseline gap-2">
+                  <p className="text-2xl font-black text-blue-400">#{myPoints?.rank || '-'}</p>
+                  <span className="text-[10px] text-gray-400 font-bold">{myPoints?.levelTitle || 'Active'}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Bonus Progress Bar Placeholder */}
+            <div className="space-y-2">
+              <div className="flex justify-between text-[10px] text-gray-400 uppercase font-bold">
+                <span>Current Tier: Silver</span>
+                <span>45,000 ETB to Gold Tier</span>
+              </div>
+              <div className="h-3 bg-black/50 rounded-full overflow-hidden border border-white/10">
+                <div
+                  className="h-full bg-gradient-to-r from-blue-500 to-cyan-400 transition-all duration-1000"
+                  style={{ width: '70%' }}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Top Store Performers */}
+        <div className="lg:col-span-1">
+          <LeaderboardWidget workers={siteWorkerPoints} currentUserId={user?.id} />
+        </div>
+      </div>
+
       {/* KPI Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <KPICard
@@ -477,6 +549,7 @@ export default function POSDashboard() {
                 {paymentChartData.map((item, i) => (
                   <div key={i} className="flex items-center justify-between text-xs">
                     <span className="text-gray-400 flex items-center">
+                      {/* eslint-disable-next-line */}
                       <div className="w-2 h-2 rounded-full mr-2" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
                       {item.name}
                     </span>
@@ -971,13 +1044,13 @@ export default function POSDashboard() {
                       onClick={handleConfirmTransferReceiving}
                       disabled={isConfirmingReceive}
                       className={`flex-1 py-3 font-bold rounded-xl transition-colors flex items-center justify-center gap-2 ${isConfirmingReceive
-                        ? 'bg-gray-500 text-gray-300 cursor-not-allowed'
+                        ? 'bg-cyber-primary/50 text-black cursor-not-allowed'
                         : 'bg-cyber-primary text-black hover:bg-cyber-accent shadow-lg shadow-cyber-primary/20'
                         }`}
                     >
                       {isConfirmingReceive ? (
                         <>
-                          <RefreshCcw size={20} className="animate-spin" />
+                          <Loader2 size={20} className="animate-spin" />
                           Processing...
                         </>
                       ) : (
@@ -1213,10 +1286,11 @@ export default function POSDashboard() {
                 {receivedItems.length > 0 && (
                   <button
                     onClick={handleConfirmReceiving}
-                    className="flex-1 py-3 bg-cyber-primary text-black font-bold rounded-xl hover:bg-cyber-accent transition-colors flex items-center justify-center gap-2"
+                    disabled={isSubmitting}
+                    className="flex-1 py-3 bg-cyber-primary text-black font-bold rounded-xl hover:bg-cyber-accent transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    <CheckCircle size={20} />
-                    Confirm & Save ({receivedItems.length} items)
+                    {isSubmitting ? <Loader2 size={20} className="animate-spin" /> : <CheckCircle size={20} />}
+                    {isSubmitting ? 'Saving...' : `Confirm & Save (${receivedItems.length} items)`}
                   </button>
                 )}
               </div>

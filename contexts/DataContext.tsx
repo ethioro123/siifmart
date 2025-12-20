@@ -2,9 +2,11 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import {
   Product, PurchaseOrder, Supplier, SaleRecord, ExpenseRecord,
-  StockMovement, CartItem, PaymentMethod, WMSJob, JobItem, Employee, Customer,
+  StockMovement, CartItem, PaymentMethod, WMSJob, JobItem, Employee, EmployeeTask, Customer,
   ReturnItem, ShiftRecord, HeldOrder, ReceivingItem, SystemConfig, Site, TransferRecord,
-  Notification, SystemLog, JobAssignment, Promotion
+  Notification, SystemLog, JobAssignment, Promotion, DiscountCode, WorkerPoints, PointsTransaction, POINTS_CONFIG,
+  StorePoints, WorkerBonusShare, BonusTier, DEFAULT_BONUS_TIERS, DEFAULT_POS_BONUS_TIERS, DEFAULT_POS_ROLE_DISTRIBUTION,
+  StorePointRule, DEFAULT_STORE_POINT_RULES, WarehousePointRule, DEFAULT_WAREHOUSE_POINT_RULES
 } from '../types';
 import { CURRENCY_SYMBOL } from '../constants';
 import {
@@ -20,7 +22,10 @@ import {
   wmsJobsService,
   systemLogsService,
   transfersService,
-  jobAssignmentsService
+  jobAssignmentsService,
+  workerPointsService,
+  pointsTransactionsService,
+  systemConfigService
 } from '../services/supabase.service';
 import { supabase } from '../lib/supabase';
 import { realtimeService } from '../services/realtime.service';
@@ -45,8 +50,10 @@ const DEFAULT_CONFIG: SystemConfig = {
   posReceiptFooter: 'Thank you for shopping with us!',
   posTerminalId: 'POS-01',
   fiscalYearStart: '2024-01-01',
-  accountingMethod: 'Cash',
-  language: 'en'
+  accountingMethod: 'cash',
+  language: 'en',
+  warehouseBonusEligibility: {},
+  posBonusEligibility: {}
 };
 
 interface DataContextType {
@@ -70,6 +77,10 @@ interface DataContextType {
   systemLogs: SystemLog[];
   jobAssignments: JobAssignment[];
   promotions: Promotion[];
+  workerPoints: WorkerPoints[];
+  pointsTransactions: PointsTransaction[];
+  tasks: EmployeeTask[];
+  setTasks: (tasks: EmployeeTask[]) => void;
 
   // Global Raw Data
   allProducts: Product[];
@@ -83,18 +94,18 @@ interface DataContextType {
   updateSite: (site: Site, user: string) => void;
   deleteSite: (id: string, user: string) => void;
 
-  addProduct: (product: Product) => void;
-  updateProduct: (product: Product) => void;
-  deleteProduct: (id: string) => void;
-  relocateProduct: (productId: string, newLocation: string, user: string) => void;
+  addProduct: (product: Product) => Promise<Product | undefined>;
+  updateProduct: (product: Product, updatedBy?: string) => Promise<Product | undefined>;
+  deleteProduct: (id: string) => Promise<void>;
+  relocateProduct: (productId: string, newLocation: string, user: string) => Promise<void>;
   cleanupAdminProducts: () => Promise<void>;
 
-  createPO: (po: PurchaseOrder) => void;
+  createPO: (po: PurchaseOrder) => Promise<PurchaseOrder | undefined>;
   updatePO: (po: PurchaseOrder) => Promise<void>;
-  receivePO: (poId: string, receivedItems?: ReceivingItem[]) => void;
+  receivePO: (poId: string, receivedItems?: ReceivingItem[], skuDecisions?: Record<string, 'keep' | 'generate'>, scannedSkus?: Record<string, string>) => Promise<any>;
   deletePO: (poId: string) => void;
 
-  processSale: (cart: CartItem[], method: PaymentMethod, user: string, tendered: number, change: number, customerId?: string, pointsRedeemed?: number) => Promise<string>;
+  processSale: (cart: CartItem[], method: PaymentMethod, user: string, tendered: number, change: number, customerId?: string, pointsRedeemed?: number, type?: 'In-Store' | 'Delivery' | 'Pickup') => Promise<{ saleId: string; pointsResult?: any }>;
   processReturn: (saleId: string, items: ReturnItem[], totalRefund: number, user: string) => void;
   closeShift: (shift: ShiftRecord) => void;
   startShift: (cashierId: string, openingFloat: number) => void;
@@ -109,16 +120,29 @@ interface DataContextType {
 
   // WMS Actions
   assignJob: (jobId: string, employeeIdOrName: string) => Promise<void>;
-  updateJobItem: (jobId: string, itemId: number, status: 'Picked' | 'Short' | 'Skipped', qty: number) => void;
+  updateJobItem: (jobId: string, itemId: number, status: 'Pending' | 'Picked' | 'Short' | 'Skipped', qty: number) => Promise<void>;
   updateJobStatus: (jobId: string, status: WMSJob['status']) => Promise<void>;
-  completeJob: (jobId: string, user: string) => void;
+  completeJob: (jobId: string, user: string, skipValidation?: boolean) => Promise<any>;
   resetJob: (jobId: string) => Promise<void>;
   fixBrokenJobs: () => Promise<void>;
+  createPutawayJob: (product: Product, quantity: number, user: string, source?: string) => Promise<WMSJob | undefined>;
 
   // HR Actions
   addEmployee: (employee: Employee, user?: string) => void;
   updateEmployee: (employee: Employee, user: string) => void;
   deleteEmployee: (id: string, user: string) => void;
+
+  // Gamification Actions (Warehouse - Individual)
+  getWorkerPoints: (employeeId: string) => WorkerPoints | undefined;
+  awardPoints: (employeeId: string, points: number, type: PointsTransaction['type'], description: string, jobId?: string) => void;
+  getLeaderboard: (siteId?: string, period?: 'today' | 'week' | 'month' | 'all') => WorkerPoints[];
+
+  // Gamification Actions (POS - Team)
+  storePoints: StorePoints[];
+  getStorePoints: (siteId: string) => StorePoints | undefined;
+  awardStorePoints: (siteId: string, points: number, revenue: number, transactionCount?: number) => void;
+  calculateWorkerBonusShare: (siteId: string, employeeRole: string) => WorkerBonusShare | undefined;
+  getStoreLeaderboard: () => StorePoints[];
 
   // Customer Actions
   addCustomer: (customer: Customer) => void;
@@ -145,6 +169,14 @@ interface DataContextType {
   // Merchandising
   addPromotion: (promo: Promotion) => void;
   deletePromotion: (id: string) => void;
+
+  // Discount Codes
+  discountCodes: DiscountCode[];
+  addDiscountCode: (code: DiscountCode) => void;
+  updateDiscountCode: (code: DiscountCode) => void;
+  deleteDiscountCode: (id: string) => void;
+  validateDiscountCode: (code: string, siteId?: string, subtotal?: number) => { valid: boolean; discountCode?: DiscountCode; error?: string };
+  useDiscountCode: (codeId: string) => void;
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
@@ -155,7 +187,20 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
   const user = storeContext?.user;
 
   // --- STATE ---
-  const [settings, setSettings] = useState<SystemConfig>(DEFAULT_CONFIG);
+  const [settings, setSettings] = useState<SystemConfig>(() => {
+    // PERSISTENCE: Try to load from localStorage
+    try {
+      if (typeof window !== 'undefined') {
+        const saved = localStorage.getItem('siifmart_system_config');
+        if (saved) {
+          return { ...DEFAULT_CONFIG, ...JSON.parse(saved) };
+        }
+      }
+    } catch (e) {
+      console.error('Failed to load settings from localStorage', e);
+    }
+    return DEFAULT_CONFIG;
+  });
   const [sites, setSites] = useState<Site[]>([]);
   const [activeSiteId, setActiveSiteId] = useState<string>('');
 
@@ -165,6 +210,53 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
   const [sales, setSales] = useState<SaleRecord[]>([]);
   const [expenses, setExpenses] = useState<ExpenseRecord[]>([]);
   const [promotions, setPromotions] = useState<Promotion[]>([]);
+  const [discountCodes, setDiscountCodes] = useState<DiscountCode[]>([
+    // Sample discount codes
+    {
+      id: 'DC-001',
+      code: 'WELCOME10',
+      name: 'Welcome Discount',
+      type: 'PERCENTAGE',
+      value: 10,
+      validFrom: '2024-01-01',
+      validUntil: '2025-12-31',
+      usageCount: 0,
+      status: 'Active',
+      createdBy: 'System',
+      createdAt: new Date().toISOString(),
+      description: '10% off for new customers'
+    },
+    {
+      id: 'DC-002',
+      code: 'SAVE50',
+      name: 'Fixed Discount',
+      type: 'FIXED',
+      value: 50,
+      minPurchaseAmount: 200,
+      validFrom: '2024-01-01',
+      validUntil: '2025-12-31',
+      usageCount: 0,
+      status: 'Active',
+      createdBy: 'System',
+      createdAt: new Date().toISOString(),
+      description: '50 ETB off on orders over 200 ETB'
+    },
+    {
+      id: 'DC-003',
+      code: 'VIP2024',
+      name: 'VIP Member Discount',
+      type: 'PERCENTAGE',
+      value: 15,
+      maxDiscountAmount: 500,
+      validFrom: '2024-01-01',
+      validUntil: '2025-12-31',
+      usageCount: 0,
+      status: 'Active',
+      createdBy: 'System',
+      createdAt: new Date().toISOString(),
+      description: '15% off (max 500 ETB) for VIP members'
+    }
+  ]);
   const [movements, setMovements] = useState<StockMovement[]>([]);
   const [jobs, setJobs] = useState<WMSJob[]>([]);
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -180,6 +272,10 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
   const [allOrders, setAllOrders] = useState<PurchaseOrder[]>([]);
   const [systemLogs, setSystemLogs] = useState<SystemLog[]>([]);
   const [jobAssignments, setJobAssignments] = useState<JobAssignment[]>([]);
+  const [workerPoints, setWorkerPoints] = useState<WorkerPoints[]>([]);
+  const [pointsTransactions, setPointsTransactions] = useState<PointsTransaction[]>([]);
+  const [tasks, setTasks] = useState<EmployeeTask[]>([]);
+  const [storePoints, setStorePoints] = useState<StorePoints[]>([]);
 
   // Derived state
   const activeSite = React.useMemo(() =>
@@ -276,6 +372,7 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
   // --- INITIAL LOAD ---
   useEffect(() => {
     loadSites();
+    loadSettings();
   }, []);
 
   // --- LOAD SITE DATA WHEN ACTIVE SITE CHANGES ---
@@ -312,6 +409,26 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
     }
   };
 
+  const loadSettings = async () => {
+    try {
+      console.log('🔄 Loading system settings...');
+      const loadedSettings = await systemConfigService.getSettings();
+      setSettings(loadedSettings);
+      console.log('✅ System settings loaded');
+    } catch (error) {
+      console.error('❌ Failed to load system settings:', error);
+      // Fallback to DEFAULT_CONFIG or localStorage if DB fails
+      try {
+        const saved = localStorage.getItem('siifmart_system_config');
+        if (saved) {
+          setSettings({ ...DEFAULT_CONFIG, ...JSON.parse(saved) });
+        }
+      } catch (e) {
+        console.error('Failed to load settings from localStorage fallback', e);
+      }
+    }
+  };
+
   const loadSiteData = async (siteId: string, force = false) => {
     // Prevent concurrent calls
     if (loadingRef.current) {
@@ -341,7 +458,9 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
         loadedEmployees,
         loadedCustomers,
         loadedLogs,
-        loadedTransfers
+        loadedTransfers,
+        loadedJobAssignments,
+        loadedWorkerPoints
       ] = await Promise.all([
         productsService.getAll(siteId),
         purchaseOrdersService.getAll(siteId),
@@ -353,7 +472,9 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
         employeesService.getAll(), // Global - Always load all employees
         customersService.getAll(), // Global
         systemLogsService.getAll(), // Global
-        transfersService.getAll(siteId)
+        transfersService.getAll(siteId),
+        jobAssignmentsService.getAll(siteId),
+        workerPointsService.getAll(siteId)
       ]);
 
       setProducts(loadedProducts);
@@ -366,6 +487,8 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
       setEmployees(loadedEmployees);
       setCustomers(loadedCustomers);
       setSystemLogs(loadedLogs);
+      setJobAssignments(loadedJobAssignments);
+      setWorkerPoints(loadedWorkerPoints);
 
       // Map site names to transfers
       const enrichedTransfers = loadedTransfers.map((t: any) => ({
@@ -447,11 +570,10 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
     }));
 
     const mockEmployees: Employee[] = mockSites.flatMap(site => [
-      { id: `EMP-${site.id}-1`, code: `SIIF-${site.id}-1`, siteId: site.id, name: `${site.manager}`, role: 'manager', email: `mgr@${site.id}.com`, phone: '555-0100', avatar: 'https://i.pravatar.cc/150', status: 'Active', joinDate: '2023-01-01', department: 'Management', performanceScore: 95, attendanceRate: 98 },
-      { id: `EMP-${site.id}-2`, code: `SIIF-${site.id}-2`, siteId: site.id, name: `Worker ${site.id}`, role: 'picker', email: `wkr@${site.id}.com`, phone: '555-0101', avatar: 'https://i.pravatar.cc/150', status: 'Active', joinDate: '2023-02-01', department: 'Operations', performanceScore: 88, attendanceRate: 95 }
+      { id: `EMP-${site.id}-1`, code: `SIIF-${site.id}-1`, siteId: site.id, name: `${site.manager}`, role: 'manager', email: `mgr@${site.id}.com`, phone: '555-0100', avatar: '', status: 'Active', joinDate: '2023-01-01', department: 'Management', performanceScore: 95, attendanceRate: 98 },
+      { id: `EMP-${site.id}-2`, code: `SIIF-${site.id}-2`, siteId: site.id, name: `Worker ${site.id}`, role: 'picker', email: `wkr@${site.id}.com`, phone: '555-0101', avatar: '', status: 'Active', joinDate: '2023-02-01', department: 'Operations', performanceScore: 88, attendanceRate: 95 }
     ]);
 
-    setSites(mockSites);
     setSites(mockSites);
 
     // Check if user is Admin/HQ before forcing a site
@@ -499,6 +621,11 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
       onWMSJobChange: (event, payload) => {
         if (event === 'INSERT') setJobs(prev => [payload, ...prev]);
         else if (event === 'UPDATE') setJobs(prev => prev.map(j => j.id === payload.id ? payload : j));
+      },
+      onJobAssignmentChange: (event, payload) => {
+        if (event === 'INSERT') setJobAssignments(prev => [payload, ...prev]);
+        else if (event === 'UPDATE') setJobAssignments(prev => prev.map(a => a.id === payload.id ? payload : a));
+        else if (event === 'DELETE') setJobAssignments(prev => prev.filter(a => a.id !== payload.id));
       }
     });
 
@@ -510,9 +637,27 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
 
   // --- ACTIONS ---
 
-  const updateSettings = (newSettings: Partial<SystemConfig>, user: string) => {
-    setSettings(prev => ({ ...prev, ...newSettings }));
-    logSystemEvent('Settings Updated', 'System configuration changed', user, 'Settings');
+  const updateSettings = async (newSettings: Partial<SystemConfig>, user: string) => {
+    setSettings(prev => {
+      const updated = { ...prev, ...newSettings };
+      // Keep localStorage as a backup
+      try {
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('siifmart_system_config', JSON.stringify(updated));
+        }
+      } catch (e) {
+        console.error('Failed to save settings to localStorage', e);
+      }
+      return updated;
+    });
+
+    try {
+      await systemConfigService.updateSettings(newSettings, user);
+      logSystemEvent('Settings Updated', 'System configuration changed', user, 'Settings');
+    } catch (error) {
+      console.error('❌ Failed to persist settings to database:', error);
+      addNotification('alert', 'Failed to save settings to server. Changes kept locally.');
+    }
   };
 
   const setActiveSite = (id: string) => setActiveSiteId(id);
@@ -552,6 +697,7 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
   };
 
   const addProduct = async (product: Product): Promise<Product | undefined> => {
+    console.log('🧪 DataContext: addProduct called with:', product);
     try {
       if (!activeSite?.id) {
         addNotification('alert', 'No active site selected. Cannot add product.');
@@ -596,11 +742,18 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
         site_id: targetSiteId
       });
 
+      console.log('🧪 DataContext: Product created in DB:', newProduct);
+
       // Update local state immediately
-      setProducts(prev => [...prev, newProduct]);
+      setProducts(prev => {
+        const next = [...prev, newProduct];
+        console.log('🧪 DataContext: Local products updated. Count:', next.length);
+        return next;
+      });
       setAllProducts(prev => [...prev, newProduct]);
 
       addNotification('success', `Product ${product.name} added`);
+      logSystemEvent('Product Added', `Product "${product.name}" (SKU: ${product.sku}) created in site ${targetSiteId}`, user?.name || 'System', 'Inventory');
       return newProduct; // Return the created product
     } catch (error: any) {
       console.error('Error adding product:', error);
@@ -613,7 +766,7 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
     }
   };
 
-  const updateProduct = async (product: Product) => {
+  const updateProduct = async (product: Product, updatedBy?: string): Promise<Product | undefined> => {
     try {
       // ============================================================
       // VALIDATION: Prevent common data quality issues
@@ -627,6 +780,10 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
 
       // 2. Check if trying to move product to HQ site
       const targetSiteId = product.siteId || (product as any).site_id;
+      if (user?.siteId) {
+        const s = sites.find(site => site.id === user.siteId);
+        if (s) setActiveSiteId(s.id);
+      }
       if (targetSiteId) {
         const targetSite = sites.find(s => s.id === targetSiteId);
         if (targetSite) {
@@ -651,19 +808,30 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
       setAllProducts(prev => prev.map(p => p.id === product.id ? product : p));
 
       addNotification('success', `Product ${product.name} updated`);
+      logSystemEvent('Product Updated', `Product "${product.name}" (SKU: ${product.sku}) updated`, updatedBy || user?.name || 'System', 'Inventory');
+      return product;
     } catch (error) {
       console.error(error);
       addNotification('alert', 'Failed to update product');
+      throw error; // Re-throw to allow caller to handle error
     }
   };
 
   const deleteProduct = async (id: string) => {
     try {
-      await productsService.delete(id);
-      addNotification('success', 'Product deleted');
+      // Use cascade delete to remove related records (stock_movements, etc.) first
+      await productsService.cascadeDelete(id);
+
+      // Update local state
+      setProducts(prev => prev.filter(p => p.id !== id));
+      setAllProducts(prev => prev.filter(p => p.id !== id));
+
+      addNotification('success', 'Product and related records deleted permanently');
+      logSystemEvent('Product Deleted', `Product with ID ${id} and all related records deleted permanently`, user?.name || 'System', 'Inventory');
     } catch (error) {
       console.error(error);
       addNotification('alert', 'Failed to delete product');
+      throw error; // Re-throw to allow caller to handle error
     }
   };
 
@@ -710,7 +878,7 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
     }
   };
 
-  const createPO = async (po: PurchaseOrder) => {
+  const createPO = async (po: PurchaseOrder): Promise<PurchaseOrder | undefined> => {
     try {
       // Extract line items from the PO
       const items = po.lineItems || [];
@@ -741,6 +909,7 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
       } else {
         setOrders(allUpdatedOrders); // Fallback to all if no site selected
       }
+      return newPO;
     } catch (error) {
       console.error('Error creating PO:', error);
       console.error('Error details:', JSON.stringify(error, null, 2));
@@ -900,8 +1069,8 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
           // SKU GENERATION & REGISTRATION LOGIC WITH DECISIONS & SCANS
           let productSku: string;
           let needsSkuUpdate = false;
-          const userDecision = skuDecisions?.[item.productId];
-          const scannedSku = scannedSkus?.[item.productId]; // Get scanned SKU for this product
+          const userDecision = item.productId ? skuDecisions?.[item.productId] : undefined;
+          const scannedSku = item.productId ? scannedSkus?.[item.productId] : undefined; // Get scanned SKU for this product
 
           if (scannedSku && scannedSku.trim() !== '') {
             // 1. Manual/Scanned SKU (Highest Priority)
@@ -977,7 +1146,7 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
                   name: productName,
                   sku: productSku,
                   category: productCategory,
-                  price: item.unitCost || 0,
+                  price: item.retailPrice || item.unitCost || 0,
                   costPrice: item.unitCost || 0,
                   siteId: targetSiteId,
                   site_id: targetSiteId,
@@ -1071,11 +1240,11 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
             orderRef: poId,
             jobNumber: `PW-${(po.poNumber || poId.slice(0, 8)).replace(/[^A-Z0-9-]/gi, '')}-${Date.now().toString(36).toUpperCase()}`,
             lineItems: [{
-              productId: targetProductId, // Use the SITE-SPECIFIC ID
+              productId: targetProductId!, // Use the SITE-SPECIFIC ID
               name: productName,
               sku: productSku, // ✅ Use finalized SKU
               image: productImage,
-              expectedQty: qtyToReceive, // Use ACTUAL received qty, not PO expected
+              expectedQty: qtyToReceive || 0, // Use ACTUAL received qty, not PO expected
               pickedQty: 0,
               status: 'Pending'
             }]
@@ -1107,6 +1276,17 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
 
         console.log(`✅ Created ${createdJobs.length} PUTAWAY jobs`);
 
+        // Log Successful Reception
+        const receivedCount = itemsToProcess.length;
+        if (receivedCount > 0) {
+          logSystemEvent(
+            'Stock Received',
+            `Received ${receivedCount} items for PO ${po.poNumber || poId}`,
+            user?.name || 'Inventory Manager',
+            'Inventory'
+          );
+        }
+
         // Force refresh jobs from DB SYNCHRONOUSLY to ensure visibility
         if (targetSiteId) {
           const js = await wmsJobsService.getAll(targetSiteId);
@@ -1125,7 +1305,7 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
           let allReceived = true;
           po.lineItems?.forEach(item => {
             const totalJobQty = allJobsForPO.reduce((sum, job) => {
-              const jobItem = job.lineItems.find(ji => ji.productId === item.productId);
+              const jobItem = job.lineItems.find((ji: any) => ji.productId === item.productId);
               return sum + (jobItem ? jobItem.expectedQty : 0);
             }, 0);
 
@@ -1153,18 +1333,7 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
         }
       }
 
-      // Log Successful Reception
-      const receivedCount = itemsToProcess.length;
-      if (receivedCount > 0) {
-        logSystemEvent(
-          'Stock Received',
-          `Received ${receivedCount} items for PO ${po.poNumber || poId}`,
-          user.name || 'Inventory Manager',
-          'Inventory'
-        );
-      }
 
-      return {}; // Return empty if no jobs created (but processed)
     } catch (error) {
       console.error('Error in receivePO:', error);
       addNotification('alert', 'Error processing reception');
@@ -1220,9 +1389,9 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
               items: item.quantity,
               orderRef: po.id,
               lineItems: [{
-                productId: item.productId,
+                productId: item.productId || '',
                 name: item.productName,
-                sku: product?.sku || item.productId,
+                sku: product?.sku || item.productId || 'UNKNOWN',
                 image: product?.image || '/placeholder.png',
                 expectedQty: item.quantity,
                 pickedQty: 0,
@@ -1249,6 +1418,83 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
     }
   };
 
+  /**
+   * Create a PUTAWAY job for a product added through Inventory.
+   * This allows products created in Inventory to flow through Fulfillment just like PO items.
+   */
+  const createPutawayJob = async (
+    product: Product,
+    quantity: number,
+    userName: string,
+    source: string = 'Inventory'
+  ): Promise<WMSJob | undefined> => {
+    try {
+      if (quantity <= 0) {
+        console.log('📦 Skipping putaway job - no stock to put away');
+        return undefined;
+      }
+
+      const targetSiteId = product.siteId || product.site_id || activeSite?.id;
+      if (!targetSiteId) {
+        console.error('❌ Cannot create putaway job - no site ID');
+        return undefined;
+      }
+
+      const jobId = `PUT-INV-${crypto.randomUUID().split('-')[0].toUpperCase()}`;
+
+      const newJob: WMSJob = {
+        id: jobId,
+        siteId: targetSiteId,
+        site_id: targetSiteId,
+        type: 'PUTAWAY',
+        status: 'Pending',
+        priority: 'Normal',
+        assignedTo: '',
+        location: product.location || 'Receiving Dock',
+        items: quantity,
+        orderRef: `INV-${product.id}`, // Reference to track source
+        lineItems: [{
+          productId: product.id,
+          name: product.name,
+          sku: product.sku || 'UNKNOWN',
+          image: product.image || '/placeholder.png',
+          expectedQty: quantity,
+          pickedQty: 0,
+          status: 'Pending'
+        }],
+        createdAt: new Date().toISOString(),
+        requestedBy: userName
+      };
+
+      console.log('📦 Creating PUTAWAY job for Inventory product:', {
+        jobId,
+        productName: product.name,
+        quantity,
+        siteId: targetSiteId,
+        source
+      });
+
+      try {
+        const createdJob = await wmsJobsService.create(newJob as any);
+        console.log('✅ Inventory PUTAWAY job created:', createdJob.id);
+
+        // Update local state
+        setJobs(prev => [createdJob, ...prev]);
+
+        return createdJob;
+      } catch (error) {
+        console.error('❌ Failed to create putaway job in DB:', error);
+        // Fallback: add to local state with temp ID
+        const fallbackJob = { ...newJob, id: crypto.randomUUID() } as WMSJob;
+        setJobs(prev => [fallbackJob, ...prev]);
+        return fallbackJob;
+      }
+    } catch (error) {
+      console.error('Error creating putaway job:', error);
+      return undefined;
+    }
+  };
+
   const processSale = async (
     cart: CartItem[],
     method: PaymentMethod,
@@ -1258,7 +1504,7 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
     customerId?: string,
     pointsRedeemed?: number,
     type: 'In-Store' | 'Delivery' | 'Pickup' = 'In-Store'
-  ): Promise<string> => {
+  ): Promise<{ saleId: string; pointsResult?: any }> => {
     try {
       const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
       const tax = subtotal * settings.taxRate;
@@ -1281,6 +1527,64 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
         type, // Save the type
         fulfillmentStatus: type === 'In-Store' ? 'Delivered' : 'Picking'
       }, cart);
+
+      // --- GAMIFICATION: Award Points for Sale ---
+      let pointsResult = null;
+      if (settings.bonusEnabled !== false) {
+        // 1. Calculate Store Points (Team-based)
+        const storeRules = settings.posPointRules || DEFAULT_STORE_POINT_RULES;
+        let totalStorePoints = 0;
+
+        cart.forEach(item => {
+          // Rule Matcher
+          const categoryRules = storeRules.filter(r => r.enabled && r.type === 'category' && r.categoryId === item.category);
+          const quantityRules = storeRules.filter(r => r.enabled && r.type === 'quantity' && r.categoryId === 'all');
+
+          // Apply highest priority category rule or base rule
+          const activeRule = categoryRules.sort((a, b) => (b.priority || 0) - (a.priority || 0))[0] ||
+            storeRules.find(r => r.id === 'rule-base');
+
+          if (activeRule) {
+            let itemPoints = item.quantity * activeRule.pointsPerUnit;
+            if (activeRule.multiplier) itemPoints *= activeRule.multiplier;
+            totalStorePoints += Math.floor(itemPoints);
+          }
+        });
+
+        // Revenue based points
+        const revenueRule = storeRules.find(r => r.type === 'revenue' && r.enabled);
+        if (revenueRule && revenueRule.revenueThreshold) {
+          totalStorePoints += Math.floor((subtotal / revenueRule.revenueThreshold) * (revenueRule.pointsPerRevenue || 1));
+        }
+
+        // Award to Store
+        awardStorePoints(activeSite?.id || '', totalStorePoints, subtotal);
+
+        // 2. Calculate Individual Cashier Points
+        // Cashiers get a smaller individual award for each transaction to drive their personal level/rank
+        const individualPoints = 5 + Math.floor(subtotal / 500); // Base 5 + 1 per 500 ETB
+
+        const cashierEmployee = employees.find(e => e.name === user || e.id === user || e.email === user);
+        if (cashierEmployee) {
+          awardPoints(
+            cashierEmployee.id,
+            individualPoints,
+            'job_complete',
+            `Processed sale ${sale.receiptNumber || sale.id}`,
+            sale.id
+          );
+
+          pointsResult = {
+            points: individualPoints,
+            storePoints: totalStorePoints,
+            breakdown: [
+              { label: 'Transaction Base', points: 5 },
+              { label: 'Revenue Bonus', points: Math.floor(subtotal / 500) },
+              { label: 'Team Contribution', points: totalStorePoints }
+            ].filter(b => b.points > 0)
+          };
+        }
+      }
 
       // --- OPTIMISTIC UPDATE: Update local state immediately ---
       setSales(prev => [sale, ...prev]);
@@ -1308,7 +1612,7 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
           const requestingStore = sites.find(s => s.id === requestingStoreId);
 
           // --- CROSS-WAREHOUSE FULFILLMENT LOGIC ---
-          // Priority: 
+          // Priority:
           // 1) Local warehouse (same site)
           // 2) Single Nearest Warehouse (Distance-based)
           // 3) Split Fulfillment (Multiple warehouses if needed)
@@ -1331,7 +1635,7 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
 
           // Function to check if a warehouse can fulfill specific items
           const canFulfillItems = (warehouseId: string, itemsToCheck: typeof cart): boolean => {
-            // In a real app, check site-specific inventory. 
+            // In a real app, check site-specific inventory.
             // For simulation, we assume global stock is available at all warehouses
             // UNLESS we want to simulate split fulfillment.
             // TODO: Connect to real site-specific inventory table
@@ -1480,6 +1784,102 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
       }
 
       addNotification('success', 'Sale processed successfully');
+
+      // Award store points for POS team bonus using configured rules
+      // Check if the store is eligible for bonuses
+      const saleStore = sites.find(s => s.id === sale.siteId);
+      const storeIsEligible = saleStore?.bonusEnabled !== false;
+
+      if (settings.posBonusEnabled !== false && sale.siteId && storeIsEligible) {
+        const pointRules = settings.posPointRules || DEFAULT_STORE_POINT_RULES;
+        const enabledRules = pointRules.filter(r => r.enabled).sort((a, b) => (b.priority || 0) - (a.priority || 0));
+
+        let totalPoints = 0;
+        const totalQuantity = cart.reduce((sum, item) => sum + item.quantity, 0);
+
+        // Process each cart item
+        cart.forEach(cartItem => {
+          const product = products.find(p => p.id === cartItem.id);
+          const itemCategory = product?.category || 'Unknown';
+          const itemSku = product?.sku;
+
+          // Find applicable rules for this item
+          let itemPoints = 0;
+
+          enabledRules.forEach(rule => {
+            let ruleApplies = false;
+            let rulePoints = 0;
+
+            switch (rule.type) {
+              case 'category':
+                // Category-specific or all categories
+                if (rule.categoryId === 'all' || rule.categoryId === itemCategory) {
+                  ruleApplies = true;
+                  rulePoints = (rule.pointsPerUnit || 0) * cartItem.quantity;
+                }
+                break;
+
+              case 'product':
+                // Specific product by SKU
+                if (rule.productSku && itemSku === rule.productSku) {
+                  ruleApplies = true;
+                  rulePoints = (rule.pointsPerUnit || 0) * cartItem.quantity;
+                }
+                break;
+
+              case 'quantity':
+                // Quantity-based bonuses (applies to all items if criteria met)
+                if (rule.categoryId === 'all' || rule.categoryId === itemCategory) {
+                  if (!rule.minQuantity || totalQuantity >= rule.minQuantity) {
+                    ruleApplies = true;
+                    rulePoints = (rule.pointsPerUnit || 0) * cartItem.quantity;
+                  }
+                }
+                break;
+            }
+
+            if (ruleApplies) {
+              // Apply max cap if configured
+              if (rule.maxPointsPerTransaction && rulePoints > rule.maxPointsPerTransaction) {
+                rulePoints = rule.maxPointsPerTransaction;
+              }
+              itemPoints += rulePoints;
+            }
+          });
+
+          totalPoints += itemPoints;
+        });
+
+        // Apply revenue-based rules (calculated on total)
+        enabledRules.filter(r => r.type === 'revenue').forEach(rule => {
+          if (rule.revenueThreshold && rule.pointsPerRevenue) {
+            const revenuePoints = Math.floor(total / rule.revenueThreshold) * rule.pointsPerRevenue;
+            totalPoints += rule.maxPointsPerTransaction
+              ? Math.min(revenuePoints, rule.maxPointsPerTransaction)
+              : revenuePoints;
+          }
+        });
+
+        // Apply quantity multipliers (for bulk sales)
+        const multiplierRule = enabledRules.find(r =>
+          r.type === 'quantity' &&
+          r.multiplier &&
+          r.multiplier > 1 &&
+          r.minQuantity &&
+          totalQuantity >= r.minQuantity
+        );
+        if (multiplierRule && multiplierRule.multiplier) {
+          totalPoints = Math.floor(totalPoints * multiplierRule.multiplier);
+        }
+
+        // Ensure at least 1 point per transaction if any items sold
+        if (totalPoints < 1 && cart.length > 0) {
+          totalPoints = 1;
+        }
+
+        awardStorePoints(sale.siteId, totalPoints, total, 1);
+      }
+
       return sale.id;
     } catch (error) {
       console.error(error);
@@ -1691,7 +2091,7 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
     }
   };
 
-  const updateJobItem = async (jobId: string, itemId: number, status: 'Picked' | 'Short' | 'Skipped', qty: number) => {
+  const updateJobItem = async (jobId: string, itemId: number, status: 'Pending' | 'Picked' | 'Short' | 'Skipped', qty: number) => {
     try {
       const job = jobs.find(j => j.id === jobId);
       if (!job) return;
@@ -1773,7 +2173,7 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
       const updatedJobLocal = {
         ...job,
         status: 'Pending',
-        assignedTo: null,
+        assignedTo: undefined,
         lineItems: updatedLineItems
       };
 
@@ -1786,6 +2186,7 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
   };
 
   const completeJob = async (jobId: string, employeeName: string, skipValidation = false) => {
+    let pointsResult = null;
     try {
       console.log(`🏁 completeJob called for: ${jobId} (skipValidation: ${skipValidation})`);
       const job = jobs.find(j => j.id === jobId);
@@ -1822,6 +2223,101 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
       console.log(`🔄 Local state updated for job ${jobId}`);
 
       addNotification('success', `Job ${job.jobNumber || jobId} completed!`);
+
+      // ═══════════════════════════════════════════════════════════════
+      // PUTAWAY LOGIC - Update Product Location
+      // ═══════════════════════════════════════════════════════════════
+      if (job.type === 'PUTAWAY' && job.location) {
+        console.log(`📦 Updating product location for PUTAWAY job ${jobId} to ${job.location}`);
+
+        // Use Promise.all to update all items in parallel
+        await Promise.all(job.lineItems.map(async (item) => {
+          if (item.status === 'Picked' && item.productId) {
+            // Update product location in DB
+            try {
+              // We use updateProduct which handles both local state and Supabase
+              const product = products.find(p => p.id === item.productId);
+              if (product) {
+                await updateProduct({ ...product, location: job.location! });
+                console.log(`✅ Updated location for product ${product.name} to ${job.location}`);
+              }
+            } catch (err) {
+              console.error(`❌ Failed to update location for product ${item.productId}`, err);
+            }
+          }
+        }));
+      }
+
+      // ═══════════════════════════════════════════════════════════════
+      // GAMIFICATION - Award Points for Job Completion
+      // ═══════════════════════════════════════════════════════════════
+      // Check if warehouse bonus is enabled globally and for this specific site
+      const jobSite = sites.find(s => s.id === job.siteId);
+      const warehouseIsEligible = jobSite?.warehouseBonusEnabled !== false;
+
+      if (employeeName && job.assignedTo && settings.bonusEnabled !== false && warehouseIsEligible) {
+        const assignedEmployee = employees.find(
+          e => e.name === job.assignedTo || e.id === job.assignedTo
+        );
+
+        if (assignedEmployee) {
+          // Check if the employee's role is eligible for points
+          const eligibleRoles = settings.warehousePointsEligibleRoles || [];
+          const employeeRoleLower = assignedEmployee.role?.toLowerCase() || '';
+          const isRoleEligible = eligibleRoles.length === 0 ||
+            eligibleRoles.find(r => r.role.toLowerCase() === employeeRoleLower)?.enabled !== false;
+
+          if (!isRoleEligible) {
+            console.log(`🎮 Skipping points for ${assignedEmployee.name} - role "${assignedEmployee.role}" is not eligible`);
+          } else {
+            // Calculate points based on configurable rules
+            const rules = settings.warehousePointRules || DEFAULT_WAREHOUSE_POINT_RULES;
+            const getPointsForAction = (action: WarehousePointRule['action']) => {
+              const rule = rules.find(r => r.action === action && r.enabled);
+              return rule ? rule.points : 0;
+            };
+
+            const basePoints = getPointsForAction(job.type as any);
+            const itemBonusPoints = getPointsForAction('ITEM_BONUS');
+            const itemBonus = (job.lineItems?.length || 0) * itemBonusPoints;
+
+            let accuracyBonus = 0;
+            if (job.lineItems && job.lineItems.length > 0) {
+              const pickedItems = job.lineItems.filter(i => i.status === 'Picked').length;
+              const accuracy = (pickedItems / job.lineItems.length) * 100;
+              if (accuracy === 100) {
+                accuracyBonus = getPointsForAction('ACCURACY_100');
+              } else if (accuracy >= 95) {
+                accuracyBonus = getPointsForAction('ACCURACY_95');
+              }
+            }
+
+            const totalPoints = basePoints + itemBonus + accuracyBonus;
+
+            // Award the points
+            awardPoints(
+              assignedEmployee.id,
+              totalPoints,
+              'job_complete',
+              `Completed ${job.type} job ${job.jobNumber || jobId}`,
+              jobId
+            );
+
+
+            console.log(`🎮 Awarded ${totalPoints} points to ${assignedEmployee.name} for completing job`);
+
+            // Return points data for UI popup
+            pointsResult = {
+              points: totalPoints,
+              breakdown: [
+                { label: 'Base Points', points: basePoints },
+                { label: 'Item Bonus', points: itemBonus },
+                { label: 'Accuracy Bonus', points: accuracyBonus }
+              ].filter(b => b.points > 0)
+            };
+          }
+        }
+      }
 
       // Log Job Completion
       logSystemEvent(
@@ -1974,7 +2470,7 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
         // PUTAWAY Complete - Stock was already updated in handleItemScan via adjustStock()
         // Just log completion and update product locations if needed
         for (const item of job.lineItems) {
-          if (item.status === 'Picked' || item.status === 'Completed') {
+          if (item.status === 'Picked') {
             const product = products.find(p => p.id === item.productId);
             if (product) {
               // Only update location if job has a destination location
@@ -2075,7 +2571,9 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
       }
 
       addNotification('success', 'Job completed');
-      logSystemEvent('Job Completed', `Job ${jobId} completed`, user, 'Inventory');
+      logSystemEvent('Job Completed', `Job ${jobId} completed`, employeeName, 'Inventory');
+
+      return pointsResult;
     } catch (error) {
       console.error(error);
       addNotification('alert', 'Failed to complete job');
@@ -2086,7 +2584,7 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
     try {
       const newEmployee = await employeesService.create({
         ...employee,
-        siteId: employee.siteId || activeSite?.id
+        siteId: employee.siteId || activeSite?.id || ''
       });
       setEmployees(prev => [newEmployee, ...prev]);
       addNotification('success', `Employee ${employee.name} added`);
@@ -2119,6 +2617,289 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
       console.error(error);
       addNotification('alert', 'Failed to delete employee');
     }
+  };
+
+  // ═══════════════════════════════════════════════════════════════
+  // GAMIFICATION - Worker Points System
+  // ═══════════════════════════════════════════════════════════════
+
+  const getLevelFromPoints = (totalPoints: number) => {
+    const levels = POINTS_CONFIG.LEVELS;
+    let currentLevel = levels[0];
+    for (let i = levels.length - 1; i >= 0; i--) {
+      if (totalPoints >= levels[i].points) {
+        currentLevel = levels[i];
+        break;
+      }
+    }
+    return currentLevel;
+  };
+
+  const getWorkerPoints = (employeeId: string): WorkerPoints | undefined => {
+    return workerPoints.find(wp => wp.employeeId === employeeId);
+  };
+
+  const awardPoints = async (
+    employeeId: string,
+    points: number,
+    type: PointsTransaction['type'],
+    description: string,
+    jobId?: string
+  ) => {
+    const employee = employees.find(e => e.id === employeeId);
+    if (!employee) return;
+
+    const now = new Date().toISOString();
+    const today = new Date().toISOString().split('T')[0];
+
+    // Create transaction
+    const transaction: PointsTransaction = {
+      id: `TXN-${Date.now()}`,
+      employeeId,
+      jobId,
+      points,
+      type,
+      description,
+      timestamp: now,
+    };
+
+    // Optimistic Update
+    setPointsTransactions(prev => [transaction, ...prev]);
+
+    // Persist Transaction
+    pointsTransactionsService.create(transaction).catch(err =>
+      console.error('Failed to persist points transaction:', err)
+    );
+
+    // Update or create worker points
+    setWorkerPoints(prev => {
+      const existing = prev.find(wp => wp.employeeId === employeeId);
+      let updatedOrNewPoint: WorkerPoints;
+
+      if (existing) {
+        // Update existing
+        const isNewDay = !existing.lastJobCompletedAt ||
+          existing.lastJobCompletedAt.split('T')[0] !== today;
+
+        const updatedPoints = existing.totalPoints + points;
+        const level = getLevelFromPoints(updatedPoints);
+
+        // Calculate bonus for warehouse workers (Individual based)
+        const bonusTiers = settings.bonusTiers || DEFAULT_BONUS_TIERS;
+        const currentPointsForPeriod = existing.monthlyPoints + points; // Use monthly points as the period
+        const tier = bonusTiers.find(t =>
+          currentPointsForPeriod >= t.minPoints && (t.maxPoints === null || currentPointsForPeriod <= t.maxPoints)
+        );
+
+        updatedOrNewPoint = {
+          ...existing,
+          totalPoints: updatedPoints,
+          todayPoints: isNewDay ? points : existing.todayPoints + points,
+          weeklyPoints: existing.weeklyPoints + points,
+          monthlyPoints: currentPointsForPeriod,
+          totalJobsCompleted: type === 'job_complete' ? existing.totalJobsCompleted + 1 : existing.totalJobsCompleted,
+          lastJobCompletedAt: type === 'job_complete' ? now : existing.lastJobCompletedAt,
+          lastUpdated: now,
+          level: level.level,
+          levelTitle: level.title,
+          currentBonusTier: tier?.tierName,
+          estimatedBonus: tier ? tier.bonusAmount + (currentPointsForPeriod * (tier.bonusPerPoint || 0)) : 0,
+          bonusPeriodPoints: currentPointsForPeriod,
+        };
+
+        // Persist Update
+        workerPointsService.update(existing.id, updatedOrNewPoint).catch(err =>
+          console.error('Failed to update worker points:', err)
+        );
+
+        return prev.map(wp => wp.employeeId === employeeId ? updatedOrNewPoint : wp);
+      } else {
+        // Create new
+        const level = getLevelFromPoints(points);
+
+        // Calculate bonus for warehouse workers
+        const bonusTiers = settings.bonusTiers || DEFAULT_BONUS_TIERS;
+        const currentPointsForPeriod = points;
+        const tier = bonusTiers.find(t =>
+          currentPointsForPeriod >= t.minPoints && (t.maxPoints === null || currentPointsForPeriod <= t.maxPoints)
+        );
+
+        const newWorkerPoints: WorkerPoints = {
+          id: `WP-${Date.now()}`,
+          siteId: employee.siteId || employee.site_id || '',
+          employeeId,
+          employeeName: employee.name,
+          employeeAvatar: employee.avatar,
+          totalPoints: points,
+          weeklyPoints: points,
+          monthlyPoints: points,
+          todayPoints: points,
+          totalJobsCompleted: type === 'job_complete' ? 1 : 0,
+          totalItemsPicked: 0,
+          averageAccuracy: 100,
+          averageTimePerJob: 0,
+          currentStreak: 1,
+          longestStreak: 1,
+          lastJobCompletedAt: type === 'job_complete' ? now : undefined,
+          lastUpdated: now,
+          achievements: [],
+          rank: prev.length + 1,
+          level: level.level,
+          levelTitle: level.title,
+          currentBonusTier: tier?.tierName,
+          estimatedBonus: tier ? tier.bonusAmount + (currentPointsForPeriod * (tier.bonusPerPoint || 0)) : 0,
+          bonusPeriodPoints: currentPointsForPeriod,
+        };
+
+        updatedOrNewPoint = newWorkerPoints;
+
+        // Persist Creation
+        workerPointsService.create(newWorkerPoints).catch(err =>
+          console.error('Failed to create worker points:', err)
+        );
+
+        return [...prev, newWorkerPoints];
+      }
+    });
+
+    console.log(`🎮 Awarded ${points} points to ${employee.name}: ${description}`);
+  };
+
+  const getLeaderboard = (siteId?: string, period: 'today' | 'week' | 'month' | 'all' = 'week'): WorkerPoints[] => {
+    let filtered = workerPoints;
+
+    if (siteId) {
+      filtered = filtered.filter(wp => wp.siteId === siteId);
+    }
+
+    // Sort by appropriate period
+    return [...filtered].sort((a, b) => {
+      switch (period) {
+        case 'today': return b.todayPoints - a.todayPoints;
+        case 'week': return b.weeklyPoints - a.weeklyPoints;
+        case 'month': return b.monthlyPoints - a.monthlyPoints;
+        default: return b.totalPoints - a.totalPoints;
+      }
+    }).map((wp, index) => ({ ...wp, rank: index + 1 }));
+  };
+
+  // ==================== STORE POINTS (POS TEAM BONUS) ====================
+
+  const getStorePoints = (siteId: string): StorePoints | undefined => {
+    return storePoints.find(sp => sp.siteId === siteId);
+  };
+
+  const awardStorePoints = (
+    siteId: string,
+    points: number,
+    revenue: number,
+    transactionCount: number = 1
+  ) => {
+    const site = sites.find(s => s.id === siteId);
+    if (!site) return;
+
+    const now = new Date().toISOString();
+    const today = new Date().toISOString().split('T')[0];
+
+    setStorePoints(prev => {
+      const existing = prev.find(sp => sp.siteId === siteId);
+
+      if (existing) {
+        // Check if it's a new day - reset today's points
+        const lastUpdateDay = existing.lastUpdated.split('T')[0];
+        const isNewDay = lastUpdateDay !== today;
+
+        // Check if it's a new week - reset weekly points
+        const lastUpdateDate = new Date(existing.lastUpdated);
+        const currentDate = new Date();
+        const weekDiff = Math.floor((currentDate.getTime() - lastUpdateDate.getTime()) / (7 * 24 * 60 * 60 * 1000));
+        const isNewWeek = weekDiff >= 1 || (currentDate.getDay() < lastUpdateDate.getDay() && !isNewDay);
+
+        // Check if it's a new month - reset monthly points
+        const isNewMonth = lastUpdateDate.getMonth() !== currentDate.getMonth() ||
+          lastUpdateDate.getFullYear() !== currentDate.getFullYear();
+
+        const updatedTodayPoints = isNewDay ? points : existing.todayPoints + points;
+        const updatedWeeklyPoints = isNewWeek ? points : existing.weeklyPoints + points;
+        const updatedMonthlyPoints = isNewMonth ? points : existing.monthlyPoints + points;
+
+        // Calculate current tier and bonus
+        const tiers = settings.posBonusTiers || DEFAULT_POS_BONUS_TIERS;
+        const tier = tiers.find(t =>
+          updatedMonthlyPoints >= t.minPoints && (t.maxPoints === null || updatedMonthlyPoints <= t.maxPoints)
+        );
+        const estimatedBonus = tier
+          ? tier.bonusAmount + (updatedMonthlyPoints * (tier.bonusPerPoint || 0))
+          : 0;
+
+        return prev.map(sp => sp.siteId === siteId ? {
+          ...sp,
+          totalPoints: sp.totalPoints + points,
+          todayPoints: updatedTodayPoints,
+          weeklyPoints: updatedWeeklyPoints,
+          monthlyPoints: updatedMonthlyPoints,
+          totalTransactions: sp.totalTransactions + transactionCount,
+          totalRevenue: sp.totalRevenue + revenue,
+          averageTicketSize: (sp.totalRevenue + revenue) / (sp.totalTransactions + transactionCount),
+          lastTransactionAt: now,
+          lastUpdated: now,
+          currentTier: tier?.tierName,
+          estimatedBonus,
+        } : sp);
+      } else {
+        // Create new store points record
+        const tiers = settings.posBonusTiers || DEFAULT_POS_BONUS_TIERS;
+        const tier = tiers.find(t =>
+          points >= t.minPoints && (t.maxPoints === null || points <= t.maxPoints)
+        );
+
+        const newStorePoints: StorePoints = {
+          id: `SP-${Date.now()}`,
+          siteId,
+          siteName: site.name,
+          totalPoints: points,
+          weeklyPoints: points,
+          monthlyPoints: points,
+          todayPoints: points,
+          totalTransactions: transactionCount,
+          totalRevenue: revenue,
+          averageTicketSize: revenue / transactionCount,
+          customerSatisfaction: 100,
+          lastTransactionAt: now,
+          lastUpdated: now,
+          currentTier: tier?.tierName,
+          estimatedBonus: tier ? tier.bonusAmount + (points * (tier.bonusPerPoint || 0)) : 0,
+        };
+
+        return [...prev, newStorePoints];
+      }
+    });
+  };
+
+  const calculateWorkerBonusShare = (siteId: string, employeeRole: string): WorkerBonusShare | undefined => {
+    const sp = storePoints.find(s => s.siteId === siteId);
+    if (!sp || !sp.estimatedBonus) return undefined;
+
+    const roleDistribution = settings.posRoleDistribution || DEFAULT_POS_ROLE_DISTRIBUTION;
+    const roleConfig = roleDistribution.find(r => r.role.toLowerCase() === employeeRole.toLowerCase());
+
+    if (!roleConfig) return undefined;
+
+    const employee = employees.find(e => e.role === employeeRole && e.siteId === siteId);
+
+    return {
+      employeeId: employee?.id || '',
+      employeeName: employee?.name || employeeRole,
+      role: employeeRole,
+      rolePercentage: roleConfig.percentage,
+      storeBonus: sp.estimatedBonus,
+      personalShare: (sp.estimatedBonus * roleConfig.percentage) / 100,
+      siteId,
+    };
+  };
+
+  const getStoreLeaderboard = (): StorePoints[] => {
+    return [...storePoints].sort((a, b) => b.monthlyPoints - a.monthlyPoints);
   };
 
   const addCustomer = async (customer: Customer) => {
@@ -2394,6 +3175,75 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
     addNotification('info', 'Promotion Deleted');
   };
 
+  // --- Discount Code Functions ---
+  const addDiscountCode = (code: DiscountCode) => {
+    setDiscountCodes(prev => [...prev, code]);
+    addNotification('success', `Discount code "${code.code}" created`);
+  };
+
+  const updateDiscountCode = (code: DiscountCode) => {
+    setDiscountCodes(prev => prev.map(c => c.id === code.id ? code : c));
+    addNotification('success', `Discount code "${code.code}" updated`);
+  };
+
+  const deleteDiscountCode = (id: string) => {
+    setDiscountCodes(prev => prev.filter(c => c.id !== id));
+    addNotification('info', 'Discount code deleted');
+  };
+
+  const validateDiscountCode = (code: string, siteId?: string, subtotal?: number): { valid: boolean; discountCode?: DiscountCode; error?: string } => {
+    const discountCode = discountCodes.find(dc => dc.code.toUpperCase() === code.toUpperCase());
+
+    if (!discountCode) {
+      return { valid: false, error: 'Invalid discount code' };
+    }
+
+    // Check status
+    if (discountCode.status !== 'Active') {
+      return { valid: false, error: 'This discount code is not active' };
+    }
+
+    // Check validity dates
+    const now = new Date();
+    const validFrom = new Date(discountCode.validFrom);
+    const validUntil = new Date(discountCode.validUntil);
+
+    if (now < validFrom) {
+      return { valid: false, error: 'This discount code is not yet valid' };
+    }
+
+    if (now > validUntil) {
+      return { valid: false, error: 'This discount code has expired' };
+    }
+
+    // Check usage limit
+    if (discountCode.usageLimit !== undefined && discountCode.usageCount >= discountCode.usageLimit) {
+      return { valid: false, error: 'This discount code has reached its usage limit' };
+    }
+
+    // Check minimum purchase amount
+    if (discountCode.minPurchaseAmount !== undefined && subtotal !== undefined && subtotal < discountCode.minPurchaseAmount) {
+      return { valid: false, error: `Minimum purchase of ${discountCode.minPurchaseAmount} required` };
+    }
+
+    // Check applicable sites
+    if (discountCode.applicableSites && discountCode.applicableSites.length > 0 && siteId) {
+      if (!discountCode.applicableSites.includes(siteId)) {
+        return { valid: false, error: 'This discount code is not valid at this location' };
+      }
+    }
+
+    return { valid: true, discountCode };
+  };
+
+  const useDiscountCode = (codeId: string) => {
+    setDiscountCodes(prev => prev.map(c =>
+      c.id === codeId
+        ? { ...c, usageCount: c.usageCount + 1 }
+        : c
+    ));
+  };
+
   // Filter data by active site
   // Data is now pre-filtered by loadSiteData, so we just pass the state directly
   // keeping these variables to match the value object structure if needed, or we can update the value object
@@ -2425,6 +3275,10 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
     systemLogs,
     jobAssignments,
     promotions,
+    workerPoints,
+    pointsTransactions,
+    tasks,
+    setTasks,
     allProducts,
     allSales,
     allOrders,
@@ -2448,6 +3302,12 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
     startShift,
     addPromotion,
     deletePromotion,
+    discountCodes,
+    addDiscountCode,
+    updateDiscountCode,
+    deleteDiscountCode,
+    validateDiscountCode,
+    useDiscountCode,
     addSupplier,
     adjustStock,
     addExpense,
@@ -2459,9 +3319,18 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
     completeJob,
     resetJob,
     fixBrokenJobs,
+    createPutawayJob,
     addEmployee,
     updateEmployee,
     deleteEmployee,
+    getWorkerPoints,
+    awardPoints,
+    getLeaderboard,
+    storePoints,
+    getStorePoints,
+    awardStorePoints,
+    calculateWorkerBonusShare,
+    getStoreLeaderboard,
     addCustomer,
     updateCustomer,
     deleteCustomer,
@@ -2513,6 +3382,10 @@ export const useData = () => {
       allSales: [],
       allOrders: [],
       jobAssignments: [],
+      workerPoints: [],
+      pointsTransactions: [],
+      tasks: [],
+      setTasks: () => { },
       // Add all required functions as no-ops
       updateSettings: () => { },
       refreshData: async () => { },
@@ -2541,9 +3414,18 @@ export const useData = () => {
       completeJob: async () => { },
       resetJob: async () => { },
       fixBrokenJobs: async () => { },
+      createPutawayJob: async () => undefined,
       addEmployee: async () => { },
       updateEmployee: async () => { },
       deleteEmployee: async () => { },
+      getWorkerPoints: () => undefined,
+      awardPoints: () => { },
+      getLeaderboard: () => [],
+      storePoints: [],
+      getStorePoints: () => undefined,
+      awardStorePoints: () => { },
+      getStoreLeaderboard: () => [],
+      calculateWorkerBonusShare: () => undefined,
       addCustomer: async () => { },
       updateCustomer: async () => { },
       deleteCustomer: async () => { },

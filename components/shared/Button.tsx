@@ -1,12 +1,17 @@
 import React from 'react';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-    children: React.ReactNode;
+    children?: React.ReactNode;
     variant?: 'primary' | 'secondary' | 'danger' | 'success' | 'ghost';
     size?: 'sm' | 'md' | 'lg';
     fullWidth?: boolean;
     loading?: boolean;
     icon?: React.ReactNode;
+    onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void | Promise<void>;
+    disabled?: boolean;
+    className?: string;
+    type?: 'submit' | 'reset' | 'button';
+    title?: string;
 }
 
 export default function Button({
@@ -14,12 +19,18 @@ export default function Button({
     variant = 'primary',
     size = 'md',
     fullWidth = false,
-    loading = false,
+    loading: externalLoading = false,
     disabled,
     icon,
     className = '',
+    onClick,
+    title,
     ...props
 }: ButtonProps) {
+    const [internalLoading, setInternalLoading] = React.useState(false);
+
+    const loading = externalLoading || internalLoading;
+
     const variants = {
         primary: 'bg-cyber-primary text-black hover:bg-cyber-accent shadow-[0_0_20px_rgba(0,255,157,0.3)]',
         secondary: 'bg-white/10 text-white hover:bg-white/20 border border-white/20',
@@ -36,6 +47,22 @@ export default function Button({
 
     const isDisabled = disabled || loading;
 
+    const handleClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
+        if (!onClick) return;
+
+        const result = onClick(e);
+
+        // Check if result is a Promise
+        if (result instanceof Promise) {
+            setInternalLoading(true);
+            try {
+                await result;
+            } finally {
+                setInternalLoading(false);
+            }
+        }
+    };
+
     return (
         <button
             className={`
@@ -47,6 +74,8 @@ export default function Button({
         ${className}
       `}
             disabled={isDisabled}
+            onClick={handleClick}
+            title={title}
             {...props}
         >
             {loading ? (

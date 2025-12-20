@@ -2,9 +2,11 @@
 import React from 'react';
 import {
     Mail, Phone, MapPin, Briefcase, Star, ClipboardList, MessageSquare,
-    Key, Trash2, ArrowRight, UserCheck, Clock
+    Key, Trash2, ArrowRight, UserCheck, Clock, Trophy, Zap, Gift
 } from 'lucide-react';
-import { Employee, Site, UserRole } from '../types';
+import { Employee, Site, UserRole, WorkerPoints } from '../types';
+import { CURRENCY_SYMBOL } from '../constants';
+import { formatCompactNumber } from '../utils/formatting';
 
 interface EmployeeRowProps {
     employee: Employee;
@@ -20,6 +22,11 @@ interface EmployeeRowProps {
     canDelete: boolean;
     canApprove: boolean;
     isSuperAdmin: boolean;
+    // Gamification props
+    workerPoints?: WorkerPoints;
+    estimatedBonus?: number;
+    bonusTierName?: string;
+    key?: React.Key;
 }
 
 export default function EmployeeRow({
@@ -35,10 +42,17 @@ export default function EmployeeRow({
     canResetPassword,
     canDelete,
     canApprove,
-    isSuperAdmin
+    isSuperAdmin,
+    workerPoints,
+    estimatedBonus,
+    bonusTierName
 }: EmployeeRowProps) {
     const isPending = employee.status === 'Pending Approval';
     const employeeSite = sites.find(s => s.id === employee.siteId || s.id === employee.site_id);
+    const [imgError, setImgError] = React.useState(false);
+
+    // Determine if this is a warehouse or store employee for display
+    const isWarehouseWorker = employeeSite?.type === 'Warehouse' || employeeSite?.type === 'Distribution Center';
 
     return (
         <div
@@ -49,11 +63,20 @@ export default function EmployeeRow({
             {/* Employee Info */}
             <div className="col-span-8 sm:col-span-6 lg:col-span-4 flex items-center gap-3 min-w-0">
                 <div className="relative shrink-0">
-                    <img
-                        src={employee.avatar}
-                        alt={employee.name}
-                        className="w-12 h-12 rounded-xl border-2 border-white/10 object-cover group-hover:border-cyber-primary/50 transition-all"
-                    />
+                    {employee.avatar && !imgError ? (
+                        <img
+                            src={employee.avatar}
+                            alt={employee.name}
+                            className="w-12 h-12 rounded-xl border-2 border-white/10 object-cover group-hover:border-cyber-primary/50 transition-all"
+                            onError={() => setImgError(true)}
+                        />
+                    ) : (
+                        <div className="w-12 h-12 rounded-xl border-2 border-white/10 bg-white/5 flex items-center justify-center group-hover:border-cyber-primary/50 transition-all">
+                            <span className="font-bold text-gray-400 group-hover:text-cyber-primary">
+                                {employee.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()}
+                            </span>
+                        </div>
+                    )}
                     <div className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-cyber-dark ${employee.status === 'Active' ? 'bg-green-500' :
                         employee.status === 'Pending Approval' ? 'bg-yellow-500 animate-pulse' :
                             'bg-red-500'
@@ -109,7 +132,7 @@ export default function EmployeeRow({
                 </div>
             </div>
 
-            {/* Performance */}
+            {/* Performance & Points */}
             <div className="hidden lg:block lg:col-span-2">
                 {isPending ? (
                     <div className="flex items-center gap-2 text-yellow-500">
@@ -118,10 +141,44 @@ export default function EmployeeRow({
                     </div>
                 ) : (
                     <div className="space-y-1.5">
-                        <div className="flex items-center gap-2">
-                            <Star size={12} className="text-yellow-400" />
-                            <span className="text-xs text-white font-bold">{employee.performanceScore}%</span>
-                        </div>
+                        {/* Points Display */}
+                        {workerPoints ? (
+                            <>
+                                <div className="flex items-center gap-2">
+                                    <Trophy size={12} className="text-yellow-400" />
+                                    <span className="text-xs text-white font-bold">{workerPoints.totalPoints.toLocaleString()} pts</span>
+                                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-400 font-bold">
+                                        Lv.{workerPoints.level}
+                                    </span>
+                                </div>
+                                {estimatedBonus && estimatedBonus > 0 && (
+                                    <div className="flex items-center gap-2">
+                                        <Gift size={12} className="text-green-400" />
+                                        <span className="text-xs text-green-400 font-bold">
+                                            {formatCompactNumber(estimatedBonus, { currency: CURRENCY_SYMBOL, maxFractionDigits: 0 })}
+                                        </span>
+                                        {bonusTierName && (
+                                            <span className="text-[10px] text-gray-500">{bonusTierName}</span>
+                                        )}
+                                    </div>
+                                )}
+                            </>
+                        ) : estimatedBonus && estimatedBonus > 0 ? (
+                            // Store employee with team bonus share
+                            <div className="flex items-center gap-2">
+                                <Gift size={12} className="text-green-400" />
+                                <span className="text-xs text-green-400 font-bold">
+                                    {formatCompactNumber(estimatedBonus, { currency: CURRENCY_SYMBOL, maxFractionDigits: 0 })}
+                                </span>
+                                <span className="text-[10px] text-gray-500">team share</span>
+                            </div>
+                        ) : (
+                            // Fallback to performance
+                            <div className="flex items-center gap-2">
+                                <Star size={12} className="text-yellow-400" />
+                                <span className="text-xs text-white font-bold">{employee.performanceScore}%</span>
+                            </div>
+                        )}
                         <div className="flex items-center gap-2">
                             <ClipboardList size={12} className="text-blue-400" />
                             <span className="text-xs text-gray-400">{pendingTasks} tasks</span>

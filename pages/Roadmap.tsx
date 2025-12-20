@@ -1,306 +1,1008 @@
-
-import React from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
-  CheckCircle,
-  Code,
-  Database,
-  Layout,
-  Lock,
-  Rocket,
-  Server,
-  Shield,
-  Smartphone,
-  Zap,
-  GitBranch,
-  Cpu,
-  ScanEye,
-  Link,
-  Layers,
-  Box,
-  Globe,
-  Bell,
-  FileText,
-  TestTube,
-  CloudLightning,
-  Truck,
-  ShoppingCart,
-  BarChart3,
-  Wifi,
-  RotateCcw,
-  Printer,
-  ClipboardCheck,
-  Banknote,
-  Network,
+  Plus,
+  Trash2,
+  Edit3,
+  Save,
+  X,
+  Link2,
+  ZoomIn,
+  ZoomOut,
+  Maximize2,
   Store,
-  BrainCircuit
+  Warehouse,
+  Building2,
+  ShoppingCart,
+  Truck,
+  Users,
+  BarChart3,
+  Lightbulb,
+  Target,
+  RefreshCw,
+  Star,
+  Eye,
+  EyeOff,
+  Pin,
+  ArrowRight,
+  Loader2,
+  Database,
+  Rocket,
+  AlertTriangle,
+  Shield
 } from 'lucide-react';
+import { useData } from '../contexts/DataContext';
+import { useStore } from '../contexts/CentralStore';
+import { brainstormService, type BrainstormNodeDB } from '../services/supabase.service';
 
-const ROADMAP_DATA = [
-  {
-    id: 'immediate-fixes',
-    phase: "Immediate To-Do: Critical Flow Fixes",
-    status: "in-progress",
-    progress: 15,
-    period: "URGENT",
-    description: "Mandatory fixes required to stabilize core operational workflows before further expansion.",
-    tech: ["Bug Fixes", "Logic Repair", "Flow Testing"],
-    items: [
-      { title: "Navigation Audit", desc: "Assess every navigation page one by one for functionality & design", icon: ScanEye, complexity: "High", priority: "Critical", status: "in-progress" },
-      { title: "Fulfillment Lifecycle", desc: "Fix Pick -> Pack -> Ship status transitions & job generation", icon: ClipboardCheck, complexity: "High", priority: "Critical", status: "in-progress" },
-      { title: "Warehouse Receiving", desc: "Debug 'Receive' to 'Putaway' inventory updates", icon: Box, complexity: "High", priority: "Critical", status: "pending" },
-      { title: "PO & Procurement", desc: "Finalize Purchase Order creation & Supplier linking", icon: Truck, complexity: "Medium", priority: "High", status: "pending" },
-      { title: "Site Context Logic", desc: "Ensure Managers are strictly locked to their assigned Site", icon: Lock, complexity: "Medium", priority: "High", status: "in-progress" },
-      { title: "Global Data Sync", desc: "Fix employee/inventory sync issues between Central Admin & Sites", icon: Database, complexity: "High", priority: "Critical", status: "pending" },
-    ]
-  },
-  {
-    id: 'phase-4',
-    phase: "Phase 4: Ecosystem Connectivity",
-    status: "in-progress",
-    progress: 10,
-    period: "Q3 2024",
-    description: "Connecting SIIFMART to the outside world: Multi-branch, eCommerce, and Vendors.",
-    tech: ["GraphQL", "PWA", "WebSockets"],
-    items: [
-      { title: "Multi-Branch Sync", desc: "Centralized Admin dashboard for multiple store locations", icon: Network, status: "in-progress", complexity: "Very High", priority: "Critical" },
-      { title: "Offline-First PWA", desc: "Service workers for zero-connectivity operation", icon: Wifi, status: "planned", complexity: "High", priority: "High" },
-      { title: "Vendor Portal", desc: "External login for suppliers to update stock status", icon: Truck, status: "planned", complexity: "Medium", priority: "Medium" },
-      { title: "eCommerce Bridge", desc: "Sync inventory with Shopify/WooCommerce", icon: Globe, status: "planned", complexity: "High", priority: "High" },
-    ]
-  },
-  {
-    id: 'phase-5',
-    phase: "Phase 5: Autonomous Retail",
-    status: "future",
-    progress: 0,
-    period: "2025 Vision",
-    description: "Next-gen retail: Computer Vision, Robotics, and Neural Networks.",
-    tech: ["WebXR", "MQTT", "TensorFlow.js"],
-    items: [
-      { title: "Computer Vision Checkout", desc: "Amazon Go-style 'Just Walk Out' tech", icon: ScanEye, status: "concept", complexity: "Extreme", priority: "Low" },
-      { title: "Drone Delivery API", desc: "Automated dispatch to logistics drones", icon: Rocket, status: "concept", complexity: "Very High", priority: "Low" },
-      { title: "Neural Supply Chain", desc: "AI predicting stock needs based on weather/events", icon: Cpu, status: "concept", complexity: "Very High", priority: "Critical" },
-      { title: "IoT Cold Chain", desc: "Real-time temperature sensors via MQTT", icon: CloudLightning, status: "concept", complexity: "High", priority: "Medium" },
-    ]
-  }
-];
+// ============================================================================
+// TYPES
+// ============================================================================
 
-const StatusBadge = ({ status }: { status: string }) => {
-  const styles = {
-    completed: "bg-green-500/10 text-green-400 border-green-500/20",
-    "in-progress": "bg-yellow-500/10 text-yellow-400 border-yellow-500/20 animate-pulse",
-    upcoming: "bg-blue-500/10 text-blue-400 border-blue-500/20",
-    planned: "bg-blue-500/10 text-blue-400 border-blue-500/20",
-    pending: "bg-gray-500/10 text-gray-400 border-gray-500/20",
-    future: "bg-purple-500/10 text-purple-400 border-purple-500/20",
-    concept: "bg-white/5 text-gray-500 border-white/10 border-dashed"
-  };
+interface BrainstormNode {
+  id: string;
+  title: string;
+  description: string;
+  department: 'stores' | 'warehouses' | 'admin' | 'pos' | 'logistics' | 'hr' | 'finance' | 'general';
+  priority: 'low' | 'medium' | 'high' | 'critical';
+  status: 'idea' | 'planning' | 'in-progress' | 'completed';
+  x: number;
+  y: number;
+  connections: string[];
+  createdAt: string;
+  // Advanced fields
+  dueDate?: string | null;
+  progress: number;
+  tags: string[];
+  isStarred: boolean;
+  completedAt?: string | null;
+  notes?: string;
+  color?: string;
+}
 
-  const labels = {
-    completed: "Completed",
-    "in-progress": "In Progress",
-    upcoming: "Planned",
-    planned: "Planned",
-    pending: "Pending",
-    future: "Vision",
-    concept: "Concept"
-  };
+// ============================================================================
+// CONSTANTS
+// ============================================================================
 
-  return (
-    <span className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold border tracking-wider ${styles[status as keyof typeof styles] || styles.pending}`}>
-      {labels[status as keyof typeof labels] || status}
-    </span>
-  );
+const DEPARTMENTS = {
+  stores: { label: 'Stores', icon: Store, color: 'from-emerald-500 to-teal-500', border: 'border-emerald-500', text: 'text-emerald-400', bg: 'bg-emerald-500' },
+  warehouses: { label: 'Warehouses', icon: Warehouse, color: 'from-blue-500 to-cyan-500', border: 'border-blue-500', text: 'text-blue-400', bg: 'bg-blue-500' },
+  admin: { label: 'Administration', icon: Building2, color: 'from-purple-500 to-violet-500', border: 'border-purple-500', text: 'text-purple-400', bg: 'bg-purple-500' },
+  pos: { label: 'Point of Sale', icon: ShoppingCart, color: 'from-orange-500 to-amber-500', border: 'border-orange-500', text: 'text-orange-400', bg: 'bg-orange-500' },
+  logistics: { label: 'Logistics', icon: Truck, color: 'from-rose-500 to-pink-500', border: 'border-rose-500', text: 'text-rose-400', bg: 'bg-rose-500' },
+  hr: { label: 'Human Resources', icon: Users, color: 'from-indigo-500 to-blue-500', border: 'border-indigo-500', text: 'text-indigo-400', bg: 'bg-indigo-500' },
+  finance: { label: 'Finance', icon: BarChart3, color: 'from-yellow-500 to-orange-500', border: 'border-yellow-500', text: 'text-yellow-400', bg: 'bg-yellow-500' },
+  general: { label: 'General', icon: Lightbulb, color: 'from-gray-500 to-slate-500', border: 'border-gray-500', text: 'text-gray-400', bg: 'bg-gray-500' }
 };
 
-const ComplexityBar = ({ level }: { level: string }) => {
-  const levels = { "Low": 1, "Medium": 2, "High": 3, "Very High": 4, "Extreme": 5 };
-  const score = levels[level as keyof typeof levels] || 1;
-
-  return (
-    <div className="flex items-center gap-1 mt-2" title={`Complexity: ${level}`}>
-      <span className="text-[9px] text-gray-600 uppercase mr-1">CMPX</span>
-      {[1, 2, 3, 4, 5].map(i => (
-        <div key={i} className={`h-1 w-2 rounded-sm ${i <= score ? 'bg-cyber-primary/60' : 'bg-gray-800'}`} />
-      ))}
-    </div>
-  );
+const PRIORITIES = {
+  low: { label: 'Low', color: 'bg-gray-500/20 text-gray-400 border-gray-500/30' },
+  medium: { label: 'Medium', color: 'bg-blue-500/20 text-blue-400 border-blue-500/30' },
+  high: { label: 'High', color: 'bg-orange-500/20 text-orange-400 border-orange-500/30' },
+  critical: { label: 'Critical', color: 'bg-red-500/20 text-red-400 border-red-500/30 animate-pulse' }
 };
 
-const ProgressBar = ({ progress, status }: { progress: number, status: string }) => (
-  <div className="w-full h-1 bg-black/40 rounded-full overflow-hidden mt-4 border border-white/5">
-    <div
-      className={`h-full transition-all duration-1000 ease-out rounded-full ${status === 'completed' ? 'bg-cyber-primary' :
-        status === 'in-progress' ? 'bg-yellow-400' :
-          status === 'future' ? 'bg-purple-500' : 'bg-blue-500'
-        }`}
-      style={{ width: `${progress}%` }}
-    />
-  </div>
-);
+const STATUSES = {
+  idea: { label: 'Idea', icon: Lightbulb, color: 'text-yellow-400' },
+  planning: { label: 'Planning', icon: Target, color: 'text-blue-400' },
+  'in-progress': { label: 'In Progress', icon: RefreshCw, color: 'text-orange-400' },
+  completed: { label: 'Completed', icon: Star, color: 'text-green-400' }
+};
+
+const NODE_WIDTH = 300;
+const NODE_HEIGHT = 160;
+
+// ============================================================================
+// HELPER: Map DB to local state
+// ============================================================================
+const mapDBToLocal = (db: BrainstormNodeDB): BrainstormNode => ({
+  id: db.id,
+  title: db.title,
+  description: db.description,
+  department: db.department as BrainstormNode['department'],
+  priority: db.priority as BrainstormNode['priority'],
+  status: db.status as BrainstormNode['status'],
+  x: db.x,
+  y: db.y,
+  connections: db.connections || [],
+  createdAt: db.created_at,
+  // Advanced fields
+  dueDate: db.due_date || null,
+  progress: db.progress || 0,
+  tags: db.tags || [],
+  isStarred: db.is_starred || false,
+  completedAt: db.completed_at || null,
+  notes: db.notes || '',
+  color: db.color || undefined
+});
+
+// ============================================================================
+// MAIN COMPONENT
+// ============================================================================
 
 export default function Roadmap() {
-  return (
-    <div className="space-y-8 pb-12">
-      {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold text-white flex items-center gap-3">
-            <GitBranch className="text-cyber-primary" />
-            System Evolution
-          </h2>
-          <p className="text-gray-400 text-sm mt-1">
-            Strategic development path from POS to Autonomous Enterprise.
+  const { addNotification } = useData();
+  const { user } = useStore();
+  const canvasRef = useRef<HTMLDivElement>(null);
+
+  // State
+  const [nodes, setNodes] = useState<BrainstormNode[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [scale, setScale] = useState(1);
+  const [offset, setOffset] = useState({ x: 0, y: 0 });
+  const [isPanning, setIsPanning] = useState(false);
+  const [panStart, setPanStart] = useState({ x: 0, y: 0 });
+  const [draggingNode, setDraggingNode] = useState<string | null>(null);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const [isCreating, setIsCreating] = useState(false);
+  const [editingNode, setEditingNode] = useState<BrainstormNode | null>(null);
+  const [connectingFrom, setConnectingFrom] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterDepartment, setFilterDepartment] = useState<string>('all');
+  const [showConnections, setShowConnections] = useState(true);
+
+  // New node form
+  const [newNode, setNewNode] = useState<Partial<BrainstormNode>>({
+    title: '',
+    description: '',
+    department: 'general',
+    priority: 'medium',
+    status: 'idea'
+  });
+
+  // Check if user is super_admin
+  const isSuperAdmin = user?.role?.toLowerCase() === 'super_admin' ||
+    user?.role?.toLowerCase().replace('_', ' ') === 'super admin';
+
+  // Load data from Supabase
+  useEffect(() => {
+    const loadData = async () => {
+      setIsLoading(true);
+      try {
+        const data = await brainstormService.getAll();
+        setNodes(data.map(mapDBToLocal));
+
+        // Load view state from localStorage
+        const viewState = brainstormService.getViewState();
+        if (viewState) {
+          setOffset(viewState.offset);
+          setScale(viewState.scale);
+        }
+      } catch (error) {
+        console.error('Failed to load brainstorm data:', error);
+        addNotification('alert', 'Failed to load brainstorm data');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadData();
+  }, []);
+
+  // Save view state on change
+  useEffect(() => {
+    const debounce = setTimeout(() => {
+      brainstormService.saveViewState({ offset, scale });
+    }, 500);
+    return () => clearTimeout(debounce);
+  }, [offset, scale]);
+
+  // Create node
+  const createNode = async () => {
+    if (!newNode.title?.trim()) {
+      addNotification('alert', 'Please enter a title');
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const nodeData = {
+        title: newNode.title,
+        description: newNode.description || '',
+        department: newNode.department || 'general',
+        priority: newNode.priority || 'medium',
+        status: newNode.status || 'idea',
+        x: (canvasRef.current?.clientWidth || 800) / 2 / scale - offset.x - NODE_WIDTH / 2 + Math.random() * 100 - 50,
+        y: (canvasRef.current?.clientHeight || 600) / 2 / scale - offset.y - NODE_HEIGHT / 2 + Math.random() * 100 - 50,
+        connections: [],
+        created_by: user?.name || 'System'
+      };
+
+      const created = await brainstormService.create(nodeData);
+      setNodes(prev => [...prev, mapDBToLocal(created)]);
+      setNewNode({ title: '', description: '', department: 'general', priority: 'medium', status: 'idea' });
+      setIsCreating(false);
+      addNotification('success', 'Idea saved to database!');
+    } catch (error) {
+      console.error('Failed to create node:', error);
+      addNotification('alert', 'Failed to save idea. Check if the brainstorm_nodes table exists.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Update node position (debounced save)
+  const saveNodePosition = useCallback(async (id: string, x: number, y: number) => {
+    try {
+      await brainstormService.update(id, { x, y });
+    } catch (error) {
+      console.warn('Failed to save position:', error);
+    }
+  }, []);
+
+  // Update node
+  const updateNode = async (id: string, updates: Partial<BrainstormNode>) => {
+    setIsSaving(true);
+    try {
+      await brainstormService.update(id, {
+        title: updates.title,
+        description: updates.description,
+        department: updates.department,
+        priority: updates.priority,
+        status: updates.status,
+        connections: updates.connections
+      });
+      setNodes(prev => prev.map(n => n.id === id ? { ...n, ...updates } : n));
+      setEditingNode(null);
+      addNotification('success', 'Idea updated!');
+    } catch (error) {
+      console.error('Failed to update node:', error);
+      addNotification('alert', 'Failed to update idea');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Delete node
+  const deleteNode = async (id: string) => {
+    setIsSaving(true);
+    try {
+      await brainstormService.delete(id);
+      setNodes(prev => prev.filter(n => n.id !== id).map(n => ({
+        ...n,
+        connections: n.connections.filter(c => c !== id)
+      })));
+      addNotification('info', 'Idea deleted');
+    } catch (error) {
+      console.error('Failed to delete node:', error);
+      addNotification('alert', 'Failed to delete idea');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Quick toggle complete
+  const quickToggleComplete = async (node: BrainstormNode) => {
+    const newStatus = node.status === 'completed' ? 'idea' : 'completed';
+    const completedAt = newStatus === 'completed' ? new Date().toISOString() : null;
+    const progress = newStatus === 'completed' ? 100 : node.progress;
+
+    // Optimistic update
+    setNodes(prev => prev.map(n =>
+      n.id === node.id ? { ...n, status: newStatus, completedAt, progress } : n
+    ));
+
+    try {
+      await brainstormService.update(node.id, {
+        status: newStatus,
+        completed_at: completedAt,
+        progress
+      });
+      addNotification('success', newStatus === 'completed' ? '✅ Marked complete!' : 'Reopened idea');
+    } catch (error) {
+      // Rollback on error
+      setNodes(prev => prev.map(n => n.id === node.id ? node : n));
+      addNotification('alert', 'Failed to update');
+    }
+  };
+
+  // Quick toggle star
+  const quickToggleStar = async (node: BrainstormNode) => {
+    const newStarred = !node.isStarred;
+
+    // Optimistic update
+    setNodes(prev => prev.map(n =>
+      n.id === node.id ? { ...n, isStarred: newStarred } : n
+    ));
+
+    try {
+      await brainstormService.update(node.id, { is_starred: newStarred });
+    } catch (error) {
+      // Rollback on error
+      setNodes(prev => prev.map(n => n.id === node.id ? node : n));
+    }
+  };
+
+  // Quick update progress
+  const quickUpdateProgress = async (node: BrainstormNode, progress: number) => {
+    setNodes(prev => prev.map(n =>
+      n.id === node.id ? { ...n, progress } : n
+    ));
+    try {
+      await brainstormService.update(node.id, { progress });
+    } catch (error) {
+      console.warn('Failed to save progress');
+    }
+  };
+
+  // Connect nodes
+  const connectNodes = async (toId: string) => {
+    if (!connectingFrom || connectingFrom === toId) {
+      setConnectingFrom(null);
+      return;
+    }
+
+    const fromNode = nodes.find(n => n.id === connectingFrom);
+    if (!fromNode || fromNode.connections.includes(toId)) {
+      setConnectingFrom(null);
+      return;
+    }
+
+    const newConnections = [...fromNode.connections, toId];
+
+    try {
+      await brainstormService.update(connectingFrom, { connections: newConnections });
+      setNodes(prev => prev.map(n =>
+        n.id === connectingFrom ? { ...n, connections: newConnections } : n
+      ));
+      addNotification('success', 'Ideas connected!');
+    } catch (error) {
+      console.error('Failed to connect:', error);
+    }
+    setConnectingFrom(null);
+  };
+
+  // Mouse handlers for panning
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (e.target === canvasRef.current || (e.target as HTMLElement).classList.contains('canvas-bg')) {
+      setIsPanning(true);
+      setPanStart({ x: e.clientX - offset.x * scale, y: e.clientY - offset.y * scale });
+    }
+  };
+
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    if (isPanning) {
+      setOffset({
+        x: (e.clientX - panStart.x) / scale,
+        y: (e.clientY - panStart.y) / scale
+      });
+    }
+    if (draggingNode) {
+      const rect = canvasRef.current?.getBoundingClientRect();
+      if (rect) {
+        const x = (e.clientX - rect.left) / scale - offset.x - dragOffset.x;
+        const y = (e.clientY - rect.top) / scale - offset.y - dragOffset.y;
+        setNodes(prev => prev.map(n => n.id === draggingNode ? { ...n, x, y } : n));
+      }
+    }
+  }, [isPanning, panStart, scale, draggingNode, dragOffset, offset]);
+
+  const handleMouseUp = useCallback(() => {
+    if (draggingNode) {
+      const node = nodes.find(n => n.id === draggingNode);
+      if (node) {
+        saveNodePosition(node.id, node.x, node.y);
+      }
+    }
+    setIsPanning(false);
+    setDraggingNode(null);
+  }, [draggingNode, nodes, saveNodePosition]);
+
+  // Node drag handlers
+  const startDragNode = (e: React.MouseEvent, node: BrainstormNode) => {
+    e.stopPropagation();
+    const rect = canvasRef.current?.getBoundingClientRect();
+    if (rect) {
+      setDraggingNode(node.id);
+      setDragOffset({
+        x: (e.clientX - rect.left) / scale - offset.x - node.x,
+        y: (e.clientY - rect.top) / scale - offset.y - node.y
+      });
+    }
+  };
+
+  // Zoom
+  const handleWheel = (e: React.WheelEvent) => {
+    e.preventDefault();
+    const delta = e.deltaY > 0 ? 0.9 : 1.1;
+    setScale(prev => Math.min(2, Math.max(0.3, prev * delta)));
+  };
+
+  // Reset view
+  const resetView = () => {
+    setScale(1);
+    setOffset({ x: 0, y: 0 });
+  };
+
+  // Filter nodes
+  const visibleNodes = nodes.filter(n => {
+    if (filterDepartment !== 'all' && n.department !== filterDepartment) return false;
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      return n.title.toLowerCase().includes(q) || n.description.toLowerCase().includes(q);
+    }
+    return true;
+  });
+
+  // Get all connections
+  const allConnections: { from: string; to: string }[] = [];
+  nodes.forEach(node => {
+    node.connections.forEach(toId => {
+      if (visibleNodes.find(n => n.id === toId)) {
+        allConnections.push({ from: node.id, to: toId });
+      }
+    });
+  });
+
+  // Access denied for non-super_admin
+  if (!isSuperAdmin) {
+    return (
+      <div className="h-[calc(100vh-120px)] flex items-center justify-center">
+        <div className="text-center max-w-md">
+          <div className="w-24 h-24 rounded-full bg-red-500/10 flex items-center justify-center mx-auto mb-6">
+            <Shield size={48} className="text-red-400" />
+          </div>
+          <h2 className="text-2xl font-bold text-white mb-3">Access Restricted</h2>
+          <p className="text-gray-400 mb-6">
+            The Brainstorm Canvas is exclusively available to <span className="text-cyber-primary font-bold">Super Administrators</span>.
+          </p>
+          <p className="text-sm text-gray-500">
+            Current role: <span className="text-white">{user?.role || 'Unknown'}</span>
           </p>
         </div>
-        <div className="flex items-center gap-4 bg-cyber-gray p-3 rounded-xl border border-white/10">
-          <div className="text-right">
-            <p className="text-xs text-gray-500 uppercase tracking-wider">Current Build</p>
-            <p className="text-xl font-bold text-cyber-primary font-mono">v2.5.0 ERP</p>
-          </div>
-          <div className="h-10 w-10 rounded-full border-4 border-cyber-primary/20 border-t-cyber-primary flex items-center justify-center animate-spin-slow">
-            <Rocket size={16} className="text-white" />
-          </div>
+      </div>
+    );
+  }
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="h-[calc(100vh-120px)] flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 size={48} className="text-cyber-primary animate-spin mx-auto mb-4" />
+          <p className="text-gray-400">Loading brainstorm canvas...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="h-[calc(100vh-120px)] flex flex-col">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4 flex-shrink-0">
+        <div>
+          <h2 className="text-2xl font-bold text-white flex items-center gap-3">
+            <Rocket className="text-cyber-primary" />
+            Brainstorm Canvas
+            <span className="text-xs bg-cyber-primary/20 text-cyber-primary px-2 py-0.5 rounded-full font-medium flex items-center gap-1">
+              <Database size={10} /> Synced
+            </span>
+          </h2>
+          <p className="text-gray-400 text-sm mt-1">
+            {nodes.length} ideas • {allConnections.length} connections • Super Admin Only
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          {isSaving && <Loader2 size={16} className="text-cyber-primary animate-spin" />}
+          <button
+            onClick={() => setShowConnections(!showConnections)}
+            className={`p-2 rounded-lg transition-all ${showConnections ? 'bg-cyber-primary/20 text-cyber-primary' : 'bg-white/5 text-gray-400'}`}
+            title="Toggle connections"
+          >
+            {showConnections ? <Eye size={18} /> : <EyeOff size={18} />}
+          </button>
+          <button onClick={() => setScale(s => Math.min(2, s + 0.1))} className="p-2 bg-white/5 rounded-lg text-gray-400 hover:text-white hover:bg-white/10" title="Zoom in">
+            <ZoomIn size={18} />
+          </button>
+          <button onClick={() => setScale(s => Math.max(0.3, s - 0.1))} className="p-2 bg-white/5 rounded-lg text-gray-400 hover:text-white hover:bg-white/10" title="Zoom out">
+            <ZoomOut size={18} />
+          </button>
+          <button onClick={resetView} className="p-2 bg-white/5 rounded-lg text-gray-400 hover:text-white hover:bg-white/10" title="Reset view">
+            <Maximize2 size={18} />
+          </button>
+          <span className="text-xs text-gray-500 font-mono w-12 text-center">{Math.round(scale * 100)}%</span>
+          <button
+            onClick={() => setIsCreating(true)}
+            className="bg-cyber-primary text-black px-4 py-2 rounded-xl font-bold text-sm hover:bg-cyber-accent transition-all shadow-[0_0_20px_rgba(0,255,157,0.2)] flex items-center gap-2"
+          >
+            <Plus size={18} />
+            New Idea
+          </button>
         </div>
       </div>
 
-      {/* Main Timeline */}
-      <div className="relative mt-12">
-        {/* Vertical Line */}
-        <div className="absolute left-8 top-0 bottom-0 w-px bg-gradient-to-b from-cyber-primary via-blue-500 to-purple-900 md:left-1/2 md:-ml-px opacity-30" />
+      {/* Filters */}
+      <div className="flex flex-wrap gap-2 mb-4 flex-shrink-0">
+        <div className="relative flex-1 min-w-[200px] max-w-[300px]">
+          <input
+            type="text"
+            placeholder="Search ideas..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full bg-cyber-gray border border-white/10 rounded-lg pl-4 pr-3 py-2 text-sm text-white placeholder-gray-500 focus:border-cyber-primary/50 focus:outline-none"
+            aria-label="Search ideas"
+          />
+        </div>
+        <button
+          onClick={() => setFilterDepartment('all')}
+          className={`px-3 py-2 rounded-lg text-xs font-medium transition-all ${filterDepartment === 'all' ? 'bg-cyber-primary text-black' : 'bg-white/5 text-gray-400 hover:bg-white/10'}`}
+        >
+          All
+        </button>
+        {Object.entries(DEPARTMENTS).map(([key, dept]) => (
+          <button
+            key={key}
+            onClick={() => setFilterDepartment(key)}
+            className={`px-3 py-2 rounded-lg text-xs font-medium transition-all flex items-center gap-1 ${filterDepartment === key ? `bg-gradient-to-r ${dept.color} text-white` : 'bg-white/5 text-gray-400 hover:bg-white/10'}`}
+            title={`Filter by ${dept.label}`}
+          >
+            <dept.icon size={12} />
+            <span className="hidden md:inline">{dept.label}</span>
+          </button>
+        ))}
+      </div>
 
-        <div className="space-y-16">
-          {ROADMAP_DATA.map((phase, index) => {
-            const isEven = index % 2 === 0;
-            const isActive = phase.status === 'in-progress';
-            const isFuture = phase.status === 'future';
+      {/* Canvas */}
+      <div
+        ref={canvasRef}
+        className="flex-1 relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-cyber-gray via-black to-cyber-gray cursor-grab active:cursor-grabbing"
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+        onWheel={handleWheel}
+      >
+        {/* Grid background */}
+        <div
+          className="canvas-bg absolute inset-0 pointer-events-none"
+          style={{
+            backgroundImage: `
+              radial-gradient(circle at 1px 1px, rgba(0,255,157,0.03) 1px, transparent 0),
+              linear-gradient(to right, rgba(0,255,157,0.02) 1px, transparent 1px),
+              linear-gradient(to bottom, rgba(0,255,157,0.02) 1px, transparent 1px)
+            `,
+            backgroundSize: `${40 * scale}px ${40 * scale}px, ${200 * scale}px ${200 * scale}px, ${200 * scale}px ${200 * scale}px`,
+            backgroundPosition: `${offset.x * scale}px ${offset.y * scale}px`
+          }}
+        />
 
-            return (
-              <div key={phase.id} className={`relative flex flex-col md:flex-row items-start ${isEven ? 'md:flex-row-reverse' : ''}`}>
+        {/* SVG Connections */}
+        {showConnections && (
+          <svg className="absolute inset-0 w-full h-full pointer-events-none overflow-visible">
+            <defs>
+              <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+                <polygon points="0 0, 10 3.5, 0 7" fill="rgba(0, 255, 157, 0.6)" />
+              </marker>
+              <linearGradient id="connectionGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="rgba(0, 255, 157, 0.3)" />
+                <stop offset="100%" stopColor="rgba(0, 255, 157, 0.6)" />
+              </linearGradient>
+            </defs>
+            {allConnections.map((conn, i) => {
+              const fromNode = nodes.find(n => n.id === conn.from);
+              const toNode = nodes.find(n => n.id === conn.to);
+              if (!fromNode || !toNode) return null;
 
-                {/* Timeline Node */}
-                <div className="absolute left-8 -translate-x-1/2 md:left-1/2 top-8 z-10 flex flex-col items-center">
-                  <div className={`w-6 h-6 rounded-full border-4 flex items-center justify-center z-20 bg-black transition-all duration-500 ${phase.status === 'completed' ? 'border-cyber-primary shadow-[0_0_20px_rgba(0,255,157,0.5)]' :
-                    isActive ? 'border-yellow-400 shadow-[0_0_20px_rgba(250,204,21,0.5)] scale-110' :
-                      isFuture ? 'border-purple-500 shadow-[0_0_20px_rgba(168,85,247,0.5)]' :
-                        'border-gray-700'
-                    }`}>
-                    {phase.status === 'completed' && <div className="w-2 h-2 bg-cyber-primary rounded-full" />}
-                    {isActive && <div className="w-2 h-2 bg-yellow-400 rounded-full animate-ping" />}
+              const fromX = (fromNode.x + NODE_WIDTH / 2 + offset.x) * scale;
+              const fromY = (fromNode.y + NODE_HEIGHT / 2 + offset.y) * scale;
+              const toX = (toNode.x + NODE_WIDTH / 2 + offset.x) * scale;
+              const toY = (toNode.y + NODE_HEIGHT / 2 + offset.y) * scale;
+
+              const midX = (fromX + toX) / 2;
+              const curvature = Math.abs(toX - fromX) * 0.2;
+
+              return (
+                <g key={i}>
+                  <path
+                    d={`M ${fromX} ${fromY} Q ${midX} ${fromY - curvature} ${toX} ${toY}`}
+                    stroke="url(#connectionGradient)"
+                    strokeWidth="2"
+                    fill="none"
+                    markerEnd="url(#arrowhead)"
+                    className="transition-all duration-300"
+                  />
+                  <circle cx={fromX} cy={fromY} r="5" fill="rgba(0, 255, 157, 0.4)" />
+                  <circle cx={fromX} cy={fromY} r="3" fill="rgba(0, 255, 157, 0.8)" />
+                </g>
+              );
+            })}
+          </svg>
+        )}
+
+        {/* Nodes */}
+        {visibleNodes.map(node => {
+          const dept = DEPARTMENTS[node.department];
+          const priority = PRIORITIES[node.priority];
+          const status = STATUSES[node.status];
+          const isCompleted = node.status === 'completed';
+
+          return (
+            <div
+              key={node.id}
+              className={`absolute group cursor-move select-none ${connectingFrom === node.id ? 'ring-2 ring-cyber-primary ring-offset-2 ring-offset-black z-50' : ''} ${isCompleted ? 'opacity-75' : ''}`}
+              style={{
+                left: (node.x + offset.x) * scale,
+                top: (node.y + offset.y) * scale,
+                width: NODE_WIDTH * scale,
+                transform: `scale(${scale})`,
+                transformOrigin: 'top left'
+              }}
+              onMouseDown={(e) => {
+                if (connectingFrom && connectingFrom !== node.id) {
+                  connectNodes(node.id);
+                } else {
+                  startDragNode(e, node);
+                }
+              }}
+            >
+              <div className={`bg-gradient-to-br from-cyber-gray via-black to-cyber-gray border-2 ${isCompleted ? 'border-green-500/40' : dept.border + '/40'} rounded-2xl p-5 shadow-2xl hover:shadow-[0_0_40px_rgba(0,255,157,0.1)] transition-all duration-300 hover:border-opacity-80 ${connectingFrom && connectingFrom !== node.id ? 'hover:ring-2 hover:ring-green-400 hover:scale-105' : 'hover:scale-102'} ${isCompleted ? 'bg-green-900/10' : ''}`}>
+
+                {/* Star & Complete indicators */}
+                <div className="absolute -top-2 -left-2 flex gap-1">
+                  {node.isStarred && (
+                    <div className="w-6 h-6 rounded-full bg-yellow-500 flex items-center justify-center shadow-lg border-2 border-black">
+                      <Star size={12} className="text-black fill-black" />
+                    </div>
+                  )}
+                </div>
+                {isCompleted && (
+                  <div className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-green-500 flex items-center justify-center shadow-lg border-2 border-black">
+                    <Star size={14} className="text-black" />
                   </div>
-                  {isActive && <div className="h-32 w-0.5 bg-gradient-to-b from-yellow-400/50 to-transparent absolute top-6" />}
+                )}
+
+                {/* Department badge & Priority */}
+                <div className="flex items-start justify-between mb-2">
+                  <div className={`flex items-center gap-2 px-2 py-1 rounded-lg bg-gradient-to-r ${dept.color}/30 border border-white/10`}>
+                    <dept.icon size={12} className={dept.text} />
+                    <span className={`text-[10px] font-bold uppercase ${dept.text}`}>{dept.label}</span>
+                  </div>
+                  <span className={`px-2 py-0.5 rounded-lg text-[9px] font-bold uppercase border ${priority.color}`}>
+                    {priority.label}
+                  </span>
                 </div>
 
-                {/* Spacer for Desktop Alignment */}
-                <div className="hidden md:block md:w-1/2" />
+                {/* Title */}
+                <h3 className={`text-white font-bold text-sm mb-1 line-clamp-1 ${isCompleted ? 'line-through opacity-70' : ''}`}>{node.title}</h3>
+                <p className="text-gray-400 text-xs line-clamp-2 mb-3 min-h-[32px]">{node.description || 'No description'}</p>
 
-                {/* Content Card */}
-                <div className={`w-full md:w-1/2 pl-16 md:pl-0 ${isEven ? 'md:pr-16' : 'md:pl-16'}`}>
-                  <div className={`group relative bg-cyber-gray border rounded-2xl overflow-hidden transition-all duration-300 hover:scale-[1.01] ${isActive ? 'border-yellow-400/30 shadow-[0_0_30px_rgba(251,191,36,0.05)]' :
-                    isFuture ? 'border-purple-500/30' :
-                      'border-white/5 hover:border-white/20'
-                    }`}>
+                {/* Progress Bar */}
+                <div className="mb-3">
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-[9px] text-gray-500 uppercase font-bold">Progress</span>
+                    <span className={`text-[10px] font-bold ${node.progress >= 100 ? 'text-green-400' : 'text-gray-400'}`}>{node.progress}%</span>
+                  </div>
+                  <div className="h-1.5 bg-black/50 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full rounded-full transition-all duration-500 ${node.progress >= 100 ? 'bg-green-500' : node.progress >= 50 ? 'bg-cyber-primary' : 'bg-blue-500'}`}
+                      style={{ width: `${Math.min(100, node.progress)}%` }}
+                    />
+                  </div>
+                </div>
 
-                    {/* Phase Indicator */}
-                    <div className="absolute top-0 right-0 px-3 py-1 bg-black/40 rounded-bl-xl border-b border-l border-white/5 text-[10px] font-mono text-gray-500">
-                      {phase.period}
+                {/* Status & Quick Actions */}
+                <div className="flex items-center justify-between pt-2 border-t border-white/10">
+                  <div className={`flex items-center gap-2 ${status.color}`}>
+                    <status.icon size={12} />
+                    <span className="text-[10px] font-medium">{status.label}</span>
+                  </div>
+
+                  <div className="flex gap-1">
+                    {/* Quick Complete Toggle - Always visible */}
+                    <button
+                      onClick={(e) => { e.stopPropagation(); quickToggleComplete(node); }}
+                      className={`p-1.5 rounded-lg transition-all ${isCompleted ? 'bg-green-500 text-black' : 'bg-white/10 text-gray-400 hover:bg-green-500/20 hover:text-green-400'}`}
+                      title={isCompleted ? 'Mark as incomplete' : 'Mark complete'}
+                    >
+                      <Star size={12} className={isCompleted ? 'fill-current' : ''} />
+                    </button>
+                    {/* Quick Star Toggle */}
+                    <button
+                      onClick={(e) => { e.stopPropagation(); quickToggleStar(node); }}
+                      className={`p-1.5 rounded-lg transition-all ${node.isStarred ? 'bg-yellow-500 text-black' : 'bg-white/10 text-gray-400 hover:bg-yellow-500/20 hover:text-yellow-400'}`}
+                      title={node.isStarred ? 'Unstar' : 'Star this idea'}
+                    >
+                      <Pin size={12} />
+                    </button>
+                    {/* Other actions on hover */}
+                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setConnectingFrom(connectingFrom === node.id ? null : node.id); }}
+                        className={`p-1.5 rounded-lg transition-colors ${connectingFrom === node.id ? 'bg-cyber-primary text-black' : 'bg-white/10 text-gray-400 hover:text-cyber-primary hover:bg-white/20'}`}
+                        title="Connect to another idea"
+                      >
+                        <Link2 size={12} />
+                      </button>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setEditingNode(node); }}
+                        className="p-1.5 bg-white/10 rounded-lg text-gray-400 hover:text-white hover:bg-white/20 transition-colors"
+                        title="Edit idea"
+                      >
+                        <Edit3 size={12} />
+                      </button>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); deleteNode(node.id); }}
+                        className="p-1.5 bg-white/10 rounded-lg text-gray-400 hover:text-red-400 hover:bg-red-500/20 transition-colors"
+                        title="Delete idea"
+                      >
+                        <Trash2 size={12} />
+                      </button>
                     </div>
+                  </div>
+                </div>
 
-                    {/* Card Header */}
-                    <div className="p-6 border-b border-white/5 relative overflow-hidden">
-                      {isActive && <div className="absolute top-0 right-0 w-32 h-32 bg-yellow-400/5 blur-3xl -mr-10 -mt-10" />}
-                      {isFuture && <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/5 blur-3xl -mr-10 -mt-10" />}
+                {/* Connection count badge */}
+                {node.connections.length > 0 && (
+                  <div className="absolute -bottom-2 -right-2 w-6 h-6 rounded-full bg-cyber-primary text-black text-xs font-bold flex items-center justify-center shadow-lg border-2 border-black">
+                    {node.connections.length}
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })}
 
-                      <div className="mb-2">
-                        <StatusBadge status={phase.status} />
-                      </div>
-                      <h3 className={`text-xl font-bold ${isActive ? 'text-yellow-400' :
-                        isFuture ? 'text-purple-400' : 'text-white'
-                        }`}>
-                        {phase.phase}
-                      </h3>
-                      <p className="text-gray-400 text-sm mt-2 leading-relaxed">
-                        {phase.description}
-                      </p>
-                      <ProgressBar progress={phase.progress} status={phase.status} />
-                    </div>
+        {/* Empty state */}
+        {nodes.length === 0 && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="text-center max-w-md">
+              <div className="w-24 h-24 rounded-full bg-gradient-to-br from-cyber-primary/20 to-transparent flex items-center justify-center mx-auto mb-6 border border-cyber-primary/30">
+                <Lightbulb size={40} className="text-cyber-primary" />
+              </div>
+              <h3 className="text-xl font-bold text-white mb-3">Start Brainstorming</h3>
+              <p className="text-gray-400 mb-6">
+                Create your first idea and connect them visually. Your canvas syncs automatically to the cloud.
+              </p>
+              <button
+                onClick={() => setIsCreating(true)}
+                className="bg-cyber-primary text-black px-6 py-3 rounded-xl font-bold hover:bg-cyber-accent transition-all flex items-center gap-2 mx-auto shadow-[0_0_30px_rgba(0,255,157,0.3)]"
+              >
+                <Plus size={20} />
+                Create Your First Idea
+              </button>
+            </div>
+          </div>
+        )}
 
-                    {/* Sub-items Grid */}
-                    <div className="p-6 bg-black/20">
-                      <div className="grid grid-cols-1 gap-4">
-                        {phase.items.map((item: any, i: number) => (
-                          <div key={i} className="flex items-start gap-3 group/item hover:bg-white/5 p-2 rounded-lg transition-colors -mx-2">
-                            <div className={`p-2 rounded-lg mt-1 shrink-0 ${item.status === 'completed' ? 'bg-cyber-primary/10 text-cyber-primary' :
-                              item.status === 'in-progress' ? 'bg-yellow-400/10 text-yellow-400' :
-                                isFuture ? 'bg-purple-500/10 text-purple-400' :
-                                  'bg-white/5 text-gray-500'
-                              }`}>
-                              <item.icon size={16} />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="flex justify-between items-start">
-                                <h4 className={`text-sm font-medium truncate ${item.status === 'in-progress' ? 'text-yellow-400' : 'text-gray-200'
-                                  }`}>
-                                  {item.title}
-                                </h4>
-                                {item.priority && (
-                                  <span className={`text-[9px] px-1.5 py-0.5 rounded border uppercase ml-2 ${item.priority === 'Critical' ? 'border-red-500/30 text-red-400' :
-                                    item.priority === 'High' ? 'border-orange-500/30 text-orange-400' :
-                                      'border-gray-700 text-gray-500'
-                                    }`}>
-                                    {item.priority}
-                                  </span>
-                                )}
-                              </div>
-                              <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">
-                                {item.desc}
-                              </p>
-                              <ComplexityBar level={item.complexity} />
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
+        {/* Connection mode indicator */}
+        {connectingFrom && (
+          <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-cyber-primary text-black px-6 py-3 rounded-2xl font-bold text-sm flex items-center gap-3 shadow-2xl z-50 border-2 border-white/20">
+            <Link2 size={18} className="animate-pulse" />
+            Click another idea to connect
+            <button onClick={() => setConnectingFrom(null)} className="p-1.5 bg-black/20 rounded-lg hover:bg-black/40 transition-colors" aria-label="Cancel Connection">
+              <X size={14} />
+            </button>
+          </div>
+        )}
+      </div>
 
-                    {/* Tech Stack Footer */}
-                    <div className="px-6 py-3 bg-black/40 border-t border-white/5 flex items-center gap-2 overflow-x-auto scrollbar-hide">
-                      <Globe size={12} className="text-gray-600 shrink-0" />
-                      {phase.tech.map((t, i) => (
-                        <span key={i} className="text-[10px] font-mono text-gray-500 whitespace-nowrap">
-                          {t}{i < phase.tech.length - 1 ? ' • ' : ''}
-                        </span>
+      {/* Create Modal */}
+      {
+        isCreating && (
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div className="bg-cyber-gray border border-white/10 rounded-2xl w-full max-w-lg shadow-2xl">
+              <div className="p-6 border-b border-white/10 flex items-center justify-between">
+                <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                  <Lightbulb className="text-cyber-primary" />
+                  New Idea
+                </h3>
+                <button onClick={() => setIsCreating(false)} className="text-gray-400 hover:text-white" title="Close">
+                  <X size={20} />
+                </button>
+              </div>
+              <div className="p-6 space-y-4">
+                <div>
+                  <label className="text-xs text-gray-500 uppercase font-bold mb-2 block">Title *</label>
+                  <input
+                    type="text"
+                    placeholder="What's your idea?"
+                    value={newNode.title}
+                    onChange={(e) => setNewNode({ ...newNode, title: e.target.value })}
+                    className="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:border-cyber-primary/50 focus:outline-none"
+                    autoFocus
+                    aria-label="Idea title"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-gray-500 uppercase font-bold mb-2 block">Description</label>
+                  <textarea
+                    placeholder="Describe your idea in detail..."
+                    value={newNode.description}
+                    onChange={(e) => setNewNode({ ...newNode, description: e.target.value })}
+                    rows={4}
+                    className="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:border-cyber-primary/50 focus:outline-none resize-none"
+                    aria-label="Idea description"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs text-gray-500 uppercase font-bold mb-2 block">Department</label>
+                    <select
+                      value={newNode.department}
+                      onChange={(e) => setNewNode({ ...newNode, department: e.target.value as BrainstormNode['department'] })}
+                      className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2.5 text-white focus:outline-none focus:border-cyber-primary/50"
+                      aria-label="Select department"
+                    >
+                      {Object.entries(DEPARTMENTS).map(([key, dept]) => (
+                        <option key={key} value={key}>{dept.label}</option>
                       ))}
-                    </div>
-
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-500 uppercase font-bold mb-2 block">Priority</label>
+                    <select
+                      value={newNode.priority}
+                      onChange={(e) => setNewNode({ ...newNode, priority: e.target.value as BrainstormNode['priority'] })}
+                      className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2.5 text-white focus:outline-none focus:border-cyber-primary/50"
+                      aria-label="Select priority"
+                    >
+                      {Object.entries(PRIORITIES).map(([key, p]) => (
+                        <option key={key} value={key}>{p.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+                <div>
+                  <label className="text-xs text-gray-500 uppercase font-bold mb-2 block">Status</label>
+                  <div className="grid grid-cols-4 gap-2">
+                    {Object.entries(STATUSES).map(([key, s]) => (
+                      <button
+                        key={key}
+                        onClick={() => setNewNode({ ...newNode, status: key as BrainstormNode['status'] })}
+                        className={`py-2.5 rounded-lg text-xs font-medium flex flex-col items-center justify-center gap-1 transition-all ${newNode.status === key ? 'bg-white/20 text-white ring-2 ring-cyber-primary' : 'bg-white/5 text-gray-400 hover:bg-white/10'}`}
+                        title={s.label}
+                      >
+                        <s.icon size={16} className={s.color} />
+                        <span className="text-[10px]">{s.label}</span>
+                      </button>
+                    ))}
                   </div>
                 </div>
               </div>
-            );
-          })}
-        </div>
-      </div>
+              <div className="p-6 border-t border-white/10 flex justify-end gap-3">
+                <button onClick={() => setIsCreating(false)} className="px-6 py-2.5 text-gray-400 hover:text-white font-medium">
+                  Cancel
+                </button>
+                <button
+                  onClick={createNode}
+                  disabled={isSaving}
+                  className="bg-cyber-primary text-black px-6 py-2.5 rounded-xl font-bold hover:bg-cyber-accent transition-all flex items-center gap-2 disabled:opacity-50"
+                >
+                  {isSaving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
+                  Save to Cloud
+                </button>
+              </div>
+            </div>
+          </div>
+        )
+      }
 
-      {/* Bottom CTA */}
-      <div className="mt-12 p-8 rounded-2xl bg-gradient-to-r from-cyber-primary/5 via-transparent to-transparent border border-cyber-primary/10 relative overflow-hidden group">
-        <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
-          <div>
-            <h3 className="text-xl font-bold text-white mb-2">Enterprise Architecture</h3>
-            <p className="text-gray-400 text-sm max-w-xl">
-              Our system is now ready for multi-site deployment. Phase 4 will introduce the connectivity layer required to link warehouses, stores, and online channels.
-            </p>
+      {/* Edit Modal */}
+      {
+        editingNode && (
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div className="bg-cyber-gray border border-white/10 rounded-2xl w-full max-w-lg shadow-2xl">
+              <div className="p-6 border-b border-white/10 flex items-center justify-between">
+                <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                  <Edit3 className="text-cyber-primary" />
+                  Edit Idea
+                </h3>
+                <button onClick={() => setEditingNode(null)} className="text-gray-400 hover:text-white" title="Close">
+                  <X size={20} />
+                </button>
+              </div>
+              <div className="p-6 space-y-4">
+                <div>
+                  <label className="text-xs text-gray-500 uppercase font-bold mb-2 block">Title</label>
+                  <input
+                    type="text"
+                    value={editingNode.title}
+                    onChange={(e) => setEditingNode({ ...editingNode, title: e.target.value })}
+                    className="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-cyber-primary/50 focus:outline-none"
+                    aria-label="Edit idea title"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-gray-500 uppercase font-bold mb-2 block">Description</label>
+                  <textarea
+                    value={editingNode.description}
+                    onChange={(e) => setEditingNode({ ...editingNode, description: e.target.value })}
+                    rows={4}
+                    className="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-cyber-primary/50 focus:outline-none resize-none"
+                    aria-label="Edit idea description"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs text-gray-500 uppercase font-bold mb-2 block">Department</label>
+                    <select
+                      value={editingNode.department}
+                      onChange={(e) => setEditingNode({ ...editingNode, department: e.target.value as BrainstormNode['department'] })}
+                      className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2.5 text-white focus:outline-none"
+                      aria-label="Edit department"
+                    >
+                      {Object.entries(DEPARTMENTS).map(([key, dept]) => (
+                        <option key={key} value={key}>{dept.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-500 uppercase font-bold mb-2 block">Priority</label>
+                    <select
+                      value={editingNode.priority}
+                      onChange={(e) => setEditingNode({ ...editingNode, priority: e.target.value as BrainstormNode['priority'] })}
+                      className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2.5 text-white focus:outline-none"
+                      aria-label="Edit priority"
+                    >
+                      {Object.entries(PRIORITIES).map(([key, p]) => (
+                        <option key={key} value={key}>{p.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+                <div>
+                  <label className="text-xs text-gray-500 uppercase font-bold mb-2 block">Status</label>
+                  <div className="grid grid-cols-4 gap-2">
+                    {Object.entries(STATUSES).map(([key, s]) => (
+                      <button
+                        key={key}
+                        onClick={() => setEditingNode({ ...editingNode, status: key as BrainstormNode['status'] })}
+                        className={`py-2.5 rounded-lg text-xs font-medium flex flex-col items-center justify-center gap-1 transition-all ${editingNode.status === key ? 'bg-white/20 text-white ring-2 ring-cyber-primary' : 'bg-white/5 text-gray-400 hover:bg-white/10'}`}
+                        title={s.label}
+                      >
+                        <s.icon size={16} className={s.color} />
+                        <span className="text-[10px]">{s.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                {/* Connections */}
+                {editingNode.connections.length > 0 && (
+                  <div>
+                    <label className="text-xs text-gray-500 uppercase font-bold mb-2 block">Connections ({editingNode.connections.length})</label>
+                    <div className="flex flex-wrap gap-2">
+                      {editingNode.connections.map(connId => {
+                        const connNode = nodes.find(n => n.id === connId);
+                        if (!connNode) return null;
+                        return (
+                          <div key={connId} className="flex items-center gap-2 bg-white/5 rounded-lg px-3 py-2 text-sm border border-white/10">
+                            <ArrowRight size={12} className="text-cyber-primary" />
+                            <span className="text-gray-300">{connNode.title}</span>
+                            <button
+                              onClick={() => {
+                                setEditingNode({
+                                  ...editingNode,
+                                  connections: editingNode.connections.filter(c => c !== connId)
+                                });
+                              }}
+                              className="text-gray-500 hover:text-red-400 transition-colors"
+                              title="Remove connection"
+                            >
+                              <X size={12} />
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+              <div className="p-6 border-t border-white/10 flex justify-end gap-3">
+                <button onClick={() => setEditingNode(null)} className="px-6 py-2.5 text-gray-400 hover:text-white font-medium">
+                  Cancel
+                </button>
+                <button
+                  onClick={() => updateNode(editingNode.id, editingNode)}
+                  disabled={isSaving}
+                  className="bg-cyber-primary text-black px-6 py-2.5 rounded-xl font-bold hover:bg-cyber-accent transition-all flex items-center gap-2 disabled:opacity-50"
+                >
+                  {isSaving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
+                  Save Changes
+                </button>
+              </div>
+            </div>
           </div>
-          <div className="flex items-center gap-3">
-            <button className="px-6 py-3 rounded-xl text-sm font-bold text-gray-400 hover:text-white border border-white/10 hover:border-white/30 transition-all">
-              View API Docs
-            </button>
-            <button className="bg-cyber-primary text-black px-6 py-3 rounded-xl font-bold text-sm hover:bg-cyber-accent transition-all shadow-[0_0_20px_rgba(0,255,157,0.2)] flex items-center gap-2 group-hover:shadow-[0_0_30px_rgba(0,255,157,0.4)]">
-              <Store size={18} />
-              Deploy New Branch
-            </button>
-          </div>
-        </div>
-        <div className="absolute top-0 left-0 w-full h-full bg-[linear-gradient(45deg,transparent_25%,rgba(68,68,68,.2)_50%,transparent_75%,transparent_100%)] bg-[length:20px_20px] opacity-5" />
-      </div>
+        )
+      }
     </div>
   );
 }

@@ -1,7 +1,8 @@
-import React from 'react';
-import { Shield, Truck, Package, RotateCw, AlertTriangle, Scan, Search, Barcode, ClipboardCheck, ArrowRight, Layers } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Shield, Truck, Package, RotateCw, AlertTriangle, Scan, Search, Barcode, ClipboardCheck, ArrowRight, Layers, Save } from 'lucide-react';
 import { useData } from '../../contexts/DataContext';
 import { useStore } from '../../contexts/CentralStore';
+import Button from '../shared/Button';
 
 // --- SUB-COMPONENTS ---
 const SectionHeader = ({ title, desc }: { title: string, desc: string }) => (
@@ -22,6 +23,7 @@ const RadioGroup = ({ label, options, value, onChange, icon: Icon }: any) => (
             {options.map((opt: any) => (
                 <button
                     key={opt.value}
+                    type="button"
                     onClick={() => onChange(opt.value)}
                     className={`p-3 rounded-xl border text-left transition-all relative overflow-hidden group ${value === opt.value
                         ? 'bg-cyber-primary/10 border-cyber-primary text-white'
@@ -92,7 +94,84 @@ const ToggleRow = ({ label, sub, checked, onChange, warning }: any) => (
 
 export default function WMSSettings() {
     const { user } = useStore();
-    const { settings, updateSettings } = useData();
+    const { settings, updateSettings, addNotification } = useData();
+
+    // Local States
+    const [inbound, setInbound] = useState<{
+        receivingLogic: 'blind' | 'verified';
+        qcSamplingRate: number;
+        qcBlockOnFailure: boolean;
+        putawayLogic: 'manual' | 'system';
+    }>({
+        receivingLogic: 'verified',
+        qcSamplingRate: 10,
+        qcBlockOnFailure: true,
+        putawayLogic: 'system'
+    });
+
+    const [health, setHealth] = useState<{
+        rotationPolicy: 'fifo' | 'fefo' | 'lifo';
+        requireExpiry: boolean;
+        cycleCountStrategy: 'abc' | 'random';
+    }>({
+        rotationPolicy: 'fifo',
+        requireExpiry: true,
+        cycleCountStrategy: 'abc'
+    });
+
+    const [outbound, setOutbound] = useState<{
+        pickingMethod: 'order' | 'wave' | 'zone';
+        strictScanning: boolean;
+        binScan: boolean;
+    }>({
+        pickingMethod: 'order',
+        strictScanning: true,
+        binScan: true
+    });
+
+    const [isSavingInbound, setIsSavingInbound] = useState(false);
+    const [isSavingHealth, setIsSavingHealth] = useState(false);
+    const [isSavingOutbound, setIsSavingOutbound] = useState(false);
+
+    // Sync from settings
+    useEffect(() => {
+        if (settings) {
+            setInbound({
+                receivingLogic: settings.receivingLogic || 'verified',
+                qcSamplingRate: settings.qcSamplingRate || 10,
+                qcBlockOnFailure: settings.qcBlockOnFailure ?? true,
+                putawayLogic: settings.putawayLogic || 'system'
+            });
+            setHealth({
+                rotationPolicy: settings.rotationPolicy || 'fifo',
+                requireExpiry: settings.requireExpiry ?? true,
+                cycleCountStrategy: settings.cycleCountStrategy || 'abc'
+            });
+            setOutbound({
+                pickingMethod: settings.pickingMethod || 'order',
+                strictScanning: settings.strictScanning ?? true,
+                binScan: settings.binScan ?? true
+            });
+        }
+    }, [settings]);
+
+    const handleSaveSection = async (section: 'inbound' | 'health' | 'outbound') => {
+        const setSaving = section === 'inbound' ? setIsSavingInbound :
+            section === 'health' ? setIsSavingHealth : setIsSavingOutbound;
+        const data = section === 'inbound' ? inbound :
+            section === 'health' ? health : outbound;
+
+        setSaving(true);
+        try {
+            await updateSettings(data, user?.name || 'Admin');
+            addNotification('success', `${section.charAt(0).toUpperCase() + section.slice(1)} wms settings saved successfully!`);
+        } catch (err) {
+            console.error(`Failed to save ${section} settings:`, err);
+            addNotification('alert', `Failed to save ${section} settings.`);
+        } finally {
+            setSaving(false);
+        }
+    };
 
     return (
         <div className="w-full max-w-full space-y-6 animate-in fade-in slide-in-from-right-4">
@@ -114,7 +193,10 @@ export default function WMSSettings() {
 
                 {/* INBOUND STRATEGY */}
                 <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-3xl p-6 hover:border-white/20 transition-all">
-                    <SectionHeader title="Inbound Strategy" desc="Receiving, QC, and Putaway Logic" />
+                    <div className="mb-6 border-b border-white/5 pb-4">
+                        <h3 className="text-xl font-bold text-white">Inbound Strategy</h3>
+                        <p className="text-sm text-gray-400 mt-1">Receiving, QC, and Putaway</p>
+                    </div>
 
                     <div className="space-y-6">
                         <RadioGroup
@@ -124,8 +206,8 @@ export default function WMSSettings() {
                                 { value: 'blind', label: 'Blind Receive', desc: 'Accept manifest without count (Speed)' },
                                 { value: 'verified', label: 'Verified Receive', desc: 'Scan every item against PO (Accuracy)' },
                             ]}
-                            value={settings.receivingLogic || 'verified'}
-                            onChange={(val: any) => updateSettings({ receivingLogic: val }, user?.name || 'Admin')}
+                            value={inbound.receivingLogic}
+                            onChange={(val: 'blind' | 'verified') => setInbound(prev => ({ ...prev, receivingLogic: val }))}
                         />
 
                         <div className="p-4 bg-black/20 rounded-xl border border-white/5 space-y-4">
@@ -136,16 +218,16 @@ export default function WMSSettings() {
                                 max={100}
                                 step={5}
                                 unit="%"
-                                value={settings.qcSamplingRate || 10}
-                                onChange={(val: number) => updateSettings({ qcSamplingRate: val }, user?.name || 'Admin')}
+                                value={inbound.qcSamplingRate}
+                                onChange={(val: number) => setInbound(prev => ({ ...prev, qcSamplingRate: val }))}
                                 sub="Percentage of inbound stock diverted to Quality Control"
                             />
 
                             <ToggleRow
                                 label="Block on Failure"
                                 sub="Reject entire lot if sample fails QC"
-                                checked={settings.qcBlockOnFailure}
-                                onChange={() => updateSettings({ qcBlockOnFailure: !settings.qcBlockOnFailure }, user?.name || 'Admin')}
+                                checked={inbound.qcBlockOnFailure}
+                                onChange={() => setInbound(prev => ({ ...prev, qcBlockOnFailure: !prev.qcBlockOnFailure }))}
                             />
                         </div>
 
@@ -156,16 +238,31 @@ export default function WMSSettings() {
                                 { value: 'manual', label: 'User Directed', desc: 'Operator chooses bin' },
                                 { value: 'system', label: 'System Directed', desc: 'Algorithm optimizes path' },
                             ]}
-                            value={settings.putawayLogic || 'system'}
-                            onChange={(val: any) => updateSettings({ putawayLogic: val }, user?.name || 'Admin')}
+                            value={inbound.putawayLogic}
+                            onChange={(val: 'manual' | 'system') => setInbound(prev => ({ ...prev, putawayLogic: val }))}
                         />
+                    </div>
+
+                    <div className="mt-8 pt-6 border-t border-white/5 flex justify-end">
+                        <Button
+                            onClick={() => handleSaveSection('inbound')}
+                            loading={isSavingInbound}
+                            icon={<Save size={16} />}
+                            variant="primary"
+                            className="px-8"
+                        >
+                            Save Inbound
+                        </Button>
                     </div>
                 </div>
 
                 <div className="space-y-6">
                     {/* INVENTORY HEALTH */}
                     <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-3xl p-6 hover:border-white/20 transition-all">
-                        <SectionHeader title="Inventory Health" desc="Rotation and Counting Policies" />
+                        <div className="mb-6 border-b border-white/5 pb-4">
+                            <h3 className="text-xl font-bold text-white">Inventory Health</h3>
+                            <p className="text-sm text-gray-400 mt-1">Rotation and Counting Policies</p>
+                        </div>
 
                         <div className="space-y-6">
                             <RadioGroup
@@ -176,15 +273,15 @@ export default function WMSSettings() {
                                     { value: 'fefo', label: 'FEFO', desc: 'First Expiry First Out (Food/Pharma)' },
                                     { value: 'lifo', label: 'LIFO', desc: 'Last In First Out' },
                                 ]}
-                                value={settings.rotationPolicy || 'fifo'}
-                                onChange={(val: any) => updateSettings({ rotationPolicy: val }, user?.name || 'Admin')}
+                                value={health.rotationPolicy}
+                                onChange={(val: 'fifo' | 'fefo' | 'lifo') => setHealth(prev => ({ ...prev, rotationPolicy: val }))}
                             />
 
                             <ToggleRow
                                 label="Mandatory Expiry Date"
                                 sub="Require expiry entry for all perishable goods"
-                                checked={settings.requireExpiry}
-                                onChange={() => updateSettings({ requireExpiry: !settings.requireExpiry }, user?.name || 'Admin')}
+                                checked={health.requireExpiry}
+                                onChange={() => setHealth(prev => ({ ...prev, requireExpiry: !prev.requireExpiry }))}
                             />
 
                             <div className="pt-4 border-t border-white/5">
@@ -195,16 +292,31 @@ export default function WMSSettings() {
                                         { value: 'abc', label: 'ABC Analysis', desc: 'Count High-Value often' },
                                         { value: 'random', label: 'Random Sample', desc: 'Daily random bins' },
                                     ]}
-                                    value={settings.cycleCountStrategy || 'abc'}
-                                    onChange={(val: any) => updateSettings({ cycleCountStrategy: val }, user?.name || 'Admin')}
+                                    value={health.cycleCountStrategy}
+                                    onChange={(val: 'abc' | 'random') => setHealth(prev => ({ ...prev, cycleCountStrategy: val }))}
                                 />
                             </div>
+                        </div>
+
+                        <div className="mt-8 pt-6 border-t border-white/5 flex justify-end">
+                            <Button
+                                onClick={() => handleSaveSection('health')}
+                                loading={isSavingHealth}
+                                icon={<Save size={16} />}
+                                variant="primary"
+                                className="px-8"
+                            >
+                                Save Health
+                            </Button>
                         </div>
                     </div>
 
                     {/* OUTBOUND & COMPLIANCE */}
                     <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-3xl p-6 hover:border-white/20 transition-all">
-                        <SectionHeader title="Outbound & Compliance" desc="Picking Efficiency and Safety" />
+                        <div className="mb-6 border-b border-white/5 pb-4">
+                            <h3 className="text-xl font-bold text-white">Outbound & Compliance</h3>
+                            <p className="text-sm text-gray-400 mt-1">Picking Efficiency and Safety</p>
+                        </div>
 
                         <div className="space-y-6">
                             <RadioGroup
@@ -215,8 +327,8 @@ export default function WMSSettings() {
                                     { value: 'wave', label: 'Wave Picking', desc: 'Batch multiple orders' },
                                     { value: 'zone', label: 'Zone Picking', desc: 'Pick by warehouse zone' },
                                 ]}
-                                value={settings.pickingMethod || 'order'}
-                                onChange={(val: any) => updateSettings({ pickingMethod: val }, user?.name || 'Admin')}
+                                value={outbound.pickingMethod}
+                                onChange={(val: 'order' | 'wave' | 'zone') => setOutbound(prev => ({ ...prev, pickingMethod: val }))}
                             />
 
                             <div className="p-4 bg-red-500/5 rounded-xl border border-red-500/10 space-y-3">
@@ -226,17 +338,29 @@ export default function WMSSettings() {
                                 <ToggleRow
                                     label="Strict Barcode Validation"
                                     sub="Prevent picking without valid item scan"
-                                    checked={settings.strictScanning}
-                                    onChange={() => updateSettings({ strictScanning: !settings.strictScanning }, user?.name || 'Admin')}
+                                    checked={outbound.strictScanning}
+                                    onChange={() => setOutbound(prev => ({ ...prev, strictScanning: !prev.strictScanning }))}
                                 />
                                 <ToggleRow
                                     label="Bin Verification"
                                     sub="Must scan bin label before picking"
-                                    checked={settings.binScan}
-                                    onChange={() => updateSettings({ binScan: !settings.binScan }, user?.name || 'Admin')}
+                                    checked={outbound.binScan}
+                                    onChange={() => setOutbound(prev => ({ ...prev, binScan: !prev.binScan }))}
                                     warning="Disabling increases errors"
                                 />
                             </div>
+                        </div>
+
+                        <div className="mt-8 pt-6 border-t border-white/5 flex justify-end">
+                            <Button
+                                onClick={() => handleSaveSection('outbound')}
+                                loading={isSavingOutbound}
+                                icon={<Save size={16} />}
+                                variant="primary"
+                                className="px-8"
+                            >
+                                Save Outbound
+                            </Button>
                         </div>
                     </div>
                 </div>

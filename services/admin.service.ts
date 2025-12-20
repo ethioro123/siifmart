@@ -54,7 +54,7 @@ export async function createEmployeeWithAuth(params: CreateEmployeeParams) {
         let isNewUser = false;
 
         const { data: existingUsers } = await adminClient.auth.admin.listUsers();
-        const existingUser = existingUsers?.users?.find(u => u.email === params.email);
+        const existingUser = (existingUsers?.users as any[])?.find(u => u.email === params.email);
 
         if (existingUser) {
             // User already exists - update metadata and password

@@ -13,58 +13,67 @@
  */
 export const formatCompactNumber = (value: number | undefined | null, options?: {
     locale?: string;
-    currency?: string; // If provided, prefixes with currency symbol roughly (though usually handled outside)
+    currency?: string;
     maxFractionDigits?: number;
+    compact?: boolean;
 }): string => {
     if (value === undefined || value === null || isNaN(value)) return '0';
 
     const absValue = Math.abs(value);
     const sign = value < 0 ? '-' : '';
 
-    // Define thresholds
-    const THRESHOLDS = [
-        { suffix: 'T', value: 1e12 },
-        { suffix: 'B', value: 1e9 },
-        { suffix: 'M', value: 1e6 },
-        { suffix: 'K', value: 1e3 },
-    ];
+    let formattedNumber: string;
 
-    // Find the first threshold that applies
-    const item = THRESHOLDS.find(t => absValue >= t.value);
+    // If NOT compact, or if the number is small (< 1000), use full precision localized string
+    if (!options?.compact || (absValue < 1000)) {
+        formattedNumber = absValue.toLocaleString(options?.locale || 'en-US', {
+            maximumFractionDigits: options?.maxFractionDigits ?? 2,
+            minimumFractionDigits: options?.maxFractionDigits !== undefined ? options.maxFractionDigits : 0
+        });
+    } else {
+        // Define thresholds for compact mode
+        const THRESHOLDS = [
+            { suffix: 'T', value: 1e12 },
+            { suffix: 'B', value: 1e9 },
+            { suffix: 'M', value: 1e6 },
+            { suffix: 'K', value: 1e3 },
+        ];
 
-    // Default formatting options
-    const fractionDigits = options?.maxFractionDigits ?? 1;
+        // Find the first threshold that applies
+        const item = THRESHOLDS.find(t => absValue >= t.value);
+        const fractionDigits = options?.maxFractionDigits ?? 1;
 
-    if (item) {
-        // We found a threshold (e.g. M for 1,500,000)
-        // Divide by threshold value: 1,500,000 / 1,000,000 = 1.5
-        const divided = (absValue / item.value);
+        if (item) {
+            const divided = (absValue / item.value);
+            let numValue = parseFloat(divided.toFixed(fractionDigits));
 
-        // Remove trailing zeros using parseFloat cleanup
-        let formatted = parseFloat(divided.toFixed(fractionDigits));
-
-        // Edge case: 999,999 -> 1000K (rounded). Should be 1M.
-        // If the number formats to "1000" and there is a larger unit, upgrade it.
-        // For T (Trillion), there is no larger unit currently defined, so 1000T is fine.
-        // But for K, M, B, we should check next tier.
-        if (formatted >= 1000) {
-            const nextIndex = THRESHOLDS.indexOf(item) - 1; // Previous item in list (larger value)
-            if (nextIndex >= 0) {
-                const nextItem = THRESHOLDS[nextIndex];
-                const nextDivided = (absValue / nextItem.value);
-                const nextFormatted = parseFloat(nextDivided.toFixed(fractionDigits));
-                return `${sign}${nextFormatted}${nextItem.suffix}`;
+            // Edge case: overflow to next unit
+            if (numValue >= 1000) {
+                const nextIndex = THRESHOLDS.indexOf(item) - 1;
+                if (nextIndex >= 0) {
+                    const nextItem = THRESHOLDS[nextIndex];
+                    const nextDivided = (absValue / nextItem.value);
+                    numValue = parseFloat(nextDivided.toFixed(fractionDigits));
+                    formattedNumber = `${numValue}${nextItem.suffix}`;
+                } else {
+                    formattedNumber = `${numValue}${item.suffix}`;
+                }
+            } else {
+                formattedNumber = `${numValue}${item.suffix}`;
             }
+        } else {
+            // Fallback for extremely small or non-matching
+            formattedNumber = absValue.toLocaleString(options?.locale || 'en-US', {
+                maximumFractionDigits: options?.maxFractionDigits ?? 2
+            });
         }
-
-        return `${sign}${formatted}${item.suffix}`;
     }
 
-    // No abbreviation needed (< 1000)
-    // For small numbers, we might want standard comma separation: 999
-    // But usually for "compact" context, plain number is fine. 
-    // Let's use standard locale string for clarity if it remains small but exact.
-    return value.toLocaleString(options?.locale || 'en-US', {
-        maximumFractionDigits: options?.maxFractionDigits ?? 2
-    });
+    // Combine sign, currency, and value
+    // User requested spacing: "ETB 1,000,000"
+    if (options?.currency) {
+        return `${options.currency} ${sign}${formattedNumber}`;
+    }
+
+    return `${sign}${formattedNumber}`;
 };

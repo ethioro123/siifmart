@@ -3,17 +3,6 @@
  * Allows the web app to communicate with the Android wrapper
  */
 
-declare global {
-    interface Window {
-        AndroidNative?: {
-            showToast: (message: string) => void;
-            vibrate: (milliseconds: number) => void;
-            getDeviceId: () => string;
-        };
-        isNativeApp?: boolean;
-    }
-}
-
 export const native = {
     /**
      * Check if running in the native Android app

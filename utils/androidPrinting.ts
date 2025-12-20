@@ -3,19 +3,6 @@
  * Detects Android app and uses native printing when available
  */
 
-declare global {
-    interface Window {
-        AndroidNative?: {
-            printDocument: (documentName: string) => void;
-            isPrintingAvailable: () => boolean;
-            showToast: (message: string) => void;
-            vibrate: (milliseconds: number) => void;
-            getDeviceId: () => string;
-        };
-        isNativeApp?: boolean;
-    }
-}
-
 /**
  * Check if running in Android native app
  */

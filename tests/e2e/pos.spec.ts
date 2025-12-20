@@ -21,9 +21,9 @@ test.describe('POS Workflow', () => {
         await page.waitForTimeout(500); // Wait for search results
 
         // Click on first product result
-        await page.click('[data-testid="product-item"]').catch(() => {
+        await page.click('[data-testid="product-item"]').catch(async () => {
             // Fallback if testid not present
-            page.click('text=Coca Cola').first();
+            await page.locator('text=Coca Cola').first().click();
         });
 
         // Verify product added to cart
@@ -46,7 +46,7 @@ test.describe('POS Workflow', () => {
         // Add a product
         await page.fill('input[placeholder*="Search"]', 'Bread');
         await page.waitForTimeout(500);
-        await page.click('text=Bread').first();
+        await page.locator('text=Bread').first().click();
 
         // Hold the order
         await page.click('button:has-text("Hold Order")');
@@ -56,7 +56,7 @@ test.describe('POS Workflow', () => {
 
         // Retrieve held order
         await page.click('button:has-text("Held Orders")');
-        await page.click('[data-testid="held-order"]').first();
+        await page.locator('[data-testid="held-order"]').first().click();
 
         // Verify cart is restored
         await expect(page.locator('text=Bread')).toBeVisible();

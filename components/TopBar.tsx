@@ -1,19 +1,61 @@
 
 import React, { useState, useMemo } from 'react';
-import { Menu, Search, Sun, Moon, Bell, X, AlertTriangle, CheckCircle, Info, MapPin, ChevronDown, Building, Store, Package, Users, ShoppingCart, FileText, LayoutDashboard } from 'lucide-react';
+import { Menu, Search, Sun, Moon, Bell, X, AlertTriangle, CheckCircle, Info, MapPin, ChevronDown, Building, Store, Package, Users, ShoppingCart, FileText, LayoutDashboard, LogOut, User, Crown, Zap, Trophy, TrendingUp } from 'lucide-react';
 import { useStore } from '../contexts/CentralStore';
 import { useData } from '../contexts/DataContext';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useLanguage } from '../contexts/LanguageContext';
+import { Globe } from 'lucide-react';
 
 export default function TopBar() {
-   const { user, toggleSidebar, theme, toggleTheme } = useStore();
-   const { activeSite, sites, setActiveSite, notifications, markNotificationsRead, addNotification, employees, allProducts, customers, allOrders, allSales } = useData();
+   const { user, toggleSidebar, theme, toggleTheme, logout } = useStore();
+   const { language, setLanguage } = useLanguage();
+   const {
+      activeSite, sites, setActiveSite, notifications, markNotificationsRead,
+      addNotification, employees, allProducts, customers, allOrders, allSales,
+      workerPoints, getWorkerPoints
+   } = useData();
    const navigate = useNavigate();
    const location = useLocation();
 
    const [isNotifOpen, setIsNotifOpen] = useState(false);
    const [searchValue, setSearchValue] = useState('');
    const [isSearchOpen, setIsSearchOpen] = useState(false);
+   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+   const dropdownRef = React.useRef<HTMLDivElement>(null);
+
+   React.useEffect(() => {
+      function handleClickOutside(event: MouseEvent) {
+         if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+            setIsUserMenuOpen(false);
+            setIsNotifOpen(false);
+         }
+      }
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => document.removeEventListener("mousedown", handleClickOutside);
+   }, []);
+
+   // Calculate points for current user (mirrors Fulfillment.tsx logic)
+   const currentUserPoints = useMemo(() => {
+      if (!user) return null;
+
+      // Try to find matching employee
+      const employee = employees.find(e => e.name === user.name || e.id === user.id);
+
+      if (employee) {
+         const points = getWorkerPoints(employee.id);
+         if (points) return points;
+      }
+
+      // Fallback or Admin dummy
+      return {
+         totalPoints: 0,
+         weeklyPoints: 0,
+         rank: '-',
+         level: 1,
+         levelTitle: 'Rookie'
+      } as any;
+   }, [user, employees, getWorkerPoints, workerPoints]);
 
    if (!user) return null;
 
@@ -107,7 +149,7 @@ export default function TopBar() {
    };
 
    return (
-      <header className="h-16 bg-cyber-dark/50 backdrop-blur-md border-b border-white/5 sticky top-0 z-30 px-6 flex items-center justify-between">
+      <header className="h-16 bg-cyber-dark/30 backdrop-blur-xl sticky top-0 z-30 px-6 flex items-center justify-between">
          <div className="flex items-center space-x-4">
             <button onClick={toggleSidebar} className="text-gray-400 hover:text-white" aria-label="Toggle sidebar">
                <Menu size={24} />
@@ -184,7 +226,7 @@ export default function TopBar() {
                                     <FileText size={16} className="text-blue-400" />
                                     <div className="flex-1">
                                        <p className="text-sm font-bold text-white">{o.poNumber || o.po_number}</p>
-                                       <p className="text-[10px] text-gray-500">{o.status} • {o.supplier}</p>
+                                       <p className="text-[10px] text-gray-500">{o.status} • {o.supplierName}</p>
                                     </div>
                                  </button>
                               ))}
@@ -207,7 +249,7 @@ export default function TopBar() {
                                  >
                                     <ShoppingCart size={16} className="text-purple-400" />
                                     <div className="flex-1">
-                                       <p className="text-sm font-bold text-white">{s.receiptNumber || s.id.substring(0, 8)}</p>
+                                       <p className="text-sm font-bold text-white">{s.receiptNumber || `SALE-${s.id.substring(0, 8).toUpperCase()}`}</p>
                                        <p className="text-[10px] text-gray-500">${s.total} • {s.date}</p>
                                     </div>
                                  </button>
@@ -327,21 +369,135 @@ export default function TopBar() {
          </div>
 
          <div className="flex items-center space-x-4">
-            {/* USER INFO */}
-            <div className="hidden md:flex items-center gap-3 px-4 py-2 rounded-full bg-gradient-to-r from-white/5 to-transparent border border-white/10 hover:border-cyber-primary/50 transition-all duration-300 group cursor-pointer hover:shadow-[0_0_15px_rgba(0,255,157,0.1)]">
-               <div className="relative">
-                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-cyber-primary to-blue-600 flex items-center justify-center text-black font-black text-sm shadow-lg group-hover:scale-105 transition-transform">
-                     {user.name.charAt(0).toUpperCase()}
+            {/* USER INFO & DROPDOWN */}
+            <div className="relative" ref={dropdownRef}>
+               <div
+                  onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                  className={`hidden md:flex items-center gap-3 px-4 py-2 rounded-full border transition-all duration-300 cursor-pointer hover:shadow-[0_0_15px_rgba(0,255,157,0.1)] ${isUserMenuOpen ? 'bg-white/10 border-cyber-primary/50' : 'bg-gradient-to-r from-white/5 to-transparent border-white/10 hover:border-cyber-primary/50'}`}
+               >
+                  <div className="relative">
+                     <div className="w-9 h-9 rounded-full bg-gradient-to-br from-cyber-primary to-blue-600 flex items-center justify-center text-black font-black text-sm shadow-lg group-hover:scale-105 transition-transform overflow-hidden border border-white/20">
+                        {user.avatar ? (
+                           <img
+                              src={user.avatar}
+                              alt={user.name}
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                 e.currentTarget.style.display = 'none';
+                                 e.currentTarget.parentElement!.innerHTML = user.name.charAt(0).toUpperCase();
+                              }}
+                           />
+                        ) : (
+                           user.name.charAt(0).toUpperCase()
+                        )}
+                     </div>
+                     <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 border-2 border-black rounded-full animate-pulse"></div>
                   </div>
-                  <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 border-2 border-black rounded-full animate-pulse"></div>
+
+                  <div className="flex flex-col">
+                     <span className="text-sm font-bold text-white leading-none group-hover:text-cyber-primary transition-colors">{user.name}</span>
+                     <span className="text-[10px] font-mono text-gray-400 uppercase tracking-wider mt-0.5 leading-none">{user.role}</span>
+                  </div>
+
+                  <ChevronDown size={14} className={`text-gray-500 transition-colors duration-300 ${isUserMenuOpen ? 'rotate-180 text-white' : ''}`} />
                </div>
 
-               <div className="flex flex-col">
-                  <span className="text-sm font-bold text-white leading-none group-hover:text-cyber-primary transition-colors">{user.name}</span>
-                  <span className="text-[10px] font-mono text-gray-400 uppercase tracking-wider mt-0.5 leading-none">{user.role}</span>
-               </div>
+               {/* Dropdown Menu */}
+               {isUserMenuOpen && (
+                  <>
+                     <div className="fixed inset-0 z-30" onClick={() => setIsUserMenuOpen(false)} />
+                     <div
+                        className="absolute right-0 mt-2 w-56 bg-cyber-gray border border-white/10 rounded-xl shadow-2xl z-40 animate-in fade-in slide-in-from-top-2 overflow-hidden"
+                        onClick={() => setIsUserMenuOpen(false)}
+                     >
+                        <div className="p-4 border-b border-white/5 bg-black/20" onClick={(e) => e.stopPropagation()}>
+                           <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Signed in as</p>
+                           <p className="text-sm font-bold text-white truncate">{user.name}</p>
+                           <p className="text-[10px] font-mono text-cyber-primary uppercase mb-3">{user.role}</p>
 
-               <ChevronDown size={14} className="text-gray-500 group-hover:text-white transition-colors group-hover:rotate-180 duration-300" />
+                           {/* Performance Highlights */}
+                           {currentUserPoints && (
+                              <div className="grid grid-cols-2 gap-2 mt-2">
+                                 <div className="bg-white/5 rounded-lg p-2 border border-white/5">
+                                    <div className="flex items-center gap-1.5 mb-1">
+                                       <Trophy size={10} className="text-yellow-400" />
+                                       <span className="text-[9px] font-bold text-gray-400 uppercase">Points</span>
+                                    </div>
+                                    <p className="text-sm font-black text-white">{currentUserPoints.totalPoints?.toLocaleString() || 0}</p>
+                                 </div>
+                                 <div className="bg-white/5 rounded-lg p-2 border border-white/5">
+                                    <div className="flex items-center gap-1.5 mb-1">
+                                       <TrendingUp size={10} className="text-cyber-primary" />
+                                       <span className="text-[9px] font-bold text-gray-400 uppercase">Rank</span>
+                                    </div>
+                                    <p className="text-sm font-black text-white">#{currentUserPoints.rank || '-'}</p>
+                                 </div>
+                                 <div className="col-span-2 bg-gradient-to-r from-cyber-primary/10 to-transparent rounded-lg p-2 border border-cyber-primary/20 flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                       <div className="w-6 h-6 rounded-full bg-cyber-primary/20 flex items-center justify-center text-cyber-primary">
+                                          <Zap size={12} fill="currentColor" />
+                                       </div>
+                                       <div>
+                                          <p className="text-[9px] font-bold text-cyber-primary uppercase leading-none">Level {currentUserPoints.level || 1}</p>
+                                          <p className="text-[10px] font-black text-white leading-tight">{currentUserPoints.levelTitle || 'Rookie'}</p>
+                                       </div>
+                                    </div>
+                                    <Crown size={14} className="text-yellow-400 opacity-50" />
+                                 </div>
+                              </div>
+                           )}
+                        </div>
+
+                        <div className="p-2">
+                           <button
+                              onClick={() => { navigate('/profile'); setIsUserMenuOpen(false); }}
+                              className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
+                           >
+                              <User size={16} />
+                              <span>My Profile</span>
+                           </button>
+
+                           {user.role === 'super_admin' && (
+                              <button
+                                 onClick={() => { navigate('/location-select'); setIsUserMenuOpen(false); }}
+                                 className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
+                              >
+                                 <MapPin size={16} />
+                                 <span>Switch Location</span>
+                              </button>
+                           )}
+
+                           {/* Language Switcher */}
+                           <div className="mt-2 px-3 py-2 border-t border-white/5">
+                              <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Display Language</p>
+                              <div className="flex items-center gap-2 bg-white/5 rounded-lg p-1.5 border border-white/5 hover:border-cyber-primary/30 transition-all">
+                                 <Globe size={14} className="text-gray-400" />
+                                 <select
+                                    value={language}
+                                    onChange={(e) => setLanguage(e.target.value as any)}
+                                    className="bg-transparent text-white text-xs outline-none border-none flex-1 cursor-pointer font-bold"
+                                    title="Select Language"
+                                 >
+                                    <option value="en" className="bg-gray-800">English</option>
+                                    <option value="am" className="bg-gray-800">Amharic (አማርኛ)</option>
+                                    <option value="or" className="bg-gray-800">Oromo (Afaan Oromoo)</option>
+                                 </select>
+                              </div>
+                           </div>
+                        </div>
+
+                        <div className="p-2 border-t border-white/5">
+                           <button
+                              onClick={() => { logout(); setIsUserMenuOpen(false); }}
+                              className="w-full flex items-center gap-3 px-3 py-2 text-sm text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                           >
+                              <LogOut size={16} />
+                              <span>Sign Out</span>
+                           </button>
+                        </div>
+                     </div>
+                  </>
+               )}
             </div>
 
             <button

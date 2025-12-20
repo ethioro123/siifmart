@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { authService } from '../services/auth.service';
+import { UserRole } from '../types';
+
 import { useSessionManager } from '../utils/useSessionManager';
 import { useDataRefresh } from '../utils/useDataRefresh';
 import { useNetworkStatus } from '../utils/useNetworkStatus';
@@ -10,11 +12,12 @@ import Toast from '../components/Toast';
 interface User {
   id: string;
   name: string;
-  role: string;
+  role: UserRole;
   avatar: string;
   title: string;
   siteId?: string;
   employeeId?: string;
+  email?: string;
 }
 
 interface ToastMessage {
@@ -38,6 +41,7 @@ interface StoreContextType {
   loading: boolean;
   isOnline: boolean;
   showToast: (message: string, type?: 'info' | 'warning' | 'error' | 'success', duration?: number) => void;
+  updateUserAvatar: (newAvatar: string) => void; // Update current user's avatar
 }
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
@@ -68,6 +72,31 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   // Monitor network status
   const { isOnline, wasOffline } = useNetworkStatus();
 
+  // Hydrate user profile from database to ensure metadata is sync'd
+  const syncUserProfile = async () => {
+    try {
+      console.log('CentralStore: Syncing user profile from database...');
+      const profile = await authService.getCurrentAuthUser();
+      if (profile) {
+        console.log('CentralStore: Profile found in DB, syncing state...');
+        const rawRole = profile.role;
+        const normalizedRole = rawRole.toLowerCase().trim().replace(/[\s-]/g, '_');
+
+        setUser({
+          id: profile.id,
+          name: profile.name,
+          role: normalizedRole as UserRole,
+          avatar: profile.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.name)}&background=0D8ABC&color=fff`,
+          title: rawRole.charAt(0).toUpperCase() + rawRole.slice(1),
+          siteId: profile.siteId,
+          employeeId: profile.id
+        });
+      }
+    } catch (error) {
+      console.error('CentralStore: Sync failed', error);
+    }
+  };
+
   // Initialize
   useEffect(() => {
     checkSession();
@@ -77,16 +106,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       async (event, session) => {
         console.log('Auth state changed:', event);
         if (event === 'SIGNED_IN' && session?.user) {
-          const u = session.user;
-          setUser({
-            id: u.id,
-            name: u.user_metadata?.name || u.email?.split('@')[0] || 'User',
-            role: u.user_metadata?.role || 'pos',
-            avatar: u.user_metadata?.avatar || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-            title: (u.user_metadata?.role || 'pos').charAt(0).toUpperCase() + (u.user_metadata?.role || 'pos').slice(1),
-            siteId: u.user_metadata?.site_id,
-            employeeId: u.user_metadata?.employee_id
-          });
+          await syncUserProfile();
         } else if (event === 'SIGNED_OUT') {
           setUser(null);
         }
@@ -126,16 +146,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     try {
       const session = await authService.getSession();
       if (session?.user) {
-        const u = session.user;
-        setUser({
-          id: u.id,
-          name: u.user_metadata?.name || u.email?.split('@')[0] || 'User',
-          role: u.user_metadata?.role || 'pos',
-          avatar: u.user_metadata?.avatar || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-          title: (u.user_metadata?.role || 'pos').charAt(0).toUpperCase() + (u.user_metadata?.role || 'pos').slice(1),
-          siteId: u.user_metadata?.site_id,
-          employeeId: u.user_metadata?.employee_id
-        });
+        await syncUserProfile();
       }
     } catch (error) {
       console.error('Session check failed:', error);
@@ -152,16 +163,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       console.log('CentralStore: Sign in successful!');
 
       if (result?.user) {
-        const u = result.user;
-        setUser({
-          id: u.id,
-          name: u.user_metadata?.name || u.email?.split('@')[0] || 'User',
-          role: u.user_metadata?.role || 'pos',
-          avatar: u.user_metadata?.avatar || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-          title: (u.user_metadata?.role || 'pos').charAt(0).toUpperCase() + (u.user_metadata?.role || 'pos').slice(1),
-          siteId: u.user_metadata?.site_id,
-          employeeId: u.user_metadata?.employee_id
-        });
+        await syncUserProfile();
         console.log('CentralStore: Login complete!');
         return true;
       }
@@ -183,12 +185,15 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
           if (!empError && employee) {
             console.log('CentralStore: Demo mode login successful!', employee.name);
+            const rawRole = employee.role;
+            const normalizedRole = rawRole.toLowerCase().trim().replace(/[\s-]/g, '_');
+
             setUser({
               id: employee.id,
               name: employee.name,
-              role: employee.role,
-              avatar: employee.avatar || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-              title: employee.role.charAt(0).toUpperCase() + employee.role.slice(1),
+              role: normalizedRole as UserRole,
+              avatar: employee.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(employee.name)}&background=0D8ABC&color=fff`,
+              title: rawRole.charAt(0).toUpperCase() + rawRole.slice(1),
               siteId: employee.site_id || employee.siteId,
               employeeId: employee.id
             });
@@ -246,6 +251,21 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // Update current user's avatar in local state
+  const updateUserAvatar = (newAvatar: string) => {
+    console.log('📷 CentralStore.updateUserAvatar called');
+    console.log('📷 Current user:', user?.name, user?.id);
+    console.log('📷 New avatar (first 100 chars):', newAvatar?.substring(0, 100));
+    if (user) {
+      const updatedUser = { ...user, avatar: newAvatar };
+      console.log('📷 Setting updated user state');
+      setUser(updatedUser);
+      console.log('📷 User state updated successfully');
+    } else {
+      console.warn('📷 updateUserAvatar called but no user is logged in');
+    }
+  };
+
   const value = React.useMemo(() => ({
     user,
     originalUser, // Expose original user to check if impersonating
@@ -259,7 +279,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     toggleSidebar,
     loading,
     isOnline,
-    showToast
+    showToast,
+    updateUserAvatar
   }), [user, originalUser, theme, isSidebarOpen, loading, isOnline]);
 
   return (

@@ -15,7 +15,11 @@ import type {
     ExpenseRecord,
     WMSJob,
     Site,
-    TransferRecord
+    TransferRecord,
+    WorkerPoints,
+    PointsTransaction,
+    PendingInventoryChange,
+    SystemConfig
 } from '../types';
 
 // ============================================================================
@@ -33,6 +37,8 @@ export const sitesService = {
         return data.map((s: any) => ({
             ...s,
             terminalCount: s.terminal_count,
+            bonusEnabled: s.bonus_enabled,
+            warehouseBonusEnabled: s.warehouse_bonus_enabled,
             code: s.code || s.id.substring(0, 8).toUpperCase() // Use database code or fallback to short UUID
         }));
     },
@@ -48,6 +54,8 @@ export const sitesService = {
         return {
             ...data,
             terminalCount: data.terminal_count,
+            bonusEnabled: data.bonus_enabled,
+            warehouseBonusEnabled: data.warehouse_bonus_enabled,
             code: data.code || data.id.substring(0, 8).toUpperCase() // Use database code or fallback to short UUID
         };
     },
@@ -83,7 +91,9 @@ export const sitesService = {
             status: site.status,
             manager: site.manager,
             capacity: site.capacity,
-            terminal_count: site.terminalCount
+            terminal_count: site.terminalCount,
+            bonus_enabled: site.bonusEnabled,
+            warehouse_bonus_enabled: site.warehouseBonusEnabled
         };
         const { data, error } = await supabase
             .from('sites')
@@ -95,18 +105,29 @@ export const sitesService = {
         return {
             ...data,
             terminalCount: data.terminal_count,
+            bonusEnabled: data.bonus_enabled,
+            warehouseBonusEnabled: data.warehouse_bonus_enabled,
             code: data.code // Return the real DB code
         };
     },
 
     async update(id: string, updates: Partial<Site>) {
         const dbUpdates: any = { ...updates };
-        // Remove fields that don't exist in the database
-        // code cannot be updated manually usually
-        delete dbUpdates.code;
+        // Remove fields that don't exist in the database or shouldn't be updated visually
+        const fieldsToRemove = ['id', 'created_at', 'updated_at', 'code'];
+        fieldsToRemove.forEach(field => delete dbUpdates[field]);
+
         if (updates.terminalCount !== undefined) {
             dbUpdates.terminal_count = updates.terminalCount;
             delete dbUpdates.terminalCount;
+        }
+        if (updates.bonusEnabled !== undefined) {
+            dbUpdates.bonus_enabled = updates.bonusEnabled;
+            delete dbUpdates.bonusEnabled;
+        }
+        if (updates.warehouseBonusEnabled !== undefined) {
+            dbUpdates.warehouse_bonus_enabled = updates.warehouseBonusEnabled;
+            delete dbUpdates.warehouseBonusEnabled;
         }
 
         const { data, error } = await supabase
@@ -120,6 +141,8 @@ export const sitesService = {
         return {
             ...data,
             terminalCount: data.terminal_count,
+            bonusEnabled: data.bonus_enabled,
+            warehouseBonusEnabled: data.warehouse_bonus_enabled,
             code: data.id?.substring(0, 8).toUpperCase() || 'UNK' // Generate code from ID
         };
     },
@@ -131,6 +154,165 @@ export const sitesService = {
             .eq('id', id);
 
         if (error) throw error;
+    }
+};
+
+// ============================================================================
+// SYSTEM CONFIG
+// ============================================================================
+
+export const systemConfigService = {
+    async getSettings(): Promise<SystemConfig> {
+        const { data, error } = await supabase
+            .from('system_config')
+            .select('*')
+            .eq('id', '00000000-0000-0000-0000-000000000001')
+            .single();
+
+        if (error) throw error;
+        return this._mapSettings(data);
+    },
+
+    async updateSettings(updates: Partial<SystemConfig>, userName: string): Promise<SystemConfig> {
+        const dbUpdates: any = {
+            ...updates,
+            updated_at: new Date().toISOString(),
+            updated_by: userName
+        };
+
+        // Map camelCase to snake_case for DB columns
+        const mapping: Record<string, string> = {
+            storeName: 'store_name',
+            logoUrl: 'logo_url',
+            brandColor: 'brand_color',
+            legalBusinessName: 'legal_business_name',
+            taxVatNumber: 'tax_vat_number',
+            registeredAddress: 'registered_address',
+            supportContact: 'support_contact',
+            supportPhone: 'support_phone',
+            taxRate: 'tax_rate',
+            lowStockThreshold: 'low_stock_threshold',
+            fefoRotation: 'fefo_rotation',
+            binScan: 'bin_scan',
+            enableLoyalty: 'enable_loyalty',
+            enableWMS: 'enable_wms',
+            multiCurrency: 'multi_currency',
+            requireShiftClosure: 'require_shift_closure',
+            posReceiptHeader: 'pos_receipt_header',
+            posReceiptFooter: 'pos_receipt_footer',
+            posTerminalId: 'pos_terminal_id',
+            posRegisterMode: 'pos_register_mode',
+            posGuestCheckout: 'pos_guest_checkout',
+            posBlockNegativeStock: 'pos_block_negative_stock',
+            posDigitalReceipts: 'pos_digital_receipts',
+            posAutoPrint: 'pos_auto_print',
+            payment_cash: 'payment_cash',
+            payment_card: 'payment_card',
+            payment_mobile_money: 'payment_mobile_money',
+            payment_store_credit: 'payment_store_credit',
+            fiscalYearStart: 'fiscal_year_start',
+            accountingMethod: 'accounting_method',
+            taxInclusive: 'tax_inclusive',
+            defaultVatRate: 'default_vat_rate',
+            withholdingTax: 'withholding_tax',
+            maxPettyCash: 'max_petty_cash',
+            expenseApprovalLimit: 'expense_approval_limit',
+            defaultCreditLimit: 'default_credit_limit',
+            receivingLogic: 'receiving_logic',
+            qcSamplingRate: 'qc_sampling_rate',
+            qcBlockOnFailure: 'qc_block_on_failure',
+            putawayLogic: 'putaway_logic',
+            rotationPolicy: 'rotation_policy',
+            requireExpiry: 'require_expiry',
+            cycleCountStrategy: 'cycle_count_strategy',
+            pickingMethod: 'picking_method',
+            strictScanning: 'strict_scanning',
+            dateFormat: 'date_format',
+            numberFormat: 'number_format',
+            logo_url: 'logo_url', // fallback
+            tax_vat_number: 'tax_vat_number' // fallback
+        };
+
+        const finalUpdates: any = {};
+        Object.entries(dbUpdates).forEach(([key, value]) => {
+            const dbKey = mapping[key] || key;
+            finalUpdates[dbKey] = value;
+        });
+
+        // Ensure we don't try to update id
+        delete finalUpdates.id;
+
+        const { data, error } = await supabase
+            .from('system_config')
+            .update(finalUpdates)
+            .eq('id', '00000000-0000-0000-0000-000000000001')
+            .select()
+            .single();
+
+        if (error) throw error;
+        return this._mapSettings(data);
+    },
+
+    _mapSettings(data: any): SystemConfig {
+        return {
+            storeName: data.store_name,
+            slogan: data.slogan,
+            logoUrl: data.logo_url,
+            brandColor: data.brand_color,
+            legalBusinessName: data.legal_business_name,
+            taxVatNumber: data.tax_vat_number,
+            registeredAddress: data.registered_address,
+            supportContact: data.support_contact,
+            supportPhone: data.support_phone,
+            currency: data.currency,
+            timezone: data.timezone,
+            dateFormat: data.date_format,
+            numberFormat: data.number_format,
+            language: data.language,
+            taxRate: data.tax_rate,
+            lowStockThreshold: data.low_stock_threshold,
+            fefoRotation: data.fefo_rotation,
+            binScan: data.bin_scan,
+            enableLoyalty: data.enable_loyalty,
+            enableWMS: data.enable_wms,
+            multiCurrency: data.multi_currency,
+            requireShiftClosure: data.require_shift_closure,
+            posReceiptHeader: data.pos_receipt_header,
+            posReceiptFooter: data.pos_receipt_footer,
+            posTerminalId: data.pos_terminal_id,
+            posRegisterMode: data.pos_register_mode,
+            posGuestCheckout: data.pos_guest_checkout,
+            posBlockNegativeStock: data.pos_block_negative_stock,
+            posDigitalReceipts: data.pos_digital_receipts,
+            posAutoPrint: data.pos_auto_print,
+            payment_cash: data.payment_cash,
+            payment_card: data.payment_card,
+            payment_mobile_money: data.payment_mobile_money,
+            payment_store_credit: data.payment_store_credit,
+            fiscalYearStart: data.fiscal_year_start,
+            accountingMethod: data.accounting_method,
+            taxInclusive: data.tax_inclusive,
+            defaultVatRate: data.default_vat_rate,
+            withholdingTax: data.withholding_tax,
+            maxPettyCash: data.max_petty_cash,
+            expenseApprovalLimit: data.expense_approval_limit,
+            defaultCreditLimit: data.default_credit_limit,
+            receivingLogic: data.receiving_logic,
+            qcSamplingRate: data.qc_sampling_rate,
+            qcBlockOnFailure: data.qc_block_on_failure,
+            putawayLogic: data.putaway_logic,
+            rotationPolicy: data.rotation_policy,
+            requireExpiry: data.require_expiry,
+            cycleCountStrategy: data.cycle_count_strategy,
+            pickingMethod: data.picking_method,
+            strictScanning: data.strict_scanning,
+            reserveStockBuffer: data.reserve_stock_buffer,
+            webhookOrderCreated: data.webhook_order_created,
+            webhookInventoryLow: data.webhook_inventory_low,
+            webhookCustomerSignup: data.webhook_customer_signup,
+            scaleIpAddress: data.scale_ip_address,
+            scannerComPort: data.scanner_com_port
+        };
     }
 };
 
@@ -165,7 +347,15 @@ export const productsService = {
             posReceivedAt: p.pos_received_at,
             pos_received_at: p.pos_received_at,
             posReceivedBy: p.pos_received_by,
-            pos_received_by: p.pos_received_by
+            pos_received_by: p.pos_received_by,
+            approvalStatus: p.approval_status,
+            approval_status: p.approval_status,
+            createdBy: p.created_by,
+            approvedBy: p.approved_by,
+            approvedAt: p.approved_at,
+            rejectedBy: p.rejected_by,
+            rejectedAt: p.rejected_at,
+            rejectionReason: p.rejection_reason
         }));
     },
 
@@ -191,7 +381,15 @@ export const productsService = {
             posReceivedAt: data.pos_received_at,
             pos_received_at: data.pos_received_at,
             posReceivedBy: data.pos_received_by,
-            pos_received_by: data.pos_received_by
+            pos_received_by: data.pos_received_by,
+            approvalStatus: data.approval_status,
+            approval_status: data.approval_status,
+            createdBy: data.created_by,
+            approvedBy: data.approved_by,
+            approvedAt: data.approved_at,
+            rejectedBy: data.rejected_by,
+            rejectedAt: data.rejected_at,
+            rejectionReason: data.rejection_reason
         };
     },
 
@@ -217,7 +415,15 @@ export const productsService = {
             posReceivedAt: data.pos_received_at,
             pos_received_at: data.pos_received_at,
             posReceivedBy: data.pos_received_by,
-            pos_received_by: data.pos_received_by
+            pos_received_by: data.pos_received_by,
+            approvalStatus: data.approval_status,
+            approval_status: data.approval_status,
+            createdBy: data.created_by,
+            approvedBy: data.approved_by,
+            approvedAt: data.approved_at,
+            rejectedBy: data.rejected_by,
+            rejectedAt: data.rejected_at,
+            rejectionReason: data.rejection_reason
         };
     },
 
@@ -239,7 +445,14 @@ export const productsService = {
             shelf_position: product.shelfPosition,
             competitor_price: product.competitorPrice,
             sales_velocity: product.salesVelocity,
-            image: product.image
+
+            image: product.image,
+            barcode: product.barcode,
+            barcode_type: product.barcodeType,
+            approval_status: product.approvalStatus,
+            created_by: product.createdBy,
+            approved_by: product.approvedBy,
+            approved_at: product.approvedAt
         };
         const { data, error } = await supabase
             .from('products')
@@ -247,47 +460,32 @@ export const productsService = {
             .select()
             .single();
 
-        if (error) throw error;
-        return {
-            ...data,
-            siteId: data.site_id,
-            costPrice: data.cost_price,
-            salePrice: data.sale_price,
-            isOnSale: data.is_on_sale,
-            expiryDate: data.expiry_date,
-            batchNumber: data.batch_number,
-            shelfPosition: data.shelf_position,
-            competitorPrice: data.competitor_price,
-            salesVelocity: data.sales_velocity,
-            posReceivedAt: data.pos_received_at,
-            pos_received_at: data.pos_received_at
-        };
+        if (error) {
+            // Robustness: If new columns are missing, retry without them
+            if (error.message.includes('column') && error.message.includes('does not exist')) {
+                console.warn('⚠️ Schema mismatch detected. Retrying product creation without approval fields...');
+                const coreProduct: any = { ...dbProduct };
+                delete coreProduct.approval_status;
+                delete coreProduct.created_by;
+                delete coreProduct.approved_by;
+                delete coreProduct.approved_at;
+
+                const { data: retryData, error: retryError } = await supabase
+                    .from('products')
+                    .insert(coreProduct)
+                    .select()
+                    .single();
+
+                if (retryError) throw retryError;
+                return this._mapProduct(retryData);
+            }
+            throw error;
+        }
+        return this._mapProduct(data);
     },
 
-    async update(id: string, updates: Partial<Product>) {
-        const dbUpdates: any = { ...updates };
-        if (updates.siteId !== undefined) { dbUpdates.site_id = updates.siteId; delete dbUpdates.siteId; }
-        if (updates.costPrice !== undefined) { dbUpdates.cost_price = updates.costPrice; delete dbUpdates.costPrice; }
-        if (updates.salePrice !== undefined) { dbUpdates.sale_price = updates.salePrice; delete dbUpdates.salePrice; }
-        if (updates.isOnSale !== undefined) { dbUpdates.is_on_sale = updates.isOnSale; delete dbUpdates.isOnSale; }
-        if (updates.expiryDate !== undefined) { dbUpdates.expiry_date = updates.expiryDate; delete dbUpdates.expiryDate; }
-        if (updates.batchNumber !== undefined) { dbUpdates.batch_number = updates.batchNumber; delete dbUpdates.batchNumber; }
-        if (updates.shelfPosition !== undefined) { dbUpdates.shelf_position = updates.shelfPosition; delete dbUpdates.shelfPosition; }
-        if (updates.competitorPrice !== undefined) { dbUpdates.competitor_price = updates.competitorPrice; delete dbUpdates.competitorPrice; }
-        if (updates.salesVelocity !== undefined) { dbUpdates.sales_velocity = updates.salesVelocity; delete dbUpdates.salesVelocity; }
-        if (updates.posReceivedAt !== undefined) { dbUpdates.pos_received_at = updates.posReceivedAt; delete dbUpdates.posReceivedAt; }
-        if (updates.pos_received_at !== undefined) { dbUpdates.pos_received_at = updates.pos_received_at; }
-        if (updates.posReceivedBy !== undefined) { dbUpdates.pos_received_by = updates.posReceivedBy; delete dbUpdates.posReceivedBy; }
-        if (updates.pos_received_by !== undefined) { dbUpdates.pos_received_by = updates.pos_received_by; }
-
-        const { data, error } = await supabase
-            .from('products')
-            .update(dbUpdates)
-            .eq('id', id)
-            .select()
-            .single();
-
-        if (error) throw error;
+    // Helper to map DB record to Product interface
+    _mapProduct(data: any): Product {
         return {
             ...data,
             siteId: data.site_id,
@@ -301,9 +499,76 @@ export const productsService = {
             salesVelocity: data.sales_velocity,
             posReceivedAt: data.pos_received_at,
             pos_received_at: data.pos_received_at,
-            posReceivedBy: data.pos_received_by,
-            pos_received_by: data.pos_received_by
+            approvalStatus: data.approval_status,
+            approval_status: data.approval_status,
+            createdBy: data.created_by,
+            approvedBy: data.approved_by,
+            approvedAt: data.approved_at,
+            rejectedBy: data.rejected_by,
+            rejectedAt: data.rejected_at,
+            rejectionReason: data.rejection_reason
         };
+    },
+
+    async update(id: string, updates: Partial<Product>) {
+        const dbUpdates: any = { ...updates };
+
+        // Remove fields that shouldn't be updated or don't exist in DB
+        const fieldsToRemove = ['id', 'created_at', 'updated_at', 'createdAt'];
+        fieldsToRemove.forEach(field => delete dbUpdates[field]);
+
+        // Map camelCase to snake_case for database
+        if (updates.siteId !== undefined) { dbUpdates.site_id = updates.siteId; delete dbUpdates.siteId; }
+        if (updates.costPrice !== undefined) { dbUpdates.cost_price = updates.costPrice; delete dbUpdates.costPrice; }
+        if (updates.salePrice !== undefined) { dbUpdates.sale_price = updates.salePrice; delete dbUpdates.salePrice; }
+        if (updates.isOnSale !== undefined) { dbUpdates.is_on_sale = updates.isOnSale; delete dbUpdates.isOnSale; }
+        if (updates.expiryDate !== undefined) { dbUpdates.expiry_date = updates.expiryDate; delete dbUpdates.expiryDate; }
+        if (updates.batchNumber !== undefined) { dbUpdates.batch_number = updates.batchNumber; delete dbUpdates.batchNumber; }
+        if (updates.shelfPosition !== undefined) { dbUpdates.shelf_position = updates.shelfPosition; delete dbUpdates.shelfPosition; }
+        if (updates.competitorPrice !== undefined) { dbUpdates.competitor_price = updates.competitorPrice; delete dbUpdates.competitorPrice; }
+        if (updates.salesVelocity !== undefined) { dbUpdates.sales_velocity = updates.salesVelocity; delete dbUpdates.salesVelocity; }
+        if (updates.posReceivedAt !== undefined) { dbUpdates.pos_received_at = updates.posReceivedAt; delete dbUpdates.posReceivedAt; }
+        if (updates.posReceivedBy !== undefined) { dbUpdates.pos_received_by = updates.posReceivedBy; delete dbUpdates.posReceivedBy; }
+        if (updates.approvalStatus !== undefined) { dbUpdates.approval_status = updates.approvalStatus; delete dbUpdates.approvalStatus; }
+        if (updates.approvedBy !== undefined) { dbUpdates.approved_by = updates.approvedBy; delete dbUpdates.approvedBy; }
+        if (updates.approvedAt !== undefined) { dbUpdates.approved_at = updates.approvedAt; delete dbUpdates.approvedAt; }
+        if (updates.rejectedBy !== undefined) { dbUpdates.rejected_by = updates.rejectedBy; delete dbUpdates.rejectedBy; }
+        if (updates.rejectedAt !== undefined) { dbUpdates.rejected_at = updates.rejectedAt; delete dbUpdates.rejectedAt; }
+        if (updates.rejectionReason !== undefined) { dbUpdates.rejection_reason = updates.rejectionReason; delete dbUpdates.rejectionReason; }
+
+        if ((updates as any).barcodeType !== undefined) {
+            dbUpdates.barcode_type = (updates as any).barcodeType;
+            delete (dbUpdates as any).barcodeType;
+        }
+
+        const { data, error } = await supabase
+            .from('products')
+            .update(dbUpdates)
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) {
+            // Robustness: If new columns are missing, retry without them
+            if (error.message.includes('column') && error.message.includes('does not exist')) {
+                console.warn('⚠️ Schema mismatch detected. Retrying product update without approval fields...');
+                const coreUpdates: any = { ...dbUpdates };
+                const fieldsToDelete = ['approval_status', 'created_by', 'approved_by', 'approved_at', 'rejected_by', 'rejected_at', 'rejection_reason'];
+                fieldsToDelete.forEach(f => delete coreUpdates[f]);
+
+                const { data: retryData, error: retryError } = await supabase
+                    .from('products')
+                    .update(coreUpdates)
+                    .eq('id', id)
+                    .select()
+                    .single();
+
+                if (retryError) throw retryError;
+                return this._mapProduct(retryData);
+            }
+            throw error;
+        }
+        return this._mapProduct(data);
     },
 
     async delete(id: string) {
@@ -315,28 +580,76 @@ export const productsService = {
         if (error) throw error;
     },
 
-    async adjustStock(productId: string, quantity: number, type: 'IN' | 'OUT' | 'ADJUSTMENT') {
-        // Get current stock
+    // Cascade delete - removes all related records first, then deletes the product
+    // Only for super admin use when absolutely necessary
+    async cascadeDelete(id: string) {
+        console.log('🗑️ Starting cascade delete for product:', id);
+
+        // 1. Delete related stock_movements
+        const { error: movementsError } = await supabase
+            .from('stock_movements')
+            .delete()
+            .eq('product_id', id);
+
+        if (movementsError) {
+            console.warn('⚠️ Failed to delete stock movements:', movementsError);
+            // Continue anyway - might not have any movements
+        } else {
+            console.log('✅ Deleted related stock_movements');
+        }
+
+        // 2. Delete related sale line items (if table exists)
+        try {
+            const { error: saleItemsError } = await supabase
+                .from('sale_items')
+                .delete()
+                .eq('product_id', id);
+
+            if (!saleItemsError) {
+                console.log('✅ Deleted related sale_items');
+            }
+        } catch (e) {
+            console.warn('⚠️ sale_items table may not exist:', e);
+        }
+
+        // 3. Delete related inventory_requests
+        const { error: requestsError } = await supabase
+            .from('inventory_requests')
+            .delete()
+            .eq('product_id', id);
+
+        if (!requestsError) {
+            console.log('✅ Deleted related inventory_requests');
+        }
+
+        // 4. Finally delete the product itself
+        const { error: productError } = await supabase
+            .from('products')
+            .delete()
+            .eq('id', id);
+
+        if (productError) {
+            console.error('❌ Failed to delete product:', productError);
+            throw productError;
+        }
+
+        console.log('✅ Product cascade deleted successfully');
+    },
+
+    async adjustStock(productId: string, quantity: number, type: 'IN' | 'OUT' | 'ADJUSTMENT', reason: string = 'Stock Adjustment', user: string = 'System') {
         const product = await this.getById(productId);
-
-        // Calculate new stock
-        const newStock = type === 'OUT'
-            ? product.stock - quantity
-            : product.stock + quantity;
-
-        // Update product
+        const newStock = type === 'OUT' ? product.stock - quantity : product.stock + quantity;
         const updated = await this.update(productId, { stock: newStock });
 
-        // Create stock movement record
         await stockMovementsService.create({
-            site_id: product.site_id,
+            site_id: product.siteId,
             product_id: productId,
             product_name: product.name,
-            type,
+            type: type === 'ADJUSTMENT' ? 'IN' : type,
             quantity,
             movement_date: new Date().toISOString(),
-            performed_by: 'System',
-            reason: `Stock ${type.toLowerCase()}`
+            performed_by: user,
+            reason: reason || `Stock ${type.toLowerCase()}`
         } as any);
 
         return updated;
@@ -480,7 +793,7 @@ export const customersService = {
     async updateLoyaltyPoints(id: string, points: number) {
         const customer = await this.getById(id);
         return await this.update(id, {
-            loyalty_points: customer.loyalty_points + points
+            loyaltyPoints: customer.loyaltyPoints + points
         });
     },
 
@@ -1919,5 +2232,411 @@ export const jobAssignmentsService = {
             totalUnitsProcessed: data.total_units_processed,
             lastCompletedAt: data.last_completed_at
         };
+    }
+};
+
+// ============================================================================
+// GAMIFICATION
+// ============================================================================
+
+export const workerPointsService = {
+    async getAll(siteId?: string) {
+        let query = supabase.from('worker_points').select('*');
+        if (siteId) {
+            query = query.eq('site_id', siteId);
+        }
+        const { data, error } = await query;
+
+        if (error) {
+            console.error('Error fetching worker points:', error);
+            return [];
+        }
+
+        return data.map((wp: any) => ({
+            id: wp.id,
+            siteId: wp.site_id,
+            employeeId: wp.employee_id,
+            employeeName: wp.employee_name,
+            employeeAvatar: wp.employee_avatar,
+            totalPoints: wp.total_points,
+            weeklyPoints: wp.weekly_points,
+            monthlyPoints: wp.monthly_points,
+            todayPoints: wp.today_points,
+            totalJobsCompleted: wp.total_jobs_completed,
+            totalItemsPicked: wp.total_items_picked,
+            averageAccuracy: wp.average_accuracy,
+            averageTimePerJob: wp.average_time_per_job,
+            currentStreak: wp.current_streak,
+            longestStreak: wp.longest_streak,
+            lastJobCompletedAt: wp.last_job_completed_at,
+            lastUpdated: wp.last_updated,
+            achievements: wp.achievements || [],
+            rank: wp.rank || 0,
+            level: wp.level || 1,
+            levelTitle: wp.level_title || 'Rookie',
+            currentBonusTier: wp.current_bonus_tier,
+            estimatedBonus: wp.estimated_bonus,
+            bonusPeriodPoints: wp.bonus_period_points
+        }));
+    },
+
+    async getByEmployee(employeeId: string) {
+        const { data, error } = await supabase
+            .from('worker_points')
+            .select('*')
+            .eq('employee_id', employeeId)
+            .maybeSingle();
+
+        if (error) throw error;
+        if (!data) return null;
+
+        return {
+            id: data.id,
+            siteId: data.site_id,
+            employeeId: data.employee_id,
+            employeeName: data.employee_name,
+            employeeAvatar: data.employee_avatar,
+            totalPoints: data.total_points,
+            weeklyPoints: data.weekly_points,
+            monthlyPoints: data.monthly_points,
+            todayPoints: data.today_points,
+            totalJobsCompleted: data.total_jobs_completed,
+            totalItemsPicked: data.total_items_picked,
+            averageAccuracy: data.average_accuracy,
+            averageTimePerJob: data.average_time_per_job,
+            currentStreak: data.current_streak,
+            longestStreak: data.longest_streak,
+            lastJobCompletedAt: data.last_job_completed_at,
+            lastUpdated: data.last_updated,
+            achievements: data.achievements || [],
+            rank: data.rank || 0,
+            level: data.level || 1,
+            levelTitle: data.level_title || 'Rookie',
+            currentBonusTier: data.current_bonus_tier,
+            estimatedBonus: data.estimated_bonus,
+            bonusPeriodPoints: data.bonus_period_points
+        };
+    },
+
+    async create(points: WorkerPoints) {
+        const dbPoints = {
+            site_id: points.siteId,
+            employee_id: points.employeeId,
+            employee_name: points.employeeName,
+            employee_avatar: points.employeeAvatar,
+            total_points: points.totalPoints,
+            weekly_points: points.weeklyPoints,
+            monthly_points: points.monthlyPoints,
+            today_points: points.todayPoints,
+            total_jobs_completed: points.totalJobsCompleted,
+            total_items_picked: points.totalItemsPicked,
+            average_accuracy: points.averageAccuracy,
+            average_time_per_job: points.averageTimePerJob,
+            current_streak: points.currentStreak,
+            longest_streak: points.longestStreak,
+            last_job_completed_at: points.lastJobCompletedAt,
+            last_updated: points.lastUpdated,
+            achievements: points.achievements,
+            rank: points.rank,
+            level: points.level,
+            level_title: points.levelTitle,
+            current_bonus_tier: points.currentBonusTier,
+            estimated_bonus: points.estimatedBonus,
+            bonus_period_points: points.bonusPeriodPoints
+        };
+
+        const { data, error } = await supabase.from('worker_points').insert(dbPoints).select().single();
+        if (error) throw error;
+
+        // Return mapped object or just assume it worked and return input with ID if new
+        return { ...points, id: data.id };
+    },
+
+    async update(id: string, updates: Partial<WorkerPoints>) {
+        const dbUpdates: any = {};
+        if (updates.totalPoints !== undefined) dbUpdates.total_points = updates.totalPoints;
+        if (updates.weeklyPoints !== undefined) dbUpdates.weekly_points = updates.weeklyPoints;
+        if (updates.monthlyPoints !== undefined) dbUpdates.monthly_points = updates.monthlyPoints;
+        if (updates.todayPoints !== undefined) dbUpdates.today_points = updates.todayPoints;
+        if (updates.totalJobsCompleted !== undefined) dbUpdates.total_jobs_completed = updates.totalJobsCompleted;
+        if (updates.totalItemsPicked !== undefined) dbUpdates.total_items_picked = updates.totalItemsPicked;
+        if (updates.averageAccuracy !== undefined) dbUpdates.average_accuracy = updates.averageAccuracy;
+        if (updates.averageTimePerJob !== undefined) dbUpdates.average_time_per_job = updates.averageTimePerJob;
+        if (updates.currentStreak !== undefined) dbUpdates.current_streak = updates.currentStreak;
+        if (updates.longestStreak !== undefined) dbUpdates.longest_streak = updates.longestStreak;
+        if (updates.lastJobCompletedAt !== undefined) dbUpdates.last_job_completed_at = updates.lastJobCompletedAt;
+        if (updates.lastUpdated !== undefined) dbUpdates.last_updated = updates.lastUpdated;
+        if (updates.achievements !== undefined) dbUpdates.achievements = updates.achievements;
+        if (updates.rank !== undefined) dbUpdates.rank = updates.rank;
+        if (updates.level !== undefined) dbUpdates.level = updates.level;
+        if (updates.levelTitle !== undefined) dbUpdates.level_title = updates.levelTitle;
+        if (updates.currentBonusTier !== undefined) dbUpdates.current_bonus_tier = updates.currentBonusTier;
+        if (updates.estimatedBonus !== undefined) dbUpdates.estimated_bonus = updates.estimatedBonus;
+        if (updates.bonusPeriodPoints !== undefined) dbUpdates.bonus_period_points = updates.bonusPeriodPoints;
+
+        const { data, error } = await supabase.from('worker_points').update(dbUpdates).eq('id', id).select().single();
+        if (error) throw error;
+        return data;
+    }
+};
+
+export const pointsTransactionsService = {
+    async create(transaction: PointsTransaction) {
+        const dbTxn = {
+            employee_id: transaction.employeeId,
+            job_id: transaction.jobId,
+            points: transaction.points,
+            type: transaction.type,
+            description: transaction.description,
+            timestamp: transaction.timestamp
+        };
+        const { data, error } = await supabase.from('points_transactions').insert(dbTxn).select().single();
+        if (error) throw error;
+        return { ...transaction, id: data.id };
+    },
+
+    async getAll(employeeId?: string) {
+        let query = supabase.from('points_transactions').select('*').order('timestamp', { ascending: false });
+        if (employeeId) query = query.eq('employee_id', employeeId);
+
+        const { data, error } = await query;
+        if (error) {
+            console.error('Error fetching points transactions:', error);
+            return [];
+        }
+
+        return data.map((t: any) => ({
+            id: t.id,
+            employeeId: t.employee_id,
+            jobId: t.job_id,
+            points: t.points,
+            type: t.type,
+            description: t.description,
+            timestamp: t.timestamp
+        }));
+    }
+};
+
+// ============================================================================
+// INVENTORY REQUESTS (Persistent Approval Queue)
+// ============================================================================
+
+export const inventoryRequestsService = {
+    async getAll(siteId?: string): Promise<PendingInventoryChange[]> {
+        const query = supabase.from('inventory_requests').select('*');
+        if (siteId) query.eq('site_id', siteId);
+
+        const { data, error } = await query.order('requested_at', { ascending: false });
+        if (error) throw error;
+
+        return data.map((r: any) => ({
+            id: r.id,
+            productId: r.product_id,
+            productName: r.product_name,
+            productSku: r.product_sku,
+            siteId: r.site_id,
+            changeType: r.change_type,
+            requestedBy: r.requested_by,
+            requestedAt: r.requested_at,
+            status: r.status,
+            proposedChanges: r.proposed_changes,
+            adjustmentType: r.adjustment_type,
+            adjustmentQty: r.adjustment_qty,
+            adjustmentReason: r.adjustment_reason,
+            approvedBy: r.approved_by,
+            approvedAt: r.approved_at,
+            rejectionReason: r.rejection_reason,
+            rejectedBy: r.rejected_by,
+            rejectedAt: r.rejected_at
+        }));
+    },
+
+    async create(request: Omit<PendingInventoryChange, 'id'>) {
+        const { data, error } = await supabase.from('inventory_requests').insert({
+            site_id: request.siteId,
+            product_id: request.productId,
+            product_name: request.productName,
+            product_sku: request.productSku,
+            change_type: request.changeType,
+            requested_by: request.requestedBy,
+            status: 'pending',
+            proposed_changes: request.proposedChanges,
+            adjustment_type: request.adjustmentType,
+            adjustment_qty: request.adjustmentQty,
+            adjustment_reason: request.adjustmentReason
+        }).select().single();
+
+        if (error) throw error;
+        return data;
+    },
+
+    async update(id: string, updates: Partial<PendingInventoryChange>) {
+        console.log('📝 inventoryRequestsService.update called:', { id, updates });
+
+        const dbUpdates: any = {
+            status: updates.status,
+            approved_by: updates.approvedBy,
+            approved_at: updates.approvedAt,
+            rejection_reason: updates.rejectionReason,
+            rejected_by: updates.rejectedBy,
+            rejected_at: updates.rejectedAt
+        };
+
+        // Remove undefined values to avoid overwriting with null
+        Object.keys(dbUpdates).forEach(key => {
+            if (dbUpdates[key] === undefined) delete dbUpdates[key];
+        });
+
+        console.log('📝 DB updates to apply:', dbUpdates);
+
+        const { data, error } = await supabase
+            .from('inventory_requests')
+            .update(dbUpdates)
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) {
+            console.error('❌ inventoryRequestsService.update FAILED:', error);
+            throw error;
+        }
+
+        console.log('✅ inventoryRequestsService.update SUCCESS:', data);
+        return data;
+    },
+
+    async delete(id: string) {
+        console.log('🗑️ inventoryRequestsService.delete called for ID:', id);
+        const { error } = await supabase.from('inventory_requests').delete().eq('id', id);
+        if (error) {
+            console.error('❌ inventoryRequestsService.delete FAILED:', error);
+            throw error;
+        }
+        console.log('✅ inventoryRequestsService.delete SUCCESS');
+    }
+};
+
+// ============================================================================
+// BRAINSTORM NODES (Super Admin Canvas)
+// ============================================================================
+
+export interface BrainstormNodeDB {
+    id: string;
+    title: string;
+    description: string;
+    department: string;
+    priority: string;
+    status: string;
+    x: number;
+    y: number;
+    connections: string[];
+    created_at: string;
+    updated_at: string;
+    created_by: string;
+    // Advanced fields
+    due_date?: string | null;
+    progress?: number;
+    tags?: string[];
+    is_starred?: boolean;
+    completed_at?: string | null;
+    notes?: string;
+    color?: string;
+}
+
+export const brainstormService = {
+    async getAll(): Promise<BrainstormNodeDB[]> {
+        const { data, error } = await supabase
+            .from('brainstorm_nodes')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        if (error) {
+            // Table might not exist yet - return empty array
+            console.warn('brainstorm_nodes table may not exist:', error);
+            return [];
+        }
+        return data || [];
+    },
+
+    async create(node: Omit<BrainstormNodeDB, 'id' | 'created_at' | 'updated_at'>): Promise<BrainstormNodeDB> {
+        const { data, error } = await supabase
+            .from('brainstorm_nodes')
+            .insert({
+                title: node.title,
+                description: node.description,
+                department: node.department,
+                priority: node.priority,
+                status: node.status,
+                x: node.x,
+                y: node.y,
+                connections: node.connections,
+                created_by: node.created_by
+            })
+            .select()
+            .single();
+
+        if (error) throw error;
+        return data;
+    },
+
+    async update(id: string, updates: Partial<BrainstormNodeDB>): Promise<BrainstormNodeDB> {
+        const { data, error } = await supabase
+            .from('brainstorm_nodes')
+            .update({
+                title: updates.title,
+                description: updates.description,
+                department: updates.department,
+                priority: updates.priority,
+                status: updates.status,
+                x: updates.x,
+                y: updates.y,
+                connections: updates.connections,
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) throw error;
+        return data;
+    },
+
+    async delete(id: string): Promise<void> {
+        // First, remove this node from all connections
+        const { data: allNodes } = await supabase
+            .from('brainstorm_nodes')
+            .select('id, connections');
+
+        if (allNodes) {
+            for (const node of allNodes) {
+                if (node.connections?.includes(id)) {
+                    await supabase
+                        .from('brainstorm_nodes')
+                        .update({ connections: node.connections.filter((c: string) => c !== id) })
+                        .eq('id', node.id);
+                }
+            }
+        }
+
+        const { error } = await supabase
+            .from('brainstorm_nodes')
+            .delete()
+            .eq('id', id);
+
+        if (error) throw error;
+    },
+
+    async saveViewState(state: { offset: { x: number; y: number }; scale: number }): Promise<void> {
+        // Save view state to localStorage as fallback (per-user preference)
+        localStorage.setItem('siifmart_brainstorm_view', JSON.stringify(state));
+    },
+
+    getViewState(): { offset: { x: number; y: number }; scale: number } | null {
+        try {
+            const saved = localStorage.getItem('siifmart_brainstorm_view');
+            return saved ? JSON.parse(saved) : null;
+        } catch {
+            return null;
+        }
     }
 };

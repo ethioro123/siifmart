@@ -7,6 +7,7 @@ import {
 import { useData } from '../contexts/DataContext';
 import { CURRENCY_SYMBOL } from '../constants';
 import { Site, Product } from '../types';
+import { formatCompactNumber } from '../utils/formatting';
 
 type ViewMode = 'grid' | 'list' | 'map';
 
@@ -31,8 +32,12 @@ export default function NetworkInventory() {
         });
 
         return inventorySites.map(site => {
-            const siteProducts = allProducts.filter(p => p.siteId === site.id || p.site_id === site.id);
-            const totalValue = siteProducts.reduce((sum, p) => sum + (p.price * p.stock), 0);
+            const siteProducts = allProducts.filter(p =>
+                (p.siteId === site.id || p.site_id === site.id) &&
+                (p.status || (p as any).status) !== 'archived'
+            );
+            const totalValueRetail = siteProducts.reduce((sum, p) => sum + (p.price * p.stock), 0);
+            const totalValueCost = siteProducts.reduce((sum, p) => sum + (p.stock * (p.costPrice || p.price * 0.7)), 0);
             const totalItems = siteProducts.reduce((sum, p) => sum + p.stock, 0);
             const lowStockItems = siteProducts.filter(p => p.stock < 10).length;
             const outOfStockItems = siteProducts.filter(p => p.stock === 0).length;
@@ -42,7 +47,8 @@ export default function NetworkInventory() {
                 site,
                 products: siteProducts,
                 metrics: {
-                    totalValue,
+                    totalValue: totalValueCost, // Use Cost as primary
+                    totalValueRetail,
                     totalItems,
                     uniqueProducts: siteProducts.length,
                     lowStockItems,
@@ -102,12 +108,14 @@ export default function NetworkInventory() {
                     <button
                         onClick={() => setViewMode('grid')}
                         className={`p-2 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-cyber-primary text-black' : 'bg-white/5 text-gray-400 hover:text-white'}`}
+                        title="Grid View"
                     >
                         <Layers size={20} />
                     </button>
                     <button
                         onClick={() => setViewMode('list')}
                         className={`p-2 rounded-lg transition-colors ${viewMode === 'list' ? 'bg-cyber-primary text-black' : 'bg-white/5 text-gray-400 hover:text-white'}`}
+                        title="List View"
                     >
                         <Box size={20} />
                     </button>
@@ -164,9 +172,23 @@ export default function NetworkInventory() {
                             <DollarSign className="text-cyan-400" size={24} />
                         </div>
                         <div>
-                            <p className="text-xs text-gray-400 uppercase font-bold">Network Value</p>
+                            <p className="text-xs text-gray-400 uppercase font-bold">Network Asset Value</p>
                             <p className="text-2xl font-bold text-white">
-                                {CURRENCY_SYMBOL}{siteInventory.reduce((sum, inv) => sum + inv.metrics.totalValue, 0).toLocaleString()}
+                                {formatCompactNumber(siteInventory.reduce((sum, inv) => sum + inv.metrics.totalValue, 0), { currency: CURRENCY_SYMBOL })}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="bg-gradient-to-br from-indigo-500/10 to-indigo-500/5 border border-indigo-500/20 rounded-2xl p-5">
+                    <div className="flex items-center gap-3 mb-3">
+                        <div className="p-2 bg-indigo-500/20 rounded-lg">
+                            <TrendingUp className="text-indigo-400" size={24} />
+                        </div>
+                        <div>
+                            <p className="text-xs text-gray-400 uppercase font-bold">Potential Revenue</p>
+                            <p className="text-2xl font-bold text-white">
+                                {formatCompactNumber(siteInventory.reduce((sum, inv) => sum + inv.metrics.totalValueRetail, 0), { currency: CURRENCY_SYMBOL })}
                             </p>
                         </div>
                     </div>
@@ -249,7 +271,7 @@ export default function NetworkInventory() {
                                                     <h5 className="font-bold text-white">{product.name}</h5>
                                                     <p className="text-xs text-gray-500 font-mono mt-1">{product.sku} • {product.category}</p>
                                                 </div>
-                                                <span className="text-sm font-bold text-cyber-primary">{CURRENCY_SYMBOL}{product.price}</span>
+                                                <span className="text-sm font-bold text-cyber-primary">{formatCompactNumber(product.price, { currency: CURRENCY_SYMBOL })}</span>
                                             </div>
                                             <div className="space-y-2">
                                                 <p className="text-xs text-gray-400 uppercase font-bold mb-2">Available at {product.locations.length} location(s):</p>
@@ -327,8 +349,8 @@ export default function NetworkInventory() {
                                         <p className="text-xl font-bold text-white">{metrics.totalItems.toLocaleString()}</p>
                                     </div>
                                     <div className="bg-black/30 rounded-lg p-3">
-                                        <p className="text-[10px] text-gray-500 uppercase font-bold mb-1">Value</p>
-                                        <p className="text-sm font-bold text-white">{CURRENCY_SYMBOL}{(metrics.totalValue / 1000).toFixed(0)}K</p>
+                                        <p className="text-[10px] text-gray-500 uppercase font-bold mb-1">Asset Value (Base Cost)</p>
+                                        <p className="text-sm font-bold text-white">{formatCompactNumber(metrics.totalValue, { currency: CURRENCY_SYMBOL })}</p>
                                     </div>
                                 </div>
 
@@ -347,7 +369,7 @@ export default function NetworkInventory() {
                                                     metrics.utilizationPercent >= 75 ? 'bg-yellow-500' :
                                                         'bg-green-500'
                                                     }`}
-                                                style={{ width: `${Math.min(100, metrics.utilizationPercent)}%` }}
+                                                style={{ width: `${Math.min(100, metrics.utilizationPercent)}%` } as React.CSSProperties}
                                             />
                                         </div>
                                     </div>
@@ -395,7 +417,7 @@ export default function NetworkInventory() {
                                                         <p className={`text-sm font-bold px-2 py-1 rounded border ${getStockStatusColor(product.stock)}`}>
                                                             {product.stock} units
                                                         </p>
-                                                        <p className="text-xs text-gray-400 mt-1">{CURRENCY_SYMBOL}{product.price}</p>
+                                                        <p className="text-xs text-gray-400 mt-1">{formatCompactNumber(product.price, { currency: CURRENCY_SYMBOL })}</p>
                                                     </div>
                                                 </div>
                                                 {product.location && (
@@ -447,7 +469,7 @@ export default function NetworkInventory() {
                                         </div>
                                         <div className="text-right">
                                             <p className="text-xs text-gray-500 uppercase font-bold">Value</p>
-                                            <p className="text-2xl font-bold text-white">{CURRENCY_SYMBOL}{(metrics.totalValue / 1000).toFixed(0)}K</p>
+                                            <p className="text-2xl font-bold text-white">{formatCompactNumber(metrics.totalValue, { currency: CURRENCY_SYMBOL })}</p>
                                         </div>
                                         <button
                                             onClick={() => toggleSiteExpansion(site.id)}
@@ -474,7 +496,7 @@ export default function NetworkInventory() {
                                                     </div>
                                                     <div className="flex items-center justify-between mt-3 pt-3 border-t border-white/5">
                                                         <span className="text-xs text-gray-400">{product.category}</span>
-                                                        <span className="text-sm font-bold text-white">{CURRENCY_SYMBOL}{product.price}</span>
+                                                        <span className="text-sm font-bold text-white">{formatCompactNumber(product.price, { currency: CURRENCY_SYMBOL })}</span>
                                                     </div>
                                                 </div>
                                             ))}

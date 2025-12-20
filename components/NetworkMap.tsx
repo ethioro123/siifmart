@@ -10,6 +10,7 @@ import 'leaflet/dist/leaflet.css';
 import { Site, Product } from '../types';
 import { Building, Store, Package, AlertTriangle, MapPin } from 'lucide-react';
 import { CURRENCY_SYMBOL } from '../constants';
+import { formatCompactNumber } from '../utils/formatting';
 
 // Fix for default marker icons in React-Leaflet
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
@@ -158,7 +159,7 @@ export default function NetworkMap({ sites, products, onSiteClick }: NetworkMapP
                                     <div className="bg-gray-50 rounded p-2">
                                         <p className="text-xs text-gray-500 uppercase font-bold">Value</p>
                                         <p className="text-sm font-bold text-gray-900">
-                                            {CURRENCY_SYMBOL}{(totalValue / 1000).toFixed(0)}K
+                                            {formatCompactNumber(totalValue, { currency: CURRENCY_SYMBOL })}
                                         </p>
                                     </div>
                                 </div>

@@ -8,9 +8,10 @@ interface ModalProps {
   children?: React.ReactNode;
   footer?: React.ReactNode;
   size?: 'sm' | 'md' | 'lg' | 'xl';
+  zIndex?: string;
 }
 
-export default function Modal({ isOpen, onClose, title, children, footer, size = 'md' }: ModalProps) {
+export default function Modal({ isOpen, onClose, title, children, footer, size = 'md', zIndex = 'z-[9999]' }: ModalProps) {
   console.log('🟦 MODAL: Rendering, isOpen=', isOpen, 'title=', title);
 
   // Close on Escape key
@@ -40,7 +41,7 @@ export default function Modal({ isOpen, onClose, title, children, footer, size =
   };
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6">
+    <div className={`fixed inset-0 ${zIndex} flex items-center justify-center p-4 sm:p-6`}>
       {/* Backdrop with blur and darken */}
       <div
         className="absolute inset-0 bg-black/80 backdrop-blur-sm transition-opacity"

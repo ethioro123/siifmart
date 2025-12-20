@@ -4,49 +4,26 @@ import {
     XCircle, AlertCircle, Trash2, Printer, Lock, DollarSign, Calendar, FileText,
     User, Building, Wheat, ShoppingBag, UploadCloud, Globe, Anchor, CreditCard,
     MapPin, PieChart as PieIcon, TrendingUp, ArrowRight, ChevronRight, Send,
-    ClipboardList, ThumbsUp, Mail, Phone, ExternalLink, Check, X, Edit3
+    ClipboardList, ThumbsUp, Mail, Phone, ExternalLink, Check, X, Edit3, Loader2
 } from 'lucide-react';
 import { generatePOId } from '../utils/idGenerator';
 import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
     PieChart, Pie, Cell, AreaChart, Area
 } from 'recharts';
-import { CURRENCY_SYMBOL } from '../constants';
+import { CURRENCY_SYMBOL, GROCERY_CATEGORIES, COMMON_UNITS } from '../constants';
 import { PurchaseOrder, Supplier, POItem, SupplierType, Product } from '../types';
 import Modal from '../components/Modal';
+import ImageUpload from '../components/ImageUpload';
+import { LeaderboardWidget, PointsEarnedPopup } from '../components/WorkerPointsDisplay';
+import Button from '../components/shared/Button';
+import { useLanguage } from '../contexts/LanguageContext';
 import { useStore } from '../contexts/CentralStore';
 import { useData } from '../contexts/DataContext';
 import { Protected, ProtectedButton } from '../components/Protected';
+import { generateQuarterlyReport } from '../utils/reportGenerator';
+import { formatCompactNumber } from '../utils/formatting';
 
-// --- COMPREHENSIVE CATEGORIES (EXPANDED) ---
-const GROCERY_CATEGORIES = {
-    'Fresh Produce': ['Fruits', 'Vegetables', 'Herbs & Spices', 'Organic Produce', 'Salad Mixes', 'Exotic Fruits'],
-    'Meat & Seafood': ['Fresh Meat', 'Poultry', 'Seafood', 'Deli Meats', 'Frozen Meat', 'Sausages & Bacon'],
-    'Dairy & Eggs': ['Milk', 'Cheese', 'Yogurt', 'Butter & Margarine', 'Eggs', 'Cream', 'Plant-Based Dairy'],
-    'Bakery': ['Bread', 'Pastries', 'Cakes', 'Cookies', 'Donuts', 'Tortillas & Wraps', 'Buns & Rolls'],
-    'Beverages': ['Soft Drinks', 'Juices', 'Water', 'Coffee & Tea', 'Energy Drinks', 'Alcohol', 'Sports Drinks'],
-    'Pantry Staples': ['Rice & Grains', 'Pasta', 'Flour & Baking', 'Cooking Oil', 'Canned Goods', 'Sauces & Condiments', 'Spices & Seasonings', 'Jams & Spreads'],
-    'Snacks & Sweets': ['Chips & Crisps', 'Chocolate', 'Candy', 'Nuts & Seeds', 'Popcorn', 'Biscuits', 'Crackers', 'Dried Fruit'],
-    'Frozen Foods': ['Ice Cream', 'Frozen Vegetables', 'Frozen Meals', 'Frozen Pizza', 'Frozen Desserts', 'Frozen Fruit'],
-    'Health & Wellness': ['Vitamins & Supplements', 'First Aid', 'Personal Care', 'Baby Products', 'Pharmacy', 'Sports Nutrition'],
-    'Household': ['Cleaning Supplies', 'Paper Products', 'Laundry', 'Kitchen Supplies', 'Air Fresheners', 'Pest Control'],
-    'Personal Care': ['Bath & Body', 'Hair Care', 'Oral Care', 'Cosmetics', 'Hygiene Products', 'Shaving & Grooming'],
-    'Pet Supplies': ['Pet Food', 'Pet Treats', 'Pet Accessories', 'Pet Grooming'],
-    'International Foods': ['Asian Foods', 'Mediterranean', 'Latin American', 'African Foods', 'Indian Foods', 'European Foods'],
-    'Organic & Natural': ['Organic Produce', 'Natural Foods', 'Gluten-Free', 'Vegan Products', 'Superfoods'],
-    'Baby & Kids': ['Baby Food', 'Diapers', 'Baby Care', 'Kids Snacks', 'Toys', 'Baby Gear'],
-    'Office & Stationery': ['Office Supplies', 'School Supplies', 'Writing Materials', 'Paper', 'Ink & Toner', 'Office Furniture'],
-    'Electronics': ['Phone Accessories', 'Batteries', 'Small Electronics', 'Computers', 'Peripherals', 'Cables & Chargers'],
-    'Home & Garden': ['Gardening', 'Home Decor', 'Tools', 'Lighting', 'Hardware', 'Outdoor Living'],
-    'Automotive': ['Car Care', 'Fluids', 'Accessories', 'Tools'],
-    'Industrial': ['Safety Gear', 'Packaging Materials', 'Warehouse Supplies', 'Maintenance'],
-    'Other': ['Miscellaneous', 'General Merchandise', 'Seasonal']
-};
-
-const COMMON_UNITS = [
-    'piece', 'kg', 'g', 'liter', 'ml', 'box', 'pack', 'carton',
-    'bag', 'bottle', 'can', 'jar', 'dozen', 'bundle', 'tray'
-];
 
 // ═══════════════════════════════════════════════════════════════
 // CATEGORY-SPECIFIC ATTRIBUTES CONFIGURATION
@@ -339,7 +316,6 @@ export default function Procurement() {
         allOrders, suppliers, products, createPO, updatePO, addSupplier, deletePO, activeSite, sites, addNotification, addProduct
     } = useData();
     // --- REPORT GENERATOR ---
-    const { generateQuarterlyReport } = require('../utils/reportGenerator');
 
     // Use allOrders but rename to orders for consistency in the rest of the component
     const orders = allOrders;
@@ -371,6 +347,7 @@ export default function Procurement() {
     const [newPOItems, setNewPOItems] = useState<POItem[]>([]);
     const [currentProductToAdd, setCurrentProductToAdd] = useState('');
     const [isRequestMode, setIsRequestMode] = useState(false);
+    const [editingPO, setEditingPO] = useState<PurchaseOrder | null>(null);
 
     // Flexible Item Entry State - CATEGORY-BASED
     const [isCustomItem, setIsCustomItem] = useState(true);
@@ -381,10 +358,12 @@ export default function Procurement() {
     const [customItemSize, setCustomItemSize] = useState(''); // NEW: Size/Weight/Volume (e.g., 500ml, 2kg)
     const [customItemSpecs, setCustomItemSpecs] = useState('');
     const [customItemUnit, setCustomItemUnit] = useState('');
+    const [customItemImage, setCustomItemImage] = useState('');
 
     // PO Financials & Terms (ALL OPTIONAL)
     const [currentQty, setCurrentQty] = useState(0);
     const [currentCost, setCurrentCost] = useState(0);
+    const [currentRetailPrice, setCurrentRetailPrice] = useState(0);
     const [shippingCost, setShippingCost] = useState(0);
     const [taxRate, setTaxRate] = useState(0);
     const [discountRate, setDiscountRate] = useState(0);
@@ -398,6 +377,8 @@ export default function Procurement() {
     const [destinationSiteIds, setDestinationSiteIds] = useState<string[]>([]); // CHANGED: Array for multi-site
     const [isMultiSiteMode, setIsMultiSiteMode] = useState(false);
     const [quantityDistribution, setQuantityDistribution] = useState<'shared' | 'per-store'>('per-store'); // NEW: How to distribute quantities
+    const [poPriority, setPoPriority] = useState<'Low' | 'Normal' | 'High' | 'Urgent'>('Normal');
+    const [productSearchTerm, setProductSearchTerm] = useState('');
 
     // Dynamic Category Attributes (for custom items)
     const [itemAttributes, setItemAttributes] = useState<Record<string, string>>({});
@@ -414,6 +395,7 @@ export default function Procurement() {
     // Helper function to get valid PO destination sites (WAREHOUSES ONLY - sorted by type then name)
     const getValidPODestinationSites = () => {
         return sites
+            .filter(site => (PO_DESTINATION_SITE_TYPES as readonly string[]).includes(site.type))
             .sort((a, b) => {
                 // Sort by type first (Warehouse, then Distribution Center)
                 const typeOrder = { 'Warehouse': 1, 'Distribution Center': 2 };
@@ -544,9 +526,20 @@ export default function Procurement() {
 
     // --- ANALYTICS DATA ---
     const metrics = useMemo(() => {
-        const dateFilteredOrders = orders.filter(po => isWithinRange(po.date || new Date().toISOString()));
+        // Multi-store filtering: Super admin sees all, others see only their site's POs
+        const siteFilteredOrders = orders.filter(po =>
+            user?.role === 'super_admin' || !activeSite || po.siteId === activeSite.id
+        );
 
-        const totalSpend = dateFilteredOrders.reduce((sum, o) => sum + (o.status !== 'Cancelled' ? o.totalAmount : 0), 0);
+        const dateFilteredOrders = siteFilteredOrders.filter(po => isWithinRange(po.date || new Date().toISOString()));
+
+        // Total Spend: Only include committed/completed orders (Approved, Ordered, Received, etc.)
+        // EXCLUDE: Draft, Rejected
+        const committedStatuses = ['Approved', 'Ordered', 'Received', 'Partially Received', 'Pending'];
+        const totalSpend = dateFilteredOrders.reduce((sum, o) =>
+            sum + (committedStatuses.includes(o.status) ? o.totalAmount : 0), 0
+        );
+
         const openPO = dateFilteredOrders.filter(o => o.status === 'Pending').length;
         const pendingValue = dateFilteredOrders.filter(o => o.status === 'Pending').reduce((sum, o) => sum + o.totalAmount, 0);
 
@@ -569,8 +562,11 @@ export default function Procurement() {
             { name: 'Jun', spend: totalSpend * 0.18 },
         ];
 
-        return { totalSpend, openPO, pendingValue, categoryData, trendData };
-    }, [orders, suppliers]);
+        const potentialRevenue = dateFilteredOrders.reduce((sum, o) =>
+            sum + (committedStatuses.includes(o.status) ? (o.lineItems || []).reduce((is, i) => is + ((i.retailPrice || i.unitCost) * i.quantity), 0) : 0), 0);
+
+        return { totalSpend, openPO, pendingValue, potentialRevenue, categoryData, trendData };
+    }, [orders, suppliers, activeSite, user, dateRange]);
 
     // --- FILTERING LOGIC ---
     const filteredOrders = orders.filter(po => {
@@ -638,6 +634,7 @@ export default function Procurement() {
             const product = products.find(p => p.id === currentProductToAdd);
             if (product) {
                 setCurrentCost(product.costPrice || product.price * 0.7);
+                setCurrentRetailPrice(product.price || 0);
             }
         }
     }, [currentProductToAdd, products, isCustomItem]);
@@ -692,22 +689,20 @@ export default function Procurement() {
             let successfulPOs = 0;
 
             // Loop through each selected destination site and create a PO
-            for (const siteId of destinationSiteIds) {
+            if (editingPO) {
+                const siteId = destinationSiteIds[0] || editingPO.siteId;
                 const destSite = sites.find(s => s.id === siteId);
                 const destination = destSite?.name || 'Unknown Location';
 
-                const newPO: PurchaseOrder = {
-                    id: crypto.randomUUID(),
-                    poNumber: generatePOId(),
-                    siteId: siteId,
+                const updatedPO: PurchaseOrder = {
+                    ...editingPO,
+                    siteId,
                     supplierId: vendorId,
                     supplierName: vendorName,
-                    date: new Date().toLocaleDateString('en-CA'),
-                    status: 'Draft', // Always create as Draft
                     totalAmount,
                     itemsCount: totalItems,
-                    expectedDelivery: expectedDate || new Date(Date.now() + 86400000 * 7).toLocaleDateString('en-CA'),
-                    lineItems: newPOItems, // Send full items to each site
+                    expectedDelivery: expectedDate || editingPO.expectedDelivery,
+                    lineItems: newPOItems,
                     shippingCost: shippingCost || 0,
                     taxAmount: taxAmount || 0,
                     notes: finalNotes,
@@ -715,11 +710,42 @@ export default function Procurement() {
                     incoterms: incoterms || 'N/A',
                     destination: destination,
                     discount: discountAmount || 0,
-                    createdBy: user?.name || 'Unknown'
+                    priority: poPriority,
                 };
 
-                await createPO(newPO);
-                successfulPOs++;
+                await updatePO(updatedPO);
+                successfulPOs = 1;
+            } else {
+                for (const siteId of destinationSiteIds) {
+                    const destSite = sites.find(s => s.id === siteId);
+                    const destination = destSite?.name || 'Unknown Location';
+
+                    const newPO: PurchaseOrder = {
+                        id: crypto.randomUUID(),
+                        poNumber: generatePOId(),
+                        siteId: siteId,
+                        supplierId: vendorId,
+                        supplierName: vendorName,
+                        date: new Date().toLocaleDateString('en-CA'),
+                        status: 'Draft', // Always create as Draft
+                        totalAmount,
+                        itemsCount: totalItems,
+                        expectedDelivery: expectedDate || new Date(Date.now() + 86400000 * 7).toLocaleDateString('en-CA'),
+                        lineItems: newPOItems, // Send full items to each site
+                        shippingCost: shippingCost || 0,
+                        taxAmount: taxAmount || 0,
+                        notes: finalNotes,
+                        paymentTerms: paymentTerms || 'To be determined',
+                        incoterms: incoterms || 'N/A',
+                        destination: destination,
+                        discount: discountAmount || 0,
+                        priority: poPriority,
+                        createdBy: user?.name || 'Unknown'
+                    };
+
+                    await createPO(newPO);
+                    successfulPOs++;
+                }
             }
 
             // Close modal and reset
@@ -727,7 +753,9 @@ export default function Procurement() {
 
             // Wait a moment for notifications to clear
             setTimeout(() => {
-                if (successfulPOs === 1) {
+                if (editingPO) {
+                    addNotification('success', `Purchase Order updated successfully`);
+                } else if (successfulPOs === 1) {
                     addNotification('success', `Purchase Order created successfully for 1 site (Draft mode)`);
                 } else {
                     addNotification('success', `Purchase Orders created successfully for ${successfulPOs} sites (Draft mode)`);
@@ -736,12 +764,16 @@ export default function Procurement() {
 
             // Clean up state
             setNewPOItems([]);
+            setPoPriority('Normal');
+            setProductSearchTerm('');
             setPoNotes('');
             setDestinationSiteIds([]);
             setIsManualVendor(false);
             setManualVendorName('');
             setNewPOSupplier('');
             setIsRequestMode(false);
+            setEditingPO(null);
+            setExpectedDate('');
 
         } catch (error) {
             console.error(error);
@@ -769,7 +801,7 @@ export default function Procurement() {
         // Reset to default site (current site or first warehouse)
         const defaultSite = activeSite?.id || sites.find(s => s.type === 'Warehouse' || s.type === 'Distribution Center')?.id || sites[0]?.id;
         setDestinationSiteIds(defaultSite ? [defaultSite] : []);
-        setIsMultiSiteMode(false); // Reset to single-site mode
+        setIsMultiSiteMode(false); // Reset to single-site mode by default
         setExpectedDate('');
         setIsCustomItem(true);
         setQuantityDistribution('per-store'); // Reset to default
@@ -798,17 +830,25 @@ export default function Procurement() {
 
         // 2. PRICE VALIDATION
         if (currentCost === undefined || currentCost === null || currentCost < 0) {
-            addNotification('alert', "Please enter a valid unit price (cannot be negative).");
+            addNotification('alert', "Please enter a valid cost price (cannot be negative).");
             return;
         }
-        if (currentCost > 99999999) {
-            addNotification('alert', "Unit price exceeds maximum limit.");
+        if (currentRetailPrice === undefined || currentRetailPrice === null || currentRetailPrice < 0) {
+            addNotification('alert', "Please enter a valid retail price (cannot be negative).");
+            return;
+        }
+        if (currentCost > 99999999 || currentRetailPrice > 99999999) {
+            addNotification('alert', "Price exceeds maximum limit.");
             return;
         }
         // Allow zero price for samples/promos but warn
         if (currentCost === 0) {
-            const confirmZero = window.confirm("Unit price is 0. This item will be free. Continue?");
+            const confirmZero = window.confirm("Cost price is 0. This item will be recorded as free. Continue?");
             if (!confirmZero) return;
+        }
+        if (currentRetailPrice === 0) {
+            const confirmZeroRetail = window.confirm("Retail price is 0. This item will be listed as free for customers. Continue?");
+            if (!confirmZeroRetail) return;
         }
 
         // 3. PRODUCT/CATEGORY VALIDATION
@@ -950,7 +990,13 @@ export default function Procurement() {
             productName,
             quantity: currentQty,
             unitCost: currentCost,
-            totalCost
+            retailPrice: currentRetailPrice,
+            totalCost,
+            image: customItemImage || undefined,
+            brand: customItemBrand || undefined,
+            size: customItemSize || undefined,
+            unit: customItemUnit || undefined,
+            category: selectedSubCategory || selectedMainCategory || undefined,
         };
 
         // 7. ADD TO LIST
@@ -975,9 +1021,11 @@ export default function Procurement() {
         setCustomItemUnit('');
         setCurrentQty(0);
         setCurrentCost(0);
+        setCurrentRetailPrice(0);
         setItemAttributes({}); // Reset dynamic attributes
         setSelectedDescTemplate(''); // Reset description template
         setPackQuantity(0); // Reset pack quantity
+        setCustomItemImage(''); // Reset product image
     };
 
     const removePOItem = (idx: number) => {
@@ -986,13 +1034,13 @@ export default function Procurement() {
 
     // State for inline editing of PO items
     const [editingItemIndex, setEditingItemIndex] = useState<number | null>(null);
-    const [editingItem, setEditingItem] = useState<{ qty: number; price: number } | null>(null);
+    const [editingItem, setEditingItem] = useState<{ qty: number; price: number; retailPrice: number } | null>(null);
 
     // Start editing an item
     const startEditItem = (idx: number) => {
         const item = newPOItems[idx];
         setEditingItemIndex(idx);
-        setEditingItem({ qty: item.quantity, price: item.unitCost });
+        setEditingItem({ qty: item.quantity, price: item.unitCost, retailPrice: item.retailPrice || 0 });
     };
 
     // Save edited item
@@ -1016,6 +1064,7 @@ export default function Procurement() {
                     ...item,
                     quantity: editingItem.qty,
                     unitCost: editingItem.price,
+                    retailPrice: editingItem.retailPrice,
                     totalCost: newTotal
                 };
             }
@@ -1374,10 +1423,10 @@ export default function Procurement() {
                             <td class="totals-label">Subtotal</td>
                             <td class="totals-value">${CURRENCY_SYMBOL}${((selectedPO.totalAmount || 0) - (selectedPO.taxAmount || 0) - (selectedPO.shippingCost || 0)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                         </tr>
-                        ${selectedPO.discount > 0 ? `
+                        ${(selectedPO.discount || 0) > 0 ? `
                         <tr>
                             <td class="totals-label">Discount</td>
-                            <td class="totals-value" style="color: #ef4444">-${CURRENCY_SYMBOL}${selectedPO.discount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                            <td class="totals-value" style="color: #ef4444">-${CURRENCY_SYMBOL}${(selectedPO.discount || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                         </tr>
                         ` : ''}
                         <tr>
@@ -1425,12 +1474,13 @@ export default function Procurement() {
     };
 
     const handleApprovePO = async () => {
-        if (!selectedPO) return;
+        if (!selectedPO || isSubmitting) return;
         if (!canApprove) {
             addNotification('alert', 'Only Super Admin or Admin can approve purchase orders');
             return;
         }
 
+        setIsSubmitting(true);
         try {
             // Update PO status to Approved
             const updatedPO: PurchaseOrder = {
@@ -1453,7 +1503,35 @@ export default function Procurement() {
         } catch (error) {
             console.error('Error approving PO:', error);
             addNotification('alert', 'Failed to approve PO. Please try again.');
+        } finally {
+            setIsSubmitting(false);
         }
+    };
+
+    const handleEditPO = (po: PurchaseOrder) => {
+        setEditingPO(po);
+        setNewPOItems(po.lineItems || []);
+
+        // Find supplier ID properly
+        if (po.supplierId?.startsWith('MANUAL')) {
+            setIsManualVendor(true);
+            setManualVendorName(po.supplierName);
+        } else {
+            setIsManualVendor(false);
+            setNewPOSupplier(po.supplierId || '');
+        }
+
+        setExpectedDate(po.expectedDelivery || '');
+        setPoPriority(po.priority || 'Normal');
+        setPoNotes(po.notes || '');
+
+        // Handle multi-site dest (even if it's one site for edit)
+        if (po.siteId) {
+            setDestinationSiteIds([po.siteId]);
+        }
+
+        setIsCreatePOOpen(true);
+        setSelectedPO(null); // Close view modal
     };
 
     const handleRejectPO = () => {
@@ -1467,8 +1545,9 @@ export default function Procurement() {
     };
 
     const handleConfirmRejectPO = async () => {
-        if (!poToReject) return;
+        if (!poToReject || isSubmitting) return;
 
+        setIsSubmitting(true);
         try {
             // Update PO status to Cancelled (rejected)
             const updatedPO: PurchaseOrder = {
@@ -1488,6 +1567,8 @@ export default function Procurement() {
         } catch (error) {
             console.error('Failed to reject PO:', error);
             addNotification('alert', 'Failed to reject PO');
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -1589,7 +1670,10 @@ export default function Procurement() {
             </div>
             <div className="flex gap-3">
                 <button
-                    onClick={() => setIsCreatePOOpen(false)}
+                    onClick={() => {
+                        setIsCreatePOOpen(false);
+                        setEditingPO(null);
+                    }}
                     className="px-6 py-2 rounded-lg border border-white/20 bg-white/10 hover:bg-white/20 text-white font-bold text-sm transition-colors"
                 >
                     Cancel
@@ -1597,15 +1681,15 @@ export default function Procurement() {
                 <button
                     onClick={handleCreatePO}
                     disabled={isSubmitting}
-                    className={`px-8 py-2 rounded-lg font-bold text-sm shadow-lg transition-all ${isSubmitting ? 'bg-gray-500 cursor-not-allowed text-gray-300' : isRequestMode ? 'bg-blue-500 hover:bg-blue-600 text-white shadow-blue-500/20' : 'bg-cyber-primary hover:bg-cyber-accent text-black shadow-cyber-primary/30'}`}
+                    className={`px-8 py-2 rounded-lg font-bold text-sm shadow-lg transition-all flex items-center gap-2 ${isSubmitting ? 'bg-gray-500 cursor-not-allowed text-gray-300' : isRequestMode ? 'bg-blue-500 hover:bg-blue-600 text-white shadow-blue-500/20' : 'bg-cyber-primary hover:bg-cyber-accent text-black shadow-cyber-primary/30'}`}
                 >
                     {isSubmitting ? (
                         <span className="flex items-center gap-2">
-                            <span className="animate-spin h-4 w-4 border-2 border-black border-t-transparent rounded-full"></span>
+                            <Loader2 size={16} className="animate-spin" />
                             Processing...
                         </span>
                     ) : (
-                        isRequestMode ? 'Submit Request' : 'Issue Order'
+                        editingPO ? 'Update Order' : (isRequestMode ? 'Submit Request' : 'Create Order')
                     )}
                 </button>
             </div>
@@ -1655,8 +1739,15 @@ export default function Procurement() {
                 <div className="space-y-6 animate-in fade-in">
                     {/* Metrics */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                        <KpiCard title="Total Spend (YTD)" value={`${CURRENCY_SYMBOL} ${(metrics.totalSpend / 1000).toFixed(1)}k`} sub="Across all categories" icon={DollarSign} color="text-cyber-primary" />
-                        <KpiCard title="Open Orders" value={metrics.openPO} sub={`Value: ${CURRENCY_SYMBOL} ${metrics.pendingValue.toLocaleString()}`} icon={Package} color="text-blue-400" />
+                        <KpiCard
+                            title={`Total Spend (${dateRange === 'All Time' ? 'Life' : dateRange.replace('This ', '')})`}
+                            value={formatCompactNumber(metrics.totalSpend, { currency: CURRENCY_SYMBOL })}
+                            sub="Across all categories"
+                            icon={DollarSign}
+                            color="text-cyber-primary"
+                        />
+                        <KpiCard title="Open Orders" value={metrics.openPO} sub={`Value: ${formatCompactNumber(metrics.pendingValue, { currency: CURRENCY_SYMBOL })}`} icon={Package} color="text-blue-400" />
+                        <KpiCard title="Potential Revenue" value={formatCompactNumber(metrics.potentialRevenue, { currency: CURRENCY_SYMBOL })} sub="From current PO items" icon={TrendingUp} color="text-green-400" />
                         <KpiCard title="Active Vendors" value={suppliers.filter(s => s.status === 'Active').length} sub="Top rated first" icon={Building} color="text-yellow-400" />
                         <KpiCard title="On-Time Delivery" value="94.2%" sub="Last 30 Days" icon={Clock} color="text-purple-400" />
                     </div>
@@ -1680,7 +1771,10 @@ export default function Procurement() {
                             <div className="flex justify-center gap-4 flex-wrap mt-4">
                                 {metrics.categoryData.map((entry, index) => (
                                     <div key={index} className="flex items-center gap-2 text-xs text-gray-400">
-                                        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }}></div>
+                                        <div
+                                            className="w-2 h-2 rounded-full"
+                                            style={{ backgroundColor: COLORS[index % COLORS.length] } as React.CSSProperties}
+                                        ></div>
                                         {entry.name}
                                     </div>
                                 ))}
@@ -1827,13 +1921,15 @@ export default function Procurement() {
                                                                 }
                                                             }}
                                                             className="w-4 h-4 rounded border-gray-600 text-cyber-primary focus:ring-cyber-primary bg-black/50"
+                                                            title={`Select PO ${po.poNumber || po.po_number || po.id}`}
+                                                            aria-label={`Select PO ${po.poNumber || po.po_number || po.id}`}
                                                         />
                                                     ) : (
                                                         <span className="w-4 h-4 block"></span>
                                                     )}
                                                 </td>
                                             )}
-                                            <td className="p-4 text-sm font-mono text-white font-bold">{po.poNumber || po.po_number || po.id}</td>
+                                            <td className="p-4 text-sm font-mono text-white font-bold">{po.poNumber || po.po_number || `PO-${po.id.substring(0, 8).toUpperCase()}`}</td>
                                             <td className="p-4 text-sm text-gray-300">{po.supplierName}</td>
                                             <td className="p-4 text-sm text-gray-300">{po.destination || sites.find(s => s.id === po.siteId)?.name || 'Unknown'}</td>
                                             <td className="p-4 text-xs text-gray-500">{po.date}</td>
@@ -1871,7 +1967,7 @@ export default function Procurement() {
 
                                                                     // Persist to database
                                                                     await updatePO(updatedPO);
-                                                                    addNotification('success', `PO ${po.poNumber || po.po_number || po.id} approved successfully`);
+                                                                    addNotification('success', `PO ${po.poNumber || po.po_number || `PO-${po.id.substring(0, 8).toUpperCase()}`} approved successfully`);
                                                                 } catch (error) {
                                                                     console.error('Error approving PO:', error);
                                                                     addNotification('alert', 'Failed to approve PO. Please try again.');
@@ -1883,7 +1979,7 @@ export default function Procurement() {
                                                             Approve
                                                         </button>
                                                     )}
-                                                    <button onClick={() => setSelectedPO(po)} className="text-xs bg-white/5 hover:bg-white/10 px-3 py-1 rounded border border-white/10 text-white transition-colors">View</button>
+                                                    <Button variant="ghost" size="sm" onClick={() => setSelectedPO(po)} className="text-xs px-3 py-1 text-white border border-white/10">View</Button>
                                                 </div>
                                             </td>
                                         </tr>
@@ -2034,7 +2130,7 @@ export default function Procurement() {
             )}
 
             {/* --- MODAL: CREATE PO (Elegant Minimal Redesign) --- */}
-            <Modal isOpen={isCreatePOOpen} onClose={() => setIsCreatePOOpen(false)} title="" size="xl" footer={createPOFooter}>
+            <Modal isOpen={isCreatePOOpen} onClose={() => { setIsCreatePOOpen(false); setEditingPO(null); }} title={editingPO ? "Edit Purchase Order" : "Create Purchase Order"} size="xl" footer={createPOFooter}>
                 <div className="space-y-6">
                     {/* Header */}
                     <div className="flex items-start justify-between">
@@ -2056,7 +2152,7 @@ export default function Procurement() {
                                 </button>
                             </div>
                             {isManualVendor ? (
-                                <input className="w-full bg-transparent border-b border-white/20 py-1 text-white text-sm focus:border-cyber-primary outline-none" placeholder="Enter vendor name..." value={manualVendorName} onChange={(e) => setManualVendorName(e.target.value)} />
+                                <input className="w-full bg-transparent border-b border-white/20 py-1 text-white text-sm focus:border-cyber-primary outline-none" placeholder="Enter vendor name..." value={manualVendorName} onChange={(e) => setManualVendorName(e.target.value)} title="Manual Vendor Name" aria-label="Manual Vendor Name" />
                             ) : (
                                 <select className="w-full bg-transparent text-white text-sm focus:outline-none cursor-pointer" value={newPOSupplier} onChange={(e) => setNewPOSupplier(e.target.value)} title="Select Vendor">
                                     <option value="" className="bg-cyber-dark">Select...</option>
@@ -2085,6 +2181,8 @@ export default function Procurement() {
                                                     setDestinationSiteIds(prev => prev.filter(id => id !== site.id));
                                                 }
                                             }}
+                                            title={`Select ${site.name}`}
+                                            aria-label={`Select ${site.name}`}
                                         />
                                         <span className="text-sm text-white truncate">{site.name}</span>
                                     </label>
@@ -2095,13 +2193,30 @@ export default function Procurement() {
                         {/* Expected */}
                         <div className="bg-white/5 rounded-xl p-4">
                             <p className="text-xs text-gray-500 uppercase tracking-wider mb-2">Expected</p>
-                            <input type="date" className="w-full bg-transparent text-white text-sm focus:outline-none" value={expectedDate} onChange={e => setExpectedDate(e.target.value)} />
+                            <input type="date" className="w-full bg-transparent text-white text-sm focus:outline-none" value={expectedDate} onChange={e => setExpectedDate(e.target.value)} title="Expected Delivery Date" aria-label="Expected Delivery Date" />
+                        </div>
+
+                        {/* Priority */}
+                        <div className="bg-white/5 rounded-xl p-4">
+                            <p className="text-xs text-gray-500 uppercase tracking-wider mb-2">Priority</p>
+                            <select
+                                className="w-full bg-transparent text-white text-sm focus:outline-none cursor-pointer"
+                                value={poPriority}
+                                onChange={(e) => setPoPriority(e.target.value as any)}
+                                title="Select Priority"
+                                aria-label="Select Priority"
+                            >
+                                <option value="Low" className="bg-cyber-dark">Low</option>
+                                <option value="Normal" className="bg-cyber-dark">Normal</option>
+                                <option value="High" className="bg-cyber-dark">High</option>
+                                <option value="Urgent" className="bg-cyber-dark">Urgent</option>
+                            </select>
                         </div>
 
                         {/* Terms */}
                         <div className="bg-white/5 rounded-xl p-4">
                             <p className="text-xs text-gray-500 uppercase tracking-wider mb-2">Payment Terms</p>
-                            <input className="w-full bg-transparent border-b border-white/20 py-1 text-white text-sm focus:border-cyber-primary outline-none" placeholder="Net 30" value={paymentTerms} onChange={e => setPaymentTerms(e.target.value)} />
+                            <input className="w-full bg-transparent border-b border-white/20 py-1 text-white text-sm focus:border-cyber-primary outline-none" placeholder="Net 30" value={paymentTerms} onChange={e => setPaymentTerms(e.target.value)} title="Payment Terms" aria-label="Payment Terms" />
                         </div>
                     </div>
 
@@ -2109,21 +2224,46 @@ export default function Procurement() {
                     <div className="bg-white/5 rounded-xl p-4 border border-white/10">
                         <div className="flex items-center justify-between mb-4">
                             <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider">Add Item</h3>
-                            <button onClick={() => { setIsCustomItem(!isCustomItem); setCurrentProductToAdd(''); setCustomItemName(''); setSelectedMainCategory(''); setItemAttributes({}); setSelectedDescTemplate(''); }} className={`text-xs px-3 py-1.5 rounded-lg font-medium transition-all ${isCustomItem ? 'bg-green-500/20 text-green-400' : 'bg-white/10 text-gray-400 hover:bg-white/20'}`}>
-                                {isCustomItem ? '✏️ Custom Item' : '📦 From Catalog'}
-                            </button>
+
                             <div className="flex items-center gap-2">
-                                <button className="p-2 text-gray-400 hover:text-white transition-colors" title="Export PDF" onClick={handleGenerateReport}>
-                                    <Download size={20} />
-                                </button>
-                                <button onClick={() => { setIsCustomItem(!isCustomItem); setCurrentProductToAdd(''); setCustomItemName(''); setSelectedMainCategory(''); setItemAttributes({}); setSelectedDescTemplate(''); }} className={`text-xs px-3 py-1.5 rounded-lg font-medium transition-all ${isCustomItem ? 'bg-green-500/20 text-green-400' : 'bg-white/10 text-gray-400 hover:bg-white/20'}`}>
-                                    {isCustomItem ? '✏️ Custom Item' : '📦 From Catalog'}
-                                </button>
+                                <Button
+                                    variant="ghost"
+                                    icon={<Download size={16} />}
+                                    title="Export PDF"
+                                    onClick={handleGenerateReport}
+                                    className="p-2 text-gray-400 hover:text-cyber-primary transition-colors"
+                                />
+                                <Button
+                                    variant={isCustomItem ? 'primary' : 'secondary'}
+                                    onClick={() => { setIsCustomItem(!isCustomItem); setCurrentProductToAdd(''); setCustomItemName(''); setSelectedMainCategory(''); setItemAttributes({}); setSelectedDescTemplate(''); }}
+                                    size="sm"
+                                    className="px-3 py-1.5"
+                                >
+                                    {isCustomItem ? 'Add Custom Item' : 'From Product Catalog'}
+                                </Button>
                             </div>
                         </div>
 
                         {isCustomItem ? (
                             <div className="space-y-3">
+                                {/* Product Image Section */}
+                                <div className="flex items-start gap-4 p-3 bg-black/20 rounded-xl border border-white/5">
+                                    <ImageUpload
+                                        value={customItemImage}
+                                        onChange={setCustomItemImage}
+                                        onError={(error) => addNotification('alert', error)}
+                                        placeholder="Add product photo"
+                                        size="md"
+                                    />
+                                    <div className="flex-1 min-w-0">
+                                        <h4 className="text-white font-bold text-xs mb-1">Product Image</h4>
+                                        <p className="text-gray-500 text-[10px] leading-relaxed">
+                                            Upload a photo for this item. You can browse files, take a photo with camera, or paste a URL.
+                                        </p>
+                                        <p className="text-gray-600 text-[9px] mt-1">Max 10MB • Supports JPG, PNG, HEIC (iPhone), WebP & more</p>
+                                    </div>
+                                </div>
+
                                 {/* Row 1: Category + Item Name + Brand */}
                                 <div className="grid grid-cols-12 gap-2">
                                     {/* Category */}
@@ -2160,7 +2300,7 @@ export default function Procurement() {
                                         <label className="text-[10px] text-gray-500 uppercase mb-1 block">Brand</label>
                                         <input
                                             className="w-full bg-black/30 border border-white/20 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500"
-                                            placeholder="e.g., Coca-Cola, Nestle..."
+                                            placeholder="e.g., Coca-Cola"
                                             value={customItemBrand}
                                             onChange={e => setCustomItemBrand(e.target.value)}
                                         />
@@ -2245,48 +2385,113 @@ export default function Procurement() {
                                     </div>
                                 </div>
 
-                                {/* Row 3: Qty + Price + Total + Add */}
-                                <div className="grid grid-cols-4 gap-3 pt-2 border-t border-white/10">
+                                {/* Row 3: Qty + Cost + Retail + Total + Add */}
+                                <div className="grid grid-cols-5 gap-3 pt-2 border-t border-white/10">
                                     <div>
                                         <label className="text-[10px] text-cyber-primary uppercase mb-1 block">Order Qty *</label>
                                         <input type="number" min="1" className="w-full bg-black/30 border border-white/20 rounded-lg px-3 py-2 text-sm text-white text-center" placeholder="0" value={currentQty || ''} onChange={e => setCurrentQty(parseInt(e.target.value) || 0)} />
                                     </div>
                                     <div>
-                                        <label className="text-[10px] text-cyber-primary uppercase mb-1 block">Unit Price *</label>
+                                        <label className="text-[10px] text-cyber-primary uppercase mb-1 block">Cost Price (ETB) *</label>
                                         <input type="number" min="0" step="0.01" className="w-full bg-black/30 border border-white/20 rounded-lg px-3 py-2 text-sm text-white text-right" placeholder="0.00" value={currentCost || ''} onChange={e => setCurrentCost(parseFloat(e.target.value) || 0)} />
                                     </div>
+                                    <div className="relative">
+                                        <label className="text-[10px] text-yellow-400 uppercase mb-1 block">Retail Price (ETB) *</label>
+                                        <input type="number" min="0" step="0.01" className="w-full bg-black/30 border border-white/20 rounded-lg px-3 py-2 text-sm text-white text-right" placeholder="0.00" value={currentRetailPrice || ''} onChange={e => setCurrentRetailPrice(parseFloat(e.target.value) || 0)} />
+                                        {currentRetailPrice > 0 && currentCost > 0 && (
+                                            <div className={`absolute -right-2 -top-1 px-2 py-0.5 rounded text-[9px] font-bold shadow-sm z-10 ${((currentRetailPrice - currentCost) / currentRetailPrice) * 100 > 15 ? 'bg-green-500 text-black' : 'bg-yellow-500 text-black'}`}>
+                                                {(((currentRetailPrice - currentCost) / currentRetailPrice) * 100).toFixed(1)}% MGN
+                                            </div>
+                                        )}
+                                    </div>
                                     <div>
-                                        <label className="text-[10px] text-gray-500 uppercase mb-1 block">Total</label>
+                                        <label className="text-[10px] text-gray-500 uppercase mb-1 block">Total (Cost)</label>
                                         <div className="w-full bg-black/50 border border-cyber-primary/30 rounded-lg px-3 py-2 text-sm text-cyber-primary font-mono font-bold text-right">
-                                            {CURRENCY_SYMBOL}{(currentCost * currentQty).toLocaleString()}
+                                            {formatCompactNumber(currentCost * currentQty, { currency: CURRENCY_SYMBOL })}
                                         </div>
                                     </div>
                                     <div className="flex items-end">
-                                        <button onClick={addItemToPO} className="w-full bg-cyber-primary hover:bg-cyber-accent text-black py-2 rounded-lg font-bold text-sm transition-colors flex items-center justify-center gap-1" title="Add Item">
-                                            <Plus size={16} /> Add
-                                        </button>
+                                        <Button
+                                            onClick={addItemToPO}
+                                            icon={<Plus size={16} />}
+                                            className="w-full bg-cyber-primary hover:bg-cyber-accent text-black py-2 rounded-lg font-bold text-sm transition-colors flex items-center justify-center gap-1"
+                                            title="Add Item"
+                                        >
+                                            Add Item
+                                        </Button>
                                     </div>
                                 </div>
                             </div>
                         ) : (
                             /* Catalog Product Selection */
                             <div className="grid grid-cols-12 gap-3">
-                                <div className="col-span-12 md:col-span-6">
-                                    <select className="w-full bg-black/30 border border-white/20 rounded-lg px-3 py-2 text-sm text-white" value={currentProductToAdd} onChange={e => setCurrentProductToAdd(e.target.value)} title="Product">
-                                        <option value="">Select product from catalog...</option>
-                                        {products.map(p => <option key={p.id} value={p.id}>{p.name} (Stock: {p.stock})</option>)}
-                                    </select>
+                                <div className="col-span-12 md:col-span-5">
+                                    <div className="relative group">
+                                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-cyber-primary transition-colors">
+                                            <Search size={14} />
+                                        </div>
+                                        <input
+                                            className="w-full bg-black/30 border border-white/20 focus:border-cyber-primary/50 outline-none rounded-lg pl-9 pr-3 py-2 text-sm text-white transition-all"
+                                            placeholder="Search product from catalog..."
+                                            value={productSearchTerm}
+                                            onChange={e => setProductSearchTerm(e.target.value)}
+                                        />
+                                        {productSearchTerm && (
+                                            <div className="absolute top-full left-0 right-0 mt-1 bg-cyber-dark border border-white/10 rounded-xl overflow-hidden shadow-2xl z-[100] max-h-[300px] overflow-y-auto custom-scrollbar">
+                                                {products
+                                                    .filter(p =>
+                                                        p.name.toLowerCase().includes(productSearchTerm.toLowerCase()) ||
+                                                        p.sku?.toLowerCase().includes(productSearchTerm.toLowerCase()) ||
+                                                        p.category?.toLowerCase().includes(productSearchTerm.toLowerCase())
+                                                    )
+                                                    .slice(0, 50)
+                                                    .map(p => (
+                                                        <div
+                                                            key={p.id}
+                                                            onClick={() => {
+                                                                setCurrentProductToAdd(p.id);
+                                                                setProductSearchTerm(p.name);
+                                                                // Set prices from catalog
+                                                                setCurrentCost(p.costPrice || (p.price * 0.7));
+                                                                setCurrentRetailPrice(p.price);
+                                                            }}
+                                                            className={`flex items-center justify-between px-4 py-3 cursor-pointer hover:bg-white/5 transition-colors border-b border-white/5 last:border-0 ${currentProductToAdd === p.id ? 'bg-cyber-primary/10' : ''}`}
+                                                        >
+                                                            <div className="min-w-0">
+                                                                <p className="text-sm font-bold text-white truncate">{p.name}</p>
+                                                                <p className="text-[10px] text-gray-500 uppercase tracking-tighter">{p.sku} • {p.category}</p>
+                                                            </div>
+                                                            <div className="text-right shrink-0">
+                                                                <p className={`text-[10px] font-bold ${p.stock < 10 ? 'text-red-400' : 'text-green-400'}`}>STK: {p.stock}</p>
+                                                                <p className="text-[10px] text-gray-400">{formatCompactNumber(p.price, { currency: CURRENCY_SYMBOL })}</p>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                {products.filter(p => p.name.toLowerCase().includes(productSearchTerm.toLowerCase())).length === 0 && (
+                                                    <div className="px-4 py-3 text-xs text-gray-500 italic">No products found...</div>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
-                                <div className="col-span-4 md:col-span-2">
-                                    <input type="number" min="1" className="w-full bg-black/30 border border-white/20 rounded-lg px-3 py-2 text-sm text-white text-center" placeholder="Qty" value={currentQty || ''} onChange={e => setCurrentQty(parseInt(e.target.value) || 0)} />
+                                <div className="col-span-3 md:col-span-1">
+                                    <input type="number" min="1" className="w-full bg-black/30 border border-white/20 rounded-lg px-2 py-2 text-sm text-white text-center" placeholder="Qty" value={currentQty || ''} onChange={e => setCurrentQty(parseInt(e.target.value) || 0)} />
                                 </div>
-                                <div className="col-span-4 md:col-span-2">
-                                    <input type="number" min="0" step="0.01" className="w-full bg-black/30 border border-white/20 rounded-lg px-3 py-2 text-sm text-white text-right" placeholder="Price" value={currentCost || ''} onChange={e => setCurrentCost(parseFloat(e.target.value) || 0)} />
+                                <div className="col-span-3 md:col-span-2">
+                                    <input type="number" min="0" step="0.01" className="w-full bg-black/30 border border-white/20 rounded-lg px-2 py-2 text-sm text-white text-right" placeholder="Cost" value={currentCost || ''} onChange={e => setCurrentCost(parseFloat(e.target.value) || 0)} />
                                 </div>
-                                <div className="col-span-4 md:col-span-2">
-                                    <button onClick={addItemToPO} className="w-full bg-cyber-primary hover:bg-cyber-accent text-black py-2 rounded-lg font-bold text-sm transition-colors flex items-center justify-center gap-1" title="Add Item">
-                                        <Plus size={16} /> Add
-                                    </button>
+                                <div className="col-span-3 md:col-span-2">
+                                    <input type="number" min="0" step="0.01" className="w-full bg-black/30 border border-white/20 rounded-lg px-2 py-2 text-sm text-white text-right" placeholder="Retail" value={currentRetailPrice || ''} onChange={e => setCurrentRetailPrice(parseFloat(e.target.value) || 0)} />
+                                </div>
+                                <div className="col-span-3 md:col-span-2">
+                                    <Button
+                                        onClick={addItemToPO}
+                                        icon={<Plus size={16} />}
+                                        className="w-full bg-cyber-primary hover:bg-cyber-accent text-black py-2 rounded-lg font-bold text-sm transition-colors flex items-center justify-center gap-1"
+                                        title="Add Item"
+                                    >
+                                        Add Item
+                                    </Button>
                                 </div>
                             </div>
                         )}
@@ -2305,7 +2510,8 @@ export default function Procurement() {
                                         <th className="text-left p-3 text-xs text-gray-500 font-medium w-8">#</th>
                                         <th className="text-left p-3 text-xs text-gray-500 font-medium">Product</th>
                                         <th className="text-right p-3 text-xs text-gray-500 font-medium w-20">Qty</th>
-                                        <th className="text-right p-3 text-xs text-gray-500 font-medium w-24">Price</th>
+                                        <th className="text-right p-3 text-xs text-gray-500 font-medium w-24">Cost</th>
+                                        <th className="text-right p-3 text-xs text-gray-500 font-medium w-24">Retail</th>
                                         <th className="text-right p-3 text-xs text-gray-500 font-medium w-24">Total</th>
                                         <th className="w-20 text-center text-xs text-gray-500 font-medium">Actions</th>
                                     </tr>
@@ -2315,8 +2521,22 @@ export default function Procurement() {
                                         <tr key={i} className={`transition-colors ${editingItemIndex === i ? 'bg-cyber-primary/10' : 'hover:bg-white/5'}`}>
                                             <td className="p-3 text-gray-500 text-sm">{i + 1}</td>
                                             <td className="p-3">
-                                                <span className="text-white">{item.productName}</span>
-                                                {item.productId.startsWith('CUSTOM') && <span className="ml-2 text-[10px] bg-green-500/20 text-green-400 px-1.5 py-0.5 rounded">Custom</span>}
+                                                <div className="flex items-center gap-2">
+                                                    {item.image ? (
+                                                        <img src={item.image} alt={item.productName} className="w-8 h-8 rounded-lg object-cover border border-white/10 flex-shrink-0" />
+                                                    ) : (
+                                                        <div className="w-8 h-8 rounded-lg bg-black/30 border border-white/10 flex items-center justify-center flex-shrink-0">
+                                                            <Package size={14} className="text-gray-500" />
+                                                        </div>
+                                                    )}
+                                                    <div className="min-w-0">
+                                                        <span className="text-white block truncate">{item.productName}</span>
+                                                        <div className="flex items-center gap-1 mt-0.5">
+                                                            {item.productId?.startsWith('CUSTOM') && <span className="text-[10px] bg-green-500/20 text-green-400 px-1.5 py-0.5 rounded">Custom</span>}
+                                                            {item.category && <span className="text-[10px] bg-white/10 text-gray-400 px-1.5 py-0.5 rounded">{item.category}</span>}
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </td>
 
                                             {/* Quantity - Editable */}
@@ -2335,7 +2555,7 @@ export default function Procurement() {
                                                 )}
                                             </td>
 
-                                            {/* Price - Editable */}
+                                            {/* Cost - Editable */}
                                             <td className="p-2 text-right">
                                                 {editingItemIndex === i ? (
                                                     <input
@@ -2345,10 +2565,27 @@ export default function Procurement() {
                                                         className="w-20 bg-black/50 border border-cyber-primary rounded px-2 py-1 text-sm text-white text-right"
                                                         value={editingItem?.price || 0}
                                                         onChange={e => setEditingItem(prev => prev ? { ...prev, price: parseFloat(e.target.value) || 0 } : null)}
-                                                        title="Unit Price"
+                                                        title="Cost Price"
                                                     />
                                                 ) : (
                                                     <span className="text-gray-400 font-mono">{item.unitCost.toLocaleString()}</span>
+                                                )}
+                                            </td>
+
+                                            {/* Retail - Editable */}
+                                            <td className="p-2 text-right">
+                                                {editingItemIndex === i ? (
+                                                    <input
+                                                        type="number"
+                                                        min="0"
+                                                        step="0.01"
+                                                        className="w-20 bg-black/50 border border-cyber-primary rounded px-2 py-1 text-sm text-white text-right"
+                                                        value={editingItem?.retailPrice || 0}
+                                                        onChange={e => setEditingItem(prev => prev ? { ...prev, retailPrice: parseFloat(e.target.value) || 0 } : null)}
+                                                        title="Retail Price"
+                                                    />
+                                                ) : (
+                                                    <span className="text-yellow-500/80 font-mono">{(item.retailPrice || 0).toLocaleString()}</span>
                                                 )}
                                             </td>
 
@@ -2419,10 +2656,11 @@ export default function Procurement() {
                         </div>
                     </div>
                 </div>
-            </Modal>
+            </Modal >
 
             {/* --- MODAL: VIEW PO (Elegant Redesign) --- */}
-            <Modal isOpen={!!selectedPO} onClose={() => setSelectedPO(null)} title="" size="lg">
+            < Modal isOpen={!!selectedPO
+            } onClose={() => setSelectedPO(null)} title="" size="lg" >
                 {selectedPO && (
                     <div className="space-y-6">
                         {/* Header - Clean & Minimal */}
@@ -2505,8 +2743,9 @@ export default function Procurement() {
                                             <th className="text-left p-4 text-xs text-gray-500 font-medium w-8">#</th>
                                             <th className="text-left p-4 text-xs text-gray-500 font-medium">Product</th>
                                             <th className="text-right p-4 text-xs text-gray-500 font-medium w-20">Qty</th>
-                                            <th className="text-right p-4 text-xs text-gray-500 font-medium w-28">Unit Price</th>
-                                            <th className="text-right p-4 text-xs text-gray-500 font-medium w-28">Total</th>
+                                            <th className="text-right p-4 text-xs text-gray-500 font-medium w-24">Cost</th>
+                                            <th className="text-right p-4 text-xs text-gray-500 font-medium w-24">Retail</th>
+                                            <th className="text-right p-4 text-xs text-gray-500 font-medium w-24">Total</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-white/5">
@@ -2523,8 +2762,9 @@ export default function Procurement() {
                                                     )}
                                                 </td>
                                                 <td className="p-4 text-gray-300 text-right font-medium">{item.quantity}</td>
-                                                <td className="p-4 text-gray-400 text-right font-mono">{CURRENCY_SYMBOL} {item.unitCost.toLocaleString()}</td>
-                                                <td className="p-4 text-cyber-primary text-right font-mono font-bold">{CURRENCY_SYMBOL} {item.totalCost.toLocaleString()}</td>
+                                                <td className="p-4 text-gray-400 text-right font-mono">{formatCompactNumber(item.unitCost, { currency: CURRENCY_SYMBOL })}</td>
+                                                <td className="p-4 text-yellow-500/80 text-right font-mono">{item.retailPrice ? formatCompactNumber(item.retailPrice, { currency: CURRENCY_SYMBOL }) : '—'}</td>
+                                                <td className="p-4 text-cyber-primary text-right font-mono font-bold">{formatCompactNumber(item.totalCost, { currency: CURRENCY_SYMBOL })}</td>
                                             </tr>
                                         ))}
                                         {(!selectedPO.lineItems || selectedPO.lineItems.length === 0) && (
@@ -2582,9 +2822,11 @@ export default function Procurement() {
                                 <div className="grid grid-cols-2 gap-3">
                                     <button
                                         onClick={handleApprovePO}
-                                        className="py-3 bg-green-500 hover:bg-green-600 text-white font-bold rounded-xl transition-colors flex items-center justify-center gap-2"
+                                        disabled={isSubmitting}
+                                        className={`py-3 bg-green-500 hover:bg-green-600 text-white font-bold rounded-xl transition-colors flex items-center justify-center gap-2 ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
                                     >
-                                        <CheckCircle size={18} /> Approve
+                                        {isSubmitting ? <Loader2 size={18} className="animate-spin" /> : <CheckCircle size={18} />}
+                                        {isSubmitting ? 'Approving...' : 'Approve'}
                                     </button>
                                     {user?.role === 'super_admin' && (
                                         <button
@@ -2620,6 +2862,15 @@ export default function Procurement() {
                                 >
                                     <Printer size={16} /> Print
                                 </button>
+
+                                {(selectedPO.status === 'Draft' || selectedPO.status === 'Approved') && (
+                                    <button
+                                        onClick={() => handleEditPO(selectedPO)}
+                                        className="py-3 bg-white/5 hover:bg-blue-500/10 text-gray-300 hover:text-blue-400 rounded-xl transition-colors flex items-center justify-center gap-2 font-medium border border-transparent hover:border-blue-500/20"
+                                    >
+                                        <Edit3 size={16} /> Edit
+                                    </button>
+                                )}
 
                                 {(selectedPO.status === 'Approved' || selectedPO.status === 'Pending' || selectedPO.status === 'Draft') && (
                                     <ProtectedButton
@@ -2795,9 +3046,8 @@ export default function Procurement() {
                     </div>
                 )}
             </Modal >
-
             {/* Supplier Details Modal */}
-            <Modal isOpen={isContactModalOpen} onClose={() => setIsContactModalOpen(false)} title={`Supplier Details: ${selectedSupplier?.name || ''}`} size="lg">
+            < Modal isOpen={isContactModalOpen} onClose={() => setIsContactModalOpen(false)} title={`Supplier Details: ${selectedSupplier?.name || ''}`} size="lg" >
                 {selectedSupplier && (
                     <div className="space-y-6">
                         {/* Status & Overview */}
@@ -2900,9 +3150,9 @@ export default function Procurement() {
                         </div>
                     </div>
                 )}
-            </Modal>
+            </Modal >
             {/* Delete PO Modal */}
-            <Modal isOpen={isDeletePOModalOpen} onClose={() => setIsDeletePOModalOpen(false)} title="Delete Purchase Order" size="md">
+            < Modal isOpen={isDeletePOModalOpen} onClose={() => setIsDeletePOModalOpen(false)} title="Delete Purchase Order" size="md" >
                 <div className="space-y-4">
                     <div className="bg-red-500/10 border border-red-500/20 p-4 rounded-xl flex items-start gap-3">
                         <AlertCircle className="text-red-400 shrink-0" size={24} />
@@ -2925,14 +3175,22 @@ export default function Procurement() {
                         />
                     </div>
                     <div className="flex gap-3 pt-2">
-                        <button onClick={() => setIsDeletePOModalOpen(false)} className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-white rounded-xl font-bold transition-colors">Cancel</button>
-                        <button onClick={handleConfirmDeletePO} className="flex-1 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl font-bold transition-colors">Delete PO</button>
+                        <Button onClick={() => setIsDeletePOModalOpen(false)} variant="secondary" className="flex-1 py-3 text-white rounded-xl font-bold transition-colors">Cancel</Button>
+                        <Button
+                            onClick={handleConfirmDeletePO}
+                            disabled={isSubmitting}
+                            variant="danger"
+                            icon={<Trash2 size={18} />}
+                            className="flex-1 py-3 text-white rounded-xl font-bold transition-all"
+                        >
+                            {isSubmitting ? 'Deleting...' : 'Delete Permanently'}
+                        </Button>
                     </div>
                 </div>
-            </Modal>
+            </Modal >
 
             {/* Reject PO Modal */}
-            <Modal isOpen={isRejectPOModalOpen} onClose={() => setIsRejectPOModalOpen(false)} title="Reject Purchase Order" size="md">
+            < Modal isOpen={isRejectPOModalOpen} onClose={() => setIsRejectPOModalOpen(false)} title="Reject Purchase Order" size="md" >
                 <div className="space-y-6">
                     <div className="bg-red-500/10 border border-red-500/20 p-4 rounded-xl flex items-start gap-3">
                         <XCircle className="text-red-400 shrink-0" size={24} />
@@ -2945,14 +3203,22 @@ export default function Procurement() {
                         </div>
                     </div>
                     <div className="flex gap-3 pt-2">
-                        <button onClick={() => setIsRejectPOModalOpen(false)} className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-white rounded-xl font-bold transition-colors">Cancel</button>
-                        <button onClick={handleConfirmRejectPO} className="flex-1 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl font-bold transition-colors">Confirm Reject</button>
+                        <Button onClick={() => setIsRejectPOModalOpen(false)} variant="secondary" className="flex-1 py-3 text-white rounded-xl font-bold transition-colors">Cancel</Button>
+                        <Button
+                            onClick={handleConfirmRejectPO}
+                            disabled={isSubmitting}
+                            variant="danger"
+                            icon={<X size={18} />}
+                            className="flex-1 py-3 text-white rounded-xl font-bold transition-all"
+                        >
+                            {isSubmitting ? 'Rejecting...' : 'Confirm Reject'}
+                        </Button>
                     </div>
                 </div>
-            </Modal>
+            </Modal >
 
             {/* Bulk Approve Modal */}
-            <Modal isOpen={isBulkApproveModalOpen} onClose={() => setIsBulkApproveModalOpen(false)} title="Bulk Approve Orders" size="md">
+            < Modal isOpen={isBulkApproveModalOpen} onClose={() => setIsBulkApproveModalOpen(false)} title="Bulk Approve Orders" size="md" >
                 <div className="space-y-6">
                     <div className="bg-blue-500/10 border border-blue-500/20 p-4 rounded-xl flex items-start gap-3">
                         <CheckCircle className="text-blue-400 shrink-0" size={24} />
@@ -2965,13 +3231,19 @@ export default function Procurement() {
                         </div>
                     </div>
                     <div className="flex gap-3 pt-2">
-                        <button onClick={() => setIsBulkApproveModalOpen(false)} className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-white rounded-xl font-bold transition-colors">Cancel</button>
-                        <button onClick={handleConfirmBulkApprove} disabled={isBulkApproving} className="flex-1 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-xl font-bold transition-colors flex items-center justify-center gap-2">
-                            {isBulkApproving ? 'Approving...' : 'Confirm Approval'}
-                        </button>
+                        <Button onClick={() => setIsBulkApproveModalOpen(false)} variant="secondary" className="flex-1 py-3 text-white rounded-xl font-bold transition-colors">Cancel</Button>
+                        <Button
+                            onClick={handleConfirmBulkApprove}
+                            disabled={isBulkApproving}
+                            variant="primary"
+                            icon={<CheckCircle size={18} />}
+                            className="flex-1 py-3 text-white rounded-xl font-bold transition-all"
+                        >
+                            {isBulkApproving ? 'Approving...' : `Approve ${selectedPOIds.length} Orders`}
+                        </Button>
                     </div>
                 </div>
-            </Modal>
+            </Modal >
             {/* MULTI-SITE ORDER MODAL REMOVED */}
         </div >
     );

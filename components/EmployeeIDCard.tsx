@@ -23,6 +23,7 @@ const ROLE_COLORS: Record<UserRole, string> = {
     inventory_specialist: '#FBBF24', // amber-400
     pos: '#4ADE80',         // green-400
     picker: '#FB923C',      // orange-400
+    packer: '#F97316',      // orange-500
     driver: '#2DD4BF',      // teal-400
     warehouse_manager: '#A78BFA', // violet-400
     dispatcher: '#E879F9',  // fuchsia-400
@@ -111,6 +112,8 @@ export default function EmployeeIDCard({ employee, siteCode, onClose }: Employee
                 <button
                     onClick={onClose}
                     className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"
+                    title="Close"
+                    aria-label="Close"
                 >
                     <X size={24} />
                 </button>

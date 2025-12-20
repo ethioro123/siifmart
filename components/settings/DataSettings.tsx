@@ -13,7 +13,7 @@ export default function DataSettings() {
     // Archive State
     const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
     const [selectedPeriod, setSelectedPeriod] = useState('Full Year');
-    const [selectedReportType, setSelectedReportType] = useState('Financials');
+    const [selectedReportType, setSelectedReportType] = useState<'Operations' | 'Financials' | 'Procurement'>('Financials');
     const [isGenerating, setIsGenerating] = useState(false);
 
     const handleRetrieveReport = () => {
@@ -181,7 +181,7 @@ export default function DataSettings() {
                             <div className="relative">
                                 <select
                                     value={selectedReportType}
-                                    onChange={(e) => setSelectedReportType(e.target.value)}
+                                    onChange={(e) => setSelectedReportType(e.target.value as 'Operations' | 'Financials' | 'Procurement')}
                                     className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white appearance-none outline-none focus:border-blue-500 transition-colors cursor-pointer"
                                     aria-label="Select Report Type"
                                 >

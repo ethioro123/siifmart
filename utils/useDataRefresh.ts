@@ -10,12 +10,13 @@ import { APP_CONFIG } from '../config/app.config';
  * - Exponential backoff on errors
  */
 export function useDataRefresh(intervalMinutes?: number) {
-    const { loadData } = useData();
-    const refreshIntervalRef = useRef<NodeJS.Timeout>();
+    const { refreshData } = useData();
+    const refreshIntervalRef = useRef<NodeJS.Timeout | null>(null);
+    const expirationCheckRef = useRef<NodeJS.Timeout | null>(null);
     const [isRefreshing, setIsRefreshing] = useState(false);
     const retryCountRef = useRef(0);
     const isInitializedRef = useRef(false);
-    const visibilityTimeoutRef = useRef<NodeJS.Timeout>();
+    const visibilityTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     const interval = intervalMinutes
         ? intervalMinutes * 60 * 1000
@@ -32,7 +33,7 @@ export function useDataRefresh(intervalMinutes?: number) {
 
         try {
             console.log('Auto-refreshing data...');
-            await loadData();
+            await refreshData();
             console.log('Data refresh complete');
             retryCountRef.current = 0; // Reset retry count on success
         } catch (error) {
@@ -57,7 +58,7 @@ export function useDataRefresh(intervalMinutes?: number) {
                 setIsRefreshing(false);
             }
         }
-    }, [loadData, isRefreshing]);
+    }, [refreshData, isRefreshing]);
 
     useEffect(() => {
         let isActive = true;

@@ -3,7 +3,9 @@
  * Live updates for products, sales, and inventory
  */
 
+import React from 'react';
 import { supabase } from '../lib/supabase';
+
 import type { RealtimeChannel } from '@supabase/supabase-js';
 
 export type RealtimeEvent = 'INSERT' | 'UPDATE' | 'DELETE' | '*';
@@ -227,6 +229,65 @@ export const realtimeService = {
     },
 
     /**
+     * Subscribe to job assignments
+     */
+    subscribeToJobAssignments(
+        callback: (event: string, payload: any) => void,
+        siteId?: string
+    ): RealtimeSubscription {
+        const channel = supabase
+            .channel('job-assignments-changes')
+            .on(
+                'postgres_changes',
+                {
+                    event: '*',
+                    schema: 'public',
+                    table: 'job_assignments'
+                },
+                (payload) => {
+                    console.log('Job assignment change:', payload);
+                    callback(payload.eventType, payload.new || payload.old);
+                }
+            )
+            .subscribe();
+
+        return {
+            channel,
+            unsubscribe: () => channel.unsubscribe()
+        };
+    },
+
+    /**
+     * Subscribe to inventory requests (Pending Approvals)
+     */
+    subscribeToInventoryRequests(
+        callback: (event: string, payload: any) => void,
+        siteId?: string
+    ): RealtimeSubscription {
+        const channel = supabase
+            .channel('inventory-requests-changes')
+            .on(
+                'postgres_changes',
+                {
+                    event: '*',
+                    schema: 'public',
+                    table: 'inventory_requests',
+                    filter: siteId ? `site_id=eq.${siteId}` : undefined
+                },
+                (payload) => {
+                    console.log('Inventory request change:', payload);
+                    callback(payload.eventType, payload.new || payload.old);
+                }
+            )
+            .subscribe();
+
+        return {
+            channel,
+            unsubscribe: () => channel.unsubscribe()
+        };
+    },
+
+    /**
      * Subscribe to all changes for a site
      */
     subscribeToSite(
@@ -237,6 +298,7 @@ export const realtimeService = {
             onStockChange?: (event: string, payload: any) => void;
             onCustomerChange?: (event: string, payload: any) => void;
             onWMSJobChange?: (event: string, payload: any) => void;
+            onJobAssignmentChange?: (event: string, payload: any) => void;
         }
     ): RealtimeSubscription[] {
         const subscriptions: RealtimeSubscription[] = [];
@@ -260,6 +322,12 @@ export const realtimeService = {
         if (callbacks.onWMSJobChange) {
             subscriptions.push(this.subscribeToWMSJobs(callbacks.onWMSJobChange, siteId));
         }
+
+        if (callbacks.onJobAssignmentChange) {
+            subscriptions.push(this.subscribeToJobAssignments(callbacks.onJobAssignmentChange, siteId));
+        }
+
+
 
         return subscriptions;
     },
@@ -380,6 +448,4 @@ export function useRealtimeSales(siteId?: string) {
     return sales;
 }
 
-// Note: React import is for type checking only
-// In actual use, import React in the component file
-declare const React: any;
+// End of file

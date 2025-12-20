@@ -26,6 +26,7 @@ import Fulfillment from './pages/Fulfillment';
 import Merchandising from './pages/Merchandising';
 import Financials from './pages/Financials';
 import LocationSelect from './pages/LocationSelect';
+import Profile from './pages/Profile';
 
 import MigrationPanel from './pages/MigrationPanel';
 
@@ -45,6 +46,23 @@ export default function App() {
 
     // Run auto-migration once
     runAutoMigration();
+
+    // STRICT SESSION ISOLATION FOR LOCALHOST
+    // This ensures that "multi-account" testing works by forcing sessions to be tab-specific (sessionStorage).
+    // It prevents standard localStorage tokens from leaking across tabs.
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      const keysToRemove: string[] = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith('sb-') && key.includes('-auth-token')) {
+          keysToRemove.push(key);
+        }
+      }
+      if (keysToRemove.length > 0) {
+        console.log('🧹 Cleaning up legacy localStorage auth tokens to enforce strict tab isolation:', keysToRemove);
+        keysToRemove.forEach(k => localStorage.removeItem(k));
+      }
+    }
   }, []);
 
   // Keyboard shortcut: Ctrl+Shift+H (or Cmd+Shift+H on Mac) to cleanup HQ products
@@ -220,7 +238,7 @@ export default function App() {
               </ProtectedRoute>
             } />
 
-            {/* Roadmap - Protected (Hidden from Pickers/Drivers) */}
+            {/* Roadmap/Brainstorm Canvas - Super Admin ONLY */}
             <Route path="/roadmap" element={
               <ProtectedRoute module="admin">
                 <Roadmap />
@@ -231,6 +249,13 @@ export default function App() {
             <Route path="/employees" element={
               <ProtectedRoute module="employees">
                 <Employees />
+              </ProtectedRoute>
+            } />
+
+            {/* My Profile - All authenticated users */}
+            <Route path="/profile" element={
+              <ProtectedRoute module="profile">
+                <Profile />
               </ProtectedRoute>
             } />
 

@@ -17,6 +17,7 @@ export interface DashboardMetrics {
 
   // Inventory Metrics
   totalStockValue: number;
+  totalStockValueRetail: number;
   stockCount: number;
   lowStockCount: number;
   outOfStockCount: number;
@@ -42,6 +43,7 @@ export interface DashboardMetrics {
   // Network Metrics (for HQ)
   totalNetworkRevenue: number;
   totalNetworkStockValue: number;
+  totalNetworkStockValueRetail: number;
   activeAlerts: number;
 
   // Quality & Returns
@@ -100,13 +102,16 @@ export function calculateMetrics(
   movements: StockMovement[],
   siteId?: string // Optional: filter by site
 ): DashboardMetrics {
+  // Filter out archived products first
+  const activeProducts = products.filter(p => (p.status || (p as any).status) !== 'archived');
+
   // Filter by site if provided
   const filteredSales = siteId
     ? sales.filter(s => s.siteId === siteId || s.site_id === siteId)
     : sales;
   const filteredProducts = siteId
-    ? products.filter(p => p.siteId === siteId || p.site_id === siteId)
-    : products;
+    ? activeProducts.filter(p => p.siteId === siteId || p.site_id === siteId)
+    : activeProducts;
   const filteredJobs = siteId
     ? jobs.filter(j => j.siteId === siteId || j.site_id === siteId)
     : jobs;
@@ -127,7 +132,8 @@ export function calculateMetrics(
   const avgBasket = transactionCount > 0 ? totalRevenue / transactionCount : 0;
 
   // Inventory Metrics
-  const totalStockValue = filteredProducts.reduce((sum, p) => sum + (p.stock * p.price), 0);
+  const totalStockValue = filteredProducts.reduce((sum, p) => sum + (p.stock * (p.costPrice || p.price * 0.7)), 0);
+  const totalStockValueRetail = filteredProducts.reduce((sum, p) => sum + (p.stock * p.price), 0);
   const stockCount = filteredProducts.reduce((sum, p) => sum + p.stock, 0);
   const lowStockCount = filteredProducts.filter(p => p.stock < 10 || p.status === 'low_stock').length;
   const outOfStockCount = filteredProducts.filter(p => p.stock === 0 || p.status === 'out_of_stock').length;
@@ -166,10 +172,11 @@ export function calculateMetrics(
 
   // Network Metrics (only if no site filter)
   const totalNetworkRevenue = siteId ? 0 : sales.reduce((sum, s) => sum + s.total, 0);
-  const totalNetworkStockValue = siteId ? 0 : products.reduce((sum, p) => sum + (p.stock * p.price), 0);
+  const totalNetworkStockValue = siteId ? 0 : activeProducts.reduce((sum, p) => sum + (p.stock * (p.costPrice || p.price * 0.7)), 0);
+  const totalNetworkStockValueRetail = siteId ? 0 : activeProducts.reduce((sum, p) => sum + (p.stock * p.price), 0);
   const activeAlerts = siteId
     ? lowStockCount + outOfStockCount
-    : products.filter(p => p.status === 'low_stock' || p.status === 'out_of_stock').length;
+    : activeProducts.filter(p => p.status === 'low_stock' || p.status === 'out_of_stock').length;
 
   return {
     totalRevenue,
@@ -179,6 +186,7 @@ export function calculateMetrics(
     avgBasket,
     transactionCount,
     totalStockValue,
+    totalStockValueRetail,
     stockCount,
     lowStockCount,
     outOfStockCount,
@@ -196,6 +204,7 @@ export function calculateMetrics(
     activeEmployees,
     totalNetworkRevenue,
     totalNetworkStockValue,
+    totalNetworkStockValueRetail,
     activeAlerts,
     returnRate: transactionCount > 0 ? (filteredSales.filter(s => s.status === 'Refunded' || s.status === 'Partially Refunded').length / transactionCount) * 100 : 0,
     totalReturnedValue: filteredSales

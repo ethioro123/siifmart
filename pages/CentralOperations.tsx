@@ -354,7 +354,7 @@ export default function CentralOperations() {
 
     // --- FILTERED DATA ---
     const filteredSales = useMemo(() => (allSales || []).filter(s => isWithinRange(s.date)), [allSales, dateRange]);
-    const filteredOrders = useMemo(() => (allOrders || []).filter(o => isWithinRange(o.createdAt)), [allOrders, dateRange]);
+    const filteredOrders = useMemo(() => (allOrders || []).filter(o => isWithinRange(o.createdAt || new Date().toISOString())), [allOrders, dateRange]);
 
 
 
@@ -625,10 +625,10 @@ export default function CentralOperations() {
 
                     <WidgetErrorBoundary title="Inventory Value">
                         <GlassKPICard
-                            title="Inventory Value"
-                            value={formatCompactNumber(allProducts.reduce((sum, p) => sum + (p.costPrice || 0) * (p.stock || 0), 0), { currency: CURRENCY_SYMBOL })}
+                            title="Network Asset Value"
+                            value={formatCompactNumber(inventoryValue, { currency: CURRENCY_SYMBOL })}
                             trend="+5.2%"
-                            sub="Total Asset Valuation"
+                            sub={`Valued at Base Cost (Retail: ${formatCompactNumber(metrics.totalNetworkStockValueRetail, { currency: CURRENCY_SYMBOL })})`}
                             icon={Package}
                             color="text-blue-400"
                         />

@@ -1,0 +1,19 @@
+components/WorkerPointsDisplay.tsx(380,47): error TS2322: Type '{ key: string; achievement: WorkerAchievement; }' is not assignable to type '{ achievement: WorkerAchievement; }'.
+  Property 'key' does not exist on type '{ achievement: WorkerAchievement; }'.
+constants.ts(853,3): error TS2741: Property 'siteId' is missing in type '{ id: string; name: string; capacity: number; occupied: number; type: "Dry"; }' but required in type 'WarehouseZone'.
+constants.ts(854,3): error TS2741: Property 'siteId' is missing in type '{ id: string; name: string; capacity: number; occupied: number; type: "Dry"; }' but required in type 'WarehouseZone'.
+constants.ts(855,3): error TS2741: Property 'siteId' is missing in type '{ id: string; name: string; capacity: number; occupied: number; temperature: string; type: "Cold"; }' but required in type 'WarehouseZone'.
+constants.ts(856,3): error TS2741: Property 'siteId' is missing in type '{ id: string; name: string; capacity: number; occupied: number; type: "Secure"; }' but required in type 'WarehouseZone'.
+contexts/CentralStore.tsx(289,11): error TS2322: Type '{ key: any; message: any; type: any; duration: any; onClose: () => void; }' is not assignable to type 'ToastProps'.
+  Property 'key' does not exist on type 'ToastProps'.
+contexts/DataContext.tsx(53,3): error TS2820: Type '"Cash"' is not assignable to type '"accrual" | "cash"'. Did you mean '"cash"'?
+lib/supabase.ts(9,21): error TS1343: The 'import.meta' meta-property is only allowed when the '--module' option is 'es2020', 'es2022', 'esnext', 'system', 'node16', 'node18', or 'nodenext'.
+lib/supabase.ts(9,33): error TS2339: Property 'env' does not exist on type 'ImportMeta'.
+lib/supabase.ts(10,25): error TS1343: The 'import.meta' meta-property is only allowed when the '--module' option is 'es2020', 'es2022', 'esnext', 'system', 'node16', 'node18', or 'nodenext'.
+lib/supabase.ts(10,37): error TS2339: Property 'env' does not exist on type 'ImportMeta'.
+pages/Fulfillment.tsx(567,20): error TS2802: Type 'Set<string>' can only be iterated through when using the '--downlevelIteration' flag or with a '--target' of 'es2015' or higher.
+pages/Fulfillment.tsx(8035,59): error TS2802: Type 'Set<unknown>' can only be iterated through when using the '--downlevelIteration' flag or with a '--target' of 'es2015' or higher.
+services/realtime.service.ts(404,37): error TS2347: Untyped function calls may not accept type arguments.
+services/realtime.service.ts(427,31): error TS2347: Untyped function calls may not accept type arguments.
+utils/barcodeGenerator.ts(1,8): error TS1259: Module '"/Users/shukriidriss/Downloads/siifmart 80/node_modules/jsbarcode/jsbarcode"' can only be default-imported using the 'esModuleInterop' flag
+utils/qrCodeGenerator.ts(1,8): error TS2613: Module '"/Users/shukriidriss/Downloads/siifmart 80/node_modules/@types/qrcode/index"' has no default export. Did you mean to use 'import { QRCode } from "/Users/shukriidriss/Downloads/siifmart 80/node_modules/@types/qrcode/index"' instead?

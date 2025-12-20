@@ -7,8 +7,8 @@ import * as dotenv from 'dotenv';
 dotenv.config({ path: '.env.local' });
 
 const supabase = createClient(
-    process.env.VITE_SUPABASE_URL,
-    process.env.VITE_SUPABASE_SERVICE_ROLE_KEY
+    process.env.VITE_SUPABASE_URL!,
+    process.env.VITE_SUPABASE_SERVICE_ROLE_KEY!
 );
 
 // Realistic warehouse products
@@ -134,7 +134,7 @@ async function seedWarehouseProducts() {
         console.log(`   Total products added: ${totalAdded}`);
         console.log('\n✨ Ready to test fulfillment workflow!');
 
-    } catch (error) {
+    } catch (error: any) {
         console.error('\n❌ Error:', error.message);
         process.exit(1);
     }

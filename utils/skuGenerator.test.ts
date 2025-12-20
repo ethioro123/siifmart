@@ -4,7 +4,7 @@
  * Run this in browser console to test SKU generation
  */
 
-import { generateSKU, isValidSKU, registerExistingSKU, getSKUCounters, extractCategoryFromSKU } from './skuGenerator';
+import { generateSKU, isValidSKU, registerExistingSKU, extractCategoryFromSKU } from './skuGenerator';
 
 export function testSKUGenerator() {
     console.log('🧪 Testing SKU Generator\n');
@@ -22,8 +22,8 @@ export function testSKUGenerator() {
     // Test 2: Sequential Numbering
     console.log('📝 Test 2: Sequential Numbering');
     const el1 = generateSKU('Electronics');
-    const el2 = generateSKU('Electronics');
-    const el3 = generateSKU('Electronics');
+    const el2 = generateSKU('Electronics', [{ sku: el1 }]);
+    const el3 = generateSKU('Electronics', [{ sku: el1 }, { sku: el2 }]);
     console.log(`  First:  ${el1}`);
     console.log(`  Second: ${el2}`);
     console.log(`  Third:  ${el3}`);
@@ -41,7 +41,7 @@ export function testSKUGenerator() {
     // Test 3: Existing SKU Usage
     console.log('📝 Test 3: Using Existing SKU');
     const existingSKU = 'BV-999';
-    const result = generateSKU('Beverages', existingSKU);
+    const result = generateSKU('Beverages', [], existingSKU);
     if (result === existingSKU) {
         console.log(`  Input: ${existingSKU}`);
         console.log(`  Output: ${result}`);
@@ -68,19 +68,10 @@ export function testSKUGenerator() {
     });
     console.log();
 
-    // Test 5: SKU Registration
+    // Test 5: SKU Registration (Deprecated but kept for structural compatibility)
     console.log('📝 Test 5: SKU Registration');
     registerExistingSKU('EL-500');
-    const nextEL = generateSKU('Electronics');
-    const nextNum = parseInt(nextEL.split('-')[1]);
-
-    if (nextNum > 500) {
-        console.log(`  Registered: EL-500`);
-        console.log(`  Next generated: ${nextEL}`);
-        console.log('  ✅ Pass - Counter updated correctly\n');
-    } else {
-        console.log('  ❌ Fail - Counter not updated\n');
-    }
+    console.log('  Note: registerExistingSKU is now a no-op as we check live inventory.\n');
 
     // Test 6: Category Extraction
     console.log('📝 Test 6: Category Extraction');
@@ -104,16 +95,6 @@ export function testSKUGenerator() {
     console.log(`  Generated: ${unknownCat}`);
     console.log(`  ${unknownCat.startsWith('VI-') ? '✅' : '⚠️'} Pass - Falls back to first 2 letters\n`);
 
-    // Display Current State
-    console.log('📊 Current SKU Counters:');
-    const counters = getSKUCounters();
-    Object.entries(counters)
-        .sort(([, a], [, b]) => (b as number) - (a as number))
-        .slice(0, 10)
-        .forEach(([prefix, count]) => {
-            console.log(`  ${prefix}: ${count}`);
-        });
-
     console.log('\n✨ Testing Complete!');
 }
 
@@ -123,10 +104,10 @@ export function demoSKUGeneration() {
 
     console.log('Scenario 1: Receiving Catalog Product');
     console.log('  Product: Laptop (already has SKU: EL-050)');
-    const catalogSKU = generateSKU('Electronics', 'EL-050');
+    const catalogSKU = generateSKU('Electronics', [], 'EL-050');
     console.log(`  Result: ${catalogSKU}`);
     registerExistingSKU(catalogSKU);
-    console.log('  Action: Registered to prevent duplicates\n');
+    console.log('  Action: Registered (legacy call)\n');
 
     console.log('Scenario 2: Receiving New Product (No SKU)');
     console.log('  Product: Premium Coffee (Category: Beverages)');
@@ -140,7 +121,7 @@ export function demoSKUGeneration() {
 
     console.log('Scenario 4: Supplier SKU Import');
     console.log('  Product: Energy Drink (Supplier SKU: BV-SUPP-001)');
-    const supplierSKU = generateSKU('Beverages', 'BV-SUPP-001');
+    const supplierSKU = generateSKU('Beverages', [], 'BV-SUPP-001');
     console.log(`  Result: ${supplierSKU}`);
     console.log('  Action: Used supplier SKU as-is\n');
 }

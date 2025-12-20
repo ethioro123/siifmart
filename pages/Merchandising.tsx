@@ -5,16 +5,17 @@ import {
    Edit2, Save, Plus, Calendar, CheckCircle, XCircle, BarChart3, BrainCircuit,
    Target, Layers, ArrowRight, Eye, Play, RefreshCw, Flame, Calculator, Zap,
    TrendingDown, MousePointer2, LineChart as LineChartIcon, Leaf, ShoppingCart, Map, Truck,
-   Power, Trash2
+   Power, Trash2, Loader2
 } from 'lucide-react';
 import {
    AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
    LineChart, Line, ComposedChart, Legend, Bar
 } from 'recharts';
-import { MOCK_PRODUCTS, MOCK_PROMOTIONS, CURRENCY_SYMBOL, MOCK_PRICING_RULES } from '../constants';
+import { MOCK_PRODUCTS, MOCK_PROMOTIONS, CURRENCY_SYMBOL, MOCK_PRICING_RULES, GROCERY_CATEGORIES } from '../constants';
 import { Product, Promotion, PricingRule, ShelfPosition } from '../types';
 import Modal from '../components/Modal';
 import { useData } from '../contexts/DataContext';
+import { formatCompactNumber } from '../utils/formatting';
 
 type Tab = 'pricing' | 'rules' | 'promos' | 'planogram' | 'markdown' | 'forecast';
 
@@ -57,6 +58,7 @@ export default function Pricing() {
    const [editForm, setEditForm] = useState<{ price: number, cost: number, salePrice: number, isOnSale: boolean }>({
       price: 0, cost: 0, salePrice: 0, isOnSale: false
    });
+   const [isSubmitting, setIsSubmitting] = useState(false);
 
    // Bulk Action State
    const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -68,7 +70,7 @@ export default function Pricing() {
    // Rule Modal
    const [isRuleModalOpen, setIsRuleModalOpen] = useState(false);
    const [newRule, setNewRule] = useState<Partial<PricingRule>>({
-      targetCategory: 'Electronics',
+      targetCategory: 'Fresh Produce',
       condition: 'Stock > X',
       action: 'Decrease Price %',
       isActive: true
@@ -102,22 +104,30 @@ export default function Pricing() {
 
    // --- ACTIONS ---
 
-   const handleCreatePromo = () => {
+   const handleCreatePromo = async () => {
       if (!newPromo.code || !newPromo.value) return;
 
-      const promo: Promotion = {
-         id: `PR-${Date.now()}`,
-         code: newPromo.code,
-         type: newPromo.type || 'PERCENTAGE',
-         value: newPromo.value,
-         status: 'Active',
-         usageCount: 0,
-         expiryDate: newPromo.expiryDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
-      };
+      setIsSubmitting(true);
+      try {
+         const promo: Promotion = {
+            id: `PR-${Date.now()}`,
+            code: newPromo.code,
+            type: newPromo.type || 'PERCENTAGE',
+            value: newPromo.value,
+            status: 'Active',
+            usageCount: 0,
+            expiryDate: newPromo.expiryDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+         };
 
-      addPromotion(promo);
-      setIsPromoModalOpen(false);
-      setNewPromo({ type: 'PERCENTAGE' });
+         await addPromotion(promo);
+         setIsPromoModalOpen(false);
+         setNewPromo({ type: 'PERCENTAGE' });
+      } catch (e) {
+         console.error(e);
+         addNotification('alert', 'Failed to create promotion');
+      } finally {
+         setIsSubmitting(false);
+      }
    };
 
    const handleEditClick = (p: Product) => {
@@ -130,18 +140,26 @@ export default function Pricing() {
       });
    };
 
-   const handleSavePrice = (id: string) => {
-      const product = products.find(p => p.id === id);
-      if (product) {
-         updateProduct({
-            ...product,
-            price: editForm.price,
-            costPrice: editForm.cost,
-            salePrice: editForm.salePrice,
-            isOnSale: editForm.isOnSale
-         });
+   const handleSavePrice = async (id: string) => {
+      setIsSubmitting(true);
+      try {
+         const product = products.find(p => p.id === id);
+         if (product) {
+            await updateProduct({
+               ...product,
+               price: editForm.price,
+               costPrice: editForm.cost,
+               salePrice: editForm.salePrice,
+               isOnSale: editForm.isOnSale
+            });
+         }
+         setEditingId(null);
+      } catch (error) {
+         console.error("Error saving price:", error);
+         addNotification('alert', 'Failed to save price');
+      } finally {
+         setIsSubmitting(false);
       }
-      setEditingId(null);
    };
 
    const toggleSelection = (id: string) => {
@@ -156,39 +174,59 @@ export default function Pricing() {
       setIsBulkDiscountModalOpen(true);
    };
 
-   const handleApplyBulkDiscount = () => {
+   const handleApplyBulkDiscount = async () => {
       if (!bulkDiscountValue) return;
 
-      const pct = parseFloat(bulkDiscountValue) / 100;
+      setIsSubmitting(true);
+      try {
+         const pct = parseFloat(bulkDiscountValue) / 100;
+         const productsToUpdate = products.filter(p => selectedIds.has(p.id));
 
-      const productsToUpdate = products.filter(p => selectedIds.has(p.id));
-      productsToUpdate.forEach(p => {
-         updateProduct({
-            ...p,
-            isOnSale: true,
-            salePrice: Math.round(p.price * (1 - pct))
-         });
-      });
+         await Promise.all(productsToUpdate.map(p =>
+            updateProduct({
+               ...p,
+               isOnSale: true,
+               salePrice: Math.round(p.price * (1 - pct))
+            })
+         ));
 
-      setSelectedIds(new Set());
-      addNotification('success', `Applied ${bulkDiscountValue}% discount to ${selectedIds.size} items.`);
-      setIsBulkDiscountModalOpen(false);
-      setBulkDiscountValue('');
+         setSelectedIds(new Set());
+         addNotification('success', `Applied ${bulkDiscountValue}% discount to ${selectedIds.size} items.`);
+         setIsBulkDiscountModalOpen(false);
+         setBulkDiscountValue('');
+      } catch (e) {
+         console.error(e);
+         addNotification('alert', 'Failed to apply bulk discount');
+      } finally {
+         setIsSubmitting(false);
+      }
    };
 
    // --- PSYCHOLOGICAL PRICING ---
-   const applyPsychologicalPricing = () => {
-      let count = 0;
-      products.forEach(p => {
-         const current = p.price;
-         const decimal = current % 1;
-         if (decimal !== 0.99 && decimal !== 0.95 && decimal !== 0) {
-            count++;
-            const base = Math.floor(current);
-            updateProduct({ ...p, price: base + 0.99 });
-         }
-      });
-      addNotification('success', `Optimized ${count} prices to .99 endings.`);
+   const applyPsychologicalPricing = async () => {
+      setIsSubmitting(true);
+      try {
+         let count = 0;
+         const updates: Promise<any>[] = [];
+
+         products.forEach(p => {
+            const current = p.price;
+            const decimal = current % 1;
+            if (decimal !== 0.99 && decimal !== 0.95 && decimal !== 0) {
+               count++;
+               const base = Math.floor(current);
+               updates.push(updateProduct({ ...p, price: base + 0.99 }));
+            }
+         });
+
+         await Promise.all(updates);
+         addNotification('success', `Optimized ${count} prices to .99 endings.`);
+      } catch (e) {
+         console.error(e);
+         addNotification('alert', 'Failed to update prices');
+      } finally {
+         setIsSubmitting(false);
+      }
    };
 
    // --- RULE ACTIONS ---
@@ -209,28 +247,40 @@ export default function Pricing() {
 
       setPricingRules([...pricingRules, rule]);
       setIsRuleModalOpen(false);
-      setNewRule({ targetCategory: 'Electronics', condition: 'Stock > X', action: 'Decrease Price %', isActive: true });
+      setNewRule({ targetCategory: 'Fresh Produce', condition: 'Stock > X', action: 'Decrease Price %', isActive: true });
    };
 
-   const runPricingRule = (rule: PricingRule) => {
-      let updatedCount = 0;
-      products.forEach(p => {
-         if (p.category === rule.targetCategory) {
-            let shouldApply = false;
-            if (rule.condition === 'Stock > X' && p.stock > rule.threshold) shouldApply = true;
-            if (rule.condition === 'Expiry < X Days' && rule.threshold > 10) shouldApply = true;
+   const runPricingRule = async (rule: PricingRule) => {
+      setIsSubmitting(true);
+      try {
+         let updatedCount = 0;
+         const updates: Promise<any>[] = [];
 
-            if (shouldApply) {
-               updatedCount++;
-               let newPrice = p.price;
-               if (rule.action === 'Decrease Price %') newPrice = p.price * (1 - (rule.value / 100));
-               if (rule.action === 'Increase Price %') newPrice = p.price * (1 + (rule.value / 100));
+         products.forEach(p => {
+            if (p.category === rule.targetCategory) {
+               let shouldApply = false;
+               if (rule.condition === 'Stock > X' && p.stock > rule.threshold) shouldApply = true;
+               if (rule.condition === 'Expiry < X Days' && rule.threshold > 10) shouldApply = true;
 
-               updateProduct({ ...p, price: parseFloat(newPrice.toFixed(2)) });
+               if (shouldApply) {
+                  updatedCount++;
+                  let newPrice = p.price;
+                  if (rule.action === 'Decrease Price %') newPrice = p.price * (1 - (rule.value / 100));
+                  if (rule.action === 'Increase Price %') newPrice = p.price * (1 + (rule.value / 100));
+
+                  updates.push(updateProduct({ ...p, price: parseFloat(newPrice.toFixed(2)) }));
+               }
             }
-         }
-      });
-      addNotification('info', `Rule Executed: Updated ${updatedCount} products in category '${rule.targetCategory}'`);
+         });
+
+         await Promise.all(updates);
+         addNotification('info', `Rule Executed: Updated ${updatedCount} products in category '${rule.targetCategory}'`);
+      } catch (e) {
+         console.error(e);
+         addNotification('alert', 'Failed to run pricing rule');
+      } finally {
+         setIsSubmitting(false);
+      }
    };
 
    const toggleRuleStatus = (id: string) => {
@@ -523,10 +573,12 @@ export default function Pricing() {
                   <div className="flex gap-2 ml-auto">
                      <button
                         onClick={applyPsychologicalPricing}
-                        className="px-3 py-2 bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 border border-purple-500/30 rounded-lg text-xs font-bold flex items-center gap-2"
+                        disabled={isSubmitting}
+                        className="px-3 py-2 bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 border border-purple-500/30 rounded-lg text-xs font-bold flex items-center gap-2 disabled:opacity-50"
                         title="Auto-round prices to .99"
                      >
-                        <Zap size={14} /> Magic Rounding (.99)
+                        {isSubmitting ? <Loader2 size={14} className="animate-spin" /> : <Zap size={14} />}
+                        {isSubmitting ? 'Optimizing...' : 'Magic Rounding (.99)'}
                      </button>
                      {selectedIds.size > 0 && (
                         <button
@@ -642,6 +694,7 @@ export default function Pricing() {
                                              checked={editForm.isOnSale}
                                              onChange={(e) => setEditForm({ ...editForm, isOnSale: e.target.checked })}
                                              className="w-4 h-4 accent-cyber-primary"
+                                             aria-label="Toggle Sale Status"
                                           />
                                           {editForm.isOnSale && (
                                              <input
@@ -649,6 +702,7 @@ export default function Pricing() {
                                                 className="w-16 text-[10px] bg-black border border-white/20 rounded text-center text-white"
                                                 value={editForm.salePrice}
                                                 onChange={(e) => setEditForm({ ...editForm, salePrice: parseFloat(e.target.value) })}
+                                                aria-label="Sale Price"
                                              />
                                           )}
                                        </div>
@@ -656,7 +710,7 @@ export default function Pricing() {
                                        p.isOnSale ? (
                                           <div className="flex flex-col items-center">
                                              <CheckCircle size={16} className="text-green-400 mb-1" />
-                                             <span className="text-[10px] text-cyber-primary font-mono">{CURRENCY_SYMBOL}{p.salePrice}</span>
+                                             <span className="text-[10px] text-cyber-primary font-mono">{formatCompactNumber(p.salePrice, { currency: CURRENCY_SYMBOL })}</span>
                                           </div>
                                        ) : (
                                           <div className="w-4 h-4 mx-auto border rounded-full border-gray-600"></div>
@@ -669,10 +723,11 @@ export default function Pricing() {
                                     {isEditing ? (
                                        <button
                                           onClick={() => handleSavePrice(p.id)}
-                                          className="p-2 bg-cyber-primary text-black rounded-lg hover:bg-cyber-accent"
+                                          disabled={isSubmitting}
+                                          className="p-2 bg-cyber-primary text-black rounded-lg hover:bg-cyber-accent disabled:opacity-50"
                                           aria-label="Save Price"
                                        >
-                                          <Save size={16} />
+                                          {isSubmitting ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
                                        </button>
                                     ) : (
                                        <div className="flex gap-2 justify-end">
@@ -748,11 +803,11 @@ export default function Pricing() {
                            </div>
                            <div className="flex justify-between text-sm">
                               <span className="text-gray-400">Current Price</span>
-                              <span className="text-white font-mono">{CURRENCY_SYMBOL}{selectedMarkdownProduct.price}</span>
+                              <span className="text-white font-mono">{formatCompactNumber(selectedMarkdownProduct.price, { currency: CURRENCY_SYMBOL })}</span>
                            </div>
                            <div className="flex justify-between text-sm">
                               <span className="text-gray-400">Break-Even Cost</span>
-                              <span className="text-white font-mono">{CURRENCY_SYMBOL}{selectedMarkdownProduct.costPrice || selectedMarkdownProduct.price * 0.7}</span>
+                              <span className="text-white font-mono">{formatCompactNumber(selectedMarkdownProduct.costPrice || selectedMarkdownProduct.price * 0.7, { currency: CURRENCY_SYMBOL })}</span>
                            </div>
                            <div className="flex justify-between text-sm">
                               <span className="text-gray-400">Weeks on Shelf</span>
@@ -771,7 +826,7 @@ export default function Pricing() {
                         disabled={!selectedMarkdownProduct || isMarkdownSimulating}
                         className="w-full py-3 bg-cyber-primary text-black font-bold rounded-xl flex items-center justify-center gap-2 disabled:opacity-50"
                      >
-                        {isMarkdownSimulating ? <RefreshCw className="animate-spin" /> : <Calculator size={18} />}
+                        {isMarkdownSimulating ? <Loader2 size={18} className="animate-spin" /> : <Calculator size={18} />}
                         {isMarkdownSimulating ? 'Calculating Elasticity...' : 'Generate Glide Path'}
                      </button>
                   </div>
@@ -834,11 +889,12 @@ export default function Pricing() {
                         </div>
                         <button
                            onClick={() => runPricingRule(rule)}
-                           className="p-3 bg-white/5 hover:bg-cyber-primary hover:text-black rounded-xl transition-all border border-white/10 group-hover:border-cyber-primary/50"
+                           disabled={isSubmitting}
+                           className="p-3 bg-white/5 hover:bg-cyber-primary hover:text-black rounded-xl transition-all border border-white/10 group-hover:border-cyber-primary/50 disabled:opacity-50"
                            aria-label="Run Rule Now"
                            title="Run Rule Now"
                         >
-                           <Play size={20} />
+                           {isSubmitting ? <Loader2 size={20} className="animate-spin text-cyber-primary" /> : <Play size={20} />}
                         </button>
                         <div className="flex flex-col gap-2 ml-2">
                            <button
@@ -1138,9 +1194,15 @@ export default function Pricing() {
                </div>
                <button
                   onClick={handleCreatePromo}
-                  className="w-full py-3 bg-cyber-primary text-black font-bold rounded-xl mt-4"
+                  disabled={isSubmitting}
+                  className="w-full py-3 bg-cyber-primary text-black font-bold rounded-xl mt-4 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                >
-                  Launch Campaign
+                  {isSubmitting ? (
+                     <>
+                        <Loader2 size={18} className="animate-spin" />
+                        <span>Launching...</span>
+                     </>
+                  ) : 'Launch Campaign'}
                </button>
             </div>
          </Modal>
@@ -1166,10 +1228,9 @@ export default function Pricing() {
                      onChange={(e) => setNewRule({ ...newRule, targetCategory: e.target.value })}
                      aria-label="Target Category"
                   >
-                     <option>Electronics</option>
-                     <option>Beverages</option>
-                     <option>Food</option>
-                     <option>Fresh</option>
+                     {Object.keys(GROCERY_CATEGORIES).map(cat => (
+                        <option key={cat} value={cat}>{cat}</option>
+                     ))}
                   </select>
                </div>
                <div className="grid grid-cols-2 gap-4">
@@ -1261,10 +1322,15 @@ export default function Pricing() {
                </div>
                <button
                   onClick={handleApplyBulkDiscount}
-                  disabled={!bulkDiscountValue}
-                  className="w-full py-3 bg-cyber-primary text-black font-bold rounded-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={!bulkDiscountValue || isSubmitting}
+                  className="w-full py-3 bg-cyber-primary text-black font-bold rounded-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                >
-                  Apply {bulkDiscountValue}% Discount
+                  {isSubmitting ? (
+                     <>
+                        <Loader2 size={18} className="animate-spin" />
+                        <span>Applying...</span>
+                     </>
+                  ) : `Apply ${bulkDiscountValue}% Discount`}
                </button>
             </div>
          </Modal>
@@ -1335,9 +1401,9 @@ export default function Pricing() {
                                                          On Order: {totalOnOrder}
                                                       </div>
                                                    )}
-                                                   {incomingCost > 0 && incomingCost !== p.costPrice && (
-                                                      <div className={`text-[10px] flex items-center gap-1 ${incomingCost > p.costPrice ? 'text-red-400' : 'text-green-400'}`}>
-                                                         {incomingCost > p.costPrice ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
+                                                   {incomingCost > 0 && incomingCost !== (p.costPrice || 0) && (
+                                                      <div className={`text-[10px] flex items-center gap-1 ${incomingCost > (p.costPrice || 0) ? 'text-red-400' : 'text-green-400'}`}>
+                                                         {incomingCost > (p.costPrice || 0) ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
                                                          New Cost: ${(incomingCost).toFixed(2)}
                                                       </div>
                                                    )}

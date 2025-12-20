@@ -4,7 +4,7 @@
  * Run this to verify your Supabase setup is working
  */
 
-import { supabase, isSupabaseConfigured } from './lib/supabase';
+import { supabase, isSupabaseConfigured } from './supabase';
 
 export async function testSupabaseConnection() {
     console.log('🔍 Testing Supabase Connection...\n');

@@ -1,12 +1,34 @@
 import React, { useState, useEffect } from 'react';
-import { Shield, Lock, Mail, Sun, Moon, AlertCircle, Loader, Eye, EyeOff } from 'lucide-react';
+import { Shield, Lock, Mail, Sun, Moon, AlertCircle, Loader, Eye, EyeOff, Package, Truck, UserCircle } from 'lucide-react';
 import { useStore } from '../contexts/CentralStore';
 import { authService } from '../services/auth.service';
 import { sitesService } from '../services/supabase.service';
 import Logo from './Logo';
 
-// Quick login list for development/testing - All employees from database
-// Quick login list for development/testing - All employees from database
+// Quick login list for development/testing
+const QUICK_LOGINS = [
+  {
+    role: 'Super Admin',
+    email: 'shukri.kamal@siifmart.com',
+    password: 'Oromo123',
+    icon: Shield,
+    color: 'text-cyber-primary'
+  },
+  {
+    role: 'Warehouse Manager',
+    email: 'lensa.merga@siifmart.com',
+    password: 'lensa123',
+    icon: Package,
+    color: 'text-blue-400'
+  },
+  {
+    role: 'Picker',
+    email: 'helen.getachew@siifmart.com',
+    password: 'helen123',
+    icon: Truck,
+    color: 'text-purple-400'
+  }
+];
 
 
 export default function LoginPage() {
@@ -189,6 +211,33 @@ export default function LoginPage() {
             {isLogin ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
           </button>
         </div>
+
+        {isLogin && (
+          <div className="mt-8 pt-6 border-t border-white/5">
+            <p className="text-[10px] text-gray-500 uppercase font-black tracking-widest mb-4 text-center">Quick Access Prototypes</p>
+            <div className="grid grid-cols-1 gap-2">
+              {QUICK_LOGINS.map((account) => (
+                <button
+                  key={account.email}
+                  type="button"
+                  onClick={() => {
+                    setEmail(account.email);
+                    setPassword(account.password);
+                  }}
+                  className="flex items-center gap-3 w-full p-2 bg-white/5 border border-white/5 rounded-xl hover:bg-white/10 hover:border-white/10 transition-all group text-left"
+                >
+                  <div className={`p-2 rounded-lg bg-black/40 ${account.color}`}>
+                    <account.icon size={16} />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-gray-300 group-hover:text-white transition-colors">{account.role}</p>
+                    <p className="text-[10px] text-gray-500 font-mono">{account.email}</p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
 
 

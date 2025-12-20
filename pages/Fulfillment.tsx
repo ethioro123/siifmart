@@ -7,26 +7,29 @@ import {
     StopCircle, PauseCircle, Shield, ShoppingBag, Snowflake, Sun,
     Droplet, Anchor, Map, FileText, X, Clock, ClipboardCheck,
     AlertOctagon, ArrowDown, Camera, ArrowLeft, MapPin, LayoutList, Zap, User, Plus, Minus,
-    Download, Upload, Navigation, Phone, QrCode, Smartphone
+    Download, Upload, Navigation, Phone, QrCode, Smartphone, Eye, Loader2, Gift, Crown, List
 } from 'lucide-react';
-import { WMSJob, JobItem, PurchaseOrder, ReceivingItem } from '../types';
+import { WMSJob, JobItem, PurchaseOrder, ReceivingItem, WorkerPoints, PendingInventoryChange } from '../types';
 import { playBeep } from '../utils/audioUtils';
 import { Protected, ProtectedButton } from '../components/Protected';
 import Modal from '../components/Modal';
 
 import { useStore } from '../contexts/CentralStore';
 import { useLanguage } from '../contexts/LanguageContext';
-import { LanguageSwitcher } from '../components/LanguageSwitcher';
 import { QRScanner } from '../components/QRScanner';
 import { useData } from '../contexts/DataContext';
+import { LeaderboardWidget, PointsEarnedPopup } from '../components/WorkerPointsDisplay';
+import Button from '../components/shared/Button';
+import { DEFAULT_BONUS_TIERS } from '../types';
 import { CURRENCY_SYMBOL } from '../constants';
-import { wmsJobsService, purchaseOrdersService, productsService } from '../services/supabase.service';
+import { wmsJobsService, purchaseOrdersService, productsService, inventoryRequestsService } from '../services/supabase.service';
 import { filterBySite } from '../utils/locationAccess';
 import { generateQRCodeLabelHTML, generateQRCode, generateQRCodeImage } from '../utils/qrCodeGenerator';
 import { generateBarcodeSVG, generateBarcodeLabelHTML, generateBatchBarcodeLabelsHTML, generateBarcodeImage } from '../utils/barcodeGenerator';
 import { generateUnifiedBatchLabelsHTML, generatePackLabelHTML, LabelSize, LabelFormat, PackLabelData } from '../utils/unifiedLabelGenerator';
 import { generateCODE128FromSKU, formatForCODE128 } from '../utils/barcodeFormatter';
 import { formatJobId, formatOrderRef, formatTransferId } from '../utils/jobIdFormatter';
+import { formatCompactNumber } from '../utils/formatting';
 
 
 type OpTab = 'DOCKS' | 'RECEIVE' | 'PUTAWAY' | 'PICK' | 'PACK' | 'REPLENISH' | 'COUNT' | 'WASTE' | 'RETURNS' | 'ASSIGN' | 'TRANSFER';
@@ -62,8 +65,19 @@ export default function WarehouseOperations() {
     const { t } = useLanguage();
     const {
         jobs, orders, products, allProducts, settings, sales, processReturn, employees, jobAssignments, activeSite, sites, movements,
-        receivePO, assignJob, updateJobItem, completeJob, resetJob, adjustStock, relocateProduct, addNotification, updateJobStatus, addProduct, refreshData, logSystemEvent
+        receivePO, assignJob, updateJobItem, completeJob, resetJob, adjustStock, relocateProduct, addNotification, updateJobStatus, addProduct, refreshData, logSystemEvent,
+        workerPoints, getWorkerPoints, getLeaderboard
     } = useData();
+
+    const [isSubmitting, setIsSubmitting] = useState(false); // Global loading state for actions
+
+    // Gamification State
+    const [showPointsPopup, setShowPointsPopup] = useState(false);
+    const [earnedPoints, setEarnedPoints] = useState({ points: 0, message: '', bonuses: [] as { label: string; points: number }[] });
+
+
+
+    // Calculate bonus for current user
 
 
     // 🔒 LOCATION-BASED ACCESS CONTROL
@@ -117,6 +131,8 @@ export default function WarehouseOperations() {
         // 2. INTERNAL: Replenish → Pick → Pack → Dispatch
         // 3. TRANSFERS: Site-to-site movement
         // 4. EXCEPTIONS: Count, Waste, Returns
+        // 4. EXCEPTIONS: Count, Waste, Returns
+        // 5. GAMIFICATION: My Points
         const allTabs: OpTab[] = ['DOCKS', 'RECEIVE', 'PUTAWAY', 'REPLENISH', 'PICK', 'PACK', 'ASSIGN', 'TRANSFER', 'COUNT', 'WASTE', 'RETURNS'];
         return allTabs.filter(tab => canAccessTab(tab));
     }, [user?.role]);
@@ -126,6 +142,7 @@ export default function WarehouseOperations() {
         return visibleTabs[0] || 'PICK';
     });
     const [selectedJob, setSelectedJob] = useState<WMSJob | null>(null);
+    const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
     // --- SCANNER STATE ---
     const [isScannerMode, setIsScannerMode] = useState(false);
@@ -235,7 +252,9 @@ export default function WarehouseOperations() {
                     const { generateSKU } = await import('../utils/skuGenerator');
                     const category = product?.category || 'General';
                     const newSku = generateSKU(category, allProducts);
-                    setScannedSkus(prev => ({ ...prev, [focusedItem.productId]: newSku }));
+                    if (focusedItem.productId) {
+                        setScannedSkus(prev => ({ ...prev, [focusedItem.productId!]: newSku }));
+                    }
                     // Implicitly 'generate'
                 }
             };
@@ -247,7 +266,7 @@ export default function WarehouseOperations() {
     const isPOFullyReceived = useMemo(() => {
         if (!receivingPO?.lineItems) return false;
         return receivingPO.lineItems.every(item => {
-            const received = receivedQuantities[item.productId] || 0;
+            const received = item.productId ? (receivedQuantities[item.productId] || 0) : 0;
             return received >= item.quantity;
         });
     }, [receivingPO, receivedQuantities]);
@@ -264,7 +283,7 @@ export default function WarehouseOperations() {
 
     // --- REPRINT OPTIONS STATE ---
     const [reprintItem, setReprintItem] = useState<{ sku: string; name: string; qty: number } | null>(null);
-    const [reprintSize, setReprintSize] = useState<'Tiny' | 'Small' | 'Medium' | 'Large'>('Medium');
+    const [reprintSize, setReprintSize] = useState<'TINY' | 'SMALL' | 'MEDIUM' | 'LARGE'>('MEDIUM');
     const [reprintFormat, setReprintFormat] = useState<'QR' | 'Barcode' | 'Both'>('Barcode');
 
     // Pack Job Reprint State (uses same size/format as above)-Rich data for detailed labels
@@ -275,7 +294,11 @@ export default function WarehouseOperations() {
     const [isPrinting, setIsPrinting] = useState(false);
     const [isCompleting, setIsCompleting] = useState(false);
     const [isDistributing, setIsDistributing] = useState(false);
+    const [label_sRePrint] = useState<string[]>([]);
     const [isCreatingTransfer, setIsCreatingTransfer] = useState(false);
+    const [creatingReplenishTask, setCreatingReplenishTask] = useState<string | null>(null); // Tracks productId of task being created
+    const [approvingVariance, setApprovingVariance] = useState<number | null>(null); // Tracks index of variance being approved
+    const [isDisposingWaste, setIsDisposingWaste] = useState(false); // Tracks waste disposal operation
     const [approvingJobId, setApprovingJobId] = useState<string | null>(null);
 
     const handleReprintLabels = async () => {
@@ -314,9 +337,9 @@ export default function WarehouseOperations() {
         const labels: Array<{ value: string; label: string; quantity: number }> = [];
 
         po.lineItems.forEach(item => {
-            const receivedQty = receivedQuantities[item.productId] || 0;
+            const receivedQty = item.productId ? (receivedQuantities[item.productId] || 0) : 0;
 
-            if (receivedQty > 0) {
+            if (receivedQty > 0 && item.productId) {
                 const product = products.find(p => p.id === item.productId);
                 // Use finalized SKU if available, otherwise product SKU
                 const itemSku = finalizedSkus[item.productId] || product?.sku || 'UNKNOWN';
@@ -331,6 +354,7 @@ export default function WarehouseOperations() {
             return;
         }
 
+        setIsPrinting(true);
         try {
             const html = await generateUnifiedBatchLabelsHTML(labels, {
                 size: labelSize as LabelSize,
@@ -344,6 +368,8 @@ export default function WarehouseOperations() {
         } catch (error) {
             console.error('Print generation failed', error);
             addNotification('alert', 'Failed to generate labels');
+        } finally {
+            setIsPrinting(false);
         }
     };
 
@@ -387,6 +413,7 @@ export default function WarehouseOperations() {
     const [dispatchPriorityFilter, setDispatchPriorityFilter] = useState<'ALL' | 'Critical' | 'High' | 'Normal'>('ALL');
     const [dispatchEmployeeFilter, setDispatchEmployeeFilter] = useState<'ALL' | 'picker' | 'packer' | 'dispatcher' | 'warehouse_manager'>('ALL');
     const [dispatchSearch, setDispatchSearch] = useState('');
+    const [assignSortBy, setAssignSortBy] = useState<'priority' | 'date' | 'items'>('priority');
     const [shippingTransferId, setShippingTransferId] = useState<string | null>(null); // Loading state for shipping buttons
     const [loadingActions, setLoadingActions] = useState<Record<string, boolean>>({}); // Generic loading state for any action by ID
 
@@ -405,7 +432,10 @@ export default function WarehouseOperations() {
     const [transferPriority, setTransferPriority] = useState<'Normal' | 'High' | 'Critical'>('Normal');
     const [transferNote, setTransferNote] = useState('');
     const [showTransferModal, setShowTransferModal] = useState(false);
-    const [transferStatusFilter, setTransferStatusFilter] = useState<'ALL' | 'Requested' | 'Approved' | 'In-Transit' | 'Received'>('ALL');
+    const [transferStatusFilter, setTransferStatusFilter] = useState<'ALL' | 'Requested' | 'Approved' | 'Picking' | 'Picked' | 'Packed' | 'In-Transit' | 'Delivered' | 'Received'>('ALL');
+    const [transferSortBy, setTransferSortBy] = useState<'date' | 'items' | 'site' | 'priority'>('date');
+    const [pickSortBy, setPickSortBy] = useState<'priority' | 'date' | 'items' | 'site'>('priority');
+    const [scannerSortBy, setScannerSortBy] = useState<'bin' | 'name' | 'status'>('bin');
     const [transferReceiveMode, setTransferReceiveMode] = useState(false);
     const [transferReceiveItems, setTransferReceiveItems] = useState<{ productId: string; expectedQty: number; receivedQty: number; condition: string; notes?: string }[]>([]);
     const [activeTransferJob, setActiveTransferJob] = useState<any | null>(null);
@@ -540,7 +570,7 @@ export default function WarehouseOperations() {
             suggestions.push(...locations);
         }
 
-        return [...new Set(suggestions)].slice(0, 5);
+        return Array.from(new Set(suggestions)).slice(0, 5);
     };
 
     // Helper to get temperature requirements
@@ -571,7 +601,8 @@ export default function WarehouseOperations() {
                     productId: item.productId,
                     productName: item.productName || '',
                     expectedQty: item.quantity,
-                    receivedQty: item.quantity
+                    receivedQty: item.quantity,
+                    quantity: item.quantity
                 })));
             }
         } else if (!receivingPO) {
@@ -591,63 +622,78 @@ export default function WarehouseOperations() {
     };
 
     const handleStartJob = async (job: WMSJob) => {
-        // Auto-assign if not assigned
-        if (!job.assignedTo && user) {
-            try {
-                await assignJob(job.id, user.id || user.name);
-                addNotification('success', t('warehouse.jobAssignedToYou').replace('{name}', user.name));
-            } catch (e) {
-                console.error('Failed to auto-assign job', e);
+        setIsSubmitting(true);
+        try {
+            // APPROVAL CHECK: Block unapproved transfer jobs
+            if (job.type === 'TRANSFER' && job.transferStatus && job.transferStatus !== 'Approved') {
+                addNotification('alert', 'This transfer must be approved by a manager before work can begin.');
+                setIsSubmitting(false);
+                return;
             }
+
+            // Auto-assign if not assigned
+            if (!job.assignedTo && user) {
+                try {
+                    await assignJob(job.id, user.id || user.name);
+                    addNotification('success', t('warehouse.jobAssignedToYou').replace('{name}', user.name));
+                } catch (e) {
+                    console.error('Failed to auto-assign job', e);
+                }
+            }
+
+            // Update status to In-Progress if Pending
+            if (job.status === 'Pending') {
+                updateJobStatus(job.id, 'In-Progress');
+            }
+
+            // SAFETY CHECK: Ensure lineItems exists (handle both camelCase and snake_case)
+            const jobLineItems = job.lineItems || (job as any).line_items || [];
+            if (!jobLineItems || jobLineItems.length === 0) {
+                addNotification('alert', t('warehouse.errorJobNoItems') || 'Job has no items. Cannot start.');
+                console.error('Job has no items:', job);
+                return;
+            }
+
+            // Normalize the job to ensure lineItems is set
+            const normalizedJob = { ...job, lineItems: jobLineItems };
+
+            // OPTIMIZATION: Inject original index before sorting to preserve DB mapping
+            const indexedItems = jobLineItems.map((item, idx) => ({ ...item, originalIndex: idx }));
+
+            // Sort items by bin location to create efficient pick path
+            const sortedItems = [...indexedItems].sort((a, b) => {
+                const prodA = filteredProducts.find(p => p.id === a.productId);
+                const prodB = filteredProducts.find(p => p.id === b.productId);
+                return (prodA?.location || '').localeCompare(prodB?.location || '');
+            });
+
+            const optimizedJob = { ...normalizedJob, lineItems: sortedItems, assignedTo: job.assignedTo || user?.name };
+
+            // Check if job is already complete (all items processed)
+            const allItemsAlreadyProcessed = optimizedJob.lineItems.every(i =>
+                i.status === 'Picked' || i.status === 'Short'
+            );
+
+            if (allItemsAlreadyProcessed) {
+                addNotification('info', 'This job is already complete');
+                return;
+            }
+
+            // Just set the job-user will click "Start Picking" button in modal to open scanner
+            setSelectedJob(optimizedJob);
+            setIsDetailsOpen(true);
+            // Don't set scanner mode here-let user preview job details first
+            setIsScannerMode(false);
+
+            logSystemEvent(
+                'Job Started',
+                `Started ${job.type} job ${job.id} with ${optimizedJob.lineItems.length} items`,
+                user?.name || 'Worker',
+                'Inventory'
+            );
+        } finally {
+            setIsSubmitting(false);
         }
-
-        // Update status to In-Progress if Pending
-        if (job.status === 'Pending') {
-            updateJobStatus(job.id, 'In-Progress');
-        }
-
-        // SAFETY CHECK: Ensure lineItems exists (handle both camelCase and snake_case)
-        const jobLineItems = job.lineItems || (job as any).line_items || [];
-        if (!jobLineItems || jobLineItems.length === 0) {
-            addNotification('alert', t('warehouse.errorJobNoItems') || 'Job has no items. Cannot start.');
-            console.error('Job has no items:', job);
-            return;
-        }
-
-        // Normalize the job to ensure lineItems is set
-        const normalizedJob = { ...job, lineItems: jobLineItems };
-
-        // OPTIMIZATION: Sort items by bin location to create efficient pick path
-        const sortedItems = [...jobLineItems].sort((a, b) => {
-            const prodA = filteredProducts.find(p => p.id === a.productId);
-            const prodB = filteredProducts.find(p => p.id === b.productId);
-            return (prodA?.location || '').localeCompare(prodB?.location || '');
-        });
-
-        const optimizedJob = { ...normalizedJob, lineItems: sortedItems, assignedTo: job.assignedTo || user?.name };
-
-        // Check if job is already complete (all items processed)
-        const allItemsAlreadyProcessed = optimizedJob.lineItems.every(i =>
-            i.status === 'Picked' || i.status === 'Short'
-        );
-
-        if (allItemsAlreadyProcessed) {
-            addNotification('info', 'This job is already complete');
-            return;
-        }
-
-        // Just set the job-user will click "Start Picking" button in modal to open scanner
-        setSelectedJob(optimizedJob);
-        // Don't set scanner mode here-let user preview job details first
-        setIsScannerMode(false);
-
-        // EXPANDED LOGGING: Log that the user started a job
-        logSystemEvent(
-            'Job Started',
-            `Started ${job.type} job ${job.id} with ${optimizedJob.lineItems.length} items`,
-            user?.name || 'Worker',
-            'Inventory'
-        );
     };
 
     const handleBinScan = (e: React.FormEvent) => {
@@ -662,7 +708,9 @@ export default function WarehouseOperations() {
 
     // Generate location from zone/aisle/bin selection
     const generateLocation = (zone: string, aisle: string, bin: string) => {
-        return `${zone} -${aisle} -${bin} `;
+        const a = aisle.padStart(2, '0');
+        const b = bin.padStart(2, '0');
+        return `Aisle ${a} - Zone ${zone} - Bin ${b}`;
     };
 
     // Get occupied locations from products
@@ -697,9 +745,30 @@ export default function WarehouseOperations() {
         playBeep('success');
     };
 
+    const applyScannerSort = (sortBy: 'bin' | 'name' | 'status') => {
+        if (!selectedJob) return;
+        const items = [...selectedJob.lineItems];
+        items.sort((a, b) => {
+            if (sortBy === 'bin') {
+                const prodA = products.find(p => p.id === a.productId);
+                const prodB = products.find(p => p.id === b.productId);
+                return (prodA?.location || '').localeCompare(prodB?.location || '');
+            } else if (sortBy === 'name') {
+                return a.name.localeCompare(b.name);
+            } else if (sortBy === 'status') {
+                const statusOrder: Record<string, number> = { 'Pending': 0, 'Short': 1, 'Picked': 2 };
+                return (statusOrder[a.status] || 0) - (statusOrder[b.status] || 0);
+            }
+            return 0;
+        });
+        setScannerSortBy(sortBy);
+        setSelectedJob({ ...selectedJob, lineItems: items });
+    };
+
     const handleItemScan = async (actualQty?: number) => {
-        if (!selectedJob || isProcessingScan) return;
+        if (!selectedJob || isProcessingScan || isSubmitting) return;
         setIsProcessingScan(true);
+        setIsSubmitting(true);
         try {
             // Find item in job
             const itemIndex = selectedJob.lineItems.findIndex(i => i.status === 'Pending');
@@ -708,6 +777,12 @@ export default function WarehouseOperations() {
             const item = selectedJob.lineItems[itemIndex];
 
             if (item) {
+                // Safety: Get original index to ensure DB update hits correct item
+                const originalIdx = (item as any).originalIndex;
+                const updateTargetIndex = typeof originalIdx === 'number' ? originalIdx : itemIndex;
+
+                console.log(`🔍 Scanning Item: ${item.name} at Sorted Idx: ${itemIndex}, Original Idx: ${updateTargetIndex}`);
+
                 // Validate location for PUTAWAY jobs
                 if (selectedJob.type === 'PUTAWAY' && !scannedBin) {
                     addNotification('alert', t('warehouse.pleaseSelectStorageLocation'));
@@ -729,36 +804,53 @@ export default function WarehouseOperations() {
                             const productCategory = 'General'; // Can be enhanced to extract from context if available
 
                             // Generate a proper SKU or use existing from item
+                            // Generate a proper SKU or use existing from item
                             const { generateSKU } = await import('../utils/skuGenerator');
                             const generatedSKU = item.sku && item.sku.trim() !== '' && item.sku !== 'MISC'
                                 ? item.sku
                                 : generateSKU(productCategory, allProducts);
 
-                            const newProduct = await addProduct({
-                                name: item.name,
-                                sku: generatedSKU,
-                                category: productCategory,
-                                price: 0,
-                                cost: 0,
-                                stock: 0, // Will be updated by adjustStock
-                                minStock: 0,
-                                siteId: selectedJob.siteId || selectedJob.site_id,
-                                site_id: selectedJob.siteId || selectedJob.site_id,
-                                location: scannedBin,
-                                image: item.image || '/placeholder.png',
-                                barcode: '',
-                                unit: 'pcs',
-                                status: 'active'
-                            });
+                            // AUTO-CREATE: Now requires approval
+                            console.log(`📝 Creating auto-create request for: ${item.name}`);
+                            const request: Omit<PendingInventoryChange, 'id'> = {
+                                productId: '', // New product
+                                productName: item.name,
+                                productSku: generatedSKU,
+                                siteId: selectedJob.siteId || selectedJob.site_id || '',
+                                changeType: 'create',
+                                requestedBy: user?.name || 'WMS Worker',
+                                requestedAt: new Date().toISOString(),
+                                status: 'pending',
+                                proposedChanges: {
+                                    name: item.name,
+                                    sku: generatedSKU,
+                                    category: productCategory,
+                                    price: 0,
+                                    cost: 0,
+                                    stock: 0, // Initial stock should be 0, Putaway Job will add the real stock
+                                    minStock: 0,
+                                    siteId: selectedJob.siteId || selectedJob.site_id,
+                                    location: scannedBin,
+                                    image: item.image || '/placeholder.png',
+                                    barcode: '',
+                                    unit: 'pcs',
+                                    status: 'active'
+                                } as any,
+                                adjustmentType: 'IN',
+                                adjustmentQty: qtyToAdd,
+                                adjustmentReason: 'Auto-create during Putaway'
+                            };
 
-                            if (newProduct) {
-                                productId = newProduct.id;
-                                console.log(`✅ Created product with SKU: ${generatedSKU}, ID: ${productId} `);
-                            } else {
-                                throw new Error('Failed to create product');
-                            }
+                            await inventoryRequestsService.create(request);
+                            addNotification('success', `✅ Creation request for "${item.name}" submitted for approval.`);
+
+                            // Since we didn't actually create the product yet, we cannot continue with stock adjustment.
+                            // We should stop here or mark item as 'Pending Approval' in UI?
+                            // For now, let's stop and notify.
+                            return;
                         } else {
-                            // Update the product's location
+                            // Updatethe product's location
+
                             await relocateProduct(productId, scannedBin, user?.name || 'WMS Worker');
                         }
 
@@ -820,12 +912,12 @@ export default function WarehouseOperations() {
                 const qtyToRecord = actualQty !== undefined ? actualQty : item.expectedQty;
                 const statusToRecord = (actualQty !== undefined && actualQty < item.expectedQty) ? 'Short' : 'Picked';
 
-                await updateJobItem(selectedJob.id, itemIndex, statusToRecord, qtyToRecord);
+                await updateJobItem(selectedJob.id, updateTargetIndex, statusToRecord, qtyToRecord);
 
                 // Show completion feedback for this item
                 setLastCompletedItem({ name: item.name, qty: qtyToRecord });
 
-                // Update local state to reflect change immediately
+                // Update local state to reflect change immediately (Using sorted index is fine for UI, but DB needs original)
                 const updatedJob = { ...selectedJob };
                 updatedJob.lineItems = [...selectedJob.lineItems]; // Shallow copy array
                 updatedJob.lineItems[itemIndex] = { ...item, status: statusToRecord, pickedQty: qtyToRecord };
@@ -838,7 +930,17 @@ export default function WarehouseOperations() {
 
                 if (allItemsProcessed) {
                     console.log(`✅ Job ${selectedJob.jobNumber || selectedJob.id} -All items processed, completing job`);
-                    await completeJob(selectedJob.id, user?.name || 'Worker', true); // skipValidation=true since we already verified
+                    const result = await completeJob(selectedJob.id, user?.name || 'Worker', true); // skipValidation=true since we already verified
+
+                    if (result && result.points > 0) {
+                        setEarnedPoints({
+                            points: result.points,
+                            message: `Job Complete!`,
+                            bonuses: result.breakdown
+                        });
+                        setShowPointsPopup(true);
+                        playBeep('success'); // Reinforce success
+                    }
 
                     // Find next pending job of the same type
                     const nextJob = filteredJobs.find(j =>
@@ -872,6 +974,7 @@ export default function WarehouseOperations() {
             }
         } finally {
             setIsProcessingScan(false);
+            setIsSubmitting(false);
         }
     };
 
@@ -951,7 +1054,6 @@ export default function WarehouseOperations() {
         return (
             <div className="fixed inset-0 z-50 bg-black flex flex-col">
                 {/* Header */}
-                {/* Header */}
                 <div className="p-4 pt-[calc(1rem+env(safe-area-inset-top))] bg-gray-900 flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4 border-b border-gray-800">
                     <div className="text-white w-full md:w-auto">
                         <div className="flex justify-between items-start">
@@ -1027,9 +1129,8 @@ export default function WarehouseOperations() {
                                 <div className="mt-2 w-48 mx-auto h-2 bg-gray-700 rounded-full overflow-hidden">
                                     <div
                                         className="h-full bg-gradient-to-r from-green-500 to-emerald-400 rounded-full transition-all duration-500"
-                                        // eslint-disable-next-line
                                         style={{ width: `${(selectedJob.lineItems.filter(i => i.status === 'Picked' || i.status === 'Short').length / selectedJob.lineItems.length) * 100}%` }}
-                                    />
+                                    ></div>
                                 </div>
                                 <p className="text-xs text-gray-500 mt-3 animate-pulse">{t('warehouse.loadingNextItem')}</p>
                             </div>
@@ -1037,11 +1138,32 @@ export default function WarehouseOperations() {
                     )}
 
                     {showList ? (
-                        <div className="w-full h-full max-w-md overflow-y-auto space-y-3">
+                        <div className="w-full h-full max-w-md overflow-y-auto space-y-3 relative">
+                            {/* Scanner Sort Controls */}
+                            <div className="sticky top-0 z-10 bg-gray-900/95 backdrop-blur pb-2">
+                                <div className="flex gap-1 p-1 bg-black/40 rounded-lg border border-white/5">
+                                    {[
+                                        { id: 'bin', label: 'Bin Path' },
+                                        { id: 'name', label: 'Name' },
+                                        { id: 'status', label: 'Status' }
+                                    ].map(opt => (
+                                        <button
+                                            key={opt.id}
+                                            onClick={() => applyScannerSort(opt.id as any)}
+                                            className={`flex-1 py-1.5 rounded-md text-[10px] uppercase font-bold transition-all ${scannerSortBy === opt.id
+                                                ? 'bg-cyber-primary text-black shadow-lg shadow-cyber-primary/20'
+                                                : 'text-gray-400 hover:text-white hover:bg-white/5'
+                                                }`}
+                                        >
+                                            {opt.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
                             {['admin', 'manager', 'super_admin'].includes(user?.role || '') && selectedJob.type === 'PICK' && (
                                 <div className="flex justify-end">
-                                    <button
-                                        disabled={isProcessingScan}
+                                    <Button
+                                        variant="ghost"
                                         onClick={async () => {
                                             if (!selectedJob || isProcessingScan) return;
                                             setIsProcessingScan(true);
@@ -1064,7 +1186,7 @@ export default function WarehouseOperations() {
                                                 }
 
                                                 // Mark all items as Picked
-                                                const updatedItems = selectedJob.lineItems.map(item => ({
+                                                const updatedItems: JobItem[] = (selectedJob.lineItems || []).map(item => ({
                                                     ...item,
                                                     status: 'Picked',
                                                     pickedQty: item.expectedQty
@@ -1076,7 +1198,16 @@ export default function WarehouseOperations() {
                                                 addNotification('success', 'All items picked and stock deducted!');
 
                                                 // Complete the job
-                                                await completeJob(selectedJob.id, user?.name || 'Worker');
+                                                const result = await completeJob(selectedJob.id, user?.name || 'Worker');
+
+                                                if (result && result.points > 0) {
+                                                    setEarnedPoints({
+                                                        points: result.points,
+                                                        message: `Admin Pick Complete!`,
+                                                        bonuses: result.breakdown
+                                                    });
+                                                    setShowPointsPopup(true);
+                                                }
 
                                                 // Close list to show completion screen
                                                 setShowList(false);
@@ -1084,11 +1215,11 @@ export default function WarehouseOperations() {
                                                 setIsProcessingScan(false);
                                             }
                                         }}
-                                        className={`flex items-center gap-2 px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-xs font-bold text-cyber-primary transition-colors mb-2 ${isProcessingScan ? 'opacity-50 cursor-not-allowed' : 'hover:bg-white/10'} `}
+                                        icon={<CheckCircle size={14} />}
+                                        className="flex items-center gap-2 px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-xs font-bold text-cyber-primary transition-colors mb-2"
                                     >
-                                        {isProcessingScan ? <RefreshCw size={14} className="animate-spin" /> : <CheckCircle size={14} />}
-                                        {isProcessingScan ? t('warehouse.processing') : t('warehouse.pickAllAdmin')}
-                                    </button>
+                                        {t('warehouse.pickAllAdmin')}
+                                    </Button>
                                 </div>
                             )}
                             {selectedJob.lineItems.map((item, idx) => {
@@ -1127,336 +1258,137 @@ export default function WarehouseOperations() {
                     ) : (
                         // SCANNER VIEW
                         <>
-                            {/* Step 1: Location Picker */}
+                            {/* Step 1: Location Input (Simplified & Robust) */}
                             {scannerStep === 'NAV' && currentItem && (
-                                <div className="w-full max-w-4xl mx-auto space-y-6">
-                                    <div className="text-center">
-                                        <Map size={48} className="text-blue-500 mx-auto mb-4" />
-                                        <h1 className="text-3xl font-bold text-white mb-2">
-                                            {selectedJob.type === 'PUTAWAY' ? t('warehouse.selectStorageLocation') : t('warehouse.selectPickLocation')}
-                                        </h1>
-                                        <p className="text-gray-400">{selectedJob.type === 'PUTAWAY' ? t('warehouse.chooseWhereToStore') : t('warehouse.chooseWhereToPick')}</p>
+                                <div className="w-full max-w-2xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                                    <div className="text-center space-y-4">
+                                        <div className="w-20 h-20 bg-blue-500/10 rounded-full flex items-center justify-center mx-auto border border-blue-500/20 shadow-lg shadow-blue-500/10">
+                                            <MapPin size={40} className="text-blue-400" />
+                                        </div>
+                                        <div>
+                                            <h1 className="text-4xl font-black text-white tracking-tight uppercase italic">
+                                                {selectedJob.type === 'PUTAWAY' ? t('warehouse.selectStorage') : t('warehouse.locateItem')}
+                                            </h1>
+                                            <p className="text-gray-400 text-lg">
+                                                Scan Location or Type: <span className="text-blue-400 font-mono font-bold">A-Z-B</span> (e.g. 1-A-1)
+                                            </p>
+                                        </div>
                                     </div>
 
-                                    {/* Location Selector */}
-                                    <div className="bg-gray-900 rounded-xl border border-gray-800 p-4 md:p-6">
-                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                                            {/* Zone Selector */}
-                                            <div>
-                                                <label className="text-xs text-gray-400 uppercase font-bold mb-2 block">{t('warehouse.zone')}</label>
-                                                <select
-                                                    aria-label={t('warehouse.zone')}
-                                                    value={selectedZone}
-                                                    onChange={(e) => {
-                                                        setSelectedZone(e.target.value);
-                                                        setSelectedAisle('01');
-                                                        setSelectedBin('01');
-                                                    }}
-                                                    className="w-full bg-gray-800 border border-gray-700 rounded-lg p-3 text-white font-mono text-lg focus:border-blue-500 outline-none"
-                                                >
-                                                    {['A', 'B', 'C', 'D', 'E', 'F'].map(zone => (
-                                                        <option key={zone} value={zone}>{t('warehouse.zone')} {zone}</option>
-                                                    ))}
-                                                </select>
-                                            </div>
+                                    {/* Simplified Location Input Container */}
+                                    <div className="bg-gray-900/60 backdrop-blur-2xl rounded-[2.5rem] border border-white/10 p-10 shadow-2xl relative overflow-hidden group">
+                                        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
 
-                                            {/* Aisle Selector */}
-                                            <div>
-                                                <label className="text-xs text-gray-400 uppercase font-bold mb-2 block">{t('warehouse.aisle')}</label>
-                                                <select
-                                                    aria-label={t('warehouse.aisle')}
-                                                    value={selectedAisle}
-                                                    onChange={(e) => {
-                                                        setSelectedAisle(e.target.value);
-                                                        setSelectedBin('01');
-                                                    }}
-                                                    className="w-full bg-gray-800 border border-gray-700 rounded-lg p-3 text-white font-mono text-lg focus:border-blue-500 outline-none"
-                                                >
-                                                    {Array.from({ length: 20 }, (_, i) => {
-                                                        const num = String(i + 1).padStart(2, '0');
-                                                        return <option key={num} value={num}>{num}</option>;
-                                                    })}
-                                                </select>
-                                            </div>
-
-                                            {/* Bin Selector */}
-                                            <div>
-                                                <label className="text-xs text-gray-400 uppercase font-bold mb-2 block">{t('warehouse.bin')}</label>
-                                                <select
-                                                    aria-label={t('warehouse.bin')}
-                                                    value={selectedBin}
-                                                    onChange={(e) => setSelectedBin(e.target.value)}
-                                                    className="w-full bg-gray-800 border border-gray-700 rounded-lg p-4 text-white font-mono text-lg focus:border-blue-500 outline-none"
-                                                >
-                                                    {Array.from({ length: 20 }, (_, i) => {
-                                                        const num = String(i + 1).padStart(2, '0');
-                                                        return <option key={num} value={num}>{num}</option>;
-                                                    })}
-                                                </select>
-                                            </div>
-
-                                            {/* Quick Select Button */}
-                                            <div className="flex items-end">
-                                                <button
-                                                    onClick={() => {
-                                                        const location = generateLocation(selectedZone, selectedAisle, selectedBin);
-                                                        handleLocationSelect(location);
-                                                    }}
-                                                    className="w-full py-4 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-lg transition-colors"
-                                                >
-                                                    {t('warehouse.selectLocation')}
-                                                </button>
-                                            </div>
-                                        </div>
-
-                                        {/* Selected Location Preview */}
-                                        <div className="bg-gray-800 rounded-lg p-4 mb-4 border border-gray-700">
-                                            <div className="flex justify-between items-center">
-                                                <div>
-                                                    <p className="text-xs text-gray-400 uppercase font-bold mb-1">{t('warehouse.selectedLocation')}</p>
-                                                    <p className="text-2xl font-mono text-white font-bold">
-                                                        {generateLocation(selectedZone, selectedAisle, selectedBin)}
-                                                    </p>
+                                        <div className="relative space-y-8">
+                                            <div className="relative">
+                                                <div className="absolute inset-y-0 left-6 flex items-center pointer-events-none text-gray-500 group-focus-within:text-cyber-primary transition-colors duration-300">
+                                                    <Scan size={32} />
                                                 </div>
-                                                <div className="text-right">
-                                                    {isLocationOccupied(generateLocation(selectedZone, selectedAisle, selectedBin)) ? (
-                                                        <span className="inline-flex items-center px-3 py-1 rounded-full bg-blue-500/20 text-blue-400 border border-blue-500/50 text-xs font-bold">
-                                                            📦 Has Items
-                                                        </span>
-                                                    ) : (
-                                                        <span className="inline-flex items-center px-3 py-1 rounded-full bg-green-500/20 text-green-400 border border-green-500/50 text-xs font-bold">
-                                                            ✓ Empty
-                                                        </span>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        {/* Manual Entry / Barcode Scan Option */}
-                                        <div className="border-t border-gray-800 pt-4">
-                                            <label className="text-xs text-gray-400 uppercase font-bold mb-2 block flex items-center gap-2">
-                                                <Scan size={14} className="text-cyber-primary" />
-                                                {t('warehouse.enterManually')} {t('warehouse.scanLocationBarcode')}
-                                            </label>
-                                            <div className="flex gap-2">
                                                 <input
                                                     type="text"
-                                                    placeholder={t('warehouse.scanOrEnterLocation')}
+                                                    placeholder="1-A-1"
                                                     value={locationSearch}
                                                     onChange={(e) => {
-                                                        const value = e.target.value.toUpperCase();
-                                                        setLocationSearch(value);
+                                                        const val = e.target.value.toUpperCase();
+                                                        setLocationSearch(val);
 
-                                                        // Auto-detect barcode scanner input (rapid entry)
-                                                        // If format matches location pattern, auto-select after brief delay
-                                                        if (/^[A-Z]-\d{2}-\d{2}$/.test(value)) {
-                                                            setTimeout(() => {
-                                                                if (locationSearch === value) {
-                                                                    handleLocationSelect(value);
-                                                                    setLocationSearch('');
-                                                                }
-                                                            }, 150);
+                                                        // Auto-parse on valid pattern (e.g. 1-A-1 to 20-Z-20)
+                                                        const match = val.match(/^(\d{1,2})-([A-Z])-(\d{1,2})$/);
+                                                        if (match) {
+                                                            const aisleNum = parseInt(match[1]);
+                                                            const zoneLetter = match[2];
+                                                            const binNum = parseInt(match[3]);
+
+                                                            if (aisleNum >= 1 && aisleNum <= 20 && binNum >= 1 && binNum <= 20) {
+                                                                // Debounced auto-submit for smooth UX
+                                                                const loc = generateLocation(zoneLetter, String(aisleNum), String(binNum));
+                                                                setTimeout(() => {
+                                                                    if (locationSearch === val) {
+                                                                        handleLocationSelect(loc);
+                                                                        setLocationSearch('');
+                                                                    }
+                                                                }, 400);
+                                                            }
                                                         }
                                                     }}
-                                                    className="flex-1 bg-gray-800 border-2 border-gray-700 rounded-lg p-3 text-white font-mono text-lg focus:border-cyber-primary focus:outline-none focus:ring-2 focus:ring-cyber-primary/50"
+                                                    className="w-full bg-black/60 border-2 border-white/10 rounded-3xl py-8 pl-16 pr-8 text-4xl font-mono text-white placeholder:text-gray-800 focus:border-cyber-primary focus:outline-none focus:ring-8 focus:ring-cyber-primary/10 transition-all text-center tracking-[0.2em] shadow-inner"
                                                     onKeyPress={(e) => {
                                                         if (e.key === 'Enter' && locationSearch) {
                                                             e.preventDefault();
-                                                            // Validate format (e.g., A-01-01)
-                                                            if (/^[A-Z]-\d{2}-\d{2}$/.test(locationSearch)) {
-                                                                handleLocationSelect(locationSearch);
-                                                                setLocationSearch('');
+                                                            const match = locationSearch.match(/^(\d{1,2})-([A-Z])-(\d{1,2})$/);
+                                                            if (match) {
+                                                                const aisleNum = parseInt(match[1]);
+                                                                const zoneLetter = match[2];
+                                                                const binNum = parseInt(match[3]);
+                                                                if (aisleNum >= 1 && aisleNum <= 20 && binNum >= 1 && binNum <= 20) {
+                                                                    handleLocationSelect(generateLocation(zoneLetter, String(aisleNum), String(binNum)));
+                                                                    setLocationSearch('');
+                                                                } else {
+                                                                    addNotification('alert', 'Aisle/Bin must be 1-20');
+                                                                }
                                                             } else {
-                                                                addNotification('alert', t('warehouse.invalidFormat'));
+                                                                handleLocationSelect(locationSearch); // Fallback for raw legacy scans
                                                                 setLocationSearch('');
                                                             }
                                                         }
                                                     }}
-                                                    ref={locationInputRef}
-                                                    onBlur={handleBlur}
                                                     autoFocus
+                                                    aria-label="Location Scanner Input"
                                                 />
+                                            </div>
+
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <button
+                                                    onClick={() => {
+                                                        if (locationSearch) {
+                                                            const match = locationSearch.match(/^(\d{1,2})-([A-Z])-(\d{1,2})$/);
+                                                            if (match) {
+                                                                handleLocationSelect(generateLocation(match[2], match[1], match[3]));
+                                                            } else {
+                                                                handleLocationSelect(locationSearch);
+                                                            }
+                                                            setLocationSearch('');
+                                                        }
+                                                    }}
+                                                    className="py-6 bg-cyber-primary hover:bg-cyber-accent text-black font-black text-xl rounded-2xl transition-all uppercase tracking-widest shadow-xl shadow-cyber-primary/20 flex items-center justify-center gap-3"
+                                                >
+                                                    <CheckCircle size={24} strokeWidth={4} />
+                                                    {t('common.confirm')}
+                                                </button>
                                                 <button
                                                     onClick={() => {
                                                         setQRScannerMode('location');
                                                         setIsQRScannerOpen(true);
                                                     }}
-                                                    className="px-4 py-3 bg-blue-500/20 border border-blue-500/30 text-blue-400 font-bold rounded-lg hover:bg-blue-500/30 transition-colors flex items-center gap-2"
-                                                    title={t('warehouse.scanLocationWithCamera')}
+                                                    className="py-6 bg-gray-800 hover:bg-gray-700 text-white font-bold text-xl rounded-2xl border border-white/10 transition-all flex items-center justify-center gap-3 shadow-xl"
                                                 >
-                                                    <Camera size={20} />
+                                                    <Camera size={24} />
+                                                    Camera
                                                 </button>
-                                                <button
-                                                    onClick={() => {
-                                                        if (locationSearch && /^[A-Z]-\d{2}-\d{2}$/.test(locationSearch)) {
-                                                            handleLocationSelect(locationSearch);
-                                                            setLocationSearch('');
-                                                        } else {
-                                                            addNotification('alert', t('warehouse.invalidFormat'));
-                                                        }
-                                                    }}
-                                                    className="px-6 py-3 bg-cyber-primary hover:bg-cyber-accent text-black font-bold rounded-lg transition-colors"
-                                                >
-                                                    {t('warehouse.use')}
-                                                </button>
-                                            </div>
-                                            <p className="text-[10px] text-gray-500 mt-2">
-                                                {t('warehouse.tipScanLocation')} <span className="font-mono font-bold">A-01-01</span>
-                                                <span className="text-blue-400 ml-2">• {t('warehouse.orUseCamera')}</span>
-                                            </p>
-                                        </div>
-
-                                        {/* Smart Location Suggestions */}
-                                        {currentItem && (() => {
-                                            const product = filteredProducts.find(p => p.id === currentItem.productId);
-                                            if (!product) return null;
-
-                                            const smartSuggestions = getSmartLocationSuggestions(currentItem.productId);
-                                            const tempReq = getTemperatureRequirement(product.category);
-                                            const similarProducts = filteredProducts.filter(p =>
-                                                p.category === product.category &&
-                                                p.location &&
-                                                p.id !== product.id
-                                            );
-                                            const similarLocations = [...new Set(similarProducts.map(p => p.location).filter((loc): loc is string => typeof loc === 'string' && !!loc))].slice(0, 5) as string[];
-
-                                            return (
-                                                <div className="border-t border-gray-800 pt-4 mt-4 space-y-4">
-                                                    {tempReq && (
-                                                        <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3">
-                                                            <div className="flex items-center gap-2">
-                                                                <Snowflake className="text-blue-400" size={16} />
-                                                                <div>
-                                                                    <p className="text-xs font-bold text-blue-400 uppercase">{t('warehouse.temperatureRequirement')}</p>
-                                                                    <p className="text-sm text-white">{tempReq}</p>
-                                                                    <p className="text-[10px] text-gray-400 mt-1">{t('warehouse.useZoneForStorage').replace('{zone}', product.category === 'Frozen' ? 'Zone F' : 'Zone C')}</p>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    )}
-
-                                                    {smartSuggestions.length > 0 && (
-                                                        <div>
-                                                            <label className="text-xs text-gray-400 uppercase font-bold mb-3 block flex items-center gap-2">
-                                                                <span>{t('warehouse.smartSuggestions')}</span>
-                                                                {product.location && (
-                                                                    <span className="text-[10px] text-gray-500 normal-case font-normal">
-                                                                        (Current: {product.location})
-                                                                    </span>
-                                                                )}
-                                                            </label>
-                                                            <div className="flex flex-wrap gap-2">
-                                                                {smartSuggestions.map(loc => (
-                                                                    <button
-                                                                        key={loc}
-                                                                        onClick={() => {
-                                                                            const parts = String(loc).match(/^([A-Z])-(\d{2})-(\d{2})$/);
-                                                                            if (parts) {
-                                                                                setSelectedZone(parts[1]);
-                                                                                setSelectedAisle(parts[2]);
-                                                                                setSelectedBin(parts[3]);
-                                                                            }
-                                                                            handleLocationSelect(String(loc));
-                                                                        }}
-                                                                        className={`px-4 py-2 rounded-lg border font-mono text-sm font-bold transition-colors ${!isLocationOccupied(loc)
-                                                                            ? 'bg-green-500/20 text-green-400 border-green-500/50 hover:bg-green-500/30'
-                                                                            : 'bg-blue-500/20 text-blue-400 border-blue-500/50 hover:bg-blue-500/30'
-                                                                            } `}
-                                                                        title={!isLocationOccupied(loc) ? t('warehouse.useLocationEmpty').replace('{loc}', loc) : t('warehouse.useLocationOccupied').replace('{loc}', loc)}
-                                                                    >
-                                                                        {loc} {!isLocationOccupied(loc) && '⭐'}
-                                                                    </button>
-                                                                ))}
-                                                            </div>
-                                                        </div>
-                                                    )}
-
-                                                    {similarLocations.length > 0 && (
-                                                        <div>
-                                                            <label className="text-xs text-gray-400 uppercase font-bold mb-3 block">
-                                                                📍 {t('warehouse.similarProducts')} ({product.category})
-                                                            </label>
-                                                            <div className="flex flex-wrap gap-2">
-                                                                {similarLocations.filter((loc): loc is string => !smartSuggestions.includes(loc)).map(loc => (
-                                                                    <button
-                                                                        key={loc}
-                                                                        onClick={() => {
-                                                                            const parts = String(loc).match(/^([A-Z])-(\d{2})-(\d{2})$/);
-                                                                            if (parts) {
-                                                                                setSelectedZone(parts[1]);
-                                                                                setSelectedAisle(parts[2]);
-                                                                                setSelectedBin(parts[3]);
-                                                                            }
-                                                                            handleLocationSelect(String(loc));
-                                                                        }}
-                                                                        className={`px-4 py-2 rounded-lg border font-mono text-sm font-bold transition-colors ${!isLocationOccupied(String(loc))
-                                                                            ? 'bg-purple-500/20 text-purple-400 border-purple-500/50 hover:bg-purple-500/30'
-                                                                            : 'bg-blue-500/20 text-blue-400 border-blue-500/50 hover:bg-blue-500/30'
-                                                                            } `}
-                                                                        title={!isLocationOccupied(String(loc)) ? t('warehouse.useLocationEmpty').replace('{loc}', String(loc)) : t('warehouse.useLocationOccupied').replace('{loc}', String(loc))}
-                                                                    >
-                                                                        {loc}
-                                                                    </button>
-                                                                ))}
-                                                            </div>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            );
-                                        })()}
-                                    </div>
-
-                                    {/* Location Grid Preview */}
-                                    <div className="bg-gray-900 rounded-xl border border-gray-800 p-6">
-                                        <h3 className="text-sm font-bold text-gray-400 uppercase mb-4">{t('warehouse.quickViewZone').replace('{zone}', selectedZone).replace('{aisle}', selectedAisle)}</h3>
-                                        <div className="grid grid-cols-5 md:grid-cols-10 gap-2">
-                                            {Array.from({ length: 20 }, (_, i) => {
-                                                const binNum = String(i + 1).padStart(2, '0');
-                                                const location = generateLocation(selectedZone, selectedAisle, binNum);
-                                                const occupied = isLocationOccupied(location);
-                                                const isSelected = binNum === selectedBin;
-
-                                                return (
-                                                    <button
-                                                        key={binNum}
-                                                        onClick={() => {
-                                                            setSelectedBin(binNum);
-                                                            handleLocationSelect(location);
-                                                        }}
-                                                        className={`p-4 rounded-xl border-2 flex flex-col items-center justify-center gap-2 transition-all ${isSelected
-                                                            ? 'bg-blue-500 border-blue-400 text-white shadow-lg shadow-blue-500/20'
-                                                            : occupied
-                                                                ? 'bg-gray-800 border-gray-700 text-blue-400 hover:border-blue-500 hover:bg-gray-750'
-                                                                : 'bg-gray-800 border-gray-700 text-white hover:border-green-500 hover:bg-gray-750'
-                                                            } `}
-                                                        title={occupied ? `Has items: ${location} ` : `Empty: ${location} `}
-                                                    >
-                                                        <span className="text-xl font-mono font-bold">{binNum}</span>
-                                                        {occupied && (
-                                                            <span className={`text-[10px] uppercase font-bold px-1.5 py-0.5 rounded ${isSelected ? 'bg-white/20 text-white' : 'bg-blue-500/20 text-blue-400'
-                                                                }`}>
-                                                                {t('warehouse.occupied')}
-                                                            </span>
-                                                        )}
-                                                    </button>
-                                                );
-                                            })}
-                                        </div>
-                                        <div className="flex gap-4 mt-4 text-xs">
-                                            <div className="flex items-center gap-2">
-                                                <div className="w-4 h-4 rounded bg-green-500/20 border border-green-500/50"></div>
-                                                <span className="text-gray-400">Empty</span>
-                                            </div>
-                                            <div className="flex items-center gap-2">
-                                                <div className="w-4 h-4 rounded bg-blue-500/20 border border-blue-500/50"></div>
-                                                <span className="text-gray-400">Has Items</span>
-                                            </div>
-                                            <div className="flex items-center gap-2">
-                                                <div className="w-4 h-4 rounded bg-blue-500 border border-blue-400"></div>
-                                                <span className="text-gray-400">Selected</span>
                                             </div>
                                         </div>
                                     </div>
+
+                                    {/* Critical Targets for Pickers */}
+                                    {selectedJob.type === 'PICK' && product?.location && (
+                                        <div className="bg-gradient-to-r from-blue-600/20 to-indigo-600/20 border-2 border-blue-500/30 rounded-3xl p-8 text-center animate-pulse shadow-2xl">
+                                            <p className="text-blue-400 font-black uppercase tracking-widest mb-2 text-sm">Pick From Location</p>
+                                            <p className="text-5xl font-mono text-white font-black tracking-tighter">{product.location}</p>
+                                        </div>
+                                    )}
+
+                                    {/* Smart Recommendation (Minimalist) */}
+                                    {selectedJob.type === 'PUTAWAY' && product?.location && (
+                                        <div className="bg-green-600/10 border border-green-500/20 rounded-2xl p-4 flex items-center justify-center gap-3">
+                                            <span className="text-green-400 font-bold">Recommended:</span>
+                                            <button
+                                                onClick={() => handleLocationSelect(product.location!)}
+                                                className="font-mono text-white font-black hover:text-green-400 transition-colors"
+                                            >
+                                                {product.location}
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
                             )}
 
@@ -1549,6 +1481,8 @@ export default function WarehouseOperations() {
                                                         onBlur={handleBlur}
                                                         autoFocus
                                                         disabled={isProcessingScan}
+                                                        title={t('warehouse.scanProductBarcode')}
+                                                        aria-label={t('warehouse.scanProductBarcode')}
                                                         onKeyDown={(e) => {
                                                             // Priority: Enter key (standard scanner terminology)
                                                             if (e.key === 'Enter' && scannedItem.trim()) {
@@ -1613,11 +1547,11 @@ export default function WarehouseOperations() {
                                     </div>
 
                                     <button
-                                        disabled={isProcessingScan}
+                                        disabled={isProcessingScan || isSubmitting}
                                         onClick={() => {
-                                            if (isProcessingScan) return;
+                                            if (isProcessingScan || isSubmitting) return;
                                             if (selectedJob?.type === 'PUTAWAY') {
-                                                const normalize = (s: string) => s?.trim().toUpperCase() || '';
+                                                const normalize = (s: string | undefined | null) => s?.trim().toUpperCase() || '';
                                                 const input = normalize(scannedItem);
                                                 const expectedSku = normalize(currentItem?.sku);
                                                 const product = filteredProducts.find(p => p.id === currentItem?.productId);
@@ -1640,10 +1574,10 @@ export default function WarehouseOperations() {
                                             }
                                             handleItemScan();
                                         }}
-                                        className={`w-full py-6 bg-green-500 text-black font-bold text-xl rounded-2xl shadow-[0_0_30px_rgba(34, 197, 94, 0.4)] flex items-center justify-center gap-3 ${isProcessingScan ? 'opacity-50 cursor-not-allowed' : 'hover:bg-green-400'} `}
+                                        className={`w-full py-6 bg-green-500 text-black font-bold text-xl rounded-2xl shadow-[0_0_30px_rgba(34, 197, 94, 0.4)] flex items-center justify-center gap-3 ${isProcessingScan || isSubmitting ? 'opacity-50 cursor-not-allowed' : 'hover:bg-green-400'} `}
                                     >
-                                        {isProcessingScan ? <RefreshCw size={28} className="animate-spin" /> : <Scan size={28} />}
-                                        {isProcessingScan ? t('warehouse.processing') : `${t('warehouse.confirm')} ${selectedJob.type} `}
+                                        {(isProcessingScan || isSubmitting) ? <RefreshCw size={28} className="animate-spin" /> : <Scan size={28} />}
+                                        {(isProcessingScan || isSubmitting) ? t('warehouse.processing') : `${t('warehouse.confirm')} ${selectedJob.type} `}
                                     </button>
 
                                     {/* Exception Handling Controls */}
@@ -1687,7 +1621,7 @@ export default function WarehouseOperations() {
                         </>
                     )}
                 </div>
-            </div >
+            </div>
         );
     };
 
@@ -1746,6 +1680,7 @@ export default function WarehouseOperations() {
                                     permission="COMPLETE_TASKS"
                                     onClick={() => {
                                         setSelectedJob(job);
+                                        setIsDetailsOpen(true);
                                         // Logic to open job details/completion modal would go here
                                         // For now we reuse the existing selection state which might trigger other UI elements
                                         // Ideally we'd have a specific driver modal
@@ -1777,7 +1712,6 @@ export default function WarehouseOperations() {
 
 
 
-
     return (
         <Protected permission="ACCESS_WAREHOUSE" showMessage>
             <div className="h-full flex flex-col gap-4 md:gap-6 p-2 md:p-0">
@@ -1785,7 +1719,7 @@ export default function WarehouseOperations() {
 
                 {/* Header Tabs */}
                 {/* Header Tabs-Scrollable on Mobile */}
-                <div className="flex items-center gap-2 overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-0 md:pb-0 bg-cyber-gray md:bg-transparent rounded-none md:rounded-xl border-y md:border border-white/5 shrink-0 no-scrollbar touch-pan-x">
+                <div className="flex items-center gap-2 overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-0 md:pb-0 bg-cyber-gray md:bg-transparent rounded-none md:rounded-xl shrink-0 no-scrollbar touch-pan-x">
                     <div className="flex gap-2 min-w-max">
                         {visibleTabs.map((tab) => (
                             <button
@@ -1801,9 +1735,20 @@ export default function WarehouseOperations() {
                         ))}
                     </div>
 
-                    <div className="hidden md:block ml-auto pl-2">
-                        <LanguageSwitcher />
+                    {/* Worker Points Widget */}
+                    <div className="hidden md:flex items-center gap-3 pl-2">
                     </div>
+
+                    {/* Points Earned Popup */}
+                    {showPointsPopup && (
+                        <PointsEarnedPopup
+                            points={earnedPoints.points}
+                            message={earnedPoints.message}
+                            bonuses={earnedPoints.bonuses}
+                            onClose={() => setShowPointsPopup(false)}
+                        />
+                    )}
+
                 </div>
 
                 {/* --- DOCKS TAB --- */}
@@ -2134,21 +2079,22 @@ export default function WarehouseOperations() {
 
                                         poJobs.forEach(job => {
                                             job.lineItems.forEach(item => {
-                                                receivedMap[item.productId] = (receivedMap[item.productId] || 0) + item.expectedQty;
-                                                if (item.sku) jobSkuMap[item.productId] = item.sku;
+                                                if (item.productId) {
+                                                    receivedMap[item.productId] = (receivedMap[item.productId] || 0) + item.expectedQty;
+                                                    if (item.sku) jobSkuMap[item.productId] = item.sku;
+                                                }
                                             });
                                         });
-
                                         // Check if PO is fully received
                                         const allItemsReceived = po.lineItems?.every(item => {
-                                            const received = receivedMap[item.productId] || 0;
+                                            const received = item.productId ? (receivedMap[item.productId] || 0) : 0;
                                             return received >= item.quantity;
                                         }) || false;
 
                                         // Sort items: Pending first, then Completed
                                         const sortedItems = [...(po.lineItems || [])].sort((a, b) => {
-                                            const receivedA = receivedMap[a.productId] || 0;
-                                            const receivedB = receivedMap[b.productId] || 0;
+                                            const receivedA = a.productId ? (receivedMap[a.productId] || 0) : 0;
+                                            const receivedB = b.productId ? (receivedMap[b.productId] || 0) : 0;
                                             const isCompleteA = receivedA >= a.quantity;
                                             const isCompleteB = receivedB >= b.quantity;
                                             if (isCompleteA === isCompleteB) return 0;
@@ -2178,7 +2124,7 @@ export default function WarehouseOperations() {
 
                                                 <div className="p-4 space-y-3">
                                                     {sortedItems.map((item, idx) => {
-                                                        const receivedQty = receivedMap[item.productId] || 0;
+                                                        const receivedQty = item.productId ? (receivedMap[item.productId] || 0) : 0;
                                                         const remainingQty = Math.max(0, item.quantity - receivedQty);
                                                         const isComplete = receivedQty >= item.quantity;
                                                         const product = products.find(p => p.id === item.productId);
@@ -2457,7 +2403,7 @@ export default function WarehouseOperations() {
                                                         >
                                                             <option value="QR">QR Code</option>
                                                             <option value="Barcode">Barcode</option>
-                                                            {(labelSize === 'Medium' || labelSize === 'Large') && <option value="Both">Both</option>}
+                                                            {(labelSize === 'MEDIUM' || labelSize === 'LARGE') && <option value="Both">Both</option>}
                                                         </select>
                                                     </div>
                                                 </div>
@@ -2571,20 +2517,19 @@ export default function WarehouseOperations() {
                                                 <button
                                                     onClick={async () => {
                                                         // Check if this completes the PO
-                                                        if (receivingPO && focusedItem) {
+                                                        if (receivingPO && focusedItem && focusedItem.productId) {
                                                             // Calculate new total including this transaction (use local calculation as state might lag)
                                                             const currentReceived = receivedQuantities[focusedItem.productId] || 0;
                                                             const newTotal = currentReceived + focusedItem.receivedQty;
 
                                                             // Simulate new state
-                                                            const updatedReceivedMap = { ...receivedQuantities, [focusedItem.productId]: newTotal };
+                                                            const updatedReceivedMap: Record<string, number> = { ...receivedQuantities, [focusedItem.productId]: newTotal };
 
                                                             // Check if ALL items are now received
                                                             const isComplete = receivingPO.lineItems.every(item => {
-                                                                const rec = updatedReceivedMap[item.productId] || 0;
+                                                                const rec = item.productId ? (updatedReceivedMap[item.productId] || 0) : 0;
                                                                 return rec >= item.quantity;
                                                             });
-
                                                             if (isComplete) {
                                                                 // Open Review Modal instead of completing immediately
                                                                 setReviewPO(receivingPO);
@@ -2631,7 +2576,7 @@ export default function WarehouseOperations() {
                                     <div className="mb-4">
                                         <label className="text-sm text-gray-400 mb-2 block">Label Size</label>
                                         <div className="grid grid-cols-4 gap-2">
-                                            {(['Tiny', 'Small', 'Medium', 'Large'] as const).map(s => (
+                                            {(['TINY', 'SMALL', 'MEDIUM', 'LARGE'] as const).map(s => (
                                                 <button
                                                     key={s}
                                                     onClick={() => setReprintSize(s)}
@@ -2645,10 +2590,10 @@ export default function WarehouseOperations() {
                                             ))}
                                         </div>
                                         <p className="text-xs text-gray-500 mt-1">
-                                            {reprintSize === 'Tiny' && '1.25" × 1"-SKU Tags'}
-                                            {reprintSize === 'Small' && '2.25" × 1.25"-Multipurpose'}
-                                            {reprintSize === 'Medium' && '3" × 2"-Shelf Labels'}
-                                            {reprintSize === 'Large' && '4" × 3"-Carton Tags'}
+                                            {reprintSize === 'TINY' && '1.25" × 1"-SKU Tags'}
+                                            {reprintSize === 'SMALL' && '2.25" × 1.25"-Multipurpose'}
+                                            {reprintSize === 'MEDIUM' && '3" × 2"-Shelf Labels'}
+                                            {reprintSize === 'LARGE' && '4" × 3"-Carton Tags'}
                                         </p>
                                     </div>
 
@@ -2729,7 +2674,7 @@ export default function WarehouseOperations() {
                                             >
                                                 <option value="QR">QR Code</option>
                                                 <option value="Barcode">Barcode (Code 128)</option>
-                                                {(labelSize === 'Medium' || labelSize === 'Large') && (
+                                                {(labelSize === 'MEDIUM' || labelSize === 'LARGE') && (
                                                     <option value="Both">Both</option>
                                                 )}
                                             </select>
@@ -2738,11 +2683,11 @@ export default function WarehouseOperations() {
 
                                     <div className="flex-1 overflow-y-auto space-y-2 mb-6 pr-2">
                                         {reviewPO.lineItems?.map((item, idx) => {
-                                            const receivedQty = receivedQuantities[item.productId] || 0;
+                                            const receivedQty = item.productId ? (receivedQuantities[item.productId] || 0) : 0;
                                             if (receivedQty === 0) return null;
 
-                                            const product = products.find(p => p.id === item.productId);
-                                            const sku = finalizedSkus[item.productId] || product?.sku || 'PENDING';
+                                            const product = item.productId ? products.find(p => p.id === item.productId) : undefined;
+                                            const sku = item.productId ? (finalizedSkus[item.productId] || product?.sku || 'PENDING') : 'PENDING';
 
                                             return (
                                                 <div key={idx} className="flex justify-between items-center p-3 bg-white/5 rounded-lg border border-white/10">
@@ -2785,7 +2730,7 @@ export default function WarehouseOperations() {
                                             }}
                                             className={`px-6 py-3 bg-green-600/20 text-green-400 border border-green-500/30 font-bold rounded-xl transition-colors flex items-center gap-2 ${isCompleting ? 'opacity-50 cursor-not-allowed' : 'hover:bg-green-600/30'} `}
                                         >
-                                            {isCompleting ? <RefreshCw size={18} className="animate-spin" /> : null}
+                                            {isCompleting ? <Loader2 size={18} className="animate-spin" /> : null}
                                             {isCompleting ? t('warehouse.processing') : t('warehouse.completeOnly')}
                                         </button>
                                         <button
@@ -2850,6 +2795,32 @@ export default function WarehouseOperations() {
                             </div>
                         </div>
 
+
+                        {/* Sort Controls */}
+                        <div className="flex justify-end px-1">
+                            <div className="flex items-center gap-2 bg-black/40 rounded-lg p-1 border border-white/10">
+                                <span className="text-[10px] uppercase font-bold text-gray-500 px-2">Sort By:</span>
+                                {([
+                                    { id: 'priority', label: 'Priority', icon: <AlertTriangle size={12} /> },
+                                    { id: 'site', label: 'Store', icon: <MapPin size={12} /> },
+                                    { id: 'date', label: 'Time', icon: <Clock size={12} /> },
+                                    { id: 'items', label: 'Size', icon: <List size={12} /> }
+                                ] as const).map(opt => (
+                                    <button
+                                        key={opt.id}
+                                        onClick={() => setPickSortBy(opt.id)}
+                                        className={`px-3 py-1.5 rounded-md text-xs font-bold flex items-center gap-1.5 transition-all ${pickSortBy === opt.id
+                                            ? 'bg-cyber-primary text-black shadow-lg shadow-cyber-primary/20'
+                                            : 'text-gray-400 hover:text-white hover:bg-white/5'
+                                            }`}
+                                    >
+                                        {opt.icon}
+                                        <span className="hidden md:inline">{opt.label}</span>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
                         {/* Job Cards Grid */}
                         <div className="flex-1 overflow-y-auto">
                             {filteredJobs.filter(j =>
@@ -2862,7 +2833,23 @@ export default function WarehouseOperations() {
                                         j.type === 'PICK' &&
                                         j.status !== 'Completed' &&
                                         (!j.assignedTo || j.assignedTo === user?.name || ['admin', 'manager', 'super_admin'].includes(user?.role || ''))
-                                    ).map(job => {
+                                    ).sort((a, b) => {
+                                        switch (pickSortBy) {
+                                            case 'priority':
+                                                const p = { 'Critical': 4, 'High': 3, 'Medium': 2, 'Normal': 1, 'Low': 0 };
+                                                return (p[b.priority] || 1) - (p[a.priority] || 1);
+                                            case 'date':
+                                                return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
+                                            case 'items':
+                                                return (b.lineItems?.length || 0) - (a.lineItems?.length || 0);
+                                            case 'site':
+                                                const siteA = sites.find(s => s.id === a.destSiteId)?.name || '';
+                                                const siteB = sites.find(s => s.id === b.destSiteId)?.name || '';
+                                                return siteA.localeCompare(siteB);
+                                            default:
+                                                return 0;
+                                        }
+                                    }).map(job => {
                                         const lineItems = job.lineItems || (job as any).line_items || [];
                                         const totalItems = lineItems.length;
                                         const pickedItems = lineItems.filter((i: any) => i.status === 'Picked').length;
@@ -3267,6 +3254,7 @@ export default function WarehouseOperations() {
                                                             <span className="text-xl font-mono font-bold text-white">{Math.round(progress)}%</span>
                                                         </div>
                                                         <div className="h-2 bg-black/40 rounded-full overflow-hidden">
+                                                            {/* eslint-disable-next-line */}
                                                             <div className="h-full bg-cyber-primary transition-all duration-300" style={{ width: `${progress}% ` }} />
                                                         </div>
                                                         <p className="text-xs text-gray-500 mt-2 text-center">{packedCount} of {totalItems} items packed</p>
@@ -3385,7 +3373,16 @@ export default function WarehouseOperations() {
 
                                                                     // Call Complete Job with validation skip (we already validated locally)
                                                                     console.log('Completing job:', currentPackJob.id);
-                                                                    await completeJob(currentPackJob.id, user?.name || 'Packer', true);
+                                                                    const result = await completeJob(currentPackJob.id, user?.name || 'Packer', true);
+
+                                                                    if (result && result.points > 0) {
+                                                                        setEarnedPoints({
+                                                                            points: result.points,
+                                                                            message: `Order Packed!`,
+                                                                            bonuses: result.breakdown
+                                                                        });
+                                                                        setShowPointsPopup(true);
+                                                                    }
                                                                     addNotification('success', 'Order Packed & Label Generated!');
                                                                     setSelectedPackJob(null);
                                                                     // packedItems set removed, no need to clear
@@ -3404,7 +3401,7 @@ export default function WarehouseOperations() {
                                                         >
                                                             {loadingActions[currentPackJob.id] ? (
                                                                 <>
-                                                                    <RefreshCw size={18} className="animate-spin" />
+                                                                    <Loader2 size={18} className="animate-spin" />
                                                                     Completing...
                                                                 </>
                                                             ) : (
@@ -3512,10 +3509,15 @@ export default function WarehouseOperations() {
                     )
                 }
 
+
+
+
                 {/* --- ASSIGN TAB (Job Assignment Center) --- */}
                 {
                     activeTab === 'ASSIGN' && canAccessTab('ASSIGN') && (
                         <div className="flex-1 overflow-y-auto space-y-6">
+
+
                             {/* JOB ASSIGNMENT CENTER */}
                             <div className="bg-cyber-gray border border-white/5 rounded-2xl p-6">
                                 <h3 className="font-bold text-white mb-4 flex items-center gap-2">
@@ -3575,6 +3577,25 @@ export default function WarehouseOperations() {
                                                 className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-1.5 text-white text-xs focus:border-cyber-primary outline-none"
                                             />
                                         </div>
+
+                                        {/* Sort By */}
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-xs text-gray-400 font-bold">Sort:</span>
+                                            <div className="flex bg-white/5 rounded-lg p-1">
+                                                {(['priority', 'date', 'items'] as const).map(sortOption => (
+                                                    <button
+                                                        key={sortOption}
+                                                        onClick={() => setAssignSortBy(sortOption)}
+                                                        className={`px-3 py-1 text-xs rounded-lg font-bold transition-colors ${assignSortBy === sortOption
+                                                            ? 'bg-cyber-primary text-black'
+                                                            : 'text-gray-400 hover:text-white'
+                                                            }`}
+                                                    >
+                                                        {sortOption.charAt(0).toUpperCase() + sortOption.slice(1)}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -3600,10 +3621,17 @@ export default function WarehouseOperations() {
                                                 if (dispatchPriorityFilter !== 'ALL') filtered = filtered.filter(j => j.priority === dispatchPriorityFilter);
                                                 if (dispatchSearch) filtered = filtered.filter(j => j.id.toLowerCase().includes(dispatchSearch.toLowerCase()));
 
-                                                // Sort by priority: Critical > High > Normal
+                                                // Sort based on selected sort option
                                                 filtered.sort((a, b) => {
-                                                    const priorityOrder: Record<string, number> = { 'Critical': 0, 'High': 1, 'Normal': 2 };
-                                                    return priorityOrder[a.priority] - priorityOrder[b.priority];
+                                                    if (assignSortBy === 'priority') {
+                                                        const priorityOrder: Record<string, number> = { 'Critical': 0, 'High': 1, 'Normal': 2 };
+                                                        return (priorityOrder[a.priority] ?? 3) - (priorityOrder[b.priority] ?? 3);
+                                                    } else if (assignSortBy === 'date') {
+                                                        return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
+                                                    } else if (assignSortBy === 'items') {
+                                                        return (b.items || 0) - (a.items || 0);
+                                                    }
+                                                    return 0;
                                                 });
 
                                                 return filtered.map(job => {
@@ -3637,7 +3665,10 @@ export default function WarehouseOperations() {
                                                     return (
                                                         <div
                                                             key={job.id}
-                                                            onClick={() => setSelectedJob(job)}
+                                                            onClick={() => {
+                                                                setSelectedJob(job);
+                                                                setIsDetailsOpen(false);
+                                                            }}
                                                             className={`p-3 rounded-lg border cursor-pointer transition-all ${selectedJob?.id === job.id
                                                                 ? 'bg-cyber-primary/20 border-cyber-primary'
                                                                 : jobZoneLocked
@@ -3670,6 +3701,17 @@ export default function WarehouseOperations() {
                                                                         💡 {t('warehouse.match')}
                                                                     </span>
                                                                 )}
+                                                                <button
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        setSelectedJob(job);
+                                                                        setIsDetailsOpen(true);
+                                                                    }}
+                                                                    className="p-1 hover:bg-white/10 rounded text-gray-400 hover:text-white"
+                                                                    title="View Details"
+                                                                >
+                                                                    <Eye size={14} />
+                                                                </button>
                                                             </div>
 
                                                             <div className="space-y-1 text-xs">
@@ -3820,37 +3862,24 @@ export default function WarehouseOperations() {
                                                                 </div>
                                                             </div>
                                                             <Protected permission="ASSIGN_TASKS">
-                                                                <button
-                                                                    disabled={!selectedJob || isOverloaded || (selectedJob && isZoneLocked(selectedJob.location || '')) || (selectedJob && loadingActions[`assign_${selectedJob.id}_${employee.id} `])}
+                                                                <Button
+                                                                    variant={roleMatch ? 'primary' : 'secondary'}
+                                                                    disabled={!selectedJob || isOverloaded || (selectedJob && isZoneLocked(selectedJob.location || ''))}
                                                                     onClick={async () => {
                                                                         if (selectedJob) {
-                                                                            const actionKey = `assign_${selectedJob.id}_${employee.id} `;
-                                                                            if (loadingActions[actionKey]) return;
-
                                                                             // Check if zone is locked before assigning
                                                                             if (isZoneLocked(selectedJob.location || '')) {
                                                                                 addNotification('alert', `Cannot assign job: Zone is locked for maintenance.`);
                                                                                 return;
                                                                             }
 
-                                                                            setLoadingActions(prev => ({ ...prev, [actionKey]: true }));
-                                                                            try {
-                                                                                await assignJob(selectedJob.id, employee.id);
-                                                                                addNotification('success', `Job assigned to ${employee.name} `);
-                                                                                setSelectedJob(null);
-                                                                            } catch (e) {
-                                                                                console.error('Assign error:', e);
-                                                                            } finally {
-                                                                                setLoadingActions(prev => ({ ...prev, [actionKey]: false }));
-                                                                            }
+                                                                            await assignJob(selectedJob.id, employee.id);
+                                                                            addNotification('success', `Job assigned to ${employee.name} `);
+                                                                            setSelectedJob(null);
                                                                         }
                                                                     }}
-                                                                    className={`px-3 py-1.5 rounded text-xs font-bold transition-colors flex items-center gap-1 ${selectedJob && !isOverloaded && !(selectedJob && isZoneLocked(selectedJob.location || ''))
-                                                                        ? roleMatch
-                                                                            ? 'bg-cyber-primary text-black hover:bg-cyber-accent'
-                                                                            : 'bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 border border-blue-500/50'
-                                                                        : 'bg-white/5 text-gray-500 cursor-not-allowed'
-                                                                        } `}
+                                                                    size="sm"
+                                                                    className="px-3 py-1.5"
                                                                     title={
                                                                         isOverloaded
                                                                             ? 'Employee has max workload (3 jobs)'
@@ -3863,15 +3892,8 @@ export default function WarehouseOperations() {
                                                                                         : 'Assign job to this employee (role match)'
                                                                     }
                                                                 >
-                                                                    {selectedJob && loadingActions[`assign_${selectedJob.id}_${employee.id} `] ? (
-                                                                        <>
-                                                                            <RefreshCw className="animate-spin" size={10} />
-                                                                            Assigning...
-                                                                        </>
-                                                                    ) : (
-                                                                        isOverloaded ? 'Full' : roleMatch ? 'Assign' : 'Assign ⚠️'
-                                                                    )}
-                                                                </button>
+                                                                    {isOverloaded ? 'Full' : roleMatch ? 'Assign' : 'Assign ⚠️'}
+                                                                </Button>
                                                             </Protected>
                                                         </div>
                                                     );
@@ -3890,7 +3912,7 @@ export default function WarehouseOperations() {
                                 </div>
 
                                 {/* Selected Job Details */}
-                                {selectedJob && (
+                                {selectedJob && isDetailsOpen && (
                                     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-200">
                                         <div className="bg-cyber-gray border border-white/10 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl shadow-cyber-primary/10 flex flex-col">
                                             {/* Header */}
@@ -3906,7 +3928,7 @@ export default function WarehouseOperations() {
                                                         <span className="text-white">{selectedJob.status}</span>
                                                     </p>
                                                 </div>
-                                                <button onClick={() => setSelectedJob(null)} aria-label="Close" className="p-2 hover:bg-white/10 rounded-lg text-gray-400 hover:text-white transition-colors">
+                                                <button onClick={() => setIsDetailsOpen(false)} aria-label="Close" className="p-2 hover:bg-white/10 rounded-lg text-gray-400 hover:text-white transition-colors">
                                                     <X size={20} />
                                                 </button>
                                             </div>
@@ -4004,7 +4026,7 @@ export default function WarehouseOperations() {
                                             {/* Footer Rules */}
                                             <div className="p-6 border-t border-white/10 bg-black/20 flex justify-end gap-3 rounded-b-2xl">
                                                 <button
-                                                    onClick={() => setSelectedJob(null)}
+                                                    onClick={() => setIsDetailsOpen(false)}
                                                     className="px-6 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg font-bold transition-colors"
                                                 >
                                                     Close
@@ -4332,7 +4354,7 @@ export default function WarehouseOperations() {
                                                                     ${barcodeSVG}
                                                                 </div>
                                                                 <div class="sku" style="font-size: ${sizeConfig.fontSize}; margin-top: 5px;">SKU: ${sku} | Unit: ${unitNumber}/${qty}</div>
-                                                            </div >
+                                                            </div>
     `;
 
                                                                 labelPromises.push(Promise.resolve(labelHTML));
@@ -4657,6 +4679,7 @@ export default function WarehouseOperations() {
                                                     {/* Progress Bar (if In-Progress) */}
                                                     {job.status === 'In-Progress' && progress > 0 && (
                                                         <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
+                                                            {/* eslint-disable-next-line */}
                                                             <div className="h-full bg-cyber-primary transition-all duration-500" style={{ width: `${progress}% ` }} />
                                                         </div>
                                                     )}
@@ -4799,63 +4822,75 @@ export default function WarehouseOperations() {
                                                 return;
                                             }
 
-                                            // Create PUTAWAY jobs for all selected items
-                                            let created = 0;
-                                            for (const productId of selectedReplenishItems) {
-                                                const product = products.find(p => p.id === productId);
-                                                if (!product) continue;
+                                            setIsSubmitting(true);
+                                            try {
+                                                // Create PUTAWAY jobs for all selected items
+                                                let created = 0;
+                                                for (const productId of selectedReplenishItems) {
+                                                    const product = products.find(p => p.id === productId);
+                                                    if (!product) continue;
 
-                                                const minStock = product.minStock || 10;
-                                                const maxStock = product.maxStock || 100;
-                                                const restockQty = Math.min(maxStock - product.stock, 50);
+                                                    const minStock = product.minStock || 10;
+                                                    const maxStock = product.maxStock || 100;
+                                                    const restockQty = Math.min(maxStock - product.stock, 50);
 
-                                                if (restockQty <= 0) continue;
+                                                    if (restockQty <= 0) continue;
 
-                                                try {
-                                                    const replenishJob: WMSJob = {
-                                                        id: `REP - ${Date.now()} - ${created} `,
-                                                        siteId: activeSite?.id || '',
-                                                        site_id: activeSite?.id,
-                                                        sourceSiteId: activeSite?.id || '',
-                                                        source_site_id: activeSite?.id,
-                                                        destSiteId: activeSite?.id || '',
-                                                        dest_site_id: activeSite?.id,
-                                                        type: 'PUTAWAY',
-                                                        status: 'Pending',
-                                                        priority: product.stock === 0 ? 'Critical' : product.stock < minStock / 2 ? 'High' : 'Normal',
-                                                        location: product.location || 'Bulk Storage',
-                                                        assignedTo: '',
-                                                        items: 1,
-                                                        lineItems: [{
-                                                            productId: product.id,
-                                                            sku: product.sku,
-                                                            name: product.name,
-                                                            image: product.image,
-                                                            expectedQty: restockQty,
-                                                            pickedQty: 0,
-                                                            status: 'Pending'
-                                                        }],
-                                                        orderRef: `REPLENISH - ${product.sku} `
-                                                    };
-                                                    await wmsJobsService.create(replenishJob);
-                                                    created++;
-                                                } catch (e) {
-                                                    console.error('Failed to create replenish job:', e);
+                                                    try {
+                                                        const replenishJob: WMSJob = {
+                                                            id: `REP - ${Date.now()} - ${created} `,
+                                                            siteId: activeSite?.id || '',
+                                                            site_id: activeSite?.id,
+                                                            sourceSiteId: activeSite?.id || '',
+                                                            source_site_id: activeSite?.id,
+                                                            destSiteId: activeSite?.id || '',
+                                                            dest_site_id: activeSite?.id,
+                                                            type: 'PUTAWAY',
+                                                            status: 'Pending',
+                                                            priority: product.stock === 0 ? 'Critical' : product.stock < minStock / 2 ? 'High' : 'Normal',
+                                                            location: product.location || 'Bulk Storage',
+                                                            assignedTo: '',
+                                                            items: 1,
+                                                            lineItems: [{
+                                                                productId: product.id,
+                                                                sku: product.sku,
+                                                                name: product.name,
+                                                                image: product.image,
+                                                                expectedQty: restockQty,
+                                                                pickedQty: 0,
+                                                                status: 'Pending'
+                                                            }],
+                                                            orderRef: `REPLENISH - ${product.sku} `
+                                                        };
+                                                        await wmsJobsService.create(replenishJob);
+                                                        created++;
+                                                    } catch (e) {
+                                                        console.error('Failed to create replenish job:', e);
+                                                    }
                                                 }
-                                            }
 
-                                            if (created > 0) {
-                                                addNotification('success', `Created ${created} replenishment jobs`);
-                                                setSelectedReplenishItems(new Set());
+                                                if (created > 0) {
+                                                    addNotification('success', `Created ${created} replenishment jobs`);
+                                                    setSelectedReplenishItems(new Set());
+                                                }
+                                            } finally {
+                                                setIsSubmitting(false);
                                             }
                                         }}
                                         className={`text-xs px-4 py-2 rounded-lg font-bold transition-colors ${selectedReplenishItems.size > 0
                                             ? 'bg-cyber-primary text-black hover:bg-cyber-accent'
                                             : 'bg-white/5 text-gray-500 cursor-not-allowed'
                                             } `}
-                                        disabled={selectedReplenishItems.size === 0}
+                                        disabled={selectedReplenishItems.size === 0 || isSubmitting}
                                     >
-                                        Generate {selectedReplenishItems.size > 0 ? `${selectedReplenishItems.size} ` : ''}Tasks
+                                        {isSubmitting ? (
+                                            <div className="flex items-center gap-2">
+                                                <Loader2 size={14} className="animate-spin" />
+                                                <span>Generating...</span>
+                                            </div>
+                                        ) : (
+                                            `Generate ${selectedReplenishItems.size > 0 ? `${selectedReplenishItems.size} ` : ''}Tasks`
+                                        )}
                                     </button>
                                 </div>
                             </div>
@@ -5023,10 +5058,12 @@ export default function WarehouseOperations() {
                                                         </td>
                                                         <td className="p-3 text-right">
                                                             <button
+                                                                disabled={creatingReplenishTask === p.id}
                                                                 onClick={async () => {
+                                                                    setCreatingReplenishTask(p.id);
                                                                     try {
                                                                         const replenishJob: WMSJob = {
-                                                                            id: `REP - ${Date.now()} `,
+                                                                            id: `REP-${Date.now()}`,
                                                                             siteId: activeSite?.id || '',
                                                                             site_id: activeSite?.id,
                                                                             sourceSiteId: activeSite?.id || '',
@@ -5048,18 +5085,30 @@ export default function WarehouseOperations() {
                                                                                 pickedQty: 0,
                                                                                 status: 'Pending'
                                                                             }],
-                                                                            orderRef: `REPLENISH - ${p.sku} `
+                                                                            orderRef: `REPLENISH-${p.sku}`
                                                                         };
                                                                         await wmsJobsService.create(replenishJob);
                                                                         addNotification('success', `Replenishment job created for ${p.name}`);
                                                                     } catch (e) {
                                                                         console.error('Failed to create replenish job:', e);
                                                                         addNotification('alert', 'Failed to create replenishment job');
+                                                                    } finally {
+                                                                        setCreatingReplenishTask(null);
                                                                     }
                                                                 }}
-                                                                className="px-3 py-1.5 bg-cyber-primary/20 hover:bg-cyber-primary/30 text-cyber-primary border border-cyber-primary/50 rounded text-xs font-bold transition-colors"
+                                                                className={`px-3 py-1.5 rounded text-xs font-bold transition-colors flex items-center gap-1 ${creatingReplenishTask === p.id
+                                                                    ? 'bg-cyber-primary/10 text-cyber-primary/50 border border-cyber-primary/30 cursor-not-allowed'
+                                                                    : 'bg-cyber-primary/20 hover:bg-cyber-primary/30 text-cyber-primary border border-cyber-primary/50'
+                                                                    }`}
                                                             >
-                                                                Create Task
+                                                                {creatingReplenishTask === p.id ? (
+                                                                    <>
+                                                                        <RefreshCw size={12} className="animate-spin" />
+                                                                        Creating...
+                                                                    </>
+                                                                ) : (
+                                                                    'Create Task'
+                                                                )}
                                                             </button>
                                                         </td>
                                                     </tr>
@@ -5320,24 +5369,54 @@ export default function WarehouseOperations() {
                                                                             Recount
                                                                         </button>
                                                                         <button
+                                                                            disabled={approvingVariance === idx}
                                                                             onClick={async () => {
-                                                                                // Approve Variance
-                                                                                await adjustStock(
-                                                                                    item.productId,
-                                                                                    Math.abs(item.variance || 0),
-                                                                                    (item.variance || 0) > 0 ? 'IN' : 'OUT',
-                                                                                    `Cycle Count Adjustment`,
-                                                                                    user?.name || 'Manager'
-                                                                                );
+                                                                                setApprovingVariance(idx);
+                                                                                try {
+                                                                                    // Approve Variance - NOW CREATES REQUEST
+                                                                                    const varianceQty = Math.abs(item.variance || 0);
+                                                                                    const adjustType = (item.variance || 0) > 0 ? 'IN' : 'OUT';
 
-                                                                                const newItems = [...countSessionItems];
-                                                                                newItems[idx].status = 'Approved';
-                                                                                setCountSessionItems(newItems);
-                                                                                addNotification('success', 'Variance approved & stock updated.');
+                                                                                    const request: Omit<PendingInventoryChange, 'id'> = {
+                                                                                        productId: item.productId,
+                                                                                        productName: product?.name || 'Unknown',
+                                                                                        productSku: product?.sku || 'Unknown',
+                                                                                        siteId: product?.siteId || user?.siteId || '',
+                                                                                        changeType: 'stock_adjustment',
+                                                                                        requestedBy: user?.name || 'Manager',
+                                                                                        requestedAt: new Date().toISOString(),
+                                                                                        status: 'pending',
+                                                                                        adjustmentType: adjustType,
+                                                                                        adjustmentQty: varianceQty,
+                                                                                        adjustmentReason: `Cycle Count Variance Approval`
+                                                                                    };
+
+                                                                                    await inventoryRequestsService.create(request);
+
+                                                                                    const newItems = [...countSessionItems];
+                                                                                    newItems[idx].status = 'Approved';
+                                                                                    setCountSessionItems(newItems);
+                                                                                    addNotification('success', 'Variance adjustment request submitted for approval.');
+                                                                                } catch (e) {
+                                                                                    console.error('Failed to approve variance:', e);
+                                                                                    addNotification('alert', 'Failed to submit variance approval');
+                                                                                } finally {
+                                                                                    setApprovingVariance(null);
+                                                                                }
                                                                             }}
-                                                                            className="px-3 py-1.5 bg-red-500/20 text-red-400 text-xs font-bold rounded-lg hover:bg-red-500/30 border border-red-500/30"
+                                                                            className={`px-3 py-1.5 text-xs font-bold rounded-lg border flex items-center gap-1 ${approvingVariance === idx
+                                                                                ? 'bg-red-500/10 text-red-400/50 border-red-500/20 cursor-not-allowed'
+                                                                                : 'bg-red-500/20 text-red-400 border-red-500/30 hover:bg-red-500/30'
+                                                                                }`}
                                                                         >
-                                                                            Approve Variance
+                                                                            {approvingVariance === idx ? (
+                                                                                <>
+                                                                                    <RefreshCw size={12} className="animate-spin" />
+                                                                                    Approving...
+                                                                                </>
+                                                                            ) : (
+                                                                                'Approve Variance'
+                                                                            )}
                                                                         </button>
                                                                     </div>
                                                                 )}
@@ -5397,13 +5476,13 @@ export default function WarehouseOperations() {
                                                     <h4 className="text-gray-400 text-sm font-bold uppercase">Net Variance Value</h4>
                                                 </div>
                                                 <p className="text-3xl font-bold text-white">
-                                                    {CURRENCY_SYMBOL}{movements
+                                                    {formatCompactNumber(movements
                                                         .filter(m => m.reason.includes('Cycle Count') || m.reason.includes('Adjustment'))
                                                         .reduce((sum, m) => {
                                                             const product = products.find(p => p.id === m.productId);
                                                             const value = m.quantity * (product?.price || 0);
                                                             return sum + (m.type === 'IN' ? value : -value);
-                                                        }, 0).toFixed(2)}
+                                                        }, 0), { currency: CURRENCY_SYMBOL })}
                                                 </p>
                                                 <p className="text-xs text-gray-400 mt-1">Total value of adjustments</p>
                                             </div>
@@ -5456,7 +5535,7 @@ export default function WarehouseOperations() {
                                                                         </td>
                                                                         <td className="p-4 text-white">{m.quantity}</td>
                                                                         <td className="p-4 text-gray-300">
-                                                                            {CURRENCY_SYMBOL}{((product?.price || 0) * m.quantity).toFixed(2)}
+                                                                            {formatCompactNumber((product?.price || 0) * m.quantity, { currency: CURRENCY_SYMBOL })}
                                                                         </td>
                                                                         <td className="p-4 text-gray-400">{m.user || 'System'}</td>
                                                                     </tr>
@@ -5610,7 +5689,7 @@ export default function WarehouseOperations() {
                                                                         </div>
                                                                     </div>
                                                                     <div className="flex items-center gap-4">
-                                                                        <p className="font-mono text-white text-sm">{CURRENCY_SYMBOL}{cost.toFixed(2)}</p>
+                                                                        <p className="font-mono text-white text-sm">{formatCompactNumber(cost, { currency: CURRENCY_SYMBOL })}</p>
                                                                         <button
                                                                             onClick={() => setWasteBasket(prev => prev.filter((_, i) => i !== idx))}
                                                                             className="text-gray-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
@@ -5629,13 +5708,14 @@ export default function WarehouseOperations() {
                                                     <div className="flex justify-between items-center mb-4">
                                                         <span className="text-gray-400">Total Value Loss</span>
                                                         <span className="text-xl font-bold text-white">
-                                                            {CURRENCY_SYMBOL}{wasteBasket.reduce((sum, item) => {
+                                                            {formatCompactNumber(wasteBasket.reduce((sum, item) => {
                                                                 const product = products.find(p => p.id === item.productId);
                                                                 return sum + ((product?.price || 0) * item.quantity);
-                                                            }, 0).toFixed(2)}
+                                                            }, 0), { currency: CURRENCY_SYMBOL })}
                                                         </span>
                                                     </div>
                                                     <button
+                                                        disabled={isDisposingWaste || wasteBasket.length === 0}
                                                         onClick={async () => {
                                                             if (wasteBasket.length === 0) return;
 
@@ -5650,24 +5730,52 @@ export default function WarehouseOperations() {
                                                                 if (!confirm('Confirm disposal of these items?')) return;
                                                             }
 
-                                                            // Process all items
-                                                            for (const item of wasteBasket) {
-                                                                await adjustStock(
-                                                                    item.productId,
-                                                                    item.quantity,
-                                                                    'OUT',
-                                                                    `Waste: ${item.reason} ${item.notes ? `(${item.notes})` : ''} `,
-                                                                    user?.name || 'WMS'
-                                                                );
-                                                            }
+                                                            setIsDisposingWaste(true);
+                                                            try {
+                                                                // Process all items - CREATE REQUESTS
+                                                                for (const item of wasteBasket) {
+                                                                    const product = products.find(p => p.id === item.productId);
+                                                                    const request: Omit<PendingInventoryChange, 'id'> = {
+                                                                        productId: item.productId,
+                                                                        productName: product?.name || 'Unknown',
+                                                                        productSku: product?.sku || 'Unknown',
+                                                                        siteId: product?.siteId || user?.siteId || '',
+                                                                        changeType: 'stock_adjustment',
+                                                                        requestedBy: user?.name || 'WMS',
+                                                                        requestedAt: new Date().toISOString(),
+                                                                        status: 'pending',
+                                                                        adjustmentType: 'OUT',
+                                                                        adjustmentQty: item.quantity,
+                                                                        adjustmentReason: `Waste: ${item.reason}${item.notes ? ` (${item.notes})` : ''}`
+                                                                    };
+                                                                    await inventoryRequestsService.create(request);
+                                                                }
 
-                                                            setWasteBasket([]);
-                                                            addNotification('success', 'Waste log submitted successfully');
+                                                                setWasteBasket([]);
+                                                                addNotification('success', 'Waste adjustment requests submitted for approval');
+                                                            } catch (e) {
+                                                                console.error('Failed to submit waste disposal:', e);
+                                                                addNotification('alert', 'Failed to submit waste disposal requests');
+                                                            } finally {
+                                                                setIsDisposingWaste(false);
+                                                            }
                                                         }}
-                                                        disabled={wasteBasket.length === 0}
-                                                        className={`w-full py-3 font-bold rounded-xl transition-all flex items-center justify-center gap-2 ${wasteBasket.length > 0 ? 'bg-red-500 hover:bg-red-600 text-white shadow-lg shadow-red-500/20' : 'bg-gray-600 text-gray-400 cursor-not-allowed'} `}
+                                                        className={`w-full py-3 font-bold rounded-xl transition-all flex items-center justify-center gap-2 ${isDisposingWaste || wasteBasket.length === 0
+                                                            ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                                                            : 'bg-red-500 hover:bg-red-600 text-white shadow-lg shadow-red-500/20'
+                                                            }`}
                                                     >
-                                                        <AlertTriangle size={18} /> Confirm Disposal
+                                                        {isDisposingWaste ? (
+                                                            <>
+                                                                <RefreshCw size={18} className="animate-spin" />
+                                                                Processing...
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <AlertTriangle size={18} />
+                                                                Confirm Disposal
+                                                            </>
+                                                        )}
                                                     </button>
                                                 </div>
                                             </div>
@@ -5705,7 +5813,7 @@ export default function WarehouseOperations() {
                                                                     <td className="p-4 text-gray-300">{m.reason.replace('Waste: ', '')}</td>
                                                                     <td className="p-4 text-white">{m.quantity}</td>
                                                                     <td className="p-4 text-red-400">
-                                                                        {CURRENCY_SYMBOL}{((product?.price || 0) * m.quantity).toFixed(2)}
+                                                                        {formatCompactNumber((product?.price || 0) * m.quantity, { currency: CURRENCY_SYMBOL })}
                                                                     </td>
                                                                     <td className="p-4 text-gray-400">{m.user || 'System'}</td>
                                                                 </tr>
@@ -5819,7 +5927,7 @@ export default function WarehouseOperations() {
                                             </div>
                                             <div className="text-right">
                                                 <p className="text-sm text-gray-400">Total Paid</p>
-                                                <p className="font-bold text-cyber-primary text-xl">{CURRENCY_SYMBOL}{foundSale.total.toLocaleString()}</p>
+                                                <p className="font-bold text-cyber-primary text-xl">{formatCompactNumber(foundSale.total, { currency: CURRENCY_SYMBOL })}</p>
                                             </div>
                                         </div>
 
@@ -5978,7 +6086,7 @@ export default function WarehouseOperations() {
                                                                             </span>
                                                                         </td>
                                                                         <td className="p-4 text-right font-mono text-white">
-                                                                            {CURRENCY_SYMBOL}{refundAmount.toFixed(2)}
+                                                                            {formatCompactNumber(refundAmount, { currency: CURRENCY_SYMBOL })}
                                                                         </td>
                                                                     </tr>
                                                                 );
@@ -6004,15 +6112,15 @@ export default function WarehouseOperations() {
                                                             <div className="space-y-3 text-sm">
                                                                 <div className="flex justify-between text-gray-400">
                                                                     <span>Subtotal</span>
-                                                                    <span>{CURRENCY_SYMBOL}{subtotal.toFixed(2)}</span>
+                                                                    <span>{formatCompactNumber(subtotal, { currency: CURRENCY_SYMBOL })}</span>
                                                                 </div>
                                                                 <div className="flex justify-between text-gray-400">
                                                                     <span>Tax (10%)</span>
-                                                                    <span>{CURRENCY_SYMBOL}{tax.toFixed(2)}</span>
+                                                                    <span>{formatCompactNumber(tax, { currency: CURRENCY_SYMBOL })}</span>
                                                                 </div>
                                                                 <div className="flex justify-between text-white font-bold text-lg pt-4 border-t border-white/10">
                                                                     <span>Total Refund</span>
-                                                                    <span className="text-cyber-primary">{CURRENCY_SYMBOL}{total.toFixed(2)}</span>
+                                                                    <span className="text-cyber-primary">{formatCompactNumber(total, { currency: CURRENCY_SYMBOL })}</span>
                                                                 </div>
                                                             </div>
                                                         );
@@ -6031,10 +6139,24 @@ export default function WarehouseOperations() {
 
                                                                 await processReturn(foundSale.id, returnItems, totalRefund, user?.name || 'WMS');
 
-                                                                // Stock Adjustments
+                                                                // Stock Adjustments - CREATE REQUESTS
                                                                 for (const item of returnItems) {
                                                                     if (item.action === 'Restock') {
-                                                                        await adjustStock(item.productId, item.quantity, 'IN', `RMA Restock: ${foundSale.id} `, user?.name || 'WMS');
+                                                                        const product = products.find(p => p.id === item.productId);
+                                                                        const request: Omit<PendingInventoryChange, 'id'> = {
+                                                                            productId: item.productId,
+                                                                            productName: product?.name || 'Unknown',
+                                                                            productSku: product?.sku || 'Unknown',
+                                                                            siteId: product?.siteId || user?.siteId || '',
+                                                                            changeType: 'stock_adjustment',
+                                                                            requestedBy: user?.name || 'WMS',
+                                                                            requestedAt: new Date().toISOString(),
+                                                                            status: 'pending',
+                                                                            adjustmentType: 'IN',
+                                                                            adjustmentQty: item.quantity,
+                                                                            adjustmentReason: `RMA Restock: ${foundSale.id}`
+                                                                        };
+                                                                        await inventoryRequestsService.create(request);
                                                                     } else if (item.action === 'Discard') {
                                                                         // Log waste automatically? Or just don't add back.
                                                                         // For now, we just don't add it back.
@@ -6136,7 +6258,7 @@ export default function WarehouseOperations() {
                                                     onClick={() => {
                                                         // For non-admin users with assigned site, force source to their site
                                                         const isRestricted = !['super_admin', 'admin'].includes(user?.role || '') && !!user?.siteId;
-                                                        setTransferSourceSite(isRestricted ? user.siteId : (activeSite?.id || ''));
+                                                        setTransferSourceSite(isRestricted ? (user?.siteId || '') : (activeSite?.id || ''));
                                                         setTransferDestSite('');
                                                         setTransferItems([]);
                                                         setTransferPriority('Normal');
@@ -6191,6 +6313,32 @@ export default function WarehouseOperations() {
 
                                     {/* Transfer List */}
                                     <div className="bg-cyber-gray border border-white/5 rounded-2xl p-6">
+
+                                        {/* Sort Controls */}
+                                        <div className="flex justify-end mb-4">
+                                            <div className="flex items-center gap-2 bg-black/40 rounded-lg p-1 border border-white/10">
+                                                <span className="text-[10px] uppercase font-bold text-gray-500 px-2">Sort By:</span>
+                                                {([
+                                                    { id: 'priority', label: 'Priority', icon: <AlertTriangle size={12} /> },
+                                                    { id: 'site', label: 'Store', icon: <MapPin size={12} /> },
+                                                    { id: 'date', label: 'Time', icon: <Clock size={12} /> },
+                                                    { id: 'items', label: 'Size', icon: <List size={12} /> }
+                                                ] as const).map(opt => (
+                                                    <button
+                                                        key={opt.id}
+                                                        onClick={() => setTransferSortBy(opt.id) as any}
+                                                        className={`px-3 py-1.5 rounded-md text-xs font-bold flex items-center gap-1.5 transition-all ${transferSortBy === opt.id
+                                                            ? 'bg-cyber-primary text-black shadow-lg shadow-cyber-primary/20'
+                                                            : 'text-gray-400 hover:text-white hover:bg-white/5'
+                                                            }`}
+                                                    >
+                                                        {opt.icon}
+                                                        <span className="hidden md:inline">{opt.label}</span>
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+
                                         <div className="space-y-4">
                                             {filteredJobs
                                                 .filter(j => j.type === 'TRANSFER')
@@ -6199,7 +6347,24 @@ export default function WarehouseOperations() {
                                                     if (transferStatusFilter === 'Picking') return j.transferStatus === 'Picking' || j.transferStatus === 'Picked';
                                                     return j.transferStatus === transferStatusFilter;
                                                 })
-                                                .sort((a, b) => new Date(b.orderRef).getTime() - new Date(a.orderRef).getTime())
+                                                .sort((a, b) => {
+                                                    switch (transferSortBy) {
+                                                        case 'priority':
+                                                            const p = { 'Critical': 4, 'High': 3, 'Medium': 2, 'Normal': 1, 'Low': 0 };
+                                                            return (p[b.priority] || 1) - (p[a.priority] || 1);
+                                                        case 'date':
+                                                            // Fallback to orderRef if createdAt is missing, assuming orderRef has timestamp or sequential ID
+                                                            return new Date(b.createdAt || b.orderRef).getTime() - new Date(a.createdAt || a.orderRef).getTime();
+                                                        case 'items':
+                                                            return (b.lineItems?.length || 0) - (a.lineItems?.length || 0);
+                                                        case 'site':
+                                                            const siteA = sites.find(s => s.id === a.destSiteId)?.name || '';
+                                                            const siteB = sites.find(s => s.id === b.destSiteId)?.name || '';
+                                                            return siteA.localeCompare(siteB);
+                                                        default:
+                                                            return 0;
+                                                    }
+                                                })
                                                 .map(transfer => {
                                                     const sourceSite = sites.find(s => s.id === transfer.sourceSiteId);
                                                     const destSite = sites.find(s => s.id === transfer.destSiteId);
@@ -6366,38 +6531,35 @@ export default function WarehouseOperations() {
                                                                     )}
 
                                                                     {transfer.transferStatus === 'In-Transit' && (
-                                                                        <button
-                                                                            onClick={async () => {
-                                                                                if (loadingActions[transfer.id]) return;
-                                                                                setLoadingActions(prev => ({ ...prev, [transfer.id]: true }));
-                                                                                try {
-                                                                                    await wmsJobsService.update(transfer.id, {
-                                                                                        transferStatus: 'Delivered'
-                                                                                    } as any);
-                                                                                    await refreshData();
-                                                                                    addNotification('success', 'Transfer marked as delivered! 📍');
-                                                                                } catch (e) {
-                                                                                    console.error('Failed to mark delivered:', e);
-                                                                                    addNotification('alert', 'Failed to update transfer');
-                                                                                } finally {
-                                                                                    setLoadingActions(prev => ({ ...prev, [transfer.id]: false }));
-                                                                                }
-                                                                            }}
-                                                                            disabled={loadingActions[transfer.id]}
-                                                                            className={`px-3 py-1.5 rounded-lg text-xs font-bold border flex items-center gap-1.5 ${loadingActions[transfer.id]
-                                                                                ? 'bg-cyan-500/10 text-cyan-300 border-cyan-500/20 cursor-wait'
-                                                                                : 'bg-cyan-500/20 text-cyan-400 hover:bg-cyan-500/30 border-cyan-500/30'
-                                                                                } `}
-                                                                        >
-                                                                            {loadingActions[transfer.id] ? (
-                                                                                <>
-                                                                                    <RefreshCw className="animate-spin" size={12} />
-                                                                                    Updating...
-                                                                                </>
-                                                                            ) : (
-                                                                                <>📍 Mark Delivered</>
-                                                                            )}
-                                                                        </button>
+                                                                        transfer.destSiteId === activeSite?.id ? (
+                                                                            /* Destination site: Start receiving process */
+                                                                            <button
+                                                                                onClick={() => {
+                                                                                    const transferLineItems = transfer.lineItems || transfer.line_items || [];
+                                                                                    if (transferLineItems.length === 0) {
+                                                                                        addNotification('alert', 'Transfer has no items to receive');
+                                                                                        return;
+                                                                                    }
+                                                                                    setActiveTransferJob(transfer);
+                                                                                    setTransferReceiveItems(transferLineItems.map((item: any) => ({
+                                                                                        productId: item.productId,
+                                                                                        expectedQty: item.expectedQty,
+                                                                                        receivedQty: 0, // Start at 0 - must scan/enter each item
+                                                                                        condition: 'Good',
+                                                                                        notes: ''
+                                                                                    })));
+                                                                                    setTransferReceiveMode(true);
+                                                                                }}
+                                                                                className="px-3 py-1.5 bg-cyan-500/20 text-cyan-400 hover:bg-cyan-500/30 border-cyan-500/30 rounded-lg text-xs font-bold border flex items-center gap-1.5"
+                                                                            >
+                                                                                📦 Confirm Arrival & Receive
+                                                                            </button>
+                                                                        ) : (
+                                                                            /* Non-destination site: Show tracking indicator */
+                                                                            <span className="px-3 py-1.5 text-xs text-purple-400 flex items-center gap-1.5">
+                                                                                🚚 In Transit to {sites.find(s => s.id === transfer.destSiteId)?.name || 'Destination'}
+                                                                            </span>
+                                                                        )
                                                                     )}
 
                                                                     {transfer.transferStatus === 'Delivered' && transfer.destSiteId === activeSite?.id && (
@@ -6654,10 +6816,10 @@ export default function WarehouseOperations() {
                                                 </>
                                             )}
                                         </button >
-                                    </div >
-                                </div >
+                                    </div>
+                                </div>
                             )}
-                        </div >
+                        </div>
                     )
                 }
 
@@ -7288,7 +7450,7 @@ export default function WarehouseOperations() {
                                                     [zoneToLock]: zoneLockReason.trim()
                                                 }));
                                             }
-                                            addNotification('warning', t('warehouse.zoneLockedNotification').replace('{zone}', zoneToLock).replace('{reason}', zoneLockReason.trim() ? `: ${zoneLockReason.trim()}` : t('warehouse.forMaintenance')));
+                                            addNotification('info', t('warehouse.zoneLockedNotification').replace('{zone}', zoneToLock).replace('{reason}', zoneLockReason.trim() ? `: ${zoneLockReason.trim()}` : t('warehouse.forMaintenance')));
                                             setShowZoneLockModal(false);
                                             setZoneLockReason('');
                                         }}
@@ -7615,25 +7777,49 @@ export default function WarehouseOperations() {
                                                         <div>
                                                             <div className="flex items-center justify-between mb-3">
                                                                 <h4 className="text-sm font-bold text-white">Allocate to Stores</h4>
-                                                                <button
-                                                                    onClick={() => {
-                                                                        const storeIds = sites
-                                                                            .filter(s => s.status === 'Active' && s.type === 'Store' && s.id !== bulkDistributionSourceSite)
-                                                                            .map(s => s.id)
-                                                                            .filter(id => !bulkDistributionAllocations.find(a => a.storeId === id));
+                                                                <div className="flex items-center gap-3">
+                                                                    <button
+                                                                        onClick={() => {
+                                                                            // Distribute evenly across all stores
+                                                                            const activeStores = sites.filter(s => s.status === 'Active' && s.type === 'Store' && s.id !== bulkDistributionSourceSite);
+                                                                            const totalStock = selectedProduct?.stock || 0;
+                                                                            const storeCount = activeStores.length;
+                                                                            if (storeCount === 0 || totalStock === 0) return;
 
-                                                                        if (storeIds.length > 0) {
-                                                                            setBulkDistributionAllocations([
-                                                                                ...bulkDistributionAllocations,
-                                                                                ...storeIds.map(id => ({ storeId: id, quantity: 0 }))
-                                                                            ]);
-                                                                        }
-                                                                    }}
-                                                                    className="text-xs text-blue-400 hover:text-blue-300 font-bold"
-                                                                >
-                                                                    + Add All Stores
-                                                                </button>
+                                                                            const baseQty = Math.floor(totalStock / storeCount);
+                                                                            const remainder = totalStock % storeCount;
+
+                                                                            const newAllocations = activeStores.map((store, idx) => ({
+                                                                                storeId: store.id,
+                                                                                quantity: baseQty + (idx < remainder ? 1 : 0)
+                                                                            }));
+                                                                            setBulkDistributionAllocations(newAllocations);
+                                                                        }}
+                                                                        className="text-xs text-green-400 hover:text-green-300 font-bold flex items-center gap-1"
+                                                                    >
+                                                                        <Zap size={12} /> Distribute Evenly
+                                                                    </button>
+                                                                    <button
+                                                                        onClick={() => {
+                                                                            const storeIds = sites
+                                                                                .filter(s => s.status === 'Active' && s.type === 'Store' && s.id !== bulkDistributionSourceSite)
+                                                                                .map(s => s.id)
+                                                                                .filter(id => !bulkDistributionAllocations.find(a => a.storeId === id));
+
+                                                                            if (storeIds.length > 0) {
+                                                                                setBulkDistributionAllocations([
+                                                                                    ...bulkDistributionAllocations,
+                                                                                    ...storeIds.map(id => ({ storeId: id, quantity: 0 }))
+                                                                                ]);
+                                                                            }
+                                                                        }}
+                                                                        className="text-xs text-blue-400 hover:text-blue-300 font-bold"
+                                                                    >
+                                                                        + Add All Stores
+                                                                    </button>
+                                                                </div>
                                                             </div>
+
 
                                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-64 overflow-y-auto">
                                                                 {sites
@@ -7912,13 +8098,26 @@ export default function WarehouseOperations() {
                                                     }
                                                 }
 
+                                                // Log distribution event for history/audit
+                                                const sourceWarehouse = sites.find(s => s.id === bulkDistributionSourceSite);
+                                                const destinationStores = bulkDistributionMode === 'single'
+                                                    ? bulkDistributionAllocations.filter(a => a.quantity > 0).map(a => sites.find(s => s.id === a.storeId)?.name).join(', ')
+                                                    : Array.from(new Set(waveProducts.flatMap(wp => wp.allocations.filter(a => a.quantity > 0).map(a => sites.find(s => s.id === a.storeId)?.name)))).join(', ');
+
+                                                logSystemEvent(
+                                                    'Bulk Distribution Created',
+                                                    `Created ${createdJobs} distribution transfers from ${sourceWarehouse?.name || 'Unknown'} to: ${destinationStores}. Mode: ${bulkDistributionMode}`,
+                                                    user?.name || 'System',
+                                                    'Inventory'
+                                                );
+
                                                 addNotification('success', `Created ${createdJobs} distribution transfers! Products will be sorted to each store.`);
                                                 setShowBulkDistributionModal(false);
                                                 setBulkDistributionAllocations([]);
                                                 setWaveProducts([]);
                                             } catch (e) {
                                                 console.error(e);
-                                                addNotification('error', 'Failed to create distribution jobs');
+                                                addNotification('alert', 'Failed to create distribution jobs');
                                             } finally {
                                                 setIsDistributing(false);
                                             }
@@ -7936,7 +8135,157 @@ export default function WarehouseOperations() {
                                         {isDistributing ? <RefreshCw size={16} className="animate-spin" /> : <Truck size={16} />}
                                         Create Distribution
                                     </button>
+
+                                    {/* Print Pick Lists Button */}
+                                    <button
+                                        onClick={() => {
+                                            const sourceWarehouse = sites.find(s => s.id === bulkDistributionSourceSite);
+                                            let pickListsHtml = `
+                                                <!DOCTYPE html>
+                                                <html>
+                                                <head>
+                                                    <title>Distribution Pick Lists - ${new Date().toLocaleDateString()}</title>
+                                                    <style>
+                                                        body { font-family: Arial, sans-serif; padding: 20px; }
+                                                        .pick-list { page-break-after: always; border: 2px solid #333; padding: 20px; margin-bottom: 20px; }
+                                                        .pick-list:last-child { page-break-after: auto; }
+                                                        .header { border-bottom: 2px solid #333; padding-bottom: 10px; margin-bottom: 15px; }
+                                                        .header h2 { margin: 0; font-size: 18px; }
+                                                        .header p { margin: 5px 0; color: #666; font-size: 12px; }
+                                                        .route { display: flex; justify-content: space-between; background: #f5f5f5; padding: 10px; border-radius: 5px; margin-bottom: 15px; }
+                                                        .route-item { text-align: center; }
+                                                        .route-label { font-size: 10px; color: #666; text-transform: uppercase; }
+                                                        .route-value { font-size: 14px; font-weight: bold; }
+                                                        table { width: 100%; border-collapse: collapse; }
+                                                        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 12px; }
+                                                        th { background: #333; color: white; }
+                                                        .qty { text-align: center; font-weight: bold; font-size: 14px; }
+                                                        .checkbox { width: 20px; height: 20px; border: 2px solid #333; }
+                                                        .footer { margin-top: 20px; padding-top: 10px; border-top: 1px dashed #ccc; font-size: 11px; color: #666; }
+                                                    </style>
+                                                </head>
+                                                <body>
+                                            `;
+
+                                            if (bulkDistributionMode === 'single') {
+                                                const product = products.find(p => p.id === bulkDistributionProductId);
+                                                bulkDistributionAllocations.filter(a => a.quantity > 0).forEach(allocation => {
+                                                    const store = sites.find(s => s.id === allocation.storeId);
+                                                    pickListsHtml += `
+                                                        <div class="pick-list">
+                                                            <div class="header">
+                                                                <h2>📦 Distribution Pick List</h2>
+                                                                <p>Generated: ${new Date().toLocaleString()} | By: ${user?.name || 'System'}</p>
+                                                            </div>
+                                                            <div class="route">
+                                                                <div class="route-item">
+                                                                    <div class="route-label">From</div>
+                                                                    <div class="route-value">${sourceWarehouse?.name || 'Warehouse'}</div>
+                                                                </div>
+                                                                <div class="route-item" style="font-size: 24px;">→</div>
+                                                                <div class="route-item">
+                                                                    <div class="route-label">To</div>
+                                                                    <div class="route-value">${store?.name || 'Store'}</div>
+                                                                </div>
+                                                            </div>
+                                                            <table>
+                                                                <thead>
+                                                                    <tr><th>☑</th><th>Product</th><th>SKU</th><th>Qty</th><th>Picked</th></tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    <tr>
+                                                                        <td><div class="checkbox"></div></td>
+                                                                        <td>${product?.name || 'Unknown'}</td>
+                                                                        <td>${product?.sku || 'N/A'}</td>
+                                                                        <td class="qty">${allocation.quantity}</td>
+                                                                        <td></td>
+                                                                    </tr>
+                                                                </tbody>
+                                                            </table>
+                                                            <div class="footer">
+                                                                <p>Picker Signature: _________________ | Date: _________________</p>
+                                                            </div>
+                                                        </div>
+                                                    `;
+                                                });
+                                            } else {
+                                                // Wave mode - group by store
+                                                const storeAllocations: Record<string, { productId: string; quantity: number }[]> = {};
+                                                waveProducts.forEach(wp => {
+                                                    wp.allocations.filter(a => a.quantity > 0).forEach(alloc => {
+                                                        if (!storeAllocations[alloc.storeId]) storeAllocations[alloc.storeId] = [];
+                                                        storeAllocations[alloc.storeId].push({ productId: wp.productId, quantity: alloc.quantity });
+                                                    });
+                                                });
+
+                                                Object.entries(storeAllocations).forEach(([storeId, items]) => {
+                                                    const store = sites.find(s => s.id === storeId);
+                                                    pickListsHtml += `
+                                                        <div class="pick-list">
+                                                            <div class="header">
+                                                                <h2>📦 Wave Distribution Pick List</h2>
+                                                                <p>Generated: ${new Date().toLocaleString()} | By: ${user?.name || 'System'}</p>
+                                                            </div>
+                                                            <div class="route">
+                                                                <div class="route-item">
+                                                                    <div class="route-label">From</div>
+                                                                    <div class="route-value">${sourceWarehouse?.name || 'Warehouse'}</div>
+                                                                </div>
+                                                                <div class="route-item" style="font-size: 24px;">→</div>
+                                                                <div class="route-item">
+                                                                    <div class="route-label">To</div>
+                                                                    <div class="route-value">${store?.name || 'Store'}</div>
+                                                                </div>
+                                                            </div>
+                                                            <table>
+                                                                <thead>
+                                                                    <tr><th>☑</th><th>Product</th><th>SKU</th><th>Qty</th><th>Picked</th></tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    ${items.map(item => {
+                                                        const product = products.find(p => p.id === item.productId);
+                                                        return `
+                                                                            <tr>
+                                                                                <td><div class="checkbox"></div></td>
+                                                                                <td>${product?.name || 'Unknown'}</td>
+                                                                                <td>${product?.sku || 'N/A'}</td>
+                                                                                <td class="qty">${item.quantity}</td>
+                                                                                <td></td>
+                                                                            </tr>
+                                                                        `;
+                                                    }).join('')}
+                                                                </tbody>
+                                                            </table>
+                                                            <div class="footer">
+                                                                <p>Total Items: ${items.reduce((sum, i) => sum + i.quantity, 0)} | Picker Signature: _________________ | Date: _________________</p>
+                                                            </div>
+                                                        </div>
+                                                    `;
+                                                });
+                                            }
+
+                                            pickListsHtml += '</body></html>';
+                                            const printWindow = window.open('', '_blank');
+                                            if (printWindow) {
+                                                printWindow.document.write(pickListsHtml);
+                                                printWindow.document.close();
+                                            }
+                                        }}
+                                        disabled={bulkDistributionMode === 'single'
+                                            ? (!bulkDistributionProductId || bulkDistributionAllocations.filter(a => a.quantity > 0).length === 0)
+                                            : (waveProducts.length === 0 || !waveProducts.some(wp => wp.allocations.some(a => a.quantity > 0)))
+                                        }
+                                        className={`px-4 py-2 rounded-lg font-bold transition-colors flex items-center gap-2 ${((bulkDistributionMode === 'single' && bulkDistributionProductId && bulkDistributionAllocations.filter(a => a.quantity > 0).length > 0) ||
+                                            (bulkDistributionMode === 'wave' && waveProducts.length > 0 && waveProducts.some(wp => wp.allocations.some(a => a.quantity > 0))))
+                                            ? 'bg-white/10 text-white hover:bg-white/20 border border-white/20'
+                                            : 'bg-white/5 text-gray-500 cursor-not-allowed border border-white/5'
+                                            }`}
+                                    >
+                                        <Printer size={16} />
+                                        Preview Pick Lists
+                                    </button>
                                 </div>
+
                             </div>
                         </div>
                     )
@@ -7944,7 +8293,7 @@ export default function WarehouseOperations() {
 
                 {/* Global Job Details Modal-Works from any tab (only show when NOT in scanner mode) */}
                 {
-                    selectedJob && !isScannerMode && (
+                    selectedJob && isDetailsOpen && !isScannerMode && (
                         <div className="fixed inset-0 z-[60] flex items-end md:items-center justify-center bg-black/80 backdrop-blur-sm p-0 md:p-4 animate-in fade-in duration-200">
                             <div className="bg-cyber-gray border-t md:border border-white/10 rounded-t-2xl md:rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl shadow-cyber-primary/10 flex flex-col pb-[env(safe-area-inset-bottom)] md:pb-0">
                                 {/* Header */}
@@ -8064,9 +8413,8 @@ export default function WarehouseOperations() {
                                     <div>
                                         {/* Show Start Picking button for PICK/PACK/PUTAWAY jobs that aren't completed */}
                                         {['PICK', 'PACK', 'PUTAWAY', 'pick', 'pack', 'putaway'].includes(selectedJob.type) && selectedJob.status !== 'Completed' ? (
-                                            <button
-                                                type="button"
-                                                onClick={(e) => {
+                                            <Button
+                                                onClick={async (e) => {
                                                     e.preventDefault();
                                                     e.stopPropagation();
                                                     console.log('🎯 Start Picking clicked!', selectedJob);
@@ -8096,7 +8444,7 @@ export default function WarehouseOperations() {
 
                                                     // Auto-assign if not assigned
                                                     if (!selectedJob.assignedTo && user) {
-                                                        assignJob(selectedJob.id, user.id || user.name);
+                                                        await assignJob(selectedJob.id, user.id || user.name);
                                                     }
 
                                                     // Open scanner
@@ -8107,13 +8455,13 @@ export default function WarehouseOperations() {
                                                     setScannedItem('');
                                                     setPickQty(0);
                                                 }}
+                                                icon={<Scan size={18} />}
                                                 className="px-6 py-3 bg-gradient-to-r from-cyber-primary to-green-400 text-black rounded-xl font-bold transition-all duration-300 hover:shadow-lg hover:shadow-cyber-primary/30 flex items-center gap-2"
                                             >
-                                                <Scan size={18} />
                                                 {selectedJob.type?.toUpperCase() === 'PICK' ? t('warehouse.startPicking') :
                                                     selectedJob.type?.toUpperCase() === 'PACK' ? t('warehouse.startPacking') :
                                                         t('warehouse.startPutaway')}
-                                            </button>
+                                            </Button>
                                         ) : null}
                                     </div>
                                     <button
@@ -8157,7 +8505,7 @@ export default function WarehouseOperations() {
                                 <div className="mb-4">
                                     <label className="text-sm text-gray-400 mb-2 block">Label Size</label>
                                     <div className="grid grid-cols-4 gap-2">
-                                        {(['Tiny', 'Small', 'Medium', 'Large'] as const).map(s => (
+                                        {(['TINY', 'SMALL', 'MEDIUM', 'LARGE'] as const).map(s => (
                                             <button
                                                 key={s}
                                                 onClick={() => setReprintSize(s)}
@@ -8171,10 +8519,10 @@ export default function WarehouseOperations() {
                                         ))}
                                     </div>
                                     <p className="text-xs text-gray-500 mt-1">
-                                        {reprintSize === 'Tiny' && '1.25" × 1"-SKU Tags'}
-                                        {reprintSize === 'Small' && '2.25" × 1.25"-Multipurpose'}
-                                        {reprintSize === 'Medium' && '3" × 2"-Shelf Labels'}
-                                        {reprintSize === 'Large' && '4" × 3"-Carton Tags'}
+                                        {reprintSize === 'TINY' && '1.25" × 1"-SKU Tags'}
+                                        {reprintSize === 'SMALL' && '2.25" × 1.25"-Multipurpose'}
+                                        {reprintSize === 'MEDIUM' && '3" × 2"-Shelf Labels'}
+                                        {reprintSize === 'LARGE' && '4" × 3"-Carton Tags'}
                                     </p>
                                 </div>
 
@@ -8256,7 +8604,7 @@ export default function WarehouseOperations() {
                         </div>
                     )
                 }
-            </div >
-        </Protected >
+            </div>
+        </Protected>
     );
 }

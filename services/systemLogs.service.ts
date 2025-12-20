@@ -143,8 +143,19 @@ class SystemLogsService {
     /**
      * Log an HR event (Salary view, Employee update)
      */
-    logHR(action: string, details: string, user?: any, severity: LogSeverity = 'INFO') {
-        return this.log('HR', severity, action, details, user);
+    logHR(action: string, details: string, user?: any, severity: LogSeverity | object = 'INFO', metadata?: Record<string, any>) {
+        // Handle overload where severity might be metadata object (backwards compatibility)
+        let actualSeverity: LogSeverity = 'INFO';
+        let actualMetadata = metadata;
+
+        if (typeof severity === 'object') {
+            actualMetadata = severity as any;
+            actualSeverity = 'INFO';
+        } else {
+            actualSeverity = severity as LogSeverity;
+        }
+
+        return this.log('HR', actualSeverity, action, details, user, actualMetadata);
     }
 
     /**

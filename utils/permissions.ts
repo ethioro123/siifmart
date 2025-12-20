@@ -40,10 +40,10 @@ export const PERMISSIONS = {
 
     // Inventory
     ACCESS_INVENTORY: ['super_admin', 'manager', 'warehouse_manager', 'dispatcher', 'auditor', 'procurement_manager', 'inventory_specialist', 'store_supervisor', 'pos'],
-    ADD_PRODUCT: ['super_admin'],
-    EDIT_PRODUCT: ['super_admin'],
+    ADD_PRODUCT: ['super_admin', 'warehouse_manager'],
+    EDIT_PRODUCT: ['super_admin', 'warehouse_manager'],
     DELETE_PRODUCT: ['super_admin'],
-    ADJUST_STOCK: ['super_admin'],
+    ADJUST_STOCK: ['super_admin', 'warehouse_manager'],
     TRANSFER_STOCK: ['super_admin'],
     VIEW_COST_PRICE: ['super_admin', 'auditor', 'finance_manager', 'procurement_manager'],
 
@@ -243,9 +243,11 @@ export function canAccessModule(userRole: UserRole | undefined, module: string):
         'pricing': 'ACCESS_PRICING',
         'warehouse': 'ACCESS_WAREHOUSE',
         'settings': 'ACCESS_SETTINGS',
+        'profile': 'ACCESS_EMPLOYEES', // Map to employees access for now, or we can just allow it
     };
 
     const permission = modulePermissions[module.toLowerCase()];
+    if (module.toLowerCase() === 'profile') return true;
     return permission ? hasPermission(userRole, permission) : false;
 }
 
@@ -255,7 +257,7 @@ export function canAccessModule(userRole: UserRole | undefined, module: string):
 export function getAccessibleModules(userRole: UserRole | undefined): string[] {
     const modules = [
         'dashboard', 'pos', 'inventory', 'sales', 'customers',
-        'employees', 'procurement', 'finance', 'pricing', 'warehouse', 'settings'
+        'employees', 'procurement', 'finance', 'pricing', 'warehouse', 'settings', 'profile'
     ];
 
     return modules.filter(module => canAccessModule(userRole, module));
@@ -296,6 +298,7 @@ export function getRoleDisplayName(role: UserRole): string {
         inventory_specialist: 'Inventory Specialist',
         cs_manager: 'Customer Service Manager',
         it_support: 'IT Support',
+        packer: 'Packer',
     };
 
     return displayNames[role] || role;
@@ -322,6 +325,7 @@ export function getRoleDescription(role: UserRole): string {
         inventory_specialist: 'Inventory Specialist - Stock control and accuracy',
         cs_manager: 'Customer Service Manager - Customer relations and support',
         it_support: 'IT Support - Technical support and system maintenance',
+        packer: 'Warehouse Packer - Order packing and shipping preparation',
     };
 
     return descriptions[role] || 'Standard user access';
@@ -348,6 +352,7 @@ export function getRoleColor(role: UserRole): string {
         inventory_specialist: 'text-lime-400 bg-lime-500/10 border-lime-500/20',
         cs_manager: 'text-sky-400 bg-sky-500/10 border-sky-500/20',
         it_support: 'text-teal-400 bg-teal-500/10 border-teal-500/20',
+        packer: 'text-orange-300 bg-orange-500/10 border-orange-500/20',
     };
 
     return colors[role] || 'text-gray-400 bg-gray-500/10 border-gray-500/20';

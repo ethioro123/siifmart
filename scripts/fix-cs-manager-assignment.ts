@@ -48,11 +48,11 @@ async function fixCSManagerAssignment() {
     console.log(`📍 Target Store: ${targetStore.name}\n`);
 
     // 2. Find the CS Manager
-    const { data: employees, error: empError } = await supabase
+    const { data: employees, error: empError } = await (supabase
       .from('employees')
       .select('id, name, role, site_id, email')
       .eq('email', 'selamawit.girma@siifmart.com')
-      .single();
+      .single() as any);
 
     if (empError) {
       throw empError;
@@ -80,7 +80,7 @@ async function fixCSManagerAssignment() {
 
     // 4. Also update auth metadata if exists
     const { data: authUsers } = await supabase.auth.admin.listUsers();
-    const authUser = authUsers?.users.find(u => u.email === employees.email);
+    const authUser = authUsers?.users.find(u => (u as any).email === (employees as any).email);
 
     if (authUser) {
       const { error: authError } = await supabase.auth.admin.updateUserById(

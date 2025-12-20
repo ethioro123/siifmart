@@ -96,6 +96,7 @@ export const TRANSLATIONS = {
             returns: { en: 'RETURNS', am: 'ምላሾች', or: 'Deebitoota' },
             assign: { en: 'ASSIGN', am: 'መድብ', or: 'Ramaduu' },
             transfer: { en: 'TRANSFER', am: 'ማስተላለፍ', or: 'Gara Birootti Dabarsuu' },
+            my_points: { en: 'MY POINTS', am: 'የእኔ ነጥቦች', or: 'Qabxiiwwan Koo' },
         },
 
         // Job Management
@@ -283,7 +284,6 @@ export const TRANSLATIONS = {
         suggested: { en: 'Suggested', am: 'የታሰበ', or: 'Yaadatame' },
         tapToScan: { en: 'Tap a card to start scanner', am: 'ስካነር ለማስጀመር ካርድ ይንኩ', or: 'Iskaanaa eegaluuf kaardii tuqi' },
         packDesc: { en: 'Pack orders for delivery', am: 'ለማድረስ ትዕዛዞችን አሽጉ', or: 'Ajajoota erguuf saami' },
-        approvedPOsWillAppear: { en: 'Approved purchase orders will appear here', am: 'የተጸድቁ የግዢ ትዕዛዞች እዚህ ይታያሉ', or: 'Ajajoota bittaa mirkaneeffaman asitti mulatu' },
 
         // Docks Section
         docks: {
@@ -445,7 +445,7 @@ export const TRANSLATIONS = {
         generating: { en: 'Generating...', am: 'በመፍጠር ላይ...', or: 'Uumaa jira...' },
         printLabel: { en: 'Print Label', am: 'መለያ አትም', or: 'Mallattoo Maxxansi' },
         printLabels: { en: 'Print Labels', am: 'መለያዎችን አትም', or: 'Mallattoolee Maxxansi' },
-        completeJob: { en: 'Complete Job', am: 'ስራ ጨርስ', or: 'Hojii Xumuri' },
+        completeJobFull: { en: 'Complete Job', am: 'ስራ ጨርስ', or: 'Hojii Xumuri' },
         boxConfiguration: { en: 'Box Configuration', am: 'የሳጥን ውቅር', or: 'Qindaa\'ina Saanduqaa' },
         boxSmall: { en: 'Small Box', am: 'ትንሽ ሳጥን', or: 'Saanduqa Xiqqaa' },
         boxMedium: { en: 'Medium Box', am: 'መካከለኛ ሳጥን', or: 'Saanduqa Giddugaleessaa' },

@@ -4,19 +4,22 @@ import {
   Search, Plus, Minus, Trash2, CreditCard, Printer, User, RotateCcw, Lock, Box,
   ArrowLeft, Smartphone, Banknote, CheckCircle, RefreshCcw, Share2, AlertTriangle,
   ArrowRight, LogOut, FileText, PauseCircle, PlayCircle, Tag, ShoppingBag, Scan, Package, Camera,
-  MapPin, Store, Truck
+  MapPin, Store, Truck, Loader2, Trophy, Gift
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { CURRENCY_SYMBOL } from '../constants';
-import { Product, CartItem, PaymentMethod, SaleRecord, ReturnCondition, ReturnReason, ReturnItem, ShiftRecord, HeldOrder, Customer } from '../types';
+import { formatCompactNumber } from '../utils/formatting';
+import { Product, CartItem, PaymentMethod, SaleRecord, ReturnCondition, ReturnReason, ReturnItem, ShiftRecord, HeldOrder, Customer, DEFAULT_POS_BONUS_TIERS, DEFAULT_POS_ROLE_DISTRIBUTION } from '../types';
 import { useStore } from '../contexts/CentralStore';
 import { useData } from '../contexts/DataContext'; // Use Live Data
 import Modal from '../components/Modal';
 import { Protected, ProtectedButton } from '../components/Protected';
 import { useLanguage } from '../contexts/LanguageContext';
-import { LanguageSwitcher } from '../components/LanguageSwitcher';
 import { QRScanner } from '../components/QRScanner';
 import { native } from '../utils/native';
+import { StoreBonusWidget, calculateStoreBonus } from '../components/StoreBonusDisplay';
+import Button from '../components/shared/Button';
+import { PointsEarnedPopup } from '../components/WorkerPointsDisplay';
 
 export default function POS() {
   const { user, logout } = useStore();
@@ -24,7 +27,8 @@ export default function POS() {
     products, activeSite, shifts, startShift, addNotification,
     processSale, processReturn, holdOrder, releaseHold, heldOrders,
     updateCustomer, customers, promotions, sales, transfers, closeShift,
-    updateProduct, sites, refreshData
+    updateProduct, sites, refreshData, settings, getStorePoints, storePoints,
+    discountCodes, validateDiscountCode, useDiscountCode
   } = useData();
   const { t } = useLanguage();
 
@@ -40,10 +44,19 @@ export default function POS() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [lastSale, setLastSale] = useState<SaleRecord | null>(null);
 
+  // Gamification state
+  const [showPointsPopup, setShowPointsPopup] = useState(false);
+  const [earnedPointsData, setEarnedPointsData] = useState<any>(null);
+
   // --- Advanced POS Features ---
   const [isRecallModalOpen, setIsRecallModalOpen] = useState(false);
   const [cartDiscount, setCartDiscount] = useState(0); // Fixed amount
+  const [appliedDiscountCode, setAppliedDiscountCode] = useState<string | null>(null);
+  const [appliedDiscountCodeDetails, setAppliedDiscountCodeDetails] = useState<{ code: string; name: string; type: 'PERCENTAGE' | 'FIXED'; value: number } | null>(null);
   const [isDiscountModalOpen, setIsDiscountModalOpen] = useState(false);
+  const [discountCodeInput, setDiscountCodeInput] = useState('');
+  const [discountCodeError, setDiscountCodeError] = useState('');
+  const [isValidatingCode, setIsValidatingCode] = useState(false);
   const [isMiscItemModalOpen, setIsMiscItemModalOpen] = useState(false);
   const [miscItem, setMiscItem] = useState({ name: 'Misc Item', price: '' });
 
@@ -206,7 +219,7 @@ export default function POS() {
         setQuickSKU('');
         addNotification('success', `Added ${product.name}`);
       } else {
-        addNotification('error', `Product not found: ${quickSKU}`);
+        addNotification('alert', `Product not found: ${quickSKU}`);
       }
     }
   };
@@ -220,6 +233,32 @@ export default function POS() {
   const navigate = useNavigate();
 
   const categories = ['All', ...Array.from(new Set(products.map(p => p.category)))];
+
+  // Get current store bonus info
+  const currentStorePoints = useMemo(() => {
+    if (!activeSite?.id) return undefined;
+    return getStorePoints(activeSite.id);
+  }, [activeSite?.id, storePoints, getStorePoints]);
+
+  const storeBonus = useMemo(() => {
+    if (!currentStorePoints) return null;
+    const tiers = settings.posBonusTiers || DEFAULT_POS_BONUS_TIERS;
+    return calculateStoreBonus(currentStorePoints.monthlyPoints, tiers);
+  }, [currentStorePoints, settings.posBonusTiers]);
+
+  // Calculate user's personal bonus share
+  const userBonusShare = useMemo(() => {
+    if (!storeBonus || !user?.role) return null;
+    const roleDistribution = settings.posRoleDistribution || DEFAULT_POS_ROLE_DISTRIBUTION;
+    const roleConfig = roleDistribution.find(r =>
+      r.role.toLowerCase() === user.role.toLowerCase()
+    );
+    if (!roleConfig) return null;
+    return {
+      percentage: roleConfig.percentage,
+      amount: (storeBonus.bonus * roleConfig.percentage) / 100
+    };
+  }, [storeBonus, user?.role, settings.posRoleDistribution]);
 
   const filteredProducts = useMemo(() => {
     return products.filter(p => {
@@ -237,7 +276,7 @@ export default function POS() {
       if (activeSite?.type === 'Warehouse' || activeSite?.type === 'Distribution Center') {
         // For warehouses: Product must have a location assigned (PUTAWAY completed)
         // Location format: A-01-05 (not just "Receiving Dock")
-        hasBeenReceived = p.location &&
+        hasBeenReceived = !!p.location &&
           p.location.trim() !== '' &&
           p.location !== 'Receiving Dock' &&
           /^[A-Z]-\d{2}-\d{2}$/.test(p.location.trim());
@@ -249,7 +288,7 @@ export default function POS() {
         hasBeenReceived = (p.siteId === activeSite?.id || p.site_id === activeSite?.id);
       } else {
         // Fallback: require location for any other site type
-        hasBeenReceived = p.location && p.location.trim() !== '';
+        hasBeenReceived = !!p.location && p.location.trim() !== '';
       }
 
       return matchesSearch && matchesCategory && hasStock && hasBeenReceived;
@@ -319,6 +358,10 @@ export default function POS() {
   const clearCart = () => {
     setCart([]);
     setCartDiscount(0);
+    setAppliedDiscountCode(null);
+    setAppliedDiscountCodeDetails(null);
+    setDiscountCodeInput('');
+    setDiscountCodeError('');
   };
 
   // Calculations
@@ -380,13 +423,67 @@ export default function POS() {
     setPendingRecallOrderId(null);
   };
 
-  const handleApplyDiscount = (type: 'FIXED' | 'PERCENT', value: number) => {
+  // Apply discount from a valid code
+  const applyDiscountFromCode = (discountCode: { id: string; code: string; name: string; type: 'PERCENTAGE' | 'FIXED'; value: number; maxDiscountAmount?: number }) => {
     let discountAmount = 0;
-    if (type === 'FIXED') discountAmount = value;
-    if (type === 'PERCENT') discountAmount = subtotal * (value / 100);
+    if (discountCode.type === 'FIXED') {
+      discountAmount = discountCode.value;
+    } else {
+      discountAmount = subtotal * (discountCode.value / 100);
+      // Apply max discount cap if exists
+      if (discountCode.maxDiscountAmount !== undefined && discountAmount > discountCode.maxDiscountAmount) {
+        discountAmount = discountCode.maxDiscountAmount;
+      }
+    }
 
     setCartDiscount(discountAmount);
+    setAppliedDiscountCode(discountCode.id);
+    setAppliedDiscountCodeDetails({
+      code: discountCode.code,
+      name: discountCode.name,
+      type: discountCode.type,
+      value: discountCode.value
+    });
     setIsDiscountModalOpen(false);
+    setDiscountCodeInput('');
+    setDiscountCodeError('');
+    addNotification('success', `Discount code "${discountCode.code}" applied!`);
+  };
+
+  // Validate and apply discount code
+  const handleValidateDiscountCode = () => {
+    if (!discountCodeInput.trim()) {
+      setDiscountCodeError('Please enter a discount code');
+      return;
+    }
+
+    setIsValidatingCode(true);
+    setDiscountCodeError('');
+
+    // Simulate slight delay for UX
+    setTimeout(() => {
+      const result = validateDiscountCode(discountCodeInput, activeSite?.id, subtotal);
+
+      if (result.valid && result.discountCode) {
+        applyDiscountFromCode(result.discountCode);
+        useDiscountCode(result.discountCode.id); // Increment usage count
+      } else {
+        setDiscountCodeError(result.error || 'Invalid discount code');
+      }
+
+      setIsValidatingCode(false);
+    }, 300);
+  };
+
+  // Remove applied discount
+  const handleRemoveDiscount = () => {
+    setCartDiscount(0);
+    setAppliedDiscountCode(null);
+    setAppliedDiscountCodeDetails(null);
+    setDiscountCodeInput('');
+    setDiscountCodeError('');
+    setIsDiscountModalOpen(false);
+    addNotification('info', 'Discount removed');
   };
 
   // --- Payment Handlers ---
@@ -410,12 +507,11 @@ export default function POS() {
       const tendered = selectedPaymentMethod === 'Cash' ? parseFloat(amountTendered) : total;
       const change = selectedPaymentMethod === 'Cash' ? changeDue : 0;
 
-      // Note: Discount is baked into total logic here for simplicity in mock
-      // In real app, pass discount separately
-      const txId = await processSale(cart, selectedPaymentMethod, user?.name || 'Cashier', tendered, change);
+      // Process sale and get points result
+      const { saleId, pointsResult } = await processSale(cart, selectedPaymentMethod, user?.name || 'Cashier', tendered, change);
 
       const saleObj: SaleRecord = {
-        id: txId,
+        id: saleId,
         siteId: activeSite?.id || 'SITE-001',
         date: new Date().toLocaleString(),
         subtotal,
@@ -431,6 +527,13 @@ export default function POS() {
       };
 
       setLastSale(saleObj);
+
+      // Handle Gamification Display
+      if (pointsResult) {
+        setEarnedPointsData(pointsResult);
+        setShowPointsPopup(true);
+      }
+
       setIsProcessing(false);
       setIsPaymentModalOpen(false);
       setIsReceiptModalOpen(true);
@@ -469,7 +572,7 @@ export default function POS() {
         ${cart.map(item => `<p>${item.name}<br>  ${item.quantity} x ${CURRENCY_SYMBOL}${item.price.toFixed(2)} = ${CURRENCY_SYMBOL}${(item.price * item.quantity).toFixed(2)}</p>`).join('')}
         <hr>
         <p>Subtotal: ${CURRENCY_SYMBOL}${subtotal.toFixed(2)}</p>
-        ${cartDiscount > 0 ? `<p>Discount: -${CURRENCY_SYMBOL}${cartDiscount.toFixed(2)}</p>` : ''}
+        ${cartDiscount > 0 ? `<p>Discount${appliedDiscountCodeDetails ? ` (${appliedDiscountCodeDetails.code})` : ''}: -${CURRENCY_SYMBOL}${cartDiscount.toFixed(2)}</p>` : ''}
         <p>Tax (15%): ${CURRENCY_SYMBOL}${tax.toFixed(2)}</p>
         <p><strong>TOTAL: ${CURRENCY_SYMBOL}${total.toFixed(2)}</strong></p>
         <hr>
@@ -690,7 +793,7 @@ export default function POS() {
         if (damagedCount > 0) message += `⚠️ ${damagedCount} damaged item(s)\n`;
         if (shortCount > 0) message += `📉 ${shortCount} short shipment(s)`;
 
-        addNotification('warning', message);
+        addNotification('alert', message);
       } else {
         addNotification('success', `✅ Successfully received ${transferReceivingItems.length} item(s) from transfer. Items are now available for sale!`);
       }
@@ -798,7 +901,7 @@ export default function POS() {
     });
 
     if (returnItems.length > 0) {
-      processReturn(foundSaleForReturn.id, returnItems, refundTotal, user?.name || 'System');
+      await processReturn(foundSaleForReturn.id, returnItems, refundTotal, user?.name || 'System');
 
       const restockItems = returnItems.filter(i => i.condition === 'Resalable');
       const writeOffItems = returnItems.filter(i => i.condition === 'Damaged');
@@ -831,8 +934,8 @@ export default function POS() {
 
   // 🔒 STORE SELECTION REQUIRED FOR ADMIN USERS (Super Admin must select a store)
   const activeSiteType = activeSite?.type || 'Administrative';
-  const isMultiSiteRole = user?.role === 'super_admin' || user?.role === 'Admin' || user?.role === 'Auditor';
-  const needsStoreSelection = isMultiSiteRole && (activeSiteType === 'Administrative' || activeSiteType === 'Headquarters');
+  const isMultiSiteRole = user?.role === 'super_admin' || user?.role === 'admin' || user?.role === 'auditor';
+  const needsStoreSelection = isMultiSiteRole && (activeSiteType === 'Administrative' || activeSiteType === 'Headquarters' || activeSiteType === 'HQ' || activeSiteType === 'Administration');
 
   if (needsStoreSelection) {
     return (
@@ -863,14 +966,14 @@ export default function POS() {
       <div className="flex-1 flex flex-col bg-cyber-gray border border-white/5 rounded-2xl overflow-hidden pb-20 lg:pb-0">
         <div className="p-4 border-b border-white/5 space-y-4">
           <div className="flex gap-4">
-            <button
+            <Button
+              variant="secondary"
               onClick={() => navigate('/')}
-              className="p-3 bg-white/5 hover:bg-white/10 rounded-xl border border-white/5 text-gray-400 hover:text-white transition-colors"
+              icon={<ArrowLeft size={20} />}
               title={t('pos.exitDashboard')}
               aria-label="Exit to Dashboard"
-            >
-              <ArrowLeft size={20} />
-            </button>
+              className="p-3 bg-white/5 hover:bg-white/10 rounded-xl border border-white/5 text-gray-400 hover:text-white transition-colors"
+            />
             <div className="flex-1 flex items-center bg-black/30 border border-white/10 rounded-xl px-4 py-3 focus-within:border-cyber-primary/50 transition-colors">
               <Search className="w-5 h-5 text-gray-400" />
               <input
@@ -883,16 +986,55 @@ export default function POS() {
               />
             </div>
             <Protected permission="ADD_PRODUCT">
-              <button
+              <Button
+                variant="secondary"
                 onClick={() => setIsMiscItemModalOpen(true)}
+                icon={<ShoppingBag size={16} />}
                 className="bg-white/5 border border-white/10 rounded-xl px-4 text-sm font-bold text-white hover:bg-white/10 transition-colors flex items-center gap-2"
               >
-                <ShoppingBag size={16} /> {t('pos.miscItem')}
-              </button>
+                {t('pos.miscItem')}
+              </Button>
             </Protected>
             <div className="hidden md:block">
-              <LanguageSwitcher />
             </div>
+
+            {/* Store Bonus Widget */}
+            {settings.posBonusEnabled !== false && currentStorePoints && storeBonus && (
+              <div className="hidden lg:flex items-center gap-2 bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 rounded-xl px-3 py-1.5">
+                <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${storeBonus.tier.tierColor === 'gray' ? 'from-gray-400 to-gray-500' :
+                  storeBonus.tier.tierColor === 'amber' ? 'from-amber-500 to-amber-600' :
+                    storeBonus.tier.tierColor === 'yellow' ? 'from-yellow-400 to-yellow-500' :
+                      storeBonus.tier.tierColor === 'cyan' ? 'from-cyan-400 to-cyan-500' :
+                        storeBonus.tier.tierColor === 'purple' ? 'from-purple-400 to-purple-600' :
+                          'from-gray-400 to-gray-500'
+                  } flex items-center justify-center`}>
+                  <Trophy size={16} className="text-white" />
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-white flex items-center gap-1">
+                    Team Bonus
+                    <span className={`px-1.5 py-0.5 rounded text-[8px] font-bold bg-gradient-to-r ${storeBonus.tier.tierColor === 'gray' ? 'from-gray-400 to-gray-500' :
+                      storeBonus.tier.tierColor === 'amber' ? 'from-amber-500 to-amber-600' :
+                        storeBonus.tier.tierColor === 'yellow' ? 'from-yellow-400 to-yellow-500' :
+                          storeBonus.tier.tierColor === 'cyan' ? 'from-cyan-400 to-cyan-500' :
+                            storeBonus.tier.tierColor === 'purple' ? 'from-purple-400 to-purple-600' :
+                              'from-gray-400 to-gray-500'
+                      } text-white`}>
+                      {storeBonus.tier.tierName}
+                    </span>
+                  </p>
+                  <p className="text-[10px] text-gray-400">{currentStorePoints.monthlyPoints.toLocaleString()} pts</p>
+                </div>
+                {userBonusShare && (
+                  <div className="text-right pl-2 border-l border-green-500/30">
+                    <p className="text-xs text-green-400 font-bold">
+                      {formatCompactNumber(userBonusShare.amount, { currency: CURRENCY_SYMBOL, maxFractionDigits: 0 })}
+                    </p>
+                    <p className="text-[10px] text-gray-500">your share</p>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Quick SKU Entry */}
@@ -910,6 +1052,7 @@ export default function POS() {
               <button
                 onClick={() => setQuickSKU('')}
                 className="text-gray-500 hover:text-white"
+                aria-label="Clear SKU"
               >
                 <Trash2 size={14} />
               </button>
@@ -1048,13 +1191,22 @@ export default function POS() {
                 </span>
               )}
             </button>
-            <button onClick={handleHoldOrder} className="text-xs text-blue-400 hover:text-white border border-blue-400/20 px-2 py-1 rounded hover:bg-blue-400/10 transition-colors" title="Hold Cart">
-              <PauseCircle size={14} />
-            </button>
+            <Button
+              variant="ghost"
+              onClick={handleHoldOrder}
+              icon={<PauseCircle size={14} />}
+              className="text-xs text-blue-400 hover:text-white border border-blue-400/20 px-2 py-1 rounded hover:bg-blue-400/10 transition-colors"
+              title="Hold Cart"
+            />
             <Protected permission="VOID_SALE">
-              <button onClick={clearCart} className="text-xs text-red-400 hover:text-red-300 border border-red-400/20 px-2 py-1 rounded hover:bg-red-400/10 transition-colors" title="Clear Cart">
+              <Button
+                variant="ghost"
+                onClick={clearCart}
+                className="text-xs text-red-400 hover:text-red-300 border border-red-400/20 px-2 py-1 rounded hover:bg-red-400/10 transition-colors"
+                title="Clear Cart"
+              >
                 {t('pos.clearCart')}
-              </button>
+              </Button>
             </Protected>
           </div>
         </div>
@@ -1113,13 +1265,20 @@ export default function POS() {
             <div className="flex justify-between text-gray-400 text-sm">
               <div className="flex items-center gap-2">
                 <span>{t('pos.discount')}</span>
+                {appliedDiscountCodeDetails && (
+                  <span className="text-[10px] bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full font-medium">
+                    {appliedDiscountCodeDetails.code}
+                  </span>
+                )}
                 <Protected permission="APPLY_DISCOUNT">
-                  <button onClick={() => setIsDiscountModalOpen(true)} className="text-[10px] bg-white/10 px-1 rounded hover:bg-white/20 flex items-center gap-1">
-                    <Tag size={10} /> Edit
+                  <button onClick={() => setIsDiscountModalOpen(true)} className="text-[10px] bg-white/10 px-1.5 py-0.5 rounded hover:bg-white/20 flex items-center gap-1">
+                    <Tag size={10} /> {appliedDiscountCodeDetails ? 'Change' : 'Add Code'}
                   </button>
                 </Protected>
               </div>
-              <span className="text-red-400">- {CURRENCY_SYMBOL} {cartDiscount.toLocaleString()}</span>
+              <span className={cartDiscount > 0 ? "text-green-400 font-medium" : "text-gray-500"}>
+                {cartDiscount > 0 ? `- ${CURRENCY_SYMBOL} ${cartDiscount.toLocaleString()}` : `${CURRENCY_SYMBOL} 0`}
+              </span>
             </div>
             <div className="flex justify-between text-gray-400 text-sm">
               <span>{t('pos.tax')} (15%)</span>
@@ -1135,45 +1294,50 @@ export default function POS() {
           <div className="grid grid-cols-2 gap-3 mb-4">
             {/* Receiving moved to POS Command Center only */}
             <Protected permission="REFUND_SALE">
-              <button
+              <Button
+                variant="ghost"
                 onClick={() => setIsReturnModalOpen(true)}
+                icon={<RotateCcw size={16} />}
                 className="flex items-center space-x-2 p-3 bg-white/5 hover:bg-white/10 rounded-xl text-xs text-red-400 hover:text-red-300 transition-colors border border-white/5 active:scale-95 justify-center"
               >
-                <RotateCcw size={16} />
                 <span className="font-medium">{t('pos.returns')}</span>
-              </button>
+              </Button>
             </Protected>
-            <button
+            <Button
+              variant="ghost"
               onClick={handleOpenDrawer}
+              icon={<Box size={16} />}
               className="flex items-center space-x-2 p-3 bg-white/5 hover:bg-white/10 rounded-xl text-xs text-gray-300 hover:text-white transition-colors border border-white/5 active:scale-95 justify-center"
             >
-              <Box size={16} />
               <span className="font-medium">{t('pos.openDrawer')}</span>
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="ghost"
               onClick={handleCloseShift}
+              icon={<Lock size={16} />}
               className="flex items-center space-x-2 p-3 bg-white/5 hover:bg-white/10 rounded-xl text-xs text-gray-300 hover:text-white transition-colors border border-white/5 active:scale-95 justify-center"
             >
-              <Lock size={16} />
               <span className="font-medium">{t('pos.closeShift')}</span>
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="ghost"
               onClick={handleReprintLast}
+              icon={<Printer size={16} />}
               className="flex items-center space-x-2 p-3 bg-white/5 hover:bg-white/10 rounded-xl text-xs text-gray-300 hover:text-white transition-colors border border-white/5 active:scale-95 justify-center"
             >
-              <Printer size={16} />
               <span className="font-medium">{t('pos.reprintLast')}</span>
-            </button>
+            </Button>
           </div>
 
           <div className="grid grid-cols-1 gap-3">
-            <button
+            <Button
+              fullWidth
               onClick={handleInitiatePayment}
+              icon={<CreditCard size={18} />}
               className="flex items-center justify-center space-x-2 bg-cyber-primary hover:bg-cyber-accent text-black font-bold py-3 rounded-xl transition-colors"
             >
-              <CreditCard size={18} />
               <span>{t('pos.payNow')}</span>
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -1292,14 +1456,17 @@ export default function POS() {
             </div>
           )}
 
-          <button
+          <Button
             onClick={handleProcessPayment}
             disabled={!isPaymentValid || isProcessing}
+            loading={isProcessing}
+            size="lg"
+            fullWidth
+            icon={<CheckCircle size={24} />}
             className="w-full py-4 bg-cyber-primary hover:bg-cyber-accent disabled:bg-gray-700 disabled:cursor-not-allowed text-black font-bold rounded-xl text-lg transition-all flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(0,255,157,0.3)]"
           >
-            {isProcessing ? <RefreshCcw className="animate-spin" /> : <CheckCircle />}
             {isProcessing ? 'Processing...' : 'Complete Transaction'}
-          </button>
+          </Button>
         </div>
       </Modal>
 
@@ -1315,7 +1482,7 @@ export default function POS() {
           </div>
 
           <div className="bg-white text-black p-6 rounded-lg w-full max-w-sm shadow-xl font-mono text-sm mb-6 relative overflow-hidden">
-            <div className="absolute bottom-0 left-0 right-0 h-2 bg-cyber-dark" style={{ maskImage: 'radial-gradient(circle, transparent 50%, black 50%)', maskSize: '10px 10px' }}></div>
+            <div className="absolute bottom-0 left-0 right-0 h-2 bg-cyber-dark receipt-edge"></div>
 
             <div className="text-center mb-4 border-b-2 border-black/10 pb-4 border-dashed">
               <h2 className="text-xl font-bold uppercase tracking-widest">SIIFMART</h2>
@@ -1330,7 +1497,7 @@ export default function POS() {
                 <p>Time: {lastSale?.date.split(' ')[1]}</p>
               </div>
               <div className="text-right">
-                <p>Rcpt #: {lastSale?.receiptNumber || lastSale?.id.split('-')[1]}</p>
+                <p>Rcpt #: {lastSale?.receiptNumber || `SALE-${lastSale?.id.substring(0, 8).toUpperCase()}`}</p>
                 <p>Cashier: {user?.name.split(' ')[0]}</p>
               </div>
             </div>
@@ -1379,21 +1546,29 @@ export default function POS() {
           </div>
 
           <div className="grid grid-cols-2 gap-4 w-full">
-            <button onClick={handlePrintReceipt} className="py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-white font-bold flex items-center justify-center gap-2">
-              <Printer size={18} />
+            <Button
+              variant="secondary"
+              onClick={handlePrintReceipt}
+              icon={<Printer size={18} />}
+              className="py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-white font-bold flex items-center justify-center gap-2"
+            >
               Print
-            </button>
-            <button onClick={handleEmailReceipt} className="py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-white font-bold flex items-center justify-center gap-2">
-              <Share2 size={18} />
+            </Button>
+            <Button
+              variant="secondary"
+              onClick={handleEmailReceipt}
+              icon={<Share2 size={18} />}
+              className="py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-white font-bold flex items-center justify-center gap-2"
+            >
               Email
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => setIsReceiptModalOpen(false)}
+              icon={<Plus size={18} />}
               className="col-span-2 py-3 bg-cyber-primary hover:bg-cyber-accent text-black font-bold rounded-xl flex items-center justify-center gap-2"
             >
-              <Plus size={18} />
               New Sale
-            </button>
+            </Button>
           </div>
         </div>
       </Modal>
@@ -1423,12 +1598,12 @@ export default function POS() {
                   value={returnSearchId}
                   onChange={(e) => setReturnSearchId(e.target.value)}
                 />
-                <button
+                <Button
                   onClick={handleSearchForReturn}
                   className="bg-cyber-primary text-black px-6 rounded-lg font-bold hover:bg-cyber-accent"
                 >
                   Lookup
-                </button>
+                </Button>
               </div>
               <p className="text-xs text-gray-500 mt-2">Tip: You can use 'TX-9981' to test.</p>
             </div>
@@ -1438,7 +1613,7 @@ export default function POS() {
               <div className="flex items-center justify-between bg-white/5 p-4 rounded-xl border border-white/5">
                 <div>
                   <p className="text-xs text-gray-400 uppercase">Transaction ID</p>
-                  <p className="text-white font-mono font-bold">{foundSaleForReturn.receiptNumber || foundSaleForReturn.id}</p>
+                  <p className="text-white font-mono font-bold">{foundSaleForReturn.receiptNumber || `SALE-${foundSaleForReturn.id.substring(0, 8).toUpperCase()}`}</p>
                   <p className="text-xs text-gray-500">{foundSaleForReturn.date}</p>
                 </div>
                 <button onClick={() => setFoundSaleForReturn(null)} className="text-xs text-cyber-primary hover:underline">
@@ -1456,12 +1631,13 @@ export default function POS() {
                         <div className="flex justify-between items-start">
                           <div>
                             <p className="text-sm text-white font-medium">{item.name}</p>
-                            <p className="text-xs text-gray-500">Sold: {item.quantity} @ {CURRENCY_SYMBOL}{item.price}</p>
+                            <p className="text-xs text-gray-500">Sold: {item.quantity} @ {formatCompactNumber(item.price, { currency: CURRENCY_SYMBOL })}</p>
                           </div>
                           <div className="flex items-center gap-3 bg-black/30 rounded-lg p-1">
                             <button
                               onClick={() => updateReturnConfig(item.id, 'qty', Math.max(0, itemConfig.qty - 1))}
                               className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 rounded"
+                              aria-label="Decrease return quantity"
                             >
                               <Minus size={14} />
                             </button>
@@ -1469,6 +1645,7 @@ export default function POS() {
                             <button
                               onClick={() => updateReturnConfig(item.id, 'qty', Math.min(item.quantity, itemConfig.qty + 1))}
                               className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 rounded"
+                              aria-label="Increase return quantity"
                             >
                               <Plus size={14} />
                             </button>
@@ -1481,6 +1658,7 @@ export default function POS() {
                               value={itemConfig.reason}
                               onChange={(e) => updateReturnConfig(item.id, 'reason', e.target.value)}
                               className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs text-gray-300 outline-none"
+                              aria-label="Return reason"
                             >
                               <option>Defective</option>
                               <option>Expired</option>
@@ -1491,6 +1669,7 @@ export default function POS() {
                               value={itemConfig.condition}
                               onChange={(e) => updateReturnConfig(item.id, 'condition', e.target.value)}
                               className={`bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs outline-none ${itemConfig.condition === 'Damaged' ? 'text-red-400' : 'text-green-400'}`}
+                              aria-label="Condition"
                             >
                               <option value="Resalable">Return to Stock (Resalable)</option>
                               <option value="Damaged">Write-off (Damaged)</option>
@@ -1529,7 +1708,7 @@ export default function POS() {
                     disabled={totalRefundAmount === 0 || isProcessing}
                     className="flex-1 py-3 bg-cyber-primary hover:bg-cyber-accent text-black font-bold rounded-xl flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {isProcessing ? <RefreshCcw className="animate-spin" /> : <RotateCcw size={18} />}
+                    {isProcessing ? <Loader2 className="animate-spin" /> : <RotateCcw size={18} />}
                     {isProcessing ? 'Processing...' : 'Confirm Refund'}
                   </button>
                 </div>
@@ -1622,7 +1801,7 @@ export default function POS() {
               disabled={!countedCash || isProcessing}
               className="flex-1 py-3 bg-red-500 hover:bg-red-600 text-white font-bold rounded-xl flex items-center justify-center gap-2 disabled:opacity-50"
             >
-              {isProcessing ? <RefreshCcw className="animate-spin" /> : <LogOut size={18} />}
+              {isProcessing ? <Loader2 className="animate-spin" /> : <LogOut size={18} />}
               {isProcessing ? 'Closing...' : 'Close Shift & Logout'}
             </button>
           </div>
@@ -1647,54 +1826,116 @@ export default function POS() {
         </div>
       </Modal>
 
-      {/* --- MODAL: DISCOUNT --- */}
-      <Modal isOpen={isDiscountModalOpen} onClose={() => setIsDiscountModalOpen(false)} title="Apply Discount" size="sm">
-        <div className="space-y-4">
-          <p className="text-xs text-gray-400">Apply to entire cart.</p>
-          <div className="grid grid-cols-2 gap-3">
-            <button onClick={() => handleApplyDiscount('PERCENT', 5)} className="p-3 bg-white/5 border border-white/10 rounded-xl text-white hover:bg-white/10">5%</button>
-            <button onClick={() => handleApplyDiscount('PERCENT', 10)} className="p-3 bg-white/5 border border-white/10 rounded-xl text-white hover:bg-white/10">10%</button>
-            <button onClick={() => handleApplyDiscount('PERCENT', 20)} className="p-3 bg-white/5 border border-white/10 rounded-xl text-white hover:bg-white/10">20%</button>
-            <button onClick={() => handleApplyDiscount('PERCENT', 50)} className="p-3 bg-white/5 border border-white/10 rounded-xl text-white hover:bg-white/10">50%</button>
-          </div>
-          <div>
-            <label className="text-xs text-gray-500 uppercase font-bold mb-1 block">Custom Fixed Amount</label>
-            <div className="flex gap-2">
-              <input type="number" id="fixedDiscount" className="flex-1 bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white" placeholder="0.00" />
-              <button
-                onClick={() => {
-                  const val = parseFloat((document.getElementById('fixedDiscount') as HTMLInputElement).value);
-                  if (!isNaN(val)) handleApplyDiscount('FIXED', val);
-                }}
-                className="bg-cyber-primary text-black px-4 rounded-lg font-bold"
-              >Apply</button>
-            </div>
-          </div>
-
-          {/* Active Promotions from Merchandising */}
-          {promotions && promotions.filter(p => p.status === 'Active').length > 0 && (
-            <div className="mt-4 pt-4 border-t border-white/5">
-              <p className="text-xs text-gray-500 uppercase font-bold mb-2">Active Campaigns</p>
-              <div className="grid grid-cols-2 gap-3">
-                {promotions.filter(p => p.status === 'Active').map(p => (
-                  <button
-                    key={p.id}
-                    onClick={() => {
-                      const type = p.type === 'PERCENTAGE' ? 'PERCENT' : 'FIXED';
-                      handleApplyDiscount(type, p.value);
-                    }}
-                    className="p-3 bg-cyber-primary/10 border border-cyber-primary/20 rounded-xl text-cyber-primary hover:bg-cyber-primary/20 flex flex-col items-center"
-                    title={`Apply code: ${p.code}`}
-                  >
-                    <span className="font-bold text-sm">{p.code}</span>
-                    <span className="text-xs">{p.type === 'PERCENTAGE' ? `${p.value}% Off` : `-${p.value} Off`}</span>
-                  </button>
-                ))}
+      {/* --- MODAL: DISCOUNT (Code Required) --- */}
+      <Modal isOpen={isDiscountModalOpen} onClose={() => { setIsDiscountModalOpen(false); setDiscountCodeError(''); }} title="Apply Discount Code" size="sm">
+        <div className="space-y-5">
+          {/* Current Applied Discount */}
+          {appliedDiscountCodeDetails && (
+            <div className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-500/30 rounded-xl p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-green-500/20 rounded-full flex items-center justify-center">
+                    <CheckCircle className="w-5 h-5 text-green-400" />
+                  </div>
+                  <div>
+                    <p className="font-bold text-green-400">{appliedDiscountCodeDetails.code}</p>
+                    <p className="text-xs text-green-300/70">{appliedDiscountCodeDetails.name}</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="text-lg font-bold text-green-400">
+                    {appliedDiscountCodeDetails.type === 'PERCENTAGE'
+                      ? `-${appliedDiscountCodeDetails.value}%`
+                      : `-${CURRENCY_SYMBOL}${appliedDiscountCodeDetails.value}`
+                    }
+                  </p>
+                  <p className="text-xs text-green-300/70">
+                    Saving: {formatCompactNumber(cartDiscount, { currency: CURRENCY_SYMBOL })}
+                  </p>
+                </div>
               </div>
+              <button
+                onClick={handleRemoveDiscount}
+                className="w-full mt-3 py-2 text-red-400 text-sm border border-red-400/30 rounded-lg hover:bg-red-400/10 transition-colors"
+              >
+                Remove Discount
+              </button>
             </div>
           )}
 
-          <button onClick={() => { setCartDiscount(0); setIsDiscountModalOpen(false); }} className="w-full py-2 text-red-400 text-sm hover:underline">Remove Discount</button>
+          {/* Discount Code Entry */}
+          {!appliedDiscountCodeDetails && (
+            <>
+              <div className="text-center">
+                <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-cyber-primary/20 to-purple-500/20 rounded-2xl flex items-center justify-center">
+                  <Tag className="w-8 h-8 text-cyber-primary" />
+                </div>
+                <p className="text-gray-400 text-sm">
+                  Enter the discount code provided to the customer
+                </p>
+              </div>
+
+              <div className="space-y-3">
+                <div>
+                  <label className="text-xs text-gray-500 uppercase font-bold mb-2 block">
+                    Discount Code
+                  </label>
+                  <input
+                    type="text"
+                    value={discountCodeInput}
+                    onChange={(e) => {
+                      setDiscountCodeInput(e.target.value.toUpperCase());
+                      setDiscountCodeError('');
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') handleValidateDiscountCode();
+                    }}
+                    placeholder="Enter code (e.g., SAVE10)"
+                    className={`w-full bg-black/30 border ${discountCodeError ? 'border-red-500' : 'border-white/10'} rounded-xl px-4 py-3 text-white text-center text-lg font-mono tracking-wider uppercase focus:border-cyber-primary focus:ring-2 focus:ring-cyber-primary/20 transition-all`}
+                    autoFocus
+                  />
+                  {discountCodeError && (
+                    <p className="mt-2 text-red-400 text-sm flex items-center gap-1">
+                      <AlertTriangle className="w-4 h-4" />
+                      {discountCodeError}
+                    </p>
+                  )}
+                </div>
+
+                <button
+                  onClick={handleValidateDiscountCode}
+                  disabled={!discountCodeInput.trim() || isValidatingCode}
+                  className="w-full bg-gradient-to-r from-cyber-primary to-cyan-400 text-black py-3 rounded-xl font-bold flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg hover:shadow-cyber-primary/30 transition-all"
+                >
+                  {isValidatingCode ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      Validating...
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle className="w-5 h-5" />
+                      Apply Code
+                    </>
+                  )}
+                </button>
+              </div>
+
+              {/* Info Section */}
+              <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+                <p className="text-xs text-gray-400 leading-relaxed">
+                  <strong className="text-white">Note:</strong> Discount codes must be obtained from management or marketing campaigns.
+                  Ask the customer for their discount code or promotional number.
+                </p>
+              </div>
+
+              {/* Cart Summary */}
+              <div className="flex justify-between text-sm text-gray-400 pt-2 border-t border-white/5">
+                <span>Cart Subtotal:</span>
+                <span className="text-white font-semibold">{formatCompactNumber(subtotal, { currency: CURRENCY_SYMBOL })}</span>
+              </div>
+            </>
+          )}
         </div>
       </Modal>
 
@@ -1702,8 +1943,9 @@ export default function POS() {
       <Modal isOpen={isMiscItemModalOpen} onClose={() => setIsMiscItemModalOpen(false)} title="Add Miscellaneous Item" size="sm">
         <div className="space-y-4">
           <div>
-            <label className="text-xs text-gray-500 uppercase font-bold mb-1 block">Description</label>
+            <label htmlFor="misc-desc" className="text-xs text-gray-500 uppercase font-bold mb-1 block">Description</label>
             <input
+              id="misc-desc"
               value={miscItem.name}
               onChange={e => setMiscItem({ ...miscItem, name: e.target.value })}
               className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white"
@@ -1787,7 +2029,7 @@ export default function POS() {
                         <p className="text-xs opacity-70">{customer.phone} • {customer.email}</p>
                         <div className="flex gap-3 mt-1 text-[10px]">
                           <span className="text-cyber-primary">{stats.totalVisits} visits</span>
-                          <span className="text-green-400">{CURRENCY_SYMBOL}{stats.totalSpent.toLocaleString()} spent</span>
+                          <span className="text-green-400">{formatCompactNumber(stats.totalSpent, { currency: CURRENCY_SYMBOL })} spent</span>
                         </div>
                       </div>
                       {selectedCustomer?.id === customer.id && <CheckCircle size={16} className="text-cyber-primary" />}
@@ -1820,7 +2062,7 @@ export default function POS() {
                     </div>
                     <div className="bg-white/5 p-3 rounded-lg">
                       <p className="text-xs text-gray-400">Total Spent</p>
-                      <p className="text-xl font-bold text-cyber-primary">{CURRENCY_SYMBOL}{getCustomerStats(selectedCustomer.id).totalSpent.toLocaleString()}</p>
+                      <p className="text-xl font-bold text-cyber-primary">{formatCompactNumber(getCustomerStats(selectedCustomer.id).totalSpent, { currency: CURRENCY_SYMBOL })}</p>
                     </div>
                   </div>
 
@@ -1831,7 +2073,7 @@ export default function POS() {
                         <div key={idx} className="bg-white/5 p-2 rounded text-xs">
                           <div className="flex justify-between">
                             <span className="text-gray-300">{new Date(sale.date).toLocaleDateString()}</span>
-                            <span className="text-cyber-primary font-bold">{CURRENCY_SYMBOL}{sale.total.toFixed(2)}</span>
+                            <span className="text-cyber-primary font-bold">{formatCompactNumber(sale.total, { currency: CURRENCY_SYMBOL })}</span>
                           </div>
                           <p className="text-gray-500 text-[10px] mt-1">{sale.items.length} items</p>
                         </div>
@@ -1920,7 +2162,10 @@ export default function POS() {
           />
           <div className="flex justify-end gap-3">
             <button onClick={() => setIsEmailReceiptModalOpen(false)} className="px-4 py-2 text-gray-400 hover:text-white">Cancel</button>
-            <button onClick={handleConfirmEmailReceipt} disabled={!emailReceiptAddress} className="px-6 py-2 bg-cyber-primary hover:bg-cyber-accent text-black font-bold rounded-lg disabled:opacity-50">Send Receipt</button>
+            <button onClick={handleConfirmEmailReceipt} disabled={!emailReceiptAddress || isProcessing} className="px-6 py-2 bg-cyber-primary hover:bg-cyber-accent text-black font-bold rounded-lg disabled:opacity-50 flex items-center gap-2">
+              {isProcessing && <Loader2 size={16} className="animate-spin" />}
+              Send Receipt
+            </button>
           </div>
         </div>
       </Modal >
@@ -1946,8 +2191,7 @@ export default function POS() {
             <iframe
               srcDoc={receiptPreviewHTML}
               title="Receipt Preview"
-              className="w-full h-full border-none"
-              style={{ backgroundColor: 'white' }}
+              className="w-full h-full border-none bg-white"
             />
           </div>
           <div className="flex justify-end gap-3 pt-4 border-t border-white/10">
@@ -1967,6 +2211,15 @@ export default function POS() {
           </div>
         </div>
       </Modal>
-    </div >
+      {/* Points Earned Popup */}
+      {showPointsPopup && earnedPointsData && (
+        <PointsEarnedPopup
+          points={earnedPointsData.points}
+          message="Transaction Complete!"
+          bonuses={earnedPointsData.breakdown}
+          onClose={() => setShowPointsPopup(false)}
+        />
+      )}
+    </div>
   );
 }

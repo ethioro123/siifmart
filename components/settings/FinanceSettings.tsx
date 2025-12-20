@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
-import { DollarSign, PieChart, CreditCard, Landmark, Calculator, AlertTriangle, Calendar, Percent, Coins, ArrowRightLeft } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { DollarSign, PieChart, CreditCard, Landmark, Calculator, AlertTriangle, Calendar, Percent, Coins, ArrowRightLeft, Save } from 'lucide-react';
 import { useData } from '../../contexts/DataContext';
 import { useStore } from '../../contexts/CentralStore';
+import Button from '../shared/Button';
 
-// --- SUB-COMPONENTS (Shared styles) ---
+// --- SUB-COMPONENTS ---
 const SectionHeader = ({ title, desc }: { title: string, desc: string }) => (
     <div className="mb-6 pb-4 border-b border-white/5">
         <h3 className="text-xl font-bold text-white">{title}</h3>
@@ -24,7 +25,7 @@ const InputGroup = ({ label, value, onChange, placeholder, sub, icon: Icon, type
             )}
             <input
                 type={type}
-                value={value}
+                value={value || ''}
                 onChange={onChange}
                 placeholder={placeholder}
                 className={`w-full bg-black/40 border border-white/10 rounded-xl py-3 text-white text-sm focus:border-cyber-primary focus:ring-1 focus:ring-cyber-primary/50 outline-none transition-all placeholder:text-gray-600 ${prefix ? 'pl-10 pr-4' : 'px-4'}`}
@@ -39,6 +40,7 @@ const RadioCard = ({ options, value, onChange }: any) => (
         {options.map((opt: any) => (
             <button
                 key={opt.value}
+                type="button"
                 onClick={() => onChange(opt.value)}
                 className={`p-4 rounded-xl border text-left transition-all ${value === opt.value
                     ? 'bg-cyber-primary/10 border-cyber-primary text-white'
@@ -74,10 +76,68 @@ const ToggleRow = ({ label, sub, checked, onChange }: any) => (
 
 export default function FinanceSettings() {
     const { user } = useStore();
-    const { settings, updateSettings } = useData();
+    const { settings, updateSettings, addNotification } = useData();
 
-    // Mock state for secondary currencies since it's a list
-    const [currencies, setCurrencies] = useState([
+    // Local States
+    const [policy, setPolicy] = useState<{
+        fiscalYearStart: string;
+        accountingMethod: 'accrual' | 'cash';
+        taxInclusive: boolean;
+        defaultVatRate: number;
+        withholdingTax: number;
+    }>({
+        fiscalYearStart: '',
+        accountingMethod: 'accrual',
+        taxInclusive: true,
+        defaultVatRate: 15,
+        withholdingTax: 2
+    });
+
+    const [limits, setLimits] = useState({
+        maxPettyCash: 200,
+        expenseApprovalLimit: 500,
+        defaultCreditLimit: 1000
+    });
+
+    const [isSavingPolicy, setIsSavingPolicy] = useState(false);
+    const [isSavingLimits, setIsSavingLimits] = useState(false);
+
+    // Sync from settings
+    useEffect(() => {
+        if (settings) {
+            setPolicy({
+                fiscalYearStart: settings.fiscalYearStart || '2025-01',
+                accountingMethod: settings.accountingMethod || 'accrual',
+                taxInclusive: settings.taxInclusive ?? true,
+                defaultVatRate: settings.defaultVatRate ?? 15,
+                withholdingTax: settings.withholdingTax ?? 2
+            });
+            setLimits({
+                maxPettyCash: settings.maxPettyCash ?? 200,
+                expenseApprovalLimit: settings.expenseApprovalLimit ?? 500,
+                defaultCreditLimit: settings.defaultCreditLimit ?? 1000
+            });
+        }
+    }, [settings]);
+
+    const handleSaveSection = async (section: 'policy' | 'limits') => {
+        const setSaving = section === 'policy' ? setIsSavingPolicy : setIsSavingLimits;
+        const data = section === 'policy' ? policy : limits;
+
+        setSaving(true);
+        try {
+            await updateSettings(data, user?.name || 'Admin');
+            addNotification('success', `${section.charAt(0).toUpperCase() + section.slice(1)} finance settings saved successfully!`);
+        } catch (err) {
+            console.error(`Failed to save ${section} settings:`, err);
+            addNotification('alert', `Failed to save ${section} settings.`);
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    // Currency list (remains static or managed locally for now as it was in original)
+    const [currencies] = useState([
         { code: 'USD', rate: 120.5 },
         { code: 'EUR', rate: 132.8 }
     ]);
@@ -100,23 +160,26 @@ export default function FinanceSettings() {
 
                 {/* FISCAL POLICY */}
                 <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-3xl p-6 hover:border-white/20 transition-all">
-                    <SectionHeader title="Fiscal Policy" desc="Accounting years and methods" />
+                    <div className="mb-6 border-b border-white/5 pb-4">
+                        <h3 className="text-xl font-bold text-white">Fiscal Policy</h3>
+                        <p className="text-sm text-gray-400 mt-1">Accounting years and methods</p>
+                    </div>
 
                     <div className="space-y-6">
                         <InputGroup
                             label="Fiscal Year Start"
                             icon={Calendar}
                             type="month"
-                            value={settings.fiscalYearStart || '2025-01'}
-                            onChange={(e: any) => updateSettings({ fiscalYearStart: e.target.value }, user?.name || 'Admin')}
+                            value={policy.fiscalYearStart}
+                            onChange={(e: any) => setPolicy(prev => ({ ...prev, fiscalYearStart: e.target.value }))}
                             sub="Reporting cycles will align with this start date"
                         />
 
                         <div className="space-y-3">
                             <label className="text-xs text-gray-400 font-bold uppercase tracking-wide">Accounting Basis</label>
                             <RadioCard
-                                value={settings.accountingMethod || 'accrual'}
-                                onChange={(val: string) => updateSettings({ accountingMethod: val }, user?.name || 'Admin')}
+                                value={policy.accountingMethod}
+                                onChange={(val: 'accrual' | 'cash') => setPolicy(prev => ({ ...prev, accountingMethod: val }))}
                                 options={[
                                     { value: 'accrual', label: 'Accrual Basis', desc: 'Record when transaction occurs', icon: PieChart },
                                     { value: 'cash', label: 'Cash Basis', desc: 'Record when cash exchanges', icon: Coins },
@@ -131,23 +194,23 @@ export default function FinanceSettings() {
                             <ToggleRow
                                 label="Tax Inclusive Pricing"
                                 sub="Prices displayed include VAT"
-                                checked={settings.taxInclusive}
-                                onChange={() => updateSettings({ taxInclusive: !settings.taxInclusive }, user?.name || 'Admin')}
+                                checked={policy.taxInclusive}
+                                onChange={() => setPolicy(prev => ({ ...prev, taxInclusive: !prev.taxInclusive }))}
                             />
                             <div className="grid grid-cols-2 gap-4 mt-2">
                                 <InputGroup
                                     label="Default VAT Rate"
                                     type="number"
-                                    value={settings.defaultVatRate || 15}
-                                    onChange={(e: any) => updateSettings({ defaultVatRate: parseFloat(e.target.value) }, user?.name || 'Admin')}
+                                    value={policy.defaultVatRate}
+                                    onChange={(e: any) => setPolicy(prev => ({ ...prev, defaultVatRate: parseFloat(e.target.value) }))}
                                     icon={Percent}
                                     prefix="%"
                                 />
                                 <InputGroup
                                     label="Withholding Tax"
                                     type="number"
-                                    value={settings.withholdingTax || 2}
-                                    onChange={(e: any) => updateSettings({ withholdingTax: parseFloat(e.target.value) }, user?.name || 'Admin')}
+                                    value={policy.withholdingTax}
+                                    onChange={(e: any) => setPolicy(prev => ({ ...prev, withholdingTax: parseFloat(e.target.value) }))}
                                     icon={Percent}
                                     prefix="%"
                                 />
@@ -159,7 +222,10 @@ export default function FinanceSettings() {
                 <div className="space-y-6">
                     {/* LIMITS & APPROVALS */}
                     <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-3xl p-6 hover:border-white/20 transition-all">
-                        <SectionHeader title="Limits & Approvals" desc="Expense controls and automation" />
+                        <div className="mb-6 border-b border-white/5 pb-4">
+                            <h3 className="text-xl font-bold text-white">Limits & Approvals</h3>
+                            <p className="text-sm text-gray-400 mt-1">Expense controls and automation</p>
+                        </div>
 
                         <div className="space-y-6">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -167,16 +233,16 @@ export default function FinanceSettings() {
                                     label="Max Petty Cash"
                                     type="number"
                                     prefix="$"
-                                    value={settings.maxPettyCash || 200}
-                                    onChange={(e: any) => updateSettings({ maxPettyCash: parseInt(e.target.value) }, user?.name || 'Admin')}
+                                    value={limits.maxPettyCash}
+                                    onChange={(e: any) => setLimits(prev => ({ ...prev, maxPettyCash: parseInt(e.target.value) }))}
                                     sub="Max cash on hand per drawer"
                                 />
                                 <InputGroup
                                     label="Expense Approval"
                                     type="number"
                                     prefix="$"
-                                    value={settings.expenseApprovalLimit || 500}
-                                    onChange={(e: any) => updateSettings({ expenseApprovalLimit: parseInt(e.target.value) }, user?.name || 'Admin')}
+                                    value={limits.expenseApprovalLimit}
+                                    onChange={(e: any) => setLimits(prev => ({ ...prev, expenseApprovalLimit: parseInt(e.target.value) }))}
                                     sub="Requires Manager > this amount"
                                 />
                             </div>
@@ -186,10 +252,22 @@ export default function FinanceSettings() {
                                 icon={CreditCard}
                                 type="number"
                                 prefix="$"
-                                value={settings.defaultCreditLimit || 1000}
-                                onChange={(e: any) => updateSettings({ defaultCreditLimit: parseInt(e.target.value) }, user?.name || 'Admin')}
+                                value={limits.defaultCreditLimit}
+                                onChange={(e: any) => setLimits(prev => ({ ...prev, defaultCreditLimit: parseInt(e.target.value) }))}
                                 sub="New B2B customers start with this limit"
                             />
+                        </div>
+
+                        <div className="mt-8 pt-6 border-t border-white/5 flex justify-end">
+                            <Button
+                                onClick={() => handleSaveSection('limits')}
+                                loading={isSavingLimits}
+                                icon={<Save size={16} />}
+                                variant="primary"
+                                className="px-8"
+                            >
+                                Save Limits
+                            </Button>
                         </div>
                     </div>
 
@@ -210,7 +288,7 @@ export default function FinanceSettings() {
                                 <label className="text-xs text-gray-400 font-bold uppercase tracking-wide flex items-center gap-2">
                                     <ArrowRightLeft size={14} /> Exchange Rates (vs Base)
                                 </label>
-                                {currencies.map((curr, idx) => (
+                                {currencies.map((curr) => (
                                     <div key={curr.code} className="flex items-center gap-3">
                                         <div className="w-12 h-10 flex items-center justify-center bg-black/40 border border-white/10 rounded-lg text-sm font-bold text-gray-300">
                                             {curr.code}

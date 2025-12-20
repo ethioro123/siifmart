@@ -9,8 +9,8 @@ import { join } from 'path';
 dotenv.config({ path: join(process.cwd(), '.env.local') });
 
 const supabase = createClient(
-  process.env.VITE_SUPABASE_URL || '',
-  process.env.VITE_SUPABASE_SERVICE_ROLE_KEY || '',
+  process.env.VITE_SUPABASE_URL!,
+  process.env.VITE_SUPABASE_SERVICE_ROLE_KEY!,
   { auth: { autoRefreshToken: false, persistSession: false } }
 );
 
@@ -38,7 +38,7 @@ async function findHQRoleEmployees() {
   const { data: employees } = await supabase
     .from('employees')
     .select('*')
-    .order('role', { ascending: true });
+    .order('role', { ascending: true }) as { data: any[] | null, error: any };
 
   if (!employees) {
     console.error('❌ No employees found');
@@ -46,7 +46,7 @@ async function findHQRoleEmployees() {
   }
 
   // Find HQ role employees
-  const hqRoleEmployees = employees.filter(e => HQ_ROLES.includes(e.role));
+  const hqRoleEmployees = (employees || []).filter((e: any) => HQ_ROLES.includes(e.role));
 
   console.log(`👥 Total Employees: ${employees.length}`);
   console.log(`🏢 HQ Role Employees: ${hqRoleEmployees.length}\n`);
@@ -55,7 +55,7 @@ async function findHQRoleEmployees() {
     console.log('⚠️  No HQ role employees found in database!\n');
     console.log('📋 Expected HQ Roles:');
     HQ_ROLES.forEach(role => {
-      const count = employees.filter(e => e.role === role).length;
+      const count = (employees || []).filter((e: any) => e.role === role).length;
       console.log(`   - ${role}: ${count} employees`);
     });
     return;
@@ -63,12 +63,12 @@ async function findHQRoleEmployees() {
 
   console.log('🏢 HQ ROLE EMPLOYEES:');
   console.log('─'.repeat(100));
-  
-  hqRoleEmployees.forEach(emp => {
+
+  hqRoleEmployees.forEach((emp: any) => {
     const site = sites?.find(s => s.id === emp.site_id);
     const siteName = site?.name || 'Unknown Site';
     const isAtFirstSite = sites && sites[0] && emp.site_id === sites[0].id;
-    
+
     console.log(
       `${isAtFirstSite ? '✅' : '⚠️ '} ${emp.name.padEnd(30)} | ` +
       `${emp.role.padEnd(20)} | ` +
@@ -78,17 +78,17 @@ async function findHQRoleEmployees() {
   });
 
   console.log('\n📊 BY SITE:');
-  const bySite = hqRoleEmployees.reduce((acc, emp) => {
+  const bySite = hqRoleEmployees.reduce((acc: any, emp: any) => {
     const site = sites?.find(s => s.id === emp.site_id);
-    const siteName = site?.name || 'Unknown';
+    const siteName = (site as any)?.name || 'Unknown';
     if (!acc[siteName]) acc[siteName] = [];
     acc[siteName].push(emp);
     return acc;
-  }, {} as Record<string, typeof hqRoleEmployees>);
+  }, {} as Record<string, any[]>);
 
-  Object.entries(bySite).forEach(([siteName, emps]) => {
-    console.log(`\n   ${siteName}: ${emps.length} employees`);
-    emps.forEach(emp => {
+  Object.entries(bySite).forEach(([siteName, emps]: [string, any]) => {
+    console.log(`\n   ${siteName}: ${(emps as any[]).length} employees`);
+    (emps as any[]).forEach((emp: any) => {
       console.log(`      - ${emp.name} (${emp.role})`);
     });
   });
@@ -96,15 +96,15 @@ async function findHQRoleEmployees() {
   // Check access
   console.log('\n🔐 ACCESS VERIFICATION:');
   console.log('─'.repeat(100));
-  
+
   const hqSite = sites?.[0];
   if (hqSite) {
     const atHQ = hqRoleEmployees.filter(e => e.site_id === hqSite.id);
     const notAtHQ = hqRoleEmployees.filter(e => e.site_id !== hqSite.id);
-    
+
     console.log(`   ✅ At HQ (${hqSite.name}): ${atHQ.length}`);
     console.log(`   ⚠️  Not at HQ: ${notAtHQ.length}`);
-    
+
     if (notAtHQ.length > 0) {
       console.log('\n   Employees that should be moved to HQ:');
       notAtHQ.forEach(emp => {
