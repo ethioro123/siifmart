@@ -21,6 +21,8 @@ export default function Layout({ children }: { children?: React.ReactNode }) {
           </div>
         </main>
       </div>
+      {/* Employee Quick Access Floating Button - Available for ALL employees */}
+      <EmployeeQuickAccess />
       {/* AI Navigation Assistant - Intelligent navigation for all users */}
 
       {/* AI Proactive Suggestions - Intelligent alerts for super admins */}
