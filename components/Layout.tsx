@@ -1,6 +1,7 @@
 import React from 'react';
 import Sidebar from './Sidebar';
 import TopBar from './TopBar';
+import EmployeeQuickAccess from './EmployeeQuickAccess';
 import NetworkStatusIndicator from './NetworkStatusIndicator';
 
 
