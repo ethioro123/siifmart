@@ -45,7 +45,7 @@ const COLORS = ['#00ff9d', '#3b82f6', '#a855f7'];
 
 export default function POSDashboard() {
   const { user, logout } = useStore();
-  const { sales, addNotification, products, updateProduct, activeSite, transfers, sites, refreshData, shifts, startShift, workerPoints } = useData(); // Live Data
+  const { sales, addNotification, products, updateProduct, activeSite, transfers, sites, refreshData, shifts, startShift, workerPoints, employees, jobs } = useData(); // Live Data
   const navigate = useNavigate();
   const [isLocked, setIsLocked] = useState(false);
   const [pin, setPin] = useState('');
@@ -796,8 +796,33 @@ export default function POSDashboard() {
                   </div>
 
                   {(() => {
+                    // Combine transfers from both sources:
+                    // 1. Traditional transfers array
+                    // 2. WMS jobs with type 'TRANSFER' (converted to transfer-like objects)
+                    const wmsTransferJobs = jobs
+                      .filter(j => j.type === 'TRANSFER')
+                      .map(j => ({
+                        id: j.id,
+                        sourceSiteId: j.siteId || (j as any).source_site_id,
+                        destSiteId: (j as any).destSiteId || (j as any).dest_site_id,
+                        status: j.status,
+                        transferStatus: (j as any).transferStatus || j.status,
+                        items: j.items || [],
+                        orderRef: j.orderRef,
+                        createdAt: j.createdAt,
+                        assignedTo: j.assignedTo
+                      }));
+
+                    // Merge both sources, avoiding duplicates
+                    const allTransferSources = [
+                      ...(transfers || []),
+                      ...wmsTransferJobs.filter(wj =>
+                        !(transfers || []).some(t => t.id === wj.id)
+                      )
+                    ];
+
                     // Filter transfers destined for this site that are in-transit or delivered
-                    const pendingTransfers = (transfers || []).filter(t => {
+                    const pendingTransfers = allTransferSources.filter(t => {
                       // Check destination matches current site (robust ID check)
                       if (String(t.destSiteId) !== String(activeSite?.id)) return false;
 
@@ -810,7 +835,7 @@ export default function POSDashboard() {
                         'requested', 'pending', 'approved',
                         'packed', 'ready', 'staging',
                         'shipped', 'in-transit', 'dispatched',
-                        'delivered', 'arrived'
+                        'delivered', 'arrived', 'picking', 'packing'
                       ];
 
                       const isValidStatus = validStatuses.includes(status);
@@ -819,21 +844,24 @@ export default function POSDashboard() {
 
                       // Check if any items haven't been POS-received yet
                       // Don't require product to exist in local products array
-                      const hasUnreceivedItems = t.items.some(item => {
+                      const items = Array.isArray(t.items) ? t.items : [];
+                      const hasUnreceivedItems = items.some((item: any) => {
                         const product = products.find(p => p.sku === item.sku || p.id === item.productId);
                         // If product exists, check if it hasn't been received
                         // If product doesn't exist yet, it still needs receiving
                         return !product || !(product.posReceivedAt || product.pos_received_at);
                       });
 
-                      return hasUnreceivedItems;
+                      return hasUnreceivedItems || items.length === 0; // Also show if no items (newly created)
                     });
 
                     if (pendingTransfers.length === 0) {
                       // Count transfers for debugging
-                      const allTransfersCount = transfers?.length || 0;
+                      const transfersArrayCount = transfers?.length || 0;
+                      const wmsTransferJobsCount = wmsTransferJobs.length;
                       // Use loose helpful filtering for debug stats
-                      const siteTransfers = (transfers || []).filter(t => String(t.destSiteId) === String(activeSite?.id));
+                      const siteTransfersFromArr = (transfers || []).filter(t => String(t.destSiteId) === String(activeSite?.id));
+                      const siteTransfersFromJobs = wmsTransferJobs.filter(t => String(t.destSiteId) === String(activeSite?.id));
 
                       return (
                         <div className="text-center py-8 border border-dashed border-white/10 rounded-xl">
@@ -846,8 +874,10 @@ export default function POSDashboard() {
                             <div className="mt-4 p-3 bg-black/40 rounded-lg text-xs text-left font-mono space-y-1">
                               <p className="text-gray-500 font-bold border-b border-gray-700 pb-1 mb-1">DEBUG INFO:</p>
                               <p className="text-gray-400">Current Site ID: <span className="text-white">{activeSite?.id}</span></p>
-                              <p className="text-gray-400">Total System Transfers: <span className="text-white">{allTransfersCount}</span></p>
-                              <p className="text-gray-400">Transfers for this Site: <span className="text-white">{siteTransfers.length}</span></p>
+                              <p className="text-gray-400">Transfers Array: <span className="text-white">{transfersArrayCount}</span></p>
+                              <p className="text-gray-400">WMS Jobs (TRANSFER): <span className="text-cyan-400">{wmsTransferJobsCount}</span></p>
+                              <p className="text-gray-400">For This Site (Arr): <span className="text-white">{siteTransfersFromArr.length}</span></p>
+                              <p className="text-gray-400">For This Site (Jobs): <span className="text-cyan-400">{siteTransfersFromJobs.length}</span></p>
 
                               {siteTransfers.length > 0 && (
                                 <div className="mt-2 pt-2 border-t border-gray-700">
@@ -865,42 +895,140 @@ export default function POSDashboard() {
 
 
                     return (
-                      <div className="space-y-3 max-h-[400px] overflow-y-auto custom-scrollbar">
+                      <div className="space-y-4 max-h-[450px] overflow-y-auto custom-scrollbar pr-1">
                         {pendingTransfers.map(transfer => {
                           const sourceSite = sites?.find(s => s.id === transfer.sourceSiteId);
-                          const itemCount = transfer.items.length;
-                          const totalQty = transfer.items.reduce((sum, i) => sum + i.quantity, 0);
+                          const items = Array.isArray(transfer.items) ? transfer.items : [];
+                          const itemCount = items.length;
+                          const totalQty = items.reduce((sum: number, i: any) => sum + (i.quantity || 0), 0);
+
+                          // Find dispatch job for this transfer to get driver info
+                          const dispatchJob = jobs.find(j =>
+                            j.type === 'DISPATCH' &&
+                            (j.orderRef === transfer.id || j.id?.includes(transfer.id?.slice(-6) || '')) ||
+                            j.orderRef === (transfer as any).orderRef
+                          );
+                          const driver = dispatchJob?.assignedTo
+                            ? employees.find(e => e.id === dispatchJob.assignedTo)
+                            : null;
+
+                          // Determine transfer type
+                          const getTransferType = () => {
+                            const ref = (transfer as any).orderRef || transfer.id || '';
+                            if (ref.toLowerCase().includes('auto') || (transfer as any).autoGenerated) {
+                              return { label: 'AUTO-REPLENISH', color: 'bg-purple-500/20 text-purple-400 border-purple-500/30' };
+                            }
+                            if (ref.toLowerCase().includes('low') || (transfer as any).triggerType === 'LOW_STOCK') {
+                              return { label: 'LOW STOCK ALERT', color: 'bg-red-500/20 text-red-400 border-red-500/30' };
+                            }
+                            return { label: 'MANUAL ORDER', color: 'bg-blue-500/20 text-blue-400 border-blue-500/30' };
+                          };
+                          const transferType = getTransferType();
+
+                          // Get status color
+                          const getStatusStyle = () => {
+                            const status = ((transfer as any).transferStatus || transfer.status || '').toLowerCase();
+                            if (status === 'delivered' || status === 'arrived') {
+                              return 'bg-green-500/20 text-green-400 border-green-500/30';
+                            }
+                            if (status === 'in-transit' || status === 'shipped' || status === 'dispatched') {
+                              return 'bg-blue-500/20 text-blue-400 border-blue-500/30';
+                            }
+                            return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30';
+                          };
 
                           return (
-                            <button
+                            <div
                               key={transfer.id}
-                              onClick={() => handleSelectTransferForReceiving(transfer.id)}
-                              className="w-full p-4 bg-white/5 border border-white/10 rounded-xl hover:border-cyber-primary/50 hover:bg-white/10 transition-all text-left group"
+                              className="bg-gradient-to-r from-white/5 to-transparent border border-white/10 rounded-2xl overflow-hidden hover:border-cyber-primary/50 transition-all group"
                             >
-                              <div className="flex items-center justify-between mb-2">
-                                <div className="flex items-center gap-3">
-                                  <div className="p-2 bg-blue-500/20 rounded-lg">
-                                    <Truck size={20} className="text-blue-400" />
+                              {/* Header */}
+                              <div className="p-4 bg-black/20 border-b border-white/5">
+                                <div className="flex items-center justify-between mb-2">
+                                  <div className="flex items-center gap-3">
+                                    <div className="p-2 bg-blue-500/20 rounded-xl">
+                                      <Package size={20} className="text-blue-400" />
+                                    </div>
+                                    <div>
+                                      <p className="font-mono font-bold text-white text-sm">
+                                        {(transfer as any).orderRef || `TRF-${transfer.id?.slice(-6).toUpperCase()}`}
+                                      </p>
+                                      <p className="text-xs text-gray-400">
+                                        Created: {(transfer as any).createdAt ? new Date((transfer as any).createdAt).toLocaleDateString() : 'Unknown'}
+                                      </p>
+                                    </div>
                                   </div>
-                                  <div>
-                                    <p className="font-bold text-white">{transfer.id.slice(0, 12)}...</p>
-                                    <p className="text-xs text-gray-400">From: {sourceSite?.name || 'Unknown'}</p>
+                                  <div className="flex items-center gap-2">
+                                    <span className={`px-2 py-1 rounded-lg text-[10px] font-bold uppercase border ${transferType.color}`}>
+                                      {transferType.label}
+                                    </span>
+                                    <span className={`px-2 py-1 rounded-lg text-[10px] font-bold uppercase border ${getStatusStyle()}`}>
+                                      {(transfer as any).transferStatus || transfer.status}
+                                    </span>
                                   </div>
                                 </div>
-                                <span className={`px-3 py-1 rounded-full text-xs font-bold ${transfer.transferStatus === 'Delivered'
-                                  ? 'bg-green-500/20 text-green-400 border border-green-500/30'
-                                  : 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
-                                  }`}>
-                                  {transfer.transferStatus}
-                                </span>
                               </div>
-                              <div className="flex items-center justify-between text-sm">
-                                <span className="text-gray-400">{itemCount} product(s) • {totalQty} units</span>
-                                <span className="text-cyber-primary group-hover:translate-x-1 transition-transform">
-                                  Receive →
-                                </span>
+
+                              {/* Body */}
+                              <div className="p-4 space-y-3">
+                                {/* Source */}
+                                <div className="flex items-center gap-3">
+                                  <div className="w-8 h-8 rounded-lg bg-green-500/10 flex items-center justify-center">
+                                    <Archive size={14} className="text-green-400" />
+                                  </div>
+                                  <div className="flex-1">
+                                    <p className="text-xs text-gray-500 uppercase font-bold">From</p>
+                                    <p className="text-sm font-bold text-white">{sourceSite?.name || 'Unknown Warehouse'}</p>
+                                    {sourceSite?.address && <p className="text-xs text-gray-500 truncate">{sourceSite.address}</p>}
+                                  </div>
+                                </div>
+
+                                {/* Driver Info */}
+                                <div className="flex items-center gap-3">
+                                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${driver ? 'bg-cyber-primary/10' : 'bg-gray-500/10'}`}>
+                                    <Truck size={14} className={driver ? 'text-cyber-primary' : 'text-gray-500'} />
+                                  </div>
+                                  <div className="flex-1">
+                                    <p className="text-xs text-gray-500 uppercase font-bold">Driver</p>
+                                    {driver ? (
+                                      <div className="flex items-center gap-2">
+                                        <p className="text-sm font-bold text-white">{driver.name}</p>
+                                        <span className={`text-[10px] px-1.5 py-0.5 rounded font-bold ${driver.driverType === 'internal' ? 'bg-green-500/20 text-green-400' :
+                                          driver.driverType === 'subcontracted' ? 'bg-blue-500/20 text-blue-400' :
+                                            'bg-purple-500/20 text-purple-400'
+                                          }`}>
+                                          {driver.driverType === 'internal' ? '🏢 Staff' :
+                                            driver.driverType === 'subcontracted' ? '📋 Contract' :
+                                              driver.driverType ? '🚗 Owner' : '🏢 Staff'}
+                                        </span>
+                                        {driver.vehicleType && <span className="text-xs text-gray-500">• {driver.vehicleType}</span>}
+                                      </div>
+                                    ) : (
+                                      <p className="text-sm text-yellow-400 font-medium">⏳ Awaiting Driver Assignment</p>
+                                    )}
+                                  </div>
+                                </div>
+
+                                {/* Items Summary */}
+                                <div className="flex items-center justify-between pt-2 border-t border-white/5">
+                                  <div className="flex items-center gap-4 text-sm">
+                                    <span className="text-gray-400">
+                                      <span className="text-white font-bold">{itemCount}</span> products
+                                    </span>
+                                    <span className="text-gray-400">
+                                      <span className="text-white font-bold">{totalQty}</span> units
+                                    </span>
+                                  </div>
+                                  <button
+                                    onClick={() => handleSelectTransferForReceiving(transfer.id)}
+                                    className="px-4 py-2 bg-cyber-primary text-black font-bold rounded-xl hover:bg-cyber-accent transition-all flex items-center gap-2 group-hover:shadow-lg group-hover:shadow-cyber-primary/20"
+                                  >
+                                    <CheckCircle size={16} />
+                                    Receive Now
+                                  </button>
+                                </div>
                               </div>
-                            </button>
+                            </div>
                           );
                         })}
                       </div>
@@ -910,159 +1038,241 @@ export default function POSDashboard() {
               )}
 
               {/* Selected Transfer - Receiving Form */}
-              {selectedTransferForReceiving && (
-                <>
-                  <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 bg-green-500/20 rounded-lg">
-                          <Package size={20} className="text-green-400" />
+              {selectedTransferForReceiving && (() => {
+                // Get full transfer info for the enhanced header
+                const selectedTransfer = transfers.find(t => t.id === selectedTransferForReceiving);
+                const sourceSite = selectedTransfer ? sites?.find(s => s.id === selectedTransfer.sourceSiteId) : null;
+
+                // Find dispatch job for driver info
+                const dispatchJob = selectedTransfer ? jobs.find(j =>
+                  j.type === 'DISPATCH' &&
+                  (j.orderRef === selectedTransfer.id || j.orderRef === (selectedTransfer as any).orderRef)
+                ) : null;
+                const driver = dispatchJob?.assignedTo ? employees.find(e => e.id === dispatchJob.assignedTo) : null;
+
+                // Determine transfer type
+                const getTransferType = () => {
+                  if (!selectedTransfer) return { label: 'TRANSFER', color: 'bg-blue-500/20 text-blue-400 border-blue-500/30' };
+                  const ref = (selectedTransfer as any).orderRef || selectedTransfer.id || '';
+                  if (ref.toLowerCase().includes('auto') || (selectedTransfer as any).autoGenerated) {
+                    return { label: 'AUTO-REPLENISH', color: 'bg-purple-500/20 text-purple-400 border-purple-500/30' };
+                  }
+                  if (ref.toLowerCase().includes('low') || (selectedTransfer as any).triggerType === 'LOW_STOCK') {
+                    return { label: 'LOW STOCK ALERT', color: 'bg-red-500/20 text-red-400 border-red-500/30' };
+                  }
+                  return { label: 'MANUAL ORDER', color: 'bg-blue-500/20 text-blue-400 border-blue-500/30' };
+                };
+                const transferType = getTransferType();
+
+                return (
+                  <>
+                    {/* Comprehensive Shipment Header */}
+                    <div className="bg-gradient-to-br from-green-900/30 to-black border border-green-500/30 rounded-2xl overflow-hidden">
+                      {/* Top Bar */}
+                      <div className="p-4 bg-black/30 border-b border-green-500/20 flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-green-500/20 rounded-xl">
+                            <CheckCircle size={24} className="text-green-400" />
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <p className="font-mono font-bold text-white">
+                                {(selectedTransfer as any)?.orderRef || `TRF-${selectedTransferForReceiving.slice(-6).toUpperCase()}`}
+                              </p>
+                              <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase border ${transferType.color}`}>
+                                {transferType.label}
+                              </span>
+                            </div>
+                            <p className="text-xs text-gray-400">{transferReceivingItems.length} items to verify</p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="font-bold text-white">Receiving: {selectedTransferForReceiving.slice(0, 12)}...</p>
-                          <p className="text-xs text-gray-400">{transferReceivingItems.length} items to verify</p>
+                        <button
+                          onClick={() => {
+                            setSelectedTransferForReceiving(null);
+                            setTransferReceivingItems([]);
+                          }}
+                          className="px-3 py-1.5 bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white text-sm font-bold rounded-lg transition-colors border border-white/10"
+                        >
+                          ← Back to List
+                        </button>
+                      </div>
+
+                      {/* Details Grid */}
+                      <div className="p-4 grid grid-cols-2 gap-4">
+                        {/* Source */}
+                        <div className="flex items-start gap-3">
+                          <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center mt-0.5">
+                            <Archive size={14} className="text-blue-400" />
+                          </div>
+                          <div>
+                            <p className="text-[10px] text-gray-500 uppercase font-bold">Source Warehouse</p>
+                            <p className="text-sm font-bold text-white">{sourceSite?.name || 'Central Warehouse'}</p>
+                            {sourceSite?.address && <p className="text-xs text-gray-500">{sourceSite.address}</p>}
+                          </div>
+                        </div>
+
+                        {/* Driver */}
+                        <div className="flex items-start gap-3">
+                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center mt-0.5 ${driver ? 'bg-cyber-primary/10' : 'bg-gray-500/10'}`}>
+                            <Truck size={14} className={driver ? 'text-cyber-primary' : 'text-gray-500'} />
+                          </div>
+                          <div>
+                            <p className="text-[10px] text-gray-500 uppercase font-bold">Delivery Driver</p>
+                            {driver ? (
+                              <>
+                                <div className="flex items-center gap-2">
+                                  <p className="text-sm font-bold text-white">{driver.name}</p>
+                                  <span className={`text-[10px] px-1.5 py-0.5 rounded font-bold ${driver.driverType === 'internal' ? 'bg-green-500/20 text-green-400' :
+                                    driver.driverType === 'subcontracted' ? 'bg-blue-500/20 text-blue-400' :
+                                      'bg-purple-500/20 text-purple-400'
+                                    }`}>
+                                    {driver.driverType === 'internal' ? 'Staff' :
+                                      driver.driverType === 'subcontracted' ? 'Contract' :
+                                        driver.driverType ? 'Owner' : 'Staff'}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-2 text-xs text-gray-500">
+                                  {driver.vehicleType && <span>🚐 {driver.vehicleType}</span>}
+                                  {driver.phone && <span>📞 {driver.phone}</span>}
+                                </div>
+                              </>
+                            ) : (
+                              <p className="text-sm text-yellow-400">⏳ No driver assigned</p>
+                            )}
+                          </div>
                         </div>
                       </div>
+                    </div>
+
+                    {/* Line Items Table */}
+                    <div className="border border-white/10 rounded-xl overflow-hidden">
+                      <div className="bg-black/20 p-3 flex items-center gap-4 text-xs font-bold text-gray-400 uppercase border-b border-white/10">
+                        <span className="flex-1">Product</span>
+                        <span className="w-20 text-center">Expected</span>
+                        <span className="w-24 text-center">Received</span>
+                        <span className="w-28 text-center">Condition</span>
+                      </div>
+                      <div className="max-h-[300px] overflow-y-auto custom-scrollbar">
+                        {transferReceivingItems.map((item, idx) => {
+                          const hasDiscrepancy = item.receivedQty !== item.expectedQty || item.condition !== 'Good';
+                          return (
+                            <div
+                              key={idx}
+                              className={`p-3 flex items-center gap-4 border-b border-white/5 ${hasDiscrepancy ? 'bg-yellow-500/5' : ''
+                                }`}
+                            >
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-bold text-white truncate">{item.name}</p>
+                                <p className="text-xs text-gray-500">SKU: {item.sku}</p>
+                              </div>
+                              <div className="w-20 text-center">
+                                <span className="text-sm font-mono text-gray-300">{item.expectedQty}</span>
+                              </div>
+                              <div className="w-24 flex items-center justify-center gap-1">
+                                <button
+                                  onClick={() => handleUpdateTransferItem(idx, 'receivedQty', Math.max(0, item.receivedQty - 1))}
+                                  className="w-6 h-6 rounded bg-white/10 hover:bg-white/20 text-white flex items-center justify-center"
+                                  aria-label="Decrease received quantity"
+                                >
+                                  <Minus size={12} />
+                                </button>
+                                <span className={`text-sm font-mono w-8 text-center ${item.receivedQty < item.expectedQty ? 'text-red-400' : 'text-green-400'
+                                  }`}>
+                                  {item.receivedQty}
+                                </span>
+                                <button
+                                  onClick={() => handleUpdateTransferItem(idx, 'receivedQty', item.receivedQty + 1)}
+                                  className="w-6 h-6 rounded bg-white/10 hover:bg-white/20 text-white flex items-center justify-center"
+                                  aria-label="Increase received quantity"
+                                >
+                                  <Plus size={12} />
+                                </button>
+                              </div>
+                              <div className="w-28">
+                                <select
+                                  value={item.condition}
+                                  onChange={(e) => handleUpdateTransferItem(idx, 'condition', e.target.value)}
+                                  className={`w-full px-2 py-1 rounded bg-black/30 border text-xs font-bold ${item.condition === 'Good'
+                                    ? 'border-green-500/30 text-green-400'
+                                    : item.condition === 'Damaged'
+                                      ? 'border-red-500/30 text-red-400'
+                                      : 'border-yellow-500/30 text-yellow-400'
+                                    }`}
+                                  aria-label="Item condition"
+                                  title="Select item condition"
+                                >
+                                  <option value="Good">✓ Good</option>
+                                  <option value="Damaged">⚠ Damaged</option>
+                                  <option value="Short">📉 Short</option>
+                                </select>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Discrepancy Summary */}
+                    {(() => {
+                      const discrepancies = transferReceivingItems.filter(
+                        item => item.receivedQty !== item.expectedQty || item.condition !== 'Good'
+                      );
+                      if (discrepancies.length === 0) return null;
+
+                      return (
+                        <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-4">
+                          <div className="flex items-center gap-2 mb-2">
+                            <AlertTriangle className="text-yellow-400" size={16} />
+                            <span className="font-bold text-yellow-400">Discrepancies Detected</span>
+                          </div>
+                          <div className="text-xs text-gray-300 space-y-1">
+                            {discrepancies.filter(d => d.receivedQty < d.expectedQty).length > 0 && (
+                              <p>• {discrepancies.filter(d => d.receivedQty < d.expectedQty).length} item(s) with quantity shortage</p>
+                            )}
+                            {discrepancies.filter(d => d.condition === 'Damaged').length > 0 && (
+                              <p>• {discrepancies.filter(d => d.condition === 'Damaged').length} item(s) marked as damaged</p>
+                            )}
+                            <p className="text-gray-500 mt-2">These will be flagged for warehouse review.</p>
+                          </div>
+                        </div>
+                      );
+                    })()}
+
+                    {/* Confirm Button */}
+                    <div className="flex gap-2 pt-2">
                       <button
                         onClick={() => {
                           setSelectedTransferForReceiving(null);
                           setTransferReceivingItems([]);
                         }}
-                        className="text-gray-400 hover:text-white text-sm"
+                        className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-white font-bold rounded-xl transition-colors"
                       >
-                        ← Back
+                        Cancel
+                      </button>
+                      <button
+                        onClick={handleConfirmTransferReceiving}
+                        disabled={isConfirmingReceive}
+                        className={`flex-1 py-3 font-bold rounded-xl transition-colors flex items-center justify-center gap-2 ${isConfirmingReceive
+                          ? 'bg-cyber-primary/50 text-black cursor-not-allowed'
+                          : 'bg-cyber-primary text-black hover:bg-cyber-accent shadow-lg shadow-cyber-primary/20'
+                          }`}
+                      >
+                        {isConfirmingReceive ? (
+                          <>
+                            <Loader2 size={20} className="animate-spin" />
+                            Processing...
+                          </>
+                        ) : (
+                          <>
+                            <CheckCircle size={20} />
+                            Confirm Receipt
+                          </>
+                        )}
                       </button>
                     </div>
-                  </div>
-
-                  {/* Line Items Table */}
-                  <div className="border border-white/10 rounded-xl overflow-hidden">
-                    <div className="bg-black/20 p-3 flex items-center gap-4 text-xs font-bold text-gray-400 uppercase border-b border-white/10">
-                      <span className="flex-1">Product</span>
-                      <span className="w-20 text-center">Expected</span>
-                      <span className="w-24 text-center">Received</span>
-                      <span className="w-28 text-center">Condition</span>
-                    </div>
-                    <div className="max-h-[300px] overflow-y-auto custom-scrollbar">
-                      {transferReceivingItems.map((item, idx) => {
-                        const hasDiscrepancy = item.receivedQty !== item.expectedQty || item.condition !== 'Good';
-                        return (
-                          <div
-                            key={idx}
-                            className={`p-3 flex items-center gap-4 border-b border-white/5 ${hasDiscrepancy ? 'bg-yellow-500/5' : ''
-                              }`}
-                          >
-                            <div className="flex-1 min-w-0">
-                              <p className="text-sm font-bold text-white truncate">{item.name}</p>
-                              <p className="text-xs text-gray-500">SKU: {item.sku}</p>
-                            </div>
-                            <div className="w-20 text-center">
-                              <span className="text-sm font-mono text-gray-300">{item.expectedQty}</span>
-                            </div>
-                            <div className="w-24 flex items-center justify-center gap-1">
-                              <button
-                                onClick={() => handleUpdateTransferItem(idx, 'receivedQty', Math.max(0, item.receivedQty - 1))}
-                                className="w-6 h-6 rounded bg-white/10 hover:bg-white/20 text-white flex items-center justify-center"
-                                aria-label="Decrease received quantity"
-                              >
-                                <Minus size={12} />
-                              </button>
-                              <span className={`text-sm font-mono w-8 text-center ${item.receivedQty < item.expectedQty ? 'text-red-400' : 'text-green-400'
-                                }`}>
-                                {item.receivedQty}
-                              </span>
-                              <button
-                                onClick={() => handleUpdateTransferItem(idx, 'receivedQty', item.receivedQty + 1)}
-                                className="w-6 h-6 rounded bg-white/10 hover:bg-white/20 text-white flex items-center justify-center"
-                                aria-label="Increase received quantity"
-                              >
-                                <Plus size={12} />
-                              </button>
-                            </div>
-                            <div className="w-28">
-                              <select
-                                value={item.condition}
-                                onChange={(e) => handleUpdateTransferItem(idx, 'condition', e.target.value)}
-                                className={`w-full px-2 py-1 rounded bg-black/30 border text-xs font-bold ${item.condition === 'Good'
-                                  ? 'border-green-500/30 text-green-400'
-                                  : item.condition === 'Damaged'
-                                    ? 'border-red-500/30 text-red-400'
-                                    : 'border-yellow-500/30 text-yellow-400'
-                                  }`}
-                                aria-label="Item condition"
-                                title="Select item condition"
-                              >
-                                <option value="Good">✓ Good</option>
-                                <option value="Damaged">⚠ Damaged</option>
-                                <option value="Short">📉 Short</option>
-                              </select>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  {/* Discrepancy Summary */}
-                  {(() => {
-                    const discrepancies = transferReceivingItems.filter(
-                      item => item.receivedQty !== item.expectedQty || item.condition !== 'Good'
-                    );
-                    if (discrepancies.length === 0) return null;
-
-                    return (
-                      <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-4">
-                        <div className="flex items-center gap-2 mb-2">
-                          <AlertTriangle className="text-yellow-400" size={16} />
-                          <span className="font-bold text-yellow-400">Discrepancies Detected</span>
-                        </div>
-                        <div className="text-xs text-gray-300 space-y-1">
-                          {discrepancies.filter(d => d.receivedQty < d.expectedQty).length > 0 && (
-                            <p>• {discrepancies.filter(d => d.receivedQty < d.expectedQty).length} item(s) with quantity shortage</p>
-                          )}
-                          {discrepancies.filter(d => d.condition === 'Damaged').length > 0 && (
-                            <p>• {discrepancies.filter(d => d.condition === 'Damaged').length} item(s) marked as damaged</p>
-                          )}
-                          <p className="text-gray-500 mt-2">These will be flagged for warehouse review.</p>
-                        </div>
-                      </div>
-                    );
-                  })()}
-
-                  {/* Confirm Button */}
-                  <div className="flex gap-2 pt-2">
-                    <button
-                      onClick={() => {
-                        setSelectedTransferForReceiving(null);
-                        setTransferReceivingItems([]);
-                      }}
-                      className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-white font-bold rounded-xl transition-colors"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      onClick={handleConfirmTransferReceiving}
-                      disabled={isConfirmingReceive}
-                      className={`flex-1 py-3 font-bold rounded-xl transition-colors flex items-center justify-center gap-2 ${isConfirmingReceive
-                        ? 'bg-cyber-primary/50 text-black cursor-not-allowed'
-                        : 'bg-cyber-primary text-black hover:bg-cyber-accent shadow-lg shadow-cyber-primary/20'
-                        }`}
-                    >
-                      {isConfirmingReceive ? (
-                        <>
-                          <Loader2 size={20} className="animate-spin" />
-                          Processing...
-                        </>
-                      ) : (
-                        <>
-                          <CheckCircle size={20} />
-                          Confirm Receipt
-                        </>
-                      )}
-                    </button>
-                  </div>
-                </>
-              )}
+                  </>
+                )
+              })()}
             </div>
           )}
 

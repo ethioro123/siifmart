@@ -1724,7 +1724,9 @@ export const wmsJobsService = {
             .order('created_at', { ascending: false });
 
         if (siteId) {
-            query = query.eq('site_id', siteId);
+            // Get jobs where site is source (site_id) OR destination (dest_site_id)
+            // This ensures stores see incoming transfers destined for them
+            query = query.or(`site_id.eq.${siteId},dest_site_id.eq.${siteId}`);
         }
 
         const { data, error } = await query;
@@ -1918,8 +1920,10 @@ export const transfersService = {
             sourceSiteId: t.source_site_id,
             destSiteId: t.dest_site_id,
             status: t.status,
+            transferStatus: t.status, // Map status to transferStatus for POS compatibility
             date: t.transfer_date,
-            items: t.items,
+            items: t.items || [],
+            createdAt: t.created_at,
             sourceSiteName: 'Loading...',
             destSiteName: 'Loading...'
         }));

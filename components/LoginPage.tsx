@@ -188,8 +188,163 @@ export default function LoginPage() {
           </button>
         </div>
 
+        {/* Quick Login for Development - Comprehensive */}
+        {isLogin && (
+          <div className="mt-6 pt-6 border-t border-white/10">
+            <p className="text-[10px] text-gray-500 uppercase tracking-widest text-center mb-3">Quick Access</p>
+            <div className="max-h-[280px] overflow-y-auto pr-1 space-y-4 custom-scrollbar">
 
+              {/* HQ / Admin Roles */}
+              <div>
+                <p className="text-[9px] text-yellow-400 uppercase tracking-widest mb-2 font-bold">🏢 Central Operations</p>
+                <div className="grid grid-cols-3 gap-1.5">
+                  {[
+                    { email: 'shukri.kamal@siifmart.com', role: 'CEO', icon: '👑', color: 'from-yellow-500/30 to-amber-600/30 border-yellow-500/40' },
+                    { email: 'sara.tesfaye@siifmart.com', role: 'Admin', icon: '⚙️', color: 'from-purple-500/20 to-purple-600/20 border-purple-500/30' },
+                    { email: 'tigist.alemayehu@siifmart.com', role: 'HR', icon: '👔', color: 'from-pink-500/20 to-pink-600/20 border-pink-500/30' },
+                    { email: 'rahel.tesfaye@siifmart.com', role: 'Finance', icon: '💰', color: 'from-emerald-500/20 to-emerald-600/20 border-emerald-500/30' },
+                    { email: 'yohannes.bekele@siifmart.com', role: 'Procurement', icon: '📦', color: 'from-amber-500/20 to-amber-600/20 border-amber-500/30' },
+                    { email: 'dawit.haile@siifmart.com', role: 'Auditor', icon: '🔍', color: 'from-red-500/20 to-red-600/20 border-red-500/30' },
+                    { email: 'selamawit.girma@siifmart.com', role: 'CS Mgr', icon: '🎧', color: 'from-violet-500/20 to-violet-600/20 border-violet-500/30' },
+                    { email: 'elias.kebede@siifmart.com', role: 'IT', icon: '💻', color: 'from-blue-500/20 to-blue-600/20 border-blue-500/30' },
+                  ].map((acc) => (
+                    <button
+                      key={acc.email}
+                      type="button"
+                      onClick={async () => {
+                        setEmail(acc.email);
+                        setPassword('Oromo123');
+                        setError('');
+                        setLoading(true);
+                        try {
+                          const success = await login(acc.email, 'Oromo123');
+                          if (!success) setError(`Login failed: ${acc.role}`);
+                        } catch (err: any) {
+                          setError(err.message || 'Login failed');
+                        } finally {
+                          setLoading(false);
+                        }
+                      }}
+                      disabled={loading}
+                      className={`bg-gradient-to-r ${acc.color} border text-white font-bold py-1.5 px-2 rounded-lg hover:opacity-80 transition-all flex items-center justify-center gap-1 disabled:opacity-50 text-[10px]`}
+                    >
+                      <span>{acc.icon}</span>
+                      <span className="truncate">{acc.role}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
 
+              {/* Warehouse WH-001 */}
+              <div>
+                <p className="text-[9px] text-violet-400 uppercase tracking-widest mb-2 font-bold">🏭 WH-001 Main Hub</p>
+                <div className="grid grid-cols-3 gap-1.5">
+                  {[
+                    { email: 'lensa.merga@siifmart.com', role: 'WH Mgr', icon: '🏭', color: 'from-violet-500/20 to-violet-600/20 border-violet-500/30' },
+                    { email: 'betelhem.bekele@siifmart.com', role: 'Dispatch', icon: '📤', color: 'from-purple-500/20 to-purple-600/20 border-purple-500/30' },
+                    { email: 'hanna.mulugeta@siifmart.com', role: 'Inventory', icon: '📊', color: 'from-pink-500/20 to-pink-600/20 border-pink-500/30' },
+                    { email: 'meron.yilma@siifmart.com', role: 'Picker 1', icon: '🛒', color: 'from-orange-500/20 to-orange-600/20 border-orange-500/30' },
+                    { email: 'betelhem.yilma@siifmart.com', role: 'Picker 2', icon: '🛒', color: 'from-orange-500/20 to-orange-600/20 border-orange-500/30' },
+                    { email: 'helen.getachew@siifmart.com', role: 'Picker 3', icon: '🛒', color: 'from-orange-500/20 to-orange-600/20 border-orange-500/30' },
+                    { email: 'mulugeta.tadesse@siifmart.com', role: 'Driver', icon: '🚚', color: 'from-teal-500/20 to-teal-600/20 border-teal-500/30' },
+                  ].map((acc) => (
+                    <button
+                      key={acc.email}
+                      type="button"
+                      onClick={async () => {
+                        setEmail(acc.email);
+                        setPassword('Oromo123');
+                        setError('');
+                        setLoading(true);
+                        try {
+                          const success = await login(acc.email, 'Oromo123');
+                          if (!success) setError(`Login failed: ${acc.role}`);
+                        } catch (err: any) {
+                          setError(err.message || 'Login failed');
+                        } finally {
+                          setLoading(false);
+                        }
+                      }}
+                      disabled={loading}
+                      className={`bg-gradient-to-r ${acc.color} border text-white font-bold py-1.5 px-2 rounded-lg hover:opacity-80 transition-all flex items-center justify-center gap-1 disabled:opacity-50 text-[10px]`}
+                    >
+                      <span>{acc.icon}</span>
+                      <span className="truncate">{acc.role}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Stores */}
+              {[
+                {
+                  site: 'ST-001 Bole', color: 'text-cyan-400', workers: [
+                    { email: 'abdi.rahman@siifmart.com', role: 'Manager', icon: '👔' },
+                    { email: 'sara.bekele@siifmart.com', role: 'Supervisor', icon: '👁️' },
+                    { email: 'tomas.tesfaye@siifmart.com', role: 'Cashier', icon: '💵' },
+                  ]
+                },
+                {
+                  site: 'ST-002 Ambo', color: 'text-green-400', workers: [
+                    { email: 'sara.mohammed@siifmart.com', role: 'Manager', icon: '👔' },
+                    { email: 'helen.kebede@siifmart.com', role: 'Supervisor', icon: '👁️' },
+                  ]
+                },
+                {
+                  site: 'ST-003 Adama', color: 'text-pink-400', workers: [
+                    { email: 'hanna.girma@siifmart.com', role: 'Manager', icon: '👔' },
+                  ]
+                },
+                {
+                  site: 'ST-004 Jimma', color: 'text-sky-400', workers: [
+                    { email: 'ahmed.hassan@siifmart.com', role: 'Manager', icon: '👔' },
+                  ]
+                },
+                {
+                  site: 'ST-005 Harar', color: 'text-red-400', workers: [
+                    { email: 'solomon.tesfaye@siifmart.com', role: 'Manager', icon: '👔' },
+                  ]
+                },
+                {
+                  site: 'ST-006 Dire Dawa', color: 'text-orange-400', workers: [
+                    { email: 'fatima.yusuf@siifmart.com', role: 'Manager', icon: '👔' },
+                  ]
+                },
+              ].map((store) => (
+                <div key={store.site}>
+                  <p className={`text-[9px] ${store.color} uppercase tracking-widest mb-2 font-bold`}>🏪 {store.site}</p>
+                  <div className="grid grid-cols-3 gap-1.5">
+                    {store.workers.map((acc) => (
+                      <button
+                        key={acc.email}
+                        type="button"
+                        onClick={async () => {
+                          setEmail(acc.email);
+                          setPassword('Oromo123');
+                          setError('');
+                          setLoading(true);
+                          try {
+                            const success = await login(acc.email, 'Oromo123');
+                            if (!success) setError(`Login failed: ${acc.role}`);
+                          } catch (err: any) {
+                            setError(err.message || 'Login failed');
+                          } finally {
+                            setLoading(false);
+                          }
+                        }}
+                        disabled={loading}
+                        className="bg-gradient-to-r from-white/5 to-white/10 border border-white/20 text-white font-bold py-1.5 px-2 rounded-lg hover:opacity-80 transition-all flex items-center justify-center gap-1 disabled:opacity-50 text-[10px]"
+                      >
+                        <span>{acc.icon}</span>
+                        <span className="truncate">{acc.role}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className="mt-8 text-center">
           <p className="text-[10px] text-gray-600 font-mono">SECURE CONNECTION • v2.5.0 • ENCRYPTED</p>

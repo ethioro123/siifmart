@@ -871,6 +871,12 @@ export interface Employee {
   attendanceRate?: number;
   address?: string;
   emergencyContact?: string;
+  // Driver-specific fields
+  driverType?: 'internal' | 'subcontracted' | 'owner_operator';
+  vehicleType?: string; // e.g., "Van", "Truck", "Motorcycle"
+  vehiclePlate?: string;
+  licenseNumber?: string;
+  licenseExpiry?: string;
 }
 
 export interface CartItem extends Product {

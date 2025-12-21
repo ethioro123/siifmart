@@ -36,7 +36,7 @@ type OpTab = 'DOCKS' | 'RECEIVE' | 'PUTAWAY' | 'PICK' | 'PACK' | 'REPLENISH' | '
 
 // Tab-level role permissions-defines which roles can access which tabs
 const TAB_PERMISSIONS: Record<OpTab, string[]> = {
-    DOCKS: ['super_admin', 'warehouse_manager', 'dispatcher'],
+    DOCKS: ['super_admin', 'warehouse_manager', 'dispatcher', 'driver'],
     RECEIVE: ['super_admin', 'warehouse_manager', 'dispatcher', 'inventory_specialist'],
     PUTAWAY: ['super_admin', 'warehouse_manager', 'dispatcher', 'picker', 'inventory_specialist'],
     PICK: ['super_admin', 'warehouse_manager', 'dispatcher', 'picker'],
@@ -1916,87 +1916,233 @@ export default function WarehouseOperations() {
                                             </div>
                                             {t('warehouse.docks.driverDashboard')}
                                         </h2>
-                                        <p className="text-sm text-gray-400 mt-1">{t('warehouse.docks.welcome').replace('{name}', user?.name || 'Driver')}</p>
+                                        <div className="flex items-center gap-2 mt-1">
+                                            <p className="text-sm text-gray-400">{t('warehouse.docks.welcome').replace('{name}', user?.name || 'Driver')}</p>
+                                            {/* Show driver type badge */}
+                                            {(() => {
+                                                const currentEmployee = employees.find(e => e.email === user?.email);
+                                                const driverType = currentEmployee?.driverType || 'internal';
+                                                return (
+                                                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase ${driverType === 'internal' ? 'bg-green-500/20 text-green-400 border border-green-500/30' :
+                                                        driverType === 'subcontracted' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' :
+                                                            'bg-purple-500/20 text-purple-400 border border-purple-500/30'
+                                                        }`}>
+                                                        {driverType === 'internal' ? '🏢 Staff' : driverType === 'subcontracted' ? '📋 Contract' : '🚗 Owner-Op'}
+                                                    </span>
+                                                );
+                                            })()}
+                                        </div>
                                     </div>
                                     <div className="text-right hidden md:block">
-                                        <p className="text-2xl font-mono font-bold text-cyber-primary">08:42 AM</p>
-                                        <p className="text-xs text-gray-500">{t('warehouse.docks.shiftStarted').replace('{time}', '06:00 AM')}</p>
+                                        <p className="text-2xl font-mono font-bold text-cyber-primary">{new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                                        <p className="text-xs text-gray-500">{new Date().toLocaleDateString()}</p>
                                     </div>
                                 </div>
 
-                                <div className="p-4 md:p-6 grid grid-cols-1 lg:grid-cols-3 gap-6 overflow-y-auto">
-                                    {/* Left Column: Current Route */}
+                                <div className="p-4 md:p-6 grid grid-cols-1 lg:grid-cols-3 gap-6 overflow-y-auto flex-1">
+                                    {/* Left Column: Available Jobs & Current Route */}
                                     <div className="lg:col-span-2 space-y-6">
-                                        {/* Current Active Delivery */}
-                                        <div className="bg-gradient-to-br from-blue-900/40 to-black border border-blue-500/30 rounded-2xl p-6 relative overflow-hidden group">
-                                            <div className="absolute top-0 right-0 p-4 opacity-50">
-                                                <MapPin size={100} className="text-blue-500/20" />
-                                            </div>
-                                            <div className="relative z-10">
-                                                <div className="flex items-center gap-2 mb-4">
-                                                    <span className="animate-pulse w-3 h-3 rounded-full bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]"></span>
-                                                    <span className="text-green-400 font-bold text-sm tracking-wider">{t('warehouse.docks.enRoute')}</span>
-                                                </div>
-                                                <h3 className="text-3xl font-bold text-white mb-2">Downtown Store #104</h3>
-                                                <p className="text-xl text-gray-300 mb-6">123 Cyber Avenue, Neo-Tokyo</p>
 
-                                                <div className="grid grid-cols-2 gap-4 mb-6">
-                                                    <div className="bg-black/40 rounded-xl p-3 border border-white/10">
-                                                        <p className="text-xs text-gray-500 uppercase">{t('warehouse.docks.distance')}</p>
-                                                        <p className="text-lg font-mono font-bold text-white">4.2 km</p>
+                                        {/* AVAILABLE JOBS - Jobs drivers can claim */}
+                                        {(() => {
+                                            const availableDispatchJobs = filteredJobs.filter(j =>
+                                                j.type === 'DISPATCH' &&
+                                                j.status === 'Pending' &&
+                                                !j.assignedTo
+                                            );
+                                            const currentEmployee = employees.find(e => e.email === user?.email);
+                                            const isInternalDriver = !currentEmployee?.driverType || currentEmployee?.driverType === 'internal';
+
+                                            return (
+                                                <div>
+                                                    <div className="flex items-center justify-between mb-4">
+                                                        <h4 className="font-bold text-white text-lg flex items-center gap-2">
+                                                            <div className="w-3 h-3 rounded-full bg-yellow-400 animate-pulse"></div>
+                                                            Available Jobs
+                                                            <span className="text-xs text-gray-500 bg-white/5 px-2 py-0.5 rounded-full">{availableDispatchJobs.length}</span>
+                                                        </h4>
+                                                        {!isInternalDriver && (
+                                                            <span className="text-xs text-orange-400 bg-orange-500/10 px-2 py-1 rounded border border-orange-500/30">
+                                                                ⚠️ Requires Manager Approval
+                                                            </span>
+                                                        )}
                                                     </div>
-                                                    <div className="bg-black/40 rounded-xl p-3 border border-white/10">
-                                                        <p className="text-xs text-gray-500 uppercase">{t('warehouse.docks.eta')}</p>
-                                                        <p className="text-lg font-mono font-bold text-white">14 mins</p>
-                                                    </div>
-                                                    <div className="bg-black/40 rounded-xl p-3 border border-white/10">
-                                                        <p className="text-xs text-gray-500 uppercase">{t('warehouse.docks.items')}</p>
-                                                        <p className="text-lg font-mono font-bold text-white">124 Pcs</p>
-                                                    </div>
-                                                    <div className="bg-black/40 rounded-xl p-3 border border-white/10">
-                                                        <p className="text-xs text-gray-500 uppercase">{t('warehouse.docks.orderRef')}</p>
-                                                        <p className="text-lg font-mono font-bold text-white">#TR-8821</p>
+
+                                                    {availableDispatchJobs.length === 0 ? (
+                                                        <div className="bg-black/20 rounded-xl p-8 border border-white/5 text-center">
+                                                            <CheckCircle size={40} className="text-gray-600 mx-auto mb-3" />
+                                                            <p className="text-gray-400">No available dispatch jobs</p>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="space-y-3">
+                                                            {availableDispatchJobs.slice(0, 5).map(job => {
+                                                                const destSite = sites.find(s => s.id === job.destSiteId);
+                                                                const sourceSite = sites.find(s => s.id === job.sourceSiteId || s.id === job.siteId);
+
+                                                                return (
+                                                                    <div key={job.id} className="bg-gradient-to-r from-yellow-900/20 to-black border border-yellow-500/30 rounded-xl p-4 hover:border-yellow-500/50 transition-all">
+                                                                        <div className="flex justify-between items-start mb-3">
+                                                                            <div>
+                                                                                <div className="flex items-center gap-2 mb-1">
+                                                                                    <span className="text-white font-mono font-bold">{formatJobId(job)}</span>
+                                                                                    <span className={`text-[10px] px-2 py-0.5 rounded font-bold ${job.priority === 'Critical' ? 'bg-red-500/20 text-red-400' :
+                                                                                        job.priority === 'High' ? 'bg-orange-500/20 text-orange-400' :
+                                                                                            'bg-blue-500/20 text-blue-400'
+                                                                                        }`}>{job.priority}</span>
+                                                                                </div>
+                                                                                <div className="flex items-center gap-2 text-sm text-gray-400">
+                                                                                    <MapPin size={12} className="text-green-400" />
+                                                                                    <span>{sourceSite?.name || 'Warehouse'}</span>
+                                                                                    <ArrowRight size={12} />
+                                                                                    <MapPin size={12} className="text-blue-400" />
+                                                                                    <span className="text-white font-medium">{destSite?.name || 'Destination'}</span>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div className="text-right">
+                                                                                <p className="text-lg font-bold text-white">{job.items || job.lineItems?.length || 0}</p>
+                                                                                <p className="text-xs text-gray-500">items</p>
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <button
+                                                                            onClick={async () => {
+                                                                                if (!currentEmployee) {
+                                                                                    addNotification('alert', 'Driver profile not found');
+                                                                                    return;
+                                                                                }
+                                                                                try {
+                                                                                    if (isInternalDriver) {
+                                                                                        // Internal drivers: Claim immediately
+                                                                                        await wmsJobsService.update(job.id, {
+                                                                                            assignedTo: currentEmployee.id,
+                                                                                            status: 'In-Progress'
+                                                                                        });
+                                                                                        await refreshData();
+                                                                                        addNotification('success', `Job ${formatJobId(job)} claimed! Starting delivery.`);
+                                                                                    } else {
+                                                                                        // Non-internal drivers: Request approval
+                                                                                        await wmsJobsService.update(job.id, {
+                                                                                            assignedTo: currentEmployee.id,
+                                                                                            status: 'Pending' // Keep pending until approved
+                                                                                        });
+                                                                                        await refreshData();
+                                                                                        addNotification('info', `Job ${formatJobId(job)} requested. Awaiting manager approval.`);
+                                                                                    }
+                                                                                } catch (err) {
+                                                                                    console.error('Failed to claim job:', err);
+                                                                                    addNotification('alert', 'Failed to claim job');
+                                                                                }
+                                                                            }}
+                                                                            className={`w-full py-3 font-bold rounded-lg transition-all flex items-center justify-center gap-2 ${isInternalDriver
+                                                                                ? 'bg-cyber-primary text-black hover:bg-cyber-accent'
+                                                                                : 'bg-orange-500/20 text-orange-400 border border-orange-500/40 hover:bg-orange-500/30'
+                                                                                }`}
+                                                                        >
+                                                                            <Truck size={18} />
+                                                                            {isInternalDriver ? 'Claim Job' : 'Request Job (Needs Approval)'}
+                                                                        </button>
+                                                                    </div>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            );
+                                        })()}
+
+                                        {/* MY ACTIVE DELIVERIES */}
+                                        {(() => {
+                                            const currentEmployee = employees.find(e => e.email === user?.email);
+                                            const myJobs = filteredJobs.filter(j =>
+                                                j.type === 'DISPATCH' &&
+                                                j.assignedTo === currentEmployee?.id &&
+                                                j.status !== 'Completed'
+                                            );
+
+                                            if (myJobs.length === 0) return null;
+
+                                            return (
+                                                <div>
+                                                    <h4 className="font-bold text-white mb-4 text-lg flex items-center gap-2">
+                                                        <div className="w-3 h-3 rounded-full bg-blue-400"></div>
+                                                        My Active Deliveries
+                                                        <span className="text-xs text-gray-500 bg-white/5 px-2 py-0.5 rounded-full">{myJobs.length}</span>
+                                                    </h4>
+
+                                                    <div className="space-y-4">
+                                                        {myJobs.map((job, idx) => {
+                                                            const destSite = sites.find(s => s.id === job.destSiteId);
+                                                            const isFirst = idx === 0;
+
+                                                            return (
+                                                                <div key={job.id} className={`rounded-xl p-4 relative overflow-hidden ${isFirst
+                                                                    ? 'bg-gradient-to-br from-blue-900/40 to-black border-2 border-blue-500/50'
+                                                                    : 'bg-black/20 border border-white/5'
+                                                                    }`}>
+                                                                    {isFirst && (
+                                                                        <div className="absolute top-0 right-0 p-4 opacity-30">
+                                                                            <MapPin size={80} className="text-blue-500/30" />
+                                                                        </div>
+                                                                    )}
+                                                                    <div className="relative z-10">
+                                                                        <div className="flex items-center justify-between mb-3">
+                                                                            <div className="flex items-center gap-2">
+                                                                                {isFirst && (
+                                                                                    <span className="animate-pulse w-3 h-3 rounded-full bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]"></span>
+                                                                                )}
+                                                                                <span className={`font-bold ${isFirst ? 'text-green-400' : 'text-gray-400'}`}>
+                                                                                    {isFirst ? t('warehouse.docks.enRoute') : `Stop ${idx + 1}`}
+                                                                                </span>
+                                                                            </div>
+                                                                            <span className="text-xs text-gray-500 font-mono">{formatJobId(job)}</span>
+                                                                        </div>
+
+                                                                        <h3 className={`font-bold mb-2 ${isFirst ? 'text-2xl text-white' : 'text-lg text-gray-300'}`}>
+                                                                            {destSite?.name || 'Destination'}
+                                                                        </h3>
+                                                                        <p className="text-sm text-gray-400 mb-4">{destSite?.address || 'Address not specified'}</p>
+
+                                                                        <div className="flex gap-3">
+                                                                            {isFirst && (
+                                                                                <>
+                                                                                    <button className="flex-1 py-3 bg-cyber-primary text-black font-bold rounded-xl hover:bg-cyber-accent transition-colors flex items-center justify-center gap-2">
+                                                                                        <Navigation size={18} />
+                                                                                        Navigate
+                                                                                    </button>
+                                                                                    <button
+                                                                                        onClick={async () => {
+                                                                                            try {
+                                                                                                await wmsJobsService.update(job.id, {
+                                                                                                    status: 'Completed',
+                                                                                                    transferStatus: 'Delivered'
+                                                                                                });
+                                                                                                await refreshData();
+                                                                                                addNotification('success', `Delivery to ${destSite?.name} completed!`);
+                                                                                            } catch (err) {
+                                                                                                addNotification('alert', 'Failed to mark as delivered');
+                                                                                            }
+                                                                                        }}
+                                                                                        className="flex-1 py-3 bg-green-500/20 text-green-400 border border-green-500/40 font-bold rounded-xl hover:bg-green-500/30 transition-colors flex items-center justify-center gap-2"
+                                                                                    >
+                                                                                        <CheckCircle size={18} />
+                                                                                        Delivered
+                                                                                    </button>
+                                                                                </>
+                                                                            )}
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            );
+                                                        })}
                                                     </div>
                                                 </div>
-
-                                                <div className="flex gap-4">
-                                                    <button className="flex-1 py-4 bg-cyber-primary text-black font-bold rounded-xl hover:bg-cyber-accent transition-colors flex items-center justify-center gap-2 shadow-lg shadow-cyber-primary/20">
-                                                        <Navigation size={20} />
-                                                        {t('warehouse.docks.startNavigation')}
-                                                    </button>
-                                                    <button className="flex-1 py-4 bg-white/10 text-white font-bold rounded-xl hover:bg-white/20 transition-colors flex items-center justify-center gap-2 border border-white/10">
-                                                        <Phone size={20} />
-                                                        {t('warehouse.docks.callStore')}
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        {/* Upcoming Stops */}
-                                        <div>
-                                            <h4 className="font-bold text-white mb-4 text-lg">Upcoming Stops</h4>
-                                            <div className="space-y-3">
-                                                {[1, 2].map((stop, idx) => (
-                                                    <div key={stop} className="bg-black/20 border border-white/5 rounded-xl p-4 flex items-center gap-4 hover:border-white/20 transition-colors">
-                                                        <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center font-bold text-gray-400">
-                                                            {idx + 2}
-                                                        </div>
-                                                        <div className="flex-1">
-                                                            <p className="font-bold text-white">Northside Branch</p>
-                                                            <p className="text-sm text-gray-500">Expected: 11:30 AM</p>
-                                                        </div>
-                                                        <div className="text-right">
-                                                            <span className="text-xs bg-white/5 text-gray-400 px-2 py-1 rounded">2 Orders</span>
-                                                        </div>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </div>
+                                            );
+                                        })()}
                                     </div>
 
-                                    {/* Right Column: Tools */}
+                                    {/* Right Column: Stats & Quick Actions */}
                                     <div className="space-y-6">
-                                        {/* Actions */}
+                                        {/* Quick Actions */}
                                         <div className="bg-black/20 border border-white/5 rounded-2xl p-5">
                                             <h4 className="font-bold text-white mb-4">Quick Actions</h4>
                                             <div className="grid grid-cols-2 gap-3">
@@ -2014,35 +2160,51 @@ export default function WarehouseOperations() {
                                                 </button>
                                                 <button className="aspect-square bg-green-500/10 border border-green-500/30 rounded-xl flex flex-col items-center justify-center gap-2 hover:bg-green-500/20 transition-colors group">
                                                     <CheckCircle size={32} className="text-green-400 group-hover:scale-110 transition-transform" />
-                                                    <span className="text-xs font-bold text-green-100">Complete Shift</span>
+                                                    <span className="text-xs font-bold text-green-100">End Shift</span>
                                                 </button>
                                             </div>
                                         </div>
 
-                                        {/* Delivery Stats */}
-                                        <div className="bg-black/20 border border-white/5 rounded-2xl p-5">
-                                            <h4 className="font-bold text-white mb-4">Today's Performance</h4>
-                                            <div className="space-y-4">
-                                                <div>
-                                                    <div className="flex justify-between text-sm mb-1">
-                                                        <span className="text-gray-400">On-Time Rate</span>
-                                                        <span className="text-green-400 font-bold">98%</span>
-                                                    </div>
-                                                    <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
-                                                        <div className="w-[98%] h-full bg-green-500 rounded-full"></div>
+                                        {/* Today's Stats */}
+                                        {(() => {
+                                            const currentEmployee = employees.find(e => e.email === user?.email);
+                                            const myCompletedToday = filteredJobs.filter(j =>
+                                                j.type === 'DISPATCH' &&
+                                                j.assignedTo === currentEmployee?.id &&
+                                                j.status === 'Completed'
+                                            ).length;
+                                            const myActiveJobs = filteredJobs.filter(j =>
+                                                j.type === 'DISPATCH' &&
+                                                j.assignedTo === currentEmployee?.id &&
+                                                j.status !== 'Completed'
+                                            ).length;
+
+                                            return (
+                                                <div className="bg-black/20 border border-white/5 rounded-2xl p-5">
+                                                    <h4 className="font-bold text-white mb-4">Today's Performance</h4>
+                                                    <div className="space-y-4">
+                                                        <div className="flex justify-between items-center">
+                                                            <span className="text-gray-400">Completed</span>
+                                                            <span className="text-2xl font-bold text-green-400">{myCompletedToday}</span>
+                                                        </div>
+                                                        <div className="flex justify-between items-center">
+                                                            <span className="text-gray-400">Active</span>
+                                                            <span className="text-2xl font-bold text-blue-400">{myActiveJobs}</span>
+                                                        </div>
+                                                        <div className="h-px bg-white/10"></div>
+                                                        <div className="flex justify-between items-center">
+                                                            <span className="text-gray-400">Total Items</span>
+                                                            <span className="text-lg font-bold text-white">
+                                                                {filteredJobs
+                                                                    .filter(j => j.type === 'DISPATCH' && j.assignedTo === currentEmployee?.id)
+                                                                    .reduce((sum, j) => sum + (j.items || j.lineItems?.length || 0), 0)
+                                                                }
+                                                            </span>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                                <div>
-                                                    <div className="flex justify-between text-sm mb-1">
-                                                        <span className="text-gray-400">Deliveries Completed</span>
-                                                        <span className="text-white font-bold">12/18</span>
-                                                    </div>
-                                                    <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
-                                                        <div className="w-[66%] h-full bg-blue-500 rounded-full"></div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
+                                            );
+                                        })()}
                                     </div>
                                 </div>
                             </div>
@@ -3309,11 +3471,43 @@ export default function WarehouseOperations() {
 
                                                     {/* Completion Actions */}
                                                     <div className="mt-auto">
+                                                        {/* Label Size Selection - Same as Reprint */}
+                                                        <div className="mb-3">
+                                                            <label className="text-xs text-gray-500 font-bold uppercase mb-2 block">Label Size</label>
+                                                            <div className="grid grid-cols-4 gap-2">
+                                                                {(['TINY', 'SMALL', 'MEDIUM', 'LARGE'] as const).map(s => (
+                                                                    <button
+                                                                        key={s}
+                                                                        onClick={() => setReprintSize(s)}
+                                                                        className={`py-2 px-2 rounded-lg text-xs font-bold transition-all ${reprintSize === s
+                                                                            ? 'bg-cyber-primary text-black'
+                                                                            : 'bg-white/5 text-white hover:bg-white/10 border border-white/10'
+                                                                            }`}
+                                                                    >
+                                                                        {s}
+                                                                    </button>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+
+                                                        {/* Label Format Selection - Same as Reprint */}
                                                         <div className="mb-4">
-                                                            <label className="text-xs text-gray-500 font-bold uppercase mb-2 block">Label Format</label>
-                                                            <div className="flex bg-black/30 rounded-lg p-1">
-                                                                <button onClick={() => setLabelFormat('BARCODE')} className={`flex-1 py-1.5 text-xs rounded font-bold ${labelFormat === 'BARCODE' ? 'bg-white/20 text-white' : 'text-gray-500'} `}>Barcode</button>
-                                                                <button onClick={() => setLabelFormat('QR')} className={`flex-1 py-1.5 text-xs rounded font-bold ${labelFormat === 'QR' ? 'bg-white/20 text-white' : 'text-gray-500'} `}>QR Code</button>
+                                                            <label className="text-xs text-gray-500 font-bold uppercase mb-2 block">Code Format</label>
+                                                            <div className="grid grid-cols-3 gap-2">
+                                                                {(['QR', 'Barcode', 'Both'] as const).map(f => (
+                                                                    <button
+                                                                        key={f}
+                                                                        onClick={() => setReprintFormat(f)}
+                                                                        className={`py-2 px-2 rounded-lg text-xs font-bold transition-all ${reprintFormat === f
+                                                                            ? 'bg-cyber-primary text-black'
+                                                                            : 'bg-white/5 text-white hover:bg-white/10 border border-white/10'
+                                                                            }`}
+                                                                    >
+                                                                        {f === 'QR' && '📱 QR'}
+                                                                        {f === 'Barcode' && '▮▯▮ Barcode'}
+                                                                        {f === 'Both' && '📱+▮ Both'}
+                                                                    </button>
+                                                                ))}
                                                             </div>
                                                         </div>
 
@@ -3417,90 +3611,145 @@ export default function WarehouseOperations() {
                                         );
                                     }
 
-                                    // Default View: JOB GRID (Flat Matte)
-                                    if (packJobs.length === 0) {
-                                        return (
-                                            <div className="h-full flex flex-col items-center justify-center text-center">
-                                                <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mb-4">
-                                                    <CheckCircle size={40} className="text-gray-600" />
-                                                </div>
-                                                <h3 className="text-xl font-bold text-white mb-2">All Caught Up</h3>
-                                                <p className="text-gray-400">No active packing jobs found.</p>
-                                            </div>
-                                        );
-                                    }
-
                                     return (
-                                        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 pb-6">
-                                            {packJobs.map(job => {
-                                                const totalItems = job.lineItems?.length || 0;
-                                                const destSite = sites.find(s => s.id === job.destSiteId);
+                                        <div className="space-y-6 pb-6 overflow-y-auto h-full">
+                                            {/* ACTIVE JOBS SECTION */}
+                                            {(() => {
+                                                const activeJobs = packJobs.filter(j => j.status !== 'Completed');
+                                                if (activeJobs.length > 0) {
+                                                    return (
+                                                        <div>
+                                                            <div className="flex items-center gap-2 mb-4">
+                                                                <div className="w-3 h-3 rounded-full bg-yellow-400 animate-pulse"></div>
+                                                                <h3 className="text-lg font-bold text-white">Active Jobs</h3>
+                                                                <span className="text-xs text-gray-500 bg-white/5 px-2 py-0.5 rounded-full">{activeJobs.length}</span>
+                                                            </div>
+                                                            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                                                                {activeJobs.map(job => {
+                                                                    const totalItems = job.lineItems?.length || 0;
+                                                                    const destSite = sites.find(s => s.id === job.destSiteId);
 
-                                                return (
-                                                    <div
-                                                        key={job.id}
-                                                        className="bg-cyber-gray border border-white/5 rounded-xl p-5 hover:border-white/20 transition-all flex flex-col"
-                                                    >
-                                                        <div className="flex justify-between items-start mb-4">
-                                                            <div>
-                                                                <span className="text-white font-mono font-bold text-lg">{formatJobId(job)}</span>
-                                                                <div className="flex items-center gap-2 mt-1">
-                                                                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${job.priority === 'Critical' ? 'bg-red-500/20 text-red-400' :
-                                                                        job.priority === 'High' ? 'bg-orange-500/20 text-orange-400' : 'bg-blue-500/20 text-blue-400'
-                                                                        } `}>
-                                                                        {job.priority}
-                                                                    </span>
-                                                                    <span className="text-xs text-gray-500">{new Date().toLocaleDateString()}</span>
-                                                                </div>
+                                                                    return (
+                                                                        <div
+                                                                            key={job.id}
+                                                                            className={`bg-cyber-gray border rounded-xl p-5 hover:border-white/20 transition-all flex flex-col ${job.status === 'In-Progress' ? 'border-blue-500/50 shadow-[0_0_15px_rgba(59,130,246,0.1)]' : 'border-yellow-500/30'
+                                                                                }`}
+                                                                        >
+                                                                            <div className="flex justify-between items-start mb-4">
+                                                                                <div>
+                                                                                    <span className="text-white font-mono font-bold text-lg">{formatJobId(job)}</span>
+                                                                                    <div className="flex items-center gap-2 mt-1">
+                                                                                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${job.status === 'In-Progress' ? 'bg-blue-500/20 text-blue-400' : 'bg-yellow-500/20 text-yellow-400'
+                                                                                            }`}>
+                                                                                            {job.status}
+                                                                                        </span>
+                                                                                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${job.priority === 'Critical' ? 'bg-red-500/20 text-red-400' :
+                                                                                            job.priority === 'High' ? 'bg-orange-500/20 text-orange-400' : 'bg-white/5 text-gray-400'
+                                                                                            }`}>
+                                                                                            {job.priority}
+                                                                                        </span>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+
+                                                                            {destSite && (
+                                                                                <div className="mb-4 p-3 bg-black/20 rounded-lg">
+                                                                                    <p className="text-xs text-gray-400 mb-1">Destination</p>
+                                                                                    <div className="flex items-center gap-2 text-white font-bold text-sm">
+                                                                                        <MapPin size={14} className="text-cyber-primary" />
+                                                                                        {destSite.name}
+                                                                                    </div>
+                                                                                </div>
+                                                                            )}
+
+                                                                            <div className="mt-auto">
+                                                                                <div className="flex justify-between text-xs text-gray-400 mb-3 border-t border-white/5 pt-3">
+                                                                                    <span>Items: {totalItems}</span>
+                                                                                    <span>Ref: {formatOrderRef(job.orderRef, job.id)}</span>
+                                                                                </div>
+                                                                                <button
+                                                                                    onClick={() => setSelectedPackJob(job.id)}
+                                                                                    className={`w-full py-3 font-bold rounded-lg transition-colors flex items-center justify-center gap-2 ${job.status === 'In-Progress'
+                                                                                        ? 'bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 border border-blue-500/30'
+                                                                                        : 'bg-cyber-primary/20 hover:bg-cyber-primary/30 text-cyber-primary border border-cyber-primary/30'
+                                                                                        }`}
+                                                                                >
+                                                                                    {job.status === 'In-Progress' ? 'Continue Packing' : 'Start Packing'} <ArrowRight size={16} />
+                                                                                </button>
+                                                                            </div>
+                                                                        </div>
+                                                                    );
+                                                                })}
                                                             </div>
                                                         </div>
+                                                    );
+                                                }
+                                                return null;
+                                            })()}
 
-                                                        {/* Route */}
-                                                        {destSite && (
-                                                            <div className="mb-4 p-3 bg-black/20 rounded-lg">
-                                                                <p className="text-xs text-gray-400 mb-1">Destination</p>
-                                                                <div className="flex items-center gap-2 text-white font-bold text-sm">
-                                                                    <MapPin size={14} className="text-cyber-primary" />
-                                                                    {destSite.name}
-                                                                </div>
+                                            {/* COMPLETED JOBS SECTION */}
+                                            {(() => {
+                                                const completedJobs = packJobs.filter(j => j.status === 'Completed');
+                                                if (completedJobs.length > 0) {
+                                                    return (
+                                                        <div>
+                                                            <div className="flex items-center gap-2 mb-4">
+                                                                <div className="w-3 h-3 rounded-full bg-green-400"></div>
+                                                                <h3 className="text-lg font-bold text-white">Completed Today</h3>
+                                                                <span className="text-xs text-gray-500 bg-white/5 px-2 py-0.5 rounded-full">{completedJobs.length}</span>
                                                             </div>
-                                                        )}
+                                                            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
+                                                                {completedJobs.map(job => {
+                                                                    const totalItems = job.lineItems?.length || 0;
+                                                                    const destSite = sites.find(s => s.id === job.destSiteId);
 
-                                                        <div className="mt-auto">
-                                                            <div className="flex justify-between text-xs text-gray-400 mb-3 border-t border-white/5 pt-3">
-                                                                <span>Items: {totalItems}</span>
-                                                                <span>Ref: {formatOrderRef(job.orderRef, job.id)}</span>
+                                                                    return (
+                                                                        <div
+                                                                            key={job.id}
+                                                                            className="bg-green-500/5 border border-green-500/20 rounded-lg p-4 flex flex-col"
+                                                                        >
+                                                                            <div className="flex justify-between items-center mb-2">
+                                                                                <span className="text-white font-mono font-bold">{formatJobId(job)}</span>
+                                                                                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-green-500/20 text-green-400">✓ Done</span>
+                                                                            </div>
+                                                                            <div className="flex items-center gap-3 text-xs text-gray-400 mb-3">
+                                                                                <span>📦 {totalItems} items</span>
+                                                                                {destSite && <span>→ {destSite.name}</span>}
+                                                                            </div>
+                                                                            <button
+                                                                                onClick={(e) => {
+                                                                                    e.stopPropagation();
+                                                                                    setPackReprintJob({
+                                                                                        id: job.id,
+                                                                                        orderRef: job.orderRef || job.id,
+                                                                                        itemCount: totalItems,
+                                                                                        destSiteName: destSite?.name
+                                                                                    });
+                                                                                }}
+                                                                                className="w-full py-2 bg-green-500/10 hover:bg-green-500/20 text-green-400 font-bold rounded-lg transition-colors flex items-center justify-center gap-2 border border-green-500/20 text-sm"
+                                                                            >
+                                                                                <Printer size={14} /> Reprint
+                                                                            </button>
+                                                                        </div>
+                                                                    );
+                                                                })}
                                                             </div>
-                                                            {job.status === 'Completed' ? (
-                                                                <button
-                                                                    onClick={(e) => {
-                                                                        e.stopPropagation();
-                                                                        // Build rich pack label data
-                                                                        setPackReprintJob({
-                                                                            id: job.id,
-                                                                            orderRef: job.orderRef || job.id,
-                                                                            itemCount: totalItems,
-                                                                            destSiteName: destSite?.name
-                                                                        });
-                                                                    }}
-                                                                    className="w-full py-3 bg-green-500/10 hover:bg-green-500/20 text-green-400 font-bold rounded-lg transition-colors flex items-center justify-center gap-2 border border-green-500/20"
-                                                                >
-                                                                    <Printer size={16} /> Reprint Label
-                                                                </button>
-                                                            ) : (
-                                                                <button
-                                                                    onClick={() => {
-                                                                        setSelectedPackJob(job.id);
-                                                                    }}
-                                                                    className="w-full py-3 bg-white/5 hover:bg-white/10 text-white font-bold rounded-lg transition-colors flex items-center justify-center gap-2 border border-white/5"
-                                                                >
-                                                                    Start Packing <ArrowRight size={16} />
-                                                                </button>
-                                                            )}
                                                         </div>
+                                                    );
+                                                }
+                                                return null;
+                                            })()}
+
+                                            {/* EMPTY STATE - Only show if NO jobs at all */}
+                                            {packJobs.length === 0 && (
+                                                <div className="h-full flex flex-col items-center justify-center text-center">
+                                                    <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mb-4">
+                                                        <CheckCircle size={40} className="text-gray-600" />
                                                     </div>
-                                                );
-                                            })}
+                                                    <h3 className="text-xl font-bold text-white mb-2">All Caught Up</h3>
+                                                    <p className="text-gray-400">No packing jobs found.</p>
+                                                </div>
+                                            )}
                                         </div>
                                     );
                                 })()}
@@ -3531,7 +3780,7 @@ export default function WarehouseOperations() {
                                         <div className="flex items-center gap-2">
                                             <span className="text-xs text-gray-400 font-bold">Type:</span>
                                             <div className="flex bg-white/5 rounded-lg p-1">
-                                                {['ALL', 'PICK', 'PACK', 'PUTAWAY'].map(type => (
+                                                {['ALL', 'PICK', 'PACK', 'PUTAWAY', 'DISPATCH'].map(type => (
                                                     <button
                                                         key={type}
                                                         onClick={() => setAssignJobFilter(type as any)}
@@ -3644,12 +3893,13 @@ export default function WarehouseOperations() {
                                                     // Find best match employee
                                                     const bestMatchEmployee = employees
                                                         .filter(e => {
-                                                            if (!['picker', 'packer', 'dispatcher', 'warehouse_manager'].includes(e.role)) return false;
+                                                            if (!['picker', 'packer', 'dispatcher', 'driver', 'warehouse_manager'].includes(e.role)) return false;
                                                             if (e.status !== 'Active') return false;
                                                             // Role match
                                                             if (job.type === 'PICK' && e.role !== 'picker' && e.role !== 'dispatcher' && e.role !== 'warehouse_manager') return false;
                                                             if (job.type === 'PACK' && e.role !== 'packer' && e.role !== 'dispatcher' && e.role !== 'warehouse_manager') return false;
                                                             if (job.type === 'PUTAWAY' && e.role !== 'dispatcher' && e.role !== 'warehouse_manager') return false;
+                                                            if (job.type === 'DISPATCH' && e.role !== 'dispatcher' && e.role !== 'driver' && e.role !== 'warehouse_manager') return false;
                                                             return true;
                                                         })
                                                         .map(e => {
