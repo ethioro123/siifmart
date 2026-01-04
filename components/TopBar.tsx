@@ -534,7 +534,7 @@ export default function TopBar() {
             <div className="relative" ref={dropdownRef}>
                <div
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                  className={`hidden sm:flex items-center gap-2 md:gap-3 px-2 md:px-4 py-1.5 md:py-2 rounded-full border transition-all duration-300 cursor-pointer hover:shadow-[0_0_15px_rgba(0,255,157,0.1)] ${isUserMenuOpen ? 'bg-white/10 border-cyber-primary/50' : 'bg-gradient-to-r from-white/5 to-transparent border-white/10 hover:border-cyber-primary/50'}`}
+                  className={`flex items-center gap-1.5 sm:gap-2 md:gap-3 px-1.5 sm:px-2 md:px-4 py-1 sm:py-1.5 md:py-2 rounded-full border transition-all duration-300 cursor-pointer hover:shadow-[0_0_15px_rgba(0,255,157,0.1)] ${isUserMenuOpen ? 'bg-white/10 border-cyber-primary/50' : 'bg-gradient-to-r from-white/5 to-transparent border-white/10 hover:border-cyber-primary/50'}`}
                >
                   <div className="relative">
                      <div className="w-7 h-7 md:w-9 md:h-9 rounded-full bg-gradient-to-br from-cyber-primary to-blue-600 flex items-center justify-center text-black font-black text-xs md:text-sm shadow-lg group-hover:scale-105 transition-transform overflow-hidden border border-white/20">
