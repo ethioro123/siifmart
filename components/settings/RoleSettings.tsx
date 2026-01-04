@@ -14,14 +14,17 @@ const SectionHeader = ({ title, desc }: { title: string, desc: string }) => (
     </div>
 );
 
-const PermissionToggle = ({ enabled, onChange, danger }: { enabled: boolean, onChange: () => void, danger?: boolean }) => (
+const PermissionToggle = ({ enabled, onChange, danger, ariaLabel }: { enabled: boolean, onChange: () => void, danger?: boolean, ariaLabel?: string }) => (
     <button
         onClick={onChange}
+        aria-label={ariaLabel || (enabled ? 'Disable' : 'Enable')}
         className={`w-9 h-5 rounded-full p-1 transition-all relative ${enabled ? (danger ? 'bg-red-500' : 'bg-cyber-primary') : 'bg-white/10'}`}
     >
         <div className={`w-3 h-3 rounded-full bg-black shadow-sm transition-transform ${enabled ? 'translate-x-4' : 'translate-x-0'}`} />
     </button>
 );
+
+// ... (Rest of file context needed? No, I'll use multi_replace if they are far apart, but here I can't. I'll use multi_replace for safety)
 
 const SecurityScore = ({ policies, role }: any) => {
     let score = 100;
@@ -103,7 +106,7 @@ export default function RoleSettings() {
     const [permissions, setPermissions] = useState<any>(defaultPermissions);
     const [policies, setPolicies] = useState<any>(defaultPolicies);
     const [roles, setRoles] = useState([
-        { id: 'admin', name: 'Super Admin', users: 0, badge: 'bg-red-500/20 text-red-400 border-red-500/30' },
+        { id: 'admin', name: 'System Admin', users: 0, badge: 'bg-red-500/20 text-red-400 border-red-500/30' },
         { id: 'manager', name: 'Store Manager', users: 0, badge: 'bg-purple-500/20 text-purple-400 border-purple-500/30' },
         { id: 'cashier', name: 'Retail Staff', users: 0, badge: 'bg-green-500/20 text-green-400 border-green-500/30' },
         { id: 'warehouse', name: 'Warehouse Ops', users: 0, badge: 'bg-orange-500/20 text-orange-400 border-orange-500/30' },
@@ -271,6 +274,7 @@ export default function RoleSettings() {
                                     </div>
                                     <input
                                         type="range" min="5" max="120" step="5"
+                                        aria-label="Session Timeout"
                                         value={currentPolicy.session_timeout}
                                         onChange={(e) => updatePolicy('session_timeout', parseInt(e.target.value))}
                                         className="w-full accent-blue-500 h-1 bg-white/10 rounded-lg appearance-none cursor-pointer"

@@ -3,6 +3,7 @@ import { useData } from '../contexts/DataContext';
 import { useStore } from '../contexts/CentralStore';
 import { useNavigate } from 'react-router-dom';
 import { generateQuarterlyReport } from '../utils/reportGenerator';
+import { productsService } from '../services/supabase.service'; // Added service import
 import {
     Users, TrendingUp, AlertTriangle, Map as MapIcon, DollarSign,
     ShoppingBag, Truck, Activity, ArrowRight, BarChart3, PieChart as PieChartIcon,
@@ -16,9 +17,10 @@ import {
 } from 'recharts';
 import { CURRENCY_SYMBOL } from '../constants';
 import { calculateMetrics, formatCurrency, METRIC_ROUTES, DashboardMetrics } from '../utils/metrics';
-import { formatCompactNumber } from '../utils/formatting';
+import { formatCompactNumber, formatDateTime, formatRelativeTime } from '../utils/formatting';
 import WidgetErrorBoundary from '../components/WidgetErrorBoundary';
 import DashboardSkeleton from '../components/DashboardSkeleton';
+import PointsPerformanceDashboard from '../components/PointsPerformanceDashboard';
 
 // --- INTERFACES ---
 interface SitePerformance {
@@ -53,11 +55,11 @@ const CyberClock = () => {
     }, []);
 
     const formatTime = (date: Date) => {
-        return date.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        return formatDateTime(date, { showTime: true }).split(', ')[1];
     };
 
     const formatDate = (date: Date) => {
-        return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }).toUpperCase();
+        return formatDateTime(date).toUpperCase();
     };
 
     return (
@@ -166,6 +168,7 @@ const SystemLoadWidget = () => {
                             </span>
                         </div>
                         <div className="w-full bg-black/40 h-2 rounded-full overflow-hidden border border-white/5">
+                            {/* eslint-disable-next-line react/forbid-dom-props */}
                             <div
                                 className={`h-full bg-gradient-to-r ${m.from} ${m.to} shadow-[0_0_10px_rgba(0,0,0,0.5)] transition-all duration-1000 ease-out relative`}
                                 style={{ width: `${m.value}%` }}
@@ -210,6 +213,20 @@ const StatCard = ({ icon: Icon, title, value, color, delay }: any) => {
     );
 };
 
+// --- NEW COMPONENT: Dashboard Section Wrapper ---
+const DashboardSection = ({ title, icon: Icon, children, className = "" }: { title: string, icon: any, children: React.ReactNode, className?: string }) => (
+    <div className={`space-y-4 mb-12 ${className}`}>
+        <div className="flex items-center gap-3 px-2">
+            <div className="p-1.5 bg-white/5 rounded-lg border border-white/10">
+                <Icon size={16} className="text-gray-400" />
+            </div>
+            <h2 className="text-xs font-black text-gray-400 uppercase tracking-[0.3em]">{title}</h2>
+            <div className="flex-1 h-[1px] bg-gradient-to-r from-white/10 to-transparent ml-4"></div>
+        </div>
+        {children}
+    </div>
+);
+
 // --- NEW COMPONENT: Activity Log Widget ---
 const ActivityLogWidget = ({ logs }: { logs?: any[] }) => {
     const displayLogs = logs?.slice(0, 5) || [];
@@ -232,12 +249,12 @@ const ActivityLogWidget = ({ logs }: { logs?: any[] }) => {
                         <div key={i} className="flex gap-3 items-start border-l-2 border-white/10 pl-3 py-1 hover:bg-white/5 hover:border-blue-500/50 transition-all rounded-r">
                             <div className="pt-0.5">
                                 <div className="text-[10px] font-bold text-cyber-primary font-mono leading-none">
-                                    {new Date(log.timestamp).toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit' })}
+                                    {formatRelativeTime(log.created_at || log.timestamp)}
                                 </div>
                             </div>
                             <div>
                                 <p className="text-white text-xs font-bold leading-tight">{log.action}</p>
-                                <p className="text-[10px] text-gray-500 leading-tight">{log.details} • <span className="text-gray-400">{log.user?.split(' ')[0]}</span></p>
+                                <p className="text-[10px] text-gray-500 leading-tight">{log.details} • <span className="text-gray-400">{(log.user_name || log.user)?.split(' ')[0]}</span></p>
                             </div>
                         </div>
                     ))
@@ -250,6 +267,7 @@ const ActivityLogWidget = ({ logs }: { logs?: any[] }) => {
     );
 };
 
+
 // --- NEW COMPONENT: Top Products Widget ---
 const TopProductsWidget = ({ products }: { products: any[] }) => {
     return (
@@ -257,7 +275,7 @@ const TopProductsWidget = ({ products }: { products: any[] }) => {
             <div className="flex justify-between items-center mb-4 relative z-10">
                 <h3 className="font-bold text-white flex items-center gap-2 text-sm">
                     <Zap className="text-yellow-400" size={16} />
-                    System Load
+                    Top Performing Products
                 </h3>
             </div>
 
@@ -277,6 +295,7 @@ const TopProductsWidget = ({ products }: { products: any[] }) => {
                                 <span className="font-mono text-cyber-primary">{formatCurrency(p.sales)}</span>
                             </div>
                             <div className="w-full bg-black/40 h-1.5 rounded-full overflow-hidden">
+                                {/* eslint-disable-next-line react/forbid-dom-props */}
                                 <div
                                     className="h-full bg-gradient-to-r from-cyber-primary to-cyan-400 rounded-full transition-all duration-1000"
                                     style={{ width: `${(p.sales / products[0].sales) * 100}%` }}
@@ -291,65 +310,64 @@ const TopProductsWidget = ({ products }: { products: any[] }) => {
 };
 
 // --- DATE TYPES ---
-type DateRangeOption = 'All Time' | 'This Month' | 'Last Month' | 'This Quarter' | 'This Year' | 'Last Year';
-
-import { Calendar } from 'lucide-react';
+import { useDateFilter, DateRangeOption } from '../hooks/useDateFilter';
+import DateRangeSelector from '../components/DateRangeSelector';
 import FiscalYearDeck from '../components/FiscalYearDeck';
 
 export default function CentralOperations() {
-    const { sites, employees, allSales, allOrders, allProducts, setActiveSite, jobs, systemLogs, activeSite } = useData();
+    const { sites, employees, allSales, allOrders, allProducts, setActiveSite, jobs, systemLogs, activeSite, workerPoints, storePoints } = useData();
     const { loading, theme } = useStore();
     const navigate = useNavigate();
 
-    // --- REPORT GENERATION ---
-    const handleGenerateReport = () => {
-        generateQuarterlyReport(metrics, dateRange, 'Operations');
-    };
+    // --- SERVER-SIDE METRICS ---
+    const [serverMetrics, setServerMetrics] = useState<any>(null); // Inventory Snapshot
+    const [serverFinancials, setServerFinancials] = useState<any>(null); // Date-Filtered Financials
+
+    // Default to 'This Quarter' as requested
+    const defaultRange: DateRangeOption = 'This Quarter';
+    const { dateRange, setDateRange, isWithinRange, startDate: filterStartDate, endDate: filterEndDate } = useDateFilter(defaultRange);
+
+    useEffect(() => {
+        const fetchMetrics = async () => {
+            try {
+                // 1. Fetch Inventory Snapshot (Always current)
+                const invData = await productsService.getMetrics();
+                setServerMetrics(invData);
+
+                // 2. Fetch Financials (Filtered by Date)
+                // Need to convert Date objects to string matching SQL timestamp if filterStartDate is valid
+                const startStr = filterStartDate ? filterStartDate.toISOString() : undefined;
+                const endStr = filterEndDate ? filterEndDate.toISOString() : undefined;
+
+                const finData = await productsService.getFinancialMetrics(undefined, startStr, endStr);
+                setServerFinancials(finData);
+            } catch (err) {
+                console.error('Failed to load server metrics:', err);
+            }
+        };
+        fetchMetrics();
+    }, [dateRange, filterStartDate, filterEndDate]);
 
     // --- DATE FILTERING STATE ---
-    const [dateRange, setDateRange] = useState<DateRangeOption>('This Quarter');
+    // Default to 'This Quarter' as requested
+    // const defaultRange: DateRangeOption = 'This Quarter'; // Removed duplicate
+    // const { dateRange, setDateRange, isWithinRange } = useDateFilter(defaultRange); // Removed duplicate call
 
-    // --- DATE FILTERING LOGIC ---
-    const getQuarterInfo = (d = new Date()) => {
-        const q = Math.floor(d.getMonth() / 3) + 1;
-        const year = d.getFullYear();
-        const start = new Date(year, (q - 1) * 3, 1);
-        const end = new Date(year, q * 3, 0);
-        return { q, year, start, end };
-    };
-
-    const isWithinRange = (dateString: string) => {
-        if (dateRange === 'All Time') return true;
-        const date = new Date(dateString);
-        const now = new Date();
-        const { q, year } = getQuarterInfo(now);
-        const start = new Date(); // Reset below
-        start.setHours(0, 0, 0, 0);
-
-        switch (dateRange) {
-            case 'This Month':
-                start.setDate(1);
-                return date >= start && date <= now;
-            case 'Last Month':
-                start.setMonth(now.getMonth() - 1);
-                start.setDate(1);
-                const endLM = new Date(now.getFullYear(), now.getMonth(), 0);
-                return date >= start && date <= endLM;
-            case 'This Quarter':
-                const qStart = new Date(year, (q - 1) * 3, 1);
-                const qEnd = new Date(now);
-                qEnd.setHours(23, 59, 59, 999);
-                return date >= qStart && date <= qEnd;
-            case 'This Year':
-                const yStart = new Date(year, 0, 1);
-                return date >= yStart;
-            case 'Last Year':
-                const lyStart = new Date(year - 1, 0, 1);
-                const lyEnd = new Date(year - 1, 11, 31);
-                return date >= lyStart && date <= lyEnd;
-            default:
-                return true;
-        }
+    // --- REPORT GENERATION ---
+    // Use metrics calculated below for report
+    const handleGenerateReport = () => {
+        // Calculating metrics here again just for report generation context if needed, or pass current metrics
+        // ideally we regenerate metrics based on filter for the report
+        const filteredMetrics = calculateMetrics(
+            allSales.filter(s => isWithinRange(s.date)),
+            allProducts, // Products usually snapshot, not filtered by date unless 'created_at'
+            jobs.filter(j => isWithinRange(j.createdAt || '')),
+            allOrders.filter(o => isWithinRange(o.date || o.createdAt || '')),
+            employees, // Employees typically active/inactive, not date range filtered for metrics usually
+            [], // Movements not loaded globally usually
+            undefined
+        );
+        generateQuarterlyReport(filteredMetrics, dateRange, 'Operations');
     };
 
     // --- FILTERED DATA ---
@@ -396,15 +414,28 @@ export default function CentralOperations() {
         }
     }, [filteredSales, allProducts, jobs, filteredOrders, employees]); // Deps updated
 
-    const totalRevenue = metrics?.totalNetworkRevenue || 0;
+    // Use filtered METRICS for Financials to respect Date Range
+    // Modified to prefer Server-Side Filtered Financials if available, then Client-Side Filtered
+    const totalRevenue = serverFinancials?.total_revenue !== undefined ? serverFinancials.total_revenue : (metrics?.totalNetworkRevenue || 0);
     const totalEmployees = metrics?.totalEmployees || 0;
     const totalSites = sites?.length || 0;
-    const activeAlerts = metrics?.activeAlerts || 0;
-    const inventoryValue = metrics?.totalNetworkStockValue || 0;
+    const activeAlerts = serverMetrics?.active_alerts !== undefined ? serverMetrics.active_alerts : (metrics?.activeAlerts || 0);
+
+    // Override with Server-Side Accurate Metric if available (Inventory Value is snapshot based, usually current)
+    const inventoryValue = serverMetrics?.total_value_cost || metrics?.totalNetworkStockValue || 0;
     const avgOrderValue = metrics?.avgBasket || 0;
 
-    // Stock Status Data (Snapshot - No Date Filter Needed)
+    // Stock Status Data (Server-Side Snapshot)
     const stockStatusData = useMemo(() => {
+        if (serverMetrics) {
+            return [
+                { name: 'Optimal', value: serverMetrics.total_count - (serverMetrics.low_stock_count + serverMetrics.out_of_stock_count), color: '#10b981' },
+                { name: 'Low Stock', value: serverMetrics.low_stock_count, color: '#f59e0b' },
+                { name: 'Out of Stock', value: serverMetrics.out_of_stock_count, color: '#ef4444' },
+            ].filter(d => d.value > 0);
+        }
+
+        // Fallback
         const goodStock = (allProducts || []).filter(p => p.stock >= 10 && p.status !== 'out_of_stock').length;
         const lowStock = (allProducts || []).filter(p => (p.stock < 10 && p.stock > 0) || p.status === 'low_stock').length;
         const outStock = (allProducts || []).filter(p => p.stock === 0 || p.status === 'out_of_stock').length;
@@ -414,9 +445,10 @@ export default function CentralOperations() {
             { name: 'Low Stock', value: lowStock, color: '#f59e0b' },
             { name: 'Out of Stock', value: outStock, color: '#ef4444' },
         ].filter(d => d.value > 0);
-    }, [allProducts, metrics]);
+    }, [allProducts, metrics, serverMetrics]);
 
     // --- SITE PERFORMANCE (Filtered) ---
+    // Fallback logic for site performance when server metrics are not loaded or incomplete
     const sitePerformance: SitePerformance[] = useMemo(() => {
         if (!sites || !filteredSales || !employees || !allProducts) return [];
 
@@ -439,8 +471,11 @@ export default function CentralOperations() {
         }).sort((a, b) => b.revenue - a.revenue);
     }, [sites, filteredSales, employees, allProducts]);
 
-    // --- CHART DATA (Filtered) ---
+    // If server metrics available, use them directly for charts
     const revenueBySiteData = useMemo(() => {
+        // REMOVED serverMetrics override to ensure Date Range filtering works
+        // if (serverMetrics?.site_performance) { return serverMetrics.site_performance; }
+
         if (!sitePerformance) return [];
         return sitePerformance.slice(0, 10).map(site => ({
             name: site.name.length > 15 ? site.name.substring(0, 12) + '...' : site.name,
@@ -450,6 +485,9 @@ export default function CentralOperations() {
     }, [sitePerformance]);
 
     const revenueByCategory = useMemo(() => {
+        // REMOVED serverMetrics override to ensure Date Range filtering works
+        // if (serverMetrics?.sales_by_category) { return serverMetrics.sales_by_category; }
+
         if (!filteredSales) return [];
         const categoryData = new Map();
         filteredSales.forEach(sale => {
@@ -467,6 +505,9 @@ export default function CentralOperations() {
 
     // --- TOP PRODUCTS (Filtered) ---
     const topProducts = useMemo(() => {
+        // REMOVED serverMetrics override to ensure Date Range filtering works
+        // if (serverMetrics?.top_products) { return serverMetrics.top_products; }
+
         if (!filteredSales) return [];
         const productStats = new Map<string, { name: string, sales: number, count: number }>();
 
@@ -554,22 +595,11 @@ export default function CentralOperations() {
 
                 <div className="flex items-end gap-6 mt-4 md:mt-0">
                     {/* NEW DATE SELECTOR */}
-                    <div className="hidden md:flex items-center bg-black/30 border border-white/10 rounded-xl px-3 py-2 h-[42px]">
-                        <Calendar size={14} className="text-gray-400 mr-2" />
-                        <select
-                            aria-label="Filter Date Range"
-                            value={dateRange}
-                            onChange={(e) => setDateRange(e.target.value as DateRangeOption)}
-                            className="bg-transparent border-none text-xs text-white outline-none font-bold cursor-pointer hover:text-cyber-primary transition-colors"
-                        >
-                            <option value="This Quarter" className="text-black">This Quarter (Current)</option>
-                            <option value="This Month" className="text-black">This Month</option>
-                            <option value="Last Month" className="text-black">Last Month</option>
-                            <option value="This Year" className="text-black">This Year (YTD)</option>
-                            <option value="Last Year" className="text-black">Last Year (Saved)</option>
-                            <option value="All Time" className="text-black">All Time</option>
-                        </select>
-                    </div>
+                    <DateRangeSelector
+                        value={dateRange}
+                        onChange={setDateRange}
+                        className="hidden md:block"
+                    />
 
                     <CyberClock />
 
@@ -610,325 +640,290 @@ export default function CentralOperations() {
             {/* --- BENTO GRID LAYOUT --- */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 max-w-[1700px] mx-auto">
 
-                {/* Financial KPI Row */}
-                <div className="col-span-1 md:col-span-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                    <WidgetErrorBoundary title="Total Revenue">
-                        <GlassKPICard
-                            title={dateRange === 'All Time' ? "Total Revenue" : `${dateRange} Revenue`}
-                            value={formatCompactNumber(metrics.totalNetworkRevenue, { currency: CURRENCY_SYMBOL })}
-                            trend="+12.5%"
-                            sub="vs. Last Month"
-                            icon={DollarSign}
-                            color="text-green-400"
-                        />
-                    </WidgetErrorBoundary>
+                {/* 1. FINANCIAL COMMAND CENTER */}
+                <DashboardSection title="Financial Command Center" icon={DollarSign} className="col-span-1 md:col-span-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                        <WidgetErrorBoundary title="Total Revenue">
+                            <GlassKPICard
+                                title={dateRange === 'All Time' ? "Total Revenue" : `${dateRange} Revenue`}
+                                value={formatCompactNumber(serverFinancials?.total_revenue !== undefined ? serverFinancials.total_revenue : metrics.totalNetworkRevenue, { currency: CURRENCY_SYMBOL })}
+                                trend="+12.5%"
+                                sub="vs. Last Month"
+                                icon={DollarSign}
+                                color="text-green-400"
+                            />
+                        </WidgetErrorBoundary>
+                        <WidgetErrorBoundary title="Net Profit">
+                            <GlassKPICard
+                                title="Net Profit"
+                                value={formatCompactNumber(serverFinancials?.net_profit !== undefined ? serverFinancials.net_profit : metrics.netProfit, { currency: CURRENCY_SYMBOL })}
+                                trend={(serverFinancials?.net_profit || metrics.netProfit) > 0 ? "+15%" : "-2%"}
+                                sub="Net Earnings"
+                                icon={Award}
+                                color="text-emerald-400"
+                            />
+                        </WidgetErrorBoundary>
+                        <WidgetErrorBoundary title="Profit Margin">
+                            <GlassKPICard
+                                title="Profit Margin"
+                                value={serverFinancials?.profit_margin !== undefined ? `${serverFinancials.profit_margin}%` : `${metrics.profitMargin.toFixed(1)}%`}
+                                trend="+1.2%"
+                                sub="Efficiency Rate"
+                                icon={TrendingUp}
+                                color="text-teal-400"
+                            />
+                        </WidgetErrorBoundary>
+                        <WidgetErrorBoundary title="Inventory Value">
+                            <GlassKPICard
+                                title="Network Asset Value"
+                                value={formatCompactNumber(inventoryValue, { currency: CURRENCY_SYMBOL })}
+                                trend="+5.2%"
+                                sub={`Valued at Base Cost (Retail: ${formatCompactNumber(metrics.totalNetworkStockValueRetail, { currency: CURRENCY_SYMBOL })})`}
+                                icon={Package}
+                                color="text-blue-400"
+                            />
+                        </WidgetErrorBoundary>
+                    </div>
 
-                    <WidgetErrorBoundary title="Inventory Value">
-                        <GlassKPICard
-                            title="Network Asset Value"
-                            value={formatCompactNumber(inventoryValue, { currency: CURRENCY_SYMBOL })}
-                            trend="+5.2%"
-                            sub={`Valued at Base Cost (Retail: ${formatCompactNumber(metrics.totalNetworkStockValueRetail, { currency: CURRENCY_SYMBOL })})`}
-                            icon={Package}
-                            color="text-blue-400"
-                        />
-                    </WidgetErrorBoundary>
-
-                    <WidgetErrorBoundary title="Active Orders">
-                        <GlassKPICard
-                            title="Active Orders"
-                            value={allOrders.filter(o => o.status !== 'Received' && o.status !== 'Cancelled').length}
-                            trend="-2.4%"
-                            sub="Pending Fulfillment"
-                            icon={ShoppingCart}
-                            color="text-purple-400"
-                        />
-                    </WidgetErrorBoundary>
-
-                    <WidgetErrorBoundary title="Avg Order Value">
-                        <GlassKPICard
-                            title="Avg. Order Value"
-                            value={formatCompactNumber(allSales.length > 0 ? allSales.reduce((sum, s) => sum + s.total, 0) / allSales.length : 0, { currency: CURRENCY_SYMBOL })}
-                            trend="+8.1%"
-                            sub="Per Transaction"
-                            icon={Activity}
-                            color="text-yellow-400"
-                        />
-                    </WidgetErrorBoundary>
-                </div>
-                {/* 2. MAIN CHART (Large Area) - Spans 3 cols */}
-                <div className="md:col-span-3 bg-gradient-to-b from-white/10 to-white/5 backdrop-blur-2xl border border-white/10 rounded-3xl p-8 h-[450px] relative overflow-hidden shadow-2xl shadow-black/50 group">
-                    <WidgetErrorBoundary title="Revenue Chart">
-                        {revenueBySiteData.length === 0 && <EmptyState message="No revenue data available" />}
-
-                        <div className="absolute top-0 right-0 w-full h-[1px] bg-gradient-to-r from-transparent via-cyber-primary/50 to-transparent opacity-50"></div>
-                        <div className="flex justify-between items-center mb-6">
-                            <h3 className="font-bold text-white flex items-center gap-2">
-                                <Activity className="text-cyber-primary" size={20} />
-                                Revenue Velocity <span className="text-xs font-normal text-gray-500 ml-2">(Top 10 Performing Sites)</span>
-                            </h3>
-                            <div className="flex gap-2">
-                                <span className="text-xs font-mono text-cyber-primary/70 bg-cyber-primary/10 px-2 py-1 rounded">LIVE</span>
-                                <span className="text-xs font-mono text-gray-500 border border-white/10 px-2 py-1 rounded">Last 24h</span>
-                            </div>
-                        </div>
-                        <ResponsiveContainer width="100%" height="85%" minWidth={0} minHeight={0}>
-                            <AreaChart data={revenueBySiteData}>
-                                <defs>
-                                    <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#00ff9d" stopOpacity={0.4} />
-                                        <stop offset="95%" stopColor="#00ff9d" stopOpacity={0} />
-                                    </linearGradient>
-                                </defs>
-                                <CartesianGrid strokeDasharray="3 3" stroke={chartGridColor} vertical={false} />
-                                <XAxis dataKey="name" stroke={chartAxisColor} fontSize={11} tickLine={false} axisLine={false} />
-                                <YAxis stroke={chartAxisColor} fontSize={11} tickLine={false} axisLine={false} tickFormatter={(val) => `${val / 1000}k`} />
-                                <Tooltip
-                                    contentStyle={{ backgroundColor: tooltipBg, backdropFilter: 'blur(10px)', border: `1px solid ${tooltipBorder}`, borderRadius: '12px' }}
-                                    itemStyle={{ color: tooltipText, fontSize: '12px' }}
-                                />
-                                <Area type="monotone" dataKey="revenue" stroke="#00ff9d" strokeWidth={3} fillOpacity={1} fill="url(#colorRevenue)" />
-                            </AreaChart>
-                        </ResponsiveContainer>
-                    </WidgetErrorBoundary>
-                </div>
-
-                {/* 3. PERFORMANCE STATS (Side) - Spans 1 col */}
-                <div className="flex flex-col gap-6">
-                    {/* Stock Health Pie */}
-                    <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-3xl p-6 h-[213px] relative flex flex-col">
-                        <WidgetErrorBoundary title="Stock Health">
-                            {stockStatusData.length === 0 && <EmptyState message="No stock data" />}
-                            <h3 className="font-bold text-white mb-2 flex items-center gap-2 text-sm">
-                                <PieChartIcon className="text-purple-400" size={16} />
-                                Stock Health
-                            </h3>
-                            <div className="flex-1 w-full min-h-0 relative">
-                                <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
-                                    <PieChart>
-                                        <Pie
-                                            data={stockStatusData}
-                                            innerRadius={40}
-                                            outerRadius={60}
-                                            paddingAngle={5}
-                                            dataKey="value"
-                                        >
-                                            {stockStatusData.map((entry, index) => (
-                                                <Cell key={`cell-${index}`} fill={entry.color} stroke="none" />
-                                            ))}
-                                        </Pie>
-                                        <Tooltip contentStyle={{ backgroundColor: tooltipBg, border: `1px solid ${tooltipBorder}`, fontSize: '12px' }} itemStyle={{ color: tooltipText }} />
-                                    </PieChart>
+                    <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 h-[400px]">
+                        {/* Revenue Velocity Chart */}
+                        <div className="lg:col-span-3 bg-gradient-to-b from-white/10 to-white/5 backdrop-blur-2xl border border-white/10 rounded-3xl p-8 relative overflow-hidden group shadow-2xl">
+                            <WidgetErrorBoundary title="Revenue Chart">
+                                {revenueBySiteData.length === 0 && <EmptyState message="No revenue data available" />}
+                                <div className="flex justify-between items-center mb-6">
+                                    <h3 className="font-bold text-white flex items-center gap-2">
+                                        <Activity className="text-cyber-primary" size={20} />
+                                        Revenue Velocity <span className="text-xs font-normal text-gray-500 ml-2">(Top 10 Sites)</span>
+                                    </h3>
+                                </div>
+                                <ResponsiveContainer width="100%" height="85%">
+                                    <AreaChart data={revenueBySiteData}>
+                                        <defs>
+                                            <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                                                <stop offset="5%" stopColor="#00ff9d" stopOpacity={0.4} />
+                                                <stop offset="95%" stopColor="#00ff9d" stopOpacity={0} />
+                                            </linearGradient>
+                                        </defs>
+                                        <CartesianGrid strokeDasharray="3 3" stroke={chartGridColor} vertical={false} />
+                                        <XAxis dataKey="name" stroke={chartAxisColor} fontSize={11} tickLine={false} axisLine={false} />
+                                        <YAxis stroke={chartAxisColor} fontSize={11} tickLine={false} axisLine={false} tickFormatter={(val) => `${val / 1000}k`} />
+                                        <Tooltip contentStyle={{ backgroundColor: tooltipBg, backdropFilter: 'blur(10px)', border: `1px solid ${tooltipBorder}`, borderRadius: '12px' }} itemStyle={{ color: tooltipText, fontSize: '12px' }} />
+                                        <Area type="monotone" dataKey="revenue" stroke="#00ff9d" strokeWidth={3} fillOpacity={1} fill="url(#colorRevenue)" />
+                                    </AreaChart>
                                 </ResponsiveContainer>
-                                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                    <span className="text-lg font-bold text-white">{metrics?.stockCount > 0 ? '100%' : '0%'}</span>
-                                </div>
-                            </div>
-                        </WidgetErrorBoundary>
-                    </div>
-
-                    {/* Alerts Card */}
-                    <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-3xl p-6 h-[213px] relative flex flex-col justify-between group">
-                        <div className="absolute -right-6 -top-6 p-8 rounded-full bg-red-500/5 blur-2xl group-hover:blur-3xl transition-all"></div>
-                        <h3 className="font-bold text-white flex items-center gap-2 text-sm">
-                            <AlertTriangle className="text-red-400" size={16} />
-                            Critical Alerts
-                        </h3>
-                        <div>
-                            <p className="text-4xl font-mono font-bold text-white">{activeAlerts}</p>
-                            <p className="text-xs text-red-400 mt-1">{metrics?.lowStockCount} Low Stock Items</p>
-                            <p className="text-xs text-red-400">{metrics?.outOfStockCount} Out of Stock</p>
+                            </WidgetErrorBoundary>
                         </div>
-                        <button onClick={() => navigate(METRIC_ROUTES.lowStock)} className="w-full py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs font-bold rounded-lg border border-red-500/20 transition-colors">
-                            View Alerts
-                        </button>
-                    </div>
-                </div>
 
-                {/* 4. OPERATIONAL EFFICIENCY ROW (New) */}
-                <div className="col-span-1 md:col-span-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-2">
-                    <WidgetErrorBoundary title="Net Profit">
-                        <GlassKPICard
-                            title="Net Profit"
-                            value={formatCompactNumber(metrics.netProfit, { currency: CURRENCY_SYMBOL })}
-                            trend={metrics.netProfit > 0 ? "+15%" : "-2%"}
-                            sub="Net Earnings"
-                            icon={Award}
-                            color="text-emerald-400"
-                        />
-                    </WidgetErrorBoundary>
-
-                    <WidgetErrorBoundary title="Profit Margin">
-                        <GlassKPICard
-                            title="Profit Margin"
-                            value={`${metrics.profitMargin.toFixed(1)}%`}
-                            trend="+1.2%"
-                            sub="Efficiency Rate"
-                            icon={TrendingUp}
-                            color="text-teal-400"
-                        />
-                    </WidgetErrorBoundary>
-
-                    <WidgetErrorBoundary title="Return Rate">
-                        <GlassKPICard
-                            title="Return Rate"
-                            value={`${metrics.returnRate.toFixed(1)}%`}
-                            trend={metrics.returnRate < 2 ? "-0.5%" : "+0.2%"} // Logic: Lower is better, so trend down is good (green?) - keep color neutral or handle trend logic elsewhere
-                            sub={`${formatCompactNumber(metrics.totalReturnedValue, { currency: CURRENCY_SYMBOL })} Refunded`}
-                            icon={Undo}
-                            color="text-rose-400"
-                        />
-                    </WidgetErrorBoundary>
-
-                    <WidgetErrorBoundary title="Basket Size">
-                        <GlassKPICard
-                            title="Avg Basket Size"
-                            value={(allSales?.reduce((acc, sale) => acc + (sale.items?.reduce((iAcc, i) => iAcc + i.quantity, 0) || 0), 0) / (allSales?.length || 1)).toFixed(1) || "0"}
-                            sub="Items Per Order"
-                            icon={ShoppingBag}
-                            color="text-orange-400"
-                        />
-                    </WidgetErrorBoundary>
-
-                    <WidgetErrorBoundary title="Staff Efficiency">
-                        <GlassKPICard
-                            title="Staff Efficiency"
-                            value={formatCompactNumber(metrics.totalEmployees > 0 ? metrics.totalNetworkRevenue / metrics.totalEmployees : 0, { currency: CURRENCY_SYMBOL })}
-                            sub="Rev. Per Employee"
-                            icon={Users}
-                            color="text-pink-400"
-                        />
-                    </WidgetErrorBoundary>
-                </div>
-
-                {/* 5. SITE MATRIX + TOP PRODUCTS + ACTIVITY LOG */}
-                <div className="col-span-1 md:col-span-4 grid grid-cols-1 lg:grid-cols-4 gap-6 h-[400px]">
-                    {/* Site Matrix - Spans 2 cols */}
-                    <div className="lg:col-span-2 bg-white/5 backdrop-blur-lg border border-white/10 rounded-3xl p-6 overflow-hidden flex flex-col relative">
-                        <WidgetErrorBoundary title="Network Performance">
-                            {sitePerformance.length === 0 && <EmptyState message="No sites connected" />}
-
-                            <h3 className="font-bold text-white mb-6 flex items-center gap-2">
-                                <MapIcon className="text-blue-400" size={20} />
-                                Network Performance
-                            </h3>
-                            <div className="overflow-y-auto custom-scrollbar pr-2">
-                                <div className="space-y-3">
-                                    {sitePerformance.map((site) => (
-                                        <div key={site.id} className="flex items-center justify-between p-4 bg-white/5 hover:bg-white/10 rounded-2xl transition-all duration-300 border border-white/5 group hover:border-white/20 hover:shadow-lg hover:shadow-black/20 hover:-translate-x-1">
-                                            <div className="flex items-center gap-4">
-                                                <div className={`p-2 rounded-lg ${site.type === 'Warehouse' ? 'bg-purple-500/20 text-purple-400' : 'bg-blue-500/20 text-blue-400'}`}>
-                                                    <Package size={16} />
-                                                </div>
-                                                <div>
-                                                    <p className="font-bold text-white text-sm">{site.name}</p>
-                                                    <p className="text-xs text-gray-500 font-mono">{site.type} • {site.staffCount} Staff</p>
-                                                </div>
-                                            </div>
-                                            <div className="text-right">
-                                                <p className="font-mono font-bold text-green-400 text-sm">{formatCompactNumber(site.revenue, { currency: CURRENCY_SYMBOL })}</p>
-                                                {site.lowStock > 0 && (
-                                                    <p className="text-[10px] font-bold text-red-400 flex items-center justify-end gap-1">
-                                                        <AlertTriangle size={10} /> {site.lowStock} Alerts
-                                                    </p>
-                                                )}
-                                            </div>
-                                            <button
-                                                onClick={() => setActiveSite(site.id)}
-                                                aria-label={`Manage ${site.name}`}
-                                                className="opacity-0 group-hover:opacity-100 transition-opacity p-2 hover:bg-cyber-primary hover:text-black rounded-lg text-white"
-                                            >
-                                                <ArrowRight size={16} />
-                                            </button>
-                                        </div>
-                                    ))}
+                        {/* Category Sales Bar Chart */}
+                        <div className="lg:col-span-1 bg-white/5 backdrop-blur-lg border border-white/10 rounded-3xl p-6 flex flex-col overflow-hidden relative">
+                            <WidgetErrorBoundary title="Category Performance">
+                                <h3 className="font-bold text-white mb-4 flex items-center gap-2 text-sm">
+                                    <Layers className="text-yellow-400" size={18} />
+                                    Category Sales
+                                </h3>
+                                <div className="flex-1 w-full min-h-0">
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <BarChart data={revenueByCategory} layout="vertical">
+                                            <XAxis type="number" hide />
+                                            <YAxis dataKey="name" type="category" width={80} tick={{ fill: chartAxisColor, fontSize: 10 }} axisLine={false} tickLine={false} />
+                                            <Tooltip cursor={{ fill: 'transparent' }} contentStyle={{ backgroundColor: tooltipBg, border: `1px solid ${tooltipBorder}` }} itemStyle={{ color: tooltipText }} />
+                                            <Bar dataKey="value" fill="#f59e0b" barSize={12} radius={[0, 4, 4, 0]} />
+                                        </BarChart>
+                                    </ResponsiveContainer>
                                 </div>
-                            </div>
-                        </WidgetErrorBoundary>
-                    </div>
-
-                    {/* Top Products - Spans 1 col */}
-                    <div className="lg:col-span-1">
-                        <WidgetErrorBoundary title="Top Products">
-                            <TopProductsWidget products={topProducts} />
-                        </WidgetErrorBoundary>
-                    </div>
-
-                    {/* Activity Log - Spans 1 col */}
-                    <div className="lg:col-span-1 flex flex-col gap-6 h-full">
-                        <div className="h-full">
-                            <WidgetErrorBoundary title="System Activity">
-                                <ActivityLogWidget logs={systemLogs} />
                             </WidgetErrorBoundary>
                         </div>
                     </div>
-                </div>
+                </DashboardSection>
 
-                {/* 6. CATEGORY SALES & QUICK STATS ROW */}
-                <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6 h-[400px]">
-                    <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-3xl p-6 flex flex-col overflow-hidden relative">
-                        <WidgetErrorBoundary title="Category Performance">
-                            {revenueByCategory.length === 0 && <EmptyState message="No category data" />}
-
-                            <h3 className="font-bold text-white mb-4 flex items-center gap-2">
-                                <Layers className="text-yellow-400" size={18} />
-                                Category Sales
-                            </h3>
-                            <div className="flex-1 w-full min-h-0">
-                                <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
-                                    <BarChart data={revenueByCategory} layout="vertical" margin={{ left: 0, right: 30, top: 0, bottom: 0 }}>
-                                        <XAxis type="number" hide />
-                                        <YAxis dataKey="name" type="category" width={80} tick={{ fill: chartAxisColor, fontSize: 10 }} axisLine={false} tickLine={false} />
-                                        <Tooltip
-                                            cursor={{ fill: 'transparent' }}
-                                            contentStyle={{ backgroundColor: tooltipBg, border: `1px solid ${tooltipBorder}` }}
-                                            itemStyle={{ color: tooltipText }}
-                                        />
-                                        <Bar dataKey="value" fill="#f59e0b" barSize={12} radius={[0, 4, 4, 0]}>
-                                            <Cell fill="#f59e0b" />
-                                            <Cell fill="#eab308" />
-                                            <Cell fill="#fbbf24" />
-                                        </Bar>
-                                    </BarChart>
-                                </ResponsiveContainer>
-                            </div>
+                {/* 2. INVENTORY & LOGISTICS HUB */}
+                <DashboardSection title="Inventory & Logistics Hub" icon={Box} className="col-span-1 md:col-span-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                        <WidgetErrorBoundary title="Active Orders">
+                            <GlassKPICard
+                                title="Active Orders"
+                                value={serverMetrics?.active_orders !== undefined ? serverMetrics.active_orders : (allOrders.filter(o => o.status !== 'Received' && o.status !== 'Cancelled').length)}
+                                trend="-2.4%"
+                                sub="Pending Fulfillment"
+                                icon={ShoppingCart}
+                                color="text-purple-400"
+                            />
+                        </WidgetErrorBoundary>
+                        <WidgetErrorBoundary title="Return Rate">
+                            <GlassKPICard
+                                title="Return Rate"
+                                value={serverMetrics?.return_rate !== undefined ? `${serverMetrics.return_rate}%` : `${metrics.returnRate.toFixed(1)}%`}
+                                trend={metrics.returnRate < 2 ? "-0.5%" : "+0.2%"}
+                                sub={`${formatCompactNumber(serverMetrics?.total_returned_value || metrics.totalReturnedValue, { currency: CURRENCY_SYMBOL })} Refunded`}
+                                icon={Undo}
+                                color="text-rose-400"
+                            />
+                        </WidgetErrorBoundary>
+                        <WidgetErrorBoundary title="Cycle Time">
+                            <GlassKPICard
+                                title="Avg. Cycle Time"
+                                value={serverMetrics?.avg_cycle_time || metrics?.avgCycleTime || '0m'}
+                                trend="-12%"
+                                sub="Processing Speed"
+                                icon={Clock}
+                                color="text-blue-400"
+                            />
+                        </WidgetErrorBoundary>
+                        <WidgetErrorBoundary title="Inbound POs">
+                            <GlassKPICard
+                                title="Inbound POs"
+                                value={serverMetrics?.inbound_pos !== undefined ? serverMetrics.inbound_pos : (metrics?.inboundPOs || 0)}
+                                trend="+5%"
+                                sub="Pending Shipments"
+                                icon={Truck}
+                                color="text-orange-400"
+                            />
                         </WidgetErrorBoundary>
                     </div>
 
-                    {/* Quick Stats Grid */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 lg:gap-4 h-full">
-                        {/* REPLACED WMS Accuracy with SYSTEM LOAD WIDGET */}
-                        <div className="sm:col-span-2 lg:col-span-1">
-                            <SystemLoadWidget />
+                    <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 h-[400px]">
+                        {/* Stock Health */}
+                        <div className="lg:col-span-1 bg-white/5 backdrop-blur-lg border border-white/10 rounded-3xl p-6 relative flex flex-col">
+                            <WidgetErrorBoundary title="Stock Health">
+                                <h3 className="font-bold text-white mb-2 flex items-center gap-2 text-sm">
+                                    <PieChartIcon className="text-purple-400" size={16} />
+                                    Stock Health
+                                </h3>
+                                <div className="flex-1 w-full min-h-0 relative">
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <PieChart>
+                                            <Pie data={stockStatusData} innerRadius={40} outerRadius={60} paddingAngle={5} dataKey="value">
+                                                {stockStatusData.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.color} stroke="none" />)}
+                                            </Pie>
+                                            <Tooltip contentStyle={{ backgroundColor: tooltipBg, border: `1px solid ${tooltipBorder}`, fontSize: '12px' }} itemStyle={{ color: tooltipText }} />
+                                        </PieChart>
+                                    </ResponsiveContainer>
+                                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                        <span className="text-lg font-bold text-white">{metrics?.stockCount > 0 ? '100%' : '0%'}</span>
+                                    </div>
+                                </div>
+                            </WidgetErrorBoundary>
                         </div>
 
-                        <StatCard
-                            icon={Clock}
-                            title="Cycle Time"
-                            value={metrics?.avgCycleTime || '0m'}
-                            color="blue"
-                            delay="0.1s"
-                        />
+                        {/* Critical Alerts */}
+                        <div className="lg:col-span-1 bg-white/5 backdrop-blur-lg border border-white/10 rounded-3xl p-6 relative flex flex-col justify-between group">
+                            <h3 className="font-bold text-white flex items-center gap-2 text-sm">
+                                <AlertTriangle className="text-red-400" size={16} />
+                                Critical Alerts
+                            </h3>
+                            <div>
+                                <p className="text-4xl font-mono font-bold text-white">{activeAlerts}</p>
+                                <p className="text-xs text-red-400 mt-1">{metrics?.lowStockCount} Low Stock Items</p>
+                                <p className="text-xs text-red-400">{metrics?.outOfStockCount} Out of Stock</p>
+                            </div>
+                            <button onClick={() => navigate(METRIC_ROUTES.lowStock)} className="w-full py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs font-bold rounded-lg border border-red-500/20 transition-colors">
+                                View Alerts
+                            </button>
+                        </div>
 
-                        <StatCard
-                            icon={Users}
-                            title="Active Staff"
-                            value={metrics?.activeEmployees || 0}
-                            color="purple"
-                            delay="0.2s"
-                        />
-
-                        <StatCard
-                            icon={Truck}
-                            title="Inbound POs"
-                            value={metrics?.inboundPOs || 0}
-                            color="orange"
-                            delay="0.3s"
-                        />
+                        {/* Top Products */}
+                        <div className="lg:col-span-2">
+                            <WidgetErrorBoundary title="Top Products">
+                                <TopProductsWidget products={topProducts} />
+                            </WidgetErrorBoundary>
+                        </div>
                     </div>
-                </div>
+                </DashboardSection>
 
+                {/* 3. NETWORK & RESOURCE MANAGEMENT */}
+                <DashboardSection title="Network & Resource Management" icon={MapIcon} className="col-span-1 md:col-span-4">
+                    <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                        {/* Site Matrix */}
+                        <div className="lg:col-span-2 bg-white/5 backdrop-blur-lg border border-white/10 rounded-3xl p-6 overflow-hidden flex flex-col relative h-[400px]">
+                            <WidgetErrorBoundary title="Network Performance">
+                                <h3 className="font-bold text-white mb-6 flex items-center gap-2">
+                                    <MapIcon className="text-blue-400" size={20} />
+                                    Network Performance
+                                </h3>
+                                <div className="overflow-y-auto custom-scrollbar pr-2">
+                                    <div className="space-y-3">
+                                        {sitePerformance.map((site) => (
+                                            <div key={site.id} className="flex items-center justify-between p-4 bg-white/5 hover:bg-white/10 rounded-2xl transition-all duration-300 border border-white/5 group hover:border-white/20 hover:shadow-lg hover:shadow-black/20 hover:-translate-x-1 cursor-pointer">
+                                                <div className="flex items-center gap-4">
+                                                    <div className={`p-2 rounded-lg ${site.type === 'Warehouse' ? 'bg-purple-500/20 text-purple-400' : 'bg-blue-500/20 text-blue-400'}`}>
+                                                        <Package size={16} />
+                                                    </div>
+                                                    <div>
+                                                        <p className="font-bold text-white text-sm">{site.name}</p>
+                                                        <p className="text-xs text-gray-500 font-mono">{site.type} • {site.staffCount} Staff</p>
+                                                    </div>
+                                                </div>
+                                                <div className="text-right">
+                                                    <p className="font-mono font-bold text-green-400 text-sm">{formatCompactNumber(site.revenue, { currency: CURRENCY_SYMBOL })}</p>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </WidgetErrorBoundary>
+                        </div>
+
+                        {/* KPIs */}
+                        <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <WidgetErrorBoundary title="Staff Efficiency">
+                                <GlassKPICard
+                                    title="Staff Efficiency"
+                                    value={formatCompactNumber(metrics.totalEmployees > 0 ? metrics.totalNetworkRevenue / metrics.totalEmployees : 0, { currency: CURRENCY_SYMBOL })}
+                                    sub="Rev. Per Employee"
+                                    icon={Users}
+                                    color="text-pink-400"
+                                />
+                            </WidgetErrorBoundary>
+                            <WidgetErrorBoundary title="Active Staff">
+                                <GlassKPICard
+                                    title="Active Staff"
+                                    value={metrics?.activeEmployees || 0}
+                                    sub="Currently On-Site"
+                                    icon={Users}
+                                    color="text-purple-400"
+                                />
+                            </WidgetErrorBoundary>
+                            <WidgetErrorBoundary title="Basket Size">
+                                <GlassKPICard
+                                    title="Avg Basket Size"
+                                    value={(allSales?.reduce((acc, sale) => acc + (sale.items?.reduce((iAcc, i) => iAcc + i.quantity, 0) || 0), 0) / (allSales?.length || 1)).toFixed(1) || "0"}
+                                    sub="Items Per Order"
+                                    icon={ShoppingBag}
+                                    color="text-orange-400"
+                                />
+                            </WidgetErrorBoundary>
+                            <WidgetErrorBoundary title="Inbound Velocity">
+                                <GlassKPICard
+                                    title="Arrival Rate"
+                                    value="8.2"
+                                    sub="Shipments / Day"
+                                    icon={Truck}
+                                    color="text-cyan-400"
+                                />
+                            </WidgetErrorBoundary>
+                        </div>
+                    </div>
+                </DashboardSection>
+
+                {/* 4. OPERATIONAL PERFORMANCE & GAMIFICATION */}
+                <PointsPerformanceDashboard
+                    workerPoints={workerPoints}
+                    storePoints={storePoints}
+                />
+
+                {/* 5. SYSTEM MONITORING & AUDIT */}
+                <DashboardSection title="System Monitoring & Audit" icon={Activity} className="col-span-1 md:col-span-4">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[400px]">
+                        <WidgetErrorBoundary title="System Load">
+                            <SystemLoadWidget />
+                        </WidgetErrorBoundary>
+                        <WidgetErrorBoundary title="Live Activity Log">
+                            <ActivityLogWidget logs={systemLogs} />
+                        </WidgetErrorBoundary>
+                    </div>
+                </DashboardSection>
             </div>
+
         </div>
     );
 }

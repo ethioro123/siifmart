@@ -30,6 +30,7 @@ import {
   CheckCircle
 } from 'lucide-react';
 import { useData } from '../contexts/DataContext';
+import { formatDateTime, formatRole } from '../utils/formatting';
 import { useStore } from '../contexts/CentralStore';
 import { brainstormService, type BrainstormNodeDB } from '../services/supabase.service';
 
@@ -290,14 +291,11 @@ export default function Roadmap() {
     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
   });
 
-  // Format date
   const formatDate = (date: string) => {
-    const d = new Date(date);
-    return d.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
+    return formatDateTime(date);
   };
   const formatTime = (date: string) => {
-    const d = new Date(date);
-    return d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    return formatDateTime(date, { showTime: true });
   };
 
   // Access denied for non-super_admin
@@ -310,10 +308,10 @@ export default function Roadmap() {
           </div>
           <h2 className="text-2xl font-bold text-white mb-3">Access Restricted</h2>
           <p className="text-gray-400 mb-6">
-            The Knowledge Base is exclusively available to <span className="text-cyber-primary font-bold">Super Administrators</span>.
+            The Knowledge Base is exclusively available to <span className="text-cyber-primary font-bold">CEOs</span>.
           </p>
           <p className="text-sm text-gray-500">
-            Current role: <span className="text-white">{user?.role || 'Unknown'}</span>
+            Current role: <span className="text-white">{formatRole(user?.role) || 'Unknown'}</span>
           </p>
         </div>
       </div>

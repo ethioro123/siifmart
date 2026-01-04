@@ -37,7 +37,7 @@ import { useData } from './contexts/DataContext';
 
 export default function App() {
   const { user, loading } = useStore();
-  const { cleanupAdminProducts, activeSite } = useData();
+  const { cleanupAdminProducts, isDataInitialLoading, loadError } = useData();
 
   React.useEffect(() => {
     if (native.isNative()) {
@@ -79,11 +79,26 @@ export default function App() {
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [cleanupAdminProducts]);
-
-  if (loading) {
+  if (loading || (user && isDataInitialLoading)) {
     return (
-      <div className="min-h-screen bg-cyber-black flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-cyber-primary"></div>
+      <div className="min-h-screen bg-cyber-black flex flex-col items-center justify-center p-6 text-center">
+        <div className="relative mb-8">
+          <div className="absolute inset-0 bg-cyber-primary/20 blur-3xl rounded-full animate-pulse" />
+          <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-cyber-primary relative z-10"></div>
+        </div>
+        <h2 className="text-xl font-black text-white tracking-[0.2em] uppercase italic mb-2">
+          {loading ? 'Authenticating Pulse' : 'Hydrating Neural Link'}
+        </h2>
+        <p className="text-xs text-cyber-primary/60 font-mono uppercase tracking-widest animate-pulse">
+          {loadError ? 'Retrying Connection...' : 'Synchronizing local databases (100%)'}
+        </p>
+
+        {loadError && (
+          <div className="mt-8 p-4 bg-red-500/10 border border-red-500/20 rounded-xl max-w-sm">
+            <p className="text-[10px] text-red-400 font-mono uppercase tracking-tighter mb-2">Connection Disrupted</p>
+            <p className="text-[11px] text-gray-400">{loadError}</p>
+          </div>
+        )}
       </div>
     );
   }
@@ -99,47 +114,39 @@ export default function App() {
             <Route path="/" element={
               <ProtectedRoute module="dashboard">
                 {(() => {
-                  // --- ROOT PATH REDIRECTION LOGIC ---
-
-                  // 1. Super Admin with NO Active Site -> Central Ops (Admin Dashboard)
-                  // 2. Super Admin WITH Active Site -> Redirect to context-specific dashboard (Store or Warehouse)
-                  if (user?.role === 'super_admin') {
-                    if (activeSite) {
-                      // Contextual Switch: Mimic local manager views
-                      if (['Store', 'Dark Store'].includes(activeSite.type)) {
-                        return <Navigate to="/pos-dashboard" replace />;
-                      }
-                      if (['Warehouse', 'Distribution Center'].includes(activeSite.type)) {
-                        return <Navigate to="/wms-dashboard" replace />;
-                      }
-                    }
-                    // Default Global View
-                    return <Navigate to="/admin" replace />;
+                  // 1. CEO & L2 Directors -> Location Select
+                  const l2Roles = ['regional_manager', 'operations_manager', 'supply_chain_manager'];
+                  if (user?.role === 'super_admin' || l2Roles.includes(user?.role || '')) {
+                    return <Navigate to="/location-select" replace />;
                   }
 
-                  const storeRoles = ['manager', 'pos', 'store_supervisor'];
-                  // Warehouse Roles: Managers get dashboard, Operators get Ops View
-                  const warehouseManagerRoles = ['warehouse_manager'];
-                  const warehouseOpRoles = ['picker', 'driver', 'inventory_specialist'];
+                  // Store Roles (L3 + L4 Store Staff)
+                  const storeRoles = ['store_manager', 'assistant_manager', 'shift_lead', 'cashier', 'sales_associate', 'stock_clerk', 'customer_service', 'manager', 'pos'];
+
+                  // Warehouse Manager Roles (get dashboard)
+                  const warehouseManagerRoles = ['warehouse_manager', 'dispatch_manager'];
+
+                  // Warehouse Operations Roles (get Fulfillment/Ops view)
+                  const warehouseOpRoles = ['picker', 'packer', 'driver', 'receiver', 'forklift_operator', 'inventory_specialist', 'dispatcher'];
 
                   if (warehouseOpRoles.includes(user?.role || '')) {
                     return <Navigate to="/wms-ops" replace />;
                   }
 
-                  if (storeRoles.includes(user?.role || '')) {
-                    return <Navigate to="/pos-dashboard" replace />;
-                  }
                   if (warehouseManagerRoles.includes(user?.role || '')) {
                     return <Navigate to="/wms-dashboard" replace />;
                   }
 
-                  // Fallback for HR/Auditors/etc if they don't have dashboard access
-                  // Redirect to their primary module
-                  if (user?.role === 'hr') return <Navigate to="/employees" replace />;
-                  if (user?.role === 'auditor') return <Navigate to="/finance" replace />;
+                  if (storeRoles.includes(user?.role || '')) {
+                    return <Navigate to="/pos-dashboard" replace />;
+                  }
+
+                  // L2 Specialized Directors
+                  if (user?.role === 'hr_manager' || user?.role === 'hr') return <Navigate to="/employees" replace />;
+                  if (user?.role === 'finance_manager' || user?.role === 'auditor') return <Navigate to="/finance" replace />;
                   if (user?.role === 'procurement_manager') return <Navigate to="/procurement" replace />;
                   if (user?.role === 'it_support') return <Navigate to="/settings" replace />;
-                  if (user?.role === 'cs_manager') return <Navigate to="/sales" replace />; // or customers
+                  if (user?.role === 'admin') return <Navigate to="/admin" replace />;
 
                   return <Navigate to="/admin" replace />; // Default fallback
                 })()}
@@ -147,7 +154,7 @@ export default function App() {
             } />
             {/* Dashboard removed - merged into Admin */}
 
-            {/* Admin Dashboard - Super Admin Only */}
+            {/* Admin Dashboard - CEO Only */}
             <Route path="/admin" element={
               <ProtectedRoute module="admin">
                 <CentralOperations />
@@ -231,6 +238,7 @@ export default function App() {
               </ProtectedRoute>
             } />
 
+
             {/* Settings - HR, Admins */}
             <Route path="/settings" element={
               <ProtectedRoute module="settings">
@@ -238,7 +246,7 @@ export default function App() {
               </ProtectedRoute>
             } />
 
-            {/* Roadmap/Brainstorm Canvas - Super Admin ONLY */}
+            {/* Roadmap/Brainstorm Canvas - CEO ONLY */}
             <Route path="/roadmap" element={
               <ProtectedRoute module="admin">
                 <Roadmap />
@@ -259,14 +267,14 @@ export default function App() {
               </ProtectedRoute>
             } />
 
-            {/* Migration Panel - Super Admin Only */}
+            {/* Migration Panel - CEO Only */}
             <Route path="/migration" element={
               <ProtectedRoute module="settings">
                 <MigrationPanel />
               </ProtectedRoute>
             } />
 
-            {/* Location Selection - Super Admin Only (for Context Switching) */}
+            {/* Location Selection - CEO Only (for Context Switching) */}
             <Route path="/location-select" element={
               <ProtectedRoute module="admin">
                 <LocationSelect />

@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 
 interface ModalProps {
@@ -7,13 +8,21 @@ interface ModalProps {
   title: string;
   children?: React.ReactNode;
   footer?: React.ReactNode;
-  size?: 'sm' | 'md' | 'lg' | 'xl';
+  size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl';
   zIndex?: string;
+  variant?: 'center' | 'side';
 }
 
-export default function Modal({ isOpen, onClose, title, children, footer, size = 'md', zIndex = 'z-[9999]' }: ModalProps) {
-  console.log('🟦 MODAL: Rendering, isOpen=', isOpen, 'title=', title);
-
+export default function Modal({
+  isOpen,
+  onClose,
+  title,
+  children,
+  footer,
+  size = 'md',
+  zIndex = 'z-[9999]',
+  variant = 'center'
+}: ModalProps) {
   // Close on Escape key
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -38,24 +47,24 @@ export default function Modal({ isOpen, onClose, title, children, footer, size =
     md: 'max-w-md',
     lg: 'max-w-2xl',
     xl: 'max-w-4xl',
+    '2xl': 'max-w-6xl',
   };
 
-  return (
-    <div className={`fixed inset-0 ${zIndex} flex items-center justify-center p-4 sm:p-6`}>
+  const isSide = variant === 'side';
+
+  const modalContent = (
+    <div className={`fixed inset-0 ${zIndex} flex ${isSide ? 'justify-end' : 'items-center justify-center'} p-0 sm:p-4`}>
       {/* Backdrop with blur and darken */}
       <div
-        className="absolute inset-0 bg-black/80 backdrop-blur-sm transition-opacity"
-        onClick={(e) => {
-          console.log('🟦 MODAL: Backdrop clicked', e);
-          onClose();
-        }}
+        className="absolute inset-0 bg-black/60 backdrop-blur-[2px] transition-opacity"
+        onClick={onClose}
       />
 
       {/* Modal Content */}
-      <div className={`relative w-full ${sizeClasses[size]} bg-cyber-dark border border-white/10 rounded-2xl shadow-[0_0_50px_rgba(0,0,0,0.5)] transform transition-all animate-in fade-in zoom-in duration-200 flex flex-col max-h-[90vh]`}>
+      <div className={`relative w-full ${isSide ? 'h-full max-w-md rounded-l-3xl rounded-r-none animate-in slide-in-from-right duration-300' : `${sizeClasses[size]} rounded-2xl animate-in fade-in zoom-in duration-200`} bg-cyber-dark border border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.5)] transform transition-all flex flex-col ${isSide ? 'max-h-full' : 'max-h-[90vh]'}`}>
 
         {/* Glow Effect */}
-        <div className="absolute -inset-[1px] bg-gradient-to-r from-transparent via-cyber-primary/20 to-transparent rounded-2xl blur-sm -z-10 pointer-events-none" />
+        <div className={`absolute -inset-[1px] bg-gradient-to-r from-transparent via-cyber-primary/20 to-transparent ${isSide ? 'rounded-l-3xl' : 'rounded-2xl'} blur-sm -z-10 pointer-events-none`} />
 
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-white/5 shrink-0">
@@ -85,4 +94,6 @@ export default function Modal({ isOpen, onClose, title, children, footer, size =
       </div>
     </div>
   );
+
+  return createPortal(modalContent, document.body);
 }

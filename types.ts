@@ -14,7 +14,31 @@ declare global {
   }
 }
 
-export type UserRole = 'super_admin' | 'admin' | 'manager' | 'warehouse_manager' | 'dispatcher' | 'pos' | 'picker' | 'packer' | 'hr' | 'auditor' | 'driver' | 'finance_manager' | 'procurement_manager' | 'store_supervisor' | 'inventory_specialist' | 'cs_manager' | 'it_support';
+// ═══════════════════════════════════════════════════════════════
+// USER ROLES - 4-Level Hierarchy for Multi-Store/Warehouse Operations
+// ═══════════════════════════════════════════════════════════════
+// Level 1: Executive
+// Level 2: Regional/Directors  
+// Level 3: Site Managers
+// Level 4: Staff
+
+export type UserRole =
+  // Level 1 - Executive
+  | 'super_admin'
+  // Level 2 - Regional/Directors
+  | 'regional_manager' | 'operations_manager' | 'finance_manager'
+  | 'hr_manager' | 'procurement_manager' | 'supply_chain_manager'
+  // Level 3 - Site Managers
+  | 'store_manager' | 'warehouse_manager' | 'dispatch_manager'
+  | 'assistant_manager' | 'shift_lead' | 'store_supervisor'
+  // Level 4 - Staff
+  | 'cashier' | 'sales_associate' | 'stock_clerk' | 'picker' | 'packer'
+  | 'receiver' | 'driver' | 'forklift_operator' | 'inventory_specialist'
+  | 'customer_service' | 'auditor' | 'it_support'
+  // Legacy roles (for backwards compatibility during migration)
+  | 'admin' | 'manager' | 'hr' | 'pos' | 'dispatcher'
+  | 'cs_manager' | 'returns_clerk' | 'merchandiser' | 'loss_prevention'
+  | 'accountant' | 'data_analyst' | 'training_coordinator';
 export type ThemeMode = 'dark' | 'light';
 export type PaymentMethod = 'Cash' | 'Card' | 'Mobile Money';
 
@@ -47,6 +71,19 @@ export interface SystemLog {
 
 export type SiteType = 'Administration' | 'Administrative' | 'Central Operations' | 'Warehouse' | 'Store' | 'Distribution Center' | 'Dark Store' | 'HQ' | 'Headquarters';
 
+export interface TaxRule {
+  name: string;
+  rate: number;
+  compound: boolean;
+}
+
+export interface TaxJurisdiction {
+  id: string;
+  name: string;
+  type: 'National' | 'Region';
+  rules: TaxRule[];
+}
+
 export interface Site {
   id: string;
   code: string; // Simplified Display ID (e.g., "001", "ADM")
@@ -64,7 +101,21 @@ export interface Site {
   // Gamification settings
   bonusEnabled?: boolean; // Whether this site earns POS team bonuses (default: true)
   warehouseBonusEnabled?: boolean; // Whether this site earns warehouse worker bonuses (default: true)
+
+  // Warehouse Structure Configuration
+  zoneCount?: number;
+  aisleCount?: number;
+  binCount?: number;
+
+  // Tax configuration
+  taxJurisdictionId?: string; // Links this site to a specific tax jurisdiction
+
+  // Fulfillment & Picking Control
+  fulfillmentStrategy?: FulfillmentStrategy;
+  isFulfillmentNode?: boolean;
 }
+
+export type FulfillmentStrategy = 'LOCAL_ONLY' | 'NEAREST' | 'SPLIT' | 'MANUAL';
 
 export interface SystemConfig {
   storeName: string;
@@ -74,16 +125,26 @@ export interface SystemConfig {
   binScan: boolean;
   lowStockThreshold: number;
   enableLoyalty: boolean;
+  loyaltyPointsRate?: number; // ETB spent per 1 loyalty point earned (0 or undefined = disabled)
   enableWMS: boolean;
   multiCurrency: boolean;
   requireShiftClosure: boolean;
+  taxJurisdictions?: TaxJurisdiction[];
+  timezone?: string;
+  dateFormat?: 'DD/MM/YYYY' | 'MM/DD/YYYY' | 'YYYY-MM-DD';
+  numberFormat?: '1,000.00' | '1.000,00';
+  language?: string;
   // Branding
+  logoUrl?: string;
   slogan?: string;
   brandColor?: string;
   // Legal & Contact
   legalBusinessName?: string;
+  taxVatNumber?: string;
   registeredAddress?: string;
+  supportContact?: string;
   supportPhone?: string;
+  exchangeRates?: { code: string; rate: number }[];
   // POS
   posReceiptHeader?: string;
   posReceiptFooter?: string;
@@ -93,6 +154,18 @@ export interface SystemConfig {
   posBlockNegativeStock?: boolean;
   posDigitalReceipts?: boolean;
   posAutoPrint?: boolean;
+  posReceiptLogo?: string;
+  posReceiptShowLogo?: boolean;
+  posReceiptAddress?: string;
+  posReceiptPhone?: string;
+  posReceiptEmail?: string;
+  posReceiptTaxId?: string;
+  posReceiptPolicy?: string;
+  posReceiptSocialHandle?: string;
+  posReceiptEnableQR?: boolean;
+  posReceiptQRLink?: string;
+  posReceiptWidth?: '80mm' | '58mm';
+  posReceiptFont?: 'monospace' | 'sans-serif';
   payment_cash?: boolean;
   payment_card?: boolean;
   payment_mobile_money?: boolean;
@@ -121,19 +194,13 @@ export interface SystemConfig {
 
   // Advanced
   reserveStockBuffer?: number;
-  language?: string;
-  timezone?: string;
-  dateFormat?: 'DD/MM/YYYY' | 'MM/DD/YYYY' | 'YYYY-MM-DD';
-  numberFormat?: '1,000.00' | '1.000,00';
-  // Additional Settings
-  logoUrl?: string;
-  taxVatNumber?: string;
-  supportContact?: string;
   webhookOrderCreated?: string;
   webhookInventoryLow?: string;
   webhookCustomerSignup?: string;
   scaleIpAddress?: string;
   scannerComPort?: string;
+  defaultPrinter?: string;
+  scaleUnit?: 'KG' | 'LBS';
   // Gamification & Bonus Settings (Warehouse)
   bonusEnabled?: boolean;
   bonusPayoutFrequency?: 'weekly' | 'biweekly' | 'monthly';
@@ -534,6 +601,9 @@ export interface WarehouseZone {
   site_id?: string; // Supabase compatibility
   temperature?: string;
   type: 'Dry' | 'Cold' | 'Secure';
+  pickingPriority: number; // Lower = Higher Priority
+  zoneType: string; // Advanced type override
+  status: 'Active' | 'Maintenance';
 }
 
 export interface StockMovement {
@@ -558,18 +628,21 @@ export interface JobItem {
   image: string;
   expectedQty: number;
   pickedQty: number;
-  status: 'Pending' | 'Picked' | 'Short' | 'Skipped' | 'Completed';
+  status: 'Pending' | 'Picked' | 'Short' | 'Skipped' | 'Completed' | 'Resolved' | 'Discrepancy' | 'Discontinued';
   batchNumber?: string;
   expiryDate?: string;
+  receivedQty?: number;
+  condition?: 'Good' | 'Damaged' | 'Short';
+  receivedAt?: string;
 }
 
 export interface WMSJob {
   id: string;
   siteId: string;
   site_id?: string; // Supabase compatibility - Warehouse/Site where job is fulfilled
-  type: 'PICK' | 'PACK' | 'PUTAWAY' | 'TRANSFER' | 'DISPATCH';
+  type: 'PICK' | 'PACK' | 'PUTAWAY' | 'TRANSFER' | 'DISPATCH' | 'REPLENISH' | 'COUNT' | 'WASTE' | 'RETURNS' | 'DRIVER';
   priority: 'Critical' | 'High' | 'Normal';
-  status: 'Pending' | 'In-Progress' | 'Completed';
+  status: 'Pending' | 'In-Progress' | 'Completed' | 'Cancelled';
   items: number;
   items_count?: number; // Compatibility alias
   lineItems: JobItem[];
@@ -577,22 +650,26 @@ export interface WMSJob {
   assignedTo?: string;
   location: string;
   orderRef: string;
+  notes?: string;
   sourceSiteId?: string; // Store/Site where order was placed / items shipped FROM
   source_site_id?: string; // Supabase compatibility
   destSiteId?: string; // Store/Site where goods are going / items shipped TO
   dest_site_id?: string; // Supabase compatibility
   jobNumber?: string; // Friendly ID (e.g., JOB-0001)
   // Transfer-specific fields
-  transferStatus?: 'Requested' | 'Approved' | 'Picking' | 'Picked' | 'Packed' | 'In-Transit' | 'Delivered' | 'Received';
+  transferStatus?: 'Requested' | 'Approved' | 'Picking' | 'Picked' | 'Packed' | 'Shipped' | 'In-Transit' | 'Delivered' | 'Received' | 'Completed' | 'Cancelled' | 'Rejected';
   requestedBy?: string; // Who requested the transfer
   approvedBy?: string; // Who approved the transfer
   shippedAt?: string; // When items were shipped
   receivedAt?: string; // When items were received at destination
   trackingNumber?: string; // Optional tracking/reference number
+  hasDiscrepancy?: boolean;
+  discrepancyDetails?: string;
   createdAt?: string;
   created_at?: string; // Supabase compatibility
   updatedAt?: string;
   updated_at?: string; // Supabase compatibility
+  deliveryMethod?: 'Internal' | 'External';
 }
 
 export type JobAssignmentStatus = 'Assigned' | 'Accepted' | 'In-Progress' | 'Paused' | 'Completed' | 'Cancelled';
@@ -690,7 +767,7 @@ export interface PointsTransaction {
   employeeId: string;
   jobId?: string;
   points: number;
-  type: 'job_complete' | 'bonus' | 'achievement' | 'speed_bonus' | 'accuracy_bonus' | 'streak_bonus';
+  type: 'JOB_COMPLETE' | 'BONUS' | 'ACHIEVEMENT' | 'SPEED_BONUS' | 'ACCURACY_BONUS' | 'STREAK_BONUS';
   description: string;
   timestamp: string;
 }
@@ -841,6 +918,22 @@ export interface EmployeeTask {
   status: 'Pending' | 'In-Progress' | 'Completed';
   priority: 'High' | 'Medium' | 'Low';
   dueDate: string;
+  createdBy?: string; // Employee ID or name of who created the task
+}
+
+export interface StaffSchedule {
+  id: string;
+  siteId: string;
+  employeeId: string;
+  employeeName: string;
+  date: string; // YYYY-MM-DD
+  startTime: string; // HH:mm
+  endTime: string; // HH:mm
+  role: string; // Role for this specific shift
+  notes?: string;
+  status: 'Scheduled' | 'Confirmed' | 'Completed' | 'Cancelled';
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface AttendanceRecord {
@@ -894,6 +987,7 @@ export interface SaleRecord {
 
   subtotal: number;
   tax: number;
+  taxBreakdown?: { name: string; rate: number; amount: number; compound: boolean }[];
   total: number;
   method: PaymentMethod;
   status: 'Completed' | 'Pending' | 'Refunded' | 'Partially Refunded';
@@ -907,6 +1001,7 @@ export interface SaleRecord {
   customerName?: string;
   customer_name?: string;
   fulfillmentStatus?: 'Pending' | 'Picking' | 'Packing' | 'Shipped' | 'Delivered';
+  release_status?: 'AUTOMATIC' | 'PENDING' | 'RELEASED';
   receiptNumber?: string; // Friendly ID (e.g., REC-0001)
 }
 
@@ -941,10 +1036,14 @@ export interface ShiftRecord {
   endTime?: string;
   openingFloat: number;
   cashSales: number;
+  cardSales?: number;
+  mobileSales?: number;
+  expenses?: number;
   expectedCash?: number;
   actualCash?: number;
   variance?: number;
-  notes?: string;
+  denominations?: Record<string, number>;
+  discrepancyReason?: string;
   status: 'Open' | 'Closed';
 }
 
@@ -982,9 +1081,12 @@ export interface TransferItem {
   name: string;
   productName?: string;
   quantity: number;
+  receivedQty?: number;
+  condition?: 'Good' | 'Damaged' | 'Short';
+  receivedAt?: string;
 }
 
-export type TransferStatus = 'Requested' | 'Approved' | 'In-Transit' | 'Delivered' | 'Completed' | 'Rejected' | 'Received';
+export type TransferStatus = 'Requested' | 'Approved' | 'In-Transit' | 'Delivered' | 'Completed' | 'Rejected' | 'Received' | 'Cancelled';
 
 export interface TransferRecord {
   id: string;
@@ -997,6 +1099,9 @@ export interface TransferRecord {
   date: string;
   items: TransferItem[];
   notes?: string;
+  createdAt?: string;
+  hasDiscrepancy?: boolean;
+  discrepancyDetails?: string;
 }
 
 export enum NavSection {
@@ -1008,4 +1113,115 @@ export enum NavSection {
   SETTINGS = 'settings',
   EMPLOYEES = 'employees',
   FINANCE = 'finance'
+}
+
+// ═══════════════════════════════════════════════════════════════
+// DISCREPANCY RESOLUTION SYSTEM
+// ═══════════════════════════════════════════════════════════════
+
+export type DiscrepancyType = 'shortage' | 'overage' | 'damaged' | 'wrong_item' | 'missing';
+export type ResolutionType = 'accept' | 'investigate' | 'claim' | 'adjust' | 'reject' | 'recount' | 'dispose' | 'replace';
+export type ResolutionStatus = 'pending' | 'in_progress' | 'approved' | 'rejected' | 'closed';
+
+export interface DiscrepancyResolution {
+  id: string;
+  transferId: string;
+  transfer_id?: string; // Supabase compatibility
+  lineItemIndex: number;
+  line_item_index?: number; // Supabase compatibility
+  productId: string;
+  product_id?: string; // Supabase compatibility
+
+  expectedQty: number;
+  expected_qty?: number; // Supabase compatibility
+  receivedQty: number;
+  received_qty?: number; // Supabase compatibility
+  variance: number;
+  discrepancyType: DiscrepancyType;
+  discrepancy_type?: DiscrepancyType; // Supabase compatibility
+
+  resolveQty?: number;
+  resolve_qty?: number; // Supabase compatibility
+
+  resolutionType: ResolutionType;
+  resolution_type?: ResolutionType; // Supabase compatibility
+  resolutionStatus: ResolutionStatus;
+  resolution_status?: ResolutionStatus; // Supabase compatibility
+  resolutionNotes?: string;
+  resolution_notes?: string; // Supabase compatibility
+  reasonCode?: string;
+  reason_code?: string; // Supabase compatibility
+
+  estimatedValue?: number;
+  estimated_value?: number; // Supabase compatibility
+  claimAmount?: number;
+  claim_amount?: number; // Supabase compatibility
+
+  photoUrls?: string[];
+  photo_urls?: string[]; // Supabase compatibility
+
+  replacementJobId?: string;
+  replacement_job_id?: string; // Supabase compatibility
+
+  reportedBy?: string;
+  reported_by?: string; // Supabase compatibility
+  resolvedBy?: string;
+  resolved_by?: string; // Supabase compatibility
+  approvedBy?: string;
+  approved_by?: string; // Supabase compatibility
+
+  createdAt: string;
+  created_at?: string; // Supabase compatibility
+  resolvedAt?: string;
+  resolved_at?: string; // Supabase compatibility
+
+  siteId?: string;
+  site_id?: string; // Supabase compatibility
+}
+
+export interface FulfillmentPlan {
+  siteId: string;
+  items: {
+    productId: string;
+    sku: string;
+    name: string;
+    quantity: number;
+    sourceSiteId: string;
+    zoneId?: string;
+  }[];
+  isSplit: boolean;
+  strategy: FulfillmentStrategy;
+}
+
+export interface DiscrepancyClaim {
+  id: string;
+  resolutionId: string;
+  resolution_id?: string; // Supabase compatibility
+
+  claimType: 'carrier' | 'supplier' | 'internal';
+  claim_type?: 'carrier' | 'supplier' | 'internal'; // Supabase compatibility
+  claimNumber?: string;
+  claim_number?: string; // Supabase compatibility
+  claimStatus: 'submitted' | 'under_review' | 'approved' | 'denied' | 'paid';
+  claim_status?: 'submitted' | 'under_review' | 'approved' | 'denied' | 'paid'; // Supabase compatibility
+
+  claimAmount: number;
+  claim_amount?: number; // Supabase compatibility
+  approvedAmount?: number;
+  approved_amount?: number; // Supabase compatibility
+
+  submittedAt: string;
+  submitted_at?: string; // Supabase compatibility
+  reviewedAt?: string;
+  reviewed_at?: string; // Supabase compatibility
+  paidAt?: string;
+  paid_at?: string; // Supabase compatibility
+
+  carrierName?: string;
+  carrier_name?: string; // Supabase compatibility
+  trackingNumber?: string;
+  tracking_number?: string; // Supabase compatibility
+
+  documents?: any;
+  notes?: string;
 }

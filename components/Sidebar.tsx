@@ -4,7 +4,7 @@ import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard, ShoppingCart, Package, Truck, Users,
   Briefcase, Map, Settings, X, FileText, ClipboardList, Tags, Eye,
-  DollarSign, Globe, Activity
+  DollarSign, Globe, Activity, Sliders
 } from 'lucide-react';
 import { useStore } from '../contexts/CentralStore';
 import { useData } from '../contexts/DataContext';
@@ -53,7 +53,7 @@ export default function Sidebar() {
   // Map each nav item to its required permission section
   const getNavItems = (userRole: UserRole) => {
     const allItems = [
-      // CENTRAL OPERATIONS - Super Admin Only
+      // CENTRAL OPERATIONS - CEO Only
       { to: "/admin", icon: Activity, label: "Central Operations", section: "dashboard", roles: ['super_admin'] },
 
       // POS
@@ -76,6 +76,8 @@ export default function Sidebar() {
 
       // FULFILLMENT (WMS) - Warehouse staff only
       { to: "/wms-ops", icon: ClipboardList, label: "Fulfillment", section: "warehouse", roles: ['warehouse_manager', 'dispatcher', 'picker', 'driver', 'inventory_specialist'] },
+
+      // PICKING CONTROL - Admins and Warehouse Managers
 
       // PROCUREMENT - Warehouse and procurement only
       { to: "/procurement", icon: Truck, label: "Procurement", section: "procurement", roles: ['super_admin', 'warehouse_manager', 'dispatcher', 'procurement_manager', 'finance_manager'] },
@@ -155,9 +157,9 @@ export default function Sidebar() {
 
   return (
     <>
-      {/* Mobile Overlay */}
+      {/* Mobile Overlay - Only visible on small screens to prevent "dark thing" effect on desktop */}
       <div
-        className={`fixed inset-0 bg-black/80 z-40 transition-opacity ${isSidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+        className={`fixed inset-0 bg-black/40 lg:bg-black/20 z-40 backdrop-blur-sm lg:backdrop-blur-none transition-opacity duration-500 ${isSidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
         onClick={toggleSidebar}
       />
 
@@ -178,7 +180,13 @@ export default function Sidebar() {
         <nav className="flex-1 px-4 space-y-2 overflow-y-auto custom-scrollbar">
           <p className="px-4 text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Menu</p>
           {navItems.map(item => (
-            <SidebarItem key={item.to} to={item.to} icon={item.icon} label={item.label} onClick={toggleSidebar} />
+            <SidebarItem
+              key={item.to}
+              to={item.to}
+              icon={item.icon}
+              label={item.label}
+              onClick={toggleSidebar}
+            />
           ))}
         </nav>
 

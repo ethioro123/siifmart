@@ -1,5 +1,6 @@
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { formatDateTime } from './formatting';
 
 interface ReportMetrics {
     totalRevenue?: number;
@@ -27,7 +28,7 @@ export const generateQuarterlyReport = (
 
         doc.setFontSize(10);
         doc.setTextColor(100, 100, 100); // Grey
-        doc.text(`Generated: ${new Date().toLocaleDateString()}`, 14, 26);
+        doc.text(`Generated: ${formatDateTime(new Date(), { showTime: true })}`, 14, 26);
 
         // -- Title --
         doc.setFontSize(16);

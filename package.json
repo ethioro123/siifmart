@@ -13,7 +13,10 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.84.0",
+    "@types/dagre": "^0.7.53",
     "@types/qrcode": "^1.5.6",
+    "@xyflow/react": "^12.10.0",
+    "dagre": "^0.8.5",
     "dotenv": "^17.2.3",
     "framer-motion": "^12.23.26",
     "heic2any": "^0.0.4",
@@ -21,6 +24,7 @@
     "jspdf": "^3.0.4",
     "jspdf-autotable": "^5.0.2",
     "jsqr": "^1.4.0",
+    "konva": "^10.0.12",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.554.0",
     "pg": "^8.16.3",
@@ -29,9 +33,13 @@
     "react-barcode": "^1.6.1",
     "react-dom": "^19.2.0",
     "react-easy-crop": "^5.5.6",
+    "react-is": "^19.2.3",
+    "react-konva": "^19.2.1",
     "react-leaflet": "^5.0.0",
     "react-router-dom": "^7.9.6",
+    "react-zoom-pan-pinch": "^3.7.0",
     "recharts": "^3.4.1",
+    "use-image": "^1.1.4",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {

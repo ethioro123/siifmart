@@ -52,7 +52,7 @@ export const MOCK_USERS: User[] = [
   {
     id: 'u2',
     name: 'Sara Tesfaye',
-    role: 'admin',
+    role: 'operations_manager',
     avatar: 'https://ui-avatars.com/api/?name=Sara+Tesfaye&background=6366F1&color=fff',
     title: 'System Administrator',
     siteId: 'Administration'
@@ -60,7 +60,7 @@ export const MOCK_USERS: User[] = [
   {
     id: 'u3',
     name: 'Tigist Alemayehu',
-    role: 'hr',
+    role: 'hr_manager',
     avatar: 'https://ui-avatars.com/api/?name=Tigist+Alemayehu&background=EC4899&color=fff',
     title: 'HR Manager',
     siteId: 'Administration'
@@ -84,7 +84,7 @@ export const MOCK_USERS: User[] = [
   {
     id: 'u6',
     name: 'Selamawit Girma',
-    role: 'cs_manager',
+    role: 'customer_service',
     avatar: 'https://ui-avatars.com/api/?name=Selamawit+Girma&background=8B5CF6&color=fff',
     title: 'Customer Service Manager',
     siteId: 'Administration'
@@ -120,7 +120,7 @@ export const MOCK_USERS: User[] = [
   {
     id: 'u10',
     name: 'Betelhem Bekele',
-    role: 'dispatcher',
+    role: 'dispatch_manager',
     avatar: 'https://ui-avatars.com/api/?name=Betelhem+Bekele&background=7C3AED&color=fff',
     title: 'Warehouse Dispatcher',
     siteId: 'WH-001'
@@ -156,7 +156,7 @@ export const MOCK_USERS: User[] = [
   {
     id: 'u14',
     name: 'Abdi Rahman',
-    role: 'manager',
+    role: 'store_manager',
     avatar: 'https://ui-avatars.com/api/?name=Abdi+Rahman&background=0D9488&color=fff',
     title: 'Store Manager',
     siteId: 'ST-001'
@@ -164,7 +164,7 @@ export const MOCK_USERS: User[] = [
   {
     id: 'u15',
     name: 'Sara Bekele',
-    role: 'store_supervisor',
+    role: 'shift_lead',
     avatar: 'https://ui-avatars.com/api/?name=Sara+Bekele&background=C026D3&color=fff',
     title: 'Store Supervisor',
     siteId: 'ST-001'
@@ -172,7 +172,7 @@ export const MOCK_USERS: User[] = [
   {
     id: 'u16',
     name: 'Tomas Tesfaye',
-    role: 'pos',
+    role: 'cashier',
     avatar: 'https://ui-avatars.com/api/?name=Tomas+Tesfaye&background=0284C7&color=fff',
     title: 'Cashier',
     siteId: 'ST-001'
@@ -184,7 +184,7 @@ export const MOCK_USERS: User[] = [
   {
     id: 'u17',
     name: 'Sara Mohammed',
-    role: 'manager',
+    role: 'store_manager',
     avatar: 'https://ui-avatars.com/api/?name=Sara+Mohammed&background=7C3AED&color=fff',
     title: 'Store Manager',
     siteId: 'ST-002'
@@ -192,7 +192,7 @@ export const MOCK_USERS: User[] = [
   {
     id: 'u18',
     name: 'Helen Kebede',
-    role: 'store_supervisor',
+    role: 'shift_lead',
     avatar: 'https://ui-avatars.com/api/?name=Helen+Kebede&background=16A34A&color=fff',
     title: 'Store Supervisor',
     siteId: 'ST-002'
@@ -200,7 +200,7 @@ export const MOCK_USERS: User[] = [
   {
     id: 'u19',
     name: 'Tomas Dinka',
-    role: 'pos',
+    role: 'cashier',
     avatar: 'https://ui-avatars.com/api/?name=Tomas+Dinka&background=CA8A04&color=fff',
     title: 'Cashier',
     siteId: 'ST-002'
@@ -212,7 +212,7 @@ export const MOCK_USERS: User[] = [
   {
     id: 'u20',
     name: 'Hanna Girma',
-    role: 'manager',
+    role: 'store_manager',
     avatar: 'https://ui-avatars.com/api/?name=Hanna+Girma&background=DB2777&color=fff',
     title: 'Store Manager',
     siteId: 'ST-003'
@@ -220,7 +220,7 @@ export const MOCK_USERS: User[] = [
   {
     id: 'u21',
     name: 'Yonas Tadesse',
-    role: 'store_supervisor',
+    role: 'shift_lead',
     avatar: 'https://ui-avatars.com/api/?name=Yonas+Tadesse&background=2563EB&color=fff',
     title: 'Store Supervisor',
     siteId: 'ST-003'
@@ -228,7 +228,7 @@ export const MOCK_USERS: User[] = [
   {
     id: 'u22',
     name: 'Kebede Alemu',
-    role: 'pos',
+    role: 'cashier',
     avatar: 'https://ui-avatars.com/api/?name=Kebede+Alemu&background=F97316&color=fff',
     title: 'Cashier',
     siteId: 'ST-003'
@@ -240,7 +240,7 @@ export const MOCK_USERS: User[] = [
   {
     id: 'u23',
     name: 'Ahmed Hassan',
-    role: 'manager',
+    role: 'store_manager',
     avatar: 'https://ui-avatars.com/api/?name=Ahmed+Hassan&background=0891B2&color=fff',
     title: 'Store Manager',
     siteId: 'ST-004'
@@ -248,7 +248,7 @@ export const MOCK_USERS: User[] = [
   {
     id: 'u24',
     name: 'Meseret Tadesse',
-    role: 'store_supervisor',
+    role: 'shift_lead',
     avatar: 'https://ui-avatars.com/api/?name=Meseret+Tadesse&background=A855F7&color=fff',
     title: 'Store Supervisor',
     siteId: 'ST-004'
@@ -256,7 +256,7 @@ export const MOCK_USERS: User[] = [
   {
     id: 'u25',
     name: 'Dawit Bekele',
-    role: 'pos',
+    role: 'cashier',
     avatar: 'https://ui-avatars.com/api/?name=Dawit+Bekele&background=14B8A6&color=fff',
     title: 'Cashier',
     siteId: 'ST-004'
@@ -268,7 +268,7 @@ export const MOCK_USERS: User[] = [
   {
     id: 'u26',
     name: 'Solomon Tesfaye',
-    role: 'manager',
+    role: 'store_manager',
     avatar: 'https://ui-avatars.com/api/?name=Solomon+Tesfaye&background=DC2626&color=fff',
     title: 'Store Manager',
     siteId: 'ST-005'
@@ -276,7 +276,7 @@ export const MOCK_USERS: User[] = [
   {
     id: 'u27',
     name: 'Almaz Haile',
-    role: 'store_supervisor',
+    role: 'shift_lead',
     avatar: 'https://ui-avatars.com/api/?name=Almaz+Haile&background=EC4899&color=fff',
     title: 'Store Supervisor',
     siteId: 'ST-005'
@@ -284,7 +284,7 @@ export const MOCK_USERS: User[] = [
   {
     id: 'u28',
     name: 'Yared Girma',
-    role: 'pos',
+    role: 'cashier',
     avatar: 'https://ui-avatars.com/api/?name=Yared+Girma&background=8B5CF6&color=fff',
     title: 'Cashier',
     siteId: 'ST-005'
@@ -296,7 +296,7 @@ export const MOCK_USERS: User[] = [
   {
     id: 'u29',
     name: 'Fatima Yusuf',
-    role: 'manager',
+    role: 'store_manager',
     avatar: 'https://ui-avatars.com/api/?name=Fatima+Yusuf&background=EA580C&color=fff',
     title: 'Store Manager',
     siteId: 'ST-006'
@@ -304,7 +304,7 @@ export const MOCK_USERS: User[] = [
   {
     id: 'u30',
     name: 'Biruk Tesfaye',
-    role: 'store_supervisor',
+    role: 'shift_lead',
     avatar: 'https://ui-avatars.com/api/?name=Biruk+Tesfaye&background=10B981&color=fff',
     title: 'Store Supervisor',
     siteId: 'ST-006'
@@ -312,7 +312,7 @@ export const MOCK_USERS: User[] = [
   {
     id: 'u31',
     name: 'Selam Bekele',
-    role: 'pos',
+    role: 'cashier',
     avatar: 'https://ui-avatars.com/api/?name=Selam+Bekele&background=3B82F6&color=fff',
     title: 'Cashier',
     siteId: 'ST-006'
@@ -624,7 +624,7 @@ export const MOCK_EMPLOYEES: Employee[] = [
     id: 'EMP-017', code: 'SIIF-017',
     siteId: 'ST-001',
     name: 'Abdi Rahman',
-    role: 'manager',
+    role: 'store_manager',
     email: 'abdi.rahman@siifmart.com',
     phone: '+251 911 000 017',
     status: 'Active',
@@ -641,7 +641,7 @@ export const MOCK_EMPLOYEES: Employee[] = [
     id: 'EMP-018', code: 'SIIF-018',
     siteId: 'ST-001',
     name: 'Sara Bekele',
-    role: 'store_supervisor',
+    role: 'shift_lead',
     email: 'sara.bekele@siifmart.com',
     phone: '+251 911 000 018',
     status: 'Active',
@@ -658,7 +658,7 @@ export const MOCK_EMPLOYEES: Employee[] = [
     id: 'EMP-019', code: 'SIIF-019',
     siteId: 'ST-001',
     name: 'Tomas Tesfaye',
-    role: 'pos',
+    role: 'cashier',
     email: 'tomas.tesfaye@siifmart.com',
     phone: '+251 911 000 019',
     status: 'Active',
@@ -675,7 +675,7 @@ export const MOCK_EMPLOYEES: Employee[] = [
     id: 'EMP-020', code: 'SIIF-020',
     siteId: 'ST-001',
     name: 'Tomas Dinka',
-    role: 'pos',
+    role: 'cashier',
     email: 'tomas.dinka@siifmart.com',
     phone: '+251 911 000 020',
     status: 'Active',
@@ -696,7 +696,7 @@ export const MOCK_EMPLOYEES: Employee[] = [
     id: 'EMP-021', code: 'SIIF-021',
     siteId: 'ST-002',
     name: 'Sara Mohammed',
-    role: 'manager',
+    role: 'store_manager',
     email: 'sara.mohammed@siifmart.com',
     phone: '+251 911 000 021',
     status: 'Active',
@@ -713,7 +713,7 @@ export const MOCK_EMPLOYEES: Employee[] = [
     id: 'EMP-022', code: 'SIIF-022',
     siteId: 'ST-003',
     name: 'Hanna Girma',
-    role: 'manager',
+    role: 'store_manager',
     email: 'hanna.girma@siifmart.com',
     phone: '+251 911 000 022',
     status: 'Active',
@@ -730,7 +730,7 @@ export const MOCK_EMPLOYEES: Employee[] = [
     id: 'EMP-023', code: 'SIIF-023',
     siteId: 'ST-004',
     name: 'Ahmed Hassan',
-    role: 'manager',
+    role: 'store_manager',
     email: 'ahmed.hassan@siifmart.com',
     phone: '+251 911 000 023',
     status: 'Active',
@@ -747,7 +747,7 @@ export const MOCK_EMPLOYEES: Employee[] = [
     id: 'EMP-024', code: 'SIIF-024',
     siteId: 'ST-005',
     name: 'Solomon Tesfaye',
-    role: 'manager',
+    role: 'store_manager',
     email: 'solomon.tesfaye@siifmart.com',
     phone: '+251 911 000 024',
     status: 'Active',
@@ -764,7 +764,7 @@ export const MOCK_EMPLOYEES: Employee[] = [
     id: 'EMP-025', code: 'SIIF-025',
     siteId: 'ST-006',
     name: 'Fatima Yusuf',
-    role: 'manager',
+    role: 'store_manager',
     email: 'fatima.yusuf@siifmart.com',
     phone: '+251 911 000 025',
     status: 'Active',
@@ -785,7 +785,7 @@ export const MOCK_EMPLOYEES: Employee[] = [
     id: 'EMP-026', code: 'SIIF-026',
     siteId: 'ST-002',
     name: 'Helen Kebede',
-    role: 'store_supervisor',
+    role: 'shift_lead',
     email: 'helen.kebede@siifmart.com',
     phone: '+251 911 000 026',
     status: 'Active',
@@ -802,7 +802,7 @@ export const MOCK_EMPLOYEES: Employee[] = [
     id: 'EMP-027', code: 'SIIF-027',
     siteId: 'ST-003',
     name: 'Yonas Tadesse',
-    role: 'store_supervisor',
+    role: 'shift_lead',
     email: 'yonas.tadesse@siifmart.com',
     phone: '+251 911 000 027',
     status: 'Active',

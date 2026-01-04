@@ -1,4 +1,4 @@
--- UPDATED: Create brainstorm_nodes table for Super Admin canvas
+-- UPDATED: Create brainstorm_nodes table for CEO canvas
 -- Run this in your Supabase SQL Editor
 
 -- Drop table if exists (for clean reinstall)
@@ -40,4 +40,4 @@ ALTER TABLE brainstorm_nodes ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow all access to brainstorm_nodes" ON brainstorm_nodes
     FOR ALL USING (true) WITH CHECK (true);
 
-COMMENT ON TABLE brainstorm_nodes IS 'Brainstorming canvas nodes for super admin strategic planning with advanced features';
+COMMENT ON TABLE brainstorm_nodes IS 'Brainstorming canvas nodes for CEO strategic planning with advanced features';

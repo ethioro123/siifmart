@@ -8,6 +8,7 @@ import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 import { SaleRecord, ExpenseRecord, Employee } from '../types';
 import { CURRENCY_SYMBOL } from '../constants';
+import { formatDateTime } from './formatting';
 
 /**
  * Export Profit & Loss Statement as PDF
@@ -46,7 +47,7 @@ export function exportPnLToPDF(
 
     doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
-    doc.text(`Generated: ${new Date().toLocaleString()}`, 105, 28, { align: 'center' });
+    doc.text(`Generated: ${formatDateTime(new Date(), { showTime: true })}`, 105, 28, { align: 'center' });
     doc.text(`Tax Region: ${taxData.region} (${taxData.rate}%)`, 105, 34, { align: 'center' });
 
     // Revenue Section
@@ -175,7 +176,7 @@ export function exportExpensesToExcel(
 ) {
     // Prepare main data
     const data = expenses.map(exp => ({
-        'Date': new Date(exp.date).toLocaleDateString(),
+        'Date': formatDateTime(exp.date),
         'Category': exp.category,
         'Description': exp.description,
         'Amount': exp.amount,
@@ -231,7 +232,7 @@ export function exportExpensesToExcel(
 
     // Group by month
     const byMonth = expenses.reduce((acc, exp) => {
-        const month = new Date(exp.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long' });
+        const month = formatDateTime(exp.date, { includeYear: true }).split(' ').slice(0, 2).join(' '); // Rough approximation for "Month Year"
         acc[month] = (acc[month] || 0) + exp.amount;
         return acc;
     }, {} as Record<string, number>);
@@ -259,7 +260,7 @@ export function exportCashFlowToExcel(
     filename: string = 'cashflow_projection.xlsx'
 ) {
     const data = projections.map(p => ({
-        'Date': new Date(p.date).toLocaleDateString(),
+        'Date': formatDateTime(p.date),
         'Cash Inflow': p.inflow,
         'Cash Outflow': p.outflow,
         'Net Cash Flow': p.netCashFlow,

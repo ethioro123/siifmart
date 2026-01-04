@@ -13,43 +13,53 @@ const SectionHeader = ({ title, desc }: { title: string, desc: string }) => (
     </div>
 );
 
-const InputGroup = ({ label, type = "text", value, onChange, placeholder, sub, icon: Icon }: any) => (
-    <div className="group">
-        <label className="text-xs text-gray-400 font-bold uppercase tracking-wide mb-2 block group-hover:text-cyber-primary transition-colors flex items-center gap-2">
-            {Icon && <Icon size={14} />} {label}
-        </label>
-        <div className="relative">
-            <input
-                type={type}
-                value={value || ''}
-                onChange={onChange}
-                placeholder={placeholder}
-                className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-cyber-primary focus:ring-1 focus:ring-cyber-primary/50 outline-none transition-all placeholder:text-gray-600"
-            />
-            {sub && <p className="text-[10px] text-gray-500 mt-2 ml-1">{sub}</p>}
+const InputGroup = ({ label, type = "text", value, onChange, placeholder, sub, icon: Icon, id }: any) => {
+    const inputId = id || `input-${label.replace(/\s+/g, '-').toLowerCase()}`;
+    return (
+        <div className="group">
+            <label htmlFor={inputId} className="text-xs text-gray-400 font-bold uppercase tracking-wide mb-2 block group-hover:text-cyber-primary transition-colors flex items-center gap-2">
+                {Icon && <Icon size={14} />} {label}
+            </label>
+            <div className="relative">
+                <input
+                    id={inputId}
+                    title={label}
+                    type={type}
+                    value={value || ''}
+                    onChange={onChange}
+                    placeholder={placeholder}
+                    className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-cyber-primary focus:ring-1 focus:ring-cyber-primary/50 outline-none transition-all placeholder:text-gray-600"
+                />
+                {sub && <p className="text-[10px] text-gray-500 mt-2 ml-1">{sub}</p>}
+            </div>
         </div>
-    </div>
-);
+    );
+};
 
-const SelectGroup = ({ label, value, onChange, options, sub, icon: Icon }: any) => (
-    <div className="group">
-        <label className="text-xs text-gray-400 font-bold uppercase tracking-wide mb-2 block group-hover:text-cyber-primary transition-colors flex items-center gap-2">
-            {Icon && <Icon size={14} />} {label}
-        </label>
-        <div>
-            <select
-                className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-cyber-primary transition-all appearance-none"
-                value={value || ''}
-                onChange={onChange}
-            >
-                {options.map((opt: any) => (
-                    <option key={opt.value} value={opt.value}>{opt.label}</option>
-                ))}
-            </select>
-            {sub && <p className="text-[10px] text-gray-500 mt-2 ml-1">{sub}</p>}
+const SelectGroup = ({ label, value, onChange, options, sub, icon: Icon, id }: any) => {
+    const selectId = id || `select-${label.replace(/\s+/g, '-').toLowerCase()}`;
+    return (
+        <div className="group">
+            <label htmlFor={selectId} className="text-xs text-gray-400 font-bold uppercase tracking-wide mb-2 block group-hover:text-cyber-primary transition-colors flex items-center gap-2">
+                {Icon && <Icon size={14} />} {label}
+            </label>
+            <div>
+                <select
+                    id={selectId}
+                    title={label}
+                    className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-cyber-primary transition-all appearance-none"
+                    value={value || ''}
+                    onChange={onChange}
+                >
+                    {options.map((opt: any) => (
+                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    ))}
+                </select>
+                {sub && <p className="text-[10px] text-gray-500 mt-2 ml-1">{sub}</p>}
+            </div>
         </div>
-    </div>
-);
+    );
+};
 
 export default function GeneralSettings() {
     const { user } = useStore();
@@ -66,6 +76,7 @@ export default function GeneralSettings() {
     const [legal, setLegal] = useState({
         legalBusinessName: '',
         taxVatNumber: '',
+        taxId: '',
         registeredAddress: '',
         supportContact: '',
         supportPhone: ''
@@ -87,6 +98,10 @@ export default function GeneralSettings() {
     const [isSavingLegal, setIsSavingLegal] = useState(false);
     const [isSavingLocalization, setIsSavingLocalization] = useState(false);
 
+    const [isSavedBranding, setIsSavedBranding] = useState(false);
+    const [isSavedLegal, setIsSavedLegal] = useState(false);
+    const [isSavedLocalization, setIsSavedLocalization] = useState(false);
+
     // Sync from settings on load/change
     useEffect(() => {
         if (settings) {
@@ -99,6 +114,7 @@ export default function GeneralSettings() {
             setLegal({
                 legalBusinessName: settings.legalBusinessName || '',
                 taxVatNumber: settings.taxVatNumber || '',
+                taxId: settings.posReceiptTaxId || '',
                 registeredAddress: settings.registeredAddress || '',
                 supportContact: settings.supportContact || '',
                 supportPhone: settings.supportPhone || ''
@@ -115,14 +131,30 @@ export default function GeneralSettings() {
     const handleSaveSection = async (section: 'branding' | 'legal' | 'localization') => {
         const setSaving = section === 'branding' ? setIsSavingBranding :
             section === 'legal' ? setIsSavingLegal : setIsSavingLocalization;
+        const setSaved = section === 'branding' ? setIsSavedBranding :
+            section === 'legal' ? setIsSavedLegal : setIsSavedLocalization;
 
         const data = section === 'branding' ? branding :
             section === 'legal' ? legal : localization;
 
+        // Validation
+        if (section === 'branding' && !branding.storeName) {
+            addNotification('alert', 'Store name is required');
+            return;
+        }
+
         setSaving(true);
         try {
-            await updateSettings(data, user?.name || 'Admin');
-            addNotification('success', `${section.charAt(0).toUpperCase() + section.slice(1)} settings saved successfully!`);
+            let saveData = { ...data };
+            if (section === 'legal' && 'taxId' in (data as any)) {
+                const { taxId, ...rest } = data as any;
+                saveData = { ...rest, posReceiptTaxId: taxId };
+            }
+
+            await updateSettings(saveData, user?.name || 'Admin');
+            addNotification('success', `${section.charAt(0).toUpperCase() + section.slice(1)} settings saved!`);
+            setSaved(true);
+            setTimeout(() => setSaved(false), 3000);
         } catch (err) {
             console.error(`Failed to save ${section} settings:`, err);
             addNotification('alert', `Failed to save ${section} settings.`);
@@ -136,7 +168,7 @@ export default function GeneralSettings() {
         input.type = 'file';
         input.accept = 'image/png,image/jpeg,image/jpg,image/webp';
 
-        input.onchange = (e: any) => {
+        input.onchange = async (e: any) => {
             const file = e.target?.files?.[0];
             if (!file) return;
 
@@ -145,18 +177,16 @@ export default function GeneralSettings() {
                 return;
             }
 
-            if (!file.type.startsWith('image/')) {
-                addNotification('alert', 'Please upload an image file');
-                return;
+            try {
+                const { systemConfigService } = await import('../../services/supabase.service');
+                addNotification('info', 'Uploading logo...');
+                const publicUrl = await systemConfigService.uploadFile(file, 'logos');
+                setBranding(prev => ({ ...prev, logoUrl: publicUrl }));
+                addNotification('success', 'Logo uploaded! Click Save to apply permanently.');
+            } catch (err) {
+                console.error('Logo upload failed:', err);
+                addNotification('alert', 'Failed to upload logo.');
             }
-
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                const logoUrl = event.target?.result as string;
-                setBranding(prev => ({ ...prev, logoUrl }));
-                addNotification('info', 'Logo preview updated. Click Save to apply.');
-            };
-            reader.readAsDataURL(file);
         };
 
         input.click();
@@ -240,6 +270,7 @@ export default function GeneralSettings() {
                                     value={branding.slogan}
                                     onChange={(e: any) => setBranding(prev => ({ ...prev, slogan: e.target.value }))}
                                     placeholder="e.g. The Future of Retail"
+                                    icon={Globe}
                                     sub="Displayed on customer-facing screens"
                                 />
                             </div>
@@ -252,11 +283,11 @@ export default function GeneralSettings() {
                     <Button
                         onClick={() => handleSaveSection('branding')}
                         loading={isSavingBranding}
-                        icon={<Save size={16} />}
-                        variant="primary"
+                        icon={isSavedBranding ? <CheckCircle size={16} className="text-cyber-primary" /> : <Save size={16} />}
+                        variant={isSavedBranding ? "ghost" : "primary"}
                         className="px-8"
                     >
-                        Save Branding
+                        {isSavedBranding ? "Branding Saved" : "Save Branding"}
                     </Button>
                 </div>
             </div>
@@ -281,14 +312,17 @@ export default function GeneralSettings() {
                         <div className="grid grid-cols-2 gap-4">
                             <InputGroup
                                 label="Tax ID / TIN"
-                                value={legal.taxVatNumber}
-                                onChange={(e: any) => setLegal(prev => ({ ...prev, taxVatNumber: e.target.value }))}
+                                value={legal.taxId}
+                                onChange={(e: any) => setLegal(prev => ({ ...prev, taxId: e.target.value }))}
                                 placeholder="0001234567"
                                 icon={Hash}
                             />
                             <InputGroup
                                 label="VAT Reg No"
+                                value={legal.taxVatNumber}
+                                onChange={(e: any) => setLegal(prev => ({ ...prev, taxVatNumber: e.target.value }))}
                                 placeholder="VAT-998877"
+                                icon={Hash}
                             />
                         </div>
 
@@ -322,11 +356,11 @@ export default function GeneralSettings() {
                         <Button
                             onClick={() => handleSaveSection('legal')}
                             loading={isSavingLegal}
-                            icon={<Save size={16} />}
-                            variant="primary"
+                            icon={isSavedLegal ? <CheckCircle size={16} className="text-cyber-primary" /> : <Save size={16} />}
+                            variant={isSavedLegal ? "ghost" : "primary"}
                             className="px-8"
                         >
-                            Save Legal Details
+                            {isSavedLegal ? "Legal Details Saved" : "Save Legal Details"}
                         </Button>
                     </div>
                 </div>
@@ -389,7 +423,8 @@ export default function GeneralSettings() {
                                 { value: "Africa/Nairobi", label: "East Africa Time (Nairobi)" },
                                 { value: "UTC", label: "UTC (Coordinated Universal Time)" },
                                 { value: "Europe/London", label: "GMT (London)" },
-                                { value: "America/New_York", label: "Eastern Time (New York)" }
+                                { value: "America/New_York", label: "Eastern Time (New York)" },
+                                { value: "Australia/Melbourne", label: "Australia Eastern (Melbourne)" }
                             ]}
                             icon={Globe}
                         />
@@ -411,11 +446,11 @@ export default function GeneralSettings() {
                         <Button
                             onClick={() => handleSaveSection('localization')}
                             loading={isSavingLocalization}
-                            icon={<Save size={16} />}
-                            variant="primary"
+                            icon={isSavedLocalization ? <CheckCircle size={16} className="text-cyber-primary" /> : <Save size={16} />}
+                            variant={isSavedLocalization ? "ghost" : "primary"}
                             className="px-8"
                         >
-                            Save Localization
+                            {isSavedLocalization ? "Localization Saved" : "Save Localization"}
                         </Button>
                     </div>
                 </div>

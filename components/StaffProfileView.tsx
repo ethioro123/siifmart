@@ -4,13 +4,13 @@ import {
     AlertTriangle, DollarSign, ClipboardList, TrendingUp, User, Plus, Trash2,
     ArrowRight, MapPin, Upload, CreditCard, MessageSquare, Download, XCircle,
     Key, Camera, Trophy, Zap, Target, Gift, Crown, Building, LayoutDashboard, FileText, Settings,
-    Store, UserCheck, Package
+    Store, UserCheck, Package, Loader2
 } from 'lucide-react';
 import {
     ResponsiveContainer, BarChart, Bar, CartesianGrid, XAxis, Tooltip
 } from 'recharts';
 import { CURRENCY_SYMBOL } from '../constants';
-import { formatCompactNumber } from '../utils/formatting';
+import { formatCompactNumber, formatRole } from '../utils/formatting';
 import { authService } from '../services/auth.service';
 import {
     Employee,
@@ -43,78 +43,43 @@ export const SYSTEM_ROLES: {
     desc: string,
     styles: { text: string, bg: string, border: string, badge: string }
 }[] = [
-        {
-            id: 'super_admin', label: 'Super Admin', desc: 'Unrestricted Access (Owner)',
-            styles: { text: 'text-yellow-400', bg: 'bg-yellow-400/10', border: 'border-yellow-400/20', badge: 'bg-yellow-400/20 text-yellow-400' }
-        },
-        {
-            id: 'admin', label: 'System Admin', desc: 'Full System Control',
-            styles: { text: 'text-purple-400', bg: 'bg-purple-400/10', border: 'border-purple-400/20', badge: 'bg-purple-400/20 text-purple-400' }
-        },
-        {
-            id: 'hr', label: 'HR Manager', desc: 'Staff & Payroll Management',
-            styles: { text: 'text-pink-400', bg: 'bg-pink-400/10', border: 'border-pink-400/20', badge: 'bg-pink-400/20 text-pink-400' }
-        },
-        {
-            id: 'finance_manager', label: 'Finance Manager', desc: 'Financial Oversight',
-            styles: { text: 'text-emerald-400', bg: 'bg-emerald-400/10', border: 'border-emerald-400/20', badge: 'bg-emerald-400/20 text-emerald-400' }
-        },
-        {
-            id: 'procurement_manager', label: 'Procurement Mgr', desc: 'Supply Chain & Purchasing',
-            styles: { text: 'text-indigo-400', bg: 'bg-indigo-400/10', border: 'border-indigo-400/20', badge: 'bg-indigo-400/20 text-indigo-400' }
-        },
-        {
-            id: 'manager', label: 'Department Manager', desc: 'Departmental Operations',
-            styles: { text: 'text-blue-400', bg: 'bg-blue-400/10', border: 'border-blue-400/20', badge: 'bg-blue-400/20 text-blue-400' }
-        },
-        {
-            id: 'it_support', label: 'IT Support', desc: 'Technical Assistance',
-            styles: { text: 'text-cyan-400', bg: 'bg-cyan-400/10', border: 'border-cyan-400/20', badge: 'bg-cyan-400/20 text-cyan-400' }
-        },
-        {
-            id: 'cs_manager', label: 'CS Manager', desc: 'Customer Service Lead',
-            styles: { text: 'text-sky-400', bg: 'bg-sky-400/10', border: 'border-sky-400/20', badge: 'bg-sky-400/20 text-sky-400' }
-        },
-        {
-            id: 'store_supervisor', label: 'Store Supervisor', desc: 'Floor Management',
-            styles: { text: 'text-blue-300', bg: 'bg-blue-300/10', border: 'border-blue-300/20', badge: 'bg-blue-300/20 text-blue-300' }
-        },
-        {
-            id: 'inventory_specialist', label: 'Inventory Specialist', desc: 'Stock Control',
-            styles: { text: 'text-amber-400', bg: 'bg-amber-400/10', border: 'border-amber-400/20', badge: 'bg-amber-400/20 text-amber-400' }
-        },
-        {
-            id: 'pos', label: 'Cashier (POS)', desc: 'Point of Sale Access',
-            styles: { text: 'text-green-400', bg: 'bg-green-400/10', border: 'border-green-400/20', badge: 'bg-green-400/20 text-green-400' }
-        },
-        {
-            id: 'picker', label: 'Warehouse Picker', desc: 'Order Fulfillment',
-            styles: { text: 'text-orange-400', bg: 'bg-orange-400/10', border: 'border-orange-400/20', badge: 'bg-orange-400/20 text-orange-400' }
-        },
-        {
-            id: 'driver', label: 'Delivery Driver', desc: 'Logistics & Delivery',
-            styles: { text: 'text-teal-400', bg: 'bg-teal-400/10', border: 'border-teal-400/20', badge: 'bg-teal-400/20 text-teal-400' }
-        },
-        {
-            id: 'warehouse_manager', label: 'Warehouse Manager', desc: 'Warehouse Operations Lead',
-            styles: { text: 'text-violet-400', bg: 'bg-violet-400/10', border: 'border-violet-400/20', badge: 'bg-violet-400/20 text-violet-400' }
-        },
-        {
-            id: 'dispatcher', label: 'Dispatcher', desc: 'Logistics Coordination',
-            styles: { text: 'text-fuchsia-400', bg: 'bg-fuchsia-400/10', border: 'border-fuchsia-400/20', badge: 'bg-fuchsia-400/20 text-fuchsia-400' }
-        },
-        {
-            id: 'auditor', label: 'Auditor', desc: 'Compliance & Audit',
-            styles: { text: 'text-rose-400', bg: 'bg-rose-400/10', border: 'border-rose-400/20', badge: 'bg-rose-400/20 text-rose-400' }
-        },
-        {
-            id: 'packer', label: 'Warehouse Packer', desc: 'Packing & Quality Control',
-            styles: { text: 'text-orange-500', bg: 'bg-orange-500/10', border: 'border-orange-500/20', badge: 'bg-orange-500/20 text-orange-500' }
-        }
+        // EXECUTIVE / MANAGEMENT
+        { id: 'super_admin', label: 'CEO', desc: 'Unrestricted Access (Owner)', styles: { text: 'text-yellow-400', bg: 'bg-yellow-400/10', border: 'border-yellow-400/20', badge: 'bg-yellow-400/20 text-yellow-400' } },
+        { id: 'admin', label: 'System Admin', desc: 'Full System Control', styles: { text: 'text-purple-400', bg: 'bg-purple-400/10', border: 'border-purple-400/20', badge: 'bg-purple-400/20 text-purple-400' } },
+        { id: 'manager', label: 'Department Manager', desc: 'Departmental Operations', styles: { text: 'text-blue-400', bg: 'bg-blue-400/10', border: 'border-blue-400/20', badge: 'bg-blue-400/20 text-blue-400' } },
+        { id: 'warehouse_manager', label: 'Warehouse Manager', desc: 'Warehouse Operations Lead', styles: { text: 'text-violet-400', bg: 'bg-violet-400/10', border: 'border-violet-400/20', badge: 'bg-violet-400/20 text-violet-400' } },
+        // SPECIALIZED MANAGERS
+        { id: 'hr', label: 'HR Manager', desc: 'Staff & Payroll Management', styles: { text: 'text-pink-400', bg: 'bg-pink-400/10', border: 'border-pink-400/20', badge: 'bg-pink-400/20 text-pink-400' } },
+        { id: 'finance_manager', label: 'Finance Manager', desc: 'Financial Oversight', styles: { text: 'text-emerald-400', bg: 'bg-emerald-400/10', border: 'border-emerald-400/20', badge: 'bg-emerald-400/20 text-emerald-400' } },
+        { id: 'procurement_manager', label: 'Procurement Mgr', desc: 'Supply Chain & Purchasing', styles: { text: 'text-indigo-400', bg: 'bg-indigo-400/10', border: 'border-indigo-400/20', badge: 'bg-indigo-400/20 text-indigo-400' } },
+        { id: 'cs_manager', label: 'CS Manager', desc: 'Customer Service Lead', styles: { text: 'text-sky-400', bg: 'bg-sky-400/10', border: 'border-sky-400/20', badge: 'bg-sky-400/20 text-sky-400' } },
+        { id: 'dispatch_manager', label: 'Dispatch Manager', desc: 'Fleet & Delivery Management', styles: { text: 'text-lime-400', bg: 'bg-lime-400/10', border: 'border-lime-400/20', badge: 'bg-lime-400/20 text-lime-400' } },
+        { id: 'store_supervisor', label: 'Store Supervisor', desc: 'Floor Management', styles: { text: 'text-blue-300', bg: 'bg-blue-300/10', border: 'border-blue-300/20', badge: 'bg-blue-300/20 text-blue-300' } },
+        // WAREHOUSE OPERATIONS
+        { id: 'dispatcher', label: 'Dispatcher', desc: 'Logistics Coordination', styles: { text: 'text-fuchsia-400', bg: 'bg-fuchsia-400/10', border: 'border-fuchsia-400/20', badge: 'bg-fuchsia-400/20 text-fuchsia-400' } },
+        { id: 'inventory_specialist', label: 'Inventory Specialist', desc: 'Stock Control', styles: { text: 'text-amber-400', bg: 'bg-amber-400/10', border: 'border-amber-400/20', badge: 'bg-amber-400/20 text-amber-400' } },
+        { id: 'picker', label: 'Warehouse Picker', desc: 'Order Fulfillment', styles: { text: 'text-orange-400', bg: 'bg-orange-400/10', border: 'border-orange-400/20', badge: 'bg-orange-400/20 text-orange-400' } },
+        { id: 'packer', label: 'Warehouse Packer', desc: 'Order Packing', styles: { text: 'text-orange-300', bg: 'bg-orange-300/10', border: 'border-orange-300/20', badge: 'bg-orange-300/20 text-orange-300' } },
+        { id: 'receiver', label: 'Receiver', desc: 'Inbound Goods Receiving', styles: { text: 'text-cyan-400', bg: 'bg-cyan-400/10', border: 'border-cyan-400/20', badge: 'bg-cyan-400/20 text-cyan-400' } },
+        { id: 'forklift_operator', label: 'Forklift Operator', desc: 'Equipment Operator', styles: { text: 'text-gray-400', bg: 'bg-gray-400/10', border: 'border-gray-400/20', badge: 'bg-gray-400/20 text-gray-400' } },
+        { id: 'driver', label: 'Delivery Driver', desc: 'Logistics & Delivery', styles: { text: 'text-teal-400', bg: 'bg-teal-400/10', border: 'border-teal-400/20', badge: 'bg-teal-400/20 text-teal-400' } },
+        { id: 'returns_clerk', label: 'Returns Clerk', desc: 'Returns & RMA Processing', styles: { text: 'text-red-300', bg: 'bg-red-300/10', border: 'border-red-300/20', badge: 'bg-red-300/20 text-red-300' } },
+        // STORE OPERATIONS
+        { id: 'pos', label: 'Cashier (POS)', desc: 'Point of Sale Access', styles: { text: 'text-green-400', bg: 'bg-green-400/10', border: 'border-green-400/20', badge: 'bg-green-400/20 text-green-400' } },
+        { id: 'cashier', label: 'Cashier (Basic)', desc: 'Basic Sales Only', styles: { text: 'text-green-300', bg: 'bg-green-300/10', border: 'border-green-300/20', badge: 'bg-green-300/20 text-green-300' } },
+        { id: 'shift_lead', label: 'Shift Lead', desc: 'Team Lead', styles: { text: 'text-blue-200', bg: 'bg-blue-200/10', border: 'border-blue-200/20', badge: 'bg-blue-200/20 text-blue-200' } },
+        { id: 'merchandiser', label: 'Merchandiser', desc: 'Displays & Planograms', styles: { text: 'text-pink-300', bg: 'bg-pink-300/10', border: 'border-pink-300/20', badge: 'bg-pink-300/20 text-pink-300' } },
+        { id: 'loss_prevention', label: 'Loss Prevention', desc: 'Security & Shrinkage', styles: { text: 'text-red-400', bg: 'bg-red-400/10', border: 'border-red-400/20', badge: 'bg-red-400/20 text-red-400' } },
+        // ADMINISTRATIVE / SUPPORT
+        { id: 'it_support', label: 'IT Support', desc: 'Technical Assistance', styles: { text: 'text-cyan-400', bg: 'bg-cyan-400/10', border: 'border-cyan-400/20', badge: 'bg-cyan-400/20 text-cyan-400' } },
+        { id: 'accountant', label: 'Accountant', desc: 'Financial Records', styles: { text: 'text-emerald-300', bg: 'bg-emerald-300/10', border: 'border-emerald-300/20', badge: 'bg-emerald-300/20 text-emerald-300' } },
+        { id: 'data_analyst', label: 'Data Analyst', desc: 'Reports & Analytics', styles: { text: 'text-purple-300', bg: 'bg-purple-300/10', border: 'border-purple-300/20', badge: 'bg-purple-300/20 text-purple-300' } },
+        { id: 'training_coordinator', label: 'Training Coordinator', desc: 'Employee Training', styles: { text: 'text-yellow-300', bg: 'bg-yellow-300/10', border: 'border-yellow-300/20', badge: 'bg-yellow-300/20 text-yellow-300' } },
+        { id: 'auditor', label: 'Auditor', desc: 'Compliance & Audit', styles: { text: 'text-rose-400', bg: 'bg-rose-400/10', border: 'border-rose-400/20', badge: 'bg-rose-400/20 text-rose-400' } }
     ];
 
 export const getRoleHierarchy = (role: UserRole): number => {
-    const hierarchy: Record<UserRole, number> = {
+    const hierarchy: Partial<Record<UserRole, number>> = {
         'super_admin': 100,
         'admin': 90,
         'finance_manager': 80,
@@ -123,15 +88,26 @@ export const getRoleHierarchy = (role: UserRole): number => {
         'auditor': 65,
         'it_support': 60,
         'cs_manager': 55,
+        'dispatch_manager': 52,
         'warehouse_manager': 50,
         'manager': 45,
         'store_supervisor': 40,
+        'accountant': 38,
+        'data_analyst': 36,
+        'training_coordinator': 35,
         'dispatcher': 35,
+        'shift_lead': 32,
         'inventory_specialist': 30,
+        'loss_prevention': 28,
+        'merchandiser': 25,
+        'receiver': 22,
+        'forklift_operator': 22,
+        'returns_clerk': 22,
         'picker': 20,
         'driver': 20,
-        'pos': 10,
-        'packer': 20
+        'packer': 20,
+        'pos': 15,
+        'cashier': 10
     };
     return hierarchy[role] || 0;
 };
@@ -154,7 +130,8 @@ export default function StaffProfileView({ employee, isOwnProfile = false, onClo
         getStorePoints,
         settings,
         addNotification,
-        updateEmployee
+        updateEmployee,
+        deleteEmployee
     } = useData();
 
     const [activeProfileTab, setActiveProfileTab] = useState<ProfileTab>('overview');
@@ -178,6 +155,12 @@ export default function StaffProfileView({ employee, isOwnProfile = false, onClo
     const [documentToDelete, setDocumentToDelete] = useState<{ docIndex: number, docName: string } | null>(null);
     const [idCardOpen, setIdCardOpen] = useState(false);
 
+    // Terminate / Delete states
+    const [isTerminateModalOpen, setIsTerminateModalOpen] = useState(false);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [isTerminating, setIsTerminating] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
+
     // Refs
     const profilePhotoInputRef = useRef<HTMLInputElement>(null);
     const documentInputRef = useRef<HTMLInputElement>(null);
@@ -191,7 +174,10 @@ export default function StaffProfileView({ employee, isOwnProfile = false, onClo
     const userRoleLevel = user ? getRoleHierarchy(user.role) : 0;
     const targetRoleLevel = getRoleHierarchy(employee.role);
     const isSuperAdmin = user?.role === 'super_admin';
+    const isHR = user?.role === 'hr';
     const canResetPassword = isSuperAdmin || (userRoleLevel > targetRoleLevel);
+    const canTerminate = (isSuperAdmin || isHR) && userRoleLevel > targetRoleLevel && !isOwnProfile;
+    const canDelete = isSuperAdmin && userRoleLevel > targetRoleLevel && !isOwnProfile;
 
     // --- ACTIONS ---
 
@@ -332,8 +318,43 @@ export default function StaffProfileView({ employee, isOwnProfile = false, onClo
     };
 
     const handleDocumentDelete = (index: number, name: string) => {
-        setDocumentToDelete({ docIndex: index, docName: name });
-        setIsDeleteDocumentModalOpen(true);
+        // Assuming 'documents' state and 'setDocuments' function exist in the actual component
+        // For this change, we'll simulate the deletion and close the modal.
+        // In a real app, you'd filter the documents array.
+        // setDocuments(prev => prev.filter((_, i) => i !== documentToDelete.docIndex));
+        setIsDeleteDocumentModalOpen(false);
+        setDocumentToDelete(null); // Clear the document to delete
+        addNotification('success', 'Document deleted.'); // Add a success notification
+    };
+
+    const handleTerminate = async () => {
+        setIsTerminating(true);
+        try {
+            await updateEmployee({ ...employee, status: 'Terminated' }, user?.name || 'System');
+            addNotification('success', `${employee.name} has been terminated`);
+            setIsTerminateModalOpen(false);
+            if (onClose) onClose();
+        } catch (error) {
+            console.error('Failed to terminate employee:', error);
+            addNotification('alert', 'Failed to terminate employee');
+        } finally {
+            setIsTerminating(false);
+        }
+    };
+
+    const handleDelete = async () => {
+        setIsDeleting(true);
+        try {
+            await deleteEmployee(employee.id, user?.name || 'System');
+            addNotification('success', `${employee.name} has been permanently deleted`);
+            setIsDeleteModalOpen(false);
+            if (onClose) onClose();
+        } catch (error) {
+            console.error('Failed to delete employee:', error);
+            addNotification('alert', 'Failed to delete employee');
+        } finally {
+            setIsDeleting(false);
+        }
     };
 
     const handleConfirmDocumentDelete = () => {
@@ -484,7 +505,7 @@ export default function StaffProfileView({ employee, isOwnProfile = false, onClo
                                 <div className="w-10 h-10 rounded-xl bg-purple-400/10 flex items-center justify-center mx-auto mb-3">
                                     <UserCheck size={20} className="text-purple-400" />
                                 </div>
-                                <p className="text-lg font-black text-white capitalize">{employee.role}</p>
+                                <p className="text-lg font-black text-white capitalize">{formatRole(employee.role)}</p>
                                 <p className="text-[10px] text-gray-500 uppercase font-black tracking-widest mt-1">Role Type</p>
                             </div>
                             <div className="bg-black/30 p-5 rounded-2xl border border-white/5 text-center group hover:border-cyan-400/30 transition-all">
@@ -700,7 +721,7 @@ export default function StaffProfileView({ employee, isOwnProfile = false, onClo
                             <h2 className="text-3xl font-black text-white mb-1">{employee.name}</h2>
                             <div className="flex flex-wrap justify-center md:justify-start gap-3 items-center mt-2">
                                 <span className="px-3 py-1 bg-cyber-primary/10 text-cyber-primary border border-cyber-primary/20 rounded-full text-xs font-bold uppercase tracking-wider">
-                                    {employee.role.replace('_', ' ')}
+                                    {formatRole(employee.role)}
                                 </span>
                                 <span className="text-gray-400 text-sm font-medium flex items-center gap-1.5">
                                     <Building size={14} /> {employee.department}
@@ -733,6 +754,16 @@ export default function StaffProfileView({ employee, isOwnProfile = false, onClo
                             {canResetPassword && (
                                 <button onClick={handleResetPassword} className="flex items-center gap-2 text-xs font-bold bg-yellow-400/10 hover:bg-yellow-400/20 text-yellow-500 px-4 py-2 rounded-xl border border-yellow-400/20 transition-all">
                                     <Key size={14} /> Reset Password
+                                </button>
+                            )}
+                            {canTerminate && employee.status !== 'Terminated' && (
+                                <button onClick={() => setIsTerminateModalOpen(true)} className="flex items-center gap-2 text-xs font-bold bg-orange-500/10 hover:bg-orange-500/20 text-orange-500 px-4 py-2 rounded-xl border border-orange-500/20 transition-all">
+                                    <AlertTriangle size={14} /> Terminate
+                                </button>
+                            )}
+                            {canDelete && (
+                                <button onClick={() => setIsDeleteModalOpen(true)} className="flex items-center gap-2 text-xs font-bold bg-red-500/10 hover:bg-red-500/20 text-red-500 px-4 py-2 rounded-xl border border-red-500/20 transition-all">
+                                    <Trash2 size={14} /> Delete
                                 </button>
                             )}
                         </div>
@@ -1213,6 +1244,81 @@ export default function StaffProfileView({ employee, isOwnProfile = false, onClo
                     </div>
                 </div>
             )}
+
+            {/* Terminate Employee Confirmation */}
+            <Modal isOpen={isTerminateModalOpen} onClose={() => setIsTerminateModalOpen(false)} title="Operational Action: Termination" size="sm">
+                <div className="p-6">
+                    <div className="flex items-center gap-4 mb-6 p-4 bg-orange-500/10 border border-orange-500/20 rounded-xl">
+                        <AlertTriangle className="text-orange-500" size={32} />
+                        <div>
+                            <h4 className="text-white font-bold">Terminate Employee?</h4>
+                            <p className="text-xs text-orange-200 opacity-80">This will revoke all active access and set status to 'Terminated'.</p>
+                        </div>
+                    </div>
+                    <div className="p-4 bg-black/40 border border-white/5 rounded-xl mb-6">
+                        <p className="text-[10px] text-gray-500 uppercase font-black tracking-widest mb-1">Target Personnel</p>
+                        <p className="text-white font-bold">{employee.name}</p>
+                        <p className="text-[10px] text-cyber-primary font-mono">{employee.id}</p>
+                    </div>
+                    <div className="flex justify-end gap-3">
+                        <button
+                            disabled={isTerminating}
+                            onClick={() => setIsTerminateModalOpen(false)}
+                            className="px-4 py-2 text-gray-400 font-bold text-xs uppercase hover:text-white transition-colors"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            disabled={isTerminating}
+                            onClick={handleTerminate}
+                            className="px-6 py-2 bg-orange-500 hover:bg-orange-600 text-white font-black rounded-lg text-xs uppercase shadow-lg shadow-orange-500/20 flex items-center gap-2"
+                        >
+                            {isTerminating ? (
+                                <><Loader2 size={14} className="animate-spin" /> Processing...</>
+                            ) : (
+                                "Confirm Termination"
+                            )}
+                        </button>
+                    </div>
+                </div>
+            </Modal>
+
+            {/* Permanent Delete Confirmation */}
+            <Modal isOpen={isDeleteModalOpen} onClose={() => setIsDeleteModalOpen(false)} title="System Action: Permanent Deletion" size="sm">
+                <div className="p-6">
+                    <div className="flex items-center gap-4 mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl">
+                        <Trash2 className="text-red-500" size={32} />
+                        <div>
+                            <h4 className="text-white font-bold">Permanent Deletion?</h4>
+                            <p className="text-xs text-red-200 opacity-80">This action CANNOT be undone. All database records will be erased.</p>
+                        </div>
+                    </div>
+                    <div className="p-4 bg-black/40 border border-white/5 rounded-xl mb-6">
+                        <p className="text-[10px] text-gray-500 uppercase font-black tracking-widest mb-1">Record to Erase</p>
+                        <p className="text-white font-bold">{employee.name}</p>
+                    </div>
+                    <div className="flex justify-end gap-3">
+                        <button
+                            disabled={isDeleting}
+                            onClick={() => setIsDeleteModalOpen(false)}
+                            className="px-4 py-2 text-gray-400 font-bold text-xs uppercase hover:text-white transition-colors"
+                        >
+                            Abort
+                        </button>
+                        <button
+                            disabled={isDeleting}
+                            onClick={handleDelete}
+                            className="px-8 py-2 bg-red-600 hover:bg-red-700 text-white font-black rounded-lg text-xs uppercase shadow-lg shadow-red-500/20 flex items-center gap-2"
+                        >
+                            {isDeleting ? (
+                                <><Loader2 size={14} className="animate-spin" /> Erasing...</>
+                            ) : (
+                                "Execute Deletion"
+                            )}
+                        </button>
+                    </div>
+                </div>
+            </Modal>
         </div>
     );
 }

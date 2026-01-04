@@ -196,7 +196,7 @@ class SystemLogsService {
     }
 
     /**
-     * Clear logs (Super Admin only - strictly controlled in real app)
+     * Clear logs (CEO only - strictly controlled in real app)
      */
     clearLogs() {
         this.logs = [];

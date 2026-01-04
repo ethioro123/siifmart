@@ -271,7 +271,7 @@ export function isAdmin(userRole: UserRole | undefined): boolean {
 }
 
 /**
- * Check if user is super admin
+ * Check if user is CEO
  */
 export function isSuperAdmin(userRole: UserRole | undefined): boolean {
     return userRole === 'super_admin';
@@ -281,7 +281,7 @@ export function isSuperAdmin(userRole: UserRole | undefined): boolean {
  * Get role display name
  */
 export function getRoleDisplayName(role: UserRole): string {
-    const displayNames: Record<UserRole, string> = {
+    const displayNames: Partial<Record<UserRole, string>> = {
         super_admin: 'CEO',
         admin: 'Administrator',
         manager: 'Store Manager',
@@ -299,6 +299,17 @@ export function getRoleDisplayName(role: UserRole): string {
         cs_manager: 'Customer Service Manager',
         it_support: 'IT Support',
         packer: 'Packer',
+        receiver: 'Receiver',
+        forklift_operator: 'Forklift Operator',
+        dispatch_manager: 'Dispatch Manager',
+        returns_clerk: 'Returns Clerk',
+        cashier: 'Cashier (Basic)',
+        shift_lead: 'Shift Lead',
+        merchandiser: 'Merchandiser',
+        loss_prevention: 'Loss Prevention',
+        accountant: 'Accountant',
+        data_analyst: 'Data Analyst',
+        training_coordinator: 'Training Coordinator',
     };
 
     return displayNames[role] || role;
@@ -308,7 +319,7 @@ export function getRoleDisplayName(role: UserRole): string {
  * Get role description
  */
 export function getRoleDescription(role: UserRole): string {
-    const descriptions: Record<UserRole, string> = {
+    const descriptions: Partial<Record<UserRole, string>> = {
         super_admin: 'Chief Executive Officer - Full system access and executive oversight',
         admin: 'System Administrator - Technical and IT operations',
         manager: 'Store Manager - Retail operations and customer service',
@@ -326,6 +337,17 @@ export function getRoleDescription(role: UserRole): string {
         cs_manager: 'Customer Service Manager - Customer relations and support',
         it_support: 'IT Support - Technical support and system maintenance',
         packer: 'Warehouse Packer - Order packing and shipping preparation',
+        receiver: 'Receiver - Inbound goods receiving and inspection',
+        forklift_operator: 'Forklift Operator - Equipment operation and material handling',
+        dispatch_manager: 'Dispatch Manager - Fleet and delivery management',
+        returns_clerk: 'Returns Clerk - Returns and RMA processing',
+        cashier: 'Basic Cashier - Sales transactions only',
+        shift_lead: 'Shift Lead - Team supervision during shifts',
+        merchandiser: 'Merchandiser - Product displays and planograms',
+        loss_prevention: 'Loss Prevention - Security and shrinkage control',
+        accountant: 'Accountant - Financial record keeping',
+        data_analyst: 'Data Analyst - Reports and business analytics',
+        training_coordinator: 'Training Coordinator - Employee training programs',
     };
 
     return descriptions[role] || 'Standard user access';
@@ -335,7 +357,7 @@ export function getRoleDescription(role: UserRole): string {
  * Get role color for UI
  */
 export function getRoleColor(role: UserRole): string {
-    const colors: Record<UserRole, string> = {
+    const colors: Partial<Record<UserRole, string>> = {
         super_admin: 'text-red-400 bg-red-500/10 border-red-500/20',
         admin: 'text-purple-400 bg-purple-500/10 border-purple-500/20',
         manager: 'text-blue-400 bg-blue-500/10 border-blue-500/20',
@@ -353,6 +375,17 @@ export function getRoleColor(role: UserRole): string {
         cs_manager: 'text-sky-400 bg-sky-500/10 border-sky-500/20',
         it_support: 'text-teal-400 bg-teal-500/10 border-teal-500/20',
         packer: 'text-orange-300 bg-orange-500/10 border-orange-500/20',
+        receiver: 'text-cyan-400 bg-cyan-500/10 border-cyan-500/20',
+        forklift_operator: 'text-gray-400 bg-gray-500/10 border-gray-500/20',
+        dispatch_manager: 'text-lime-400 bg-lime-500/10 border-lime-500/20',
+        returns_clerk: 'text-red-300 bg-red-300/10 border-red-300/20',
+        cashier: 'text-green-300 bg-green-300/10 border-green-300/20',
+        shift_lead: 'text-blue-200 bg-blue-200/10 border-blue-200/20',
+        merchandiser: 'text-pink-300 bg-pink-300/10 border-pink-300/20',
+        loss_prevention: 'text-red-400 bg-red-400/10 border-red-400/20',
+        accountant: 'text-emerald-300 bg-emerald-300/10 border-emerald-300/20',
+        data_analyst: 'text-purple-300 bg-purple-300/10 border-purple-300/20',
+        training_coordinator: 'text-yellow-300 bg-yellow-300/10 border-yellow-300/20',
     };
 
     return colors[role] || 'text-gray-400 bg-gray-500/10 border-gray-500/20';

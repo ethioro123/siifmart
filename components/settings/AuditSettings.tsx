@@ -3,6 +3,7 @@ import {
     FileText, Search, Filter, Download, Calendar, User, Activity, AlertCircle
 } from 'lucide-react';
 import { useData } from '../../contexts/DataContext';
+import { formatDateTime } from '../../utils/formatting';
 
 export default function AuditSettings() {
     const { systemLogs } = useData();
@@ -87,7 +88,7 @@ export default function AuditSettings() {
                             {filteredLogs.length > 0 ? filteredLogs.map((log: any, i) => (
                                 <tr key={log.id || i} className="hover:bg-white/5 transition-colors">
                                     <td className="p-4 text-xs text-gray-400 font-mono whitespace-nowrap">
-                                        {new Date(log.created_at).toLocaleString()}
+                                        {formatDateTime(log.created_at, { showTime: true })}
                                     </td>
                                     <td className="p-4">
                                         <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded border ${getLevelColor(log.module)}`}>

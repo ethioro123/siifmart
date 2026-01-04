@@ -5,7 +5,7 @@ import {
    Edit2, Save, Plus, Calendar, CheckCircle, XCircle, BarChart3, BrainCircuit,
    Target, Layers, ArrowRight, Eye, Play, RefreshCw, Flame, Calculator, Zap,
    TrendingDown, MousePointer2, LineChart as LineChartIcon, Leaf, ShoppingCart, Map, Truck,
-   Power, Trash2, Loader2
+   Power, Trash2, Loader2, Package
 } from 'lucide-react';
 import {
    AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -53,6 +53,11 @@ export default function Pricing() {
    const [pricingRules, setPricingRules] = useState<PricingRule[]>(MOCK_PRICING_RULES);
    const [searchTerm, setSearchTerm] = useState('');
 
+   // Pagination State
+   const [currentPage, setCurrentPage] = useState(1);
+   const [itemsPerPage, setItemsPerPage] = useState(10);
+   const ITEMS_PER_PAGE_OPTIONS = [10, 25, 50, 100];
+
    // Edit State
    const [editingId, setEditingId] = useState<string | null>(null);
    const [editForm, setEditForm] = useState<{ price: number, cost: number, salePrice: number, isOnSale: boolean }>({
@@ -97,10 +102,46 @@ export default function Pricing() {
    const [selectedLocationProduct, setSelectedLocationProduct] = useState<Product | null>(null);
 
    // Filtering
-   const filteredProducts = products.filter(p =>
-      p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      p.sku.toLowerCase().includes(searchTerm.toLowerCase())
-   );
+   const filteredProducts = useMemo(() => {
+      // Reset to page 1 when search changes
+      return products.filter(p =>
+         p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+         p.sku.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+   }, [products, searchTerm]);
+
+   // Reset page when search changes
+   React.useEffect(() => {
+      setCurrentPage(1);
+   }, [searchTerm]);
+
+   // Pagination calculations
+   const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+   const startIndex = (currentPage - 1) * itemsPerPage;
+   const endIndex = startIndex + itemsPerPage;
+   const paginatedProducts = filteredProducts.slice(startIndex, endIndex);
+
+   // Generate page numbers for pagination
+   const getPageNumbers = () => {
+      const pages: (number | string)[] = [];
+      const maxVisiblePages = 5;
+
+      if (totalPages <= maxVisiblePages) {
+         for (let i = 1; i <= totalPages; i++) pages.push(i);
+      } else {
+         pages.push(1);
+         if (currentPage > 3) pages.push('...');
+
+         const start = Math.max(2, currentPage - 1);
+         const end = Math.min(totalPages - 1, currentPage + 1);
+
+         for (let i = start; i <= end; i++) pages.push(i);
+
+         if (currentPage < totalPages - 2) pages.push('...');
+         pages.push(totalPages);
+      }
+      return pages;
+   };
 
    // --- ACTIONS ---
 
@@ -167,6 +208,14 @@ export default function Pricing() {
       if (newSet.has(id)) newSet.delete(id);
       else newSet.add(id);
       setSelectedIds(newSet);
+   };
+
+   const toggleSelectAll = () => {
+      if (selectedIds.size === filteredProducts.length) {
+         setSelectedIds(new Set());
+      } else {
+         setSelectedIds(new Set(filteredProducts.map(p => p.id)));
+      }
    };
 
    const applyBulkSale = () => {
@@ -525,7 +574,21 @@ export default function Pricing() {
                               return (
                                  <tr key={p.id} className="hover:bg-white/5 transition-colors">
                                     <td className="p-4 flex items-center gap-3">
-                                       <img src={p.image} className="w-8 h-8 rounded bg-black" alt="" />
+                                       <div className="w-8 h-8 rounded bg-black/30 border border-white/10 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                                          {p.image && !p.image.includes('placeholder.com') ? (
+                                             <img
+                                                src={p.image}
+                                                className="w-full h-full object-cover"
+                                                alt=""
+                                                onError={(e) => {
+                                                   e.currentTarget.style.display = 'none';
+                                                   (e.currentTarget.parentElement as HTMLElement).innerHTML = '<div class="text-gray-600"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-package"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg></div>';
+                                                }}
+                                             />
+                                          ) : (
+                                             <Package size={14} className="text-gray-600" />
+                                          )}
+                                       </div>
                                        <span className="font-bold text-white">{p.name}</span>
                                     </td>
                                     <td className="p-4 text-center text-gray-400">{p.stock}</td>
@@ -596,7 +659,13 @@ export default function Pricing() {
                      <thead>
                         <tr className="bg-black/20 border-b border-white/5">
                            <th className="p-4 text-center w-12">
-                              <input type="checkbox" className="accent-cyber-primary" aria-label="Select all products" />
+                              <input
+                                 type="checkbox"
+                                 className="accent-cyber-primary w-4 h-4"
+                                 aria-label="Select all products"
+                                 checked={selectedIds.size === filteredProducts.length && filteredProducts.length > 0}
+                                 onChange={toggleSelectAll}
+                              />
                            </th>
                            <th className="p-4 text-xs text-gray-500 uppercase">Product</th>
                            <th className="p-4 text-xs text-gray-500 uppercase text-right">Retail Price</th>
@@ -608,7 +677,7 @@ export default function Pricing() {
                         </tr>
                      </thead>
                      <tbody className="divide-y divide-white/5">
-                        {filteredProducts.map(p => {
+                        {paginatedProducts.map(p => {
                            const isEditing = editingId === p.id;
                            const cost = isEditing ? editForm.cost : (p.costPrice || p.price * 0.7);
                            const retail = isEditing ? editForm.price : p.price;
@@ -628,7 +697,21 @@ export default function Pricing() {
                                  </td>
                                  <td className="p-4">
                                     <div className="flex items-center gap-3">
-                                       <img src={p.image} className="w-10 h-10 rounded bg-black" alt="" />
+                                       <div className="w-10 h-10 rounded bg-black/30 border border-white/10 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                                          {p.image && !p.image.includes('placeholder.com') ? (
+                                             <img
+                                                src={p.image}
+                                                className="w-full h-full object-cover"
+                                                alt=""
+                                                onError={(e) => {
+                                                   e.currentTarget.style.display = 'none';
+                                                   (e.currentTarget.parentElement as HTMLElement).innerHTML = '<div class="text-gray-600"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-package"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg></div>';
+                                                }}
+                                             />
+                                          ) : (
+                                             <Package size={18} className="text-gray-600" />
+                                          )}
+                                       </div>
                                        <div>
                                           <p className="text-sm font-bold text-white">{p.name}</p>
                                           <p className="text-xs text-gray-500">{p.category}</p>
@@ -754,9 +837,121 @@ export default function Pricing() {
                               </tr>
                            );
                         })}
+                        {filteredProducts.length === 0 && (
+                           <tr>
+                              <td colSpan={8} className="p-12 text-center">
+                                 <div className="flex flex-col items-center justify-center text-gray-500">
+                                    <Search size={48} className="mb-4 opacity-30" />
+                                    <p className="font-bold text-lg">No products found</p>
+                                    <p className="text-sm">Try adjusting your search term or filters</p>
+                                 </div>
+                              </td>
+                           </tr>
+                        )}
                      </tbody>
                   </table>
                </div>
+
+               {/* Modern Pagination Controls */}
+               {filteredProducts.length > 0 && (
+                  <div className="p-4 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4">
+                     {/* Info and Items Per Page */}
+                     <div className="flex items-center gap-4">
+                        <span className="text-sm text-gray-400">
+                           Showing <span className="text-white font-bold">{startIndex + 1}</span> to <span className="text-white font-bold">{Math.min(endIndex, filteredProducts.length)}</span> of <span className="text-cyber-primary font-bold">{filteredProducts.length}</span> products
+                        </span>
+                        <div className="flex items-center gap-2">
+                           <span className="text-xs text-gray-500">Show:</span>
+                           <select
+                              value={itemsPerPage}
+                              onChange={(e) => {
+                                 setItemsPerPage(Number(e.target.value));
+                                 setCurrentPage(1);
+                              }}
+                              className="bg-black/50 border border-white/10 rounded-lg px-2 py-1 text-sm text-white outline-none focus:border-cyber-primary/50 cursor-pointer"
+                              aria-label="Items per page"
+                           >
+                              {ITEMS_PER_PAGE_OPTIONS.map(n => (
+                                 <option key={n} value={n}>{n}</option>
+                              ))}
+                           </select>
+                        </div>
+                     </div>
+
+                     {/* Page Navigation */}
+                     <div className="flex items-center gap-1">
+                        {/* First Page */}
+                        <button
+                           onClick={() => setCurrentPage(1)}
+                           disabled={currentPage === 1}
+                           className={`px-2 py-1.5 rounded-lg text-xs font-bold transition-all ${currentPage === 1
+                              ? 'text-gray-600 cursor-not-allowed'
+                              : 'text-gray-400 hover:text-white hover:bg-white/10'
+                              }`}
+                           title="First page"
+                        >
+                           ««
+                        </button>
+
+                        {/* Previous */}
+                        <button
+                           onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                           disabled={currentPage === 1}
+                           className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${currentPage === 1
+                              ? 'text-gray-600 cursor-not-allowed'
+                              : 'text-gray-400 hover:text-white hover:bg-white/10'
+                              }`}
+                        >
+                           Prev
+                        </button>
+
+                        {/* Page Numbers */}
+                        <div className="flex items-center gap-1 mx-2">
+                           {getPageNumbers().map((page, idx) => (
+                              typeof page === 'number' ? (
+                                 <button
+                                    key={idx}
+                                    onClick={() => setCurrentPage(page)}
+                                    className={`w-8 h-8 rounded-lg text-xs font-bold transition-all ${currentPage === page
+                                       ? 'bg-cyber-primary text-black'
+                                       : 'text-gray-400 hover:text-white hover:bg-white/10'
+                                       }`}
+                                 >
+                                    {page}
+                                 </button>
+                              ) : (
+                                 <span key={idx} className="text-gray-500 px-1">...</span>
+                              )
+                           ))}
+                        </div>
+
+                        {/* Next */}
+                        <button
+                           onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                           disabled={currentPage === totalPages}
+                           className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${currentPage === totalPages
+                              ? 'text-gray-600 cursor-not-allowed'
+                              : 'text-gray-400 hover:text-white hover:bg-white/10'
+                              }`}
+                        >
+                           Next
+                        </button>
+
+                        {/* Last Page */}
+                        <button
+                           onClick={() => setCurrentPage(totalPages)}
+                           disabled={currentPage === totalPages}
+                           className={`px-2 py-1.5 rounded-lg text-xs font-bold transition-all ${currentPage === totalPages
+                              ? 'text-gray-600 cursor-not-allowed'
+                              : 'text-gray-400 hover:text-white hover:bg-white/10'
+                              }`}
+                           title="Last page"
+                        >
+                           »»
+                        </button>
+                     </div>
+                  </div>
+               )}
             </div>
          )}
 
@@ -795,7 +990,21 @@ export default function Pricing() {
                      {selectedMarkdownProduct && (
                         <div className="p-4 bg-white/5 rounded-xl border border-white/5 space-y-3">
                            <div className="flex items-center gap-3 pb-3 border-b border-white/5">
-                              <img src={selectedMarkdownProduct.image} className="w-10 h-10 rounded bg-black" alt="" />
+                              <div className="w-10 h-10 rounded bg-black/30 border border-white/10 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                                 {selectedMarkdownProduct.image && !selectedMarkdownProduct.image.includes('placeholder.com') ? (
+                                    <img
+                                       src={selectedMarkdownProduct.image}
+                                       className="w-full h-full object-cover"
+                                       alt=""
+                                       onError={(e) => {
+                                          e.currentTarget.style.display = 'none';
+                                          (e.currentTarget.parentElement as HTMLElement).innerHTML = '<div class="text-gray-600"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-package"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg></div>';
+                                       }}
+                                    />
+                                 ) : (
+                                    <Package size={18} className="text-gray-600" />
+                                 )}
+                              </div>
                               <div>
                                  <p className="font-bold text-white text-sm">{selectedMarkdownProduct.name}</p>
                                  <p className="text-[10px] text-gray-400">{selectedMarkdownProduct.sku}</p>
@@ -992,7 +1201,21 @@ export default function Pricing() {
                                           } ${showHeatmap && isHot ? 'bg-red-500/40' : showHeatmap && isCold ? 'bg-blue-500/40' : 'bg-white/5'
                                           }`}
                                     >
-                                       <img src={p.image} className="w-full h-full object-cover opacity-80" alt="" />
+                                       <div className="w-full h-full bg-black/30 border border-white/10 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                                          {p.image && !p.image.includes('placeholder.com') ? (
+                                             <img
+                                                src={p.image}
+                                                className="w-full h-full object-cover opacity-80"
+                                                alt=""
+                                                onError={(e) => {
+                                                   e.currentTarget.style.display = 'none';
+                                                   (e.currentTarget.parentElement as HTMLElement).innerHTML = '<div class="text-gray-600"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-package"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg></div>';
+                                                }}
+                                             />
+                                          ) : (
+                                             <Package size={32} className="text-gray-600" />
+                                          )}
+                                       </div>
 
                                        {/* Heatmap Overlay */}
                                        {showHeatmap && (
@@ -1042,7 +1265,21 @@ export default function Pricing() {
                                  onClick={() => handleShelfSwap(p.id)}
                                  className={`flex items-center gap-2 p-2 rounded hover:bg-white/10 cursor-pointer border border-transparent ${swapSource === p.id ? 'border-yellow-400 bg-white/10' : ''}`}
                               >
-                                 <img src={p.image} className="w-8 h-8 rounded bg-black" alt="" />
+                                 <div className="w-8 h-8 rounded bg-black/30 border border-white/10 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                                    {p.image && !p.image.includes('placeholder.com') ? (
+                                       <img
+                                          src={p.image}
+                                          className="w-full h-full object-cover"
+                                          alt=""
+                                          onError={(e) => {
+                                             e.currentTarget.style.display = 'none';
+                                             (e.currentTarget.parentElement as HTMLElement).innerHTML = '<div class="text-gray-600"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-package"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg></div>';
+                                          }}
+                                       />
+                                    ) : (
+                                       <Package size={14} className="text-gray-600" />
+                                    )}
+                                 </div>
                                  <div className="flex-1 min-w-0">
                                     <p className="text-xs text-white truncate font-medium">{p.name}</p>
                                     <p className="text-[10px] text-gray-500">{p.sku}</p>
@@ -1344,7 +1581,21 @@ export default function Pricing() {
             {selectedLocationProduct && (
                <div className="space-y-6">
                   <div className="flex items-center gap-4 bg-white/5 p-4 rounded-xl border border-white/5">
-                     <img src={selectedLocationProduct.image} className="w-16 h-16 rounded bg-black" alt="" />
+                     <div className="w-16 h-16 rounded bg-black/30 border border-white/10 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                        {selectedLocationProduct.image && !selectedLocationProduct.image.includes('placeholder.com') ? (
+                           <img
+                              src={selectedLocationProduct.image}
+                              className="w-full h-full object-cover"
+                              alt=""
+                              onError={(e) => {
+                                 e.currentTarget.style.display = 'none';
+                                 (e.currentTarget.parentElement as HTMLElement).innerHTML = '<div class="text-gray-600"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-package"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg></div>';
+                              }}
+                           />
+                        ) : (
+                           <Package size={24} className="text-gray-600" />
+                        )}
+                     </div>
                      <div>
                         <h3 className="text-xl font-bold text-white">{selectedLocationProduct.name}</h3>
                         <p className="text-gray-400">{selectedLocationProduct.sku}</p>

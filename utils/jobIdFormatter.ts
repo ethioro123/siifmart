@@ -8,16 +8,15 @@
  * If jobNumber is available, uses it directly
  * Otherwise, creates a short hash from the UUID
  */
-export const formatJobId = (job: { id: string; jobNumber?: string; job_number?: string; type?: string }): string => {
+export const formatJobId = (job: { id: string; jobNumber?: string; job_number?: string; type?: string; orderRef?: string }): string => {
     // Prefer proper job number if available
     if (job.jobNumber) return job.jobNumber;
     if (job.job_number) return job.job_number;
 
-    // Fallback: Create a short, readable ID from UUID
-    // Take last 4 chars of UUID (hex) and convert to number
+    // For DISPATCH jobs, if orderRef is available and formatted (has ORD), we can use it or prefix it
+    // But usually we want a consistent DS-XXXXXX format
     const uuid = job.id || '';
-    const hexPart = uuid.replace(/-/g, '').slice(-6);
-    const numericPart = parseInt(hexPart, 16) % 10000; // 4 digit number
+    const numericPart = uuidToNumber(uuid);
 
     // Get type prefix (matching supabase.service.ts)
     const type = job.type?.toUpperCase() || 'JOB';
@@ -27,7 +26,7 @@ export const formatJobId = (job: { id: string; jobNumber?: string; job_number?: 
                 type === 'TRANSFER' ? 'TRF' :
                     type === 'DISPATCH' ? 'DS' : 'JB';
 
-    return `${prefix}-${String(numericPart).padStart(4, '0')}`;
+    return `${prefix}-${String(numericPart).padStart(6, '0')}`;
 };
 
 /**
@@ -35,28 +34,17 @@ export const formatJobId = (job: { id: string; jobNumber?: string; job_number?: 
  * Similar to job ID but for order refs
  */
 export const formatOrderRef = (orderRef: string | undefined | null, fallbackId?: string): string => {
-    if (orderRef && !orderRef.includes('-') && orderRef.length < 12) {
-        // Already a short ID
-        return orderRef;
+    const idToProcess = (orderRef || fallbackId || '').trim();
+    if (!idToProcess) return 'N/A';
+
+    // If it's already a short numeric code (e.g. from manual entry)
+    if (idToProcess.startsWith('ORD-') && idToProcess.length <= 10 && /^\d+$/.test(idToProcess.slice(4))) {
+        return idToProcess;
     }
 
-    if (orderRef) {
-        // If it looks like a UUID, shorten it
-        if (orderRef.length === 36 && orderRef.includes('-')) {
-            return `ORD-${orderRef.slice(-6).toUpperCase()}`;
-        }
-        return orderRef;
-    }
-
-    // Use fallback ID
-    if (fallbackId) {
-        if (fallbackId.length === 36 && fallbackId.includes('-')) {
-            return `ORD-${fallbackId.slice(-6).toUpperCase()}`;
-        }
-        return fallbackId;
-    }
-
-    return 'N/A';
+    // Convert UUID/Hex to a consistent 6-digit number
+    const numericPart = uuidToNumber(idToProcess);
+    return `ORD-${String(numericPart).padStart(6, '0')}`;
 };
 
 /**
@@ -67,10 +55,9 @@ export const formatTransferId = (transfer: { id: string; jobNumber?: string; job
     if (transfer.job_number) return transfer.job_number;
 
     const uuid = transfer.id || '';
-    const hexPart = uuid.replace(/-/g, '').slice(-6);
-    const numericPart = parseInt(hexPart, 16) % 10000;
+    const numericPart = uuidToNumber(uuid);
 
-    return `TRF-${String(numericPart).padStart(4, '0')}`;
+    return `TRF-${String(numericPart).padStart(6, '0')}`;
 };
 
 /**

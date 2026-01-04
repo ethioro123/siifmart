@@ -3,6 +3,7 @@ import { Employee, UserRole } from '../types';
 import QRCode from 'qrcode';
 import { X, Printer, Shield, MapPin, Building, CreditCard } from 'lucide-react';
 import Logo from './Logo';
+import { formatRole } from '../utils/formatting';
 
 interface EmployeeIDCardProps {
     employee: Employee;
@@ -10,7 +11,7 @@ interface EmployeeIDCardProps {
     onClose: () => void;
 }
 
-const ROLE_COLORS: Record<UserRole, string> = {
+const ROLE_COLORS: Partial<Record<UserRole, string>> = {
     super_admin: '#FACC15', // yellow-400
     admin: '#C084FC',       // purple-400
     hr: '#F472B6',          // pink-400
@@ -28,6 +29,20 @@ const ROLE_COLORS: Record<UserRole, string> = {
     warehouse_manager: '#A78BFA', // violet-400
     dispatcher: '#E879F9',  // fuchsia-400
     auditor: '#FB7185',     // rose-400
+    // New Warehouse Ops roles
+    receiver: '#22D3EE',    // cyan-400
+    forklift_operator: '#9CA3AF', // gray-400
+    dispatch_manager: '#A3E635', // lime-400
+    returns_clerk: '#FCA5A5', // red-300
+    // New Store Ops roles
+    cashier: '#86EFAC',     // green-300
+    shift_lead: '#BFDBFE',  // blue-200
+    merchandiser: '#F9A8D4', // pink-300
+    loss_prevention: '#F87171', // red-400
+    // New Administrative roles
+    accountant: '#6EE7B7',  // emerald-300
+    data_analyst: '#D8B4FE', // purple-300
+    training_coordinator: '#FDE047', // yellow-300
 };
 
 export default function EmployeeIDCard({ employee, siteCode, onClose }: EmployeeIDCardProps) {
@@ -135,7 +150,7 @@ export default function EmployeeIDCard({ employee, siteCode, onClose }: Employee
                         </div>
                         <div className="flex justify-between text-sm">
                             <span className="text-gray-400">Role:</span>
-                            <span className="text-white font-medium capitalize">{employee.role.replace('_', ' ')}</span>
+                            <span className="text-white font-medium capitalize">{formatRole(employee.role)}</span>
                         </div>
                         <div className="flex justify-between text-sm">
                             <span className="text-gray-400">Employee ID:</span>
@@ -221,7 +236,7 @@ export default function EmployeeIDCard({ employee, siteCode, onClose }: Employee
                                     className="text-xs font-bold uppercase tracking-wider mb-2 truncate"
                                     style={{ color: roleColor }}
                                 >
-                                    {employee.role.replace(/_/g, ' ')}
+                                    {formatRole(employee.role)}
                                 </p>
 
                                 <div className="space-y-1">

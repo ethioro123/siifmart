@@ -1,7 +1,7 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Search, Filter, ArrowUpDown, MoreHorizontal, AlertTriangle, FileText, Download, Printer, Box, Trash2, Edit, RefreshCw, Map, TrendingUp, Layout, ClipboardList, Thermometer, Shield, XCircle, DollarSign, ChevronDown, Minus, Barcode, Package, Loader2, Clock, CheckCircle, User, ArrowRight } from 'lucide-react';
-import { formatCompactNumber } from '../utils/formatting';
+import { formatCompactNumber, formatDateTime } from '../utils/formatting';
 import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
     PieChart, Pie, Cell
@@ -9,9 +9,10 @@ import {
 import { MOCK_ZONES, CURRENCY_SYMBOL, GROCERY_CATEGORIES, COMMON_UNITS } from '../constants';
 import ImageUpload from '../components/ImageUpload';
 import { Product, StockMovement, PendingInventoryChange } from '../types';
-import { inventoryRequestsService } from '../services/supabase.service';
+import { inventoryRequestsService, stockMovementsService, productsService } from '../services/supabase.service';
 import Modal from '../components/Modal';
 import LabelPrintModal from '../components/LabelPrintModal';
+import { motion } from 'framer-motion';
 import { useStore } from '../contexts/CentralStore';
 import { useData } from '../contexts/DataContext';
 import { Protected, ProtectedButton } from '../components/Protected';
@@ -37,7 +38,7 @@ const getABCClass = (product: Product, totalValue: number) => {
 
 export default function Inventory() {
     const { user } = useStore();
-    const { products, allProducts, sites, movements, addProduct, updateProduct, deleteProduct, adjustStock, activeSite, setActiveSite, addNotification, refreshData, logSystemEvent, createPutawayJob } = useData();
+    const { products, allProducts, sites, addProduct, updateProduct, deleteProduct, adjustStock, activeSite, setActiveSite, addNotification, refreshData, logSystemEvent, createPutawayJob } = useData();
     const navigate = useNavigate();
 
     // --- READ-ONLY & PERMISSIONS ---
@@ -50,12 +51,12 @@ export default function Inventory() {
     }, [activeSite]);
 
     // 🔒 LOCATION-BASED ACCESS CONTROL
-    // If Read-Only (Super Admin, Store, HQ): Show ALL products (Global View) to allow lookup
+    // If Read-Only (CEO, Store, HQ): Show ALL products (Global View) to allow lookup
     // If Write Access (Warehouse): Show only the active site's products
     const filteredProducts = useMemo(() => {
         const base = isReadOnly ? allProducts : filterBySite(products, user?.role || 'pos', activeSite?.id || '');
         // Standardize: Filter out archived products from inventory calculations and views
-        return base.filter(p => (p.status || (p as any).status) !== 'archived');
+        return (Array.isArray(base) ? base : []).filter(p => (p.status || (p as any).status) !== 'archived');
     }, [products, allProducts, isReadOnly, user?.role, activeSite]);
 
     // PDA Mode Detection
@@ -63,6 +64,35 @@ export default function Inventory() {
 
     // Default to 'stock' tab for PDA, 'overview' for desktop
     const [activeTab, setActiveTab] = useState<Tab>(isNativeApp ? 'stock' : 'overview');
+
+    // Server-side Pagination State for Movements
+    const [localMovements, setLocalMovements] = useState<StockMovement[]>([]);
+    const [movementsLoading, setMovementsLoading] = useState(false);
+    const [totalMovementsCount, setTotalMovementsCount] = useState(0);
+    const [currentMovementsPage, setCurrentMovementsPage] = useState(1);
+    const MOVEMENTS_PER_PAGE = 20;
+
+    useEffect(() => {
+        if (activeTab === 'movements') {
+            const fetchMovements = async () => {
+                setMovementsLoading(true);
+                try {
+                    const offset = (currentMovementsPage - 1) * MOVEMENTS_PER_PAGE;
+                    const { data, count } = await stockMovementsService.getAll(activeSite?.id, undefined, MOVEMENTS_PER_PAGE, offset);
+                    setLocalMovements(data);
+                    setTotalMovementsCount(count);
+                } catch (error) {
+                    console.error('Failed to fetch movements', error);
+                    addNotification('alert', 'Failed to load movements');
+                } finally {
+                    setMovementsLoading(false);
+                }
+            };
+            fetchMovements();
+        }
+    }, [activeTab, currentMovementsPage, activeSite?.id]);
+
+
 
     // --- FILTER STATE ---
     const [searchTerm, setSearchTerm] = useState('');
@@ -75,6 +105,71 @@ export default function Inventory() {
         priceRange: 'All', // 0-100, 100-1000, 1000+
         siteId: 'All' // New Location Filter
     });
+
+    // Server-side Pagination for Products
+    const [localProducts, setLocalProducts] = useState<Product[]>([]);
+    const [productsLoading, setProductsLoading] = useState(false);
+    const [totalProductCount, setTotalProductCount] = useState(0);
+    const [currentProductPage, setCurrentProductPage] = useState(1);
+    const PRODUCTS_PER_PAGE = 20;
+
+    const fetchProducts = useCallback(async () => {
+        setProductsLoading(true);
+        try {
+            const offset = (currentProductPage - 1) * PRODUCTS_PER_PAGE;
+            // Map generic filters to service filters
+            const serviceFilters = {
+                search: searchTerm,
+                category: filters.category,
+                status: filters.status
+            };
+
+            // Site ID logic: If activeSite is set (Warehouse view), force that siteId.
+            // If activeSite is null (Global view), allow filters.siteId.
+            let querySiteId = activeSite?.id;
+            if (!querySiteId && filters.siteId !== 'All') {
+                querySiteId = filters.siteId;
+            }
+
+            const { data, count } = await productsService.getAll(querySiteId, PRODUCTS_PER_PAGE, offset, serviceFilters);
+            setLocalProducts(data || []);
+            setTotalProductCount(count || 0);
+        } catch (error) {
+            console.error('Failed to fetch products', error);
+            addNotification('alert', 'Failed to load products');
+        } finally {
+            setProductsLoading(false);
+        }
+    }, [activeSite?.id, currentProductPage, filters, searchTerm, PRODUCTS_PER_PAGE, addNotification]);
+
+    // --- SERVER-SIDE METRICS ---
+    const [serverMetrics, setServerMetrics] = useState<any>(null);
+
+    useEffect(() => {
+        const fetchMetrics = async () => {
+            try {
+                // Same site logic as products
+                let metricSiteId = activeSite?.id;
+                if (!metricSiteId && filters.siteId !== 'All') {
+                    metricSiteId = filters.siteId;
+                }
+                const metrics = await productsService.getMetrics(metricSiteId);
+                setServerMetrics(metrics);
+            } catch (err) {
+                console.error('Failed to load inventory metrics:', err);
+            }
+        };
+        fetchMetrics();
+    }, [activeSite?.id, filters.siteId]);
+
+    useEffect(() => {
+        fetchProducts();
+    }, [fetchProducts]);
+
+    useEffect(() => {
+        setCurrentProductPage(1);
+    }, [activeSite?.id, filters, searchTerm]);
+
 
     // --- SORT STATE ---
     const [sortConfig, setSortConfig] = useState<{ key: string, direction: 'asc' | 'desc' } | null>({ key: 'createdAt', direction: 'desc' }); // Default to recent
@@ -254,9 +349,7 @@ export default function Inventory() {
                     <div className="grid grid-cols-2 gap-4">
                         <div className="p-5 bg-black/40 rounded-xl border border-white/5 shadow-inner">
                             <label className="text-[10px] text-gray-500 uppercase font-bold block mb-2">Change Quantity</label>
-                            <span className={`text-4xl font-black tracking-tighter ${requestForDetails.adjustmentType === 'IN' ? 'text-green-400' : 'text-red-400'}`}>
-                                {requestForDetails.adjustmentType === 'IN' ? '+' : '-'}{requestForDetails.adjustmentQty}
-                            </span>
+                            <span className={`text-4xl font-black tracking-tighter ${requestForDetails.adjustmentType === 'IN' ? '+' : '-'}`}>{requestForDetails.adjustmentQty}</span>
                         </div>
                         <div className="p-5 bg-black/40 rounded-xl border border-white/5 shadow-inner">
                             <label className="text-[10px] text-gray-500 uppercase font-bold block mb-2">Stated Reason</label>
@@ -322,32 +415,28 @@ export default function Inventory() {
     // Pending changes count for badge
     const pendingCount = pendingProducts.length + pendingChanges.length;
 
-    // --- DATA PROCESSING ---
-    const totalInventoryValueCost = filteredProducts.reduce((sum, p) => sum + (p.stock * (p.costPrice || p.price * 0.7)), 0);
-    const totalInventoryValueRetail = filteredProducts.reduce((sum, p) => sum + (p.stock * p.price), 0);
+    // --- DATA PROCESSING (Server-Side) ---
+    const totalInventoryValueCost = serverMetrics?.total_value_cost || 0;
+    const totalInventoryValueRetail = serverMetrics?.total_value_retail || 0;
     const totalInventoryValue = totalInventoryValueCost; // Primary for Asset Value
 
     const filteredItems = useMemo(() => {
-        const filtered = filteredProducts.filter(p => {
-            const matchesSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase()) || p.sku.toLowerCase().includes(searchTerm.toLowerCase());
-            const matchesCat = filters.category === 'All' || p.category === filters.category;
-            const matchesStatus = filters.status === 'All' ||
-                (filters.status === 'Active' && p.status === 'active') ||
-                (filters.status === 'Low Stock' && p.status === 'low_stock') ||
-                (filters.status === 'Out of Stock' && p.status === 'out_of_stock');
+        // Server has already applied filters and sorting. 
+        // We ensure localProducts is an array.
+        let processed = Array.isArray(localProducts) ? localProducts : [];
 
-            const abc = getABCClass(p, totalInventoryValue);
-            const matchesABC = filters.abc === 'All' || abc === filters.abc;
+        // Client-side ABC filter (imperfect but requested)
+        if (filters.abc !== 'All') {
+            processed = processed.filter(p => {
+                const abc = getABCClass(p, totalInventoryValue);
+                return abc === filters.abc;
+            });
+        }
 
-            // Site Filter Logic
-            const matchesSite = filters.siteId === 'All' || p.siteId === filters.siteId || p.site_id === filters.siteId;
-
-            return matchesSearch && matchesCat && matchesStatus && matchesABC && matchesSite;
-        });
-
-        // Apply Sorting
-        if (sortConfig !== null) {
-            filtered.sort((a: Product, b: Product) => {
+        // No client-side sorting needed for most fields as server does it.
+        // But for calculated fields (assetValue, abc), we sort client-side on the current page.
+        if (sortConfig && ['assetValue', 'abc'].includes(sortConfig.key)) {
+            processed.sort((a: Product, b: Product) => {
                 let aValue: any = a[sortConfig.key as keyof Product];
                 let bValue: any = b[sortConfig.key as keyof Product];
 
@@ -360,52 +449,31 @@ export default function Inventory() {
                     bValue = getABCClass(b, totalInventoryValue);
                 }
 
-                // Handle string comparison
-                if (typeof aValue === 'string') aValue = aValue.toLowerCase();
-                if (typeof bValue === 'string') bValue = bValue.toLowerCase();
-
-                // Handle null/undefined
-                if (aValue === undefined || aValue === null) return 1;
-                if (bValue === undefined || bValue === null) return -1;
-
-                if (aValue < bValue) {
-                    return sortConfig.direction === 'asc' ? -1 : 1;
-                }
-                if (aValue > bValue) {
-                    return sortConfig.direction === 'asc' ? 1 : -1;
-                }
+                if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
+                if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
                 return 0;
             });
         }
 
-        return filtered;
-    }, [filteredProducts, searchTerm, filters, totalInventoryValue, sortConfig]);
+        return processed;
+    }, [localProducts, filters.abc, sortConfig, totalInventoryValue]);
 
-    // Analytics Data
+
+
+    // Analytics Data (Server-Side)
     const categoryData = useMemo(() => {
-        const data: Record<string, number> = {};
-        // Use filteredItems for analytics to reflect site choice? 
-        // Or keep it global? Usually filters affect the list. 
-        // user probably wants to see analytics for selected "view" too.
-        // Let's stick to filteredProducts (which is either Global or Active Site) for high level charts
-        // unless we want charts to react to the dropdown?
-        // Let's use filteredProducts for now to keep charts stable unless context changes.
-        filteredProducts.forEach(p => { data[p.category] = (data[p.category] || 0) + (p.price * p.stock); });
-        return Object.keys(data).map(k => ({ name: k, value: data[k] }));
-    }, [filteredProducts]);
+        if (serverMetrics?.category_stats) return serverMetrics.category_stats;
+        return [];
+    }, [serverMetrics]);
 
     const abcData = useMemo(() => {
-        const counts = { A: 0, B: 0, C: 0 };
-        filteredProducts.forEach(p => {
-            const c = getABCClass(p, totalInventoryValue);
-            counts[c as keyof typeof counts]++;
-        });
+        if (serverMetrics?.abc_stats) return serverMetrics.abc_stats;
         return [
-            { name: 'Class A (Vital)', value: counts.A },
-            { name: 'Class B (Important)', value: counts.B },
-            { name: 'Class C (Standard)', value: counts.C },
+            { name: 'Class A (Vital)', value: 0 },
+            { name: 'Class B (Important)', value: 0 },
+            { name: 'Class C (Standard)', value: 0 },
         ];
-    }, [filteredProducts, totalInventoryValue]);
+    }, [serverMetrics]);
 
     // --- HANDLERS ---
 
@@ -533,7 +601,7 @@ export default function Inventory() {
                 location: locationInput,
                 expiryDate: formData.get('expiryDate') as string,
                 status: 'active', // Default to active, availability depends on physical stock
-                image: productImage || editingProduct?.image || 'https://via.placeholder.com/200x200?text=No+Image',
+                image: productImage || editingProduct?.image || '/placeholder.png',
                 // Extended fields for PO consistency
                 brand: productBrand || undefined,
                 size: productSize || undefined,
@@ -657,7 +725,7 @@ export default function Inventory() {
 
         setIsSubmitting(true);
         try {
-            // Super admin can delete directly, others need approval
+            // CEO can delete directly, others need approval
             if (canApprove) {
                 await deleteProduct(productToDelete);
                 addNotification('success', 'Product deleted permanently.');
@@ -698,7 +766,7 @@ export default function Inventory() {
     // --- APPROVAL HANDLERS ---
     const handleApproveProduct = async (product: Product) => {
         if (!canApprove) {
-            addNotification('alert', 'Only Super Admin can approve products.');
+            addNotification('alert', 'Only CEO can approve products.');
             return;
         }
         setIsSubmitting(true);
@@ -743,7 +811,7 @@ export default function Inventory() {
 
     const handleRejectProduct = async (product: Product) => {
         if (!canApprove) {
-            addNotification('alert', 'Only Super Admin can reject products.');
+            addNotification('alert', 'Only CEO can reject products.');
             return;
         }
         if (!rejectionReason.trim()) {
@@ -952,7 +1020,7 @@ export default function Inventory() {
 
         setIsSubmitting(true);
         try {
-            // Super admin can adjust directly, others need approval
+            // CEO can adjust directly, others need approval
             if (canApprove) {
                 await adjustStock(editingProduct.id, qty, adjustType, adjustReason, user?.name || 'System');
                 addNotification('success', `Stock adjusted for "${editingProduct.name}".`);
@@ -1056,7 +1124,7 @@ export default function Inventory() {
                 <TabButton id="stock" label="Master List" icon={Layout} />
                 <TabButton id="zones" label="Zone Map" icon={Map} />
                 <TabButton id="movements" label="Audit Log" icon={ClipboardList} />
-                {/* Pending Approvals Tab - Visible to Super Admin & Managers */}
+                {/* Pending Approvals Tab - Visible to CEO & Managers */}
                 {canViewPending && (
                     <Button onClick={() => setActiveTab('pending')} variant={activeTab === 'pending' ? 'primary' : 'ghost'} className={`flex items-center space-x-2 px-4 py-3 rounded-lg text-sm font-medium transition-all ${activeTab === 'pending' ? 'bg-amber-500 text-black shadow-[0_0_15px_rgba(245,158,11,0.3)]' : 'text-amber-400 hover:text-white hover:bg-white/5'} `}>
                         <Clock size={16} />
@@ -1105,7 +1173,7 @@ export default function Inventory() {
                                 <ResponsiveContainer width="100%" height="100%" minHeight={0}>
                                     <PieChart>
                                         <Pie data={abcData} cx="50%" cy="50%" innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value">
-                                            {abcData.map((entry, index) => (
+                                            {abcData.map((entry: any, index: number) => (
                                                 <Cell key={`cell - ${index} `} fill={COLORS[index % COLORS.length]} stroke="none" />
                                             ))}
                                         </Pie>
@@ -1114,10 +1182,13 @@ export default function Inventory() {
                                 </ResponsiveContainer>
                             </div>
                             <div className="space-y-3 mt-4">
-                                {abcData.map((item, i) => (
+                                {abcData.map((item: any, i: number) => (
                                     <div key={i} className="flex justify-between items-center text-sm">
                                         <div className="flex items-center gap-2">
-                                            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: COLORS[i] }} />
+                                            <motion.div
+                                                animate={{ backgroundColor: COLORS[i % COLORS.length] }}
+                                                className="w-2 h-2 rounded-full"
+                                            />
                                             <span className="text-gray-300">{item.name}</span>
                                         </div>
                                         <span className="font-mono text-white font-bold">{item.value} SKUs</span>
@@ -1317,7 +1388,21 @@ export default function Inventory() {
                                                 <td className="p-4"><input type="checkbox" aria-label="Select row" className="accent-cyber-primary" checked={isSelected} onChange={() => toggleSelection(product.id)} /></td>
                                                 <td className="p-4">
                                                     <div className="flex items-center space-x-3">
-                                                        <img src={product.image} alt="" className="w-12 h-12 rounded-lg bg-black object-cover border border-white/10" />
+                                                        <div className="w-12 h-12 rounded-lg bg-black/30 border border-white/10 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                                                            {product.image && !product.image.includes('placeholder.com') ? (
+                                                                <img
+                                                                    src={product.image}
+                                                                    alt=""
+                                                                    className="w-full h-full object-cover"
+                                                                    onError={(e) => {
+                                                                        e.currentTarget.style.display = 'none';
+                                                                        (e.currentTarget.parentElement as HTMLElement).innerHTML = '<div class="text-gray-600"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-package"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg></div>';
+                                                                    }}
+                                                                />
+                                                            ) : (
+                                                                <Package size={20} className="text-gray-600" />
+                                                            )}
+                                                        </div>
                                                         <div>
                                                             <p className="text-sm font-medium text-white">{product.name}</p>
                                                             <div className="flex items-center space-x-2 mt-1">
@@ -1406,6 +1491,32 @@ export default function Inventory() {
                                 </div>
                             )}
                         </div>
+
+                        {/* Product Pagination Controls */}
+                        <div className="flex justify-between items-center p-4 border-t border-white/5 bg-black/20">
+                            <div className="text-xs text-gray-400">
+                                Showing {localProducts.length} of {formatCompactNumber(totalProductCount)} records
+                            </div>
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={() => setCurrentProductPage(prev => Math.max(1, prev - 1))}
+                                    disabled={currentProductPage === 1 || productsLoading}
+                                    className="px-3 py-1 bg-white/5 hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed rounded text-xs text-white transition-colors border border-white/10"
+                                >
+                                    Previous
+                                </button>
+                                <span className="flex items-center px-2 text-xs text-gray-400 font-mono">
+                                    Page {currentProductPage}
+                                </span>
+                                <button
+                                    onClick={() => setCurrentProductPage(prev => Math.min(prev + 1, Math.max(1, Math.ceil(totalProductCount / PRODUCTS_PER_PAGE))))}
+                                    disabled={currentProductPage >= Math.ceil(totalProductCount / PRODUCTS_PER_PAGE) || productsLoading}
+                                    className="px-3 py-1 bg-white/5 hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed rounded text-xs text-white transition-colors border border-white/10"
+                                >
+                                    Next
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             )}
@@ -1431,8 +1542,10 @@ export default function Inventory() {
                                 </div>
                                 <div className="relative z-10">
                                     <div className="w-full bg-black/50 rounded-full h-4 border border-white/10 overflow-hidden relative">
-                                        {/* eslint-disable-next-line react-dom/no-unsafe-inline-styles */}
-                                        <div className={`h - full transition - all duration - 1000 ${colorClass} `} style={{ width: `${usagePercent}% ` }} />
+                                        <motion.div
+                                            animate={{ width: `${usagePercent}%` }}
+                                            className={`h-full transition-all duration-1000 ${colorClass}`}
+                                        />
                                     </div>
                                     {zone.temperature && <div className="mt-4 flex items-center gap-2 text-blue-400 text-sm bg-blue-500/5 px-3 py-2 rounded-lg border border-blue-500/10 w-fit"><Thermometer size={14} /> <span>Current Temp: {zone.temperature}</span></div>}
                                 </div>
@@ -1450,13 +1563,13 @@ export default function Inventory() {
                         <table className="w-full text-left">
                             <thead><tr className="bg-black/20 border-b border-white/5"><th className="p-4 text-xs text-gray-500 uppercase">Ref ID</th><th className="p-4 text-xs text-gray-500 uppercase">Time</th><th className="p-4 text-xs text-gray-500 uppercase">Type</th><th className="p-4 text-xs text-gray-500 uppercase">Product</th><th className="p-4 text-xs text-gray-500 uppercase text-right">Qty</th><th className="p-4 text-xs text-gray-500 uppercase">User</th><th className="p-4 text-xs text-gray-500 uppercase">Reason</th></tr></thead>
                             <tbody className="divide-y divide-white/5">
-                                {movements.map((move) => (
+                                {localMovements.map((move) => (
                                     <tr key={move.id} className="hover:bg-white/5">
                                         <td className="p-4 text-xs font-mono text-gray-400">{move.id}</td>
                                         <td className="p-4 text-xs text-white">{move.date}</td>
-                                        <td className="p-4"><span className={`text - [10px] font - bold px - 2 py - 1 rounded uppercase border ${move.type === 'IN' ? 'text-green-400 border-green-400/20 bg-green-400/5' : move.type === 'OUT' ? 'text-blue-400 border-blue-400/20 bg-blue-400/5' : 'text-yellow-400 border-yellow-400/20 bg-yellow-400/5'} `}>{move.type}</span></td>
+                                        <td className="p-4"><span className={`text-[10px] font-bold px-2 py-1 rounded uppercase border ${move.type === 'IN' ? 'text-green-400 border-green-400/20 bg-green-400/5' : move.type === 'OUT' ? 'text-blue-400 border-blue-400/20 bg-blue-400/5' : 'text-yellow-400 border-yellow-400/20 bg-yellow-400/5'} `}>{move.type}</span></td>
                                         <td className="p-4 text-sm text-white">{move.productName}</td>
-                                        <td className={`p - 4 text - sm font - mono text - right font - bold ${move.type === 'IN' ? 'text-green-400' : 'text-white'} `}>{move.type === 'IN' ? '+' : ''}{move.quantity}</td>
+                                        <td className={`p-4 text-sm font-mono text-right font-bold ${move.type === 'IN' ? 'text-green-400' : 'text-white'} `}>{move.type === 'IN' ? '+' : ''}{move.quantity}</td>
                                         <td className="p-4 text-xs text-gray-300">{move.performedBy}</td>
                                         <td className="p-4 text-xs text-gray-500 italic">{move.reason}</td>
                                     </tr>
@@ -1464,10 +1577,35 @@ export default function Inventory() {
                             </tbody>
                         </table>
                     </div>
+                    {/* Pagination Controls */}
+                    <div className="flex justify-between items-center p-4 border-t border-white/5 bg-black/20">
+                        <div className="text-xs text-gray-400">
+                            Showing {localMovements.length} of {formatCompactNumber(totalMovementsCount)} records
+                        </div>
+                        <div className="flex gap-2">
+                            <button
+                                onClick={() => setCurrentMovementsPage(prev => Math.max(1, prev - 1))}
+                                disabled={currentMovementsPage === 1 || movementsLoading}
+                                className="px-3 py-1 bg-white/5 hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed rounded text-xs text-white transition-colors border border-white/10"
+                            >
+                                Previous
+                            </button>
+                            <span className="flex items-center px-2 text-xs text-gray-400 font-mono">
+                                Page {currentMovementsPage}
+                            </span>
+                            <button
+                                onClick={() => setCurrentMovementsPage(prev => (localMovements.length === MOVEMENTS_PER_PAGE ? prev + 1 : prev))}
+                                disabled={localMovements.length < MOVEMENTS_PER_PAGE || movementsLoading}
+                                className="px-3 py-1 bg-white/5 hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed rounded text-xs text-white transition-colors border border-white/10"
+                            >
+                                Next
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
 
-            {/* --- PENDING APPROVALS TAB (Visible to Super Admin & Managers) --- */}
+            {/* --- PENDING APPROVALS TAB (Visible to CEO & Managers) --- */}
             {activeTab === 'pending' && canViewPending && (
                 <div className="space-y-6 animate-in fade-in">
                     {/* Pending Products Section */}
@@ -1502,7 +1640,21 @@ export default function Inventory() {
                                             <tr key={prod.id} className="hover:bg-white/5">
                                                 <td className="p-4">
                                                     <div className="flex items-center gap-3">
-                                                        <img src={prod.image} alt={prod.name} className="w-10 h-10 rounded-lg object-cover border border-white/10" />
+                                                        <div className="w-10 h-10 rounded-lg bg-black/30 border border-white/10 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                                                            {prod.image && !prod.image.includes('placeholder.com') ? (
+                                                                <img
+                                                                    src={prod.image}
+                                                                    alt={prod.name}
+                                                                    className="w-full h-full object-cover"
+                                                                    onError={(e) => {
+                                                                        e.currentTarget.style.display = 'none';
+                                                                        (e.currentTarget.parentElement as HTMLElement).innerHTML = '<div class="text-gray-600"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-package"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg></div>';
+                                                                    }}
+                                                                />
+                                                            ) : (
+                                                                <Package size={16} className="text-gray-600" />
+                                                            )}
+                                                        </div>
                                                         <div>
                                                             <p className="font-semibold text-white text-sm">{prod.name}</p>
                                                             <p className="text-[10px] text-gray-400">{prod.brand}</p>
@@ -1516,7 +1668,7 @@ export default function Inventory() {
                                                     <User size={12} /> {prod.createdBy || prod.created_by || 'Unknown'}
                                                 </td>
                                                 <td className="p-4 text-xs text-gray-400">
-                                                    {prod.createdAt || prod.created_at ? new Date(prod.createdAt || prod.created_at || '').toLocaleDateString() : '-'}
+                                                    {prod.createdAt || prod.created_at ? formatDateTime(prod.createdAt || prod.created_at || '') : '-'}
                                                 </td>
                                                 <td className="p-4">
                                                     <div className="flex items-center justify-center gap-2">
@@ -1570,7 +1722,7 @@ export default function Inventory() {
                                                         ) : (
                                                             <div className="flex items-center justify-center">
                                                                 <span className="text-xs text-amber-500/50 italic border border-amber-500/10 px-3 py-1 bg-amber-500/5 rounded-lg flex items-center gap-1">
-                                                                    <Clock size={12} /> Awaiting Super Admin
+                                                                    <Clock size={12} /> Awaiting CEO
                                                                 </span>
                                                             </div>
                                                         )}
@@ -1665,7 +1817,7 @@ export default function Inventory() {
                                                     <User size={12} /> {change.requestedBy}
                                                 </td>
                                                 <td className="p-4 text-xs text-gray-400">
-                                                    {new Date(change.requestedAt || (change as any).requested_at || '').toLocaleDateString()}
+                                                    {formatDateTime(change.requestedAt || (change as any).requested_at || '')}
                                                 </td>
                                                 <td className="p-4 text-center">
                                                     {canApprove ? (
@@ -1704,7 +1856,7 @@ export default function Inventory() {
                                                             </Button>
                                                         </div>
                                                     ) : (
-                                                        <span className="text-xs text-amber-500/50 italic">Awaiting Super Admin</span>
+                                                        <span className="text-xs text-amber-500/50 italic">Awaiting CEO</span>
                                                     )}
                                                 </td>
                                             </tr>

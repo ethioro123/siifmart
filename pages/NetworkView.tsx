@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import {
     Building, Store, Package, MapPin, TrendingUp, AlertTriangle,
-    Search, Filter, ChevronDown, ChevronRight, Box, Layers,
+    Search, Filter, ChevronDown, ChevronRight,
     ArrowRight, Clock, DollarSign, Activity, Users, Truck
 } from 'lucide-react';
 import { useData } from '../contexts/DataContext';
@@ -9,14 +9,22 @@ import { CURRENCY_SYMBOL } from '../constants';
 import { Site, Product } from '../types';
 import { formatCompactNumber } from '../utils/formatting';
 
-type ViewMode = 'grid' | 'list' | 'map';
+const PRODUCTS_PER_PAGE = 10;
 
 export default function NetworkInventory() {
     const { sites, allProducts, activeSite } = useData();
-    const [viewMode, setViewMode] = useState<ViewMode>('grid');
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedSite, setSelectedSite] = useState<Site | null>(null);
-    const [expandedSites, setExpandedSites] = useState<Set<string>>(new Set());
+    const [expandedSiteId, setExpandedSiteId] = useState<string | null>(null);
+    const [siteProductPages, setSiteProductPages] = useState<Record<string, number>>({});
+
+    // Get current page for a site (default to 1)
+    const getPageForSite = (siteId: string) => siteProductPages[siteId] || 1;
+
+    // Set page for a specific site
+    const setPageForSite = (siteId: string, page: number) => {
+        setSiteProductPages(prev => ({ ...prev, [siteId]: page }));
+    };
 
     // Calculate inventory metrics per site (exclude Admin - administrative offices don't hold inventory)
     const siteInventory = useMemo(() => {
@@ -73,14 +81,9 @@ export default function NetworkInventory() {
         );
     }, [siteInventory, searchTerm]);
 
+    // Toggle site expansion - accordion style (only one at a time)
     const toggleSiteExpansion = (siteId: string) => {
-        const newExpanded = new Set(expandedSites);
-        if (newExpanded.has(siteId)) {
-            newExpanded.delete(siteId);
-        } else {
-            newExpanded.add(siteId);
-        }
-        setExpandedSites(newExpanded);
+        setExpandedSiteId(prev => prev === siteId ? null : siteId);
     };
 
     const getStockStatusColor = (stock: number) => {
@@ -90,12 +93,6 @@ export default function NetworkInventory() {
         return 'text-green-400 bg-green-500/10 border-green-500/30';
     };
 
-    const getUtilizationColor = (percent: number) => {
-        if (percent >= 90) return 'text-red-400';
-        if (percent >= 75) return 'text-yellow-400';
-        return 'text-green-400';
-    };
-
     return (
         <div className="space-y-6">
             {/* Header */}
@@ -103,22 +100,6 @@ export default function NetworkInventory() {
                 <div>
                     <h1 className="text-3xl font-bold text-white mb-2">Network Inventory</h1>
                     <p className="text-gray-400">Real-time visibility across all warehouses and stores</p>
-                </div>
-                <div className="flex gap-2">
-                    <button
-                        onClick={() => setViewMode('grid')}
-                        className={`p-2 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-cyber-primary text-black' : 'bg-white/5 text-gray-400 hover:text-white'}`}
-                        title="Grid View"
-                    >
-                        <Layers size={20} />
-                    </button>
-                    <button
-                        onClick={() => setViewMode('list')}
-                        className={`p-2 rounded-lg transition-colors ${viewMode === 'list' ? 'bg-cyber-primary text-black' : 'bg-white/5 text-gray-400 hover:text-white'}`}
-                        title="List View"
-                    >
-                        <Box size={20} />
-                    </button>
                 </div>
             </div>
 
@@ -308,182 +289,58 @@ export default function NetworkInventory() {
                 )}
             </div>
 
-            {/* Inventory Grid/List */}
-            {viewMode === 'grid' ? (
-                <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-                    {filteredInventory.map(({ site, products: siteProducts, metrics }) => (
-                        <div
-                            key={site.id}
-                            className="bg-gradient-to-br from-cyber-gray to-black/40 border border-white/10 rounded-2xl overflow-hidden hover:border-cyber-primary/50 transition-all duration-300 hover:shadow-[0_0_30px_rgba(0,255,157,0.1)]"
-                        >
-                            {/* Site Header */}
-                            <div className="p-6 border-b border-white/10">
-                                <div className="flex items-start justify-between mb-4">
-                                    <div className="flex items-center gap-3">
-                                        <div className={`p-3 rounded-xl ${site.type === 'Warehouse' ? 'bg-blue-500/20 text-blue-400' : 'bg-green-500/20 text-green-400'}`}>
-                                            {site.type === 'Warehouse' ? <Building size={24} /> : <Store size={24} />}
-                                        </div>
-                                        <div>
-                                            <h3 className="text-lg font-bold text-white">{site.name}</h3>
-                                            <p className="text-xs text-gray-400 flex items-center gap-1 mt-1">
-                                                <MapPin size={12} /> {site.address}
-                                            </p>
-                                        </div>
+            {/* Inventory List */}
+            <div className="space-y-4">
+                {filteredInventory.map(({ site, products: siteProducts, metrics }) => (
+                    <div key={site.id} className="bg-cyber-gray border border-white/5 rounded-2xl overflow-hidden">
+                        <div className="p-6">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-4 flex-1">
+                                    <div className={`p-3 rounded-xl ${site.type === 'Warehouse' ? 'bg-blue-500/20 text-blue-400' : 'bg-green-500/20 text-green-400'}`}>
+                                        {site.type === 'Warehouse' ? <Building size={28} /> : <Store size={28} />}
                                     </div>
-                                    <span className={`px-2 py-1 rounded-full text-[10px] uppercase font-bold border ${site.status === 'Active' ? 'text-green-400 border-green-500/30 bg-green-500/10' :
-                                        site.status === 'Maintenance' ? 'text-yellow-400 border-yellow-500/30 bg-yellow-500/10' :
-                                            'text-red-400 border-red-500/30 bg-red-500/10'
-                                        }`}>
-                                        {site.status}
-                                    </span>
-                                </div>
-
-                                {/* Metrics Grid */}
-                                <div className="grid grid-cols-3 gap-3">
-                                    <div className="bg-black/30 rounded-lg p-3">
-                                        <p className="text-[10px] text-gray-500 uppercase font-bold mb-1">Products</p>
-                                        <p className="text-xl font-bold text-cyber-primary">{metrics.uniqueProducts}</p>
-                                    </div>
-                                    <div className="bg-black/30 rounded-lg p-3">
-                                        <p className="text-[10px] text-gray-500 uppercase font-bold mb-1">Total Items</p>
-                                        <p className="text-xl font-bold text-white">{metrics.totalItems.toLocaleString()}</p>
-                                    </div>
-                                    <div className="bg-black/30 rounded-lg p-3">
-                                        <p className="text-[10px] text-gray-500 uppercase font-bold mb-1">Asset Value (Base Cost)</p>
-                                        <p className="text-sm font-bold text-white">{formatCompactNumber(metrics.totalValue, { currency: CURRENCY_SYMBOL })}</p>
+                                    <div className="flex-1">
+                                        <h3 className="text-xl font-bold text-white mb-1">{site.name}</h3>
+                                        <p className="text-sm text-gray-400 flex items-center gap-2">
+                                            <MapPin size={14} /> {site.address}
+                                            <span className="mx-2">•</span>
+                                            <Users size={14} /> {site.manager}
+                                        </p>
                                     </div>
                                 </div>
-
-                                {/* Utilization Bar */}
-                                {site.type === 'Warehouse' && (
-                                    <div className="mt-4">
-                                        <div className="flex justify-between items-center mb-2">
-                                            <span className="text-xs text-gray-400">Capacity Utilization</span>
-                                            <span className={`text-xs font-bold ${getUtilizationColor(metrics.utilizationPercent)}`}>
-                                                {metrics.utilizationPercent.toFixed(0)}%
-                                            </span>
-                                        </div>
-                                        <div className="h-2 bg-black/30 rounded-full overflow-hidden">
-                                            <div
-                                                className={`h-full transition-all ${metrics.utilizationPercent >= 90 ? 'bg-red-500' :
-                                                    metrics.utilizationPercent >= 75 ? 'bg-yellow-500' :
-                                                        'bg-green-500'
-                                                    }`}
-                                                style={{ width: `${Math.min(100, metrics.utilizationPercent)}%` } as React.CSSProperties}
-                                            />
-                                        </div>
+                                <div className="flex items-center gap-6">
+                                    <div className="text-right">
+                                        <p className="text-xs text-gray-500 uppercase font-bold">Products</p>
+                                        <p className="text-2xl font-bold text-cyber-primary">{metrics.uniqueProducts}</p>
                                     </div>
-                                )}
-
-                                {/* Alerts */}
-                                {(metrics.lowStockItems > 0 || metrics.outOfStockItems > 0) && (
-                                    <div className="mt-4 flex gap-2">
-                                        {metrics.outOfStockItems > 0 && (
-                                            <div className="flex-1 bg-red-500/10 border border-red-500/30 rounded-lg p-2 flex items-center gap-2">
-                                                <AlertTriangle className="text-red-400" size={14} />
-                                                <span className="text-xs text-red-400 font-bold">{metrics.outOfStockItems} Out of Stock</span>
-                                            </div>
-                                        )}
-                                        {metrics.lowStockItems > 0 && (
-                                            <div className="flex-1 bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-2 flex items-center gap-2">
-                                                <AlertTriangle className="text-yellow-400" size={14} />
-                                                <span className="text-xs text-yellow-400 font-bold">{metrics.lowStockItems} Low Stock</span>
-                                            </div>
-                                        )}
+                                    <div className="text-right">
+                                        <p className="text-xs text-gray-500 uppercase font-bold">Total Items</p>
+                                        <p className="text-2xl font-bold text-white">{metrics.totalItems.toLocaleString()}</p>
                                     </div>
-                                )}
+                                    <div className="text-right">
+                                        <p className="text-xs text-gray-500 uppercase font-bold">Value</p>
+                                        <p className="text-2xl font-bold text-white">{formatCompactNumber(metrics.totalValue, { currency: CURRENCY_SYMBOL })}</p>
+                                    </div>
+                                    <button
+                                        onClick={() => toggleSiteExpansion(site.id)}
+                                        className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                                        title={expandedSiteId === site.id ? "Collapse products" : "Expand products"}
+                                    >
+                                        {expandedSiteId === site.id ? <ChevronDown size={20} className="text-gray-400" /> : <ChevronRight size={20} className="text-gray-400" />}
+                                    </button>
+                                </div>
                             </div>
 
-                            {/* Product List */}
-                            <div className="p-4">
-                                <button
-                                    onClick={() => toggleSiteExpansion(site.id)}
-                                    className="w-full flex items-center justify-between text-sm text-gray-400 hover:text-white transition-colors mb-3"
-                                >
-                                    <span className="font-bold">Products ({siteProducts.length})</span>
-                                    {expandedSites.has(site.id) ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
-                                </button>
+                            {expandedSiteId === site.id && (() => {
+                                const currentPage = getPageForSite(site.id);
+                                const totalPages = Math.ceil(siteProducts.length / PRODUCTS_PER_PAGE);
+                                const startIdx = (currentPage - 1) * PRODUCTS_PER_PAGE;
+                                const paginatedProducts = siteProducts.slice(startIdx, startIdx + PRODUCTS_PER_PAGE);
 
-                                {expandedSites.has(site.id) && (
-                                    <div className="space-y-2 max-h-96 overflow-y-auto custom-scrollbar">
-                                        {siteProducts.slice(0, 20).map(product => (
-                                            <div key={product.id} className="bg-black/20 border border-white/5 rounded-lg p-3 hover:border-cyber-primary/30 transition-colors">
-                                                <div className="flex items-center justify-between">
-                                                    <div className="flex-1">
-                                                        <p className="text-sm font-bold text-white">{product.name}</p>
-                                                        <p className="text-xs text-gray-500 font-mono">{product.sku}</p>
-                                                    </div>
-                                                    <div className="text-right">
-                                                        <p className={`text-sm font-bold px-2 py-1 rounded border ${getStockStatusColor(product.stock)}`}>
-                                                            {product.stock} units
-                                                        </p>
-                                                        <p className="text-xs text-gray-400 mt-1">{formatCompactNumber(product.price, { currency: CURRENCY_SYMBOL })}</p>
-                                                    </div>
-                                                </div>
-                                                {product.location && (
-                                                    <p className="text-xs text-gray-500 mt-2 flex items-center gap-1">
-                                                        <MapPin size={10} /> {product.location}
-                                                    </p>
-                                                )}
-                                            </div>
-                                        ))}
-                                        {siteProducts.length > 20 && (
-                                            <p className="text-xs text-gray-500 text-center py-2">
-                                                + {siteProducts.length - 20} more products
-                                            </p>
-                                        )}
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            ) : (
-                /* List View */
-                <div className="space-y-4">
-                    {filteredInventory.map(({ site, products: siteProducts, metrics }) => (
-                        <div key={site.id} className="bg-cyber-gray border border-white/5 rounded-2xl overflow-hidden">
-                            <div className="p-6">
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-4 flex-1">
-                                        <div className={`p-3 rounded-xl ${site.type === 'Warehouse' ? 'bg-blue-500/20 text-blue-400' : 'bg-green-500/20 text-green-400'}`}>
-                                            {site.type === 'Warehouse' ? <Building size={28} /> : <Store size={28} />}
-                                        </div>
-                                        <div className="flex-1">
-                                            <h3 className="text-xl font-bold text-white mb-1">{site.name}</h3>
-                                            <p className="text-sm text-gray-400 flex items-center gap-2">
-                                                <MapPin size={14} /> {site.address}
-                                                <span className="mx-2">•</span>
-                                                <Users size={14} /> {site.manager}
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center gap-6">
-                                        <div className="text-right">
-                                            <p className="text-xs text-gray-500 uppercase font-bold">Products</p>
-                                            <p className="text-2xl font-bold text-cyber-primary">{metrics.uniqueProducts}</p>
-                                        </div>
-                                        <div className="text-right">
-                                            <p className="text-xs text-gray-500 uppercase font-bold">Total Items</p>
-                                            <p className="text-2xl font-bold text-white">{metrics.totalItems.toLocaleString()}</p>
-                                        </div>
-                                        <div className="text-right">
-                                            <p className="text-xs text-gray-500 uppercase font-bold">Value</p>
-                                            <p className="text-2xl font-bold text-white">{formatCompactNumber(metrics.totalValue, { currency: CURRENCY_SYMBOL })}</p>
-                                        </div>
-                                        <button
-                                            onClick={() => toggleSiteExpansion(site.id)}
-                                            className="p-2 hover:bg-white/10 rounded-lg transition-colors"
-                                        >
-                                            {expandedSites.has(site.id) ? <ChevronDown size={20} className="text-gray-400" /> : <ChevronRight size={20} className="text-gray-400" />}
-                                        </button>
-                                    </div>
-                                </div>
-
-                                {expandedSites.has(site.id) && (
+                                return (
                                     <div className="mt-6 pt-6 border-t border-white/10">
                                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                                            {siteProducts.map(product => (
+                                            {paginatedProducts.map(product => (
                                                 <div key={product.id} className="bg-black/20 border border-white/5 rounded-lg p-4 hover:border-cyber-primary/30 transition-colors">
                                                     <div className="flex items-start justify-between mb-2">
                                                         <div className="flex-1">
@@ -501,13 +358,45 @@ export default function NetworkInventory() {
                                                 </div>
                                             ))}
                                         </div>
+
+                                        {/* Pagination Controls */}
+                                        {totalPages > 1 && (
+                                            <div className="flex items-center justify-between pt-4 mt-4 border-t border-white/10">
+                                                <span className="text-xs text-gray-500">
+                                                    Showing {startIdx + 1}-{Math.min(startIdx + PRODUCTS_PER_PAGE, siteProducts.length)} of {siteProducts.length}
+                                                </span>
+                                                <div className="flex items-center gap-2">
+                                                    <button
+                                                        onClick={() => setPageForSite(site.id, currentPage - 1)}
+                                                        disabled={currentPage === 1}
+                                                        className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-colors ${currentPage === 1
+                                                            ? 'bg-white/5 text-gray-600 cursor-not-allowed'
+                                                            : 'bg-white/10 text-white hover:bg-cyber-primary/20 hover:text-cyber-primary'}`}
+                                                    >
+                                                        Prev
+                                                    </button>
+                                                    <span className="text-xs text-gray-400 font-mono">
+                                                        {currentPage}/{totalPages}
+                                                    </span>
+                                                    <button
+                                                        onClick={() => setPageForSite(site.id, currentPage + 1)}
+                                                        disabled={currentPage === totalPages}
+                                                        className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-colors ${currentPage === totalPages
+                                                            ? 'bg-white/5 text-gray-600 cursor-not-allowed'
+                                                            : 'bg-white/10 text-white hover:bg-cyber-primary/20 hover:text-cyber-primary'}`}
+                                                    >
+                                                        Next
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
-                                )}
-                            </div>
+                                );
+                            })()}
                         </div>
-                    ))}
-                </div>
-            )}
+                    </div>
+                ))}
+            </div>
 
             {filteredInventory.length === 0 && (
                 <div className="bg-cyber-gray border border-white/5 rounded-2xl p-12 text-center">

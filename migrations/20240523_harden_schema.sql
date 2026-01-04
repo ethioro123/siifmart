@@ -101,7 +101,7 @@ FOR INSERT
 WITH CHECK (true);
 
 
--- POLICY: Super Admins & HQ Roles can see ALL Sites
+-- POLICY: CEOs & HQ Roles can see ALL Sites
 DROP POLICY IF EXISTS "HQ_Access_All_Sites" ON "sites";
 CREATE POLICY "HQ_Access_All_Sites" ON "sites"
 FOR ALL

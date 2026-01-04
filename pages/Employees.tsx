@@ -5,13 +5,14 @@ import {
    Calendar, Award, CheckCircle, Clock, AlertTriangle, DollarSign, ClipboardList,
    TrendingUp, User, Plus, Trash2, ArrowRight, ArrowLeft, MapPin, Upload, CreditCard,
    MessageSquare, Download, XCircle, Lock, UserCheck, Network, Layers, FileText,
-   Sun, Moon, Sunset, Building, Key, Camera, Loader2, Trophy, Zap, Target, Gift, Crown
+   Sun, Moon, Sunset, Building, Key, Camera, Loader2, Trophy, Zap, Target, Gift, Crown,
+   LayoutGrid, List
 } from 'lucide-react';
 import {
    AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar
 } from 'recharts';
 import { MOCK_TASKS, CURRENCY_SYMBOL } from '../constants';
-import { formatCompactNumber } from '../utils/formatting';
+import { formatCompactNumber, formatDateTime } from '../utils/formatting';
 import { Employee, EmployeeTask, UserRole, DEFAULT_POS_BONUS_TIERS, DEFAULT_POS_ROLE_DISTRIBUTION, DEFAULT_BONUS_TIERS } from '../types';
 import { calculateBonus } from '../components/WorkerPointsDisplay';
 import { calculateStoreBonus } from '../components/StoreBonusDisplay';
@@ -57,71 +58,129 @@ const SYSTEM_ROLES: {
    id: UserRole,
    label: string,
    desc: string,
+   level: number,
    styles: { text: string, bg: string, border: string, badge: string }
 }[] = [
+      // ═══ LEVEL 1 - EXECUTIVE ═══
       {
-         id: 'super_admin', label: 'Super Admin', desc: 'Unrestricted Access (Owner)',
+         id: 'super_admin', label: 'CEO', desc: 'Unrestricted Access (Owner)', level: 1,
          styles: { text: 'text-yellow-400', bg: 'bg-yellow-400/10', border: 'border-yellow-400/20', badge: 'bg-yellow-400/20 text-yellow-400' }
       },
+
+      // ═══ LEVEL 2 - REGIONAL/DIRECTORS ═══
       {
-         id: 'admin', label: 'System Admin', desc: 'Full System Control',
-         styles: { text: 'text-purple-400', bg: 'bg-purple-400/10', border: 'border-purple-400/20', badge: 'bg-purple-400/20 text-purple-400' }
+         id: 'regional_manager', label: 'Regional Manager', desc: 'Multi-Store Oversight', level: 2,
+         styles: { text: 'text-blue-500', bg: 'bg-blue-500/10', border: 'border-blue-500/20', badge: 'bg-blue-500/20 text-blue-500' }
       },
       {
-         id: 'hr', label: 'HR Manager', desc: 'Staff & Payroll Management',
-         styles: { text: 'text-pink-400', bg: 'bg-pink-400/10', border: 'border-pink-400/20', badge: 'bg-pink-400/20 text-pink-400' }
-      },
-      {
-         id: 'finance_manager', label: 'Finance Manager', desc: 'Financial Oversight',
-         styles: { text: 'text-emerald-400', bg: 'bg-emerald-400/10', border: 'border-emerald-400/20', badge: 'bg-emerald-400/20 text-emerald-400' }
-      },
-      {
-         id: 'procurement_manager', label: 'Procurement Mgr', desc: 'Supply Chain & Purchasing',
-         styles: { text: 'text-indigo-400', bg: 'bg-indigo-400/10', border: 'border-indigo-400/20', badge: 'bg-indigo-400/20 text-indigo-400' }
-      },
-      {
-         id: 'manager', label: 'Department Manager', desc: 'Departmental Operations',
+         id: 'operations_manager', label: 'Operations Manager', desc: 'HQ Operations', level: 2,
          styles: { text: 'text-blue-400', bg: 'bg-blue-400/10', border: 'border-blue-400/20', badge: 'bg-blue-400/20 text-blue-400' }
       },
       {
-         id: 'it_support', label: 'IT Support', desc: 'Technical Assistance',
-         styles: { text: 'text-cyan-400', bg: 'bg-cyan-400/10', border: 'border-cyan-400/20', badge: 'bg-cyan-400/20 text-cyan-400' }
+         id: 'finance_manager', label: 'Finance Manager', desc: 'Financial Oversight', level: 2,
+         styles: { text: 'text-emerald-400', bg: 'bg-emerald-400/10', border: 'border-emerald-400/20', badge: 'bg-emerald-400/20 text-emerald-400' }
       },
       {
-         id: 'cs_manager', label: 'CS Manager', desc: 'Customer Service Lead',
-         styles: { text: 'text-sky-400', bg: 'bg-sky-400/10', border: 'border-sky-400/20', badge: 'bg-sky-400/20 text-sky-400' }
+         id: 'hr_manager', label: 'HR Manager', desc: 'Staff & Payroll Management', level: 2,
+         styles: { text: 'text-pink-400', bg: 'bg-pink-400/10', border: 'border-pink-400/20', badge: 'bg-pink-400/20 text-pink-400' }
       },
       {
-         id: 'store_supervisor', label: 'Store Supervisor', desc: 'Floor Management',
-         styles: { text: 'text-blue-300', bg: 'bg-blue-300/10', border: 'border-blue-300/20', badge: 'bg-blue-300/20 text-blue-300' }
+         id: 'procurement_manager', label: 'Procurement Manager', desc: 'Supply Chain & Purchasing', level: 2,
+         styles: { text: 'text-indigo-400', bg: 'bg-indigo-400/10', border: 'border-indigo-400/20', badge: 'bg-indigo-400/20 text-indigo-400' }
       },
       {
-         id: 'inventory_specialist', label: 'Inventory Specialist', desc: 'Stock Control',
-         styles: { text: 'text-amber-400', bg: 'bg-amber-400/10', border: 'border-amber-400/20', badge: 'bg-amber-400/20 text-amber-400' }
+         id: 'supply_chain_manager', label: 'Supply Chain Manager', desc: 'End-to-End Logistics', level: 2,
+         styles: { text: 'text-violet-400', bg: 'bg-violet-400/10', border: 'border-violet-400/20', badge: 'bg-violet-400/20 text-violet-400' }
       },
+
+      // ═══ LEVEL 3 - SITE MANAGERS ═══
       {
-         id: 'pos', label: 'Cashier (POS)', desc: 'Point of Sale Access',
-         styles: { text: 'text-green-400', bg: 'bg-green-400/10', border: 'border-green-400/20', badge: 'bg-green-400/20 text-green-400' }
-      },
-      {
-         id: 'picker', label: 'Warehouse Picker', desc: 'Order Fulfillment',
-         styles: { text: 'text-orange-400', bg: 'bg-orange-400/10', border: 'border-orange-400/20', badge: 'bg-orange-400/20 text-orange-400' }
-      },
-      {
-         id: 'driver', label: 'Delivery Driver', desc: 'Logistics & Delivery',
+         id: 'store_manager', label: 'Store Manager', desc: 'Single Store Operations', level: 3,
          styles: { text: 'text-teal-400', bg: 'bg-teal-400/10', border: 'border-teal-400/20', badge: 'bg-teal-400/20 text-teal-400' }
       },
       {
-         id: 'warehouse_manager', label: 'Warehouse Manager', desc: 'Warehouse Operations Lead',
-         styles: { text: 'text-violet-400', bg: 'bg-violet-400/10', border: 'border-violet-400/20', badge: 'bg-violet-400/20 text-violet-400' }
+         id: 'warehouse_manager', label: 'Warehouse Manager', desc: 'Warehouse Operations Lead', level: 3,
+         styles: { text: 'text-teal-500', bg: 'bg-teal-500/10', border: 'border-teal-500/20', badge: 'bg-teal-500/20 text-teal-500' }
       },
       {
-         id: 'dispatcher', label: 'Dispatcher', desc: 'Logistics Coordination',
-         styles: { text: 'text-fuchsia-400', bg: 'bg-fuchsia-400/10', border: 'border-fuchsia-400/20', badge: 'bg-fuchsia-400/20 text-fuchsia-400' }
+         id: 'dispatch_manager', label: 'Dispatch Manager', desc: 'Fleet & Delivery Management', level: 3,
+         styles: { text: 'text-lime-400', bg: 'bg-lime-400/10', border: 'border-lime-400/20', badge: 'bg-lime-400/20 text-lime-400' }
       },
       {
-         id: 'auditor', label: 'Auditor', desc: 'Compliance & Audit',
+         id: 'assistant_manager', label: 'Assistant Manager', desc: 'Deputy Management', level: 3,
+         styles: { text: 'text-cyan-400', bg: 'bg-cyan-400/10', border: 'border-cyan-400/20', badge: 'bg-cyan-400/20 text-cyan-400' }
+      },
+      {
+         id: 'shift_lead', label: 'Shift Lead', desc: 'Team Lead', level: 3,
+         styles: { text: 'text-blue-200', bg: 'bg-blue-200/10', border: 'border-blue-200/20', badge: 'bg-blue-200/20 text-blue-200' }
+      },
+
+      // ═══ LEVEL 4 - STAFF ═══
+      {
+         id: 'cashier', label: 'Cashier', desc: 'POS Operations', level: 4,
+         styles: { text: 'text-green-400', bg: 'bg-green-400/10', border: 'border-green-400/20', badge: 'bg-green-400/20 text-green-400' }
+      },
+      {
+         id: 'sales_associate', label: 'Sales Associate', desc: 'Floor Sales', level: 4,
+         styles: { text: 'text-green-300', bg: 'bg-green-300/10', border: 'border-green-300/20', badge: 'bg-green-300/20 text-green-300' }
+      },
+      {
+         id: 'stock_clerk', label: 'Stock Clerk', desc: 'Shelving & Stocking', level: 4,
+         styles: { text: 'text-amber-400', bg: 'bg-amber-400/10', border: 'border-amber-400/20', badge: 'bg-amber-400/20 text-amber-400' }
+      },
+      {
+         id: 'picker', label: 'Picker', desc: 'Order Picking', level: 4,
+         styles: { text: 'text-orange-400', bg: 'bg-orange-400/10', border: 'border-orange-400/20', badge: 'bg-orange-400/20 text-orange-400' }
+      },
+      {
+         id: 'packer', label: 'Packer', desc: 'Order Packing', level: 4,
+         styles: { text: 'text-orange-300', bg: 'bg-orange-300/10', border: 'border-orange-300/20', badge: 'bg-orange-300/20 text-orange-300' }
+      },
+      {
+         id: 'receiver', label: 'Receiver', desc: 'Goods Receiving', level: 4,
+         styles: { text: 'text-cyan-400', bg: 'bg-cyan-400/10', border: 'border-cyan-400/20', badge: 'bg-cyan-400/20 text-cyan-400' }
+      },
+      {
+         id: 'driver', label: 'Driver', desc: 'Delivery', level: 4,
+         styles: { text: 'text-slate-400', bg: 'bg-slate-400/10', border: 'border-slate-400/20', badge: 'bg-slate-400/20 text-slate-400' }
+      },
+      {
+         id: 'forklift_operator', label: 'Forklift Operator', desc: 'Equipment Operator', level: 4,
+         styles: { text: 'text-gray-400', bg: 'bg-gray-400/10', border: 'border-gray-400/20', badge: 'bg-gray-400/20 text-gray-400' }
+      },
+      {
+         id: 'inventory_specialist', label: 'Inventory Specialist', desc: 'Stock Control', level: 4,
+         styles: { text: 'text-amber-300', bg: 'bg-amber-300/10', border: 'border-amber-300/20', badge: 'bg-amber-300/20 text-amber-300' }
+      },
+      {
+         id: 'customer_service', label: 'Customer Service', desc: 'Returns & Inquiries', level: 4,
+         styles: { text: 'text-sky-400', bg: 'bg-sky-400/10', border: 'border-sky-400/20', badge: 'bg-sky-400/20 text-sky-400' }
+      },
+      {
+         id: 'auditor', label: 'Auditor', desc: 'Compliance & Audit', level: 4,
          styles: { text: 'text-rose-400', bg: 'bg-rose-400/10', border: 'border-rose-400/20', badge: 'bg-rose-400/20 text-rose-400' }
+      },
+      {
+         id: 'it_support', label: 'IT Support', desc: 'Technical Assistance', level: 4,
+         styles: { text: 'text-purple-300', bg: 'bg-purple-300/10', border: 'border-purple-300/20', badge: 'bg-purple-300/20 text-purple-300' }
+      },
+
+      // ═══ LEGACY ROLES (backwards compatibility) ═══
+      {
+         id: 'admin', label: 'Admin (Legacy)', desc: 'System Admin', level: 2,
+         styles: { text: 'text-purple-400', bg: 'bg-purple-400/10', border: 'border-purple-400/20', badge: 'bg-purple-400/20 text-purple-400' }
+      },
+      {
+         id: 'manager', label: 'Manager (Legacy)', desc: 'Department Manager', level: 3,
+         styles: { text: 'text-blue-400', bg: 'bg-blue-400/10', border: 'border-blue-400/20', badge: 'bg-blue-400/20 text-blue-400' }
+      },
+      {
+         id: 'hr', label: 'HR (Legacy)', desc: 'Human Resources', level: 2,
+         styles: { text: 'text-pink-400', bg: 'bg-pink-400/10', border: 'border-pink-400/20', badge: 'bg-pink-400/20 text-pink-400' }
+      },
+      {
+         id: 'pos', label: 'POS Staff (Legacy)', desc: 'Point of Sale', level: 4,
+         styles: { text: 'text-green-400', bg: 'bg-green-400/10', border: 'border-green-400/20', badge: 'bg-green-400/20 text-green-400' }
       }
    ];
 
@@ -146,6 +205,7 @@ export default function Employees() {
    const [filterRole, setFilterRole] = useState<string>('All');
    const [filterStatus, setFilterStatus] = useState<string>('All');
    const [filterDepartment, setFilterDepartment] = useState<string>('All');
+   const [layoutMode, setLayoutMode] = useState<'grid' | 'list'>('grid');
    const [filterSite, setFilterSite] = useState<string>('All');
    const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -154,6 +214,17 @@ export default function Employees() {
    const [idCardEmployee, setIdCardEmployee] = useState<Employee | null>(null);
    const [isTerminateModalOpen, setIsTerminateModalOpen] = useState(false);
    const [terminateInput, setTerminateInput] = useState('');
+
+   // Floating Task Queue State
+   const [isTaskQueueOpen, setIsTaskQueueOpen] = useState(false);
+
+   // Server-Side Pagination State
+   const [paginatedEmployees, setPaginatedEmployees] = useState<Employee[]>([]);
+   const [currentPage, setCurrentPage] = useState(1);
+   const [totalPages, setTotalPages] = useState(1);
+   const [totalCount, setTotalCount] = useState(0);
+   const [isLoadingEmployees, setIsLoadingEmployees] = useState(false);
+   const ITEMS_PER_PAGE = 20;
 
    // Delete Confirmation State
    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -176,20 +247,47 @@ export default function Employees() {
    // Store documents per employee ID
    const [employeeDocuments, setEmployeeDocuments] = useState<Record<string, Array<{ name: string; url: string; type: string; size: number; uploadedAt: string }>>>({});
 
-   // --- AUTHORITY LOGIC ---
+   // --- AUTHORITY LOGIC (4-Level Role Hierarchy) ---
    const getCreatableRoles = (): UserRole[] => {
       if (!user) return [];
       switch (user.role) {
          case 'super_admin':
-            return ['super_admin', 'admin', 'manager', 'hr', 'warehouse_manager', 'dispatcher', 'pos', 'picker', 'driver', 'auditor', 'finance_manager', 'procurement_manager', 'cs_manager', 'it_support', 'store_supervisor', 'inventory_specialist'];
+            // CEO can create ALL roles
+            return [
+               'super_admin',
+               'regional_manager', 'operations_manager', 'finance_manager', 'hr_manager', 'procurement_manager', 'supply_chain_manager',
+               'store_manager', 'warehouse_manager', 'dispatch_manager', 'assistant_manager', 'shift_lead',
+               'cashier', 'sales_associate', 'stock_clerk', 'picker', 'packer', 'receiver', 'driver', 'forklift_operator', 'inventory_specialist', 'customer_service', 'auditor', 'it_support',
+               // Legacy
+               'admin', 'manager', 'hr', 'pos'
+            ];
+         case 'regional_manager':
+         case 'operations_manager':
          case 'admin':
-            return ['manager', 'hr', 'warehouse_manager', 'dispatcher', 'pos', 'picker', 'driver', 'auditor', 'store_supervisor', 'inventory_specialist'];
+            // L2 can create L3 + L4
+            return [
+               'store_manager', 'warehouse_manager', 'dispatch_manager', 'assistant_manager', 'shift_lead',
+               'cashier', 'sales_associate', 'stock_clerk', 'picker', 'packer', 'receiver', 'driver', 'forklift_operator', 'inventory_specialist', 'customer_service', 'auditor', 'it_support',
+               'manager', 'hr', 'pos'
+            ];
+         case 'hr_manager':
          case 'hr':
-            return ['manager', 'warehouse_manager', 'dispatcher', 'pos', 'picker', 'driver', 'auditor', 'store_supervisor', 'inventory_specialist'];
+            // HR can create L3 + L4 (except finance/procurement)
+            return [
+               'store_manager', 'warehouse_manager', 'dispatch_manager', 'assistant_manager', 'shift_lead',
+               'cashier', 'sales_associate', 'stock_clerk', 'picker', 'packer', 'receiver', 'driver', 'forklift_operator', 'inventory_specialist', 'customer_service', 'auditor', 'it_support',
+               'manager', 'pos'
+            ];
+         case 'store_manager':
          case 'manager':
-            return ['pos', 'picker', 'driver', 'store_supervisor'];
+            // L3 Store Manager can create L4 store staff
+            return ['assistant_manager', 'shift_lead', 'cashier', 'sales_associate', 'stock_clerk', 'customer_service', 'pos'];
          case 'warehouse_manager':
-            return ['picker', 'driver', 'dispatcher'];
+            // L3 Warehouse Manager can create L4 warehouse staff
+            return ['assistant_manager', 'shift_lead', 'picker', 'packer', 'receiver', 'driver', 'forklift_operator', 'inventory_specialist'];
+         case 'dispatch_manager':
+            // L3 Dispatch Manager can create drivers
+            return ['driver'];
          default:
             return [];
       }
@@ -214,26 +312,51 @@ export default function Employees() {
    const canApproveEmployees = hasPermission(user?.role, 'APPROVE_EMPLOYEE');
    const isDepartmentManager = hasPermission(user?.role, 'ACCESS_EMPLOYEES') && !canManageEmployees;
 
-   // Role hierarchy for termination checks
+   // Role hierarchy for termination checks - 4-level structure
    const getRoleHierarchy = (role: UserRole): number => {
-      const hierarchy: Record<UserRole, number> = {
+      const hierarchy: Record<string, number> = {
+         // Level 1 - Executive (100)
          'super_admin': 100,
-         'admin': 90,
-         'finance_manager': 80,
-         'hr': 75,
-         'procurement_manager': 70,
-         'auditor': 65,
-         'it_support': 60,
-         'cs_manager': 55,
-         'warehouse_manager': 50,
-         'manager': 45,
-         'store_supervisor': 40,
-         'dispatcher': 35,
-         'inventory_specialist': 30,
-         'picker': 20,
+         // Level 2 - Regional/Directors (80-95)
+         'regional_manager': 95,
+         'operations_manager': 90,
+         'finance_manager': 85,
+         'hr_manager': 85,
+         'procurement_manager': 82,
+         'supply_chain_manager': 80,
+         // Level 3 - Site Managers (50-70)
+         'store_manager': 70,
+         'warehouse_manager': 68,
+         'dispatch_manager': 65,
+         'assistant_manager': 60,
+         'shift_lead': 55,
+         // Level 4 - Staff (10-40)
+         'cashier': 30,
+         'sales_associate': 28,
+         'stock_clerk': 25,
+         'picker': 22,
+         'packer': 22,
+         'receiver': 22,
          'driver': 20,
-         'pos': 10,
-         'packer': 20
+         'forklift_operator': 20,
+         'inventory_specialist': 25,
+         'customer_service': 25,
+         'auditor': 40,
+         'it_support': 35,
+         // Legacy roles
+         'admin': 90,
+         'manager': 65,
+         'hr': 85,
+         'pos': 28,
+         'dispatcher': 35,
+         'cs_manager': 60,
+         'store_supervisor': 55,
+         'returns_clerk': 22,
+         'merchandiser': 25,
+         'loss_prevention': 30,
+         'accountant': 35,
+         'data_analyst': 35,
+         'training_coordinator': 35
       };
       return hierarchy[role] || 0;
    };
@@ -250,12 +373,12 @@ export default function Employees() {
       const userHierarchy = getRoleHierarchy(user.role);
       const targetHierarchy = getRoleHierarchy(targetEmployee.role);
 
-      // Super Admin can only be terminated by themselves (which is blocked above) or not at all
+      // CEO can only be terminated by themselves (which is blocked above) or not at all
       if (targetEmployee.role === 'super_admin') {
-         return false; // Super Admin cannot be terminated by anyone
+         return false; // CEO cannot be terminated by anyone
       }
 
-      // Admin can only be terminated by Super Admin
+      // Admin can only be terminated by CEO
       if (targetEmployee.role === 'admin' && user.role !== 'super_admin') {
          return false;
       }
@@ -594,32 +717,65 @@ export default function Employees() {
       setPhotoRequests(prev => prev.filter(r => r.id !== request.id));
       addNotification('info', 'Photo request rejected.');
    };
+   // --- SERVER-SIDE PAGINATION EFFECT ---
+   useEffect(() => {
+      const fetchEmployees = async () => {
+         setIsLoadingEmployees(true);
+         try {
+            // Apply Site Context/Filter
+            // Note: If viewMode is not Directory, we might not need to fetch, 
+            // but for simplicity we fetch when filters change.
+            let querySiteId = activeSite?.id;
+            if (!querySiteId && filterSite !== 'All') {
+               querySiteId = filterSite;
+            }
 
-   const filteredEmployees = useMemo(() => {
-      return visibleEmployees.filter(emp => {
-         const searchLower = searchTerm.toLowerCase();
-         const matchesSearch = !searchTerm ||
-            emp.name.toLowerCase().includes(searchLower) ||
-            emp.email.toLowerCase().includes(searchLower) ||
-            (emp.phone && emp.phone.toLowerCase().includes(searchLower)) ||
-            (emp.department && emp.department.toLowerCase().includes(searchLower)) ||
-            (sites.find(s => s.id === emp.siteId || s.id === emp.site_id)?.name || '').toLowerCase().includes(searchLower);
+            // Build filters object
+            const queryFilters = {
+               role: filterRole,
+               status: filterStatus,
+               department: filterDepartment
+            };
 
-         // Role filter
-         const matchesRole = filterRole === 'All' || emp.role === filterRole;
+            const { data, count } = await employeesService.getPaginated(
+               querySiteId,
+               currentPage,
+               ITEMS_PER_PAGE,
+               searchTerm,
+               queryFilters
+            );
 
-         // Status filter
-         const matchesStatus = filterStatus === 'All' || emp.status === filterStatus;
+            setPaginatedEmployees(data || []);
+            setTotalCount(count);
+            setTotalPages(Math.ceil(count / ITEMS_PER_PAGE));
+         } catch (error) {
+            console.error('Failed to fetch employees:', error);
+         } finally {
+            setIsLoadingEmployees(false);
+         }
+      };
 
-         // Department filter
-         const matchesDepartment = filterDepartment === 'All' || emp.department === filterDepartment;
+      // Debounce logic could go here for search
+      const timer = setTimeout(() => {
+         fetchEmployees();
+      }, 300);
 
-         // Site filter
-         const matchesSite = filterSite === 'All' || emp.siteId === filterSite || emp.site_id === filterSite;
+      return () => clearTimeout(timer);
+   }, [currentPage, searchTerm, filterRole, filterStatus, filterDepartment, filterSite, activeSite?.id]);
 
-         return matchesSearch && matchesRole && matchesStatus && matchesDepartment && matchesSite;
+
+   // Sort the current page client-side by Hierarchy
+   const displayedEmployees = useMemo(() => {
+      return [...paginatedEmployees].sort((a, b) => {
+         // 1. Sort by Hierarchy (Highest Role First)
+         const hierarchyA = getRoleHierarchy(a.role);
+         const hierarchyB = getRoleHierarchy(b.role);
+         if (hierarchyA !== hierarchyB) return hierarchyB - hierarchyA;
+
+         // 2. Sort by Name (Alphabetical)
+         return a.name.localeCompare(b.name);
       });
-   }, [visibleEmployees, searchTerm, filterRole, filterStatus, filterDepartment, filterSite, sites]);
+   }, [paginatedEmployees]);
 
    // --- WIZARD STATE ---
    const [addStep, setAddStep] = useState(1);
@@ -663,11 +819,11 @@ export default function Employees() {
    };
 
    const handleApproveEmployee = (empId: string, empName: string, empRole: UserRole) => {
-      // RBAC: Only Super Admin can approve Admin/Super Admin roles
+      // RBAC: Only CEO can approve Admin/CEO roles
       const isHighLevelRole = ['admin', 'super_admin'].includes(empRole);
 
       if (isHighLevelRole && user?.role !== 'super_admin') {
-         addNotification('alert', `Access Denied: Only Super Admin can approve ${empRole.replace('_', ' ')} roles.`);
+         addNotification('alert', `Access Denied: Only CEO can approve ${empRole.replace('_', ' ')} roles.`);
          return;
       }
 
@@ -724,9 +880,9 @@ export default function Employees() {
          if (selectedEmployee.id === user?.id) {
             addNotification('alert', "Access Denied: You cannot terminate your own employment.");
          } else if (selectedEmployee.role === 'super_admin') {
-            addNotification('alert', "Access Denied: Super Admin cannot be terminated through the system.");
+            addNotification('alert', "Access Denied: CEO cannot be terminated through the system.");
          } else if (selectedEmployee.role === 'admin' && user?.role !== 'super_admin') {
-            addNotification('alert', "Access Denied: Only Super Admin can terminate Admin roles.");
+            addNotification('alert', "Access Denied: Only CEO can terminate Admin roles.");
          } else {
             addNotification('alert', `Access Denied: You cannot terminate employees with role "${selectedEmployee.role}".`);
          }
@@ -764,7 +920,7 @@ export default function Employees() {
 
    const handleDeleteEmployee = (id: string) => {
       if (user?.role !== 'super_admin') {
-         addNotification('alert', "Access Denied: Record deletion is restricted to Super Admin. Please use 'Terminate' instead.");
+         addNotification('alert', "Access Denied: Record deletion is restricted to CEO. Please use 'Terminate' instead.");
          return;
       }
 
@@ -776,7 +932,7 @@ export default function Employees() {
 
       // Prevent deleting super_admin
       if (employee.role === 'super_admin') {
-         addNotification('alert', "Access Denied: Super Admin records cannot be deleted. Please use 'Terminate' instead.");
+         addNotification('alert', "Access Denied: CEO records cannot be deleted. Please use 'Terminate' instead.");
          return;
       }
 
@@ -987,6 +1143,7 @@ export default function Employees() {
 
    const handleFinalSubmit = async () => {
       console.log('🔵 handleFinalSubmit called!');
+      setIsSubmitting(true);
       console.log('📋 newEmpData:', newEmpData);
       console.log('👤 user:', user);
       console.log('🏢 sites:', sites);
@@ -1002,6 +1159,7 @@ export default function Employees() {
          if (validationError) {
             setValidationMessage(validationError);
             setIsValidationModalOpen(true);
+            setIsSubmitting(false);
             return;
          }
       }
@@ -1084,7 +1242,7 @@ export default function Employees() {
                }
             } else {
                console.log('Skipping auth creation: User is not super_admin', user?.role);
-               addNotification('info', 'Note: Only Super Admins can create login accounts. Creating employee profile only.');
+               addNotification('info', 'Note: Only CEOs can create login accounts. Creating employee profile only.');
             }
          } else {
             console.log('Skipping auth creation: Email or password missing');
@@ -1146,6 +1304,8 @@ export default function Employees() {
       } catch (error: any) {
          console.error('Failed to create employee:', error);
          addNotification('alert', `Failed to create employee:\n\n${error.message || 'Unknown error'}\n\nPlease check the console for details.`);
+      } finally {
+         setIsSubmitting(false);
       }
    };
 
@@ -1161,14 +1321,26 @@ export default function Employees() {
 
    // --- RENDERERS ---
 
-   const StatCard = ({ title, value, icon: Icon, color }: any) => (
-      <div className="bg-cyber-gray border border-white/5 rounded-xl p-4 flex items-center gap-4">
-         <div className={`p-3 rounded-lg bg-white/5 ${color}`}>
-            <Icon size={24} />
-         </div>
-         <div>
-            <p className="text-xs text-gray-400 uppercase font-bold">{title}</p>
-            <p className="text-xl font-bold text-white">{value}</p>
+   const StatCard = ({ title, value, icon: Icon, color, onClick, active }: any) => (
+      <div
+         onClick={onClick}
+         className={`relative overflow-hidden bg-black/40 border rounded-2xl p-6 hover:bg-white/5 transition-all group ${onClick ? 'cursor-pointer' : ''} ${active ? 'border-cyber-primary shadow-[0_0_15px_rgba(0,255,157,0.15)] bg-white/5' : 'border-white/10'}`}
+      >
+         <div className="flex items-center justify-between z-10 relative">
+            <div>
+               <p className="text-gray-400 text-xs font-bold uppercase tracking-wider mb-1">{title}</p>
+               <h3 className="text-3xl font-bold text-white font-mono">{value}</h3>
+               {/* Visual Hint for Clickable Cards */}
+               {onClick && (
+                  <div className={`flex items-center gap-1 mt-2 text-[10px] font-bold uppercase tracking-wider ${active ? 'text-cyber-primary' : 'text-gray-500 group-hover:text-white'} transition-colors`}>
+                     <span>{active ? 'Hide Queue' : 'View Queue'}</span>
+                     <ArrowRight size={10} className={active ? '-rotate-90 transition-transform' : 'group-hover:translate-x-1 transition-transform'} />
+                  </div>
+               )}
+            </div>
+            <div className={`p-3 rounded-xl bg-white/5 border border-white/10 group-hover:scale-110 transition-transform ${color}`}>
+               <Icon size={24} />
+            </div>
          </div>
       </div>
    );
@@ -1321,7 +1493,7 @@ export default function Employees() {
                            {/* Details */}
                            <div className="flex-1 min-w-0">
                               <p className="text-white font-bold truncate">{req.userName}</p>
-                              <p className="text-xs text-gray-400">Requested {new Date(req.timestamp).toLocaleDateString()}</p>
+                              <p className="text-xs text-gray-400">Requested {formatDateTime(req.timestamp)}</p>
                            </div>
 
                            {/* Actions */}
@@ -1350,977 +1522,958 @@ export default function Employees() {
             {/* KPI Metrics */}
             {canViewAll && viewMode === 'directory' && (
                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  {/* KPI Metrics */}
                   <StatCard title="Total Workforce" value={employees.length} icon={User} color="text-blue-400" />
                   <StatCard title="Active Shift" value={Math.floor(employees.length * 0.7)} icon={Clock} color="text-green-400" />
-                  <StatCard title="Pending Tasks" value={tasks.filter(t => t.status !== 'Completed').length} icon={ClipboardList} color="text-yellow-400" />
+                  <StatCard
+                     title="Pending Tasks"
+                     value={tasks.filter(t => t.status !== 'Completed').length}
+                     icon={ClipboardList}
+                     color="text-yellow-400"
+                     onClick={() => setIsTaskQueueOpen(!isTaskQueueOpen)}
+                     active={isTaskQueueOpen}
+                  />
                   <StatCard title="Avg Performance" value="88%" icon={TrendingUp} color="text-cyber-primary" />
                </div>
             )}
 
+            {/* Collapsible Global Task Queue */}
+            {canViewAll && isTaskQueueOpen && (
+               <div className="animate-in slide-in-from-top duration-300">
+                  <div className="bg-black/40 border border-white/10 rounded-2xl p-6 space-y-4">
+                     <div className="flex items-center justify-between">
+                        <h3 className="font-bold text-white flex items-center gap-2">
+                           <ClipboardList size={18} className="text-cyber-primary" />
+                           Global Task Board
+                        </h3>
+                        <div className="flex items-center gap-2">
+                           <span className="text-xs text-gray-500 uppercase font-bold px-2 py-1 bg-white/5 rounded-lg border border-white/5">
+                              {tasks.filter(t => t.status !== 'Completed').length} Active
+                           </span>
+                           <button
+                              onClick={() => setIsTaskQueueOpen(false)}
+                              className="p-1 hover:bg-white/10 rounded-lg text-gray-400 hover:text-white transition-colors"
+                              title="Close Task Board"
+                              aria-label="Close Task Board"
+                           >
+                              <XCircle size={20} />
+                           </button>
+                        </div>
+                     </div>
 
+                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 overflow-x-auto pb-2">
+                        {['High', 'Medium', 'Low'].map(priority => {
+                           const priorityTasks = tasks.filter(t => t.priority === priority && t.status !== 'Completed');
+                           const color = priority === 'High' ? 'text-red-400 border-red-500/30 bg-red-500/5' :
+                              priority === 'Medium' ? 'text-yellow-400 border-yellow-500/30 bg-yellow-500/5' :
+                                 'text-blue-400 border-blue-500/30 bg-blue-500/5';
 
+                           return (
+                              <div key={priority} className={`rounded-xl border ${color.split(' ')[1]} ${color.split(' ')[2]} p-4 min-w-[250px]`}>
+                                 <div className="flex items-center justify-between mb-3 border-b border-white/5 pb-2">
+                                    <span className={`text-xs font-bold uppercase ${priority === 'High' ? 'text-red-400' : priority === 'Medium' ? 'text-yellow-400' : 'text-blue-400'}`}>
+                                       {priority} Priority
+                                    </span>
+                                    <span className="text-xs bg-black/30 px-2 py-0.5 rounded-full text-white/50">{priorityTasks.length}</span>
+                                 </div>
+
+                                 <div className="space-y-2 max-h-[200px] overflow-y-auto pr-2 custom-scrollbar">
+                                    {priorityTasks.length === 0 ? (
+                                       <div className="text-center py-4 text-xs text-gray-500 italic">No tasks</div>
+                                    ) : (
+                                       priorityTasks.map(task => (
+                                          <div key={task.id} className="bg-black/40 p-3 rounded-lg border border-white/5 hover:border-white/20 transition-colors group cursor-pointer">
+                                             <div className="flex justify-between items-start mb-1">
+                                                <span className="text-sm font-medium text-gray-200 line-clamp-1">{task.title}</span>
+                                             </div>
+                                             <div className="flex items-center justify-between text-[10px] text-gray-500">
+                                                <span>{employees.find(e => e.id === task.assignedTo)?.name || 'Unassigned'}</span>
+                                                <span className="text-gray-600">{formatDateTime(task.dueDate).split(',')[0]}</span>
+                                             </div>
+                                          </div>
+                                       ))
+                                    )}
+                                 </div>
+                              </div>
+                           );
+                        })}
+                     </div>
+                  </div>
+               </div>
+            )}
             {/* ... (Directory & Org views same as before) ... */}
 
             {/* --- DIRECTORY MODE --- */}
             {viewMode === 'directory' && (
-               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                  <div className="lg:col-span-2 space-y-6">
-                     <div className="bg-cyber-gray border border-white/5 rounded-2xl p-4 space-y-4">
-                        {/* Search Bar */}
-                        <div className="flex items-center bg-black/30 border border-white/10 rounded-xl px-4 py-2 focus-within:border-cyber-primary/50 transition-colors">
-                           <Search className="w-4 h-4 text-gray-400" />
-                           <input
-                              type="text"
-                              placeholder={canViewAll ? "Search by name, email, phone, department, or location..." : "Search profile..."}
-                              className="bg-transparent border-none ml-3 flex-1 text-white text-sm outline-none placeholder-gray-500"
-                              value={searchTerm}
-                              onChange={(e) => setSearchTerm(e.target.value)}
-                              aria-label="Search Employees"
-                              title="Search Employees"
-                           />
-                           {searchTerm && (
-                              <button
-                                 onClick={() => setSearchTerm('')}
-                                 className="ml-2 p-1 hover:bg-white/10 rounded text-gray-400 hover:text-white transition-colors"
-                                 title="Clear search"
-                              >
-                                 <XCircle size={16} />
-                              </button>
+               <div className="space-y-6 relative">
+                  {/* Header Row */}
+                  <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 animate-in fade-in slide-in-from-top-4">
+                     <div>
+                        <h2 className="text-xl font-semibold text-white">Team Directory</h2>
+                        <p className="text-sm text-gray-500 mt-0.5">{totalCount} employees</p>
+                     </div>
+
+                     <div className="flex items-center gap-3">
+                        <button
+                           onClick={() => setIsTaskQueueOpen(!isTaskQueueOpen)}
+                           className={`px-4 py-2 rounded-xl flex items-center gap-2 font-bold transition-all border ${isTaskQueueOpen ? 'bg-cyber-primary text-black border-cyber-primary shadow-[0_0_15px_rgba(0,255,157,0.4)]' : 'bg-black/40 text-gray-400 border-white/10 hover:text-white hover:border-white/30'}`}
+                           title="Toggle Global Task Queue"
+                        >
+                           <ClipboardList size={18} />
+                           <span>Task Queue</span>
+                           {tasks.filter(t => t.status !== 'Completed').length > 0 && (
+                              <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${isTaskQueueOpen ? 'bg-black/20 text-black' : 'bg-cyber-primary text-black'}`}>
+                                 {tasks.filter(t => t.status !== 'Completed').length}
+                              </span>
+                           )}
+                        </button>
+
+                        {/* Layout Toggle */}
+                        <div className="bg-black/40 p-1 rounded-xl border border-white/10 flex">
+                           <button
+                              onClick={() => setLayoutMode('grid')}
+                              className={`p-2 rounded-lg transition-all ${layoutMode === 'grid' ? 'bg-cyber-primary/20 text-cyber-primary' : 'text-gray-500 hover:text-white'}`}
+                              title="Grid View"
+                           >
+                              <LayoutGrid size={18} />
+                           </button>
+                           <button
+                              onClick={() => setLayoutMode('list')}
+                              className={`p-2 rounded-lg transition-all ${layoutMode === 'list' ? 'bg-cyber-primary/20 text-cyber-primary' : 'text-gray-500 hover:text-white'}`}
+                              title="List View"
+                           >
+                              <List size={18} />
+                           </button>
+                        </div>
+                     </div>
+                  </div>
+
+                  <div className="w-full space-y-6">
+                     <div className="space-y-4">
+                        <div className="flex flex-col lg:flex-row gap-4">
+                           {/* Search Bar */}
+                           <div className="flex items-center bg-white/[0.03] border border-white/10 rounded-xl px-4 py-2.5 focus-within:border-white/20 transition-colors flex-1">
+                              <Search className="w-4 h-4 text-gray-500" />
+                              <input
+                                 type="text"
+                                 placeholder={canViewAll ? "Search members..." : "Search profile..."}
+                                 className="bg-transparent border-none ml-3 flex-1 text-white text-sm outline-none placeholder-gray-600"
+                                 value={searchTerm}
+                                 onChange={(e) => {
+                                    setSearchTerm(e.target.value);
+                                    setCurrentPage(1);
+                                 }}
+                              />
+                              {searchTerm && (
+                                 <button
+                                    onClick={() => setSearchTerm('')}
+                                    className="ml-2 text-gray-500 hover:text-white transition-colors"
+                                    aria-label="Clear search"
+                                 >
+                                    <XCircle size={14} />
+                                 </button>
+                              )}
+                           </div>
+
+                           {/* Filters */}
+                           {canViewAll && (
+                              <div className="flex flex-wrap gap-2">
+                                 {/* Minimal Select Styles */}
+                                 {[
+                                    { value: filterRole, setValue: setFilterRole, options: SYSTEM_ROLES.map(r => ({ value: r.id, label: r.label })), default: 'All Roles' },
+                                    { value: filterStatus, setValue: setFilterStatus, options: [{ value: 'Active', label: 'Active' }, { value: 'Pending Approval', label: 'Pending' }, { value: 'Inactive', label: 'Inactive' }], default: 'All Status' },
+                                    { value: filterDepartment, setValue: setFilterDepartment, options: Array.from(new Set(visibleEmployees.map(e => e.department).filter(Boolean))).map(d => ({ value: d, label: d })), default: 'All Departments' },
+                                    { value: filterSite, setValue: setFilterSite, options: sites.map(s => ({ value: s.id, label: s.name })), default: 'All Locations' }
+                                 ].map((filter, i) => (
+                                    <select
+                                       key={i}
+                                       aria-label={filter.default}
+                                       value={filter.value}
+                                       onChange={(e) => {
+                                          filter.setValue(e.target.value);
+                                          setCurrentPage(1);
+                                       }}
+                                       className="bg-white/[0.03] hover:bg-white/[0.05] border border-white/10 rounded-lg px-3 py-2.5 text-sm text-gray-300 focus:outline-none focus:border-white/20 cursor-pointer transition-colors max-w-[150px]"
+                                    >
+                                       <option value="All">{filter.default}</option>
+                                       {filter.options.map((opt: any) => (
+                                          <option key={opt.value} value={opt.value} className="bg-[#1a1a1a] text-gray-300">
+                                             {opt.label}
+                                          </option>
+                                       ))}
+                                    </select>
+                                 ))}
+
+                                 {/* Clear Filters */}
+                                 {(filterRole !== 'All' || filterStatus !== 'All' || filterDepartment !== 'All' || filterSite !== 'All') && (
+                                    <button
+                                       onClick={() => {
+                                          setFilterRole('All'); setFilterStatus('All');
+                                          setFilterDepartment('All'); setFilterSite('All'); setSearchTerm('');
+                                       }}
+                                       className="px-3 py-2.5 rounded-lg bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white text-sm transition-colors"
+                                       title="Clear Filters"
+                                    >
+                                       <XCircle size={16} />
+                                    </button>
+                                 )}
+                              </div>
                            )}
                         </div>
 
-                        {/* Filters Row */}
-                        {canViewAll && (
-                           <div className="flex flex-col sm:flex-row flex-wrap gap-3">
-                              {/* Role Filter */}
-                              <div className="flex items-center gap-2 w-full sm:w-auto">
-                                 <Filter size={14} className="text-gray-400" />
-                                 <select
-                                    value={filterRole}
-                                    onChange={(e) => setFilterRole(e.target.value)}
-                                    className="bg-black/30 border border-white/10 rounded-lg px-3 py-1.5 text-sm text-white focus:border-cyber-primary focus:outline-none w-full sm:w-auto sm:min-w-[140px]"
-                                    aria-label="Filter by Role"
-                                    title="Filter by Role"
-                                 >
-                                    <option value="All">All Roles</option>
-                                    {SYSTEM_ROLES.map(role => (
-                                       <option key={role.id} value={role.id} className="text-black">
-                                          {role.id.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                                       </option>
-                                    ))}
-                                 </select>
-                              </div>
-
-                              {/* Status Filter */}
-                              <select
-                                 value={filterStatus}
-                                 onChange={(e) => setFilterStatus(e.target.value)}
-                                 className="bg-black/30 border border-white/10 rounded-lg px-3 py-1.5 text-sm text-white focus:border-cyber-primary focus:outline-none min-w-[120px]"
-                                 aria-label="Filter by Status"
-                                 title="Filter by Status"
-                              >
-                                 <option value="All">All Status</option>
-                                 <option value="Active" className="text-black">Active</option>
-                                 <option value="Pending Approval" className="text-black">Pending</option>
-                                 <option value="Inactive" className="text-black">Inactive</option>
-                              </select>
-
-                              {/* Department Filter */}
-                              <select
-                                 value={filterDepartment}
-                                 onChange={(e) => setFilterDepartment(e.target.value)}
-                                 className="bg-black/30 border border-white/10 rounded-lg px-3 py-1.5 text-sm text-white focus:border-cyber-primary focus:outline-none min-w-[160px]"
-                                 aria-label="Filter by Department"
-                                 title="Filter by Department"
-                              >
-                                 <option value="All">All Departments</option>
-                                 {Array.from(new Set(visibleEmployees.map(e => e.department).filter(Boolean))).map(dept => (
-                                    <option key={dept} value={dept} className="text-black">{dept}</option>
-                                 ))}
-                              </select>
-
-                              {/* Site Filter */}
-                              <select
-                                 value={filterSite}
-                                 onChange={(e) => setFilterSite(e.target.value)}
-                                 className="bg-black/30 border border-white/10 rounded-lg px-3 py-1.5 text-sm text-white focus:border-cyber-primary focus:outline-none min-w-[160px]"
-                                 aria-label="Filter by Site"
-                                 title="Filter by Site"
-                              >
-                                 <option value="All">All Locations</option>
-                                 {sites.map(site => (
-                                    <option key={site.id} value={site.id} className="text-black">{site.name}</option>
-                                 ))}
-                              </select>
-
-                              {/* Clear Filters Button */}
-                              {(filterRole !== 'All' || filterStatus !== 'All' || filterDepartment !== 'All' || filterSite !== 'All') && (
-                                 <button
-                                    onClick={() => {
-                                       setFilterRole('All');
-                                       setFilterStatus('All');
-                                       setFilterDepartment('All');
-                                       setFilterSite('All');
-                                       setSearchTerm('');
-                                    }}
-                                    className="px-3 py-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 text-sm font-bold transition-colors flex items-center gap-2"
-                                 >
-                                    <XCircle size={14} />
-                                    Clear Filters
-                                 </button>
-                              )}
-
-                              {/* Results Count */}
-                              <div className="ml-auto flex items-center text-xs text-gray-400">
-                                 <span className="font-bold text-white">{filteredEmployees.length}</span>
-                                 <span className="ml-1">of {visibleEmployees.length} employees</span>
-                              </div>
-                           </div>
-                        )}
+                        {/* Counts */}
+                        <div className="text-xs text-gray-500 px-1">
+                           {displayedEmployees.length} result{displayedEmployees.length !== 1 && 's'}
+                           {filterRole !== 'All' || searchTerm ? ` (filtered from ${totalCount})` : ''}
+                        </div>
                      </div>
 
                      {/* Employee Table - Modern Row Design */}
-                     <div className="bg-cyber-gray border border-white/5 rounded-2xl overflow-x-auto">
-                        {/* Table Header */}
-                        <div className="bg-black/30 border-b border-white/5 px-6 py-3 grid grid-cols-12 gap-4 items-center">
-                           <div className="col-span-8 sm:col-span-6 lg:col-span-4">
-                              <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Employee</span>
-                           </div>
-                           <div className="hidden sm:block sm:col-span-3 lg:col-span-2">
-                              <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Role & Status</span>
-                           </div>
-                           <div className="hidden lg:block lg:col-span-2">
-                              <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Location</span>
-                           </div>
-                           <div className="hidden lg:block lg:col-span-2">
-                              <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Performance</span>
-                           </div>
-                           <div className="col-span-4 sm:col-span-3 lg:col-span-2 text-right">
-                              <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Actions</span>
-                           </div>
-                        </div>
+                     {/* --- DISPLAY AREA (GRID / LIST) --- */}
+                     {layoutMode === 'grid' ? (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                           {isLoadingEmployees && (
+                              <div className="col-span-full flex justify-center py-12">
+                                 <Loader2 className="animate-spin text-white/50" size={24} />
+                              </div>
+                           )}
 
-                        {/* Employee Rows */}
-                        <div className="divide-y divide-white/5">
-                           {filteredEmployees.map((employee) => {
-                              const pendingTasksCount = tasks.filter(t => t.assignedTo === employee.id && t.status !== 'Completed').length;
+                           {displayedEmployees.map((employee) => {
                               const roleConfig = SYSTEM_ROLES.find(r => r.id === employee.role) || SYSTEM_ROLES[8];
-
-                              // Get employee's gamification data
-                              const empPoints = getWorkerPoints(employee.id);
-                              const empSite = sites.find(s => s.id === employee.siteId || s.id === employee.site_id);
-                              const isWarehouse = empSite?.type === 'Warehouse' || empSite?.type === 'Distribution Center';
-
-                              // Calculate bonus based on employee type
-                              let empBonus = 0;
-                              let empTierName = '';
-
-                              if (isWarehouse && empPoints) {
-                                 // Warehouse worker - individual bonus
-                                 const bonusTiers = settings.bonusTiers || DEFAULT_BONUS_TIERS;
-                                 const bonusInfo = calculateBonus(empPoints.monthlyPoints, bonusTiers);
-                                 empBonus = bonusInfo.bonus;
-                                 empTierName = bonusInfo.tier.tierName;
-                              } else if (!isWarehouse && empSite) {
-                                 // Store worker - team bonus share
-                                 const sp = getStorePoints(empSite.id);
-                                 if (sp) {
-                                    const bonusTiers = settings.posBonusTiers || DEFAULT_POS_BONUS_TIERS;
-                                    const roleDistribution = settings.posRoleDistribution || DEFAULT_POS_ROLE_DISTRIBUTION;
-                                    const storeBonus = calculateStoreBonus(sp.monthlyPoints, bonusTiers);
-                                    const roleConfig = roleDistribution.find(r =>
-                                       r.role.toLowerCase() === employee.role.toLowerCase()
-                                    );
-                                    if (roleConfig) {
-                                       empBonus = (storeBonus.bonus * roleConfig.percentage) / 100;
-                                       empTierName = storeBonus.tier.tierName;
-                                    }
-                                 }
-                              }
-
                               return (
-                                 <EmployeeRow
+                                 <div
                                     key={employee.id}
-                                    employee={employee}
-                                    sites={sites}
-                                    roleConfig={roleConfig}
-                                    pendingTasks={pendingTasksCount}
-                                    onSelect={() => setSelectedEmployee(employee)}
-                                    onMessage={() => {
-                                       setSelectedEmployee(employee);
-                                       // Hint: we could add a tab prop to StaffProfileView to open 'overview' with message modal open
-                                    }}
-                                    onResetPassword={() => {
-                                       setSelectedEmployee(employee);
-                                    }}
-                                    onDelete={() => handleDeleteEmployee(employee.id)}
-                                    onApprove={() => handleApproveEmployee(employee.id, employee.name, employee.role)}
-                                    canResetPassword={
-                                       !!((user?.role === 'super_admin') || (user && getRoleHierarchy(user.role) > getRoleHierarchy(employee.role)))
-                                    }
-                                    canDelete={user?.role === 'super_admin'}
-                                    canApprove={canApproveEmployees}
-                                    isSuperAdmin={user?.role === 'super_admin'}
-                                    workerPoints={empPoints}
-                                    estimatedBonus={empBonus}
-                                    bonusTierName={empTierName}
-                                 />
+                                    onClick={() => setSelectedEmployee(employee)}
+                                    className="bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.06] hover:border-white/10 rounded-xl p-5 cursor-pointer transition-all duration-200"
+                                 >
+                                    <div className="flex items-start gap-4">
+                                       {/* Avatar */}
+                                       <div className="relative flex-shrink-0">
+                                          <img
+                                             src={employee.avatar || `https://ui-avatars.com/api/?name=${employee.name}&background=1a1a1a&color=ffffff&bold=true`}
+                                             className="w-12 h-12 rounded-full object-cover"
+                                             alt={employee.name}
+                                          />
+                                          <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-[#0a0a0a] ${employee.status === 'Active' ? 'bg-emerald-400' : 'bg-gray-500'}`} />
+                                       </div>
+
+                                       {/* Info */}
+                                       <div className="flex-1 min-w-0">
+                                          <h3 className="text-sm font-semibold text-white truncate">{employee.name}</h3>
+                                          <p className={`text-xs mt-0.5 ${roleConfig.styles.text}`}>{roleConfig.label}</p>
+                                          <p className="text-[11px] text-gray-500 mt-1 truncate">
+                                             {sites.find(s => s.id === employee.siteId)?.name || 'Unassigned'}
+                                          </p>
+                                       </div>
+                                    </div>
+                                 </div>
                               );
                            })}
 
-                           {/* Empty State */}
-                           {filteredEmployees.length === 0 && (
-                              <div className="px-6 py-16 text-center text-gray-500">
-                                 <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-4">
-                                    <User size={32} className="opacity-50" />
-                                 </div>
-                                 <p className="text-lg font-medium">
-                                    {canViewAll
-                                       ? "No employees found matching your criteria."
-                                       : "Your employee profile was not found in the linked database."}
-                                 </p>
+                           {displayedEmployees.length === 0 && !isLoadingEmployees && (
+                              <div className="col-span-full py-16 text-center text-gray-500">
+                                 <User size={32} className="mx-auto mb-3 opacity-30" />
+                                 <p className="text-sm">No employees found</p>
                               </div>
                            )}
                         </div>
-                     </div>
-                  </div>
+                     ) : (
+                        <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl overflow-hidden">
+                           {/* Simple List */}
+                           <div className="divide-y divide-white/[0.04]">
+                              {isLoadingEmployees && (
+                                 <div className="flex justify-center py-12">
+                                    <Loader2 className="animate-spin text-white/50" size={24} />
+                                 </div>
+                              )}
 
-                  {/* Global Task Queue - Enhanced */}
-                  {canViewAll && (
-                     <div className="bg-gradient-to-br from-cyber-gray to-black/40 border border-white/5 rounded-2xl overflow-hidden flex flex-col h-[calc(100vh-200px)] sticky top-4 shadow-2xl">
-                        {/* Header with Stats */}
-                        <div className="p-4 border-b border-white/5 bg-gradient-to-r from-black/40 to-cyber-gray/40">
-                           <div className="flex items-center justify-between mb-3">
-                              <h3 className="font-bold text-white flex items-center gap-2">
-                                 <div className="p-1.5 bg-gradient-to-br from-cyber-primary/20 to-blue-500/20 rounded-lg">
-                                    <ClipboardList className="text-cyber-primary" size={18} />
-                                 </div>
-                                 Global Task Queue
-                              </h3>
-                              <div className="flex items-center gap-2">
-                                 <div className="px-2 py-1 bg-cyber-primary/10 border border-cyber-primary/20 rounded-lg">
-                                    <span className="text-xs font-bold text-cyber-primary">
-                                       {tasks.filter(t => t.status !== 'Completed').length} Active
-                                    </span>
-                                 </div>
-                              </div>
-                           </div>
-
-                           {/* Priority Summary */}
-                           <div className="grid grid-cols-3 gap-2">
-                              <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-2">
-                                 <div className="text-[10px] text-gray-400 uppercase font-bold tracking-wider">High</div>
-                                 <div className="text-lg font-bold text-red-400">
-                                    {tasks.filter(t => t.priority === 'High' && t.status !== 'Completed').length}
-                                 </div>
-                              </div>
-                              <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-2">
-                                 <div className="text-[10px] text-gray-400 uppercase font-bold tracking-wider">Medium</div>
-                                 <div className="text-lg font-bold text-yellow-400">
-                                    {tasks.filter(t => t.priority === 'Medium' && t.status !== 'Completed').length}
-                                 </div>
-                              </div>
-                              <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-2">
-                                 <div className="text-[10px] text-gray-400 uppercase font-bold tracking-wider">Low</div>
-                                 <div className="text-lg font-bold text-blue-400">
-                                    {tasks.filter(t => t.priority === 'Low' && t.status !== 'Completed').length}
-                                 </div>
-                              </div>
-                           </div>
-                        </div>
-
-                        {/* Task List */}
-                        <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar">
-                           {tasks
-                              .filter(t => t.status !== 'Completed')
-                              .sort((a, b) => {
-                                 const priorityOrder = { 'High': 0, 'Medium': 1, 'Low': 2 };
-                                 return priorityOrder[a.priority] - priorityOrder[b.priority];
-                              })
-                              .map(task => {
-                                 const assignee = employees.find(e => e.id === task.assignedTo);
-                                 const priorityStyles = {
-                                    'High': {
-                                       bg: 'from-red-500/10 to-black/40',
-                                       border: 'border-red-500/30',
-                                       hoverBorder: 'hover:border-red-500/60',
-                                       badge: 'text-red-400 border-red-500/30 bg-red-500/10',
-                                       shadow: 'hover:shadow-[0_0_15px_rgba(239,68,68,0.1)]'
-                                    },
-                                    'Medium': {
-                                       bg: 'from-yellow-500/10 to-black/40',
-                                       border: 'border-yellow-500/30',
-                                       hoverBorder: 'hover:border-yellow-500/60',
-                                       badge: 'text-yellow-400 border-yellow-500/30 bg-yellow-500/10',
-                                       shadow: 'hover:shadow-[0_0_15px_rgba(234,179,8,0.1)]'
-                                    },
-                                    'Low': {
-                                       bg: 'from-blue-500/10 to-black/40',
-                                       border: 'border-blue-500/30',
-                                       hoverBorder: 'hover:border-blue-500/60',
-                                       badge: 'text-blue-400 border-blue-500/30 bg-blue-500/10',
-                                       shadow: 'hover:shadow-[0_0_15px_rgba(59,130,246,0.1)]'
-                                    }
-                                 };
-                                 const style = priorityStyles[task.priority];
+                              {displayedEmployees.map((employee) => {
+                                 const roleConfig = SYSTEM_ROLES.find(r => r.id === employee.role) || SYSTEM_ROLES[8];
 
                                  return (
-                                    <div
-                                       key={task.id}
-                                       onClick={() => {
-                                          if (assignee) {
-                                             setSelectedEmployee(assignee);
-                                          }
-                                       }}
-                                       className={`p-3 bg-gradient-to-br ${style.bg} border ${style.border} ${style.hoverBorder} ${style.shadow} rounded-xl transition-all cursor-pointer group relative overflow-hidden`}
-                                    >
-                                       <div className="absolute top-0 right-0 w-16 h-16 bg-white/5 rounded-full blur-xl group-hover:bg-white/10 transition-all"></div>
-
-                                       <div className="relative">
-                                          {/* Task Header */}
-                                          <div className="flex justify-between items-start mb-2">
-                                             <span className={`text-[10px] font-bold uppercase px-2 py-1 rounded border ${style.badge}`}>
-                                                {task.priority}
-                                             </span>
-                                             <div className="flex items-center gap-1.5">
-                                                <div className={`w-1.5 h-1.5 rounded-full ${task.status === 'In-Progress' ? 'bg-yellow-400 animate-pulse' :
-                                                   task.status === 'Pending' ? 'bg-gray-400' : 'bg-green-400'
-                                                   }`}></div>
-                                                <span className="text-[10px] text-gray-400">{task.status}</span>
-                                             </div>
-                                          </div>
-
-                                          {/* Task Title */}
-                                          <p className="text-sm text-white font-medium line-clamp-2 mb-3">{task.title}</p>
-
-                                          {/* Assignee */}
-                                          {assignee && (
-                                             <div className="flex items-center gap-2 p-2 bg-black/30 rounded-lg border border-white/5">
-                                                <img
-                                                   src={assignee.avatar}
-                                                   className="w-6 h-6 rounded-lg border border-white/10"
-                                                   alt={assignee.name}
-                                                />
-                                                <div className="flex-1 min-w-0">
-                                                   <p className="text-xs font-bold text-white truncate">{assignee.name}</p>
-                                                   <p className="text-[10px] text-gray-500 truncate">{assignee.role.replace('_', ' ')}</p>
-                                                </div>
-                                                <ArrowRight size={12} className="text-gray-600 group-hover:text-white group-hover:translate-x-0.5 transition-all" />
-                                             </div>
-                                          )}
-                                       </div>
-                                    </div>
+                                    <EmployeeRow
+                                       key={employee.id}
+                                       employee={employee}
+                                       sites={sites}
+                                       roleConfig={roleConfig}
+                                       pendingTasks={0}
+                                       onSelect={() => setSelectedEmployee(employee)}
+                                       onMessage={() => setSelectedEmployee(employee)}
+                                       canResetPassword={false}
+                                       canDelete={false}
+                                       canApprove={false}
+                                       isSuperAdmin={false}
+                                    />
                                  );
                               })}
 
-                           {/* Empty State */}
-                           {tasks.filter(t => t.status !== 'Completed').length === 0 && (
-                              <div className="flex flex-col items-center justify-center py-16 text-gray-500">
-                                 <div className="w-20 h-20 rounded-full bg-gradient-to-br from-cyber-primary/10 to-green-500/10 flex items-center justify-center mb-4 border border-white/5">
-                                    <CheckCircle size={40} className="text-green-500 opacity-50" />
+                              {displayedEmployees.length === 0 && !isLoadingEmployees && (
+                                 <div className="px-6 py-16 text-center text-gray-500">
+                                    <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-4">
+                                       <User size={32} className="opacity-50" />
+                                    </div>
+                                    <p className="text-lg font-medium">{canViewAll ? "No employees found." : "Profile not found."}</p>
                                  </div>
-                                 <p className="text-lg font-bold text-white">All Clear!</p>
-                                 <p className="text-sm text-gray-500 mt-1">No pending tasks at the moment</p>
-                              </div>
-                           )}
-                        </div>
-                     </div>
-                  )}
-               </div>
-            )}
-         </div>
-
-         {/* --- ORG CHART & SHIFTS OMITTED FOR BREVITY (SAME AS BEFORE) --- */}
-         {viewMode === 'org' && <OrgChart key={employees.length} employees={employees} sites={sites} />}
-         {viewMode === 'shifts' && <ShiftPlanner key={employees.length} employees={employees} canEdit={canManageShifts} />}
-
-
-
-         {/* WIZARD MODAL WITH SITE SELECTION */}
-         <Modal isOpen={isAddModalOpen} onClose={resetWizard} title="Onboard Talent" size="lg">
-            <div className="flex flex-col h-[500px]">
-               {/* Stepper */}
-               <div className="flex justify-between items-center mb-8 px-4">
-                  {[1, 2, 3, 4].map(step => (
-                     <div key={step} className="flex flex-col items-center relative z-10">
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-300 ${step === addStep ? 'bg-cyber-primary text-black scale-110 shadow-[0_0_15px_rgba(0,255,157,0.5)]' :
-                           step < addStep ? 'bg-green-500 text-black' : 'bg-white/10 text-gray-500'
-                           }`}>
-                           {step < addStep ? <CheckCircle size={16} /> : step}
-                        </div>
-                        <span className={`text-[10px] mt-2 uppercase font-bold ${step === addStep ? 'text-cyber-primary' : 'text-gray-500'}`}>
-                           {['Identity', 'Role', 'Details', 'Review'][step - 1]}
-                        </span>
-                     </div>
-                  ))}
-                  <div className="absolute top-[88px] left-12 right-12 h-0.5 bg-white/10 -z-0">
-                     <div className="h-full bg-cyber-primary transition-all duration-500" style={{ width: `${((addStep - 1) / 3) * 100}%` }}></div>
-                  </div>
-               </div>
-
-               {/* Content Area */}
-               <div className="flex-1 overflow-y-auto px-4 py-2">
-
-                  {/* STEP 1: IDENTITY */}
-                  {addStep === 1 && (
-                     <div className="space-y-6 animate-in fade-in slide-in-from-right-4">
-                        <div className="flex gap-6">
-                           <div
-                              onClick={handlePhotoClick}
-                              className="w-32 h-32 bg-black/30 border border-white/10 rounded-2xl flex flex-col items-center justify-center text-gray-500 hover:text-white hover:border-cyber-primary cursor-pointer transition-all group overflow-hidden relative"
-                           >
-                              {newEmpData.avatar ? (
-                                 <img src={newEmpData.avatar} alt="Profile" className="w-full h-full object-cover" />
-                              ) : (
-                                 <>
-                                    <Upload size={24} className="mb-2 group-hover:scale-110 transition-transform" />
-                                    <span className="text-xs text-center px-2">Upload Photo</span>
-                                 </>
                               )}
                            </div>
-                           {/* Hidden Input Moved Outside Container */}
-                           <input
-                              type="file"
-                              ref={fileInputRef}
-                              onChange={handleFileChange}
-                              className="hidden"
-                              accept="image/*,.heic,.heif"
-                              aria-label="Upload Profile Photo"
-                              title="Upload Profile Photo"
-                           />
-                           <div className="flex-1 space-y-4">
-                              <div className="grid grid-cols-2 gap-4">
-                                 <div>
-                                    <label className="text-xs text-gray-400 uppercase font-bold mb-1 block">First Name <span className="text-red-500">*</span></label>
-                                    <input
-                                       className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white focus:border-cyber-primary outline-none"
-                                       value={newEmpData.firstName}
-                                       onChange={e => setNewEmpData({ ...newEmpData, firstName: e.target.value })}
-                                       aria-label="First Name"
-                                       title="First Name"
-                                    />
-                                 </div>
-                                 <div>
-                                    <label className="text-xs text-gray-400 uppercase font-bold mb-1 block">Last Name</label>
-                                    <input
-                                       className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white focus:border-cyber-primary outline-none"
-                                       value={newEmpData.lastName}
-                                       onChange={e => setNewEmpData({ ...newEmpData, lastName: e.target.value })}
-                                       aria-label="Last Name"
-                                       title="Last Name"
-                                    />
-                                 </div>
-                              </div>
-                              <div>
-                                 <label className="text-xs text-gray-400 uppercase font-bold mb-1 block">Email Address (Optional)</label>
-                                 <input
-                                    className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white focus:border-cyber-primary outline-none"
-                                    value={newEmpData.email}
-                                    placeholder="e.g. user@company.com"
-                                    onChange={e => setNewEmpData({ ...newEmpData, email: e.target.value })}
-                                    aria-label="Email Address"
-                                    title="Email Address"
-                                 />
-                              </div>
-                              <div>
-                                 <label className="text-xs text-gray-400 uppercase font-bold mb-1 block">Password (For Login)</label>
-                                 <input
-                                    type="password"
-                                    className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white focus:border-cyber-primary outline-none"
-                                    value={newEmpData.password}
-                                    onChange={e => setNewEmpData({ ...newEmpData, password: e.target.value })}
-                                    placeholder="••••••••"
-                                    aria-label="Password"
-                                    title="Password"
-                                 />
-                              </div>
-                           </div>
                         </div>
-                     </div>
-                  )}
-
-                  {/* NEW: SITE SELECTION (Admin/HR Only) */}
-                  {(user?.role === 'admin' || user?.role === 'super_admin' || user?.role === 'hr') && (
-                     <div>
-                        <label className="text-xs text-cyber-primary uppercase font-bold mb-2 block flex items-center gap-2"><MapPin size={14} /> Assign Workplace</label>
-                        <select
-                           className="w-full bg-cyber-primary/10 border border-cyber-primary/30 text-white rounded-lg px-3 py-3 outline-none"
-                           value={newEmpData.siteId}
-                           onChange={e => setNewEmpData({ ...newEmpData, siteId: e.target.value })}
-                           aria-label="Assign Workplace"
-                           title="Assign Workplace"
-                        >
-                           {sites.map(s => (
-                              <option key={s.id} value={s.id} className="text-black">{s.name} ({s.type})</option>
-                           ))}
-                        </select>
-                        <p className="text-[10px] text-gray-500 mt-1">Employee will only see data for this location.</p>
-                     </div>
-                  )}
-
-                  <div className="grid grid-cols-2 gap-4">
-                     <div>
-                        <label className="text-xs text-gray-400 uppercase font-bold mb-1 block">Phone Number</label>
-                        <input
-                           className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white focus:border-cyber-primary outline-none"
-                           value={newEmpData.phone}
-                           placeholder="e.g. +251 911..."
-                           onChange={e => setNewEmpData({ ...newEmpData, phone: e.target.value })}
-                           aria-label="Phone Number"
-                           title="Phone Number"
-                        />
-                     </div>
-                     <div>
-                        <label className="text-xs text-gray-400 uppercase font-bold mb-1 block">Address</label>
-                        <input
-                           className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white focus:border-cyber-primary outline-none"
-                           value={newEmpData.address}
-                           onChange={e => setNewEmpData({ ...newEmpData, address: e.target.value })}
-                           aria-label="Address"
-                           title="Address"
-                        />
-                     </div>
-                  </div>
-               </div>
-
-               {/* STEP 2: ROLE (FILTERED BY AUTHORITY) */}
-               {addStep === 2 && (
-                  <div className="space-y-4 animate-in fade-in slide-in-from-right-4">
-                     <p className="text-sm text-gray-400 mb-2">Select System Access Level (Filtered by your permissions)</p>
-                     <div className="grid grid-cols-2 gap-3">
-                        {availableRoles.map(roleObj => {
-                           const violations = authService.validateSeparationOfDuties(roleObj.id);
-                           const hasViolations = violations.length > 0;
-
-                           return (
-                              <div
-                                 key={roleObj.id}
-                                 onClick={() => handleRoleChange(roleObj.id)}
-                                 className={`p-4 rounded-xl border cursor-pointer transition-all flex items-center gap-3 relative ${newEmpData.role === roleObj.id
-                                    ? `bg-white/10 ${roleObj.styles.text} ${roleObj.styles.border} shadow-[0_0_15px_rgba(255,255,255,0.1)]`
-                                    : 'bg-black/20 border-white/5 hover:border-white/20'
-                                    }`}
-                              >
-                                 <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${newEmpData.role === roleObj.id ? 'border-white' : 'border-gray-500'
-                                    }`}>
-                                    {newEmpData.role === roleObj.id && <div className="w-2 h-2 bg-white rounded-full" />}
-                                 </div>
-                                 <div className="flex-1">
-                                    <div className="flex items-center gap-2">
-                                       <p className="text-white font-bold uppercase text-sm">{roleObj.label}</p>
-                                       {hasViolations && (
-                                          <div className="group/sod relative">
-                                             <AlertTriangle size={14} className="text-yellow-500" />
-                                             <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2 bg-black border border-yellow-500/50 rounded text-[10px] text-yellow-200 opacity-0 group-hover/sod:opacity-100 pointer-events-none transition-opacity z-50">
-                                                Warning: This role has inherent Separation of Duties conflicts: {violations.join(', ')}
-                                             </div>
-                                          </div>
-                                       )}
-                                    </div>
-                                    <p className="text-[10px] text-gray-400">{roleObj.desc}</p>
-                                 </div>
-                              </div>
-                           )
-                        })}
-                     </div>
-                  </div>
-               )}
-
-               {/* STEP 3: DETAILS */}
-               {addStep === 3 && (
-                  <div className="space-y-6 animate-in fade-in slide-in-from-right-4">
-                     <div>
-                        <label className="text-xs text-gray-400 uppercase font-bold mb-2 block">Department (Filtered)</label>
-                        <div className="grid grid-cols-2 gap-2">
-                           {availableDepartments.map(dept => (
+                     )}    {/* Pagination Controls */}
+                     {totalPages > 1 && (
+                        <div className="flex items-center justify-between p-4 bg-black/30 border-t border-white/5">
+                           <div className="text-xs text-gray-500">
+                              Showing {(currentPage - 1) * ITEMS_PER_PAGE + 1} to {Math.min(currentPage * ITEMS_PER_PAGE, totalCount)} of {totalCount}
+                           </div>
+                           <div className="flex items-center gap-2">
                               <button
-                                 key={dept}
-                                 onClick={() => setNewEmpData({ ...newEmpData, department: dept })}
-                                 className={`px-3 py-2 rounded-lg text-xs font-bold text-left transition-colors ${newEmpData.department === dept ? 'bg-blue-500 text-white' : 'bg-white/5 text-gray-400 hover:bg-white/10'
-                                    }`}
+                                 onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                                 disabled={currentPage === 1}
+                                 className="p-2 rounded-lg bg-white/5 border border-white/10 text-white disabled:opacity-30 disabled:cursor-not-allowed hover:bg-white/10 transition-colors"
+                                 title="Previous Page"
+                                 aria-label="Previous Page"
                               >
-                                 {dept}
+                                 <ArrowLeft size={16} />
                               </button>
-                           ))}
+
+                              {/* Page Numbers */}
+                              <div className="flex items-center gap-1">
+                                 {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                                    // Simple pagination logic for first 5 pages or sliding window 
+                                    // For simplicity, just showing sliding window around current page
+                                    let p = i + 1;
+                                    if (totalPages > 5 && currentPage > 3) {
+                                       p = currentPage - 2 + i;
+                                    }
+                                    if (p > totalPages) return null;
+
+                                    return (
+                                       <button
+                                          key={p}
+                                          onClick={() => setCurrentPage(p)}
+                                          className={`w-8 h-8 rounded-lg text-xs font-bold transition-all border ${currentPage === p
+                                             ? 'bg-cyber-primary text-black border-cyber-primary shadow-[0_0_10px_rgba(0,255,157,0.3)]'
+                                             : 'bg-white/5 text-gray-400 border-white/10 hover:bg-white/10 hover:text-white'
+                                             }`}
+                                       >
+                                          {p}
+                                       </button>
+                                    );
+                                 })}
+                              </div>
+
+                              <button
+                                 onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                                 disabled={currentPage === totalPages}
+                                 className="p-2 rounded-lg bg-white/5 border border-white/10 text-white disabled:opacity-30 disabled:cursor-not-allowed hover:bg-white/10 transition-colors"
+                                 title="Next Page"
+                                 aria-label="Next Page"
+                              >
+                                 <ArrowRight size={16} />
+                              </button>
+                           </div>
                         </div>
+                     )}
+                  </div>
+               </div>
+            )}
+
+
+            {/* --- ORG CHART & SHIFTS OMITTED FOR BREVITY (SAME AS BEFORE) --- */}
+            {viewMode === 'org' && <OrgChart key={employees.length} employees={employees} sites={sites} />}
+            {viewMode === 'shifts' && <ShiftPlanner key={employees.length} employees={employees} canEdit={canManageShifts} />}
+
+
+
+            {/* WIZARD MODAL WITH SITE SELECTION */}
+            <Modal isOpen={isAddModalOpen} onClose={resetWizard} title="Onboard Talent" size="lg">
+               <div className="flex flex-col h-[500px]">
+                  {/* Stepper */}
+                  <div className="flex justify-between items-center mb-8 px-4">
+                     {[1, 2, 3, 4].map(step => (
+                        <div key={step} className="flex flex-col items-center relative z-10">
+                           <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-300 ${step === addStep ? 'bg-cyber-primary text-black scale-110 shadow-[0_0_15px_rgba(0,255,157,0.5)]' :
+                              step < addStep ? 'bg-green-500 text-black' : 'bg-white/10 text-gray-500'
+                              }`}>
+                              {step < addStep ? <CheckCircle size={16} /> : step}
+                           </div>
+                           <span className={`text-[10px] mt-2 uppercase font-bold ${step === addStep ? 'text-cyber-primary' : 'text-gray-500'}`}>
+                              {['Identity', 'Role', 'Details', 'Review'][step - 1]}
+                           </span>
+                        </div>
+                     ))}
+                     <div className="absolute top-[88px] left-12 right-12 h-0.5 bg-white/10 -z-0">
+                        {/* eslint-disable-next-line react/forbid-dom-props */}
+                        <div className="h-full bg-cyber-primary transition-all duration-500" style={{ width: `${((addStep - 1) / 3) * 100}%` }}></div>
                      </div>
-                     <div className="grid grid-cols-2 gap-4">
-                        <div>
-                           <label className="text-xs text-gray-400 uppercase font-bold mb-1 block">Monthly Salary ({CURRENCY_SYMBOL})</label>
-                           <input
-                              type="number"
-                              className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white focus:border-cyber-primary outline-none font-mono"
-                              value={newEmpData.salary}
-                              onChange={e => setNewEmpData({ ...newEmpData, salary: e.target.value })}
-                              aria-label="Monthly Salary"
-                              title="Monthly Salary"
-                           />
+                  </div>
+
+                  {/* Content Area */}
+                  <div className="flex-1 overflow-y-auto px-4 py-2">
+
+                     {/* STEP 1: IDENTITY */}
+                     {addStep === 1 && (
+                        <div className="space-y-6 animate-in fade-in slide-in-from-right-4">
+                           <div className="flex gap-6">
+                              <div
+                                 onClick={handlePhotoClick}
+                                 className="w-32 h-32 bg-black/30 border border-white/10 rounded-2xl flex flex-col items-center justify-center text-gray-500 hover:text-white hover:border-cyber-primary cursor-pointer transition-all group overflow-hidden relative"
+                              >
+                                 {newEmpData.avatar ? (
+                                    <img src={newEmpData.avatar} alt="Profile" className="w-full h-full object-cover" />
+                                 ) : (
+                                    <>
+                                       <Upload size={24} className="mb-2 group-hover:scale-110 transition-transform" />
+                                       <span className="text-xs text-center px-2">Upload Photo</span>
+                                    </>
+                                 )}
+                              </div>
+                              {/* Hidden Input Moved Outside Container */}
+                              <input
+                                 type="file"
+                                 ref={fileInputRef}
+                                 onChange={handleFileChange}
+                                 accept="image/*,.heic,.heif"
+                                 className="hidden"
+                                 aria-label="Upload Profile Photo"
+                                 title="Upload Profile Photo"
+                              />
+                              <div className="flex-1 space-y-4">
+                                 <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                       <label className="text-xs text-gray-400 uppercase font-bold mb-1 block">First Name <span className="text-red-500">*</span></label>
+                                       <input
+                                          className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white focus:border-cyber-primary outline-none"
+                                          value={newEmpData.firstName}
+                                          onChange={e => setNewEmpData({ ...newEmpData, firstName: e.target.value })}
+                                          aria-label="First Name"
+                                          title="First Name"
+                                       />
+                                    </div>
+                                    <div>
+                                       <label className="text-xs text-gray-400 uppercase font-bold mb-1 block">Last Name</label>
+                                       <input
+                                          className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white focus:border-cyber-primary outline-none"
+                                          value={newEmpData.lastName}
+                                          onChange={e => setNewEmpData({ ...newEmpData, lastName: e.target.value })}
+                                          aria-label="Last Name"
+                                          title="Last Name"
+                                       />
+                                    </div>
+                                 </div>
+                                 <div>
+                                    <label className="text-xs text-gray-400 uppercase font-bold mb-1 block">Email Address (Optional)</label>
+                                    <input
+                                       className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white focus:border-cyber-primary outline-none"
+                                       value={newEmpData.email}
+                                       placeholder="e.g. user@company.com"
+                                       onChange={e => setNewEmpData({ ...newEmpData, email: e.target.value })}
+                                       aria-label="Email Address"
+                                       title="Email Address"
+                                    />
+                                 </div>
+                                 <div>
+                                    <label className="text-xs text-gray-400 uppercase font-bold mb-1 block">Password (For Login)</label>
+                                    <input
+                                       type="password"
+                                       className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white focus:border-cyber-primary outline-none"
+                                       value={newEmpData.password}
+                                       onChange={e => setNewEmpData({ ...newEmpData, password: e.target.value })}
+                                       placeholder="••••••••"
+                                       aria-label="Password"
+                                       title="Password"
+                                    />
+                                 </div>
+                              </div>
+                           </div>
+
+                           {/* NEW: SITE SELECTION (Admin/HR Only) */}
+                           {(user?.role === 'admin' || user?.role === 'super_admin' || user?.role === 'hr') && (
+                              <div>
+                                 <label className="text-xs text-cyber-primary uppercase font-bold mb-2 block flex items-center gap-2"><MapPin size={14} /> Assign Workplace</label>
+                                 <select
+                                    className="w-full bg-cyber-primary/10 border border-cyber-primary/30 text-white rounded-lg px-3 py-3 outline-none"
+                                    value={newEmpData.siteId}
+                                    onChange={e => setNewEmpData({ ...newEmpData, siteId: e.target.value })}
+                                    aria-label="Assign Workplace"
+                                    title="Assign Workplace"
+                                 >
+                                    {sites.map(s => (
+                                       <option key={s.id} value={s.id} className="text-black">{s.name} ({s.type})</option>
+                                    ))}
+                                 </select>
+                                 <p className="text-[10px] text-gray-500 mt-1">Employee will only see data for this location.</p>
+                              </div>
+                           )}
+
+                           <div className="grid grid-cols-2 gap-4">
+                              <div>
+                                 <label className="text-xs text-gray-400 uppercase font-bold mb-1 block">Phone Number</label>
+                                 <input
+                                    className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white focus:border-cyber-primary outline-none"
+                                    value={newEmpData.phone}
+                                    placeholder="e.g. +251 911..."
+                                    onChange={e => setNewEmpData({ ...newEmpData, phone: e.target.value })}
+                                    aria-label="Phone Number"
+                                    title="Phone Number"
+                                 />
+                              </div>
+                              <div>
+                                 <label className="text-xs text-gray-400 uppercase font-bold mb-1 block">Address</label>
+                                 <input
+                                    className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white focus:border-cyber-primary outline-none"
+                                    value={newEmpData.address}
+                                    onChange={e => setNewEmpData({ ...newEmpData, address: e.target.value })}
+                                    aria-label="Address"
+                                    title="Address"
+                                 />
+                              </div>
+                           </div>
                         </div>
-                        <div>
-                           <label className="text-xs text-gray-400 uppercase font-bold mb-1 block">Specialization</label>
-                           <input
-                              className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white focus:border-cyber-primary outline-none"
-                              placeholder="e.g. Cold Storage"
-                              value={newEmpData.specialization}
-                              onChange={e => setNewEmpData({ ...newEmpData, specialization: e.target.value })}
-                              aria-label="Specialization"
-                              title="Specialization"
-                           />
+                     )}
+
+                     {/* STEP 2: ROLE (FILTERED BY AUTHORITY) */}
+                     {addStep === 2 && (
+                        <div className="space-y-4 animate-in fade-in slide-in-from-right-4">
+                           <p className="text-sm text-gray-400 mb-2">Select System Access Level (Filtered by your permissions)</p>
+                           <div className="grid grid-cols-2 gap-3">
+                              {availableRoles.map(roleObj => {
+                                 const violations = authService.validateSeparationOfDuties(roleObj.id);
+                                 const hasViolations = violations.length > 0;
+
+                                 return (
+                                    <div
+                                       key={roleObj.id}
+                                       onClick={() => handleRoleChange(roleObj.id)}
+                                       className={`p-4 rounded-xl border cursor-pointer transition-all flex items-center gap-3 relative ${newEmpData.role === roleObj.id
+                                          ? `bg-white/10 ${roleObj.styles.text} ${roleObj.styles.border} shadow-[0_0_15px_rgba(255,255,255,0.1)]`
+                                          : 'bg-black/20 border-white/5 hover:border-white/20'
+                                          }`}
+                                    >
+                                       <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${newEmpData.role === roleObj.id ? 'border-white' : 'border-gray-500'
+                                          }`}>
+                                          {newEmpData.role === roleObj.id && <div className="w-2 h-2 bg-white rounded-full" />}
+                                       </div>
+                                       <div className="flex-1">
+                                          <div className="flex items-center gap-2">
+                                             <p className="text-white font-bold uppercase text-sm">{roleObj.label}</p>
+                                             {hasViolations && (
+                                                <div className="group/sod relative">
+                                                   <AlertTriangle size={14} className="text-yellow-500" />
+                                                   <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2 bg-black border border-yellow-500/50 rounded text-[10px] text-yellow-200 opacity-0 group-hover/sod:opacity-100 pointer-events-none transition-opacity z-50">
+                                                      Warning: This role has inherent Separation of Duties conflicts: {violations.join(', ')}
+                                                   </div>
+                                                </div>
+                                             )}
+                                          </div>
+                                          <p className="text-[10px] text-gray-400">{roleObj.desc}</p>
+                                       </div>
+                                    </div>
+                                 )
+                              })}
+                           </div>
                         </div>
+                     )}
+
+                     {/* STEP 3: DETAILS */}
+                     {addStep === 3 && (
+                        <div className="space-y-6 animate-in fade-in slide-in-from-right-4">
+                           <div>
+                              <label className="text-xs text-gray-400 uppercase font-bold mb-2 block">Department (Filtered)</label>
+                              <div className="grid grid-cols-2 gap-2">
+                                 {availableDepartments.map(dept => (
+                                    <button
+                                       key={dept}
+                                       onClick={() => setNewEmpData({ ...newEmpData, department: dept })}
+                                       className={`px-3 py-2 rounded-lg text-xs font-bold text-left transition-colors ${newEmpData.department === dept ? 'bg-blue-500 text-white' : 'bg-white/5 text-gray-400 hover:bg-white/10'
+                                          }`}
+                                    >
+                                       {dept}
+                                    </button>
+                                 ))}
+                              </div>
+                           </div>
+                           <div className="grid grid-cols-2 gap-4">
+                              <div>
+                                 <label className="text-xs text-gray-400 uppercase font-bold mb-1 block">Monthly Salary ({CURRENCY_SYMBOL})</label>
+                                 <input
+                                    type="number"
+                                    className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white focus:border-cyber-primary outline-none font-mono"
+                                    value={newEmpData.salary}
+                                    onChange={e => setNewEmpData({ ...newEmpData, salary: e.target.value })}
+                                    aria-label="Monthly Salary"
+                                    title="Monthly Salary"
+                                 />
+                              </div>
+                              <div>
+                                 <label className="text-xs text-gray-400 uppercase font-bold mb-1 block">Specialization</label>
+                                 <input
+                                    className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white focus:border-cyber-primary outline-none"
+                                    placeholder="e.g. Cold Storage"
+                                    value={newEmpData.specialization}
+                                    onChange={e => setNewEmpData({ ...newEmpData, specialization: e.target.value })}
+                                    aria-label="Specialization"
+                                    title="Specialization"
+                                 />
+                              </div>
+                           </div>
+                           <div>
+                              <label className="text-xs text-gray-400 uppercase font-bold mb-1 block">Start Date</label>
+                              <input
+                                 type="date"
+                                 className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white focus:border-cyber-primary outline-none"
+                                 value={newEmpData.joinDate}
+                                 onChange={e => setNewEmpData({ ...newEmpData, joinDate: e.target.value })}
+                                 aria-label="Start Date"
+                                 title="Start Date"
+                              />
+                           </div>
+                        </div>
+                     )}
+
+                     {/* STEP 4: REVIEW */}
+                     {addStep === 4 && (
+                        <div className="space-y-4 animate-in fade-in slide-in-from-right-4">
+                           <p className="text-sm text-gray-400 mb-4">Review and confirm all details before creating the employee profile.</p>
+
+                           <div className="grid grid-cols-2 gap-4">
+                              {/* Personal Information */}
+                              <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+                                 <h4 className="text-xs text-gray-400 uppercase font-bold mb-3 flex items-center gap-2">
+                                    <User size={14} /> Personal Information
+                                 </h4>
+                                 <div className="space-y-2 text-sm">
+                                    <div className="flex justify-between">
+                                       <span className="text-gray-400">Full Name:</span>
+                                       <span className="text-white font-medium">{newEmpData.firstName} {newEmpData.lastName}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                       <span className="text-gray-400">Email:</span>
+                                       <span className="text-white font-mono text-xs">{newEmpData.email || 'Not provided'}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                       <span className="text-gray-400">Phone:</span>
+                                       <span className="text-white">{newEmpData.phone || 'Not provided'}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                       <span className="text-gray-400">Join Date:</span>
+                                       <span className="text-white">{newEmpData.joinDate || new Date().toISOString().split('T')[0]}</span>
+                                    </div>
+                                 </div>
+                              </div>
+
+                              {/* Role & Location */}
+                              <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+                                 <h4 className="text-xs text-gray-400 uppercase font-bold mb-3 flex items-center gap-2">
+                                    <Briefcase size={14} /> Role & Location
+                                 </h4>
+                                 <div className="space-y-2 text-sm">
+                                    <div className="flex justify-between">
+                                       <span className="text-gray-400">Role:</span>
+                                       <span className="text-cyber-primary font-bold uppercase text-xs">{newEmpData.role.replace('_', ' ')}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                       <span className="text-gray-400">Department:</span>
+                                       <span className="text-white">{newEmpData.department}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                       <span className="text-gray-400">Location:</span>
+                                       <span className="text-white font-medium">{sites.find(s => s.id === newEmpData.siteId)?.name || 'Central Operations'}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                       <span className="text-gray-400">Site Type:</span>
+                                       <span className="text-white">{sites.find(s => s.id === newEmpData.siteId)?.type || 'Administration'}</span>
+                                    </div>
+                                 </div>
+                              </div>
+
+                              {/* Compensation */}
+                              {newEmpData.salary && (
+                                 <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+                                    <h4 className="text-xs text-gray-400 uppercase font-bold mb-3 flex items-center gap-2">
+                                       <DollarSign size={14} /> Compensation
+                                    </h4>
+                                    <div className="space-y-2 text-sm">
+                                       <div className="flex justify-between">
+                                          <span className="text-gray-400">Base Salary:</span>
+                                          <span className="text-green-400 font-bold">${parseFloat(newEmpData.salary).toLocaleString()}/mo</span>
+                                       </div>
+                                       <div className="flex justify-between">
+                                          <span className="text-gray-400">Specialization:</span>
+                                          <span className="text-white">{newEmpData.specialization || 'Generalist'}</span>
+                                       </div>
+                                    </div>
+                                 </div>
+                              )}
+
+                              {/* Login Credentials */}
+                              {newEmpData.email && newEmpData.password && (
+                                 <div className="bg-cyber-primary/10 rounded-xl p-4 border border-cyber-primary/30">
+                                    <h4 className="text-xs text-cyber-primary uppercase font-bold mb-3 flex items-center gap-2">
+                                       <Key size={14} /> Login Credentials
+                                    </h4>
+                                    <div className="space-y-2 text-sm">
+                                       <div className="flex justify-between">
+                                          <span className="text-gray-400">Email:</span>
+                                          <span className="text-white font-mono text-xs">{newEmpData.email}</span>
+                                       </div>
+                                       <div className="flex justify-between items-center">
+                                          <span className="text-gray-400">Password:</span>
+                                          <span className="text-white font-mono text-xs">
+                                             {['super_admin', 'hr'].includes(user?.role || '')
+                                                ? newEmpData.password
+                                                : '•'.repeat(newEmpData.password.length)}
+                                          </span>
+                                       </div>
+                                       <p className="text-xs text-cyan-400 mt-2">✓ Login account will be created</p>
+                                    </div>
+                                 </div>
+                              )}
+                           </div>
+
+                           {/* Preview Card */}
+                           <div className="bg-gradient-to-br from-white/5 to-white/10 rounded-xl p-4 border border-white/20">
+                              <div className="flex items-center gap-4">
+                                 <img
+                                    src={newEmpData.avatar || `https://ui-avatars.com/api/?name=${newEmpData.firstName}+${newEmpData.lastName}&background=random`}
+                                    alt=""
+                                    className="w-16 h-16 rounded-xl object-cover border-2 border-cyber-primary"
+                                 />
+                                 <div className="flex-1">
+                                    <h3 className="text-lg font-bold text-white">{newEmpData.firstName} {newEmpData.lastName}</h3>
+                                    <p className="text-cyber-primary text-sm font-bold uppercase">{newEmpData.role.replace('_', ' ')}</p>
+                                    <p className="text-gray-400 text-xs">{newEmpData.department} • {sites.find(s => s.id === newEmpData.siteId)?.name || 'Central Operations'}</p>
+                                 </div>
+                                 <div className="text-right">
+                                    <p className="text-xs text-gray-400">Employee ID</p>
+                                    <p className="text-cyan-400 font-mono font-bold">Will be assigned</p>
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                     )}
+
+                  </div>
+
+                  {/* Navigation Footer */}
+                  <div className="pt-4 border-t border-white/10 flex justify-between mt-auto">
+                     <button
+                        onClick={handleWizardBack}
+                        disabled={addStep === 1}
+                        className="px-6 py-3 rounded-xl text-gray-400 font-bold hover:text-white disabled:opacity-30 transition-colors flex items-center gap-2"
+                     >
+                        <ArrowLeft size={16} /> Back
+                     </button>
+
+                     {addStep < 4 ? (
+                        <button
+                           onClick={handleWizardNext}
+                           className="px-8 py-3 bg-white text-black font-bold rounded-xl hover:bg-gray-200 transition-colors flex items-center gap-2"
+                        >
+                           Next Step <ArrowRight size={16} />
+                        </button>
+                     ) : (
+                        <button
+                           onClick={handleFinalSubmit}
+                           disabled={isSubmitting}
+                           className={`px-8 py-3 bg-cyber-primary text-black font-bold rounded-xl hover:bg-cyber-accent transition-colors shadow-[0_0_20px_rgba(0,255,157,0.3)] flex items-center gap-2 ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        >
+                           {isSubmitting ? <Loader2 className="animate-spin" size={16} /> : <CheckCircle size={16} />}
+                           {isSubmitting ? 'Creating...' : 'Confirm & Create'}
+                        </button>
+                     )}
+                  </div>
+               </div>
+            </Modal>
+
+            {/* --- MODAL: EMPLOYEE PROFILE --- */}
+            <Modal
+               isOpen={!!selectedEmployee
+               }
+               onClose={() => setSelectedEmployee(null)}
+               title="Staff Profile"
+               size="lg"
+            >
+               {selectedEmployee && (
+                  <StaffProfileView
+                     employee={selectedEmployee}
+                     onClose={() => setSelectedEmployee(null)}
+                  />
+               )}
+            </Modal>
+
+            {/* ID Card Generator Modal */}
+            {
+               idCardEmployee && (
+                  <EmployeeIDCard
+                     employee={idCardEmployee}
+                     siteCode={sites.find(s => s.id === idCardEmployee.siteId)?.code || sites.find(s => s.id === idCardEmployee.siteId)?.name || idCardEmployee.siteId}
+                     onClose={() => setIdCardEmployee(null)}
+                  />
+               )
+            }
+
+            {/* --- MODAL: TERMINATE EMPLOYEE --- */}
+            <Modal isOpen={isTerminateModalOpen} onClose={() => setIsTerminateModalOpen(false)} title="Confirm Termination" size="md">
+               <div className="p-6 space-y-4">
+                  <div className="flex items-center gap-3 p-4 bg-red-500/10 border border-red-500/20 rounded-xl">
+                     <AlertTriangle className="text-red-400" size={24} />
+                     <div>
+                        <h4 className="font-bold text-red-400">Critical Action</h4>
+                        <p className="text-xs text-gray-400">You are about to terminate {selectedEmployee?.name}. This will revoke access and update their status to "Terminated".</p>
+                     </div>
+                  </div>
+
+                  <div className="space-y-2">
+                     <label className="text-xs font-bold text-gray-500 uppercase">Type "TERMINATE" to confirm</label>
+                     <input
+                        type="text"
+                        value={terminateInput}
+                        onChange={(e) => setTerminateInput(e.target.value)}
+                        className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-red-500 outline-none transition-colors"
+                        placeholder="TERMINATE"
+                     />
+                  </div>
+
+                  <div className="flex gap-3 pt-2">
+                     <button
+                        onClick={() => setIsTerminateModalOpen(false)}
+                        className="flex-1 py-3 px-4 bg-white/5 hover:bg-white/10 text-gray-400 rounded-xl font-bold transition-all"
+                     >
+                        Cancel
+                     </button>
+                     <button
+                        onClick={handleConfirmTermination}
+                        disabled={terminateInput !== 'TERMINATE'}
+                        className={`flex-1 py-3 px-4 rounded-xl font-bold transition-all flex items-center justify-center gap-2 ${terminateInput === 'TERMINATE' ? 'bg-red-500 text-white hover:bg-red-600 shadow-lg shadow-red-500/20' : 'bg-gray-800 text-gray-500 cursor-not-allowed'}`}
+                     >
+                        Confirm Termination
+                     </button>
+                  </div>
+               </div>
+            </Modal>
+
+            {/* --- MODAL: DELETE RECORD --- */}
+            <Modal isOpen={isDeleteModalOpen} onClose={() => setIsDeleteModalOpen(false)} title="Delete Employee Record" size="md">
+               <div className="p-6 space-y-4">
+                  <div className="flex items-center gap-3 p-4 bg-red-500/10 border border-red-500/20 rounded-xl">
+                     <Trash2 className="text-red-400" size={24} />
+                     <div>
+                        <h4 className="font-bold text-red-400">Irreversible Action</h4>
+                        <p className="text-xs text-gray-400">This will permanently delete {employeeToDelete?.name}'s record from the database. This cannot be undone.</p>
+                     </div>
+                  </div>
+
+                  <div className="p-4 bg-white/5 border border-white/10 rounded-xl text-xs text-gray-400">
+                     <p className="font-bold text-gray-300 mb-1">Requirements for deletion:</p>
+                     <ul className="list-disc list-inside space-y-1">
+                        <li>Employee must be <strong>Terminated</strong> first</li>
+                        <li>You must be a <strong>CEO</strong></li>
+                        <li>Record cannot be restored after deletion</li>
+                     </ul>
+                  </div>
+
+                  <div className="space-y-2">
+                     <label className="text-xs font-bold text-gray-500 uppercase">Type "DELETE" to confirm permanent removal</label>
+                     <input
+                        type="text"
+                        value={deleteInput}
+                        onChange={(e) => setDeleteInput(e.target.value)}
+                        className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-red-500 outline-none transition-colors"
+                        placeholder="DELETE"
+                     />
+                  </div>
+
+                  <div className="flex gap-3 pt-2">
+                     <button
+                        onClick={() => setIsDeleteModalOpen(false)}
+                        className="flex-1 py-3 px-4 bg-white/5 hover:bg-white/10 text-gray-400 rounded-xl font-bold transition-all"
+                     >
+                        Cancel
+                     </button>
+                     <button
+                        onClick={handleConfirmDelete}
+                        disabled={deleteInput !== 'DELETE'}
+                        className={`flex-1 py-3 px-4 rounded-xl font-bold transition-all flex items-center justify-center gap-2 ${deleteInput === 'DELETE' ? 'bg-red-500 text-white hover:bg-red-600 shadow-lg shadow-red-500/20' : 'bg-gray-800 text-gray-500 cursor-not-allowed'}`}
+                     >
+                        Permanently Delete
+                     </button>
+                  </div>
+               </div>
+            </Modal>
+
+            {/* --- MODAL: APPROVE EMPLOYEE --- */}
+            <Modal isOpen={isApproveModalOpen} onClose={() => setIsApproveModalOpen(false)} title="Approve Employee" size="md">
+               <div className="p-6 space-y-6">
+                  <div className="text-center space-y-3">
+                     <div className="w-20 h-20 bg-green-500/10 rounded-full flex items-center justify-center mx-auto border border-green-500/20 animate-pulse">
+                        <UserCheck className="text-green-400" size={40} />
                      </div>
                      <div>
-                        <label className="text-xs text-gray-400 uppercase font-bold mb-1 block">Start Date</label>
-                        <input
-                           type="date"
-                           className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white focus:border-cyber-primary outline-none"
-                           value={newEmpData.joinDate}
-                           onChange={e => setNewEmpData({ ...newEmpData, joinDate: e.target.value })}
-                           aria-label="Start Date"
-                           title="Start Date"
-                        />
+                        <h3 className="text-xl font-bold text-white">Activate Talent</h3>
+                        <p className="text-sm text-gray-400">Approving {employeeToApprove?.name} will grant them system access based on the assigned role: <span className="text-cyber-primary font-bold">{employeeToApprove?.role}</span></p>
                      </div>
                   </div>
-               )}
 
-               {/* STEP 4: REVIEW */}
-               {addStep === 4 && (
-                  <div className="space-y-4 animate-in fade-in slide-in-from-right-4">
-                     <p className="text-sm text-gray-400 mb-4">Review and confirm all details before creating the employee profile.</p>
-
-                     <div className="grid grid-cols-2 gap-4">
-                        {/* Personal Information */}
-                        <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-                           <h4 className="text-xs text-gray-400 uppercase font-bold mb-3 flex items-center gap-2">
-                              <User size={14} /> Personal Information
-                           </h4>
-                           <div className="space-y-2 text-sm">
-                              <div className="flex justify-between">
-                                 <span className="text-gray-400">Full Name:</span>
-                                 <span className="text-white font-medium">{newEmpData.firstName} {newEmpData.lastName}</span>
-                              </div>
-                              <div className="flex justify-between">
-                                 <span className="text-gray-400">Email:</span>
-                                 <span className="text-white font-mono text-xs">{newEmpData.email || 'Not provided'}</span>
-                              </div>
-                              <div className="flex justify-between">
-                                 <span className="text-gray-400">Phone:</span>
-                                 <span className="text-white">{newEmpData.phone || 'Not provided'}</span>
-                              </div>
-                              <div className="flex justify-between">
-                                 <span className="text-gray-400">Join Date:</span>
-                                 <span className="text-white">{newEmpData.joinDate || new Date().toISOString().split('T')[0]}</span>
-                              </div>
-                           </div>
-                        </div>
-
-                        {/* Role & Location */}
-                        <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-                           <h4 className="text-xs text-gray-400 uppercase font-bold mb-3 flex items-center gap-2">
-                              <Briefcase size={14} /> Role & Location
-                           </h4>
-                           <div className="space-y-2 text-sm">
-                              <div className="flex justify-between">
-                                 <span className="text-gray-400">Role:</span>
-                                 <span className="text-cyber-primary font-bold uppercase text-xs">{newEmpData.role.replace('_', ' ')}</span>
-                              </div>
-                              <div className="flex justify-between">
-                                 <span className="text-gray-400">Department:</span>
-                                 <span className="text-white">{newEmpData.department}</span>
-                              </div>
-                              <div className="flex justify-between">
-                                 <span className="text-gray-400">Location:</span>
-                                 <span className="text-white font-medium">{sites.find(s => s.id === newEmpData.siteId)?.name || 'Central Operations'}</span>
-                              </div>
-                              <div className="flex justify-between">
-                                 <span className="text-gray-400">Site Type:</span>
-                                 <span className="text-white">{sites.find(s => s.id === newEmpData.siteId)?.type || 'Administration'}</span>
-                              </div>
-                           </div>
-                        </div>
-
-                        {/* Compensation */}
-                        {newEmpData.salary && (
-                           <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-                              <h4 className="text-xs text-gray-400 uppercase font-bold mb-3 flex items-center gap-2">
-                                 <DollarSign size={14} /> Compensation
-                              </h4>
-                              <div className="space-y-2 text-sm">
-                                 <div className="flex justify-between">
-                                    <span className="text-gray-400">Base Salary:</span>
-                                    <span className="text-green-400 font-bold">${parseFloat(newEmpData.salary).toLocaleString()}/mo</span>
-                                 </div>
-                                 <div className="flex justify-between">
-                                    <span className="text-gray-400">Specialization:</span>
-                                    <span className="text-white">{newEmpData.specialization || 'Generalist'}</span>
-                                 </div>
-                              </div>
-                           </div>
-                        )}
-
-                        {/* Login Credentials */}
-                        {newEmpData.email && newEmpData.password && (
-                           <div className="bg-cyber-primary/10 rounded-xl p-4 border border-cyber-primary/30">
-                              <h4 className="text-xs text-cyber-primary uppercase font-bold mb-3 flex items-center gap-2">
-                                 <Key size={14} /> Login Credentials
-                              </h4>
-                              <div className="space-y-2 text-sm">
-                                 <div className="flex justify-between">
-                                    <span className="text-gray-400">Email:</span>
-                                    <span className="text-white font-mono text-xs">{newEmpData.email}</span>
-                                 </div>
-                                 <div className="flex justify-between">
-                                    <span className="text-gray-400">Password:</span>
-                                    <span className="text-white font-mono text-xs">{'•'.repeat(newEmpData.password.length)}</span>
-                                 </div>
-                                 <p className="text-xs text-cyan-400 mt-2">✓ Login account will be created</p>
-                              </div>
-                           </div>
-                        )}
+                  <div className="grid grid-cols-2 gap-3">
+                     <div className="p-3 bg-white/5 border border-white/10 rounded-xl">
+                        <p className="text-[10px] text-gray-500 uppercase font-bold mb-1">Department</p>
+                        <p className="text-sm text-white font-medium">{employeeToApprove?.department || 'Unassigned'}</p>
                      </div>
-
-                     {/* Preview Card */}
-                     <div className="bg-gradient-to-br from-white/5 to-white/10 rounded-xl p-4 border border-white/20">
-                        <div className="flex items-center gap-4">
-                           <img
-                              src={newEmpData.avatar || `https://ui-avatars.com/api/?name=${newEmpData.firstName}+${newEmpData.lastName}&background=random`}
-                              alt=""
-                              className="w-16 h-16 rounded-xl object-cover border-2 border-cyber-primary"
-                           />
-                           <div className="flex-1">
-                              <h3 className="text-lg font-bold text-white">{newEmpData.firstName} {newEmpData.lastName}</h3>
-                              <p className="text-cyber-primary text-sm font-bold uppercase">{newEmpData.role.replace('_', ' ')}</p>
-                              <p className="text-gray-400 text-xs">{newEmpData.department} • {sites.find(s => s.id === newEmpData.siteId)?.name || 'Central Operations'}</p>
-                           </div>
-                           <div className="text-right">
-                              <p className="text-xs text-gray-400">Employee ID</p>
-                              <p className="text-cyan-400 font-mono font-bold">Will be assigned</p>
-                           </div>
-                        </div>
+                     <div className="p-3 bg-white/5 border border-white/10 rounded-xl">
+                        <p className="text-[10px] text-gray-500 uppercase font-bold mb-1">Location</p>
+                        <p className="text-sm text-white font-medium">{sites.find(s => s.id === employeeToApprove?.siteId)?.name || 'Unassigned'}</p>
                      </div>
                   </div>
-               )}
 
-            </div>
-
-            {/* Navigation Footer */}
-            <div className="pt-4 border-t border-white/10 flex justify-between mt-auto">
-               <button
-                  onClick={handleWizardBack}
-                  disabled={addStep === 1}
-                  className="px-6 py-3 rounded-xl text-gray-400 font-bold hover:text-white disabled:opacity-30 transition-colors flex items-center gap-2"
-               >
-                  <ArrowLeft size={16} /> Back
-               </button>
-
-               {addStep < 4 ? (
-                  <button
-                     onClick={handleWizardNext}
-                     className="px-8 py-3 bg-white text-black font-bold rounded-xl hover:bg-gray-200 transition-colors flex items-center gap-2"
-                  >
-                     Next Step <ArrowRight size={16} />
-                  </button>
-               ) : (
-                  <button
-                     onClick={handleFinalSubmit}
-                     disabled={isSubmitting}
-                     className={`px-8 py-3 bg-cyber-primary text-black font-bold rounded-xl hover:bg-cyber-accent transition-colors shadow-[0_0_20px_rgba(0,255,157,0.3)] flex items-center gap-2 ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
-                  >
-                     {isSubmitting ? <Loader2 className="animate-spin" size={16} /> : <CheckCircle size={16} />}
-                     {isSubmitting ? 'Creating...' : 'Confirm & Create'}
-                  </button>
-               )}
-            </div>
-         </Modal>
-
-         {/* --- MODAL: EMPLOYEE PROFILE --- */}
-         <Modal
-            isOpen={!!selectedEmployee
-            }
-            onClose={() => setSelectedEmployee(null)}
-            title="Staff Profile"
-            size="lg"
-         >
-            {selectedEmployee && (
-               <StaffProfileView
-                  employee={selectedEmployee}
-                  onClose={() => setSelectedEmployee(null)}
-               />
-            )}
-         </Modal>
-
-         {/* ID Card Generator Modal */}
-         {
-            idCardEmployee && (
-               <EmployeeIDCard
-                  employee={idCardEmployee}
-                  siteCode={sites.find(s => s.id === idCardEmployee.siteId)?.code || sites.find(s => s.id === idCardEmployee.siteId)?.name || idCardEmployee.siteId}
-                  onClose={() => setIdCardEmployee(null)}
-               />
-            )
-         }
-
-         {/* --- MODAL: TERMINATE EMPLOYEE --- */}
-         <Modal isOpen={isTerminateModalOpen} onClose={() => setIsTerminateModalOpen(false)} title="Confirm Termination" size="md">
-            <div className="p-6 space-y-4">
-               <div className="flex items-center gap-3 p-4 bg-red-500/10 border border-red-500/20 rounded-xl">
-                  <AlertTriangle className="text-red-400" size={24} />
-                  <div>
-                     <h4 className="font-bold text-red-400">Critical Action</h4>
-                     <p className="text-xs text-gray-400">You are about to terminate {selectedEmployee?.name}. This will revoke access and update their status to "Terminated".</p>
+                  <div className="flex gap-3">
+                     <button
+                        onClick={() => setIsApproveModalOpen(false)}
+                        className="flex-1 py-3 px-4 bg-white/5 hover:bg-white/10 text-gray-400 rounded-xl font-bold transition-all"
+                     >
+                        Decline
+                     </button>
+                     <button
+                        onClick={handleConfirmApprove}
+                        className="flex-1 py-4 px-4 bg-cyber-primary text-black hover:bg-cyber-primary/90 rounded-xl font-bold transition-all flex items-center justify-center gap-2 shadow-lg shadow-cyber-primary/20"
+                     >
+                        <CheckCircle size={18} />
+                        Approve & Activate
+                     </button>
                   </div>
                </div>
+            </Modal>
 
-               <div className="space-y-2">
-                  <label className="text-xs font-bold text-gray-500 uppercase">Type "TERMINATE" to confirm</label>
-                  <input
-                     type="text"
-                     value={terminateInput}
-                     onChange={(e) => setTerminateInput(e.target.value)}
-                     className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-red-500 outline-none transition-colors"
-                     placeholder="TERMINATE"
-                  />
-               </div>
+            {/* --- MODAL: VALIDATION WARNING --- */}
+            <Modal isOpen={isValidationModalOpen} onClose={() => setIsValidationModalOpen(false)} title="Validation Warning" size="md">
+               <div className="p-6 space-y-4">
+                  <div className="flex items-center gap-3 p-4 bg-amber-500/10 border border-amber-500/20 rounded-xl">
+                     <AlertTriangle className="text-amber-400" size={24} />
+                     <div>
+                        <h4 className="font-bold text-amber-400">Configuration Mismatch</h4>
+                        <p className="text-xs text-gray-400">A potential issue was identified with the role and location assignment.</p>
+                     </div>
+                  </div>
 
-               <div className="flex gap-3 pt-2">
-                  <button
-                     onClick={() => setIsTerminateModalOpen(false)}
-                     className="flex-1 py-3 px-4 bg-white/5 hover:bg-white/10 text-gray-400 rounded-xl font-bold transition-all"
-                  >
-                     Cancel
-                  </button>
-                  <button
-                     onClick={handleConfirmTermination}
-                     disabled={terminateInput !== 'TERMINATE'}
-                     className={`flex-1 py-3 px-4 rounded-xl font-bold transition-all flex items-center justify-center gap-2 ${terminateInput === 'TERMINATE' ? 'bg-red-500 text-white hover:bg-red-600 shadow-lg shadow-red-500/20' : 'bg-gray-800 text-gray-500 cursor-not-allowed'}`}
-                  >
-                     Confirm Termination
-                  </button>
-               </div>
-            </div>
-         </Modal>
+                  <div className="p-5 bg-black/40 border border-white/5 rounded-xl text-amber-200/90 text-sm leading-relaxed italic">
+                     "{validationMessage}"
+                  </div>
 
-         {/* --- MODAL: DELETE RECORD --- */}
-         <Modal isOpen={isDeleteModalOpen} onClose={() => setIsDeleteModalOpen(false)} title="Delete Employee Record" size="md">
-            <div className="p-6 space-y-4">
-               <div className="flex items-center gap-3 p-4 bg-red-500/10 border border-red-500/20 rounded-xl">
-                  <Trash2 className="text-red-400" size={24} />
-                  <div>
-                     <h4 className="font-bold text-red-400">Irreversible Action</h4>
-                     <p className="text-xs text-gray-400">This will permanently delete {employeeToDelete?.name}'s record from the database. This cannot be undone.</p>
+                  <div className="flex gap-3 pt-2">
+                     <button
+                        onClick={() => setIsValidationModalOpen(false)}
+                        className="flex-1 py-3 px-4 bg-white/5 hover:bg-white/10 text-gray-400 rounded-xl font-bold transition-all"
+                     >
+                        Cancel & Edit
+                     </button>
+                     <button
+                        onClick={handleConfirmValidation}
+                        className="flex-1 py-3 px-4 bg-amber-500 text-black hover:bg-amber-600 rounded-xl font-bold transition-all flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20"
+                     >
+                        Proceed Anyway
+                     </button>
                   </div>
                </div>
-
-               <div className="p-4 bg-white/5 border border-white/10 rounded-xl text-xs text-gray-400">
-                  <p className="font-bold text-gray-300 mb-1">Requirements for deletion:</p>
-                  <ul className="list-disc list-inside space-y-1">
-                     <li>Employee must be <strong>Terminated</strong> first</li>
-                     <li>You must be a <strong>Super Admin</strong></li>
-                     <li>Record cannot be restored after deletion</li>
-                  </ul>
-               </div>
-
-               <div className="space-y-2">
-                  <label className="text-xs font-bold text-gray-500 uppercase">Type "DELETE" to confirm permanent removal</label>
-                  <input
-                     type="text"
-                     value={deleteInput}
-                     onChange={(e) => setDeleteInput(e.target.value)}
-                     className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-red-500 outline-none transition-colors"
-                     placeholder="DELETE"
-                  />
-               </div>
-
-               <div className="flex gap-3 pt-2">
-                  <button
-                     onClick={() => setIsDeleteModalOpen(false)}
-                     className="flex-1 py-3 px-4 bg-white/5 hover:bg-white/10 text-gray-400 rounded-xl font-bold transition-all"
-                  >
-                     Cancel
-                  </button>
-                  <button
-                     onClick={handleConfirmDelete}
-                     disabled={deleteInput !== 'DELETE'}
-                     className={`flex-1 py-3 px-4 rounded-xl font-bold transition-all flex items-center justify-center gap-2 ${deleteInput === 'DELETE' ? 'bg-red-500 text-white hover:bg-red-600 shadow-lg shadow-red-500/20' : 'bg-gray-800 text-gray-500 cursor-not-allowed'}`}
-                  >
-                     Permanently Delete
-                  </button>
-               </div>
-            </div>
-         </Modal>
-
-         {/* --- MODAL: APPROVE EMPLOYEE --- */}
-         <Modal isOpen={isApproveModalOpen} onClose={() => setIsApproveModalOpen(false)} title="Approve Employee" size="md">
-            <div className="p-6 space-y-6">
-               <div className="text-center space-y-3">
-                  <div className="w-20 h-20 bg-green-500/10 rounded-full flex items-center justify-center mx-auto border border-green-500/20 animate-pulse">
-                     <UserCheck className="text-green-400" size={40} />
-                  </div>
-                  <div>
-                     <h3 className="text-xl font-bold text-white">Activate Talent</h3>
-                     <p className="text-sm text-gray-400">Approving {employeeToApprove?.name} will grant them system access based on the assigned role: <span className="text-cyber-primary font-bold">{employeeToApprove?.role}</span></p>
-                  </div>
-               </div>
-
-               <div className="grid grid-cols-2 gap-3">
-                  <div className="p-3 bg-white/5 border border-white/10 rounded-xl">
-                     <p className="text-[10px] text-gray-500 uppercase font-bold mb-1">Department</p>
-                     <p className="text-sm text-white font-medium">{employeeToApprove?.department || 'Unassigned'}</p>
-                  </div>
-                  <div className="p-3 bg-white/5 border border-white/10 rounded-xl">
-                     <p className="text-[10px] text-gray-500 uppercase font-bold mb-1">Location</p>
-                     <p className="text-sm text-white font-medium">{sites.find(s => s.id === employeeToApprove?.siteId)?.name || 'Unassigned'}</p>
-                  </div>
-               </div>
-
-               <div className="flex gap-3">
-                  <button
-                     onClick={() => setIsApproveModalOpen(false)}
-                     className="flex-1 py-3 px-4 bg-white/5 hover:bg-white/10 text-gray-400 rounded-xl font-bold transition-all"
-                  >
-                     Decline
-                  </button>
-                  <button
-                     onClick={handleConfirmApprove}
-                     className="flex-1 py-4 px-4 bg-cyber-primary text-black hover:bg-cyber-primary/90 rounded-xl font-bold transition-all flex items-center justify-center gap-2 shadow-lg shadow-cyber-primary/20"
-                  >
-                     <CheckCircle size={18} />
-                     Approve & Activate
-                  </button>
-               </div>
-            </div>
-         </Modal>
-
-         {/* --- MODAL: VALIDATION WARNING --- */}
-         <Modal isOpen={isValidationModalOpen} onClose={() => setIsValidationModalOpen(false)} title="Validation Warning" size="md">
-            <div className="p-6 space-y-4">
-               <div className="flex items-center gap-3 p-4 bg-amber-500/10 border border-amber-500/20 rounded-xl">
-                  <AlertTriangle className="text-amber-400" size={24} />
-                  <div>
-                     <h4 className="font-bold text-amber-400">Configuration Mismatch</h4>
-                     <p className="text-xs text-gray-400">A potential issue was identified with the role and location assignment.</p>
-                  </div>
-               </div>
-
-               <div className="p-5 bg-black/40 border border-white/5 rounded-xl text-amber-200/90 text-sm leading-relaxed italic">
-                  "{validationMessage}"
-               </div>
-
-               <div className="flex gap-3 pt-2">
-                  <button
-                     onClick={() => setIsValidationModalOpen(false)}
-                     className="flex-1 py-3 px-4 bg-white/5 hover:bg-white/10 text-gray-400 rounded-xl font-bold transition-all"
-                  >
-                     Cancel & Edit
-                  </button>
-                  <button
-                     onClick={handleConfirmValidation}
-                     className="flex-1 py-3 px-4 bg-amber-500 text-black hover:bg-amber-600 rounded-xl font-bold transition-all flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20"
-                  >
-                     Proceed Anyway
-                  </button>
-               </div>
-            </div>
-         </Modal>
+            </Modal>
+         </div >
       </>
    );
 }

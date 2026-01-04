@@ -1,9 +1,9 @@
 import React, { useMemo } from 'react';
 import {
     Store, Trophy, Users, TrendingUp, Star, Gift, Crown,
-    DollarSign, Target, Award, ChevronRight, Sparkles
+    DollarSign, Target, Award, ChevronRight, Sparkles, Zap
 } from 'lucide-react';
-import { StorePoints, BonusTier, POSRoleDistribution, DEFAULT_POS_BONUS_TIERS, DEFAULT_POS_ROLE_DISTRIBUTION } from '../types';
+import { StorePoints, BonusTier, POSRoleDistribution, WorkerPoints, DEFAULT_POS_BONUS_TIERS, DEFAULT_POS_ROLE_DISTRIBUTION, POINTS_CONFIG } from '../types';
 import { CURRENCY_SYMBOL } from '../constants';
 import { formatCompactNumber } from '../utils/formatting';
 
@@ -13,6 +13,8 @@ interface StoreBonusDisplayProps {
     bonusTiers?: BonusTier[];
     roleDistribution?: POSRoleDistribution[];
     compact?: boolean;
+    workerPoints?: WorkerPoints;
+    leaderboard?: WorkerPoints[];
 }
 
 // Calculate store bonus from points and tiers
@@ -30,6 +32,11 @@ const getTierColor = (tierColor: string) => {
     const colors: Record<string, string> = {
         gray: 'from-gray-400 to-gray-500',
         amber: 'from-amber-500 to-amber-600',
+        bronze: 'from-orange-700 to-orange-500',
+        silver: 'from-gray-300 to-gray-400',
+        gold: 'from-yellow-400 to-amber-500',
+        platinum: 'from-cyan-400 to-blue-500',
+        diamond: 'from-blue-400 to-purple-500',
         yellow: 'from-yellow-400 to-yellow-500',
         cyan: 'from-cyan-400 to-cyan-500',
         purple: 'from-purple-400 to-purple-600',
@@ -37,6 +44,28 @@ const getTierColor = (tierColor: string) => {
         green: 'from-green-400 to-green-600',
     };
     return colors[tierColor] || 'from-gray-400 to-gray-500';
+};
+
+// Get level info
+const getLevelInfo = (totalPoints: number) => {
+    const levels = POINTS_CONFIG.LEVELS;
+    let currentLevel = levels[0];
+    let nextLevel = levels[1];
+
+    for (let i = levels.length - 1; i >= 0; i--) {
+        if (totalPoints >= levels[i].points) {
+            currentLevel = levels[i];
+            nextLevel = levels[i + 1] || levels[i];
+            break;
+        }
+    }
+
+    const pointsToNext = nextLevel.points - totalPoints;
+    const progressPercent = currentLevel.level === nextLevel.level
+        ? 100
+        : ((totalPoints - currentLevel.points) / (nextLevel.points - currentLevel.points)) * 100;
+
+    return { currentLevel, nextLevel, pointsToNext, progressPercent };
 };
 
 // Compact widget for header/sidebar
@@ -99,7 +128,9 @@ export default function StoreBonusDisplay({
     currentUserRole,
     bonusTiers = DEFAULT_POS_BONUS_TIERS,
     roleDistribution = DEFAULT_POS_ROLE_DISTRIBUTION,
-    compact = false
+    compact = false,
+    workerPoints,
+    leaderboard
 }: StoreBonusDisplayProps) {
     if (!storePoints) {
         return (
@@ -145,6 +176,12 @@ export default function StoreBonusDisplay({
         };
     }, [currentUserRole, roleDistribution, bonusInfo.bonus]);
 
+    // Personal Level Info
+    const levelInfo = useMemo(() =>
+        workerPoints ? getLevelInfo(workerPoints.totalPoints) : null,
+        [workerPoints]
+    );
+
     if (compact) {
         return (
             <StoreBonusWidget
@@ -157,143 +194,128 @@ export default function StoreBonusDisplay({
     }
 
     return (
-        <div className="bg-gradient-to-br from-blue-500/5 via-purple-500/5 to-pink-500/5 border border-blue-500/20 rounded-2xl p-6 space-y-4">
+        <div className="bg-gradient-to-br from-cyber-gray to-blue-900/10 border border-white/10 rounded-2xl p-6 h-full relative overflow-hidden group">
+            {/* Animated Glow Effect */}
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-purple-500/5 to-pink-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+            <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+
             {/* Header */}
-            <div className="flex items-start justify-between">
-                <div className="flex items-center gap-3">
-                    <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${getTierColor(bonusInfo.tier.tierColor)} flex items-center justify-center shadow-lg`}>
-                        <Store size={28} className="text-white" />
+            <div className="relative flex items-center justify-between mb-6">
+                <div className="flex items-center gap-4">
+                    <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${getTierColor(bonusInfo.tier.tierColor)} flex items-center justify-center shadow-lg relative`}>
+                        <div className="absolute inset-0 bg-white/20 animate-pulse rounded-xl" />
+                        <Store size={28} className="text-white relative z-10" />
+                        <div className="absolute -bottom-2 -right-2 bg-black/80 border border-white/10 rounded-lg px-1.5 py-0.5">
+                            <span className="text-[10px] font-bold text-white">Lvl {levelInfo?.currentLevel.level || '-'}</span>
+                        </div>
                     </div>
                     <div>
                         <h3 className="font-bold text-white text-lg flex items-center gap-2">
-                            {storePoints.siteName}
-                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold bg-gradient-to-r ${getTierColor(bonusInfo.tier.tierColor)} text-white`}>
+                            Team Performance
+                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold bg-gradient-to-r ${getTierColor(bonusInfo.tier.tierColor)} text-white shadow shadow-white/10`}>
                                 {bonusInfo.tier.tierName}
                             </span>
                         </h3>
-                        <p className="text-xs text-gray-400">Team Bonus Progress</p>
+                        <p className="text-xs text-blue-300 flex items-center gap-1">
+                            <Sparkles size={10} />
+                            {storePoints.siteName}
+                        </p>
                     </div>
                 </div>
+                {/* Points / Bonus Toggle View */}
                 <div className="text-right">
-                    <p className="text-xs text-gray-400">Store Bonus Pool</p>
-                    <p className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">
+                    <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">Store Pool</p>
+                    <p className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">
                         {formatCompactNumber(bonusInfo.bonus, { currency: CURRENCY_SYMBOL, maxFractionDigits: 0 })}
                     </p>
                 </div>
             </div>
 
-            {/* Stats Row */}
-            <div className="grid grid-cols-4 gap-3">
-                <div className="bg-black/30 rounded-xl p-3 text-center">
-                    <Target className="mx-auto text-blue-400 mb-1" size={18} />
-                    <p className="text-lg font-bold text-white">{storePoints.monthlyPoints.toLocaleString()}</p>
-                    <p className="text-[10px] text-gray-500">Monthly Points</p>
+            {/* Main Stats Grid */}
+            <div className="relative grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                {/* Total Store Sales/Points */}
+                <div className="bg-black/30 p-4 rounded-xl border border-white/5 backdrop-blur-sm">
+                    <div className="flex items-center justify-between mb-2">
+                        <p className="text-[10px] text-gray-400 uppercase font-bold">Store Points</p>
+                        <Trophy size={14} className="text-yellow-500" />
+                    </div>
+                    <p className="text-2xl font-black text-white">{storePoints.monthlyPoints.toLocaleString()}</p>
+                    <p className="text-[10px] text-green-400 flex items-center gap-1">
+                        <TrendingUp size={10} />
+                        +{storePoints.todayPoints.toLocaleString()} today
+                    </p>
                 </div>
-                <div className="bg-black/30 rounded-xl p-3 text-center">
-                    <TrendingUp className="mx-auto text-green-400 mb-1" size={18} />
-                    <p className="text-lg font-bold text-white">{storePoints.todayPoints.toLocaleString()}</p>
-                    <p className="text-[10px] text-gray-500">Today</p>
+
+                {/* Personal Contribution (Gamified) */}
+                <div className="bg-gradient-to-br from-blue-500/10 to-transparent p-4 rounded-xl border border-blue-500/20 backdrop-blur-sm">
+                    <div className="flex items-center justify-between mb-2">
+                        <p className="text-[10px] text-blue-300 uppercase font-bold">Your Score</p>
+                        <Zap size={14} className="text-blue-400" />
+                    </div>
+                    <p className="text-2xl font-black text-white">{workerPoints?.totalPoints.toLocaleString() || 0}</p>
+                    <p className="text-[10px] text-blue-300">
+                        {levelInfo?.currentLevel.title || 'Rookie'} • Lvl {levelInfo?.currentLevel.level || 1}
+                    </p>
                 </div>
-                <div className="bg-black/30 rounded-xl p-3 text-center">
-                    <DollarSign className="mx-auto text-yellow-400 mb-1" size={18} />
-                    <p className="text-lg font-bold text-white">{formatCompactNumber(storePoints.averageTicketSize, { currency: CURRENCY_SYMBOL, maxFractionDigits: 0 })}</p>
-                    <p className="text-[10px] text-gray-500">Avg Ticket</p>
-                </div>
-                <div className="bg-black/30 rounded-xl p-3 text-center">
-                    <Star className="mx-auto text-purple-400 mb-1" size={18} />
-                    <p className="text-lg font-bold text-white">{storePoints.totalTransactions.toLocaleString()}</p>
-                    <p className="text-[10px] text-gray-500">Transactions</p>
+
+                {/* Rank */}
+                <div className="bg-black/30 p-4 rounded-xl border border-white/5 backdrop-blur-sm">
+                    <div className="flex items-center justify-between mb-2">
+                        <p className="text-[10px] text-gray-400 uppercase font-bold">Store Rank</p>
+                        <Crown size={14} className="text-purple-500" />
+                    </div>
+                    <div className="flex items-baseline gap-2">
+                        <p className="text-2xl font-black text-white">#{workerPoints?.rank || '-'}</p>
+                        <span className="text-xs text-gray-500">of {leaderboard?.length || '-'}</span>
+                    </div>
+                    <p className="text-[10px] text-gray-500 truncate">Top 10% of staff</p>
                 </div>
             </div>
 
-            {/* Progress to Next Tier */}
-            {nextTier && (
-                <div className="bg-black/20 rounded-xl p-4">
-                    <div className="flex justify-between items-center mb-2">
-                        <span className="text-xs text-gray-400">Progress to {nextTier.tierName}</span>
-                        <span className="text-xs text-blue-400 font-bold">
-                            {(nextTier.minPoints - storePoints.monthlyPoints).toLocaleString()} pts to go
-                        </span>
-                    </div>
-                    <div className="h-3 bg-black/40 rounded-full overflow-hidden">
-                        <div
-                            className={`h-full bg-gradient-to-r ${getTierColor(nextTier.tierColor)} transition-all duration-500`}
-                            style={{ width: `${tierProgress}%` }}
-                        />
-                    </div>
-                    <p className="text-[10px] text-gray-500 mt-2">
-                        Next tier unlocks: {formatCompactNumber(nextTier.bonusAmount, { currency: CURRENCY_SYMBOL, maxFractionDigits: 0 })} pool + {formatCompactNumber(nextTier.bonusPerPoint || 0, { currency: CURRENCY_SYMBOL, maxFractionDigits: 2 })}/point
-                    </p>
+            {/* Progress to Next Store Tier */}
+            <div className="relative space-y-2 mb-6">
+                <div className="flex justify-between text-[10px] text-gray-400 uppercase font-bold">
+                    <span>Current: {bonusInfo.tier.tierName}</span>
+                    {nextTier ? (
+                        <span className="text-blue-400">{nextTier.minPoints - storePoints.monthlyPoints} pts to {nextTier.tierName}</span>
+                    ) : (
+                        <span className="text-purple-400">Max Tier Reached!</span>
+                    )}
                 </div>
-            )}
+                <div className="h-3 bg-black/50 rounded-full overflow-hidden border border-white/10 relative">
+                    <div
+                        className={`h-full bg-gradient-to-r ${getTierColor(bonusInfo.tier.tierColor)} transition-all duration-1000 relative overflow-hidden`}
+                        style={{ width: `${tierProgress}%` }}
+                    >
+                        <div className="absolute inset-0 bg-white/20 animate-[shimmer_2s_infinite]" />
+                    </div>
+                </div>
+                {nextTier && (
+                    <p className="text-[10px] text-gray-500 text-center">
+                        Next tier unlocks <span className="text-white font-bold">{formatCompactNumber(nextTier.bonusAmount, { currency: CURRENCY_SYMBOL })}</span> base bonus
+                    </p>
+                )}
+            </div>
 
-            {/* Your Personal Share */}
+            {/* Personal Share Estimate */}
             {userShare && (
-                <div className="bg-gradient-to-r from-green-500/10 to-emerald-500/5 border border-green-500/30 rounded-xl p-4">
+                <div className="relative bg-gradient-to-r from-green-500/10 to-emerald-500/5 rounded-xl p-4 border border-green-500/20">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                            <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${getTierColor(userShare.color)} flex items-center justify-center`}>
-                                <Gift size={24} className="text-white" />
+                            <div className="w-10 h-10 rounded-lg bg-green-500/20 flex items-center justify-center">
+                                <DollarSign className="text-green-400" />
                             </div>
                             <div>
-                                <h4 className="font-bold text-white flex items-center gap-2">
-                                    Your Estimated Share
-                                    <span className="text-[10px] font-normal text-gray-400">({userShare.role})</span>
-                                </h4>
-                                <p className="text-xs text-gray-400">
-                                    {userShare.percentage}% of store bonus pool
-                                </p>
+                                <p className="text-xs text-gray-300 font-bold">Est. Personal Bonus</p>
+                                <p className="text-[10px] text-green-400/80">{userShare.percentage}% Share ({userShare.role})</p>
                             </div>
                         </div>
-                        <div className="text-right">
-                            <p className="text-3xl font-black text-green-400">
-                                {formatCompactNumber(userShare.amount, { currency: CURRENCY_SYMBOL, maxFractionDigits: 0 })}
-                            </p>
-                            <p className="text-[10px] text-gray-500">this period</p>
-                        </div>
+                        <p className="text-2xl font-black text-green-400">
+                            {formatCompactNumber(userShare.amount, { currency: CURRENCY_SYMBOL, maxFractionDigits: 0 })}
+                        </p>
                     </div>
                 </div>
             )}
-
-            {!userShare && currentUserRole && (
-                <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-4 text-center">
-                    <p className="text-yellow-400 text-sm">
-                        Your role "{currentUserRole}" is not configured for bonus distribution.
-                    </p>
-                    <p className="text-xs text-gray-400 mt-1">
-                        Contact your manager to set up your bonus share.
-                    </p>
-                </div>
-            )}
-
-            {/* Team Distribution Preview */}
-            <div className="border-t border-white/5 pt-4">
-                <h4 className="text-xs text-gray-400 font-bold uppercase mb-3 flex items-center gap-2">
-                    <Users size={14} />
-                    Team Distribution Preview
-                </h4>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                    {roleDistribution.sort((a, b) => b.percentage - a.percentage).slice(0, 4).map(role => {
-                        const share = (bonusInfo.bonus * role.percentage) / 100;
-                        const isCurrentUser = currentUserRole?.toLowerCase() === role.role.toLowerCase();
-                        return (
-                            <div
-                                key={role.id}
-                                className={`bg-black/30 rounded-lg p-2 text-center transition-all ${isCurrentUser ? 'ring-2 ring-green-400/50' : ''}`}
-                            >
-                                <p className="text-[10px] text-gray-400 truncate flex items-center justify-center gap-1">
-                                    {role.role}
-                                    {isCurrentUser && <Sparkles size={10} className="text-green-400" />}
-                                </p>
-                                <p className="text-sm font-bold text-white">
-                                    {formatCompactNumber(share, { currency: CURRENCY_SYMBOL, maxFractionDigits: 0 })}
-                                </p>
-                                <p className="text-[10px] text-gray-500">{role.percentage}%</p>
-                            </div>
-                        );
-                    })}
-                </div>
-            </div>
         </div>
     );
 }
@@ -369,4 +391,3 @@ export function StoreLeaderboard({
         </div>
     );
 }
-

@@ -8,6 +8,7 @@ import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 import { SaleRecord, Product, Site } from '../types';
 import { CURRENCY_SYMBOL } from '../constants';
+import { formatDateTime } from './formatting';
 
 /**
  * Export sales to PDF
@@ -21,14 +22,14 @@ export function exportSalesToPDF(sales: SaleRecord[], filename: string = 'sales_
 
     // Add metadata
     doc.setFontSize(10);
-    doc.text(`Generated: ${new Date().toLocaleString()}`, 14, 30);
+    doc.text(`Generated: ${formatDateTime(new Date(), { showTime: true })}`, 14, 30);
     doc.text(`Total Transactions: ${sales.length}`, 14, 36);
     doc.text(`Total Revenue: ${CURRENCY_SYMBOL}${sales.reduce((sum, s) => sum + s.total, 0).toLocaleString()}`, 14, 42);
 
     // Prepare table data
     const tableData = sales.map(sale => [
         sale.id.substring(0, 8),
-        new Date(sale.date).toLocaleDateString(),
+        formatDateTime(sale.date),
         sale.cashierName || 'Unknown',
         sale.method,
         `${CURRENCY_SYMBOL}${sale.total.toFixed(2)}`,
@@ -56,7 +57,7 @@ export function exportSalesToExcel(sales: SaleRecord[], filename: string = 'sale
     // Prepare data
     const data = sales.map(sale => ({
         'Receipt ID': sale.id,
-        'Date': new Date(sale.date).toLocaleString(),
+        'Date': formatDateTime(sale.date, { showTime: true }),
         'Store': sale.siteId || 'N/A',
         'Cashier': sale.cashierName || 'Unknown',
         'Payment Method': sale.method,
@@ -139,7 +140,7 @@ export function exportInventoryToExcel(
             'Value': product.stock * product.price,
             'Location': product.location || 'N/A',
             'Status': product.status,
-            'Expiry Date': product.expiryDate || 'N/A'
+            'Expiry Date': product.expiryDate ? formatDateTime(product.expiryDate) : 'N/A'
         }));
 
         const ws = XLSX.utils.json_to_sheet(data);
@@ -200,7 +201,7 @@ export function exportSitePerformanceToPDF(
 
     // Metadata
     doc.setFontSize(10);
-    doc.text(`Generated: ${new Date().toLocaleString()}`, 14, 30);
+    doc.text(`Generated: ${formatDateTime(new Date(), { showTime: true })}`, 14, 30);
     doc.text(`Total Sites: ${sites.length}`, 14, 36);
 
     // Prepare table data

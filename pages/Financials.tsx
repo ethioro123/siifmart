@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
    PieChart, Pie, Cell, Tooltip, ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid,
    ComposedChart, Bar, Line, Legend
@@ -10,18 +10,22 @@ import {
    PieChart as PieIcon, Target, ArrowUpRight, ArrowDownRight, Search, Calendar, Loader2
 } from 'lucide-react';
 import { CURRENCY_SYMBOL } from '../constants';
-import { ExpenseRecord } from '../types';
+import { ExpenseRecord, Employee, DEFAULT_POS_BONUS_TIERS, DEFAULT_POS_ROLE_DISTRIBUTION } from '../types';
+import { calculateStoreBonus } from '../components/StoreBonusDisplay';
+import { expensesService } from '../services/supabase.service';
 import Modal from '../components/Modal';
 import { useStore } from '../contexts/CentralStore';
 import { useData } from '../contexts/DataContext'; // Use Live Data
 import { generateQuarterlyReport } from '../utils/reportGenerator';
 import { formatCompactNumber } from '../utils/formatting';
+import { useDateFilter, DateRangeOption } from '../hooks/useDateFilter';
+import DateRangeSelector from '../components/DateRangeSelector';
 
 // Regional Tax Configurations
 type FinanceTab = 'overview' | 'expenses' | 'payroll' | 'tax' | 'budget';
-type DateRangeOption = 'All Time' | 'This Month' | 'Last Month' | 'This Quarter' | 'This Year' | 'Last Year';
 
 const TAX_REGIONS = {
+   'SYSTEM': { name: 'System Default', taxName: 'Tax', rate: 0, code: 'N/A' }, // Rate updated in component
    'ET': { name: 'Ethiopia', taxName: 'VAT', rate: 15, code: 'ETB' },
    'KE': { name: 'Kenya', taxName: 'VAT', rate: 16, code: 'KES' },
    'UG': { name: 'Uganda', taxName: 'VAT', rate: 18, code: 'UGX' },
@@ -32,7 +36,7 @@ const TAX_REGIONS = {
 
 export default function Finance() {
    const { user } = useStore();
-   const { employees, sales, expenses, allProducts, addExpense, deleteExpense, processPayroll, activeSite, addNotification } = useData();
+   const { employees, sales, expenses, allProducts, addExpense, deleteExpense, processPayroll, activeSite, addNotification, settings, sites, getStorePoints } = useData();
 
    const [activeTab, setActiveTab] = useState<FinanceTab>('overview');
    const [isAddExpenseOpen, setIsAddExpenseOpen] = useState(false);
@@ -45,8 +49,11 @@ export default function Finance() {
    const [isPayrollModalOpen, setIsPayrollModalOpen] = useState(false);
 
    // Tax State
-   const [selectedRegion, setSelectedRegion] = useState<keyof typeof TAX_REGIONS>('ET');
-   const currentTaxConfig = TAX_REGIONS[selectedRegion];
+   const [selectedRegion, setSelectedRegion] = useState<keyof typeof TAX_REGIONS>('SYSTEM');
+
+   const currentTaxConfig = selectedRegion === 'SYSTEM'
+      ? { ...TAX_REGIONS['SYSTEM'], rate: settings?.taxRate ?? 0 }
+      : TAX_REGIONS[selectedRegion];
 
    // New Expense State
    const [newExpData, setNewExpData] = useState<Partial<ExpenseRecord>>({
@@ -55,6 +62,69 @@ export default function Finance() {
 
    // --- DATE FILTERING STATE ---
    const [dateRange, setDateRange] = useState<DateRangeOption>('This Quarter');
+
+   // Server-Side Pagination State for Expenses
+   const [localExpenses, setLocalExpenses] = useState<ExpenseRecord[]>([]);
+   const [expensesLoading, setExpensesLoading] = useState(false);
+   const [totalExpensesCount, setTotalExpensesCount] = useState(0);
+   const [currentExpensesPage, setCurrentExpensesPage] = useState(1);
+   const EXPENSES_PER_PAGE = 20;
+
+   useEffect(() => {
+      if (activeTab === 'expenses') {
+         const fetchExpenses = async () => {
+            setExpensesLoading(true);
+            try {
+               const offset = (currentExpensesPage - 1) * EXPENSES_PER_PAGE;
+
+               // Calculate Dates for Filter
+               const now = new Date();
+               let startDate: string | undefined;
+               let endDate: string | undefined;
+
+               const { q, year } = getQuarterInfo(now);
+
+               if (dateRange === 'This Month') {
+                  const start = new Date(now.getFullYear(), now.getMonth(), 1);
+                  startDate = start.toISOString().split('T')[0];
+                  endDate = now.toISOString().split('T')[0]; // Up to today
+               } else if (dateRange === 'Last Month') {
+                  const start = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+                  const end = new Date(now.getFullYear(), now.getMonth(), 0);
+                  startDate = start.toISOString().split('T')[0];
+                  endDate = end.toISOString().split('T')[0];
+               } else if (dateRange === 'This Quarter') {
+                  const start = new Date(year, (q - 1) * 3, 1);
+                  startDate = start.toISOString().split('T')[0];
+                  endDate = now.toISOString().split('T')[0];
+               } else if (dateRange === 'This Year') {
+                  const start = new Date(year, 0, 1);
+                  startDate = start.toISOString().split('T')[0];
+                  endDate = now.toISOString().split('T')[0];
+               } else if (dateRange === 'Last Year') {
+                  const start = new Date(year - 1, 0, 1);
+                  const end = new Date(year - 1, 11, 31);
+                  startDate = start.toISOString().split('T')[0];
+                  endDate = end.toISOString().split('T')[0];
+               }
+               // 'All Time' leaves startDate/endDate undefined
+
+               const { data, count } = await expensesService.getAll(activeSite?.id, EXPENSES_PER_PAGE, offset, {
+                  startDate,
+                  endDate
+               });
+
+               setLocalExpenses(data);
+               setTotalExpensesCount(count);
+            } catch (error) {
+               console.error('Failed to fetch expenses', error);
+            } finally {
+               setExpensesLoading(false);
+            }
+         };
+         fetchExpenses();
+      }
+   }, [activeTab, currentExpensesPage, activeSite?.id, dateRange]);
 
    // --- DATE FILTERING LOGIC ---
    const getQuarterInfo = (d = new Date()) => {
@@ -131,73 +201,137 @@ export default function Finance() {
       return Math.min(100, Math.max(0, (daysPassed / totalDays) * 100));
    };
 
-   // --- FILTERED DATASETS ---
+   // Server-Side Financial Data
+   const [serverFinancials, setServerFinancials] = useState<any>(null);
+
+   useEffect(() => {
+      const fetchFinancials = async () => {
+         try {
+            // Convert dateRange to startDate/endDate for RPC
+            const { q, year } = getQuarterInfo(new Date());
+            const now = new Date();
+            let start: Date | undefined;
+            let end: Date | undefined;
+
+            if (dateRange === 'This Month') {
+               start = new Date(now.getFullYear(), now.getMonth(), 1);
+               end = now;
+            } else if (dateRange === 'Last Month') {
+               start = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+               end = new Date(now.getFullYear(), now.getMonth(), 0);
+            } else if (dateRange === 'This Quarter') {
+               start = new Date(year, (q - 1) * 3, 1);
+               end = now;
+            } else if (dateRange === 'This Year') {
+               start = new Date(year, 0, 1);
+               end = now;
+            } else if (dateRange === 'Last Year') {
+               start = new Date(year - 1, 0, 1);
+               end = new Date(year - 1, 11, 31);
+            }
+            // 'All Time' -> undefined
+
+            const data = await expensesService.getFinancialMetrics(
+               activeSite?.id,
+               start?.toISOString(),
+               end?.toISOString()
+            );
+            setServerFinancials(data);
+         } catch (err) {
+            console.error("Error fetching financial metrics:", err);
+         }
+      };
+
+      fetchFinancials();
+   }, [dateRange, activeSite?.id]);
+
+
+   // --- FILTERED DATASETS (Keep for Legacy/Component Logic if needed, but metrics are replaced) ---
    const filteredExpenses = expenses.filter(e => isWithinRange(e.date));
-   // Sales filter: Handle timestamp or date string
    const filteredSales = sales.filter(s => isWithinRange(s.created_at || new Date().toISOString()));
 
-
-   // --- CALCULATIONS (USING FILTERED DATA) ---
+   // --- CALCULATIONS (USING SERVER METRICS OR FALLBACK) ---
 
    // 1. Expense Breakdown (Pie Chart)
-   const expensesByCategory = filteredExpenses.reduce((acc: Record<string, number>, exp: any) => {
-      const cat = exp.category || 'Other';
-      acc[cat] = (acc[cat] || 0) + (Number(exp.amount) || 0);
-      return acc;
-   }, {} as Record<string, number>);
+   const expenseBreakdownData = useMemo(() => {
+      if (serverFinancials?.expense_breakdown) {
+         return serverFinancials.expense_breakdown.map((item: any) => ({
+            name: item.name,
+            value: item.value // Server returns absolute value, we can use it directly or calc %
+         })).map((item: any, _: number, arr: any[]) => {
+            const total = arr.reduce((s, i) => s + i.value, 0);
+            return { ...item, value: total > 0 ? parseFloat(((item.value / total) * 100).toFixed(1)) : 0 };
+         });
+      }
+      // Fallback
+      const expensesByCategory = filteredExpenses.reduce((acc: Record<string, number>, exp: any) => {
+         const cat = exp.category || 'Other';
+         acc[cat] = (acc[cat] || 0) + (Number(exp.amount) || 0);
+         return acc;
+      }, {} as Record<string, number>);
 
-   const totalRecordedExpenses = Object.values(expensesByCategory).reduce<number>((sum, val) => sum + (val as number), 0);
-   const expenseBreakdownData = Object.entries(expensesByCategory).map(([name, value]) => {
-      const val = value as number;
-      const total = totalRecordedExpenses as number;
-      return {
-         name,
-         value: total > 0 ? parseFloat(((val / total) * 100).toFixed(1)) : 0
-      };
-   });
+      const totalRecordedExpenses = Object.values(expensesByCategory).reduce<number>((sum, val) => sum + (val as number), 0);
+      return Object.entries(expensesByCategory).map(([name, value]) => {
+         const val = value as number;
+         const total = totalRecordedExpenses as number;
+         return {
+            name,
+            value: total > 0 ? parseFloat(((val / total) * 100).toFixed(1)) : 0
+         };
+      });
+   }, [filteredExpenses, serverFinancials]);
 
-   // 2. Cashflow Data (Last 4 Weeks - Logic Updated to respect filter or default to trends)
-   // NOTE: If All Time is selected, we show 4-week trend. If specific range, we might want to aggregate differently, 
-   // but for now let's keep the weekly aggregation logic but applied to the filtered dataset.
 
-   const getWeekNumber = (d: Date) => {
-      d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
-      d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
-      const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-      return Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1) / 7);
-   }
+   // 2. Cashflow Data 
+   const cashflowData = useMemo(() => {
+      if (serverFinancials?.cashflow_data) {
+         // Format dates for display (e.g., "YYYY-MM-DD" -> "MMM D" or keep as is)
+         return serverFinancials.cashflow_data.map((d: any) => ({
+            name: new Date(d.name).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }),
+            income: d.income,
+            expense: d.expense
+         }));
+      }
 
-   // Aggregate Sales by Week
-   const salesByWeek = filteredSales.reduce((acc, s) => {
-      const date = new Date(s.created_at || s.date);
-      const week = `W${getWeekNumber(date)} `;
-      acc[week] = (acc[week] || 0) + s.total;
-      return acc;
-   }, {} as Record<string, number>);
+      const getWeekNumber = (d: Date) => {
+         d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+         d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+         const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+         return Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1) / 7);
+      }
 
-   // Aggregate Expenses by Week
-   const expensesByWeek = filteredExpenses.reduce((acc, e) => {
-      const date = new Date(e.date);
-      const week = `W${getWeekNumber(date)} `;
-      acc[week] = (acc[week] || 0) + e.amount;
-      return acc;
-   }, {} as Record<string, number>);
+      const salesByWeek = filteredSales.reduce((acc, s) => {
+         const date = new Date(s.created_at || s.date);
+         const week = `W${getWeekNumber(date)} `;
+         acc[week] = (acc[week] || 0) + s.total;
+         return acc;
+      }, {} as Record<string, number>);
 
-   // Merge for Chart
-   const allWeeks = Array.from(new Set([...Object.keys(salesByWeek), ...Object.keys(expensesByWeek)])).sort();
-   // If the range is small (e.g. month), show all weeks in that range. If All Time, limit to last few?
-   // Let's just show what's available in the filtered dataset.
-   const cashflowData = allWeeks.map(week => ({
-      name: week,
-      income: salesByWeek[week] || 0,
-      expense: expensesByWeek[week] || 0
-   }));
+      const expensesByWeek = filteredExpenses.reduce((acc, e) => {
+         const date = new Date(e.date);
+         const week = `W${getWeekNumber(date)} `;
+         acc[week] = (acc[week] || 0) + e.amount;
+         return acc;
+      }, {} as Record<string, number>);
+
+      const allWeeks = Array.from(new Set([...Object.keys(salesByWeek), ...Object.keys(expensesByWeek)])).sort();
+      return allWeeks.map(week => ({
+         name: week,
+         income: salesByWeek[week] || 0,
+         expense: expensesByWeek[week] || 0
+      }));
+   }, [filteredSales, filteredExpenses, serverFinancials]);
 
    // --- PAYROLL FILTERS ---
    const [payrollSearch, setPayrollSearch] = useState('');
    const [payrollRoleFilter, setPayrollRoleFilter] = useState('All');
    const [payrollSort, setPayrollSort] = useState<'name' | 'salary' | 'department'>('name');
    const [payrollSortDir, setPayrollSortDir] = useState<'asc' | 'desc'>('asc');
+
+   // --- PAYROLL PAGINATION ---
+   const [payrollPage, setPayrollPage] = useState(1);
+   const [payrollPerPage, setPayrollPerPage] = useState(10);
+   const PAYROLL_PER_PAGE_OPTIONS = [10, 25, 50, 100];
 
    const filteredEmployees = employees.filter(emp => {
       const matchesSearch = emp.name.toLowerCase().includes(payrollSearch.toLowerCase()) ||
@@ -218,6 +352,39 @@ export default function Finance() {
       return 0;
    });
 
+   // Reset payroll page when filters change
+   React.useEffect(() => {
+      setPayrollPage(1);
+   }, [payrollSearch, payrollRoleFilter]);
+
+   // Payroll pagination calculations
+   const payrollTotalPages = Math.ceil(filteredEmployees.length / payrollPerPage);
+   const payrollStartIndex = (payrollPage - 1) * payrollPerPage;
+   const payrollEndIndex = payrollStartIndex + payrollPerPage;
+   const paginatedEmployees = filteredEmployees.slice(payrollStartIndex, payrollEndIndex);
+
+   // Generate payroll page numbers
+   const getPayrollPageNumbers = () => {
+      const pages: (number | string)[] = [];
+      const maxVisible = 5;
+
+      if (payrollTotalPages <= maxVisible) {
+         for (let i = 1; i <= payrollTotalPages; i++) pages.push(i);
+      } else {
+         pages.push(1);
+         if (payrollPage > 3) pages.push('...');
+
+         const start = Math.max(2, payrollPage - 1);
+         const end = Math.min(payrollTotalPages - 1, payrollPage + 1);
+
+         for (let i = start; i <= end; i++) pages.push(i);
+
+         if (payrollPage < payrollTotalPages - 2) pages.push('...');
+         pages.push(payrollTotalPages);
+      }
+      return pages;
+   };
+
    const uniqueRoles = ['All', ...Array.from(new Set(employees.map(e => e.role)))];
 
    // If no data, provide empty placeholder
@@ -226,31 +393,33 @@ export default function Finance() {
    }
 
 
-   const totalRevenue = filteredSales.reduce((sum, s) => sum + s.total, 0);
-   // Payroll is usually monthly recurring, so "total salaries" relative to a date range is tricky.
-   // For now, if range is "This Month", we show 1 month of payroll. If "This Year", 12 months (mocked * multiplier).
-   // BUT simpler: Just show the current active payroll run cost as a static liability for now, OR:
-   // Realistically, payroll should be 'Expense Records' with category 'Payroll'.
-   // Since 'employees' list just shows CURRENT salary, we will treat 'Total Payroll' as (Monthly Salary * Months in Range).
-   // Let's refine: The 'Total Expenses' metric combines OpEx (from expenses list) + Payroll.
-   // If filtering by date, we should sum actual payroll expenses found in 'expenses'.
-   // If 'expenses' doesn't contain payroll (it's separate), we might be double counting or missing it.
-   // Looking at the code: `totalExpenses = totalSalaries + totalOpEx`.
-   // `totalSalaries` comes from `employees.reduce`. This is just the SUM OF ANNUAL/MONTHLY SALARIES right now, not a historical record.
-   // This is a limitation. For this specific task (Data Clarity), I will label it clearly or adjust.
-   // Let's assume `totalSalaries` is the CURRENT MONTHLY Run Rate.
-   // If the user selects "This Year", they might expect 12x. 
-   // To avoid confusion, I will label 'Payroll' as "Monthly Run Rate" in the breakdown if it's not historical, 
-   // OR strictly use `filteredExpenses` if payroll is logged there.
-   // The original code did: `totalExpenses = totalSalaries + totalOpEx`.
-   // I will keep this existing logic but allow OpEx to be filtered. 
-   // Note: The user asked for "from when to when".
-   // If I show "Total Expenses" and it mixes "Last Month's OpEx" with "Today's Payroll Run Rate", it's confusing.
-   // I will only apply date filtering to the REVENUE and OPEX (Ledger) parts which are historical.
-   // Payroll implies "Current Active Roster Cost" here.
+   const totalRevenue = serverFinancials?.total_revenue ?? filteredSales.reduce((sum, s) => sum + s.total, 0);
 
+   // Apply same logic for OpEx
    const totalSalaries = employees.reduce((sum, e) => sum + (e.salary || 0), 0);
-   const totalOpEx = filteredExpenses.reduce((sum, e) => sum + e.amount, 0);
+   const totalOpEx = serverFinancials?.total_expenses ?? filteredExpenses.reduce((sum, e) => sum + e.amount, 0);
+
+   // Calculate employee bonus based on role distribution from gamification settings
+   const calculateEmployeeBonus = (emp: Employee): number => {
+      const empSite = sites.find(s => s.id === emp.siteId || s.id === (emp as any).site_id);
+      if (!empSite) return 0;
+
+      const storePointsData = getStorePoints(empSite.id);
+      if (!storePointsData) return 0;
+
+      const bonusTiers = settings.posBonusTiers || DEFAULT_POS_BONUS_TIERS;
+      const roleDistribution = settings.posRoleDistribution || DEFAULT_POS_ROLE_DISTRIBUTION;
+
+      const storeBonus = calculateStoreBonus(storePointsData.monthlyPoints, bonusTiers);
+      const roleConfig = roleDistribution.find(r =>
+         r.role.toLowerCase() === emp.role.toLowerCase()
+      );
+
+      return roleConfig ? (storeBonus.bonus * roleConfig.percentage) / 100 : 0;
+   };
+
+   // Calculate total bonuses for all employees
+   const totalBonuses = employees.reduce((sum, emp) => sum + calculateEmployeeBonus(emp), 0);
 
    // Inventory Valuation at Cost
    const totalInventoryValue = allProducts
@@ -263,7 +432,7 @@ export default function Finance() {
    // However, to minimize disruption, I'll stick to the previous formula but be aware `totalOpEx` is now dynamic.
    const totalExpenses = totalSalaries + totalOpEx;
 
-   const totalRefunds = filteredSales.filter(s => s.status === 'Refunded').reduce((sum, s) => sum + s.total, 0);
+   const totalRefunds = serverFinancials?.total_refunds ?? filteredSales.filter(s => s.status === 'Refunded').reduce((sum, s) => sum + s.total, 0);
 
    // Dynamic Tax Calc
    const taxRateDecimal = currentTaxConfig.rate / 100;
@@ -452,7 +621,7 @@ export default function Finance() {
                         <span>{Math.round(getQuarterProgress())}%</span>
                      </div>
                      <div className="h-1 bg-white/10 rounded-full overflow-hidden">
-                        {/* eslint-disable-next-line */}
+                        {/* eslint-disable-next-line react/forbid-dom-props */}
                         <div
                            className="h-full bg-cyber-primary transition-all duration-500"
                            style={{ width: `${getQuarterProgress()}%` }}
@@ -463,22 +632,10 @@ export default function Finance() {
             </div>
             <div className="flex flex-wrap items-center gap-3">
                {/* Date Filter */}
-               <div className="flex items-center bg-black/30 border border-white/10 rounded-xl px-3 h-10 transition-all hover:border-cyber-primary/50">
-                  <Calendar size={14} className="text-gray-400 mr-2" />
-                  <select
-                     aria-label="Filter Date Range"
-                     value={dateRange}
-                     onChange={(e) => setDateRange(e.target.value as DateRangeOption)}
-                     className="bg-transparent border-none text-xs text-white outline-none font-bold cursor-pointer transition-colors"
-                  >
-                     <option value="This Quarter" className="text-black">This Quarter</option>
-                     <option value="This Month" className="text-black">This Month</option>
-                     <option value="Last Month" className="text-black">Last Month</option>
-                     <option value="This Year" className="text-black">This Year (YTD)</option>
-                     <option value="Last Year" className="text-black">Last Year</option>
-                     <option value="All Time" className="text-black">All Time</option>
-                  </select>
-               </div>
+               <DateRangeSelector
+                  value={dateRange}
+                  onChange={(val) => setDateRange(val)}
+               />
 
                {/* Region Selector */}
                <div className="flex items-center bg-black/30 border border-white/10 rounded-xl px-3 h-10 transition-all hover:border-cyber-primary/50">
@@ -620,7 +777,7 @@ export default function Finance() {
                   {/* Expense Distribution */}
                   <div className="bg-cyber-gray border border-white/5 rounded-2xl p-6">
                      <h3 className="font-bold text-white mb-6">Expense Breakdown</h3>
-                     {expenseBreakdownData.length > 0 && expenseBreakdownData.some(d => d.value > 0) ? (
+                     {expenseBreakdownData.length > 0 && expenseBreakdownData.some((d: any) => d.value > 0) ? (
                         <>
                            <div className="h-[200px] w-full">
                               <ResponsiveContainer width="100%" height="100%" minHeight={0}>
@@ -634,7 +791,7 @@ export default function Finance() {
                                        paddingAngle={5}
                                        dataKey="value"
                                     >
-                                       {expenseBreakdownData.map((entry, index) => (
+                                       {expenseBreakdownData.map((entry: any, index: number) => (
                                           <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke="none" />
                                        ))}
                                     </Pie>
@@ -646,10 +803,11 @@ export default function Finance() {
                               </ResponsiveContainer>
                            </div>
                            <div className="space-y-2 mt-4 max-h-[140px] overflow-y-auto pr-2 custom-scrollbar">
-                              {expenseBreakdownData.map((item, i) => (
+                              {expenseBreakdownData.map((item: any, i: number) => (
                                  <div key={i} className="flex justify-between items-center text-sm border-b border-white/5 pb-2 last:border-0 last:pb-0">
                                     <div className="flex items-center gap-2">
-                                       <div className="w-2 h-2 rounded-full" style={{ backgroundColor: COLORS[i % COLORS.length] }}></div>
+                                       {/* eslint-disable-next-line react/forbid-dom-props */}
+                                       <div className={`w-2 h-2 rounded-full bg-[${COLORS[i % COLORS.length]}]`}></div>
                                        <span className="text-gray-300 text-xs">{item.name}</span>
                                     </div>
                                     <span className="font-mono text-white text-xs">{item.value}%</span>
@@ -794,8 +952,8 @@ export default function Finance() {
                      </tr>
                   </thead>
                   <tbody className="divide-y divide-white/5">
-                     {filteredExpenses.length > 0 ? (
-                        filteredExpenses.map(exp => (
+                     {localExpenses.length > 0 ? (
+                        localExpenses.map(exp => (
                            <tr key={exp.id} className="hover:bg-white/5 transition-colors group">
                               <td className="p-4 text-xs text-white">{exp.date}</td>
                               <td className="p-4">
@@ -837,6 +995,31 @@ export default function Finance() {
                      )}
                   </tbody>
                </table>
+               {/* Pagination Controls */}
+               <div className="flex justify-between items-center p-4 border-t border-white/5 bg-black/20">
+                  <div className="text-xs text-gray-400">
+                     Showing {localExpenses.length} of {formatCompactNumber(totalExpensesCount)} records
+                  </div>
+                  <div className="flex gap-2">
+                     <button
+                        onClick={() => setCurrentExpensesPage(prev => Math.max(1, prev - 1))}
+                        disabled={currentExpensesPage === 1 || expensesLoading}
+                        className="px-3 py-1 bg-white/5 hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed rounded text-xs text-white transition-colors border border-white/10"
+                     >
+                        Previous
+                     </button>
+                     <span className="flex items-center px-2 text-xs text-gray-400 font-mono">
+                        Page {currentExpensesPage}
+                     </span>
+                     <button
+                        onClick={() => setCurrentExpensesPage(prev => (localExpenses.length === EXPENSES_PER_PAGE ? prev + 1 : prev))}
+                        disabled={localExpenses.length < EXPENSES_PER_PAGE || expensesLoading}
+                        className="px-3 py-1 bg-white/5 hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed rounded text-xs text-white transition-colors border border-white/10"
+                     >
+                        Next
+                     </button>
+                  </div>
+               </div>
             </div>
          )}
 
@@ -894,10 +1077,12 @@ export default function Finance() {
                            >
                               Salary {payrollSort === 'salary' && (payrollSortDir === 'asc' ? '↑' : '↓')}
                            </th>
+                           <th className="p-4 text-xs text-gray-500 uppercase text-right">Bonus</th>
+                           <th className="p-4 text-xs text-gray-500 uppercase text-right">Total</th>
                         </tr>
                      </thead>
                      <tbody className="divide-y divide-white/5">
-                        {filteredEmployees.map(emp => (
+                        {paginatedEmployees.map(emp => (
                            <tr key={emp.id} className="hover:bg-white/5 group transition-colors">
                               <td className="p-4 flex items-center gap-3">
                                  <div className="w-8 h-8 rounded-full bg-black/50 border border-white/10 overflow-hidden flex-shrink-0">
@@ -920,18 +1105,130 @@ export default function Finance() {
                               <td className="p-4 text-sm font-mono text-white text-right font-bold">
                                  {CURRENCY_SYMBOL} {(emp.salary || 0).toLocaleString()}
                               </td>
+                              <td className="p-4 text-sm font-mono text-right">
+                                 {calculateEmployeeBonus(emp) > 0 ? (
+                                    <span className="text-green-400 font-bold">+{CURRENCY_SYMBOL} {calculateEmployeeBonus(emp).toLocaleString()}</span>
+                                 ) : (
+                                    <span className="text-gray-500">—</span>
+                                 )}
+                              </td>
+                              <td className="p-4 text-sm font-mono text-cyber-primary text-right font-bold">
+                                 {CURRENCY_SYMBOL} {((emp.salary || 0) + calculateEmployeeBonus(emp)).toLocaleString()}
+                              </td>
                            </tr>
                         ))}
                      </tbody>
                   </table>
+
+                  {/* Payroll Pagination Controls */}
+                  {filteredEmployees.length > 0 && (
+                     <div className="p-4 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4">
+                        {/* Info */}
+                        <div className="flex items-center gap-4">
+                           <span className="text-xs text-gray-400">
+                              Showing <span className="text-white font-bold">{payrollStartIndex + 1}</span> to <span className="text-white font-bold">{Math.min(payrollEndIndex, filteredEmployees.length)}</span> of <span className="text-cyber-primary font-bold">{filteredEmployees.length}</span> employees
+                           </span>
+                           <select
+                              value={payrollPerPage}
+                              onChange={(e) => {
+                                 setPayrollPerPage(Number(e.target.value));
+                                 setPayrollPage(1);
+                              }}
+                              className="bg-black/50 border border-white/10 rounded-lg px-2 py-1 text-xs text-white outline-none focus:border-cyber-primary/50 cursor-pointer"
+                              aria-label="Items per page"
+                           >
+                              {PAYROLL_PER_PAGE_OPTIONS.map(n => (
+                                 <option key={n} value={n}>{n} / page</option>
+                              ))}
+                           </select>
+                        </div>
+
+                        {/* Navigation */}
+                        <div className="flex items-center gap-1">
+                           <button
+                              onClick={() => setPayrollPage(1)}
+                              disabled={payrollPage === 1}
+                              className={`px-2 py-1 rounded-lg text-xs font-bold transition-all ${payrollPage === 1
+                                 ? 'text-gray-600 cursor-not-allowed'
+                                 : 'text-gray-400 hover:text-white hover:bg-white/10'
+                                 }`}
+                           >
+                              «
+                           </button>
+                           <button
+                              onClick={() => setPayrollPage(p => Math.max(1, p - 1))}
+                              disabled={payrollPage === 1}
+                              className={`px-2 py-1 rounded-lg text-xs font-bold transition-all ${payrollPage === 1
+                                 ? 'text-gray-600 cursor-not-allowed'
+                                 : 'text-gray-400 hover:text-white hover:bg-white/10'
+                                 }`}
+                           >
+                              Prev
+                           </button>
+
+                           <div className="flex items-center gap-1 mx-2">
+                              {getPayrollPageNumbers().map((page, idx) => (
+                                 typeof page === 'number' ? (
+                                    <button
+                                       key={idx}
+                                       onClick={() => setPayrollPage(page)}
+                                       className={`w-6 h-6 rounded text-xs font-bold transition-all ${payrollPage === page
+                                          ? 'bg-cyber-primary text-black'
+                                          : 'text-gray-400 hover:text-white hover:bg-white/10'
+                                          }`}
+                                    >
+                                       {page}
+                                    </button>
+                                 ) : (
+                                    <span key={idx} className="text-gray-500 px-1 text-xs">...</span>
+                                 )
+                              ))}
+                           </div>
+
+                           <button
+                              onClick={() => setPayrollPage(p => Math.min(payrollTotalPages, p + 1))}
+                              disabled={payrollPage === payrollTotalPages}
+                              className={`px-2 py-1 rounded-lg text-xs font-bold transition-all ${payrollPage === payrollTotalPages
+                                 ? 'text-gray-600 cursor-not-allowed'
+                                 : 'text-gray-400 hover:text-white hover:bg-white/10'
+                                 }`}
+                           >
+                              Next
+                           </button>
+                           <button
+                              onClick={() => setPayrollPage(payrollTotalPages)}
+                              disabled={payrollPage === payrollTotalPages}
+                              className={`px-2 py-1 rounded-lg text-xs font-bold transition-all ${payrollPage === payrollTotalPages
+                                 ? 'text-gray-600 cursor-not-allowed'
+                                 : 'text-gray-400 hover:text-white hover:bg-white/10'
+                                 }`}
+                           >
+                              »
+                           </button>
+                        </div>
+                     </div>
+                  )}
                </div>
 
                <div className="bg-cyber-gray border border-white/5 rounded-2xl p-6 h-fit">
-                  <h3 className="font-bold text-white mb-6">Payroll Actions</h3>
-                  <div className="p-4 bg-black/20 rounded-xl mb-6 text-center border border-white/5">
-                     <p className="text-gray-400 text-xs uppercase font-bold mb-1">Total Monthly Payout</p>
-                     <p className="text-3xl font-mono font-bold text-cyber-primary">{CURRENCY_SYMBOL} {totalSalaries.toLocaleString()}</p>
-                     <p className="text-[10px] text-gray-500 mt-2">{employees.length} Active Employees</p>
+                  <h3 className="font-bold text-white mb-6">Payroll Summary</h3>
+                  <div className="space-y-4 mb-6">
+                     <div className="p-4 bg-black/20 rounded-xl border border-white/5">
+                        <p className="text-gray-400 text-xs uppercase font-bold mb-1">Base Salaries</p>
+                        <p className="text-2xl font-mono font-bold text-white">{CURRENCY_SYMBOL} {totalSalaries.toLocaleString()}</p>
+                     </div>
+                     {totalBonuses > 0 && (
+                        <div className="p-4 bg-green-500/10 rounded-xl border border-green-500/20">
+                           <p className="text-green-400 text-xs uppercase font-bold mb-1">Performance Bonuses</p>
+                           <p className="text-2xl font-mono font-bold text-green-400">+{CURRENCY_SYMBOL} {totalBonuses.toLocaleString()}</p>
+                           <p className="text-[10px] text-green-400/60 mt-1">Based on store performance & role distribution</p>
+                        </div>
+                     )}
+                     <div className="p-4 bg-cyber-primary/10 rounded-xl border border-cyber-primary/20">
+                        <p className="text-cyber-primary text-xs uppercase font-bold mb-1">Total Monthly Payout</p>
+                        <p className="text-3xl font-mono font-bold text-cyber-primary">{CURRENCY_SYMBOL} {(totalSalaries + totalBonuses).toLocaleString()}</p>
+                        <p className="text-[10px] text-gray-500 mt-2">{employees.length} Active Employees</p>
+                     </div>
                   </div>
                   <button
                      onClick={handleProcessPayroll}

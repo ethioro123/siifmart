@@ -152,12 +152,16 @@ export const realtimeService = {
                 {
                     event: '*',
                     schema: 'public',
-                    table: 'wms_jobs',
-                    filter: siteId ? `site_id=eq.${siteId}` : undefined
+                    table: 'wms_jobs'
+                    // Remove database-level filter to support dual-site (source OR destination) via callback
                 },
                 (payload) => {
-                    console.log('WMS job change:', payload);
-                    callback(payload.eventType, payload.new || payload.old);
+                    const data = (payload.new || payload.old) as any;
+                    // Filter in callback to support dual-site logic
+                    if (!siteId || data.site_id === siteId || data.dest_site_id === siteId) {
+                        console.log('WMS job (filtered) change:', data);
+                        callback(payload.eventType, data);
+                    }
                 }
             )
             .subscribe();
@@ -167,6 +171,40 @@ export const realtimeService = {
             unsubscribe: () => channel.unsubscribe()
         };
     },
+
+    /**
+     * Subscribe to transfers
+     */
+    subscribeToTransfers(
+        callback: (event: string, payload: any) => void,
+        siteId?: string
+    ): RealtimeSubscription {
+        const channel = supabase
+            .channel('transfers-changes')
+            .on(
+                'postgres_changes',
+                {
+                    event: '*',
+                    schema: 'public',
+                    table: 'transfers'
+                },
+                (payload) => {
+                    const data = (payload.new || payload.old) as any;
+                    // Dual-site filtering (source OR destination)
+                    if (!siteId || data.source_site_id === siteId || data.dest_site_id === siteId) {
+                        console.log('Transfer (filtered) change:', data);
+                        callback(payload.eventType, data);
+                    }
+                }
+            )
+            .subscribe();
+
+        return {
+            channel,
+            unsubscribe: () => channel.unsubscribe()
+        };
+    },
+
 
     /**
      * Subscribe to purchase orders
@@ -299,6 +337,7 @@ export const realtimeService = {
             onCustomerChange?: (event: string, payload: any) => void;
             onWMSJobChange?: (event: string, payload: any) => void;
             onJobAssignmentChange?: (event: string, payload: any) => void;
+            onTransferChange?: (event: string, payload: any) => void;
         }
     ): RealtimeSubscription[] {
         const subscriptions: RealtimeSubscription[] = [];
@@ -325,6 +364,10 @@ export const realtimeService = {
 
         if (callbacks.onJobAssignmentChange) {
             subscriptions.push(this.subscribeToJobAssignments(callbacks.onJobAssignmentChange, siteId));
+        }
+
+        if (callbacks.onTransferChange) {
+            subscriptions.push(this.subscribeToTransfers(callbacks.onTransferChange, siteId));
         }
 
 

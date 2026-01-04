@@ -31,7 +31,7 @@ const SINGLE_SITE_ROLES: UserRole[] = [
 
     // Store workers
     'manager',
-    'store_supervisor',
+    'shift_lead',
     'pos'
 ];
 
@@ -67,7 +67,7 @@ export function canAccessSite(userRole: UserRole, userSiteId: string, dataSiteId
  * Filter array of items by site access
  * Simple business logic: Filter by siteId
  */
-export function filterBySite<T extends { siteId?: string; site_id?: string }>(
+export function filterBySite<T extends { siteId?: string; site_id?: string; destSiteId?: string; dest_site_id?: string }>(
     items: T[],
     userRole: UserRole,
     userSiteId: string
@@ -77,10 +77,11 @@ export function filterBySite<T extends { siteId?: string; site_id?: string }>(
         return items;
     }
 
-    // Single-site roles see only their site
+    // Single-site roles see only their site (as source OR destination)
     return items.filter(item => {
         const itemSiteId = item.siteId || item.site_id;
-        return itemSiteId === userSiteId;
+        const itemDestSiteId = item.destSiteId || item.dest_site_id;
+        return itemSiteId === userSiteId || itemDestSiteId === userSiteId;
     });
 }
 

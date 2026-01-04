@@ -25,6 +25,7 @@ export default defineConfig(({ mode }) => {
     },
     optimizeDeps: {
       exclude: ['lucide-react'],
+      include: ['konva', 'react-konva', 'use-image'],
     },
     resolve: {
       alias: {

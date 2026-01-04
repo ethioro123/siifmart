@@ -2,6 +2,7 @@
 import React from 'react';
 import { Calendar, TrendingUp, CheckCircle, Clock, Lock } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { formatDateTime } from '../utils/formatting';
 
 interface FiscalYearDeckProps {
     year: number;
@@ -21,7 +22,7 @@ const FiscalYearDeck: React.FC<FiscalYearDeckProps> = ({ year, currentQuarter, m
     const getQuarterDates = (q: number) => {
         const start = new Date(year, (q - 1) * 3, 1);
         const end = new Date(year, q * 3, 0);
-        return `${start.toLocaleDateString(undefined, { month: 'short' })} - ${end.toLocaleDateString(undefined, { month: 'short' })}`;
+        return `${formatDateTime(start)} - ${formatDateTime(end)}`;
     };
 
     // Helper calculate progress for CURRENT quarter

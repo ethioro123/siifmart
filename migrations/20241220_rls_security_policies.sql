@@ -313,7 +313,7 @@ CREATE POLICY "expenses_delete" ON expenses
     FOR DELETE USING (auth.role() = 'authenticated');
 
 -- ----------------------------------------------------------------------------
--- BRAINSTORM_NODES - Super admin canvas
+-- BRAINSTORM_NODES - CEO canvas
 -- All authenticated users can access (app enforces super_admin check)
 -- ----------------------------------------------------------------------------
 
@@ -388,7 +388,7 @@ SECURITY LEVELS:
    - Role-based restrictions enforced at APPLICATION level
    - This prevents direct API attacks from browser console
 
-3. SUPER ADMIN:
+3. CEO:
    - Full access (enforced by application logic)
 
 WHY THIS APPROACH:

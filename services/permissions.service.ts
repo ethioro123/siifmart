@@ -189,6 +189,196 @@ export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
         'dashboard.view',
         'warehouse.view', 'warehouse.pack',
         'inventory.view'
+    ],
+
+    // ============================================================================
+    // NEW ROLES - Warehouse Operations
+    // ============================================================================
+
+    receiver: [
+        // Inbound receiving specialist
+        'dashboard.view',
+        'warehouse.view', 'warehouse.receive',
+        'inventory.view',
+        'procurement.view', 'procurement.receive'
+    ],
+
+    forklift_operator: [
+        // Specialized equipment operator
+        'dashboard.view',
+        'warehouse.view', 'warehouse.putaway',
+        'inventory.view'
+    ],
+    dispatch_manager: [
+        // Manages driver fleet and deliveries
+        'dashboard.view',
+        'warehouse.view', 'warehouse.dispatch',
+        'inventory.view', 'inventory.transfer',
+        'employees.view', 'employees.manage_attendance'
+    ],
+
+    returns_clerk: [
+        // Processes returns and RMAs
+        'dashboard.view',
+        'warehouse.view',
+        'inventory.view', 'inventory.adjust',
+        'customers.view', 'customers.view_history',
+        'sales.refund'
+    ],
+
+    // ============================================================================
+    // NEW ROLES - Store Operations
+    // ============================================================================
+
+    cashier: [
+        // Basic POS (no inventory, no refunds)
+        'dashboard.view',
+        'pos.view', 'pos.create_sale',
+        'customers.view'
+    ],
+
+    shift_lead: [
+        // Team lead with limited supervisor access
+        'dashboard.view',
+        'pos.view', 'pos.create_sale', 'pos.hold_order',
+        'inventory.view', 'inventory.count',
+        'customers.view', 'customers.create', 'customers.edit',
+        'employees.view', 'employees.manage_attendance'
+    ],
+
+    merchandiser: [
+        // Manages displays and planograms
+        'dashboard.view',
+        'inventory.view',
+        'pricing.view', 'pricing.edit'
+    ],
+
+    loss_prevention: [
+        // Security and shrinkage monitoring
+        'dashboard.view',
+        'inventory.view', 'inventory.count',
+        'sales.view', 'sales.view_reports',
+        'settings.view_logs'
+    ],
+
+    // ============================================================================
+    // NEW ROLES - Administrative
+    // ============================================================================
+
+    accountant: [
+        // View finance without approval rights
+        'dashboard.view',
+        'finance.view', 'finance.view_reports', 'finance.view_payroll',
+        'sales.view', 'sales.view_reports',
+        'procurement.view'
+    ],
+
+    data_analyst: [
+        // Read-only access to reports
+        'dashboard.view',
+        'sales.view', 'sales.view_reports',
+        'inventory.view',
+        'finance.view', 'finance.view_reports',
+        'customers.view', 'customers.view_history'
+    ],
+
+    training_coordinator: [
+        // Manages employee training
+        'dashboard.view',
+        'employees.view', 'employees.edit', 'employees.manage_attendance'
+    ],
+
+    // ============================================================================
+    // LEVEL 2 - Regional/Directors (Missing entries)
+    // ============================================================================
+
+    regional_manager: [
+        'dashboard.view', 'admin.view',
+        'pos.view', 'pos.create_sale', 'pos.refund', 'pos.hold_order',
+        'inventory.view', 'inventory.create', 'inventory.edit', 'inventory.adjust', 'inventory.count', 'inventory.transfer',
+        'warehouse.view', 'warehouse.receive', 'warehouse.pick', 'warehouse.pack', 'warehouse.dispatch', 'warehouse.putaway', 'warehouse.count',
+        'procurement.view', 'procurement.create_po', 'procurement.edit_po', 'procurement.approve_po', 'procurement.receive',
+        'finance.view', 'finance.view_reports', 'finance.create_expense', 'finance.approve_expense',
+        'sales.view', 'sales.view_reports', 'sales.create', 'sales.refund',
+        'customers.view', 'customers.create', 'customers.edit', 'customers.view_history', 'customers.manage_loyalty',
+        'employees.view', 'employees.create', 'employees.edit', 'employees.approve', 'employees.manage_attendance',
+        'pricing.view', 'pricing.edit', 'pricing.create_promo', 'pricing.approve_promo',
+        'settings.view', 'settings.edit', 'settings.manage_sites'
+    ],
+
+    operations_manager: [
+        'dashboard.view', 'admin.view',
+        'pos.view', 'pos.create_sale', 'pos.refund', 'pos.hold_order',
+        'inventory.view', 'inventory.create', 'inventory.edit', 'inventory.adjust', 'inventory.count', 'inventory.transfer',
+        'warehouse.view', 'warehouse.receive', 'warehouse.pick', 'warehouse.pack', 'warehouse.dispatch', 'warehouse.putaway', 'warehouse.count',
+        'procurement.view', 'procurement.create_po', 'procurement.edit_po', 'procurement.receive',
+        'finance.view', 'finance.view_reports',
+        'sales.view', 'sales.view_reports', 'sales.create',
+        'customers.view', 'customers.create', 'customers.edit', 'customers.view_history',
+        'employees.view', 'employees.edit', 'employees.manage_attendance',
+        'pricing.view', 'pricing.edit',
+        'settings.view'
+    ],
+
+    hr_manager: [
+        'dashboard.view',
+        'employees.view', 'employees.create', 'employees.edit', 'employees.delete', 'employees.approve', 'employees.view_salary', 'employees.edit_salary', 'employees.manage_attendance',
+        'finance.view_payroll', 'finance.manage_payroll'
+    ],
+
+    supply_chain_manager: [
+        'dashboard.view',
+        'inventory.view', 'inventory.create', 'inventory.edit', 'inventory.adjust', 'inventory.count', 'inventory.transfer',
+        'warehouse.view', 'warehouse.receive', 'warehouse.pick', 'warehouse.pack', 'warehouse.dispatch', 'warehouse.putaway', 'warehouse.count',
+        'procurement.view', 'procurement.create_po', 'procurement.edit_po', 'procurement.approve_po', 'procurement.receive',
+        'finance.view'
+    ],
+
+    // ============================================================================
+    // LEVEL 3 - Site Managers (Missing entries)
+    // ============================================================================
+
+    store_manager: [
+        'dashboard.view',
+        'pos.view', 'pos.create_sale', 'pos.refund', 'pos.hold_order', 'pos.void_sale',
+        'inventory.view', 'inventory.edit', 'inventory.count',
+        'sales.view', 'sales.view_reports', 'sales.create', 'sales.refund',
+        'customers.view', 'customers.create', 'customers.edit', 'customers.view_history', 'customers.manage_loyalty',
+        'employees.view', 'employees.edit', 'employees.manage_attendance',
+        'pricing.view', 'pricing.edit', 'pricing.create_promo'
+    ],
+
+    assistant_manager: [
+        'dashboard.view',
+        'pos.view', 'pos.create_sale', 'pos.refund', 'pos.hold_order',
+        'inventory.view', 'inventory.count',
+        'sales.view', 'sales.view_reports',
+        'customers.view', 'customers.create', 'customers.edit', 'customers.view_history',
+        'employees.view', 'employees.manage_attendance',
+        'pricing.view'
+    ],
+
+    // ============================================================================
+    // LEVEL 4 - Staff (Missing entries)
+    // ============================================================================
+
+    sales_associate: [
+        'dashboard.view',
+        'pos.view', 'pos.create_sale',
+        'inventory.view',
+        'customers.view', 'customers.create'
+    ],
+
+    stock_clerk: [
+        'dashboard.view',
+        'inventory.view', 'inventory.count',
+        'warehouse.view'
+    ],
+
+    customer_service: [
+        'dashboard.view',
+        'customers.view', 'customers.create', 'customers.edit', 'customers.view_history',
+        'sales.view', 'sales.refund'
     ]
 };
 

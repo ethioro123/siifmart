@@ -70,7 +70,7 @@ export default function LocationSelect() {
                             />
                         </div>
 
-                        {/* Option to return to HQ View if user is Super Admin */}
+                        {/* Option to return to HQ View if user is CEO */}
                         {user?.role === 'super_admin' && (
                             <button
                                 onClick={handleBackToCentral}

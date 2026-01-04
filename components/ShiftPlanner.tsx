@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Employee, UserRole } from '../types';
 import { Sun, Moon, Sunset, XCircle, Save, ChevronLeft, ChevronRight, Shield, Briefcase, Package, User, ShoppingBag, Truck } from 'lucide-react';
+import { formatDateTime, formatRole } from '../utils/formatting';
 
 interface ShiftPlannerProps {
     employees: Employee[];
@@ -286,7 +287,7 @@ const ShiftPlanner: React.FC<ShiftPlannerProps> = ({ employees, canEdit = false,
         const end = new Date(start);
         end.setDate(end.getDate() + 6);
 
-        return `${start.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} - ${end.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}`;
+        return `${formatDateTime(start)} - ${formatDateTime(end)}`;
     };
 
     return (
@@ -372,7 +373,7 @@ const ShiftPlanner: React.FC<ShiftPlannerProps> = ({ employees, canEdit = false,
                                                     <img src={emp.avatar} alt="" className="w-8 h-8 rounded-lg object-cover" />
                                                     <div>
                                                         <p className="font-bold text-white text-sm">{emp.name}</p>
-                                                        <p className="text-[10px] text-gray-500">{emp.role}</p>
+                                                        <p className="text-[10px] text-gray-500">{formatRole(emp.role)}</p>
                                                     </div>
                                                 </div>
                                             </td>

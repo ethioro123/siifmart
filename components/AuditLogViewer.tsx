@@ -12,6 +12,7 @@ import {
     Activity
 } from 'lucide-react';
 import { systemLogsService, LogEntry, LogCategory, LogSeverity } from '../services/systemLogs.service';
+import { formatDateTime } from '../utils/formatting';
 import { authService } from '../services/auth.service';
 
 export const AuditLogViewer: React.FC = () => {
@@ -204,7 +205,7 @@ export const AuditLogViewer: React.FC = () => {
                                     <td className="p-4 text-sm text-gray-600 whitespace-nowrap">
                                         <div className="flex items-center gap-2">
                                             <Clock size={14} />
-                                            {new Date(log.timestamp).toLocaleString()}
+                                            {formatDateTime(log.timestamp, { showTime: true })}
                                         </div>
                                     </td>
                                     <td className="p-4">
@@ -258,7 +259,7 @@ export const AuditLogViewer: React.FC = () => {
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="p-3 bg-gray-50 rounded-lg">
                                     <span className="text-xs text-gray-500 uppercase block mb-1">Timestamp</span>
-                                    <span className="text-sm font-medium">{new Date(selectedLog.timestamp).toLocaleString()}</span>
+                                    <span className="text-sm font-medium">{formatDateTime(selectedLog.timestamp, { showTime: true })}</span>
                                 </div>
                                 <div className="p-3 bg-gray-50 rounded-lg">
                                     <span className="text-xs text-gray-500 uppercase block mb-1">Log Reference</span>

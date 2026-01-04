@@ -1,13 +1,15 @@
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback, useMemo } from 'react';
 import {
   Product, PurchaseOrder, Supplier, SaleRecord, ExpenseRecord,
   StockMovement, CartItem, PaymentMethod, WMSJob, JobItem, Employee, EmployeeTask, Customer,
   ReturnItem, ShiftRecord, HeldOrder, ReceivingItem, SystemConfig, Site, TransferRecord,
   Notification, SystemLog, JobAssignment, Promotion, DiscountCode, WorkerPoints, PointsTransaction, POINTS_CONFIG,
   StorePoints, WorkerBonusShare, BonusTier, DEFAULT_BONUS_TIERS, DEFAULT_POS_BONUS_TIERS, DEFAULT_POS_ROLE_DISTRIBUTION,
-  StorePointRule, DEFAULT_STORE_POINT_RULES, WarehousePointRule, DEFAULT_WAREHOUSE_POINT_RULES
+  StorePointRule, DEFAULT_STORE_POINT_RULES, WarehousePointRule, DEFAULT_WAREHOUSE_POINT_RULES, WarehouseZone, FulfillmentPlan,
+  StaffSchedule
 } from '../types';
+import { useNavigate } from 'react-router-dom';
 import { CURRENCY_SYMBOL } from '../constants';
 import {
   sitesService,
@@ -25,12 +27,21 @@ import {
   jobAssignmentsService,
   workerPointsService,
   pointsTransactionsService,
-  systemConfigService
+  storePointsService,
+  systemConfigService,
+  tasksService,
+  warehouseZonesService,
+  inventoryRequestsService,
+  discrepancyService,
+  schedulesService
 } from '../services/supabase.service';
 import { supabase } from '../lib/supabase';
 import { realtimeService } from '../services/realtime.service';
 import { useStore } from './CentralStore';
 import { generateSKU, registerExistingSKU } from '../utils/skuGenerator';
+import { setGlobalTimezone } from '../utils/formatting';
+
+const isUUID = (id: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
 
 
 
@@ -38,7 +49,7 @@ import { generateSKU, registerExistingSKU } from '../utils/skuGenerator';
 const DEFAULT_CONFIG: SystemConfig = {
   storeName: 'SIIFMART',
   currency: 'ETB',
-  taxRate: 0.15,
+  taxRate: 0,
   lowStockThreshold: 10,
   fefoRotation: true,
   binScan: false,
@@ -46,14 +57,28 @@ const DEFAULT_CONFIG: SystemConfig = {
   enableWMS: true,
   multiCurrency: false,
   requireShiftClosure: true,
-  posReceiptHeader: 'SIIFMART',
+  posDigitalReceipts: true,
+  posAutoPrint: false,
+  posReceiptHeader: 'SIIFMART RETAIL',
   posReceiptFooter: 'Thank you for shopping with us!',
+  posReceiptLogo: 'https://siifmart.com/logo.png',
+  posReceiptShowLogo: true,
+  posReceiptAddress: 'Addis Ababa, Ethiopia',
+  posReceiptPhone: '+251 911 223 344',
+  posReceiptEmail: 'contact@siifmart.com',
+  posReceiptTaxId: 'TIN-0012345678',
+  posReceiptPolicy: 'No refunds after 7 days without receipt.',
+  posReceiptSocialHandle: '@siifmart',
+  posReceiptEnableQR: true,
+  posReceiptQRLink: 'https://siifmart.com/feedback',
+  posReceiptFont: 'sans-serif',
   posTerminalId: 'POS-01',
   fiscalYearStart: '2024-01-01',
   accountingMethod: 'cash',
   language: 'en',
   warehouseBonusEligibility: {},
-  posBonusEligibility: {}
+  posBonusEligibility: {},
+  taxJurisdictions: [] // Empty by default - sites use settings.taxRate unless assigned a jurisdiction
 };
 
 interface DataContextType {
@@ -81,6 +106,9 @@ interface DataContextType {
   pointsTransactions: PointsTransaction[];
   tasks: EmployeeTask[];
   setTasks: (tasks: EmployeeTask[]) => void;
+  zones: WarehouseZone[];
+  allZones: WarehouseZone[];
+  schedules: StaffSchedule[];
 
   // Global Raw Data
   allProducts: Product[];
@@ -93,9 +121,10 @@ interface DataContextType {
   addSite: (site: Site, user: string) => void;
   updateSite: (site: Site, user: string) => void;
   deleteSite: (id: string, user: string) => void;
+  getTaxForSite: (siteId?: string) => { name: string, rate: number, compound: boolean }[];
 
   addProduct: (product: Product) => Promise<Product | undefined>;
-  updateProduct: (product: Product, updatedBy?: string) => Promise<Product | undefined>;
+  updateProduct: (product: Partial<Product> & { id: string }, updatedBy?: string) => Promise<Product | undefined>;
   deleteProduct: (id: string) => Promise<void>;
   relocateProduct: (productId: string, newLocation: string, user: string) => Promise<void>;
   cleanupAdminProducts: () => Promise<void>;
@@ -105,7 +134,7 @@ interface DataContextType {
   receivePO: (poId: string, receivedItems?: ReceivingItem[], skuDecisions?: Record<string, 'keep' | 'generate'>, scannedSkus?: Record<string, string>) => Promise<any>;
   deletePO: (poId: string) => void;
 
-  processSale: (cart: CartItem[], method: PaymentMethod, user: string, tendered: number, change: number, customerId?: string, pointsRedeemed?: number, type?: 'In-Store' | 'Delivery' | 'Pickup') => Promise<{ saleId: string; pointsResult?: any }>;
+  processSale: (cart: CartItem[], method: PaymentMethod, user: string, tendered: number, change: number, customerId?: string, pointsRedeemed?: number, type?: 'In-Store' | 'Delivery' | 'Pickup', taxBreakdown?: any[]) => Promise<{ saleId: string; pointsResult?: any }>;
   processReturn: (saleId: string, items: ReturnItem[], totalRefund: number, user: string) => void;
   closeShift: (shift: ShiftRecord) => void;
   startShift: (cashierId: string, openingFloat: number) => void;
@@ -120,8 +149,9 @@ interface DataContextType {
 
   // WMS Actions
   assignJob: (jobId: string, employeeIdOrName: string) => Promise<void>;
-  updateJobItem: (jobId: string, itemId: number, status: 'Pending' | 'Picked' | 'Short' | 'Skipped', qty: number) => Promise<void>;
+  updateJobItem: (jobId: string, itemId: number, status: JobItem['status'], qty: number) => Promise<void>;
   updateJobStatus: (jobId: string, status: WMSJob['status']) => Promise<void>;
+  updateJob: (id: string, updates: Partial<WMSJob>) => Promise<void>;
   completeJob: (jobId: string, user: string, skipValidation?: boolean) => Promise<any>;
   resetJob: (jobId: string) => Promise<void>;
   fixBrokenJobs: () => Promise<void>;
@@ -131,6 +161,11 @@ interface DataContextType {
   addEmployee: (employee: Employee, user?: string) => void;
   updateEmployee: (employee: Employee, user: string) => void;
   deleteEmployee: (id: string, user: string) => void;
+
+  // Rostering Actions
+  addSchedule: (schedule: StaffSchedule, user: string) => Promise<StaffSchedule | undefined>;
+  updateSchedule: (id: string, updates: Partial<StaffSchedule>, user: string) => Promise<StaffSchedule | undefined>;
+  deleteSchedule: (id: string, user: string) => Promise<void>;
 
   // Gamification Actions (Warehouse - Individual)
   getWorkerPoints: (employeeId: string) => WorkerPoints | undefined;
@@ -157,9 +192,12 @@ interface DataContextType {
   requestTransfer: (transfer: TransferRecord) => void;
   shipTransfer: (id: string, user: string) => void;
   receiveTransfer: (id: string, user: string, receivedQuantities?: Record<string, number>) => void;
+  updateTransfer: (id: string, updates: Partial<TransferRecord>) => Promise<void>;
 
   // System Actions
   addNotification: (type: 'alert' | 'success' | 'info', message: string) => void;
+  clearNotification: (id: string) => void;
+  clearAllNotifications: () => void;
   markNotificationsRead: () => void;
   logSystemEvent: (action: string, details: string, user: string, module: SystemLog['module']) => void;
   exportSystemData: () => string;
@@ -177,6 +215,9 @@ interface DataContextType {
   deleteDiscountCode: (id: string) => void;
   validateDiscountCode: (code: string, siteId?: string, subtotal?: number) => { valid: boolean; discountCode?: DiscountCode; error?: string };
   useDiscountCode: (codeId: string) => void;
+  releaseOrder: (saleId: string) => Promise<void>;
+  isDataInitialLoading: boolean;
+  loadError: string | null;
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
@@ -276,6 +317,11 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
   const [pointsTransactions, setPointsTransactions] = useState<PointsTransaction[]>([]);
   const [tasks, setTasks] = useState<EmployeeTask[]>([]);
   const [storePoints, setStorePoints] = useState<StorePoints[]>([]);
+  const [zones, setZones] = useState<WarehouseZone[]>([]);
+  const [allZones, setAllZones] = useState<WarehouseZone[]>([]);
+  const [schedules, setSchedules] = useState<StaffSchedule[]>([]);
+  const [isDataInitialLoading, setIsDataInitialLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   // Derived state
   const activeSite = React.useMemo(() =>
@@ -283,27 +329,74 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
     [sites, activeSiteId]
   );
 
-  const addNotification = (type: 'alert' | 'success' | 'info', message: string) => {
+  // --- NOTIFICATION PERSISTENCE ---
+
+  // Load notifs from local storage on mount
+  useEffect(() => {
+    try {
+      const savedNotifs = localStorage.getItem('siifmart_notifications');
+      if (savedNotifs) {
+        setNotifications(JSON.parse(savedNotifs));
+      }
+    } catch (e) {
+      console.error('Failed to load notifications', e);
+    }
+  }, []);
+
+  // Save notifs to local storage whenever they change
+  useEffect(() => {
+    localStorage.setItem('siifmart_notifications', JSON.stringify(notifications));
+  }, [notifications]);
+
+  // Check for expired notifications (older than 24h) every minute
+  useEffect(() => {
+    const checkExpiration = () => {
+      const now = new Date().getTime();
+      const oneDayMs = 24 * 60 * 60 * 1000;
+
+      setNotifications(prev => {
+        const filtered = prev.filter(n => {
+          // Parse timestamp - handle both ISO string and number
+          const notifTime = new Date(n.timestamp).getTime();
+          return (now - notifTime) < oneDayMs;
+        });
+
+        // Only update if count changed to prevent render loops
+        return filtered.length !== prev.length ? filtered : prev;
+      });
+    };
+
+    // Check immediately and then every minute
+    checkExpiration();
+    const interval = setInterval(checkExpiration, 60000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const addNotification = useCallback((type: 'alert' | 'success' | 'info', message: string) => {
     const newNotif: Notification = {
-      id: Date.now().toString(),
+      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       type,
       message,
       timestamp: new Date().toISOString(),
       read: false
     };
     setNotifications(prev => [newNotif, ...prev]);
+    // NO AUTO REMOVAL - Persist for 24h
+  }, []);
 
-    // Auto remove after 5s
-    setTimeout(() => {
-      setNotifications(prev => prev.filter(n => n.id !== newNotif.id));
-    }, 5000);
-  };
+  const clearNotification = useCallback((id: string) => {
+    setNotifications(prev => prev.filter(n => n.id !== id));
+  }, []);
+
+  const clearAllNotifications = useCallback(() => {
+    setNotifications([]);
+  }, []);
 
   // Guard to prevent concurrent loadData calls
   const loadingRef = React.useRef(false);
   const loadedSiteRef = React.useRef<string>('');
 
-  const logSystemEvent = async (action: string, details: string, user: string, module: SystemLog['module']) => {
+  const logSystemEvent = useCallback(async (action: string, details: string, user: string, module: SystemLog['module']) => {
     try {
       const newLog = await systemLogsService.create({
         action,
@@ -315,16 +408,16 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
     } catch (error) {
       console.error('Failed to log system event:', error);
     }
-  };
+  }, []);
 
   // --- SYNC USER'S SITE ---
   // When user logs in or changes, update active site to match their assigned location
-  // IMPORTANT: Skip sync for roles that can manually switch sites (Super Admin, Admin, Auditor)
+  // IMPORTANT: Skip sync for roles that can manually switch sites (CEO, Admin, Auditor)
   const userSiteSyncRef = React.useRef<boolean>(false); // Track if initial sync has been done
 
   useEffect(() => {
     // Roles that can switch sites should NOT have their site auto-synced after initial load
-    const canSwitchSites = ['super_admin', 'Super Admin', 'Admin', 'Auditor'].includes(user?.role || '');
+    const canSwitchSites = ['super_admin', 'CEO', 'Super Admin', 'Admin', 'Auditor'].includes(user?.role || '');
 
     console.log('🔍 User Site Sync Check:', {
       userExists: !!user,
@@ -357,7 +450,7 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
         console.log(`🔄 Syncing active site: "${activeSiteId || 'none'}" → "${userSite.name}" (${user.siteId})`);
         setActiveSiteId(user.siteId);
       } else if (canSwitchSites && !activeSiteId) {
-        console.log('🌍 Super Admin/HQ Role - Staying in Global View');
+        console.log('🌍 CEO/HQ Role - Staying in Global View');
       } else {
         console.log(`✅ Active site already set: ${activeSiteId}`);
       }
@@ -386,7 +479,26 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
   // Load Global Data once on mount (background)
   useEffect(() => {
     loadGlobalData();
+
+    // FAIL-SAFE: If hydration takes more than 10s, release the screen
+    // This prevents "loads forever" issues if a specific service hangs
+    const timeout = setTimeout(() => {
+      if (isDataInitialLoading) {
+        console.warn('⚠️ Hydration taking too long - releasing fail-safe');
+        setIsDataInitialLoading(false);
+      }
+    }, 10000);
+
+    return () => clearTimeout(timeout);
   }, []);
+
+  // --- SYNC TIMEZONE ---
+  useEffect(() => {
+    if (settings.timezone) {
+      setGlobalTimezone(settings.timezone);
+      console.log('🌍 Global timezone updated to:', settings.timezone);
+    }
+  }, [settings.timezone]);
 
   const loadSites = async () => {
     try {
@@ -394,18 +506,29 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
       const loadedSites = await sitesService.getAll();
       setSites(loadedSites);
 
+      try {
+        const loadedAllZones = await warehouseZonesService.getAll();
+        setAllZones(loadedAllZones);
+      } catch (zoneError) {
+        console.warn('⚠️ Failed to load warehouse zones:', zoneError);
+        setAllZones([]); // Fallback to empty zones if table/columns missing
+      }
+
       if (loadedSites.length === 0) {
-        throw new Error('No sites found. Triggering Demo Mode.');
+        addNotification('info', 'No operational sites were found in the database.');
       }
 
       // NOTE: We do NOT set activeSiteId here anymore. 
       // We rely on the `useEffect` observing `user` and `sites` to set the initial site.
       // This prevents race conditions where we might default to site[0] before the user profile is loaded.
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ Failed to load sites:', error);
-      // Fallback to demo mode if sites fail to load
-      generateDemoData();
+      const errorMsg = `Unable to connect to the logistics server (${error?.message || 'Network Error'}).`;
+      addNotification('alert', `System Error: ${errorMsg} Retrying...`);
+      setLoadError(errorMsg);
+      // Retry in 3 seconds
+      setTimeout(loadSites, 3000);
     }
   };
 
@@ -415,8 +538,8 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
       const loadedSettings = await systemConfigService.getSettings();
       setSettings(loadedSettings);
       console.log('✅ System settings loaded');
-    } catch (error) {
-      console.error('❌ Failed to load system settings:', error);
+    } catch (error: any) {
+      console.error('❌ Failed to load system settings:', error?.message || error);
       // Fallback to DEFAULT_CONFIG or localStorage if DB fails
       try {
         const saved = localStorage.getItem('siifmart_system_config');
@@ -430,8 +553,8 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
   };
 
   const loadSiteData = async (siteId: string, force = false) => {
-    // Prevent concurrent calls
-    if (loadingRef.current) {
+    // Prevent concurrent calls UNLESS forced
+    if (loadingRef.current && !force) {
       console.log('⏭️ Skipping loadData - already loading');
       return;
     }
@@ -444,9 +567,15 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
 
     loadingRef.current = true;
     try {
+      if (!isUUID(siteId)) {
+        console.warn(`⚠️ skipping loadSiteData: "${siteId}" is not a valid UUID (likely Demo Mode)`);
+        return;
+      }
+
       console.log(`🔄 Loading data for site: ${siteId}...`);
 
       // Load all data in parallel, filtered by siteId where applicable
+      // Load data, skipping global collections if they already have data
       const [
         loadedProducts,
         loadedOrders,
@@ -460,21 +589,32 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
         loadedLogs,
         loadedTransfers,
         loadedJobAssignments,
-        loadedWorkerPoints
+        loadedWorkerPoints,
+        loadedStorePoints,
+        loadedTasks,
+        loadedSchedules,
+        loadedZones
       ] = await Promise.all([
-        productsService.getAll(siteId),
-        purchaseOrdersService.getAll(siteId),
-        suppliersService.getAll(), // Global
-        salesService.getAll(siteId),
-        expensesService.getAll(siteId),
-        stockMovementsService.getAll(siteId),
-        wmsJobsService.getAll(siteId),
-        employeesService.getAll(), // Global - Always load all employees
-        customersService.getAll(), // Global
-        systemLogsService.getAll(), // Global
-        transfersService.getAll(siteId),
-        jobAssignmentsService.getAll(siteId),
-        workerPointsService.getAll(siteId)
+        productsService.getAll(siteId, 2000).then(res => res.data), // Scalability: Limit products to 2000 to prevent crash
+        purchaseOrdersService.getAll(siteId, 1000).then(res => res.data), // Limit to 1000 recent POs (increased from 500)
+        suppliers.length > 0 ? Promise.resolve(suppliers) : suppliersService.getAll().then(res => res.data),
+        salesService.getAll(siteId, 2000).then(res => res.data), // Scalability: Limit to 2000 recent sales (increased from 1000)
+        expensesService.getAll(siteId, 500).then(res => res.data), // Limit to 500 recent expenses (increased from 200)
+        stockMovementsService.getAll(siteId, undefined, 2000).then(res => res.data), // Limit to 2000 recent movements (increased from 1000)
+        wmsJobsService.getAll(siteId, 2000), // Scalability: Limit to 2000 recent jobs (increased from 500)
+        employees.length > 0 ? Promise.resolve(employees) : employeesService.getAll(),
+        customers.length > 0 ? Promise.resolve(customers) : customersService.getAll(2000), // Limit to 2000 customers (Retail Scale)
+        systemLogs.length > 0 ? Promise.resolve(systemLogs) : systemLogsService.getAll(),
+        transfersService.getAll(siteId, 500), // Limit to 500 recent transfers (increased from 100)
+        jobAssignmentsService.getAll(siteId, undefined, 500), // Limit to 500 recent assignments (increased from 100)
+        workerPointsService.getAll(siteId),
+        storePointsService.getAll(),
+        tasksService.getAll(siteId, 500), // Limit to 500 recent tasks (increased from 100)
+        schedulesService.getAll(siteId),
+        warehouseZonesService.getAll(siteId).catch(err => {
+          console.warn('⚠️ Missing warehouse_zones table/columns:', err);
+          return [];
+        })
       ]);
 
       setProducts(loadedProducts);
@@ -489,6 +629,10 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
       setSystemLogs(loadedLogs);
       setJobAssignments(loadedJobAssignments);
       setWorkerPoints(loadedWorkerPoints);
+      setStorePoints(loadedStorePoints);
+      setTasks(loadedTasks);
+      setSchedules(loadedSchedules);
+      setZones(loadedZones);
 
       // Map site names to transfers
       const enrichedTransfers = loadedTransfers.map((t: any) => ({
@@ -502,99 +646,61 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
       loadedSiteRef.current = siteId;
 
       console.log('✅ Data loaded successfully!');
-      console.log(`   - Products: ${loadedProducts.length}`);
-      console.log(`   - Employees: ${loadedEmployees.length}`);
-      console.log(`   - Orders: ${loadedOrders.length}`);
-    } catch (error) {
+      setLoadError(null);
+      setIsDataInitialLoading(false);
+    } catch (error: any) {
       console.error('❌ Failed to load data:', error);
-      addNotification('alert', 'Failed to load site data.');
+      setLoadError(`Failed to load site data: ${error?.message || 'Unknown Error'}`);
+      addNotification('alert', 'Failed to load site data. Retrying...');
+      // Retry in 5 seconds
+      setTimeout(() => loadSiteData(siteId, true), 5000);
     } finally {
       loadingRef.current = false;
     }
   };
 
+  const refreshData = useCallback(async () => {
+    if (activeSiteId) {
+      console.log('🔄 Manual Refresh Triggered');
+      await loadSiteData(activeSiteId, true);
+    }
+  }, [activeSiteId, loadSiteData]);
+
   const loadGlobalData = async () => {
     try {
       console.log('🌍 Loading Global HQ Data...');
-      // In a real app, these would be optimized aggregate queries
       // For now, we fetch all and aggregate on client (careful with volume)
-      const [allProds, allSls, allOrds, allEmps] = await Promise.all([
-        productsService.getAll(),
-        salesService.getAll(),
-        purchaseOrdersService.getAll(),
-        employeesService.getAll()
+      const [allProds, allSls, allOrds, allEmps, allSupps] = await Promise.all([
+        productsService.getAll(undefined, 2000).then(res => res.data), // Scalability: Limit global view to 2000
+        salesService.getAll(undefined, 2000).then(res => res.data), // Scalability: increased for global
+        purchaseOrdersService.getAll(undefined, 1000).then(res => res.data), // increased for global
+        employeesService.getAll(),
+        suppliersService.getAll(1000).then(res => res.data) // Load all active partners for HQ
       ]);
 
       setAllProducts(allProds);
       setAllSales(allSls);
       setAllOrders(allOrds);
       setEmployees(allEmps); // HQ sees all employees
+      setSuppliers(allSupps);
+
+      const allSchedules = await schedulesService.getAll();
+      setSchedules(allSchedules);
 
       console.log('✅ Global HQ Data Loaded');
+      // If no site is active yet (e.g. CEO), global load finishes the hydration
+      if (!activeSiteId) {
+        setIsDataInitialLoading(false);
+      }
     } catch (error) {
       console.error('❌ Failed to load global data:', error);
+      // Even if global fails, don't lock the user out forever
+      if (!activeSiteId) {
+        setIsDataInitialLoading(false);
+      }
     }
   };
 
-  const generateDemoData = () => {
-    addNotification('alert', 'Failed to connect to server. Loading DEMO DATA.');
-
-    // --- GENERATE MOCK DATA FOR TESTING ---
-    const mockSites: Site[] = [
-      { id: 'WH-01', code: 'WH-01', name: 'Adama Distribution Center', type: 'Warehouse', address: 'Adama, Ethiopia', status: 'Active', manager: 'Ahmed Hassan', capacity: 10000, terminalCount: 5 },
-      { id: 'WH-02', code: 'WH-02', name: 'Harar Logistics Hub', type: 'Warehouse', address: 'Harar, Ethiopia', status: 'Active', manager: 'Fatima Yusuf', capacity: 8000, terminalCount: 4 },
-      { id: 'WH-03', code: 'WH-03', name: 'Dire Dawa Storage Facility', type: 'Warehouse', address: 'Dire Dawa, Ethiopia', status: 'Active', manager: 'Solomon Tesfaye', capacity: 12000, terminalCount: 6 },
-      { id: 'WH-04', code: 'WH-04', name: 'Bedeno Fulfillment Center', type: 'Warehouse', address: 'Bedeno, Ethiopia', status: 'Active', manager: 'Maryam Ibrahim', capacity: 9000, terminalCount: 5 },
-      { id: 'WH-05', code: 'WH-05', name: 'Burqa Cold Chain Warehouse', type: 'Warehouse', address: 'Burqa, Ethiopia', status: 'Active', manager: 'Dawit Bekele', capacity: 5000, terminalCount: 3 },
-      { id: 'ST-01', code: 'ST-01', name: 'Bole Supermarket', type: 'Store', address: 'Bole, Addis Ababa', status: 'Active', manager: 'Sara Mohammed', capacity: 2000, terminalCount: 3 },
-      { id: 'ST-02', code: 'ST-02', name: 'Ambo Retail Store', type: 'Store', address: 'Ambo, Ethiopia', status: 'Active', manager: 'Yonas Alemayehu', capacity: 1500, terminalCount: 2 },
-      { id: 'ST-03', code: 'ST-03', name: 'Aratanya Market', type: 'Store', address: 'Aratanya, Ethiopia', status: 'Active', manager: 'Hanna Girma', capacity: 1800, terminalCount: 2 },
-      { id: 'ST-04', code: 'ST-04', name: 'Awaday Grocery', type: 'Store', address: 'Awaday, Ethiopia', status: 'Active', manager: 'Abdi Rahman', capacity: 1600, terminalCount: 2 },
-      { id: 'ST-05', code: 'ST-05', name: 'Fadis Supercenter', type: 'Store', address: 'Fadis, Ethiopia', status: 'Active', manager: 'Tigist Haile', capacity: 3000, terminalCount: 4 },
-    ];
-
-    const mockProducts: Product[] = Array.from({ length: 50 }).map((_, i) => ({
-      id: `PROD-${i + 1}`,
-      siteId: mockSites[Math.floor(Math.random() * mockSites.length)].id,
-      name: `Product ${i + 1}`,
-      sku: `SKU-${1000 + i}`,
-      category: ['Electronics', 'Food', 'Beverages', 'Fresh'][Math.floor(Math.random() * 4)],
-      price: Math.floor(Math.random() * 100) + 10,
-      costPrice: Math.floor(Math.random() * 80) + 5,
-      salePrice: Math.floor(Math.random() * 120) + 15,
-      stock: Math.floor(Math.random() * 100),
-      status: 'active',
-      location: `A-${Math.floor(Math.random() * 10)}-${Math.floor(Math.random() * 5)}`,
-      image: `https://picsum.photos/200?random=${i}`,
-      salesVelocity: 'Medium'
-    }));
-
-    const mockEmployees: Employee[] = mockSites.flatMap(site => [
-      { id: `EMP-${site.id}-1`, code: `SIIF-${site.id}-1`, siteId: site.id, name: `${site.manager}`, role: 'manager', email: `mgr@${site.id}.com`, phone: '555-0100', avatar: '', status: 'Active', joinDate: '2023-01-01', department: 'Management', performanceScore: 95, attendanceRate: 98 },
-      { id: `EMP-${site.id}-2`, code: `SIIF-${site.id}-2`, siteId: site.id, name: `Worker ${site.id}`, role: 'picker', email: `wkr@${site.id}.com`, phone: '555-0101', avatar: '', status: 'Active', joinDate: '2023-02-01', department: 'Operations', performanceScore: 88, attendanceRate: 95 }
-    ]);
-
-    setSites(mockSites);
-
-    // Check if user is Admin/HQ before forcing a site
-    const isHQRole = ['super_admin', 'admin', 'auditor', 'finance_manager', 'hr', 'procurement_manager', 'it_support'].includes(user?.role || '');
-    if (!isHQRole) {
-      setActiveSiteId(mockSites[0].id);
-    } else {
-      console.log('🌍 Demo Mode: HQ Role detected - Defaulting to Global View');
-    }
-    setProducts(mockProducts);
-    setEmployees(mockEmployees);
-    setTransfers([]);
-    setJobs([]);
-    setSales([]);
-    setCustomers([]);
-    setSuppliers([]);
-    setOrders([]);
-    setExpenses([]);
-    setMovements([]);
-    setSystemLogs([]);
-  };
 
   // --- REAL-TIME UPDATES ---
   useEffect(() => {
@@ -611,9 +717,13 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
       onSaleChange: (event, payload) => {
         if (event === 'INSERT') setSales(prev => [payload, ...prev]);
       },
-      onStockChange: (event, payload) => {
-        if (event === 'INSERT') setMovements(prev => [payload, ...prev]);
-      },
+      // --- BANDWIDTH OPTIMIZATION ---
+      // We DISABLED stock movement listening because at 100k sales/day, 
+      // this generates ~500k events/day (500MB egress per device).
+      // Stock levels still update via 'onProductChange' above.
+      // onStockChange: (event, payload) => {
+      //   if (event === 'INSERT') setMovements(prev => [payload, ...prev]);
+      // },
       onCustomerChange: (event, payload) => {
         if (event === 'INSERT') setCustomers(prev => [payload, ...prev]);
         else if (event === 'UPDATE') setCustomers(prev => prev.map(c => c.id === payload.id ? payload : c));
@@ -626,6 +736,11 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
         if (event === 'INSERT') setJobAssignments(prev => [payload, ...prev]);
         else if (event === 'UPDATE') setJobAssignments(prev => prev.map(a => a.id === payload.id ? payload : a));
         else if (event === 'DELETE') setJobAssignments(prev => prev.filter(a => a.id !== payload.id));
+      },
+      onTransferChange: (event, payload) => {
+        if (event === 'INSERT') setTransfers(prev => [payload, ...prev]);
+        else if (event === 'UPDATE') setTransfers(prev => prev.map(t => t.id === payload.id ? payload : t));
+        else if (event === 'DELETE') setTransfers(prev => prev.filter(t => t.id !== payload.id));
       }
     });
 
@@ -637,7 +752,7 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
 
   // --- ACTIONS ---
 
-  const updateSettings = async (newSettings: Partial<SystemConfig>, user: string) => {
+  const updateSettings = useCallback(async (newSettings: Partial<SystemConfig>, user: string) => {
     setSettings(prev => {
       const updated = { ...prev, ...newSettings };
       // Keep localStorage as a backup
@@ -658,11 +773,24 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
       console.error('❌ Failed to persist settings to database:', error);
       addNotification('alert', 'Failed to save settings to server. Changes kept locally.');
     }
-  };
+  }, []);
 
-  const setActiveSite = (id: string) => setActiveSiteId(id);
+  const setActiveSite = useCallback((id: string) => setActiveSiteId(id), []);
 
-  const addSite = async (site: Site, user: string) => {
+  const getTaxForSite = useCallback((siteId?: string) => {
+    const id = siteId || activeSiteId;
+    const site = sites.find(s => s.id === id);
+    if (!site?.taxJurisdictionId) {
+      return [{ name: 'Standard Tax', rate: settings.taxRate ?? 0, compound: false }];
+    }
+    const jurisdiction = settings.taxJurisdictions?.find(j => j.id === site.taxJurisdictionId);
+    if (!jurisdiction || !jurisdiction.rules || jurisdiction.rules.length === 0) {
+      return [{ name: 'Standard Tax', rate: settings.taxRate ?? 0, compound: false }];
+    }
+    return jurisdiction.rules;
+  }, [activeSiteId, sites, settings.taxRate, settings.taxJurisdictions]);
+
+  const addSite = useCallback(async (site: Site, user: string) => {
     try {
       const newSite = await sitesService.create(site);
       setSites(prev => [newSite, ...prev]);
@@ -672,9 +800,9 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
       console.error(error);
       addNotification('alert', 'Failed to create site');
     }
-  };
+  }, []);
 
-  const updateSite = async (site: Site, user: string) => {
+  const updateSite = useCallback(async (site: Site, user: string) => {
     try {
       const updated = await sitesService.update(site.id, site);
       setSites(prev => prev.map(s => s.id === site.id ? updated : s));
@@ -683,9 +811,9 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
       console.error(error);
       addNotification('alert', 'Failed to update site');
     }
-  };
+  }, []);
 
-  const deleteSite = async (id: string, user: string) => {
+  const deleteSite = useCallback(async (id: string, user: string) => {
     try {
       await sitesService.delete(id);
       setSites(prev => prev.filter(s => s.id !== id));
@@ -694,9 +822,9 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
       console.error(error);
       addNotification('alert', 'Failed to delete site');
     }
-  };
+  }, []);
 
-  const addProduct = async (product: Product): Promise<Product | undefined> => {
+  const addProduct = useCallback(async (product: Product): Promise<Product | undefined> => {
     console.log('🧪 DataContext: addProduct called with:', product);
     try {
       if (!activeSite?.id) {
@@ -757,23 +885,46 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
       return newProduct; // Return the created product
     } catch (error: any) {
       console.error('Error adding product:', error);
-      if (error?.code === '23505' || error?.message?.includes('unique constraints')) {
-        addNotification('alert', `Duplicate SKU! A product with SKU "${product.sku}" already exists in this site.`);
+
+      // HANDLE DUPLICATE SKU (409 Conflict)
+      // If product already exists, fetch and return it so operations can continue
+      if (error?.code === '23505' || error?.message?.includes('unique constraints') || error?.status === 409) {
+        console.warn(`Product with SKU "${product.sku}" already exists. Fetching existing record...`);
+        try {
+          // Attempt to find the existing product in the target site
+          const existing = await productsService.getBySKU(product.sku);
+          if (existing) {
+            // If we found it, verify site match if needed, but for now just return it to unblock flow
+            addNotification('info', `Product ${product.sku} already exists. Using existing record.`);
+
+            // Update local state to ensure it's visible
+            setProducts(prev => {
+              const exists = prev.find(p => p.id === existing.id);
+              if (exists) return prev;
+              return [existing, ...prev];
+            });
+
+            return existing;
+          }
+        } catch (fetchErr) {
+          console.error('Failed to recover existing product:', fetchErr);
+        }
+        addNotification('alert', `Duplicate SKU! A product with SKU "${product.sku}" already exists but could not be retrieved.`);
       } else {
         addNotification('alert', `Failed to add product: ${error.message || 'Unknown error'}`);
       }
       return undefined;
     }
-  };
+  }, [activeSite, sites, addNotification, logSystemEvent]);
 
-  const updateProduct = async (product: Product, updatedBy?: string): Promise<Product | undefined> => {
+  const updateProduct = useCallback(async (product: Partial<Product> & { id: string }, updatedBy?: string): Promise<Product | undefined> => {
     try {
       // ============================================================
       // VALIDATION: Prevent common data quality issues
       // ============================================================
 
-      // 1. Validate price is set and greater than 0
-      if (!product.price || product.price <= 0) {
+      // 1. Validate price is set and greater than 0 (Only if price is being updated)
+      if (product.price !== undefined && product.price <= 0) {
         addNotification('alert', 'Product price must be greater than 0. Please set a valid price.');
         return;
       }
@@ -801,23 +952,23 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
 
       // ============================================================
 
-      await productsService.update(product.id, product);
+      const updated = await productsService.update(product.id, product);
 
-      // Update local state immediately
-      setProducts(prev => prev.map(p => p.id === product.id ? product : p));
-      setAllProducts(prev => prev.map(p => p.id === product.id ? product : p));
+      // Update local state immediately (Merge updates)
+      setProducts(prev => prev.map(p => p.id === product.id ? { ...p, ...updated } : p));
+      setAllProducts(prev => prev.map(p => p.id === product.id ? { ...p, ...updated } : p));
 
-      addNotification('success', `Product ${product.name} updated`);
-      logSystemEvent('Product Updated', `Product "${product.name}" (SKU: ${product.sku}) updated`, updatedBy || user?.name || 'System', 'Inventory');
-      return product;
+      addNotification('success', `Product ${product.name || updated.name} updated`);
+      logSystemEvent('Product Updated', `Product "${product.name || updated.name}" updated`, updatedBy || user?.name || 'System', 'Inventory');
+      return updated;
     } catch (error) {
       console.error(error);
       addNotification('alert', 'Failed to update product');
       throw error; // Re-throw to allow caller to handle error
     }
-  };
+  }, [addNotification, logSystemEvent, user, sites]);
 
-  const deleteProduct = async (id: string) => {
+  const deleteProduct = useCallback(async (id: string) => {
     try {
       // Use cascade delete to remove related records (stock_movements, etc.) first
       await productsService.cascadeDelete(id);
@@ -833,9 +984,9 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
       addNotification('alert', 'Failed to delete product');
       throw error; // Re-throw to allow caller to handle error
     }
-  };
+  }, [addNotification, logSystemEvent, user]);
 
-  const relocateProduct = async (productId: string, newLocation: string, user: string) => {
+  const relocateProduct = useCallback(async (productId: string, newLocation: string, user: string) => {
     try {
       await productsService.update(productId, { location: newLocation });
 
@@ -848,9 +999,9 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
       console.error(error);
       addNotification('alert', 'Failed to relocate product');
     }
-  };
+  }, [addNotification, logSystemEvent]);
 
-  const cleanupAdminProducts = async () => {
+  const cleanupAdminProducts = useCallback(async () => {
     try {
       // Find all products assigned to HQ
       const hqProducts = allProducts.filter(p => p.siteId === 'Administration' || p.site_id === 'Administration');
@@ -876,9 +1027,9 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
       console.error('Failed to cleanup HQ products:', error);
       addNotification('alert', 'Failed to cleanup HQ products');
     }
-  };
+  }, [allProducts, addNotification, logSystemEvent]);
 
-  const createPO = async (po: PurchaseOrder): Promise<PurchaseOrder | undefined> => {
+  const createPO = useCallback(async (po: PurchaseOrder): Promise<PurchaseOrder | undefined> => {
     try {
       // Extract line items from the PO
       const items = po.lineItems || [];
@@ -890,7 +1041,7 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
       const newPO = await purchaseOrdersService.create({
         ...po,
         poNumber: po.poNumber || po.id, // Pass Human ID as poNumber
-        site_id: po.siteId || activeSite?.id
+        siteId: po.siteId || activeSite?.id || 'HQ'
       }, items);
 
       // Update local state (both site-specific and global)
@@ -899,12 +1050,12 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
       addNotification('success', `PO #${newPO.id.slice(0, 8)} created successfully`);
 
       // Refresh orders from DB to ensure consistency
-      const allUpdatedOrders = await purchaseOrdersService.getAll(); // Get all orders
+      const allUpdatedOrders = await purchaseOrdersService.getAll().then(res => res.data); // Get all orders
       setAllOrders(allUpdatedOrders); // Update global orders
 
       // Update site-specific orders (filter by active site)
       if (activeSiteId) {
-        const siteOrders = await purchaseOrdersService.getAll(activeSiteId);
+        const siteOrders = await purchaseOrdersService.getAll(activeSiteId).then(res => res.data);
         setOrders(siteOrders);
       } else {
         setOrders(allUpdatedOrders); // Fallback to all if no site selected
@@ -926,9 +1077,9 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
       setAllOrders(prev => [localPO, ...prev]); // Also update allOrders
       addNotification('success', `PO #${localPO.id.slice(0, 8)} created (local - DB Failed: ${error instanceof Error ? error.message : String(error)})`);
     }
-  };
+  }, [activeSite, activeSiteId, addNotification]);
 
-  const updatePO = async (po: PurchaseOrder) => {
+  const updatePO = useCallback(async (po: PurchaseOrder) => {
     try {
       await purchaseOrdersService.update(po.id, po);
       setOrders(prev => prev.map(o => o.id === po.id ? po : o));
@@ -938,9 +1089,9 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
       console.error(error);
       addNotification('alert', 'Failed to update PO');
     }
-  };
+  }, [addNotification]);
 
-  const receivePO = async (poId: string, receivedItems?: ReceivingItem[], skuDecisions?: Record<string, 'keep' | 'generate'>, scannedSkus?: Record<string, string>) => {
+  const receivePO = useCallback(async (poId: string, receivedItems?: ReceivingItem[], skuDecisions?: Record<string, 'keep' | 'generate'>, scannedSkus?: Record<string, string>) => {
     try {
       // Find the PO to get line items
       const po = orders.find(o => o.id === poId);
@@ -1226,7 +1377,7 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
             }
           }
 
-          const productImage = product?.image || '/placeholder.png';
+          const productImage = product?.image || '';
 
           const newJob: Omit<WMSJob, 'id' | 'created_at' | 'updated_at'> = {
             siteId: targetSiteId,
@@ -1338,9 +1489,9 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
       console.error('Error in receivePO:', error);
       addNotification('alert', 'Error processing reception');
     }
-  };
+  }, [orders, addNotification, activeSiteId, allProducts, sites, logSystemEvent]);
 
-  const deletePO = async (poId: string) => {
+  const deletePO = useCallback(async (poId: string) => {
     try {
       await purchaseOrdersService.delete(poId);
       setOrders(prev => prev.filter(o => o.id !== poId));
@@ -1350,9 +1501,9 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
       console.error(error);
       addNotification('alert', 'Failed to delete PO');
     }
-  };
+  }, [addNotification]);
 
-  const fixBrokenJobs = async () => {
+  const fixBrokenJobs = useCallback(async () => {
     console.log('Running Fix Broken Jobs...');
     let fixedCount = 0;
 
@@ -1378,10 +1529,11 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
           const jobPromises = po.lineItems.map(async (item, index) => {
             const product = products.find(p => p.id === item.productId);
             const newJob: WMSJob = {
-              id: `PUT-${crypto.randomUUID().split('-')[0].toUpperCase()}`,
+              id: crypto.randomUUID(),
+              type: 'PUTAWAY',
+              jobNumber: `PUT-${po.poNumber || po.id.slice(-4)}-${index}`,
               siteId: po.siteId || activeSite?.id || 'SITE-001',
               site_id: po.siteId || activeSite?.id,
-              type: 'PUTAWAY',
               status: 'Pending',
               priority: 'Normal',
               assignedTo: '',
@@ -1392,7 +1544,7 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
                 productId: item.productId || '',
                 name: item.productName,
                 sku: product?.sku || item.productId || 'UNKNOWN',
-                image: product?.image || '/placeholder.png',
+                image: product?.image || '',
                 expectedQty: item.quantity,
                 pickedQty: 0,
                 status: 'Pending'
@@ -1416,13 +1568,13 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
     } else {
       addNotification('info', 'No broken POs found.');
     }
-  };
+  }, [orders, jobs, products, activeSite, addNotification]);
 
   /**
    * Create a PUTAWAY job for a product added through Inventory.
    * This allows products created in Inventory to flow through Fulfillment just like PO items.
    */
-  const createPutawayJob = async (
+  const createPutawayJob = useCallback(async (
     product: Product,
     quantity: number,
     userName: string,
@@ -1440,34 +1592,17 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
         return undefined;
       }
 
-      const jobId = `PUT-INV-${crypto.randomUUID().split('-')[0].toUpperCase()}`;
-
-      const newJob: WMSJob = {
-        id: jobId,
-        siteId: targetSiteId,
-        site_id: targetSiteId,
-        type: 'PUTAWAY',
-        status: 'Pending',
-        priority: 'Normal',
-        assignedTo: '',
-        location: product.location || 'Receiving Dock',
-        items: quantity,
-        orderRef: `INV-${product.id}`, // Reference to track source
-        lineItems: [{
-          productId: product.id,
-          name: product.name,
-          sku: product.sku || 'UNKNOWN',
-          image: product.image || '/placeholder.png',
-          expectedQty: quantity,
-          pickedQty: 0,
-          status: 'Pending'
-        }],
-        createdAt: new Date().toISOString(),
-        requestedBy: userName
+      const lineItem = {
+        productId: product.id,
+        name: product.name,
+        sku: product.sku || 'UNKNOWN',
+        image: product.image || '',
+        expectedQty: quantity,
+        pickedQty: 0,
+        status: 'Pending' as JobItem['status']
       };
 
       console.log('📦 Creating PUTAWAY job for Inventory product:', {
-        jobId,
         productName: product.name,
         quantity,
         siteId: targetSiteId,
@@ -1475,7 +1610,20 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
       });
 
       try {
-        const createdJob = await wmsJobsService.create(newJob as any);
+        const createdJob = await wmsJobsService.create({
+          siteId: targetSiteId,
+          site_id: targetSiteId,
+          type: 'PUTAWAY',
+          priority: 'Normal',
+          status: 'Pending',
+          items: quantity,
+          lineItems: [lineItem],
+          location: product.location || 'Receiving Dock',
+          orderRef: `INV-${product.id}`,
+          jobNumber: `PUT-INV-${Date.now().toString().slice(-4)}${Math.random().toString(36).substr(2, 3).toUpperCase()}`,
+          createdAt: new Date().toISOString(),
+          requestedBy: userName
+        });
         console.log('✅ Inventory PUTAWAY job created:', createdJob.id);
 
         // Update local state
@@ -1485,7 +1633,21 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
       } catch (error) {
         console.error('❌ Failed to create putaway job in DB:', error);
         // Fallback: add to local state with temp ID
-        const fallbackJob = { ...newJob, id: crypto.randomUUID() } as WMSJob;
+        const fallbackJob: WMSJob = {
+          id: crypto.randomUUID(),
+          siteId: targetSiteId,
+          site_id: targetSiteId,
+          type: 'PUTAWAY',
+          priority: 'Normal',
+          status: 'Pending',
+          items: quantity,
+          lineItems: [lineItem],
+          location: product.location || 'Receiving Dock',
+          orderRef: `INV-${product.id}`,
+          jobNumber: `PUT-INV-${Date.now().toString().slice(-4)}${Math.random().toString(36).substr(2, 3).toUpperCase()}`,
+          createdAt: new Date().toISOString(),
+          requestedBy: userName
+        };
         setJobs(prev => [fallbackJob, ...prev]);
         return fallbackJob;
       }
@@ -1493,400 +1655,38 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
       console.error('Error creating putaway job:', error);
       return undefined;
     }
-  };
+  }, [activeSite]);
 
-  const processSale = async (
-    cart: CartItem[],
-    method: PaymentMethod,
-    user: string,
-    tendered: number,
-    change: number,
-    customerId?: string,
-    pointsRedeemed?: number,
-    type: 'In-Store' | 'Delivery' | 'Pickup' = 'In-Store'
-  ): Promise<{ saleId: string; pointsResult?: any }> => {
+  /**
+   * Calculates how an order should be fulfilled based on advanced picking rules.
+   * Respects site-specific strategies, distance, and zone priorities.
+   */
+  const calculateFulfillmentPlan = useCallback(async (
+    requestingSiteId: string,
+    cart: CartItem[]
+  ): Promise<FulfillmentPlan[]> => {
+    return await salesService.calculateFulfillmentPlan(requestingSiteId, cart);
+  }, []);
+
+
+  const releaseOrder = useCallback(async (saleId: string) => {
     try {
-      const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-      const tax = subtotal * settings.taxRate;
-      const total = subtotal + tax;
+      const sale = allSales.find(s => s.id === saleId) || sales.find(s => s.id === saleId);
+      if (!sale) throw new Error('Sale not found');
 
-      const sale = await salesService.create({
-        siteId: activeSite?.id || '',
-        site_id: activeSite?.id,
-        customer_id: customerId,
-        date: new Date().toISOString(),
-        items: cart,
-        subtotal,
-        tax,
-        total,
-        method: method,
-        status: 'Completed',
-        amountTendered: tendered,
-        change,
-        cashierName: user,
-        type, // Save the type
-        fulfillmentStatus: type === 'In-Store' ? 'Delivered' : 'Picking'
-      }, cart);
+      console.log(`🚀 Releasing order via Backend: ${saleId} (${sale.receiptNumber})`);
 
-      // --- GAMIFICATION: Award Points for Sale ---
-      let pointsResult = null;
-      if (settings.bonusEnabled !== false) {
-        // 1. Calculate Store Points (Team-based)
-        const storeRules = settings.posPointRules || DEFAULT_STORE_POINT_RULES;
-        let totalStorePoints = 0;
+      await salesService.releaseOrder(saleId);
 
-        cart.forEach(item => {
-          // Rule Matcher
-          const categoryRules = storeRules.filter(r => r.enabled && r.type === 'category' && r.categoryId === item.category);
-          const quantityRules = storeRules.filter(r => r.enabled && r.type === 'quantity' && r.categoryId === 'all');
+      // Refresh data to get new jobs and updated sale status
+      await refreshData();
 
-          // Apply highest priority category rule or base rule
-          const activeRule = categoryRules.sort((a, b) => (b.priority || 0) - (a.priority || 0))[0] ||
-            storeRules.find(r => r.id === 'rule-base');
-
-          if (activeRule) {
-            let itemPoints = item.quantity * activeRule.pointsPerUnit;
-            if (activeRule.multiplier) itemPoints *= activeRule.multiplier;
-            totalStorePoints += Math.floor(itemPoints);
-          }
-        });
-
-        // Revenue based points
-        const revenueRule = storeRules.find(r => r.type === 'revenue' && r.enabled);
-        if (revenueRule && revenueRule.revenueThreshold) {
-          totalStorePoints += Math.floor((subtotal / revenueRule.revenueThreshold) * (revenueRule.pointsPerRevenue || 1));
-        }
-
-        // Award to Store
-        awardStorePoints(activeSite?.id || '', totalStorePoints, subtotal);
-
-        // 2. Calculate Individual Cashier Points
-        // Cashiers get a smaller individual award for each transaction to drive their personal level/rank
-        const individualPoints = 5 + Math.floor(subtotal / 500); // Base 5 + 1 per 500 ETB
-
-        const cashierEmployee = employees.find(e => e.name === user || e.id === user || e.email === user);
-        if (cashierEmployee) {
-          awardPoints(
-            cashierEmployee.id,
-            individualPoints,
-            'job_complete',
-            `Processed sale ${sale.receiptNumber || sale.id}`,
-            sale.id
-          );
-
-          pointsResult = {
-            points: individualPoints,
-            storePoints: totalStorePoints,
-            breakdown: [
-              { label: 'Transaction Base', points: 5 },
-              { label: 'Revenue Bonus', points: Math.floor(subtotal / 500) },
-              { label: 'Team Contribution', points: totalStorePoints }
-            ].filter(b => b.points > 0)
-          };
-        }
-      }
-
-      // --- OPTIMISTIC UPDATE: Update local state immediately ---
-      setSales(prev => [sale, ...prev]);
-
-      // --- STOCK LEVEL CHECK (RETAIL -> WAREHOUSE CONNECTION) ---
-      // Check if any item dropped below threshold to trigger replenishment
-      cart.forEach(item => {
-        const product = products.find(p => p.id === item.id);
-        if (product) {
-          const newStock = product.stock - item.quantity;
-          if (newStock <= settings.lowStockThreshold) {
-            // Trigger Warehouse Alert
-            addNotification('alert', `⚠️ Low Stock Alert: ${product.name} is down to ${newStock}. Replenishment needed!`);
-            // In a real system, this would create a 'Replenish' task automatically
-          }
-        }
-      });
-
-      // --- AUTO-GENERATE WMS JOBS (ALL SALES - IN-STORE IS PRIORITY) ---
-      // Supports CROSS-WAREHOUSE FULFILLMENT: Any store can source from any warehouse
-      if (settings.enableWMS && cart.length > 0) {
-        try {
-          // Store where order was placed (requesting store)
-          const requestingStoreId = sale.siteId || activeSite?.id || '';
-          const requestingStore = sites.find(s => s.id === requestingStoreId);
-
-          // --- CROSS-WAREHOUSE FULFILLMENT LOGIC ---
-          // Priority:
-          // 1) Local warehouse (same site)
-          // 2) Single Nearest Warehouse (Distance-based)
-          // 3) Split Fulfillment (Multiple warehouses if needed)
-
-          const warehouses = sites.filter(s => s.type === 'Warehouse' && s.status === 'Active');
-
-          // Helper: Calculate distance between two coordinates (Haversine formula)
-          const getDistance = (lat1?: number, lon1?: number, lat2?: number, lon2?: number): number => {
-            if (!lat1 || !lon1 || !lat2 || !lon2) return 99999; // Return huge distance if coords missing
-            const R = 6371; // Radius of the earth in km
-            const dLat = (lat2 - lat1) * (Math.PI / 180);
-            const dLon = (lon2 - lon1) * (Math.PI / 180);
-            const a =
-              Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-              Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) *
-              Math.sin(dLon / 2) * Math.sin(dLon / 2);
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-            return R * c; // Distance in km
-          };
-
-          // Function to check if a warehouse can fulfill specific items
-          const canFulfillItems = (warehouseId: string, itemsToCheck: typeof cart): boolean => {
-            // In a real app, check site-specific inventory.
-            // For simulation, we assume global stock is available at all warehouses
-            // UNLESS we want to simulate split fulfillment.
-            // TODO: Connect to real site-specific inventory table
-            return itemsToCheck.every(item => {
-              const product = products.find(p => p.id === item.id);
-              return product && product.stock >= item.quantity;
-            });
-          };
-
-          let fulfillmentPlan: { warehouseId: string, items: typeof cart }[] = [];
-
-          // STRATEGY 1: Local Fulfillment
-          if (requestingStore?.type === 'Warehouse' && canFulfillItems(requestingStoreId, cart)) {
-            fulfillmentPlan.push({ warehouseId: requestingStoreId, items: cart });
-          }
-
-          // STRATEGY 2: Single Nearest Warehouse
-          else {
-            // Sort warehouses by distance to requesting store
-            const sortedWarehouses = warehouses.map(wh => ({
-              ...wh,
-              distance: getDistance(requestingStore?.latitude, requestingStore?.longitude, wh.latitude, wh.longitude)
-            })).sort((a, b) => a.distance - b.distance);
-
-            // Find first one that can fulfill ALL items
-            const bestWarehouse = sortedWarehouses.find(wh => canFulfillItems(wh.id, cart));
-
-            if (bestWarehouse) {
-              fulfillmentPlan.push({ warehouseId: bestWarehouse.id, items: cart });
-              console.log(`📍 Distance Routing: Selected ${bestWarehouse.name} (${bestWarehouse.distance.toFixed(1)}km away)`);
-            }
-
-            // STRATEGY 3: Split Fulfillment
-            else {
-              console.log('🔀 Split Fulfillment Triggered: No single warehouse has all items.');
-
-              // For each item, find the nearest warehouse that has it
-              const warehouseMap = new Map<string, typeof cart>();
-
-              cart.forEach(item => {
-                // Find nearest warehouse for THIS item
-                const nearestForProduct = sortedWarehouses.find(wh => canFulfillItems(wh.id, [item]));
-
-                if (nearestForProduct) {
-                  const existingItems = warehouseMap.get(nearestForProduct.id) || [];
-                  warehouseMap.set(nearestForProduct.id, [...existingItems, item]);
-                } else {
-                  // Fallback: Assign to active site if no one has it (backorder)
-                  const fallbackId = activeSite?.id || '';
-                  const existingItems = warehouseMap.get(fallbackId) || [];
-                  warehouseMap.set(fallbackId, [...existingItems, item]);
-                }
-              });
-
-              // Convert map to plan
-              warehouseMap.forEach((items, warehouseId) => {
-                fulfillmentPlan.push({ warehouseId, items });
-              });
-            }
-          }
-
-          // Execute Fulfillment Plan (Create Jobs)
-          for (const plan of fulfillmentPlan) {
-            const { warehouseId, items } = plan;
-            const warehouse = sites.find(s => s.id === warehouseId);
-
-            // Log
-            if (warehouseId !== requestingStoreId) {
-              console.log(`🏭 CROSS-WAREHOUSE: Order from ${requestingStore?.name} → Fulfilling ${items.length} items from ${warehouse?.name}`);
-            }
-
-            // Create PICK Job
-            const pickJobId = `PICK-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-            const pickJob: WMSJob = {
-              id: pickJobId,
-              siteId: warehouseId,
-              site_id: warehouseId,
-              sourceSiteId: warehouseId,
-              source_site_id: warehouseId,
-              destSiteId: requestingStoreId,
-              dest_site_id: requestingStoreId,
-              type: 'PICK',
-              status: 'Pending',
-              priority: type === 'In-Store' ? 'Critical' : 'High',
-              location: 'Zone A', // Simplified
-              assignedTo: '',
-              items: items.length,
-              lineItems: items.map((item, index) => ({
-                productId: item.id,
-                name: item.name,
-                sku: products.find(p => p.id === item.id)?.sku || 'UNKNOWN',
-                image: item.image || '',
-                expectedQty: item.quantity,
-                pickedQty: 0,
-                status: 'Pending'
-              })),
-              orderRef: sale.id, // Changed from newSale.id to sale.id
-              jobNumber: `PICK-${sale.id.slice(-4)}` // Changed from newSale.id to sale.id
-            };
-
-            await wmsJobsService.create(pickJob);
-            console.log(`✅ Generated PICK job ${pickJobId} for ${type} sale ${sale.id} (Priority: ${pickJob.priority})${warehouseId !== requestingStoreId ? ' [CROSS-WAREHOUSE]' : ''}`);
-
-            // Update local state
-            setJobs(prev => [pickJob, ...prev]);
-
-            // Create PACK Job (if not In-Store, or if Cross-Warehouse)
-            // Even In-Store orders need packing if they come from another warehouse
-            if (type !== 'In-Store' || warehouseId !== requestingStoreId) {
-              const packJobId = `PACK-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-              const packJob: WMSJob = {
-                id: packJobId,
-                siteId: warehouseId,
-                site_id: warehouseId,
-                sourceSiteId: warehouseId,
-                source_site_id: warehouseId,
-                destSiteId: requestingStoreId,
-                dest_site_id: requestingStoreId,
-                type: 'PACK',
-                status: 'Pending',
-                priority: type === 'Pickup' ? 'High' : 'Normal',
-                location: 'Packing Station 1',
-                assignedTo: '',
-                items: items.length,
-                lineItems: items.map((item, index) => ({
-                  productId: item.id,
-                  name: item.name,
-                  sku: products.find(p => p.id === item.id)?.sku || 'UNKNOWN',
-                  image: item.image || '',
-                  expectedQty: item.quantity,
-                  pickedQty: 0,
-                  status: 'Pending'
-                })),
-                orderRef: sale.id, // Changed from newSale.id to sale.id
-                jobNumber: `PACK-${sale.id.slice(-4)}` // Changed from newSale.id to sale.id
-              };
-              await wmsJobsService.create(packJob);
-              console.log(`✅ Generated PACK job ${packJobId} for ${type} sale ${sale.id}`);
-              setJobs(prev => [packJob, ...prev]);
-            }
-          }
-        } catch (jobError) {
-          console.error('Failed to create WMS jobs:', jobError);
-          addNotification('info', 'Sale completed but fulfillment jobs could not be created');
-        }
-      }
-
-      addNotification('success', 'Sale processed successfully');
-
-      // Award store points for POS team bonus using configured rules
-      // Check if the store is eligible for bonuses
-      const saleStore = sites.find(s => s.id === sale.siteId);
-      const storeIsEligible = saleStore?.bonusEnabled !== false;
-
-      if (settings.posBonusEnabled !== false && sale.siteId && storeIsEligible) {
-        const pointRules = settings.posPointRules || DEFAULT_STORE_POINT_RULES;
-        const enabledRules = pointRules.filter(r => r.enabled).sort((a, b) => (b.priority || 0) - (a.priority || 0));
-
-        let totalPoints = 0;
-        const totalQuantity = cart.reduce((sum, item) => sum + item.quantity, 0);
-
-        // Process each cart item
-        cart.forEach(cartItem => {
-          const product = products.find(p => p.id === cartItem.id);
-          const itemCategory = product?.category || 'Unknown';
-          const itemSku = product?.sku;
-
-          // Find applicable rules for this item
-          let itemPoints = 0;
-
-          enabledRules.forEach(rule => {
-            let ruleApplies = false;
-            let rulePoints = 0;
-
-            switch (rule.type) {
-              case 'category':
-                // Category-specific or all categories
-                if (rule.categoryId === 'all' || rule.categoryId === itemCategory) {
-                  ruleApplies = true;
-                  rulePoints = (rule.pointsPerUnit || 0) * cartItem.quantity;
-                }
-                break;
-
-              case 'product':
-                // Specific product by SKU
-                if (rule.productSku && itemSku === rule.productSku) {
-                  ruleApplies = true;
-                  rulePoints = (rule.pointsPerUnit || 0) * cartItem.quantity;
-                }
-                break;
-
-              case 'quantity':
-                // Quantity-based bonuses (applies to all items if criteria met)
-                if (rule.categoryId === 'all' || rule.categoryId === itemCategory) {
-                  if (!rule.minQuantity || totalQuantity >= rule.minQuantity) {
-                    ruleApplies = true;
-                    rulePoints = (rule.pointsPerUnit || 0) * cartItem.quantity;
-                  }
-                }
-                break;
-            }
-
-            if (ruleApplies) {
-              // Apply max cap if configured
-              if (rule.maxPointsPerTransaction && rulePoints > rule.maxPointsPerTransaction) {
-                rulePoints = rule.maxPointsPerTransaction;
-              }
-              itemPoints += rulePoints;
-            }
-          });
-
-          totalPoints += itemPoints;
-        });
-
-        // Apply revenue-based rules (calculated on total)
-        enabledRules.filter(r => r.type === 'revenue').forEach(rule => {
-          if (rule.revenueThreshold && rule.pointsPerRevenue) {
-            const revenuePoints = Math.floor(total / rule.revenueThreshold) * rule.pointsPerRevenue;
-            totalPoints += rule.maxPointsPerTransaction
-              ? Math.min(revenuePoints, rule.maxPointsPerTransaction)
-              : revenuePoints;
-          }
-        });
-
-        // Apply quantity multipliers (for bulk sales)
-        const multiplierRule = enabledRules.find(r =>
-          r.type === 'quantity' &&
-          r.multiplier &&
-          r.multiplier > 1 &&
-          r.minQuantity &&
-          totalQuantity >= r.minQuantity
-        );
-        if (multiplierRule && multiplierRule.multiplier) {
-          totalPoints = Math.floor(totalPoints * multiplierRule.multiplier);
-        }
-
-        // Ensure at least 1 point per transaction if any items sold
-        if (totalPoints < 1 && cart.length > 0) {
-          totalPoints = 1;
-        }
-
-        awardStorePoints(sale.siteId, totalPoints, total, 1);
-      }
-
-      return sale.id;
+      addNotification('success', `Order ${sale.receiptNumber} released successfully.`);
     } catch (error) {
-      console.error(error);
-      addNotification('alert', 'Failed to process sale');
-      throw error;
+      console.error('Failed to release order:', error);
+      addNotification('alert', 'Failed to release order.');
     }
-  };
+  }, [allSales, sales, refreshData, addNotification]);
 
   const processReturn = async (saleId: string, items: ReturnItem[], totalRefund: number, user: string) => {
     try {
@@ -1936,9 +1736,16 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
     }
   };
 
-  const adjustStock = async (productId: string, qty: number, type: 'IN' | 'OUT', reason: string, user: string) => {
+  const adjustStock = async (productId: string, quantity: number, type: 'IN' | 'OUT', reason: string, user: string) => {
+    console.log(`🧪 DataContext: adjustStock called for ${productId}, Qty: ${quantity}, Type: ${type}`);
+
     try {
-      await productsService.adjustStock(productId, qty, type === 'IN' ? 'IN' : 'OUT');
+      if (isNaN(Number(quantity))) {
+        console.error('❌ DataContext: Invalid quantity passed to adjustStock:', quantity);
+        addNotification('alert', 'Invalid stock quantity');
+        return;
+      }
+      await productsService.adjustStock(productId, Number(quantity), type === 'IN' ? 'IN' : 'OUT', reason, user);
 
       // Force fetch latest data from DB to ensure UI is 100% accurate
       // This prevents issues where local state might drift or have type errors (e.g. string/number)
@@ -1951,13 +1758,13 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
       } catch (fetchErr) {
         console.warn('Failed to refresh product after stock adjustment, falling back to local update', fetchErr);
         // Fallback optimistic update
-        const stockChange = type === 'IN' ? qty : -qty;
+        const stockChange = type === 'IN' ? quantity : -quantity;
         setProducts(prev => prev.map(p =>
           p.id === productId ? { ...p, stock: Math.max(0, Number(p.stock || 0) + stockChange) } : p
         ));
       }
 
-      console.log(`📦 Stock adjusted: ${productId} ${type} ${qty} (${reason})`);
+      console.log(`📦 Stock adjusted: ${productId} ${type} ${quantity} (${reason})`);
     } catch (error) {
       console.error(error);
       addNotification('alert', 'Failed to adjust stock');
@@ -2078,7 +1885,7 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
 
       // Update job status
       const updatedJob = await wmsJobsService.update(jobId, {
-        assignedTo: employee.name,
+        assignedTo: employee.id,
         status: 'In-Progress'
       });
 
@@ -2091,7 +1898,7 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
     }
   };
 
-  const updateJobItem = async (jobId: string, itemId: number, status: 'Pending' | 'Picked' | 'Short' | 'Skipped', qty: number) => {
+  const updateJobItem = async (jobId: string, itemId: number, status: JobItem['status'], qty: number) => {
     try {
       const job = jobs.find(j => j.id === jobId);
       if (!job) return;
@@ -2187,7 +1994,11 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
 
   const completeJob = async (jobId: string, employeeName: string, skipValidation = false) => {
     let pointsResult = null;
+    const stage = (name: string) => console.log(`[ST-PACK] 🕒 Stage: ${name} (Job: ${jobId})`);
+    console.time(`completeJob-${jobId}`);
+
     try {
+      stage('Start');
       console.log(`🏁 completeJob called for: ${jobId} (skipValidation: ${skipValidation})`);
       const job = jobs.find(j => j.id === jobId);
 
@@ -2197,7 +2008,6 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
       }
 
       // Validate that all items are actually completed (Picked or Short)
-      // Skip validation if caller already verified (e.g., handleItemScan)
       if (!skipValidation && job.lineItems && job.lineItems.length > 0) {
         const allItemsProcessed = job.lineItems.every(item =>
           item.status === 'Picked' || item.status === 'Short'
@@ -2205,41 +2015,41 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
 
         if (!allItemsProcessed) {
           console.warn(`⚠️ Job ${jobId} has unprocessed items, not completing yet`);
-          const pendingItems = job.lineItems.filter(i => i.status === 'Pending');
-          console.log(`   Pending items: ${pendingItems.length}`, pendingItems.map(i => i.name));
           return;
         }
       }
 
-      console.log(`✅ All items processed. Completing job ${jobId} (${job.type})`);
-
+      stage('DB Update WMS Job');
       // Update in database
       await wmsJobsService.complete(jobId);
       console.log(`💾 Database updated for job ${jobId}`);
 
+      stage('Local State Update');
       // Update local state immediately - this ensures the UI updates
-      // Use functional update to ensure we preserve the latest lineItems from previous updates
-      setJobs(prev => prev.map(j => j.id === jobId ? { ...j, status: 'Completed' as const } : j));
-      console.log(`🔄 Local state updated for job ${jobId}`);
+      setJobs(prev => prev.map(j => {
+        if (j.id === jobId) {
+          const updatedLineItems = j.lineItems?.map(item => ({
+            ...item,
+            status: (item.status === 'Short' ? 'Short' : 'Completed') as any
+          }));
+          return { ...j, status: 'Completed' as const, lineItems: updatedLineItems };
+        }
+        return j;
+      }));
 
       addNotification('success', `Job ${job.jobNumber || jobId} completed!`);
 
       // ═══════════════════════════════════════════════════════════════
-      // PUTAWAY LOGIC - Update Product Location
+      // PUTAWAY LOGIC
       // ═══════════════════════════════════════════════════════════════
       if (job.type === 'PUTAWAY' && job.location) {
-        console.log(`📦 Updating product location for PUTAWAY job ${jobId} to ${job.location}`);
-
-        // Use Promise.all to update all items in parallel
+        stage('Putaway Location Update');
         await Promise.all(job.lineItems.map(async (item) => {
           if (item.status === 'Picked' && item.productId) {
-            // Update product location in DB
             try {
-              // We use updateProduct which handles both local state and Supabase
               const product = products.find(p => p.id === item.productId);
               if (product) {
                 await updateProduct({ ...product, location: job.location! });
-                console.log(`✅ Updated location for product ${product.name} to ${job.location}`);
               }
             } catch (err) {
               console.error(`❌ Failed to update location for product ${item.productId}`, err);
@@ -2249,9 +2059,9 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
       }
 
       // ═══════════════════════════════════════════════════════════════
-      // GAMIFICATION - Award Points for Job Completion
+      // GAMIFICATION
       // ═══════════════════════════════════════════════════════════════
-      // Check if warehouse bonus is enabled globally and for this specific site
+      stage('Gamification Points');
       const jobSite = sites.find(s => s.id === job.siteId);
       const warehouseIsEligible = jobSite?.warehouseBonusEnabled !== false;
 
@@ -2261,17 +2071,13 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
         );
 
         if (assignedEmployee) {
-          // Check if the employee's role is eligible for points
           const eligibleRoles = settings.warehousePointsEligibleRoles || [];
           const employeeRoleLower = assignedEmployee.role?.toLowerCase() || '';
           const isRoleEligible = eligibleRoles.length === 0 ||
             eligibleRoles.find(r => r.role.toLowerCase() === employeeRoleLower)?.enabled !== false;
 
-          if (!isRoleEligible) {
-            console.log(`🎮 Skipping points for ${assignedEmployee.name} - role "${assignedEmployee.role}" is not eligible`);
-          } else {
-            // Calculate points based on configurable rules
-            const rules = settings.warehousePointRules || DEFAULT_WAREHOUSE_POINT_RULES;
+          if (isRoleEligible) {
+            const rules = settings.warehousePointRules || []; // No defaults - only user-configured rules
             const getPointsForAction = (action: WarehousePointRule['action']) => {
               const rule = rules.find(r => r.action === action && r.enabled);
               return rule ? rule.points : 0;
@@ -2285,28 +2091,12 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
             if (job.lineItems && job.lineItems.length > 0) {
               const pickedItems = job.lineItems.filter(i => i.status === 'Picked').length;
               const accuracy = (pickedItems / job.lineItems.length) * 100;
-              if (accuracy === 100) {
-                accuracyBonus = getPointsForAction('ACCURACY_100');
-              } else if (accuracy >= 95) {
-                accuracyBonus = getPointsForAction('ACCURACY_95');
-              }
+              if (accuracy === 100) accuracyBonus = getPointsForAction('ACCURACY_100');
             }
 
             const totalPoints = basePoints + itemBonus + accuracyBonus;
+            awardPoints(assignedEmployee.id, totalPoints, 'JOB_COMPLETE', `Completed ${job.type} job ${job.jobNumber || jobId}`, jobId);
 
-            // Award the points
-            awardPoints(
-              assignedEmployee.id,
-              totalPoints,
-              'job_complete',
-              `Completed ${job.type} job ${job.jobNumber || jobId}`,
-              jobId
-            );
-
-
-            console.log(`🎮 Awarded ${totalPoints} points to ${assignedEmployee.name} for completing job`);
-
-            // Return points data for UI popup
             pointsResult = {
               points: totalPoints,
               breakdown: [
@@ -2319,264 +2109,145 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
         }
       }
 
-      // Log Job Completion
-      logSystemEvent(
-        'Job Completed',
-        `Completed ${job.type} job ${job.jobNumber || jobId}`,
-        employeeName || 'System',
-        'Inventory'
-      );
-
       // --- JOB CHAINING LOGIC ---
+      stage('Job Chaining');
       if (job && job.type === 'PICK' && job.orderRef) {
-        // 1. Create PACK Job
-        const packJob: WMSJob = {
-          id: `PACK-${Date.now()}`,
+        stage('Chaining: PICK -> PACK');
+        const packJob = await wmsJobsService.create({
           siteId: job.siteId,
           site_id: job.site_id,
           type: 'PACK',
-          status: 'Pending',
           priority: job.priority,
-          location: 'Packing Station 1',
-          assignedTo: '',
+          status: 'Pending',
           items: job.items,
-          lineItems: job.lineItems.map(item => ({ ...item, status: 'Pending', pickedQty: 0 })), // Reset for packing
+          lineItems: job.lineItems.map(item => ({ ...item, status: 'Pending' as JobItem['status'], pickedQty: 0 })),
+          location: 'Packing Station 1',
           orderRef: job.orderRef,
+          jobNumber: `PCK-${job.orderRef?.slice(-4) || Date.now().toString().slice(-4)}${Math.random().toString(36).substr(2, 3).toUpperCase()}`,
           sourceSiteId: job.sourceSiteId,
-          source_site_id: job.source_site_id,
-          destSiteId: job.destSiteId,
-          dest_site_id: job.dest_site_id
-        };
+          destSiteId: job.destSiteId
+        });
+        // Add to state only if it doesn't already exist (prevent double entries from real-time)
+        setJobs(prev => prev.find(j => j.id === packJob.id) ? prev : [packJob, ...prev]);
 
-        await wmsJobsService.create(packJob);
-        setJobs(prev => [packJob, ...prev]); // Optimistic add
-
-        // 2. Check if this is for a SALE or a TRANSFER
         const sale = sales.find(s => s.id === job.orderRef);
-        // Robust check: Check jobs list OR if orderRef looks like a Transfer ID
-        const transfer = jobs.find(j => j.id === job.orderRef && j.type === 'TRANSFER');
-        const isTransfer = transfer || (job.orderRef && (job.orderRef.startsWith('TRF-') || job.orderRef.includes('TRANSFER')));
+        const transfer = jobs.find(j => (j.id === job.orderRef || j.jobNumber === job.orderRef) && j.type === 'TRANSFER');
+        const isTransfer = !!transfer || (job.orderRef && (job.orderRef.startsWith('TRF-')));
 
         if (sale) {
-          // Update Sale Status to Packing
           await salesService.update(sale.id, { fulfillmentStatus: 'Packing' });
           setSales(prev => prev.map(s => s.id === sale.id ? { ...s, fulfillmentStatus: 'Packing' } : s));
-          addNotification('success', 'Pick complete! Pack job created for Sale.');
         } else if (isTransfer) {
-          // Update Transfer Status to Picked (ready for packing)
-          // We can send partial update without needing the full transfer object
-          const transferId = transfer?.id || job.orderRef!;
-          console.log(`📦 Updating Transfer ${transferId} to Picked`);
+          const tId = transfer?.id || job.orderRef;
+          await wmsJobsService.update(tId, { transferStatus: 'Picked' });
+          setJobs(prev => prev.map(j => j.id === tId ? { ...j, transferStatus: 'Picked' } : j));
+          setTransfers(prev => prev.map(t => t.id === tId ? { ...t, transferStatus: 'Picked' } : t));
 
-          await wmsJobsService.update(transferId, { transferStatus: 'Picked' });
-
-          setJobs(prev => prev.map(j => j.id === transferId ? { ...j, transferStatus: 'Picked' } : j));
-          // Also update transfers list if it exists there
-          setTransfers(prev => prev.map(t => t.id === transferId ? { ...t, transferStatus: 'Picked' } : t));
-
-          // 🔥 REDUCE STOCK at source when PICK is completed
-          // This ensures inventory reflects picked items immediately
-          console.log(`📦 Reducing stock for ${job.lineItems?.length || 0} picked items at source...`);
           if (job.lineItems) {
             for (const item of job.lineItems) {
               if (item.productId && item.expectedQty > 0) {
                 const product = products.find(p => p.id === item.productId);
                 if (product) {
-                  const pickedQty = item.pickedQty || item.expectedQty;
-
-                  // Use adjustStock which properly updates DB and logs movement
-                  await adjustStock(
-                    product.id,
-                    pickedQty,
-                    'OUT',
-                    `Transfer to ${sites.find(s => s.id === job.destSiteId)?.name || 'destination store'}`,
-                    employeeName
-                  );
-
-                  console.log(`  📤 Reduced ${product.name}: -${pickedQty}`);
+                  await adjustStock(product.id, item.pickedQty || item.expectedQty, 'OUT', `Transfer to ${sites.find(s => s.id === job.destSiteId)?.name || 'store'}`, employeeName);
                 }
               }
             }
           }
-
-          addNotification('success', 'Transfer picked! Stock reduced. Pack job created.');
-        } else {
-          addNotification('success', 'Pick complete! Pack job created.');
         }
       } else if (job && job.type === 'PACK' && job.orderRef) {
-        // PACK Complete -> Check if cross-warehouse (needs dispatch) or local (direct shipped)
+        stage('Chaining: PACK -> Next');
         const isCrossWarehouse = job.sourceSiteId && job.destSiteId && job.sourceSiteId !== job.destSiteId;
         const sale = sales.find(s => s.id === job.orderRef);
-
-        // Robust check for transfer
-        const transfer = jobs.find(j => j.id === job.orderRef && j.type === 'TRANSFER');
-        const isTransfer = transfer || (job.orderRef && (job.orderRef.startsWith('TRF-') || job.orderRef.includes('TRANSFER')));
-        const transferId = transfer?.id || job.orderRef!;
+        const transfer = jobs.find(j => (j.id === job.orderRef || j.jobNumber === job.orderRef) && j.type === 'TRANSFER');
+        const isTransfer = !!transfer || (job.orderRef && (job.orderRef.startsWith('TRF-')));
+        const tId = transfer?.id || job.orderRef;
 
         if (isCrossWarehouse) {
-          // CROSS-WAREHOUSE: Create DISPATCH job for driver delivery
-          const dispatchJobId = `DISPATCH-${Date.now()}`;
-          const dispatchJob: WMSJob = {
-            id: dispatchJobId,
+          stage('Cross-Warehouse Dispatch');
+          const dispatchJob = await wmsJobsService.create({
             siteId: job.siteId,
             site_id: job.site_id,
             type: 'DISPATCH',
-            status: 'Pending',
             priority: job.priority,
-            location: 'Dispatch Bay',
-            assignedTo: '',
+            status: 'Pending',
             items: job.items,
-            lineItems: job.lineItems.map(item => ({ ...item, status: 'Pending' })),
+            lineItems: job.lineItems.map(item => ({ ...item, status: 'Pending' as JobItem['status'] })),
+            location: 'Dispatch Bay',
             orderRef: job.orderRef,
+            jobNumber: `DSP-${job.orderRef?.slice(-4) || Date.now().toString().slice(-4)}${Math.random().toString(36).substr(2, 3).toUpperCase()}`,
             sourceSiteId: job.sourceSiteId,
-            source_site_id: job.source_site_id,
             destSiteId: job.destSiteId,
-            dest_site_id: job.dest_site_id,
-            jobNumber: `DSP-${job.orderRef?.slice(-4) || dispatchJobId.slice(-4)}`,
-            transferStatus: 'Packed' // Ready for dispatch
-          };
+            transferStatus: 'Packed'
+          });
 
-          await wmsJobsService.create(dispatchJob);
-          setJobs(prev => [dispatchJob, ...prev]);
+          setJobs(prev => prev.find(j => j.id === dispatchJob.id) ? prev : [dispatchJob, ...prev]);
 
-          // Update status based on whether it's a sale or transfer
           if (sale) {
             await salesService.update(sale.id, { fulfillmentStatus: 'Shipped' });
             setSales(prev => prev.map(s => s.id === sale.id ? { ...s, fulfillmentStatus: 'Shipped' } : s));
           } else if (isTransfer) {
-            // Update Transfer status to Packed
-            await wmsJobsService.update(transferId, { transferStatus: 'Packed' });
-            setJobs(prev => prev.map(j => j.id === transferId ? { ...j, transferStatus: 'Packed' } : j));
-            setTransfers(prev => prev.map(t => t.id === transferId ? { ...t, transferStatus: 'Packed' } : t));
+            await wmsJobsService.update(tId, { transferStatus: 'Packed' });
+            setJobs(prev => prev.map(j => j.id === tId ? { ...j, transferStatus: 'Packed' } : j));
+            setTransfers(prev => prev.map(t => t.id === tId ? { ...t, transferStatus: 'Packed' } : t));
           }
-
-          const destSite = sites.find(s => s.id === job.destSiteId);
-          addNotification('success', `Packed! Dispatch job created for delivery to ${destSite?.name || 'destination'}`);
-          console.log(`🚚 Created DISPATCH job ${dispatchJobId} for cross-warehouse delivery to ${destSite?.name}`);
         } else {
-          // LOCAL: Direct fulfillment (no dispatch needed)
+          stage('Local Fulfillment');
           if (sale) {
             await salesService.update(sale.id, { fulfillmentStatus: 'Delivered' });
             setSales(prev => prev.map(s => s.id === sale.id ? { ...s, fulfillmentStatus: 'Delivered' } : s));
           } else if (isTransfer) {
-            // For local transfers (same site), mark as Packed directly
-            await wmsJobsService.update(transferId, { transferStatus: 'Packed' });
-            setJobs(prev => prev.map(j => j.id === transferId ? { ...j, transferStatus: 'Packed' } : j));
-            setTransfers(prev => prev.map(t => t.id === transferId ? { ...t, transferStatus: 'Packed' } : t));
-          }
-          addNotification('success', 'Packed and ready!');
-        }
-      } else if (job && job.type === 'PUTAWAY') {
-        // PUTAWAY Complete - Stock was already updated in handleItemScan via adjustStock()
-        // Just log completion and update product locations if needed
-        for (const item of job.lineItems) {
-          if (item.status === 'Picked') {
-            const product = products.find(p => p.id === item.productId);
-            if (product) {
-              // Only update location if job has a destination location
-              if (job.location && job.location !== 'Receiving Dock') {
-                await productsService.update(product.id, { location: job.location });
-                setProducts(prev => prev.map(p => p.id === product.id ? { ...p, location: job.location } : p));
-              }
-            }
+            await wmsJobsService.update(tId, { transferStatus: 'Packed' });
+            setJobs(prev => prev.map(j => j.id === tId ? { ...j, transferStatus: 'Packed' } : j));
+            setTransfers(prev => prev.map(t => t.id === tId ? { ...t, transferStatus: 'Packed' } : t));
           }
         }
-        addNotification('success', 'Putaway complete! Items stored successfully.');
       } else if (job && job.type === 'DISPATCH') {
-        // DISPATCH Complete -> Mark as Delivered and update inventory
+        stage('Dispatch Completion');
         const sale = sales.find(s => s.id === job.orderRef);
-        // Robust check for transfer
-        const transfer = jobs.find(j => j.id === job.orderRef && j.type === 'TRANSFER');
-        const isTransfer = transfer || (job.orderRef && (job.orderRef.startsWith('TRF-') || job.orderRef.includes('TRANSFER')));
-        const transferId = transfer?.id || job.orderRef!;
+        const transfer = jobs.find(j => (j.id === job.orderRef || j.jobNumber === job.orderRef) && j.type === 'TRANSFER');
+        const isTransfer = !!transfer || (job.orderRef && (job.orderRef.startsWith('TRF-')));
+        const tId = transfer?.id || job.orderRef;
 
-        const destSite = sites.find(s => s.id === job.destSiteId);
-        const sourceSite = sites.find(s => s.id === job.sourceSiteId);
-
-        // Update sale or transfer status to Delivered
         if (sale) {
           await salesService.update(sale.id, { fulfillmentStatus: 'Delivered' });
           setSales(prev => prev.map(s => s.id === sale.id ? { ...s, fulfillmentStatus: 'Delivered' } : s));
         } else if (isTransfer) {
-          await wmsJobsService.update(transferId, { transferStatus: 'In-Transit' });
-          setJobs(prev => prev.map(j => j.id === transferId ? { ...j, transferStatus: 'In-Transit' } : j));
-          setTransfers(prev => prev.map(t => t.id === transferId ? { ...t, transferStatus: 'In-Transit' } : t));
+          await wmsJobsService.update(tId, { transferStatus: 'Delivered' });
+          setJobs(prev => prev.map(j => j.id === tId ? { ...j, transferStatus: 'Delivered' } : j));
+          setTransfers(prev => prev.map(t => t.id === tId ? { ...t, transferStatus: 'Delivered' } : t));
         }
 
-        // Process inventory updates
         if (job.destSiteId && job.lineItems) {
-          console.log(`📦 DISPATCH Complete: Processing inventory for ${destSite?.name || job.destSiteId}`);
-
+          stage('Inventory Destination Update');
           for (const item of job.lineItems) {
             if (item.productId && item.expectedQty > 0) {
-              // Find source product to get details
               const sourceProduct = products.find(p => p.id === item.productId);
-
               if (sourceProduct) {
-                // NOTE: Stock was already decremented at PICK completion
-                // DISPATCH now only handles destination increment
-
-                // 2. INCREMENT destination store inventory
-                const destProduct = products.find(p =>
-                  p.siteId === job.destSiteId && p.sku === sourceProduct.sku
-                );
-
+                const destProduct = products.find(p => p.siteId === job.destSiteId && p.sku === sourceProduct.sku);
                 if (destProduct) {
-                  // Update existing product stock at destination
                   const newStock = destProduct.stock + item.expectedQty;
                   await productsService.update(destProduct.id, { stock: newStock });
-                  setProducts(prev => prev.map(p =>
-                    p.id === destProduct.id ? { ...p, stock: newStock } : p
-                  ));
-                  console.log(`  📥 Incremented ${sourceProduct.name} at ${destSite?.name}: +${item.expectedQty} (now ${newStock})`);
+                  setProducts(prev => prev.map(p => p.id === destProduct.id ? { ...p, stock: newStock } : p));
                 } else {
-                  // Create new product entry at destination store
-                  const newProduct = {
-                    ...sourceProduct,
-                    id: `${sourceProduct.sku}-${job.destSiteId}-${Date.now()}`,
-                    siteId: job.destSiteId,
-                    site_id: job.destSiteId,
-                    stock: item.expectedQty,
-                    location: '', // New location at store
-                    posReceivedAt: new Date().toISOString(),
-                    posReceivedBy: employeeName
-                  };
-
+                  const newProduct = { ...sourceProduct, id: `${sourceProduct.sku}-${job.destSiteId}-${Date.now()}`, siteId: job.destSiteId, site_id: job.destSiteId, stock: item.expectedQty, location: '', posReceivedAt: new Date().toISOString(), posReceivedBy: employeeName };
                   const createdProduct = await productsService.create(newProduct);
                   setProducts(prev => [createdProduct, ...prev]);
-                  console.log(`  ✅ Created ${sourceProduct.name} at ${destSite?.name} with stock ${item.expectedQty}`);
                 }
-
-                // Log IN movement at destination
-                const inMovement: StockMovement = {
-                  id: `MOV-IN-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
-                  siteId: job.destSiteId,
-                  site_id: job.destSiteId,
-                  productId: item.productId,
-                  productName: sourceProduct.name,
-                  type: 'IN',
-                  quantity: item.expectedQty,
-                  date: new Date().toISOString(),
-                  performedBy: employeeName,
-                  reason: `Transfer received from ${sourceSite?.name || 'warehouse'}`
-                };
-                setMovements(prev => [inMovement, ...prev]);
               }
             }
           }
         }
-
-        addNotification('success', `Dispatch complete! Delivered to ${destSite?.name || 'destination store'}`);
-        console.log(`🎉 DISPATCH job ${jobId} completed - delivered to ${destSite?.name}`);
       }
 
-      addNotification('success', 'Job completed');
-      logSystemEvent('Job Completed', `Job ${jobId} completed`, employeeName, 'Inventory');
-
+      stage('Final Logs');
+      logSystemEvent('Job Completed', `Job ${job.jobNumber || jobId} completed`, employeeName, 'Inventory');
+      console.timeEnd(`completeJob-${jobId}`);
       return pointsResult;
     } catch (error) {
-      console.error(error);
+      console.error(`❌ completeJob failed for ${jobId}:`, error);
+      console.timeEnd(`completeJob-${jobId}`);
       addNotification('alert', 'Failed to complete job');
+      throw error;
     }
   };
 
@@ -2619,11 +2290,55 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
     }
   };
 
+  const addSchedule = useCallback(async (schedule: StaffSchedule, user: string) => {
+    try {
+      const newSchedule = await schedulesService.create(schedule);
+      if (newSchedule) {
+        setSchedules(prev => [...prev, newSchedule]);
+        addNotification('success', `Schedule created for ${schedule.employeeName}`);
+        logSystemEvent('Create Schedule', `Scheduled ${schedule.employeeName} for ${schedule.date}`, user, 'HR');
+      }
+      return newSchedule || undefined;
+    } catch (error) {
+      console.error('Failed to add schedule:', error);
+      addNotification('alert', 'Failed to create schedule');
+      return undefined;
+    }
+  }, [addNotification, logSystemEvent]);
+
+  const updateSchedule = useCallback(async (id: string, updates: Partial<StaffSchedule>, user: string) => {
+    try {
+      const updated = await schedulesService.update(id, updates);
+      if (updated) {
+        setSchedules(prev => prev.map(s => s.id === id ? updated : s));
+        addNotification('success', 'Schedule updated');
+        logSystemEvent('Update Schedule', `Updated schedule ${id}`, user, 'HR');
+      }
+      return updated || undefined;
+    } catch (error) {
+      console.error('Failed to update schedule:', error);
+      addNotification('alert', 'Failed to update schedule');
+      return undefined;
+    }
+  }, [addNotification, logSystemEvent]);
+
+  const deleteSchedule = useCallback(async (id: string, user: string) => {
+    try {
+      await schedulesService.delete(id);
+      setSchedules(prev => prev.filter(s => s.id !== id));
+      addNotification('success', 'Schedule removed');
+      logSystemEvent('Delete Schedule', `Deleted schedule ${id}`, user, 'HR');
+    } catch (error) {
+      console.error('Failed to delete schedule:', error);
+      addNotification('alert', 'Failed to remove schedule');
+    }
+  }, [addNotification, logSystemEvent]);
+
   // ═══════════════════════════════════════════════════════════════
   // GAMIFICATION - Worker Points System
   // ═══════════════════════════════════════════════════════════════
 
-  const getLevelFromPoints = (totalPoints: number) => {
+  const getLevelFromPoints = useCallback((totalPoints: number) => {
     const levels = POINTS_CONFIG.LEVELS;
     let currentLevel = levels[0];
     for (let i = levels.length - 1; i >= 0; i--) {
@@ -2633,13 +2348,13 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
       }
     }
     return currentLevel;
-  };
+  }, []);
 
-  const getWorkerPoints = (employeeId: string): WorkerPoints | undefined => {
+  const getWorkerPoints = useCallback((employeeId: string): WorkerPoints | undefined => {
     return workerPoints.find(wp => wp.employeeId === employeeId);
-  };
+  }, [workerPoints]);
 
-  const awardPoints = async (
+  const awardPoints = useCallback(async (
     employeeId: string,
     points: number,
     type: PointsTransaction['type'],
@@ -2654,7 +2369,7 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
 
     // Create transaction
     const transaction: PointsTransaction = {
-      id: `TXN-${Date.now()}`,
+      id: crypto.randomUUID(),
       employeeId,
       jobId,
       points,
@@ -2676,38 +2391,62 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
       const existing = prev.find(wp => wp.employeeId === employeeId);
       let updatedOrNewPoint: WorkerPoints;
 
-      if (existing) {
-        // Update existing
-        const isNewDay = !existing.lastJobCompletedAt ||
-          existing.lastJobCompletedAt.split('T')[0] !== today;
+      // Logic for period reset
+      const checkReset = (wp: WorkerPoints) => {
+        const lastUpdate = new Date(wp.lastUpdated);
+        const currentDate = new Date();
 
+        // Reset Today
+        const isNewDay = lastUpdate.toDateString() !== currentDate.toDateString();
+
+        // Reset Weekly (Monday starts week)
+        const getWeekNumber = (date: Date) => {
+          const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+          const dayNum = d.getUTCDay() || 7;
+          d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+          const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+          return Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1) / 7);
+        };
+        const isNewWeek = getWeekNumber(lastUpdate) !== getWeekNumber(currentDate);
+
+        // Reset Monthly
+        const isNewMonth = lastUpdate.getMonth() !== currentDate.getMonth() || lastUpdate.getFullYear() !== currentDate.getFullYear();
+
+        return {
+          todayPoints: isNewDay ? 0 : wp.todayPoints,
+          weeklyPoints: isNewWeek ? 0 : wp.weeklyPoints,
+          monthlyPoints: isNewMonth ? 0 : wp.monthlyPoints,
+          isNewDay
+        };
+      };
+
+      if (existing) {
+        const resetData = checkReset(existing);
         const updatedPoints = existing.totalPoints + points;
         const level = getLevelFromPoints(updatedPoints);
 
-        // Calculate bonus for warehouse workers (Individual based)
+        const currentMonthly = resetData.monthlyPoints + points;
         const bonusTiers = settings.bonusTiers || DEFAULT_BONUS_TIERS;
-        const currentPointsForPeriod = existing.monthlyPoints + points; // Use monthly points as the period
         const tier = bonusTiers.find(t =>
-          currentPointsForPeriod >= t.minPoints && (t.maxPoints === null || currentPointsForPeriod <= t.maxPoints)
+          currentMonthly >= t.minPoints && (t.maxPoints === null || currentMonthly <= t.maxPoints)
         );
 
         updatedOrNewPoint = {
           ...existing,
           totalPoints: updatedPoints,
-          todayPoints: isNewDay ? points : existing.todayPoints + points,
-          weeklyPoints: existing.weeklyPoints + points,
-          monthlyPoints: currentPointsForPeriod,
-          totalJobsCompleted: type === 'job_complete' ? existing.totalJobsCompleted + 1 : existing.totalJobsCompleted,
-          lastJobCompletedAt: type === 'job_complete' ? now : existing.lastJobCompletedAt,
+          todayPoints: resetData.todayPoints + points,
+          weeklyPoints: resetData.weeklyPoints + points,
+          monthlyPoints: currentMonthly,
+          totalJobsCompleted: type === 'JOB_COMPLETE' ? existing.totalJobsCompleted + 1 : existing.totalJobsCompleted,
+          lastJobCompletedAt: type === 'JOB_COMPLETE' ? now : existing.lastJobCompletedAt,
           lastUpdated: now,
           level: level.level,
           levelTitle: level.title,
           currentBonusTier: tier?.tierName,
-          estimatedBonus: tier ? tier.bonusAmount + (currentPointsForPeriod * (tier.bonusPerPoint || 0)) : 0,
-          bonusPeriodPoints: currentPointsForPeriod,
+          estimatedBonus: tier ? tier.bonusAmount + (currentMonthly * (tier.bonusPerPoint || 0)) : 0,
+          bonusPeriodPoints: currentMonthly,
         };
 
-        // Persist Update
         workerPointsService.update(existing.id, updatedOrNewPoint).catch(err =>
           console.error('Failed to update worker points:', err)
         );
@@ -2716,16 +2455,13 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
       } else {
         // Create new
         const level = getLevelFromPoints(points);
-
-        // Calculate bonus for warehouse workers
         const bonusTiers = settings.bonusTiers || DEFAULT_BONUS_TIERS;
-        const currentPointsForPeriod = points;
         const tier = bonusTiers.find(t =>
-          currentPointsForPeriod >= t.minPoints && (t.maxPoints === null || currentPointsForPeriod <= t.maxPoints)
+          points >= t.minPoints && (t.maxPoints === null || points <= t.maxPoints)
         );
 
         const newWorkerPoints: WorkerPoints = {
-          id: `WP-${Date.now()}`,
+          id: crypto.randomUUID(),
           siteId: employee.siteId || employee.site_id || '',
           employeeId,
           employeeName: employee.name,
@@ -2734,26 +2470,24 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
           weeklyPoints: points,
           monthlyPoints: points,
           todayPoints: points,
-          totalJobsCompleted: type === 'job_complete' ? 1 : 0,
+          totalJobsCompleted: type === 'JOB_COMPLETE' ? 1 : 0,
           totalItemsPicked: 0,
           averageAccuracy: 100,
           averageTimePerJob: 0,
           currentStreak: 1,
           longestStreak: 1,
-          lastJobCompletedAt: type === 'job_complete' ? now : undefined,
+          lastJobCompletedAt: type === 'JOB_COMPLETE' ? now : undefined,
           lastUpdated: now,
           achievements: [],
           rank: prev.length + 1,
           level: level.level,
           levelTitle: level.title,
           currentBonusTier: tier?.tierName,
-          estimatedBonus: tier ? tier.bonusAmount + (currentPointsForPeriod * (tier.bonusPerPoint || 0)) : 0,
-          bonusPeriodPoints: currentPointsForPeriod,
+          estimatedBonus: tier ? tier.bonusAmount + (points * (tier.bonusPerPoint || 0)) : 0,
+          bonusPeriodPoints: points,
         };
 
         updatedOrNewPoint = newWorkerPoints;
-
-        // Persist Creation
         workerPointsService.create(newWorkerPoints).catch(err =>
           console.error('Failed to create worker points:', err)
         );
@@ -2763,9 +2497,9 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
     });
 
     console.log(`🎮 Awarded ${points} points to ${employee.name}: ${description}`);
-  };
+  }, [employees, settings, getLevelFromPoints]);
 
-  const getLeaderboard = (siteId?: string, period: 'today' | 'week' | 'month' | 'all' = 'week'): WorkerPoints[] => {
+  const getLeaderboard = useCallback((siteId?: string, period: 'today' | 'week' | 'month' | 'all' = 'week'): WorkerPoints[] => {
     let filtered = workerPoints;
 
     if (siteId) {
@@ -2781,15 +2515,15 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
         default: return b.totalPoints - a.totalPoints;
       }
     }).map((wp, index) => ({ ...wp, rank: index + 1 }));
-  };
+  }, [workerPoints]);
 
   // ==================== STORE POINTS (POS TEAM BONUS) ====================
 
-  const getStorePoints = (siteId: string): StorePoints | undefined => {
+  const getStorePoints = useCallback((siteId: string): StorePoints | undefined => {
     return storePoints.find(sp => sp.siteId === siteId);
-  };
+  }, [storePoints]);
 
-  const awardStorePoints = (
+  const awardStorePoints = useCallback((
     siteId: string,
     points: number,
     revenue: number,
@@ -2799,29 +2533,33 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
     if (!site) return;
 
     const now = new Date().toISOString();
-    const today = new Date().toISOString().split('T')[0];
 
     setStorePoints(prev => {
       const existing = prev.find(sp => sp.siteId === siteId);
+      let updatedOrNew: StorePoints;
 
       if (existing) {
         // Check if it's a new day - reset today's points
-        const lastUpdateDay = existing.lastUpdated.split('T')[0];
-        const isNewDay = lastUpdateDay !== today;
-
-        // Check if it's a new week - reset weekly points
         const lastUpdateDate = new Date(existing.lastUpdated);
         const currentDate = new Date();
-        const weekDiff = Math.floor((currentDate.getTime() - lastUpdateDate.getTime()) / (7 * 24 * 60 * 60 * 1000));
-        const isNewWeek = weekDiff >= 1 || (currentDate.getDay() < lastUpdateDate.getDay() && !isNewDay);
+        const isNewDay = lastUpdateDate.toDateString() !== currentDate.toDateString();
+
+        // Check if it's a new week - reset weekly points
+        const getWeekNumber = (date: Date) => {
+          const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+          const dayNum = d.getUTCDay() || 7;
+          d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+          const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+          return Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1) / 7);
+        };
+        const isNewWeek = getWeekNumber(lastUpdateDate) !== getWeekNumber(currentDate);
 
         // Check if it's a new month - reset monthly points
-        const isNewMonth = lastUpdateDate.getMonth() !== currentDate.getMonth() ||
-          lastUpdateDate.getFullYear() !== currentDate.getFullYear();
+        const isNewMonth = lastUpdateDate.getMonth() !== currentDate.getMonth() || lastUpdateDate.getFullYear() !== currentDate.getFullYear();
 
-        const updatedTodayPoints = isNewDay ? points : existing.todayPoints + points;
-        const updatedWeeklyPoints = isNewWeek ? points : existing.weeklyPoints + points;
-        const updatedMonthlyPoints = isNewMonth ? points : existing.monthlyPoints + points;
+        const updatedTodayPoints = isNewDay ? points : (existing.todayPoints || 0) + points;
+        const updatedWeeklyPoints = isNewWeek ? points : (existing.weeklyPoints || 0) + points;
+        const updatedMonthlyPoints = isNewMonth ? points : (existing.monthlyPoints || 0) + points;
 
         // Calculate current tier and bonus
         const tiers = settings.posBonusTiers || DEFAULT_POS_BONUS_TIERS;
@@ -2832,20 +2570,26 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
           ? tier.bonusAmount + (updatedMonthlyPoints * (tier.bonusPerPoint || 0))
           : 0;
 
-        return prev.map(sp => sp.siteId === siteId ? {
-          ...sp,
-          totalPoints: sp.totalPoints + points,
+        updatedOrNew = {
+          ...existing,
+          totalPoints: existing.totalPoints + points,
           todayPoints: updatedTodayPoints,
           weeklyPoints: updatedWeeklyPoints,
           monthlyPoints: updatedMonthlyPoints,
-          totalTransactions: sp.totalTransactions + transactionCount,
-          totalRevenue: sp.totalRevenue + revenue,
-          averageTicketSize: (sp.totalRevenue + revenue) / (sp.totalTransactions + transactionCount),
-          lastTransactionAt: now,
-          lastUpdated: now,
+          totalTransactions: existing.totalTransactions + transactionCount,
+          totalRevenue: existing.totalRevenue + revenue,
+          averageTicketSize: (existing.totalRevenue + revenue) / (existing.totalTransactions + transactionCount),
+          lastTransactionAt: currentDate.toISOString(),
+          lastUpdated: currentDate.toISOString(),
           currentTier: tier?.tierName,
           estimatedBonus,
-        } : sp);
+        };
+
+        storePointsService.update(existing.id, updatedOrNew).catch(err =>
+          console.error('Failed to update store points:', err)
+        );
+
+        return prev.map(sp => sp.siteId === siteId ? updatedOrNew : sp);
       } else {
         // Create new store points record
         const tiers = settings.posBonusTiers || DEFAULT_POS_BONUS_TIERS;
@@ -2854,7 +2598,7 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
         );
 
         const newStorePoints: StorePoints = {
-          id: `SP-${Date.now()}`,
+          id: crypto.randomUUID(),
           siteId,
           siteName: site.name,
           totalPoints: points,
@@ -2871,12 +2615,16 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
           estimatedBonus: tier ? tier.bonusAmount + (points * (tier.bonusPerPoint || 0)) : 0,
         };
 
+        storePointsService.create(newStorePoints).catch(err =>
+          console.error('Failed to create store points:', err)
+        );
+
         return [...prev, newStorePoints];
       }
     });
-  };
+  }, [sites, settings]);
 
-  const calculateWorkerBonusShare = (siteId: string, employeeRole: string): WorkerBonusShare | undefined => {
+  const calculateWorkerBonusShare = useCallback((siteId: string, employeeRole: string): WorkerBonusShare | undefined => {
     const sp = storePoints.find(s => s.siteId === siteId);
     if (!sp || !sp.estimatedBonus) return undefined;
 
@@ -2896,13 +2644,13 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
       personalShare: (sp.estimatedBonus * roleConfig.percentage) / 100,
       siteId,
     };
-  };
+  }, [storePoints, settings, employees]);
 
-  const getStoreLeaderboard = (): StorePoints[] => {
+  const getStoreLeaderboard = useCallback((): StorePoints[] => {
     return [...storePoints].sort((a, b) => b.monthlyPoints - a.monthlyPoints);
-  };
+  }, [storePoints]);
 
-  const addCustomer = async (customer: Customer) => {
+  const addCustomer = useCallback(async (customer: Customer) => {
     try {
       const newCustomer = await customersService.create(customer);
       setCustomers(prev => [newCustomer, ...prev]);
@@ -2911,9 +2659,9 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
       console.error(error);
       addNotification('alert', 'Failed to add customer');
     }
-  };
+  }, [addNotification]);
 
-  const updateCustomer = async (customer: Customer) => {
+  const updateCustomer = useCallback(async (customer: Customer) => {
     try {
       await customersService.update(customer.id, customer);
       setCustomers(prev => prev.map(c => c.id === customer.id ? customer : c));
@@ -2922,9 +2670,9 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
       console.error(error);
       addNotification('alert', 'Failed to update customer');
     }
-  };
+  }, [addNotification]);
 
-  const deleteCustomer = async (id: string) => {
+  const deleteCustomer = useCallback(async (id: string) => {
     try {
       await customersService.delete(id);
       setCustomers(prev => prev.filter(c => c.id !== id));
@@ -2933,18 +2681,365 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
       console.error(error);
       addNotification('alert', 'Failed to delete customer');
     }
-  };
+  }, [addNotification]);
 
-  const holdOrder = (order: HeldOrder) => {
+  const processSale = useCallback(async (
+    cart: CartItem[],
+    method: PaymentMethod,
+    user: string,
+    tendered: number,
+    change: number,
+    customerId?: string,
+    pointsRedeemed?: number,
+    type: 'In-Store' | 'Delivery' | 'Pickup' = 'In-Store',
+    taxBreakdown: { name: string; rate: number; amount: number; compound: boolean }[] = []
+  ): Promise<{ saleId: string; pointsResult?: any }> => {
+    try {
+      const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+      const tax = subtotal * (settings.taxRate / 100);
+      const total = subtotal + tax;
+
+      // --- DATA OPTIMIZATION: Sanitize Items for Storage (Keep DB small) ---
+      // We strip heavy fields like images, logs, and descriptions
+      const sanitizedItems = cart.map(item => ({
+        id: item.id,
+        siteId: item.siteId, // Mandatory
+        name: item.name,
+        sku: item.sku,
+        price: item.price,
+        quantity: item.quantity,
+        status: item.status, // Mandatory
+        stock: item.stock,   // Mandatory
+        // Keep essential metadata
+        category: item.category,
+        unit: item.unit,
+        size: item.size,
+        brand: item.brand,
+        // Critical: Set image to empty string to save space (it's mandatory in TS)
+        image: '',
+        // Optional fields we explicitly drop by not including them:
+        // - receivingNotes
+        // - posReceivedBy
+        // - approvedBy
+        // - history logs
+        // - description
+      })) as CartItem[];
+
+      const sale = await salesService.create({
+        siteId: activeSite?.id || '',
+        site_id: activeSite?.id,
+        customer_id: customerId,
+        date: new Date().toISOString(),
+        items: sanitizedItems, // Use optimized items
+        subtotal,
+        tax,
+        taxBreakdown,
+        total,
+        method: method,
+        status: 'Completed',
+        amountTendered: tendered,
+        change,
+        cashierName: user,
+        type, // Save the type
+        fulfillmentStatus: type === 'In-Store' ? 'Delivered' : 'Picking'
+      }, sanitizedItems); // Use optimized items
+
+      // --- CRITICAL FIX: Update Local State Immediately ---
+      // This ensures the UI reflects the new sale without needing a refresh or realtime subscription
+      const newSaleRecord: SaleRecord = {
+        ...sale,
+        items: cart, // Ensure items are attached for immediate display
+        siteId: activeSite?.id || '', // Ensure siteId is present
+        receiptNumber: sale.receiptNumber || `TX-${Date.now()}` // Fallback if DB doesn't return it yet (though it should)
+      };
+
+      setSales(prev => [newSaleRecord, ...prev]);
+      setAllSales(prev => [newSaleRecord, ...prev]); // Update global list as well since SalesHistory uses it
+
+      // --- GAMIFICATION: Award Points for Sale ---
+      let pointsResult = null;
+      console.log('🎮 GAMIFICATION CHECK:', {
+        posBonusEnabled: settings.posBonusEnabled,
+        hasRules: !!settings.posPointRules,
+        rulesCount: settings.posPointRules?.length || 0,
+        cartItems: cart.length
+      });
+      if (settings.posBonusEnabled !== false) {
+        // 1. Calculate Store Points (Team-based)
+        const storeRules = settings.posPointRules || []; // No defaults - only user-configured rules
+        console.log('🎮 POS Gamification - Using rules:', storeRules.length, 'rules',
+          settings.posPointRules ? '(from settings)' : '(defaults)');
+        let totalStorePoints = 0;
+        const pointsBreakdown: { item: string; rule: string; points: number }[] = [];
+
+        cart.forEach(item => {
+          let itemPoints = 0;
+          let appliedRuleName = 'none';
+
+          // Find matching category-specific rule (exact match)
+          const categoryRule = storeRules.find(r =>
+            r.enabled && r.type === 'category' && r.categoryId === item.category
+          );
+
+          // Find base/quantity rule (matches 'all' categories)
+          const baseRule = storeRules.find(r =>
+            r.enabled && (r.type === 'quantity' || r.type === 'category') && r.categoryId === 'all'
+          );
+
+          // Use category-specific rule if exists, otherwise use base rule
+          const activeRule = categoryRule || baseRule;
+
+          if (activeRule) {
+            itemPoints = item.quantity * (activeRule.pointsPerUnit || 1);
+            if (activeRule.multiplier) itemPoints *= activeRule.multiplier;
+            if (activeRule.minQuantity && item.quantity < activeRule.minQuantity) {
+              itemPoints = 0; // Don't apply if below min quantity
+            }
+            if (activeRule.maxPointsPerTransaction && itemPoints > activeRule.maxPointsPerTransaction) {
+              itemPoints = activeRule.maxPointsPerTransaction;
+            }
+            appliedRuleName = activeRule.name;
+          }
+
+          pointsBreakdown.push({
+            item: item.name,
+            rule: appliedRuleName,
+            points: Math.floor(itemPoints)
+          });
+          totalStorePoints += Math.floor(itemPoints);
+        });
+
+        // Revenue based points
+        const revenueRule = storeRules.find(r => r.type === 'revenue' && r.enabled);
+        if (revenueRule && revenueRule.revenueThreshold) {
+          const revenuePoints = Math.floor((subtotal / revenueRule.revenueThreshold) * (revenueRule.pointsPerRevenue || 1));
+          totalStorePoints += revenuePoints;
+          pointsBreakdown.push({
+            item: 'Revenue Bonus',
+            rule: revenueRule.name,
+            points: revenuePoints
+          });
+        }
+
+        console.log('🎮 Points breakdown:', pointsBreakdown);
+        console.log('🎮 Total store points:', totalStorePoints);
+
+        // Award to Store
+        awardStorePoints(activeSite?.id || '', totalStorePoints, subtotal);
+
+        // 2. Calculate Individual Cashier Points
+        // Cashiers earn their share of store points (based on the same rules) for personal level progression
+        const individualPoints = totalStorePoints; // Award full store points to the cashier too
+
+        const cashierEmployee = employees.find(e => e.name === user || e.id === user || e.email === user);
+        if (cashierEmployee) {
+          awardPoints(
+            cashierEmployee.id,
+            individualPoints,
+            'JOB_COMPLETE',
+            `Processed sale ${sale.receiptNumber || sale.id}`,
+            sale.id
+          );
+
+          pointsResult = {
+            points: individualPoints,
+            storePoints: totalStorePoints,
+            breakdown: pointsBreakdown.map(b => ({ label: b.item, points: b.points }))
+          };
+        }
+      }
+
+      // --- OPTIMISTIC UPDATE: Update local state immediately ---
+      setSales(prev => [sale, ...prev]);
+
+      // --- CUSTOMER LOYALTY UPDATES ---
+      if (customerId && settings.enableLoyalty !== false) {
+        const customer = customers.find(c => c.id === customerId);
+        if (customer) {
+          // Calculate loyalty points earned - uses settings.loyaltyPointsRate or 0 if not set
+          const loyaltyRate = settings.loyaltyPointsRate || 0; // ETB per 1 loyalty point, 0 = disabled
+          const pointsEarned = loyaltyRate > 0 ? Math.floor(subtotal / loyaltyRate) : 0;
+
+          // Current points + earned - redeemed
+          const currentPoints = customer.loyaltyPoints || 0;
+          const redeemed = pointsRedeemed || 0;
+          const newLoyaltyPoints = Math.max(0, currentPoints + pointsEarned - redeemed);
+
+          // Update customer in DB
+          try {
+            await customersService.update(customerId, {
+              loyaltyPoints: newLoyaltyPoints,
+              totalSpent: (customer.totalSpent || 0) + total,
+              lastVisit: new Date().toISOString()
+            });
+
+            // Update local state
+            setCustomers(prev => prev.map(c =>
+              c.id === customerId
+                ? { ...c, loyaltyPoints: newLoyaltyPoints, totalSpent: (c.totalSpent || 0) + total, lastVisit: new Date().toISOString() }
+                : c
+            ));
+
+            console.log(`💎 Loyalty Update: Customer ${customer.name} earned ${pointsEarned} pts, redeemed ${redeemed} pts. New Balance: ${newLoyaltyPoints}`);
+          } catch (err) {
+            console.error('Failed to update customer loyalty:', err);
+          }
+        }
+      }
+
+      // --- STOCK LEVEL CHECK (RETAIL -> WAREHOUSE CONNECTION) ---
+      // Check if any item dropped below threshold to trigger replenishment
+      cart.forEach(item => {
+        const product = products.find(p => p.id === item.id);
+        if (product) {
+          const newStock = product.stock - item.quantity;
+          if (newStock <= settings.lowStockThreshold) {
+            // Trigger Warehouse Alert
+            addNotification('alert', `⚠️ Low Stock Alert: ${product.name} is down to ${newStock}. Replenishment needed!`);
+            // In a real system, this would create a 'Replenish' task automatically
+          }
+        }
+      });
+
+      // --- AUTO-GENERATE WMS JOBS ---
+      if (settings.enableWMS && cart.length > 0) {
+        try {
+          const requestingStoreId = sale.siteId || activeSite?.id || '';
+          const requestingStore = sites.find(s => s.id === requestingStoreId);
+          const strategy = requestingStore?.fulfillmentStrategy || 'NEAREST';
+
+          if (strategy === 'MANUAL') {
+            console.log('⏳ Order held for MANUAL release optimization.');
+            await salesService.update(sale.id, { release_status: 'PENDING' });
+            return { saleId: sale.id, pointsResult };
+          }
+
+          // Trigger backend release (handles planning and job creation)
+          await salesService.releaseOrder(sale.id);
+
+          // Refresh local state to reflect new jobs
+          await refreshData();
+        } catch (jobError) {
+          console.error('Failed to create WMS jobs:', jobError);
+          addNotification('info', 'Sale completed but fulfillment jobs could not be created');
+        }
+      }
+
+      addNotification('success', 'Sale processed successfully');
+
+      // Award store points for POS team bonus using configured rules
+      // Check if the store is eligible for bonuses
+      const saleStore = sites.find(s => s.id === sale.siteId);
+      const storeIsEligible = saleStore?.bonusEnabled !== false;
+
+      if (settings.posBonusEnabled !== false && sale.siteId && storeIsEligible) {
+        const pointRules = settings.posPointRules || []; // No defaults - only user-configured rules
+        const enabledRules = pointRules.filter(r => r.enabled).sort((a, b) => (b.priority || 0) - (a.priority || 0));
+
+        let totalPoints = 0;
+        const totalQuantity = cart.reduce((sum, item) => sum + item.quantity, 0);
+
+        // Process each cart item
+        cart.forEach(cartItem => {
+          const product = products.find(p => p.id === cartItem.id);
+          const itemCategory = product?.category || 'Unknown';
+          const itemSku = product?.sku;
+
+          // Find applicable rules for this item
+          let itemPoints = 0;
+
+          enabledRules.forEach(rule => {
+            let ruleApplies = false;
+            let rulePoints = 0;
+
+            switch (rule.type) {
+              case 'category':
+                // Category-specific or all categories
+                if (rule.categoryId === 'all' || rule.categoryId === itemCategory) {
+                  ruleApplies = true;
+                  rulePoints = (rule.pointsPerUnit || 0) * cartItem.quantity;
+                }
+                break;
+
+              case 'product':
+                // Specific product by SKU
+                if (rule.productSku && itemSku === rule.productSku) {
+                  ruleApplies = true;
+                  rulePoints = (rule.pointsPerUnit || 0) * cartItem.quantity;
+                }
+                break;
+
+              case 'quantity':
+                // Quantity-based bonuses (applies to all items if criteria met)
+                if (rule.categoryId === 'all' || rule.categoryId === itemCategory) {
+                  if (!rule.minQuantity || totalQuantity >= rule.minQuantity) {
+                    ruleApplies = true;
+                    rulePoints = (rule.pointsPerUnit || 0) * cartItem.quantity;
+                  }
+                }
+                break;
+            }
+
+            if (ruleApplies) {
+              // Apply max cap if configured
+              if (rule.maxPointsPerTransaction && rulePoints > rule.maxPointsPerTransaction) {
+                rulePoints = rule.maxPointsPerTransaction;
+              }
+              itemPoints += rulePoints;
+            }
+          });
+
+          totalPoints += itemPoints;
+        });
+
+        // Apply revenue-based rules (calculated on total)
+        enabledRules.filter(r => r.type === 'revenue').forEach(rule => {
+          if (rule.revenueThreshold && rule.pointsPerRevenue) {
+            const revenuePoints = Math.floor(total / rule.revenueThreshold) * rule.pointsPerRevenue;
+            totalPoints += rule.maxPointsPerTransaction
+              ? Math.min(revenuePoints, rule.maxPointsPerTransaction)
+              : revenuePoints;
+          }
+        });
+
+        // Apply quantity multipliers (for bulk sales)
+        const multiplierRule = enabledRules.find(r =>
+          r.type === 'quantity' &&
+          r.multiplier &&
+          r.multiplier > 1 &&
+          r.minQuantity &&
+          totalQuantity >= r.minQuantity
+        );
+        if (multiplierRule && multiplierRule.multiplier) {
+          totalPoints = Math.floor(totalPoints * multiplierRule.multiplier);
+        }
+
+        // Ensure at least 1 point per transaction if any items sold
+        if (totalPoints < 1 && cart.length > 0) {
+          totalPoints = 1;
+        }
+
+        awardStorePoints(sale.siteId, totalPoints, total, 1);
+      }
+
+      return { saleId: sale.id, pointsResult };
+    } catch (error) {
+      console.error(error);
+      addNotification('alert', 'Failed to process sale');
+      throw error;
+    }
+  }, [settings, activeSite, sites, products, employees, customers, addNotification, awardPoints, awardStorePoints]);
+
+  const holdOrder = useCallback((order: HeldOrder) => {
     setHeldOrders(prev => [order, ...prev]);
     addNotification('info', 'Order placed on hold');
-  };
+  }, [addNotification]);
 
-  const releaseHold = (orderId: string) => {
+  const releaseHold = useCallback((orderId: string) => {
     setHeldOrders(prev => prev.filter(o => o.id !== orderId));
-  };
+  }, []);
 
-  const requestTransfer = async (transfer: TransferRecord) => {
+  const requestTransfer = useCallback(async (transfer: TransferRecord) => {
     console.log('📦 requestTransfer called:', {
       id: transfer.id,
       sourceSiteId: transfer.sourceSiteId,
@@ -2977,9 +3072,9 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
       console.error('❌ requestTransfer failed:', error);
       addNotification('alert', 'Failed to request transfer');
     }
-  };
+  }, [sites, addNotification]);
 
-  const shipTransfer = async (id: string, user: string) => {
+  const shipTransfer = useCallback(async (id: string, user: string) => {
     const transfer = transfers.find(t => t.id === id);
     if (!transfer) {
       addNotification('alert', 'Transfer not found');
@@ -3034,9 +3129,19 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
       console.error('Error shipping transfer:', error);
       addNotification('alert', 'Failed to ship transfer. Please try again.');
     }
-  };
+  }, [transfers, products, addNotification, logSystemEvent]);
 
-  const receiveTransfer = async (id: string, user: string, receivedQuantities?: Record<string, number>) => {
+  const updateJob = useCallback(async (id: string, updates: Partial<WMSJob>) => {
+    try {
+      const updated = await wmsJobsService.update(id, updates);
+      setJobs(prev => prev.map(j => j.id === id ? updated : j));
+    } catch (error) {
+      console.error(error);
+      addNotification('alert', 'Failed to update job');
+    }
+  }, [addNotification]);
+
+  const receiveTransfer = useCallback(async (id: string, user: string, receivedQuantities?: Record<string, number>) => {
     const transfer = transfers.find(t => t.id === id);
     if (!transfer) {
       addNotification('alert', 'Transfer not found');
@@ -3125,17 +3230,100 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
       console.error('Error receiving transfer:', error);
       addNotification('alert', 'Failed to receive transfer. Please try again.');
     }
-  };
+  }, [transfers, products, sites, allProducts, addNotification, logSystemEvent]);
+
+  const updateTransfer = useCallback(async (id: string, updates: Partial<TransferRecord>) => {
+    try {
+      const updated = await transfersService.update(id, updates);
+      setTransfers(prev => prev.map(t => t.id === id ? { ...t, ...updated } : t));
+    } catch (error) {
+      console.error(error);
+      addNotification('alert', 'Failed to update transfer');
+    }
+  }, [addNotification]);
 
 
+  const createTransfer = useCallback(async (transfer: TransferRecord) => {
+    // Re-use logic from requestTransfer or simple create
+    try {
+      const created = await transfersService.create(transfer);
+      const enriched = {
+        ...created,
+        sourceSiteName: sites.find(s => s.id === created.sourceSiteId)?.name || 'Unknown',
+        destSiteName: sites.find(s => s.id === created.destSiteId)?.name || 'Unknown'
+      };
+      setTransfers(prev => [enriched, ...prev]);
+      addNotification('success', 'Transfer created');
+      return created;
+    } catch (e) {
+      console.error(e);
+      addNotification('alert', 'Failed to create transfer');
+      throw e;
+    }
+  }, [sites, addNotification]);
 
-  const markNotificationsRead = () => {
+  const deleteTransfer = useCallback(async (id: string, user: string) => {
+    try {
+      await transfersService.delete(id);
+      setTransfers(prev => prev.filter(t => t.id !== id));
+      addNotification('info', 'Transfer deleted');
+    } catch (e) {
+      console.error(e);
+      addNotification('alert', 'Failed to delete transfer');
+    }
+  }, [addNotification]);
+
+  const cancelTransfer = useCallback(async (id: string, user: string) => {
+    try {
+      // Cast 'Cancelled' to any to bypass strict type check on Partial<TransferRecord> if needed, 
+      // or assume TransferStatus includes 'Cancelled' (it might be missing in type def)
+      await transfersService.update(id, { status: 'Cancelled' as any });
+      setTransfers(prev => prev.map(t => t.id === id ? { ...t, status: 'Cancelled' as any } : t));
+      addNotification('info', 'Transfer cancelled');
+    } catch (e) {
+      console.error(e);
+      addNotification('alert', 'Failed to cancel transfer');
+    }
+  }, [addNotification]);
+
+  // NOTE: shipTransfer and requestTransfer are already defined above (lines ~3107 and ~3142)
+  // We utilize those existing robust implementations.
+
+  // Missing Job Functions
+  const deleteJob = useCallback(async (id: string) => {
+    try {
+      await wmsJobsService.delete(id);
+      setJobs(prev => prev.filter(j => j.id !== id));
+      addNotification('info', 'Job deleted');
+    } catch (e) {
+      console.error(e);
+      addNotification('alert', 'Failed to delete job');
+    }
+  }, [addNotification]);
+
+  const markJobComplete = useCallback(async (id: string, user: string) => {
+    // Wrapper for updateJobStatus
+    await updateJobStatus(id, 'Completed');
+  }, [updateJobStatus]);
+
+  const updatePromotion = useCallback((promotion: Partial<Promotion> & { id: string }) => {
+    setPromotions(prev => prev.map(p => p.id === promotion.id ? { ...p, ...promotion } : p));
+    addNotification('success', 'Promotion updated');
+  }, [addNotification]);
+
+  // Alias rejection to cancellation for now or implement specific logic
+  const rejectTransfer = useCallback(async (id: string, user: string) => {
+    await cancelTransfer(id, user);
+  }, [cancelTransfer]);
+
+  // Fix: Add deletePO implementation if missing or ensure it exists
+  // It is defined in lines 124 but might be missing implementation body or standard placement
+
+  const markNotificationsRead = useCallback(() => {
     setNotifications(prev => prev.map(n => ({ ...n, read: true })));
-  };
+  }, []);
 
-
-
-  const exportSystemData = () => {
+  const exportSystemData = useCallback(() => {
     const data = {
       settings,
       products,
@@ -3145,9 +3333,9 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
       suppliers
     };
     return JSON.stringify(data, null, 2);
-  };
+  }, [settings, products, sales, customers, employees, suppliers]);
 
-  const resetData = () => {
+  const resetData = useCallback(() => {
     // In Supabase context, this might be dangerous or restricted
     // For now, we'll just reload data
     if (activeSiteId) {
@@ -3156,42 +3344,35 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
     } else {
       loadSites();
     }
-  };
+  }, [activeSiteId, loadSiteData, loadSites, addNotification]);
 
-  const refreshData = async () => {
-    if (activeSiteId) {
-      console.log('🔄 Manual Refresh Triggered');
-      await loadSiteData(activeSiteId, true);
-    }
-  };
-
-  const addPromotion = (promo: Promotion) => {
+  const addPromotion = useCallback((promo: Promotion) => {
     setPromotions(prev => [...prev, promo]);
     addNotification('success', `Promotion ${promo.code} Created`);
-  };
+  }, [addNotification]);
 
-  const deletePromotion = (id: string) => {
+  const deletePromotion = useCallback((id: string) => {
     setPromotions(prev => prev.filter(p => p.id !== id));
     addNotification('info', 'Promotion Deleted');
-  };
+  }, [addNotification]);
 
   // --- Discount Code Functions ---
-  const addDiscountCode = (code: DiscountCode) => {
+  const addDiscountCode = useCallback((code: DiscountCode) => {
     setDiscountCodes(prev => [...prev, code]);
     addNotification('success', `Discount code "${code.code}" created`);
-  };
+  }, [addNotification]);
 
-  const updateDiscountCode = (code: DiscountCode) => {
+  const updateDiscountCode = useCallback((code: DiscountCode) => {
     setDiscountCodes(prev => prev.map(c => c.id === code.id ? code : c));
     addNotification('success', `Discount code "${code.code}" updated`);
-  };
+  }, [addNotification]);
 
-  const deleteDiscountCode = (id: string) => {
+  const deleteDiscountCode = useCallback((id: string) => {
     setDiscountCodes(prev => prev.filter(c => c.id !== id));
     addNotification('info', 'Discount code deleted');
-  };
+  }, [addNotification]);
 
-  const validateDiscountCode = (code: string, siteId?: string, subtotal?: number): { valid: boolean; discountCode?: DiscountCode; error?: string } => {
+  const validateDiscountCode = useCallback((code: string, siteId?: string, subtotal?: number): { valid: boolean; discountCode?: DiscountCode; error?: string } => {
     const discountCode = discountCodes.find(dc => dc.code.toUpperCase() === code.toUpperCase());
 
     if (!discountCode) {
@@ -3234,15 +3415,15 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
     }
 
     return { valid: true, discountCode };
-  };
+  }, [discountCodes]);
 
-  const useDiscountCode = (codeId: string) => {
+  const useDiscountCode = useCallback((codeId: string) => {
     setDiscountCodes(prev => prev.map(c =>
       c.id === codeId
         ? { ...c, usageCount: c.usageCount + 1 }
         : c
     ));
-  };
+  }, []);
 
   // Filter data by active site
   // Data is now pre-filtered by loadSiteData, so we just pass the state directly
@@ -3255,7 +3436,7 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
   const filteredMovements = movements;
   const filteredJobs = jobs;
 
-  const value: DataContextType = {
+  const value = useMemo<DataContextType>(() => ({
     settings,
     products: filteredProducts,
     orders: filteredOrders,
@@ -3282,47 +3463,60 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
     allProducts,
     allSales,
     allOrders,
+    discountCodes,
+    zones,
+    allZones,
+
+    // Actions
     updateSettings,
     setActiveSite,
     addSite,
     updateSite,
     deleteSite,
+    getTaxForSite,
+
     addProduct,
     updateProduct,
     deleteProduct,
     relocateProduct,
     cleanupAdminProducts,
+
     createPO,
     updatePO,
     receivePO,
     deletePO,
+
     processSale,
     processReturn,
     closeShift,
     startShift,
-    addPromotion,
-    deletePromotion,
-    discountCodes,
-    addDiscountCode,
-    updateDiscountCode,
-    deleteDiscountCode,
-    validateDiscountCode,
-    useDiscountCode,
+
     addSupplier,
     adjustStock,
+
     addExpense,
     deleteExpense,
     processPayroll,
+
     assignJob,
     updateJobItem,
     updateJobStatus,
+    updateJob,
     completeJob,
     resetJob,
     fixBrokenJobs,
+    deleteJob,
+    markJobComplete,
     createPutawayJob,
+
     addEmployee,
     updateEmployee,
     deleteEmployee,
+    schedules,
+    addSchedule,
+    updateSchedule,
+    deleteSchedule,
+
     getWorkerPoints,
     awardPoints,
     getLeaderboard,
@@ -3331,21 +3525,66 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
     awardStorePoints,
     calculateWorkerBonusShare,
     getStoreLeaderboard,
+
     addCustomer,
     updateCustomer,
     deleteCustomer,
+
     holdOrder,
     releaseHold,
+
     requestTransfer,
     shipTransfer,
     receiveTransfer,
-    addNotification,
+    rejectTransfer,
+    updateTransfer,
+    createTransfer,
+    deleteTransfer,
+    cancelTransfer,
+
     markNotificationsRead,
+    addNotification,
+    clearNotification,
+    clearAllNotifications,
+
     logSystemEvent,
     exportSystemData,
     resetData,
-    refreshData
-  };
+    refreshData,
+
+    addPromotion,
+    updatePromotion,
+    deletePromotion,
+
+    addDiscountCode,
+    updateDiscountCode,
+    deleteDiscountCode,
+    validateDiscountCode,
+    useDiscountCode,
+    releaseOrder,
+    isDataInitialLoading,
+    loadError
+  }), [
+    settings, products, orders, suppliers, sales, expenses, movements, jobs,
+    employees, customers, shifts, heldOrders, sites, activeSite, transfers,
+    notifications, systemLogs, jobAssignments, promotions, workerPoints,
+    pointsTransactions, tasks, schedules, storePoints, zones, allZones, allProducts,
+    allSales, allOrders, discountCodes, isDataInitialLoading, loadError,
+    updateSettings, setActiveSite, addSite, updateSite, deleteSite, getTaxForSite,
+    addProduct, updateProduct, deleteProduct, relocateProduct, cleanupAdminProducts,
+    createPO, updatePO, receivePO, deletePO, processSale, processReturn, closeShift,
+    startShift, addSupplier, adjustStock, addExpense, deleteExpense, processPayroll,
+    assignJob, updateJobItem, updateJobStatus, updateJob, completeJob, resetJob, fixBrokenJobs,
+    deleteJob, markJobComplete, createPutawayJob, addEmployee, updateEmployee, deleteEmployee,
+    getWorkerPoints, awardPoints, getLeaderboard, storePoints, getStorePoints, awardStorePoints,
+    calculateWorkerBonusShare, getStoreLeaderboard, addCustomer, updateCustomer, deleteCustomer,
+    holdOrder, releaseHold, requestTransfer, shipTransfer, receiveTransfer, rejectTransfer,
+    updateTransfer, createTransfer, deleteTransfer, cancelTransfer, markNotificationsRead,
+    addNotification, clearNotification, clearAllNotifications, logSystemEvent, exportSystemData,
+    resetData, refreshData, addPromotion, updatePromotion, deletePromotion, addDiscountCode,
+    updateDiscountCode, deleteDiscountCode, validateDiscountCode, useDiscountCode,
+    releaseOrder, addSchedule, updateSchedule, deleteSchedule
+  ]);
 
   return (
     <DataContext.Provider value={value}>
@@ -3386,6 +3625,8 @@ export const useData = () => {
       pointsTransactions: [],
       tasks: [],
       setTasks: () => { },
+      zones: [],
+      allZones: [],
       // Add all required functions as no-ops
       updateSettings: () => { },
       refreshData: async () => { },
@@ -3409,12 +3650,14 @@ export const useData = () => {
       deleteExpense: async () => { },
       processPayroll: async () => { },
       assignJob: async () => { },
-      updateJobItem: async () => { },
+      updateJobItem: async (jobId: string, itemId: number, status: JobItem['status'], qty: number) => { },
       updateJobStatus: async () => { },
       completeJob: async () => { },
       resetJob: async () => { },
       fixBrokenJobs: async () => { },
       createPutawayJob: async () => undefined,
+      updateJob: async () => { },
+      updateTransfer: async () => { },
       addEmployee: async () => { },
       updateEmployee: async () => { },
       deleteEmployee: async () => { },
@@ -3438,7 +3681,8 @@ export const useData = () => {
       markNotificationsRead: () => { },
       logSystemEvent: () => { },
       exportSystemData: () => '',
-      resetData: () => { }
+      resetData: () => { },
+      releaseOrder: async () => { }
     } as unknown as DataContextType;
   }
   return context;

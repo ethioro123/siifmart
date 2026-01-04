@@ -61,10 +61,16 @@ export default function InfrastructureSettings() {
     const { user } = useStore();
     const { settings, updateSettings, addNotification } = useData();
 
-    // Local State
-    const [hardware, setHardware] = useState({
+    const [hardware, setHardware] = useState<{
+        scaleIpAddress: string;
+        scannerComPort: string;
+        defaultPrinter: string;
+        scaleUnit: 'KG' | 'LBS';
+    }>({
         scaleIpAddress: '',
-        scannerComPort: ''
+        scannerComPort: '',
+        defaultPrinter: 'Main Receipt Printer',
+        scaleUnit: 'KG'
     });
     const [isSaving, setIsSaving] = useState(false);
 
@@ -73,7 +79,9 @@ export default function InfrastructureSettings() {
         if (settings) {
             setHardware({
                 scaleIpAddress: settings.scaleIpAddress || '',
-                scannerComPort: settings.scannerComPort || ''
+                scannerComPort: settings.scannerComPort || '',
+                defaultPrinter: settings.defaultPrinter || 'Main Receipt Printer',
+                scaleUnit: settings.scaleUnit || 'KG'
             });
         }
     }, [settings]);
@@ -198,8 +206,13 @@ export default function InfrastructureSettings() {
                         </h4>
                         <div className="space-y-3">
                             <div className="group">
-                                <label className="text-[10px] text-gray-500 uppercase font-bold mb-1 block">Default Printer</label>
-                                <select className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-cyber-primary">
+                                <select
+                                    className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-cyber-primary"
+                                    value={hardware.defaultPrinter}
+                                    onChange={(e) => setHardware(prev => ({ ...prev, defaultPrinter: e.target.value }))}
+                                    aria-label="Default Printer"
+                                    title="Default Printer"
+                                >
                                     <option>Main Receipt Printer</option>
                                     <option>Kitchen Printer</option>
                                 </select>
@@ -207,8 +220,18 @@ export default function InfrastructureSettings() {
                             <div className="group">
                                 <label className="text-[10px] text-gray-500 uppercase font-bold mb-1 block">Scale Unit</label>
                                 <div className="flex bg-black/30 rounded-lg border border-white/10 p-1">
-                                    <button className="flex-1 py-1 text-xs font-bold rounded bg-cyber-primary text-black shadow-sm">KG</button>
-                                    <button className="flex-1 py-1 text-xs text-gray-500 hover:text-white transition-colors">LBS</button>
+                                    <button
+                                        onClick={() => setHardware(prev => ({ ...prev, scaleUnit: 'KG' }))}
+                                        className={`flex-1 py-1 text-xs font-bold rounded transition-all ${hardware.scaleUnit === 'KG' ? 'bg-cyber-primary text-black shadow-sm' : 'text-gray-500 hover:text-white'}`}
+                                    >
+                                        KG
+                                    </button>
+                                    <button
+                                        onClick={() => setHardware(prev => ({ ...prev, scaleUnit: 'LBS' }))}
+                                        className={`flex-1 py-1 text-xs font-bold rounded transition-all ${hardware.scaleUnit === 'LBS' ? 'bg-cyber-primary text-black shadow-sm' : 'text-gray-500 hover:text-white'}`}
+                                    >
+                                        LBS
+                                    </button>
                                 </div>
                             </div>
                         </div>

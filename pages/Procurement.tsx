@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import {
     Truck, Plus, Search, Filter, Download, Star, Clock, Package, CheckCircle,
     XCircle, AlertCircle, Trash2, Printer, Lock, DollarSign, Calendar, FileText,
@@ -20,9 +20,12 @@ import Button from '../components/shared/Button';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useStore } from '../contexts/CentralStore';
 import { useData } from '../contexts/DataContext';
+import { formatCompactNumber, formatDateTime } from '../utils/formatting';
 import { Protected, ProtectedButton } from '../components/Protected';
 import { generateQuarterlyReport } from '../utils/reportGenerator';
-import { formatCompactNumber } from '../utils/formatting';
+import { purchaseOrdersService, suppliersService } from '../services/supabase.service';
+import { useDateFilter, DateRangeOption } from '../hooks/useDateFilter';
+import DateRangeSelector from '../components/DateRangeSelector';
 
 
 // ═══════════════════════════════════════════════════════════════
@@ -305,20 +308,41 @@ const PO_DESTINATION_SITE_TYPES = ['Warehouse', 'Distribution Center'] as const;
 type Tab = 'overview' | 'requests' | 'orders' | 'suppliers';
 type FilterStatus = 'All' | 'Pending' | 'Received' | 'Cancelled';
 type POStatus = 'Draft' | 'Pending' | 'Approved' | 'Rejected' | 'Ordered' | 'Received' | 'Partially Received';
-type DateRangeOption = 'All Time' | 'This Month' | 'Last Month' | 'This Quarter' | 'This Year' | 'Last Year';
-
 // --- CHART CONFIG ---
 const COLORS = ['#00ff9d', '#3b82f6', '#f59e0b', '#ec4899', '#8b5cf6'];
 
 export default function Procurement() {
     const { user } = useStore();
     const {
-        allOrders, suppliers, products, createPO, updatePO, addSupplier, deletePO, activeSite, sites, addNotification, addProduct
+        suppliers, products, createPO, updatePO, addSupplier, deletePO, activeSite, sites, addNotification, addProduct, settings, getTaxForSite
     } = useData();
     // --- REPORT GENERATOR ---
 
-    // Use allOrders but rename to orders for consistency in the rest of the component
-    const orders = allOrders;
+    // Server-side Pagination State
+    const [orders, setOrders] = useState<PurchaseOrder[]>([]);
+    const [requests, setRequests] = useState<PurchaseOrder[]>([]);
+    const [loading, setLoading] = useState(false);
+    const [totalCount, setTotalCount] = useState(0);
+    const [totalRequestsCount, setTotalRequestsCount] = useState(0);
+    const [totalSuppliersCount, setTotalSuppliersCount] = useState(0);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [requestPage, setRequestPage] = useState(1);
+    const [supplierPage, setSupplierPage] = useState(1);
+    const ITEMS_PER_PAGE = 20;
+
+    const [procurementMetrics, setProcurementMetrics] = useState({
+        totalSpend: 0,
+        openPO: 0,
+        pendingValue: 0,
+        potentialRevenue: 0,
+        categoryData: [] as any[],
+        trendData: [] as any[]
+    });
+
+    const [localSuppliers, setLocalSuppliers] = useState<Supplier[]>([]);
+
+    // Use local orders state instead of global allOrders
+    // const orders = allOrders; // REMOVED
 
     const [activeTab, setActiveTab] = useState<Tab>('overview');
 
@@ -334,7 +358,7 @@ export default function Procurement() {
     const [isProductCatalogOpen, setIsProductCatalogOpen] = useState(false);
     const [isContactModalOpen, setIsContactModalOpen] = useState(false);
 
-    // Bulk Selection State (for Super Admin)
+    // Bulk Selection State (for CEO)
     const [selectedPOIds, setSelectedPOIds] = useState<string[]>([]);
     const [isBulkApproving, setIsBulkApproving] = useState(false);
 
@@ -374,6 +398,14 @@ export default function Procurement() {
     // Enterprise Fields (OPTIONAL)
     const [paymentTerms, setPaymentTerms] = useState('');
     const [incoterms, setIncoterms] = useState('');
+    const [poRequestedBy, setPoRequestedBy] = useState<string>(user?.name || '');
+
+    // Reset requestedBy whenever user changes
+    useEffect(() => {
+        if (user?.name && !poRequestedBy) {
+            setPoRequestedBy(user.name);
+        }
+    }, [user, poRequestedBy]);
     const [destinationSiteIds, setDestinationSiteIds] = useState<string[]>([]); // CHANGED: Array for multi-site
     const [isMultiSiteMode, setIsMultiSiteMode] = useState(false);
     const [quantityDistribution, setQuantityDistribution] = useState<'shared' | 'per-store'>('per-store'); // NEW: How to distribute quantities
@@ -418,6 +450,116 @@ export default function Procurement() {
         return { q, year, start, end };
     };
 
+    const formatDateISO = (d: Date) => {
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, "0");
+        const day = String(d.getDate()).padStart(2, "0");
+        return `${year}-${month}-${day}`;
+    };
+
+    const getFilterDates = () => {
+        const now = new Date();
+        const currentYear = now.getFullYear();
+        const { year, start, end } = getQuarterInfo(now);
+
+        const getSpecificQuarter = (q: number, y: number) => {
+            const qs = new Date(y, (q - 1) * 3, 1);
+            const qe = new Date(y, q * 3, 0);
+            return { startDate: formatDateISO(qs), endDate: formatDateISO(qe) };
+        };
+
+        switch (dateRange) {
+            case "This Month":
+                const mStart = new Date(now.getFullYear(), now.getMonth(), 1);
+                return { startDate: formatDateISO(mStart), endDate: formatDateISO(now) };
+            case "Last Month":
+                const lmStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+                const lmEnd = new Date(now.getFullYear(), now.getMonth(), 0);
+                return { startDate: formatDateISO(lmStart), endDate: formatDateISO(lmEnd) };
+            case "This Quarter":
+                return { startDate: formatDateISO(start), endDate: formatDateISO(end) };
+            case "This Year":
+                return { startDate: formatDateISO(new Date(currentYear, 0, 1)), endDate: formatDateISO(now) };
+            case "Last Year":
+                const lastYearStart = new Date(currentYear - 1, 0, 1);
+                const lastYearEnd = new Date(currentYear - 1, 11, 31);
+                return { startDate: formatDateISO(lastYearStart), endDate: formatDateISO(lastYearEnd) };
+            case "Q1 2025": return getSpecificQuarter(1, 2025);
+            case "Q2 2025": return getSpecificQuarter(2, 2025);
+            case "Q3 2025": return getSpecificQuarter(3, 2025);
+            case "Q4 2025": return getSpecificQuarter(4, 2025);
+            case "Q1 2024": return getSpecificQuarter(1, 2024);
+            case "Q2 2024": return getSpecificQuarter(2, 2024);
+            case "Q3 2024": return getSpecificQuarter(3, 2024);
+            case "Q4 2024": return getSpecificQuarter(4, 2024);
+            case "All Time":
+            default:
+                return { startDate: undefined, endDate: undefined };
+        }
+    };
+
+    // Unified Fetch Effect
+    const fetchData = useCallback(async () => {
+        setLoading(true);
+        try {
+            const dates = getFilterDates();
+
+            if (activeTab === 'overview') {
+                // Strategic Metrics: Strictly Quarterly (or selected range)
+                const metricFilters = {
+                    startDate: dates.startDate,
+                    endDate: dates.endDate
+                };
+
+                // If at "Central Operations" (HQ), fetch GLOBAL metrics (pass undefined siteId)
+                // Otherwise fetch site-specific metrics
+                const querySiteId = activeSite?.name === 'Central Operations' ? undefined : activeSite?.id;
+
+                const stats = await purchaseOrdersService.getMetrics(querySiteId, metricFilters);
+                setProcurementMetrics(stats);
+            } else if (activeTab === 'orders') {
+                // Operational Workspace: Load All History (ignore date filter)
+                const offset = (currentPage - 1) * ITEMS_PER_PAGE;
+                const poFilters = {
+                    status: statusFilter,
+                    search: searchTerm,
+                    startDate: undefined, // All History
+                    endDate: undefined    // All History
+                };
+                const res = await purchaseOrdersService.getAll(activeSite?.id, ITEMS_PER_PAGE, offset, { ...poFilters, isRequest: false });
+                setOrders(res.data);
+                setTotalCount(res.count);
+            } else if (activeTab === 'requests') {
+                // Requests Workspace: Load All Requests History
+                const offset = (requestPage - 1) * ITEMS_PER_PAGE;
+                const prFilters = {
+                    status: statusFilter,
+                    search: searchTerm,
+                    startDate: undefined,
+                    endDate: undefined
+                };
+                const res = await purchaseOrdersService.getAll(activeSite?.id, ITEMS_PER_PAGE, offset, { ...prFilters, isRequest: true });
+                setRequests(res.data);
+                setTotalRequestsCount(res.count);
+            } else if (activeTab === 'suppliers') {
+                const offset = (supplierPage - 1) * ITEMS_PER_PAGE;
+                const res = await suppliersService.getAll(ITEMS_PER_PAGE, offset);
+                setLocalSuppliers(res.data);
+                setTotalSuppliersCount(res.count);
+            }
+
+        } catch (err) {
+            console.error('Fetch error:', err);
+            addNotification('alert', 'Failed to refresh data');
+        } finally {
+            setLoading(false);
+        }
+    }, [activeTab, activeSite?.id, currentPage, requestPage, supplierPage, statusFilter, searchTerm, dateRange]);
+
+    useEffect(() => {
+        fetchData();
+    }, [fetchData]);
+
     const getDateRangeLabels = () => {
         const { q, year, start, end } = getQuarterInfo();
 
@@ -427,14 +569,17 @@ export default function Procurement() {
             case 'Last Month':
                 return `Previous Month`;
             case 'This Quarter':
-                return `Q${q} ${year} (${start.toLocaleDateString(undefined, { month: 'short' })} - ${end.toLocaleDateString(undefined, { month: 'short' })})`;
+                const startStr = formatDateTime(start);
+                const endStr = formatDateTime(end);
+                return `Q${q} ${year} (${startStr} - ${endStr})`;
             case 'This Year':
                 return `FY ${year}`;
             case 'Last Year':
                 return `FY ${year - 1}`;
             case 'All Time':
-            default:
                 return "All Available Data";
+            default:
+                return dateRange; // Fallback for specific quarters
         }
     };
 
@@ -524,68 +669,12 @@ export default function Procurement() {
         </button>
     );
 
-    // --- ANALYTICS DATA ---
-    const metrics = useMemo(() => {
-        // Multi-store filtering: Super admin sees all, others see only their site's POs
-        const siteFilteredOrders = orders.filter(po =>
-            user?.role === 'super_admin' || !activeSite || po.siteId === activeSite.id
-        );
+    // --- FILTERING LOGIC REPLACED BY SERVER-SIDE ---
+    const activePurchaseOrders = orders;
+    const activeRequests = requests;
 
-        const dateFilteredOrders = siteFilteredOrders.filter(po => isWithinRange(po.date || new Date().toISOString()));
-
-        // Total Spend: Only include committed/completed orders (Approved, Ordered, Received, etc.)
-        // EXCLUDE: Draft, Rejected
-        const committedStatuses = ['Approved', 'Ordered', 'Received', 'Partially Received', 'Pending'];
-        const totalSpend = dateFilteredOrders.reduce((sum, o) =>
-            sum + (committedStatuses.includes(o.status) ? o.totalAmount : 0), 0
-        );
-
-        const openPO = dateFilteredOrders.filter(o => o.status === 'Pending').length;
-        const pendingValue = dateFilteredOrders.filter(o => o.status === 'Pending').reduce((sum, o) => sum + o.totalAmount, 0);
-
-        // Spend by Category (Mocked via Supplier Category)
-        const categorySpend: Record<string, number> = {};
-        dateFilteredOrders.forEach(o => {
-            const sup = suppliers.find(s => s.id === o.supplierId);
-            const cat = sup?.category || 'General';
-            categorySpend[cat] = (categorySpend[cat] || 0) + o.totalAmount;
-        });
-        const categoryData = Object.keys(categorySpend).map(k => ({ name: k, value: categorySpend[k] }));
-
-        // Spend Trend (Mocked)
-        const trendData = [
-            { name: 'Jan', spend: totalSpend * 0.1 },
-            { name: 'Feb', spend: totalSpend * 0.15 },
-            { name: 'Mar', spend: totalSpend * 0.12 },
-            { name: 'Apr', spend: totalSpend * 0.25 },
-            { name: 'May', spend: totalSpend * 0.2 },
-            { name: 'Jun', spend: totalSpend * 0.18 },
-        ];
-
-        const potentialRevenue = dateFilteredOrders.reduce((sum, o) =>
-            sum + (committedStatuses.includes(o.status) ? (o.lineItems || []).reduce((is, i) => is + ((i.retailPrice || i.unitCost) * i.quantity), 0) : 0), 0);
-
-        return { totalSpend, openPO, pendingValue, potentialRevenue, categoryData, trendData };
-    }, [orders, suppliers, activeSite, user, dateRange]);
-
-    // --- FILTERING LOGIC ---
-    const filteredOrders = orders.filter(po => {
-        const poNumber = (po.po_number || po.poNumber || po.id).toLowerCase();
-        const matchesSearch =
-            poNumber.includes(searchTerm.toLowerCase()) ||
-            po.supplierName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            (po.destination && po.destination.toLowerCase().includes(searchTerm.toLowerCase()));
-
-        const matchesFilter = statusFilter === 'All' || po.status === statusFilter;
-
-        // Multi-store filtering: Super admin sees all, others see only their site's POs
-        const matchesSite = user?.role === 'super_admin' || !activeSite || po.siteId === activeSite.id;
-
-        return matchesSearch && matchesFilter && matchesSite;
-    });
-
-
-    const activePurchaseOrders = filteredOrders.filter(o => !o.notes?.includes('[PR]'));
+    // Use procurementMetrics instead of calculating on subset
+    const metrics = procurementMetrics;
 
     const cycleFilter = () => {
         const states: FilterStatus[] = ['All', 'Pending', 'Received', 'Cancelled'];
@@ -622,7 +711,7 @@ export default function Procurement() {
                     setTaxRate(0);
                     setPaymentTerms('Cash on Delivery');
                 } else {
-                    setTaxRate(15);
+                    setTaxRate(settings.taxRate ?? 0);
                     setPaymentTerms('Net 30');
                 }
             }
@@ -694,23 +783,37 @@ export default function Procurement() {
                 const destSite = sites.find(s => s.id === siteId);
                 const destination = destSite?.name || 'Unknown Location';
 
+                // Calculate site-specific tax for the update case
+                const siteTaxRules = getTaxForSite(siteId);
+                let siteTaxAmount = 0;
+                let currentBase = itemsTotal;
+                siteTaxRules.forEach((rule: any) => {
+                    const ruleTax = currentBase * (rule.rate / 100);
+                    siteTaxAmount += ruleTax;
+                    if (rule.compound) currentBase += ruleTax;
+                });
+
+                const siteTotalAmount = itemsTotal + siteTaxAmount + (shippingCost || 0) - (discountAmount || 0);
+
                 const updatedPO: PurchaseOrder = {
                     ...editingPO,
                     siteId,
                     supplierId: vendorId,
                     supplierName: vendorName,
-                    totalAmount,
+                    totalAmount: siteTotalAmount,
                     itemsCount: totalItems,
                     expectedDelivery: expectedDate || editingPO.expectedDelivery,
                     lineItems: newPOItems,
                     shippingCost: shippingCost || 0,
-                    taxAmount: taxAmount || 0,
+                    taxAmount: siteTaxAmount,
                     notes: finalNotes,
                     paymentTerms: paymentTerms || 'To be determined',
                     incoterms: incoterms || 'N/A',
                     destination: destination,
                     discount: discountAmount || 0,
                     priority: poPriority,
+                    createdBy: editingPO.createdBy || 'Unknown',
+                    requestedBy: editingPO.requestedBy || poRequestedBy || user?.name || 'Unknown'
                 };
 
                 await updatePO(updatedPO);
@@ -720,27 +823,40 @@ export default function Procurement() {
                     const destSite = sites.find(s => s.id === siteId);
                     const destination = destSite?.name || 'Unknown Location';
 
+                    // Calculate site-specific tax for this site
+                    const siteTaxRules = getTaxForSite(siteId);
+                    let siteTaxAmount = 0;
+                    let currentBase = itemsTotal;
+                    siteTaxRules.forEach((rule: any) => {
+                        const ruleTax = currentBase * (rule.rate / 100);
+                        siteTaxAmount += ruleTax;
+                        if (rule.compound) currentBase += ruleTax;
+                    });
+
+                    const siteTotalAmount = itemsTotal + siteTaxAmount + (shippingCost || 0) - (discountAmount || 0);
+
                     const newPO: PurchaseOrder = {
                         id: crypto.randomUUID(),
                         poNumber: generatePOId(),
                         siteId: siteId,
                         supplierId: vendorId,
                         supplierName: vendorName,
-                        date: new Date().toLocaleDateString('en-CA'),
-                        status: 'Draft', // Always create as Draft
-                        totalAmount,
+                        date: new Date().toISOString().split('T')[0],
+                        status: 'Draft',
+                        totalAmount: siteTotalAmount,
                         itemsCount: totalItems,
-                        expectedDelivery: expectedDate || new Date(Date.now() + 86400000 * 7).toLocaleDateString('en-CA'),
-                        lineItems: newPOItems, // Send full items to each site
+                        expectedDelivery: expectedDate || new Date(Date.now() + 86400000 * 7).toISOString().split('T')[0],
+                        lineItems: newPOItems,
                         shippingCost: shippingCost || 0,
-                        taxAmount: taxAmount || 0,
+                        taxAmount: siteTaxAmount,
                         notes: finalNotes,
                         paymentTerms: paymentTerms || 'To be determined',
                         incoterms: incoterms || 'N/A',
                         destination: destination,
                         discount: discountAmount || 0,
                         priority: poPriority,
-                        createdBy: user?.name || 'Unknown'
+                        createdBy: user?.name || 'Unknown',
+                        requestedBy: poRequestedBy || user?.name || 'Unknown'
                     };
 
                     await createPO(newPO);
@@ -771,9 +887,13 @@ export default function Procurement() {
             setIsManualVendor(false);
             setManualVendorName('');
             setNewPOSupplier('');
+            setPoRequestedBy(user?.name || '');
             setIsRequestMode(false);
             setEditingPO(null);
             setExpectedDate('');
+
+            // Trigger Refresh
+            fetchData();
 
         } catch (error) {
             console.error(error);
@@ -913,10 +1033,11 @@ export default function Procurement() {
                 ? selectedMainCategory.substring(0, 3).toUpperCase().replace(/[^A-Z]/g, 'X')
                 : 'GEN';
             const timestamp = Date.now().toString().slice(-6);
-            const newSku = `${categoryPrefix}-${timestamp}`;
+            const randomSuffix = Math.random().toString(36).substr(2, 4).toUpperCase();
+            const newSku = `${categoryPrefix}-${timestamp}-${randomSuffix}`;
 
             // Use CUSTOM prefix to identify custom items
-            productId = `CUSTOM-${Date.now()}-${Math.random().toString(36).substr(2, 5).toUpperCase()}`;
+            productId = `CUSTOM-${Date.now()}-${Math.random().toString(36).substr(2, 8).toUpperCase()}`;
 
             // Optionally auto-create product in catalog (only if user wants)
             // For now, just use the CUSTOM ID - product will be created when PO is approved/received
@@ -1139,6 +1260,7 @@ export default function Procurement() {
             setIsDeletePOModalOpen(false);
             setPoToDelete(null);
             setDeleteInput('');
+            fetchData();
         } catch (error) {
             console.error(error);
         }
@@ -1476,7 +1598,7 @@ export default function Procurement() {
     const handleApprovePO = async () => {
         if (!selectedPO || isSubmitting) return;
         if (!canApprove) {
-            addNotification('alert', 'Only Super Admin or Admin can approve purchase orders');
+            addNotification('alert', 'Only CEO or Admin can approve purchase orders');
             return;
         }
 
@@ -1495,6 +1617,7 @@ export default function Procurement() {
 
             setSelectedPO({ ...updatedPO });
             addNotification('success', `PO ${selectedPO.poNumber || selectedPO.po_number || selectedPO.id} approved successfully`);
+            fetchData();
 
             // Close and reopen to refresh
             setTimeout(() => {
@@ -1537,7 +1660,7 @@ export default function Procurement() {
     const handleRejectPO = () => {
         if (!selectedPO) return;
         if (user?.role !== 'super_admin') {
-            addNotification('alert', 'Only Super Admin can reject purchase orders');
+            addNotification('alert', 'Only CEO can reject purchase orders');
             return;
         }
         setPoToReject(selectedPO);
@@ -1561,6 +1684,7 @@ export default function Procurement() {
 
             setSelectedPO({ ...updatedPO });
             addNotification('info', `PO ${poToReject.poNumber || poToReject.id} has been rejected. You can now edit or delete it.`);
+            fetchData();
 
             setIsRejectPOModalOpen(false);
             setPoToReject(null);
@@ -1579,7 +1703,7 @@ export default function Procurement() {
         }
 
         if (user?.role !== 'super_admin' && user?.role !== 'admin') {
-            addNotification('alert', 'Only Super Admin or Admin can approve purchase orders');
+            addNotification('alert', 'Only CEO or Admin can approve purchase orders');
             return;
         }
 
@@ -1623,6 +1747,7 @@ export default function Procurement() {
             }
 
             setSelectedPOIds([]);
+            fetchData();
         } catch (error) {
             console.error('Bulk approve error:', error);
             addNotification('alert', 'An error occurred during bulk approval');
@@ -1731,23 +1856,49 @@ export default function Procurement() {
                 <TabButton id="overview" label="Overview" icon={PieIcon} />
 
                 <TabButton id="orders" label="Orders (PO)" icon={Package} />
+                <TabButton id="requests" label="Requests (PR)" icon={FileText} />
                 <TabButton id="suppliers" label="Suppliers" icon={Truck} />
             </div>
 
             {/* --- OVERVIEW TAB --- */}
             {activeTab === 'overview' && (
                 <div className="space-y-6 animate-in fade-in">
+                    {/* Date Analysis Filter */}
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-cyber-gray p-4 rounded-xl border border-white/5">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 bg-cyber-primary/10 rounded-lg">
+                                <Calendar className="w-5 h-5 text-cyber-primary" />
+                            </div>
+                            <div>
+                                <h3 className="text-white font-bold text-sm">Temporal Analysis</h3>
+                                <p className="text-gray-400 text-[10px]">{getDateRangeLabels()}</p>
+                            </div>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                            <span className="text-gray-500 text-xs">Period:</span>
+                            <DateRangeSelector
+                                value={dateRange}
+                                onChange={setDateRange}
+                                options={[
+                                    'All Time', 'This Month', 'Last Month', 'This Quarter', 'This Year', 'Last Year',
+                                    'Q1 2025', 'Q2 2025', 'Q3 2025', 'Q4 2025',
+                                    'Q1 2024', 'Q2 2024', 'Q3 2024', 'Q4 2024'
+                                ]}
+                            />
+                        </div>
+                    </div>
                     {/* Metrics */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                         <KpiCard
                             title={`Total Spend (${dateRange === 'All Time' ? 'Life' : dateRange.replace('This ', '')})`}
-                            value={formatCompactNumber(metrics.totalSpend, { currency: CURRENCY_SYMBOL })}
+                            value={formatCompactNumber(procurementMetrics.totalSpend, { currency: CURRENCY_SYMBOL })}
                             sub="Across all categories"
                             icon={DollarSign}
                             color="text-cyber-primary"
                         />
-                        <KpiCard title="Open Orders" value={metrics.openPO} sub={`Value: ${formatCompactNumber(metrics.pendingValue, { currency: CURRENCY_SYMBOL })}`} icon={Package} color="text-blue-400" />
-                        <KpiCard title="Potential Revenue" value={formatCompactNumber(metrics.potentialRevenue, { currency: CURRENCY_SYMBOL })} sub="From current PO items" icon={TrendingUp} color="text-green-400" />
+                        <KpiCard title="Open Orders" value={procurementMetrics.openPO} sub={`Value: ${formatCompactNumber(procurementMetrics.pendingValue, { currency: CURRENCY_SYMBOL })}`} icon={Package} color="text-blue-400" />
+                        <KpiCard title="Potential Revenue" value={formatCompactNumber(procurementMetrics.potentialRevenue, { currency: CURRENCY_SYMBOL })} sub="From current PO items" icon={TrendingUp} color="text-green-400" />
                         <KpiCard title="Active Vendors" value={suppliers.filter(s => s.status === 'Active').length} sub="Top rated first" icon={Building} color="text-yellow-400" />
                         <KpiCard title="On-Time Delivery" value="94.2%" sub="Last 30 Days" icon={Clock} color="text-purple-400" />
                     </div>
@@ -1759,17 +1910,17 @@ export default function Procurement() {
                             <div className="h-[300px]">
                                 <ResponsiveContainer width="100%" height="100%" minHeight={0}>
                                     <PieChart>
-                                        <Pie data={metrics.categoryData} cx="50%" cy="50%" innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value">
-                                            {metrics.categoryData.map((entry, index) => (
+                                        <Pie data={procurementMetrics.categoryData} cx="50%" cy="50%" innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value">
+                                            {procurementMetrics.categoryData.map((entry, index) => (
                                                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke="none" />
                                             ))}
                                         </Pie>
-                                        <Tooltip contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #333' }} />
+                                        <Tooltip contentStyle={{ backgroundColor: '#1a1a1a', border: '#333' }} />
                                     </PieChart>
                                 </ResponsiveContainer>
                             </div>
                             <div className="flex justify-center gap-4 flex-wrap mt-4">
-                                {metrics.categoryData.map((entry, index) => (
+                                {procurementMetrics.categoryData.map((entry, index) => (
                                     <div key={index} className="flex items-center gap-2 text-xs text-gray-400">
                                         <div
                                             className="w-2 h-2 rounded-full"
@@ -1785,7 +1936,7 @@ export default function Procurement() {
                             <h3 className="font-bold text-white mb-6">Monthly Spend Trend</h3>
                             <div className="h-[300px]">
                                 <ResponsiveContainer width="100%" height="100%" minHeight={0}>
-                                    <AreaChart data={metrics.trendData}>
+                                    <AreaChart data={procurementMetrics.trendData}>
                                         <defs>
                                             <linearGradient id="colorSpend" x1="0" y1="0" x2="0" y2="1">
                                                 <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
@@ -1795,7 +1946,7 @@ export default function Procurement() {
                                         <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
                                         <XAxis dataKey="name" stroke="#666" fontSize={12} tickLine={false} axisLine={false} />
                                         <YAxis stroke="#666" fontSize={12} tickLine={false} axisLine={false} />
-                                        <Tooltip contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #333' }} />
+                                        <Tooltip contentStyle={{ backgroundColor: '#1a1a1a', border: '#333' }} />
                                         <Area type="monotone" dataKey="spend" stroke="#3b82f6" fillOpacity={1} fill="url(#colorSpend)" />
                                     </AreaChart>
                                 </ResponsiveContainer>
@@ -1831,7 +1982,7 @@ export default function Procurement() {
                         </button>
                     </div>
 
-                    {/* Bulk Actions Bar (Super Admin Only) */}
+                    {/* Bulk Actions Bar (CEO Only) */}
                     {user?.role === 'super_admin' && selectedPOIds.length > 0 && (
                         <div className="mx-4 mb-4 bg-cyber-primary/10 border border-cyber-primary/30 rounded-lg p-3 flex items-center justify-between">
                             <div className="flex items-center gap-3">
@@ -1869,7 +2020,7 @@ export default function Procurement() {
                         <table className="w-full text-left">
                             <thead>
                                 <tr className="bg-white/5 border-b border-white/5">
-                                    {/* Bulk Selection Checkbox (Super Admin Only) */}
+                                    {/* Bulk Selection Checkbox (CEO Only) */}
                                     {user?.role === 'super_admin' && (
                                         <th className="p-4 w-12">
                                             {activePurchaseOrders.filter(po => po.status === 'Draft').length > 0 && (
@@ -1891,12 +2042,15 @@ export default function Procurement() {
                                         </th>
                                     )}
                                     <th className="p-4 text-xs text-gray-400 uppercase">PO Number</th>
+                                    <th className="p-4 text-xs text-gray-400 uppercase text-center">Priority</th>
                                     <th className="p-4 text-xs text-gray-400 uppercase">Supplier</th>
                                     <th className="p-4 text-xs text-gray-400 uppercase">Destination</th>
                                     <th className="p-4 text-xs text-gray-400 uppercase">Date</th>
+                                    <th className="p-4 text-xs text-gray-400 uppercase">Expected</th>
                                     <th className="p-4 text-xs text-gray-400 uppercase text-right">Items</th>
                                     <th className="p-4 text-xs text-gray-400 uppercase text-right">Amount</th>
                                     <th className="p-4 text-xs text-gray-400 uppercase text-center">Status</th>
+                                    <th className="p-4 text-xs text-gray-400 uppercase">Requested By</th>
                                     <th className="p-4 text-xs text-gray-400 uppercase"></th>
                                 </tr>
                             </thead>
@@ -1906,7 +2060,7 @@ export default function Procurement() {
                                     const isSelected = selectedPOIds.includes(po.id);
                                     return (
                                         <tr key={po.id} className={`hover:bg-white/5 group transition-colors ${isSelected ? 'bg-cyber-primary/5 border-l-2 border-cyber-primary' : ''}`}>
-                                            {/* Selection Checkbox (Super Admin Only, Draft POs Only) */}
+                                            {/* Selection Checkbox (CEO Only, Draft POs Only) */}
                                             {user?.role === 'super_admin' && (
                                                 <td className="p-4">
                                                     {isDraft ? (
@@ -1930,11 +2084,25 @@ export default function Procurement() {
                                                 </td>
                                             )}
                                             <td className="p-4 text-sm font-mono text-white font-bold">{po.poNumber || po.po_number || `PO-${po.id.substring(0, 8).toUpperCase()}`}</td>
+                                            <td className="p-4">
+                                                <div className={`mx-auto px-2 py-0.5 rounded text-[9px] font-bold border uppercase text-center w-fit ${po.priority === 'High' || po.priority === 'Urgent' ? 'text-red-400 border-red-500/20 bg-red-500/10' :
+                                                    po.priority === 'Low' ? 'text-blue-400 border-blue-500/20 bg-blue-500/10' :
+                                                        'text-gray-400 border-gray-500/20 bg-gray-500/10'
+                                                    }`}>
+                                                    {po.priority || 'Normal'}
+                                                </div>
+                                            </td>
                                             <td className="p-4 text-sm text-gray-300">{po.supplierName}</td>
-                                            <td className="p-4 text-sm text-gray-300">{po.destination || sites.find(s => s.id === po.siteId)?.name || 'Unknown'}</td>
-                                            <td className="p-4 text-xs text-gray-500">{po.date}</td>
+                                            <td className="p-4 text-sm text-gray-300">
+                                                <div className="flex items-center gap-1.5 max-w-[250px]">
+                                                    <MapPin size={12} className="text-gray-500 flex-shrink-0" />
+                                                    <span>{po.destination || sites.find(s => s.id === po.siteId)?.name || 'Unknown'}</span>
+                                                </div>
+                                            </td>
+                                            <td className="p-4 text-xs text-gray-500 whitespace-nowrap">{po.date}</td>
+                                            <td className="p-4 text-xs text-blue-400 whitespace-nowrap">{po.expectedDelivery || 'N/A'}</td>
                                             <td className="p-4 text-sm text-gray-300 font-mono text-right">{po.itemsCount}</td>
-                                            <td className="p-4 text-sm text-cyber-primary font-mono text-right">{CURRENCY_SYMBOL} {po.totalAmount.toLocaleString()}</td>
+                                            <td className="p-4 text-sm text-cyber-primary font-mono text-right font-bold">{CURRENCY_SYMBOL} {po.totalAmount.toLocaleString()}</td>
                                             <td className="p-4 text-center">
                                                 <span className={`inline-flex items-center px-2 py-1 rounded text-[10px] font-bold uppercase border ${po.status === 'Received' ? 'text-green-400 border-green-500/20 bg-green-500/10' :
                                                     po.status === 'Approved' ? 'text-cyan-400 border-cyan-500/20 bg-cyan-500/10' :
@@ -1950,36 +2118,40 @@ export default function Procurement() {
                                                     {po.status}
                                                 </span>
                                             </td>
-                                            <td className="p-4 text-right">
-                                                <div className="flex items-center justify-end gap-2">
-                                                    {/* Approve button for Draft POs (Super Admin & Admin) */}
+                                            <td className="p-4 text-xs text-gray-500 italic max-w-[100px] truncate">{po.requestedBy || po.createdBy || 'Unknown'}</td>
+                                            <td className="p-4 pr-6 text-right">
+                                                <div className="flex justify-end gap-2">
                                                     {po.status === 'Draft' && canApprove && (
                                                         <button
-                                                            onClick={async () => {
+                                                            onClick={async (e) => {
+                                                                e.stopPropagation();
+                                                                if (!window.confirm('Approve this purchase order?')) return;
                                                                 try {
-                                                                    // Update PO status to Approved
                                                                     const updatedPO: PurchaseOrder = {
                                                                         ...po,
                                                                         status: 'Approved',
                                                                         approvedBy: user?.name || 'Unknown',
                                                                         approvedAt: new Date().toISOString()
                                                                     };
-
-                                                                    // Persist to database
                                                                     await updatePO(updatedPO);
                                                                     addNotification('success', `PO ${po.poNumber || po.po_number || `PO-${po.id.substring(0, 8).toUpperCase()}`} approved successfully`);
+                                                                    fetchData();
                                                                 } catch (error) {
                                                                     console.error('Error approving PO:', error);
-                                                                    addNotification('alert', 'Failed to approve PO. Please try again.');
+                                                                    addNotification('alert', 'Failed to approve PO');
                                                                 }
                                                             }}
-                                                            className="text-xs bg-green-500 hover:bg-green-600 px-3 py-1 rounded text-white font-bold transition-colors flex items-center gap-1"
+                                                            className="text-[10px] bg-green-500 hover:bg-green-600 px-2 py-1 rounded text-white font-bold transition-colors flex items-center gap-1"
                                                         >
-                                                            <CheckCircle size={12} />
-                                                            Approve
+                                                            <CheckCircle size={10} /> Approve
                                                         </button>
                                                     )}
-                                                    <Button variant="ghost" size="sm" onClick={() => setSelectedPO(po)} className="text-xs px-3 py-1 text-white border border-white/10">View</Button>
+                                                    <button
+                                                        onClick={(e) => { e.stopPropagation(); setSelectedPO(po); }}
+                                                        className="p-1 px-2 hover:bg-white/10 rounded border border-white/10 text-gray-300 text-[10px] font-bold transition-colors"
+                                                    >
+                                                        Details
+                                                    </button>
                                                 </div>
                                             </td>
                                         </tr>
@@ -1987,11 +2159,158 @@ export default function Procurement() {
                                 })}
                                 {activePurchaseOrders.length === 0 && (
                                     <tr>
-                                        <td colSpan={user?.role === 'super_admin' ? 9 : 8} className="p-8 text-center text-gray-500 italic">No active purchase orders found.</td>
+                                        <td colSpan={user?.role === 'super_admin' ? 12 : 11} className="p-8 text-center text-gray-500 italic">No active purchase orders found.</td>
                                     </tr>
                                 )}
                             </tbody>
                         </table>
+                    </div>
+
+                    {/* Pagination Controls */}
+                    <div className="flex items-center justify-between p-4 border-t border-white/5 bg-black/20 rounded-b-2xl">
+                        <p className="text-xs text-gray-500 font-mono">
+                            Showing <span className="text-gray-300">{activePurchaseOrders.length}</span> of <span className="text-gray-300">{totalCount}</span> Results
+                        </p>
+                        <div className="flex gap-2">
+                            <button
+                                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                                disabled={currentPage === 1 || loading}
+                                className="px-3 py-1.5 border border-white/10 rounded-lg text-xs font-bold text-gray-400 hover:bg-white/5 disabled:opacity-30 transition-colors"
+                            >
+                                Previous
+                            </button>
+                            <div className="flex items-center px-4 bg-white/5 rounded-lg border border-white/10">
+                                <span className="text-[10px] text-gray-500 uppercase font-bold tracking-wider mr-2">Page</span>
+                                <span className="text-sm font-mono font-bold text-cyber-primary">{currentPage}</span>
+                                <span className="text-[10px] text-gray-500 mx-2">of</span>
+                                <span className="text-sm font-mono text-white">{Math.ceil(totalCount / ITEMS_PER_PAGE)}</span>
+                            </div>
+                            <button
+                                onClick={() => setCurrentPage(prev => prev + 1)}
+                                disabled={currentPage * ITEMS_PER_PAGE >= totalCount || loading}
+                                className="px-3 py-1.5 border border-white/10 rounded-lg text-xs font-bold text-gray-400 hover:bg-white/5 disabled:opacity-30 transition-colors"
+                            >
+                                Next
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* --- REQUESTS TAB --- */}
+            {activeTab === 'requests' && (
+                <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                    <div className="bg-cyber-gray/30 border border-white/10 rounded-2xl overflow-hidden backdrop-blur-sm">
+                        <table className="w-full text-left border-collapse">
+                            <thead>
+                                <tr className="bg-white/5 border-b border-white/10">
+                                    <th className="p-4 text-xs text-gray-400 uppercase pl-6 font-bold">Request #</th>
+                                    <th className="p-4 text-xs text-gray-400 uppercase font-bold text-center">Priority</th>
+                                    <th className="p-4 text-xs text-gray-400 uppercase font-bold">Supplier</th>
+                                    <th className="p-4 text-xs text-gray-400 uppercase font-bold text-right">Items</th>
+                                    <th className="p-4 text-xs text-gray-400 uppercase font-bold text-right">Est. Cost</th>
+                                    <th className="p-4 text-xs text-gray-400 uppercase text-center font-bold">Status</th>
+                                    <th className="p-4 text-xs text-gray-400 uppercase font-bold">Requested By</th>
+                                    <th className="p-4 text-xs text-gray-400 uppercase pr-6 text-right font-bold">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-white/5">
+                                {activeRequests.map((req) => (
+                                    <tr key={req.id} className="hover:bg-white/5 group transition-colors cursor-pointer" onClick={() => setSelectedPO(req)}>
+                                        <td className="p-4 text-sm font-mono text-white font-bold pl-6">{req.poNumber || req.po_number || `PR-${req.id.substring(0, 8).toUpperCase()}`}</td>
+                                        <td className="p-4">
+                                            <div className={`mx-auto px-2 py-0.5 rounded text-[9px] font-bold border uppercase text-center w-fit ${req.priority === 'High' || req.priority === 'Urgent' ? 'text-red-400 border-red-500/20 bg-red-500/10' :
+                                                req.priority === 'Low' ? 'text-blue-400 border-blue-500/20 bg-blue-500/10' :
+                                                    'text-gray-400 border-gray-500/20 bg-gray-500/10'
+                                                }`}>
+                                                {req.priority || 'Normal'}
+                                            </div>
+                                        </td>
+                                        <td className="p-4 text-sm text-gray-300">{req.supplierName}</td>
+                                        <td className="p-4 text-sm text-gray-300 font-mono text-right">{req.itemsCount}</td>
+                                        <td className="p-4 text-sm text-cyber-primary font-mono text-right font-bold">{CURRENCY_SYMBOL} {req.totalAmount.toLocaleString()}</td>
+                                        <td className="p-4 text-center">
+                                            <span className="inline-flex items-center px-2 py-1 rounded text-[10px] font-bold uppercase border text-blue-400 border-blue-500/20 bg-blue-500/10">
+                                                Request
+                                            </span>
+                                        </td>
+                                        <td className="p-4 text-xs text-gray-500 italic truncate max-w-[120px]">{req.requestedBy || req.createdBy || 'Unknown'}</td>
+                                        <td className="p-4 pr-6 text-right">
+                                            <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); setSelectedPO(req); }}
+                                                    className="p-1 px-2 hover:bg-white/10 rounded border border-white/10 text-gray-300 text-[10px] font-bold"
+                                                >
+                                                    Review
+                                                </button>
+                                                {canApprove && (
+                                                    <button
+                                                        onClick={async (e) => {
+                                                            e.stopPropagation();
+                                                            setSelectedPO(req);
+                                                            // We use setImmediate or setTimeout to ensure state is updated before calling handler
+                                                            // or better, just inline the approval logic since handleApprovePO depends on state
+                                                            if (!window.confirm('Convert this request to a Purchase Order?')) return;
+                                                            try {
+                                                                const updatedPO: PurchaseOrder = {
+                                                                    ...req,
+                                                                    status: 'Approved',
+                                                                    approvedBy: user?.name || 'Unknown',
+                                                                    approvedAt: new Date().toISOString()
+                                                                };
+                                                                await updatePO(updatedPO);
+                                                                addNotification('success', `Request ${req.poNumber || req.po_number} converted to PO successfully`);
+                                                                fetchData();
+                                                            } catch (error) {
+                                                                console.error('Error converting request:', error);
+                                                                addNotification('alert', 'Failed to convert request');
+                                                            }
+                                                        }}
+                                                        className="p-1 px-2 bg-cyber-primary hover:bg-cyber-accent text-black rounded text-[10px] font-bold transition-colors"
+                                                    >
+                                                        Convert to PO
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                                {activeRequests.length === 0 && (
+                                    <tr>
+                                        <td colSpan={8} className="p-8 text-center text-gray-500 italic">No purchase requests found.</td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+
+                        {/* Pagination Controls */}
+                        <div className="flex items-center justify-between p-4 border-t border-white/5 bg-black/20">
+                            <p className="text-xs text-gray-500 font-mono">
+                                Showing <span className="text-gray-300">{activeRequests.length}</span> of <span className="text-gray-300">{totalRequestsCount}</span> Requests
+                            </p>
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={() => setRequestPage(prev => Math.max(1, prev - 1))}
+                                    disabled={requestPage === 1 || loading}
+                                    className="px-3 py-1.5 border border-white/10 rounded-lg text-xs font-bold text-gray-400 hover:bg-white/5 disabled:opacity-30"
+                                >
+                                    Previous
+                                </button>
+                                <div className="flex items-center px-4 bg-white/5 rounded-lg border border-white/10">
+                                    <span className="text-[10px] text-gray-500 uppercase font-bold tracking-wider mr-2">Page</span>
+                                    <span className="text-sm font-mono font-bold text-blue-400">{requestPage}</span>
+                                    <span className="text-[10px] text-gray-500 mx-2">of</span>
+                                    <span className="text-sm font-mono text-white">{Math.ceil(totalRequestsCount / ITEMS_PER_PAGE)}</span>
+                                </div>
+                                <button
+                                    onClick={() => setRequestPage(prev => prev + 1)}
+                                    disabled={requestPage * ITEMS_PER_PAGE >= totalRequestsCount || loading}
+                                    className="px-3 py-1.5 border border-white/10 rounded-lg text-xs font-bold text-gray-400 hover:bg-white/5 disabled:opacity-30"
+                                >
+                                    Next
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             )}
@@ -2007,7 +2326,7 @@ export default function Procurement() {
                             </div>
                             <div>
                                 <h2 className="text-xl font-bold text-white">Supplier Directory</h2>
-                                <p className="text-xs text-gray-400">{suppliers.length} Active Partners</p>
+                                <p className="text-xs text-gray-400">{totalSuppliersCount} Active Partners</p>
                             </div>
                         </div>
                         <Protected permission="MANAGE_SUPPLIERS">
@@ -2034,7 +2353,7 @@ export default function Procurement() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {suppliers.map((sup) => {
+                                {localSuppliers.map((sup) => {
                                     const Icon = getSupplierIcon(sup.type);
                                     return (
                                         <tr
@@ -2116,7 +2435,7 @@ export default function Procurement() {
                                 })}
                             </tbody>
                         </table>
-                        {suppliers.length === 0 && (
+                        {localSuppliers.length === 0 && (
                             <div className="p-12 text-center text-gray-500 flex flex-col items-center justify-center">
                                 <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4">
                                     <Search size={32} className="opacity-50" />
@@ -2125,6 +2444,35 @@ export default function Procurement() {
                                 <p className="text-sm mt-1">Add a new supplier to get started.</p>
                             </div>
                         )}
+                    </div>
+
+                    {/* Pagination Controls */}
+                    <div className="flex items-center justify-between p-4 border border-white/10 border-t-0 bg-black/20 rounded-b-2xl">
+                        <p className="text-xs text-gray-500 font-mono">
+                            Showing <span className="text-gray-300">{localSuppliers.length}</span> of <span className="text-gray-300">{totalSuppliersCount}</span> Partners
+                        </p>
+                        <div className="flex gap-2">
+                            <button
+                                onClick={() => setSupplierPage(prev => Math.max(1, prev - 1))}
+                                disabled={supplierPage === 1 || loading}
+                                className="px-3 py-1.5 border border-white/10 rounded-lg text-xs font-bold text-gray-400 hover:bg-white/5 disabled:opacity-30 transition-colors"
+                            >
+                                Previous
+                            </button>
+                            <div className="flex items-center px-4 bg-white/5 rounded-lg border border-white/10">
+                                <span className="text-[10px] text-gray-500 uppercase font-bold tracking-wider mr-2">Page</span>
+                                <span className="text-sm font-mono font-bold text-yellow-500">{supplierPage}</span>
+                                <span className="text-[10px] text-gray-500 mx-2">of</span>
+                                <span className="text-sm font-mono text-white">{Math.ceil(totalSuppliersCount / ITEMS_PER_PAGE)}</span>
+                            </div>
+                            <button
+                                onClick={() => setSupplierPage(prev => prev + 1)}
+                                disabled={supplierPage * ITEMS_PER_PAGE >= totalSuppliersCount || loading}
+                                className="px-3 py-1.5 border border-white/10 rounded-lg text-xs font-bold text-gray-400 hover:bg-white/5 disabled:opacity-30 transition-colors"
+                            >
+                                Next
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}
@@ -2136,7 +2484,7 @@ export default function Procurement() {
                     <div className="flex items-start justify-between">
                         <div>
                             <h2 className="text-2xl font-bold text-white">{isRequestMode ? "New Purchase Request" : "New Purchase Order"}</h2>
-                            <p className="text-sm text-gray-400 mt-1">{new Date().toLocaleDateString()}</p>
+                            <p className="text-sm text-gray-400 mt-1">{formatDateTime(new Date())}</p>
                         </div>
                         <span className="px-4 py-2 bg-yellow-500/20 text-yellow-400 rounded-full text-sm font-bold">Draft</span>
                     </div>
@@ -2184,7 +2532,7 @@ export default function Procurement() {
                                             title={`Select ${site.name}`}
                                             aria-label={`Select ${site.name}`}
                                         />
-                                        <span className="text-sm text-white truncate">{site.name}</span>
+                                        <span className="text-sm text-white">{site.name}</span>
                                     </label>
                                 ))}
                             </div>
@@ -2217,6 +2565,22 @@ export default function Procurement() {
                         <div className="bg-white/5 rounded-xl p-4">
                             <p className="text-xs text-gray-500 uppercase tracking-wider mb-2">Payment Terms</p>
                             <input className="w-full bg-transparent border-b border-white/20 py-1 text-white text-sm focus:border-cyber-primary outline-none" placeholder="Net 30" value={paymentTerms} onChange={e => setPaymentTerms(e.target.value)} title="Payment Terms" aria-label="Payment Terms" />
+                        </div>
+
+                        {/* Requester */}
+                        <div className="bg-white/5 rounded-xl p-4">
+                            <p className="text-xs text-gray-500 uppercase tracking-wider mb-2">Requester *</p>
+                            <div className="flex items-center gap-2">
+                                <User size={14} className="text-gray-500" />
+                                <input
+                                    className="w-full bg-transparent border-b border-white/20 py-1 text-white text-sm focus:border-cyber-primary outline-none"
+                                    placeholder="Name of requester..."
+                                    value={poRequestedBy}
+                                    onChange={e => setPoRequestedBy(e.target.value)}
+                                    title="Name of Requester"
+                                    aria-label="Name of Requester"
+                                />
+                            </div>
                         </div>
                     </div>
 
@@ -2522,8 +2886,16 @@ export default function Procurement() {
                                             <td className="p-3 text-gray-500 text-sm">{i + 1}</td>
                                             <td className="p-3">
                                                 <div className="flex items-center gap-2">
-                                                    {item.image ? (
-                                                        <img src={item.image} alt={item.productName} className="w-8 h-8 rounded-lg object-cover border border-white/10 flex-shrink-0" />
+                                                    {item.image && !item.image.includes('placeholder.com') ? (
+                                                        <img
+                                                            src={item.image}
+                                                            alt={item.productName}
+                                                            className="w-8 h-8 rounded-lg object-cover border border-white/10 flex-shrink-0"
+                                                            onError={(e) => {
+                                                                e.currentTarget.style.display = 'none';
+                                                                (e.currentTarget.parentElement as HTMLElement).innerHTML = '<div class="w-8 h-8 rounded-lg bg-black/30 border border-white/10 flex items-center justify-center flex-shrink-0"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-package text-gray-500"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg></div>';
+                                                            }}
+                                                        />
                                                     ) : (
                                                         <div className="w-8 h-8 rounded-lg bg-black/30 border border-white/10 flex items-center justify-center flex-shrink-0">
                                                             <Package size={14} className="text-gray-500" />
@@ -2676,28 +3048,36 @@ export default function Procurement() {
                                     )}
                                 </p>
                             </div>
-                            <div className={`px-4 py-2 rounded-full text-sm font-bold ${selectedPO.status === 'Received' ? 'bg-green-500/20 text-green-400' :
-                                selectedPO.status === 'Approved' || selectedPO.status === 'Pending' ? 'bg-blue-500/20 text-blue-400' :
-                                    selectedPO.status === 'Draft' ? 'bg-yellow-500/20 text-yellow-400' :
-                                        'bg-red-500/20 text-red-400'
-                                }`}>
-                                {selectedPO.status}
+                            <div className="flex flex-col items-end gap-2">
+                                <div className={`px-4 py-2 rounded-full text-sm font-bold ${selectedPO.status === 'Received' ? 'bg-green-500/20 text-green-400' :
+                                    selectedPO.status === 'Approved' || selectedPO.status === 'Pending' ? 'bg-blue-500/20 text-blue-400' :
+                                        selectedPO.status === 'Draft' ? 'bg-yellow-500/20 text-yellow-400' :
+                                            'bg-red-500/20 text-red-400'
+                                    }`}>
+                                    {selectedPO.status}
+                                </div>
+                                <div className={`px-3 py-1 rounded-full text-[10px] font-bold border uppercase ${selectedPO.priority === 'High' || selectedPO.priority === 'Urgent' ? 'text-red-400 border-red-500/20 bg-red-500/10' :
+                                    selectedPO.priority === 'Low' ? 'text-blue-400 border-blue-500/20 bg-blue-500/10' :
+                                        'text-gray-400 border-gray-500/20 bg-gray-500/10'
+                                    }`}>
+                                    Priority: {selectedPO.priority || 'Normal'}
+                                </div>
                             </div>
                         </div>
 
                         {/* Key Info - Enhanced Grid */}
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                             <div className="bg-white/5 rounded-xl p-4">
-                                <p className="text-xs text-gray-500 uppercase tracking-wider">Created</p>
+                                <p className="text-xs text-gray-500 uppercase tracking-wider">Order Date</p>
                                 <p className="text-white font-medium mt-1">{selectedPO.date || 'N/A'}</p>
                             </div>
                             <div className="bg-white/5 rounded-xl p-4">
                                 <p className="text-xs text-gray-500 uppercase tracking-wider">Requested By</p>
-                                <p className="text-white font-medium mt-1">{selectedPO.createdBy || user?.name || 'N/A'}</p>
+                                <p className="text-white font-medium mt-1 truncate">{selectedPO.requestedBy || selectedPO.createdBy || 'Unknown'}</p>
                             </div>
                             <div className="bg-white/5 rounded-xl p-4">
                                 <p className="text-xs text-gray-500 uppercase tracking-wider">Destination</p>
-                                <p className="text-white font-medium mt-1 truncate">{selectedPO.destination || 'N/A'}</p>
+                                <p className="text-white font-medium mt-1">{selectedPO.destination || 'N/A'}</p>
                             </div>
                             <div className="bg-white/5 rounded-xl p-4">
                                 <p className="text-xs text-gray-500 uppercase tracking-wider">Expected By</p>
@@ -3010,7 +3390,21 @@ export default function Procurement() {
                             {products.slice(0, 20).map(product => (
                                 <div key={product.id} className="bg-white/5 border border-white/10 rounded-xl p-4 hover:border-cyber-primary/50 transition-colors">
                                     <div className="flex items-start gap-3">
-                                        <img src={product.image} alt={product.name} className="w-16 h-16 rounded-lg object-cover" />
+                                        {product.image && !product.image.includes('placeholder.com') ? (
+                                            <img
+                                                src={product.image}
+                                                alt={product.name}
+                                                className="w-16 h-16 rounded-lg object-cover"
+                                                onError={(e) => {
+                                                    e.currentTarget.style.display = 'none';
+                                                    (e.currentTarget.parentElement as HTMLElement).innerHTML = '<div class="w-16 h-16 rounded-lg bg-black/30 flex items-center justify-center flex-shrink-0"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-package text-gray-600"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg></div>';
+                                                }}
+                                            />
+                                        ) : (
+                                            <div className="w-16 h-16 rounded-lg bg-black/30 flex items-center justify-center flex-shrink-0">
+                                                <Package size={24} className="text-gray-600" />
+                                            </div>
+                                        )}
                                         <div className="flex-1 min-w-0">
                                             <h4 className="text-white font-bold text-sm truncate">{product.name}</h4>
                                             <p className="text-xs text-gray-400 mt-1">SKU: {product.sku || product.id}</p>

@@ -231,13 +231,13 @@ export function formatPercentage(value: number, decimals: number = 1): string {
  * Navigation routes for metrics
  */
 export const METRIC_ROUTES = {
-  revenue: '/sales-history',
+  revenue: '/sales',
   inventory: '/inventory',
   lowStock: '/inventory?filter=low_stock',
-  wms: '/warehouse-operations',
-  picks: '/warehouse-operations?tab=PICK',
-  packs: '/warehouse-operations?tab=PACK',
-  putaways: '/warehouse-operations?tab=PUTAWAY',
+  wms: '/wms-ops',
+  picks: '/wms-ops?tab=PICK',
+  packs: '/wms-ops?tab=PACK',
+  putaways: '/wms-ops?tab=PUTAWAY',
   procurement: '/procurement',
   pendingPOs: '/procurement?filter=pending',
   employees: '/employees',

@@ -40,6 +40,7 @@ interface StoreContextType {
   toggleSidebar: () => void;
   loading: boolean;
   isOnline: boolean;
+  isServerDown: boolean;
   showToast: (message: string, type?: 'info' | 'warning' | 'error' | 'success', duration?: number) => void;
   updateUserAvatar: (newAvatar: string) => void; // Update current user's avatar
 }
@@ -51,6 +52,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [isServerDown, setIsServerDown] = useState(false);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
 
   // Session warning handler
@@ -89,7 +91,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           avatar: profile.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.name)}&background=0D8ABC&color=fff`,
           title: rawRole.charAt(0).toUpperCase() + rawRole.slice(1),
           siteId: profile.siteId,
-          employeeId: profile.id
+          employeeId: profile.id,
+          email: profile.email
         });
       }
     } catch (error) {
@@ -142,6 +145,41 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
 
+  // --- SERVER HEALTH KILL-SWITCH ---
+  useEffect(() => {
+    // We import supabase here to avoid circular dependencies if any
+    const checkServerHealth = async () => {
+      try {
+        const { supabase } = await import('../lib/supabase');
+        // Simple light-weight check: Read one site record
+        const { error } = await supabase.from('sites').select('id').limit(1);
+
+        if (error) {
+          // If message contains 'fetch' it's almost certainly a connection issue
+          const msg = error.message.toLowerCase();
+          if (msg.includes('fetch') || msg.includes('network') || msg.includes('failed')) {
+            console.error('CRITICAL: Server unreachable!', error);
+            setIsServerDown(true);
+          } else {
+            // Other errors (auth, etc) mean the server IS reachable
+            setIsServerDown(false);
+          }
+        } else {
+          setIsServerDown(false);
+        }
+      } catch (e) {
+        console.error('CRITICAL: Health check exception!', e);
+        setIsServerDown(true);
+      }
+    };
+
+    // Check every 5 seconds
+    const interval = setInterval(checkServerHealth, 5000);
+    checkServerHealth(); // Immediate check
+
+    return () => clearInterval(interval);
+  }, []);
+
   const checkSession = async () => {
     try {
       const session = await authService.getSession();
@@ -165,44 +203,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       if (result?.user) {
         await syncUserProfile();
         console.log('CentralStore: Login complete!');
+        // Force navigate to root to trigger role-based redirects in App.tsx
+        window.location.hash = '#/';
         return true;
       }
 
       return false;
     } catch (error) {
       console.error('Login failed:', error);
-
-      // DEMO MODE FALLBACK: Check if employee exists and password is Test123!
-      if (password === 'Test123!') {
-        console.log('CentralStore: Trying demo mode...');
-        try {
-          const { supabase } = await import('../lib/supabase');
-          const { data: employee, error: empError } = await supabase
-            .from('employees')
-            .select('*, sites(name)')
-            .eq('email', email)
-            .single();
-
-          if (!empError && employee) {
-            console.log('CentralStore: Demo mode login successful!', employee.name);
-            const rawRole = employee.role;
-            const normalizedRole = rawRole.toLowerCase().trim().replace(/[\s-]/g, '_');
-
-            setUser({
-              id: employee.id,
-              name: employee.name,
-              role: normalizedRole as UserRole,
-              avatar: employee.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(employee.name)}&background=0D8ABC&color=fff`,
-              title: rawRole.charAt(0).toUpperCase() + rawRole.slice(1),
-              siteId: employee.site_id || employee.siteId,
-              employeeId: employee.id
-            });
-            return true;
-          }
-        } catch (demoError) {
-          console.error('Demo mode failed:', demoError);
-        }
-      }
 
       return false;
     }
@@ -279,9 +287,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     toggleSidebar,
     loading,
     isOnline,
+    isServerDown,
     showToast,
     updateUserAvatar
-  }), [user, originalUser, theme, isSidebarOpen, loading, isOnline]);
+  }), [user, originalUser, theme, isSidebarOpen, loading, isOnline, isServerDown]);
 
   return (
     <StoreContext.Provider value={value}>

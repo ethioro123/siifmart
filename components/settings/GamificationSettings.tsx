@@ -64,6 +64,7 @@ export default function GamificationSettings() {
     const [isPointRuleModalOpen, setIsPointRuleModalOpen] = useState(false);
     const [editingPointRule, setEditingPointRule] = useState<StorePointRule | null>(null);
     const [editedPointRule, setEditedPointRule] = useState<Partial<StorePointRule>>({});
+    const [ruleNameError, setRuleNameError] = useState(false);
 
     // Modal state for editing tier
     const [editingTier, setEditingTier] = useState<BonusTier | null>(null);
@@ -275,10 +276,14 @@ export default function GamificationSettings() {
     };
 
     const handleSavePointRule = () => {
-        if (!editedPointRule.name) {
+        console.log('handleSavePointRule called', editedPointRule);
+        if (!editedPointRule.name || editedPointRule.name.trim() === '') {
+            console.log('Rule name validation failed');
+            setRuleNameError(true);
             showToast('Please provide a rule name', 'error');
             return;
         }
+        setRuleNameError(false);
 
         const completeRule: StorePointRule = {
             id: editedPointRule.id || `rule-${Date.now()}`,
@@ -323,9 +328,16 @@ export default function GamificationSettings() {
             enabled: editedWarehouseRule.enabled ?? true,
         };
 
-        setWarehousePointRules(prev => prev.map(r => r.id === editedWarehouseRule.id ? completeRule : r));
+        if (editingWarehouseRule) {
+            // Editing existing rule
+            setWarehousePointRules(prev => prev.map(r => r.id === editingWarehouseRule.id ? completeRule : r));
+            showToast('Rule updated', 'success');
+        } else {
+            // Adding new rule
+            setWarehousePointRules(prev => [...prev, completeRule]);
+            showToast('Rule added', 'success');
+        }
         setIsWarehouseRuleModalOpen(false);
-        showToast('Rule updated', 'success');
     };
 
     const handleDeletePointRule = (ruleId: string) => {
@@ -388,38 +400,64 @@ export default function GamificationSettings() {
 
     return (
         <div className="w-full max-w-full space-y-6 animate-in fade-in slide-in-from-right-4">
-            {/* HEADER BANNER */}
-            <div className="p-4 bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-500/20 rounded-xl flex items-start gap-3">
-                <Trophy className="text-purple-400 shrink-0 mt-0.5" size={20} />
-                <div>
-                    <h4 className="text-purple-400 font-bold text-sm">Gamification & Bonus Settings</h4>
-                    <p className="text-xs text-gray-400 mt-1">
-                        Configure bonuses for warehouse workers (individual) and POS staff (team-based).
-                    </p>
+            {/* HEADER BANNER with SAVE BUTTON */}
+            <div className="p-4 bg-white/5 border border-white/10 rounded-xl flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-cyber-primary/10 flex items-center justify-center">
+                        <Trophy className="text-cyber-primary" size={20} />
+                    </div>
+                    <div>
+                        <h4 className="text-white font-bold">Gamification & Bonuses</h4>
+                        <p className="text-xs text-gray-400 mt-1">
+                            Configure bonuses for warehouse workers (individual) and POS staff (team-based).
+                        </p>
+                    </div>
                 </div>
+                <button
+                    onClick={handleSave}
+                    disabled={isSaving}
+                    className={`px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-all text-sm ${isSaving
+                        ? 'bg-gray-600/50 text-gray-400 cursor-not-allowed'
+                        : activeTab === 'warehouse'
+                            ? 'bg-gradient-to-r from-cyber-primary to-green-400 text-black hover:shadow-[0_0_30px_rgba(0,255,157,0.3)]'
+                            : 'bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:shadow-[0_0_30px_rgba(100,100,255,0.3)]'
+                        }`}
+                >
+                    {isSaving ? (
+                        <>
+                            <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                            Saving...
+                        </>
+                    ) : (
+                        <>
+                            <Save size={16} />
+                            Save All
+                        </>
+                    )}
+                </button>
             </div>
 
             {/* TABS: Warehouse vs POS */}
-            <div className="flex gap-2 bg-white/5 p-1 rounded-xl">
+            <div className="flex gap-1 bg-white/5 p-1 rounded-xl">
                 <button
                     onClick={() => setActiveTab('warehouse')}
                     className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-bold transition-all ${activeTab === 'warehouse'
-                        ? 'bg-gradient-to-r from-cyber-primary to-green-400 text-black'
+                        ? 'bg-cyber-primary text-black'
                         : 'text-gray-400 hover:text-white hover:bg-white/5'
                         }`}
                 >
                     <Trophy size={18} />
-                    Warehouse (Individual)
+                    Warehouse
                 </button>
                 <button
                     onClick={() => setActiveTab('pos')}
                     className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-bold transition-all ${activeTab === 'pos'
-                        ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white'
+                        ? 'bg-blue-500 text-white'
                         : 'text-gray-400 hover:text-white hover:bg-white/5'
                         }`}
                 >
                     <ShoppingBag size={18} />
-                    POS (Team-Based)
+                    POS Team
                 </button>
             </div>
 
@@ -432,22 +470,23 @@ export default function GamificationSettings() {
                         <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center">
-                                        <Gift size={20} className="text-white" />
+                                    <div className="w-10 h-10 rounded-xl bg-cyber-primary flex items-center justify-center">
+                                        <Gift size={20} className="text-black" />
                                     </div>
                                     <div>
                                         <h4 className="font-bold text-white text-sm">Bonus System</h4>
                                         <p className="text-[10px] text-gray-400">Enable worker bonuses</p>
                                     </div>
                                 </div>
-                                <label className="relative inline-flex items-center cursor-pointer">
+                                <label className="relative inline-flex items-center cursor-pointer" title="Toggle warehouse bonuses">
                                     <input
                                         type="checkbox"
                                         className="sr-only peer"
                                         checked={bonusEnabled}
                                         onChange={(e) => setBonusEnabled(e.target.checked)}
+                                        title="Enable warehouse worker bonuses"
                                     />
-                                    <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
+                                    <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyber-primary"></div>
                                 </label>
                             </div>
                         </div>
@@ -455,7 +494,7 @@ export default function GamificationSettings() {
                         {/* Payout Frequency */}
                         <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4">
                             <div className="flex items-center gap-3 mb-3">
-                                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
+                                <div className="w-10 h-10 rounded-xl bg-blue-500 flex items-center justify-center">
                                     <Calendar size={20} className="text-white" />
                                 </div>
                                 <div>
@@ -464,9 +503,10 @@ export default function GamificationSettings() {
                                 </div>
                             </div>
                             <select
+                                title="Select payout frequency"
                                 value={payoutFrequency}
                                 onChange={(e) => setPayoutFrequency(e.target.value as any)}
-                                className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-purple-500 focus:outline-none"
+                                className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-cyber-primary focus:outline-none"
                             >
                                 <option value="weekly">Weekly</option>
                                 <option value="biweekly">Bi-Weekly</option>
@@ -526,10 +566,10 @@ export default function GamificationSettings() {
                                             <div className="flex items-center justify-between">
                                                 <div className="flex items-center gap-3">
                                                     <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${isEnabled
-                                                        ? 'bg-gradient-to-br from-cyber-primary to-green-400'
+                                                        ? 'bg-cyber-primary'
                                                         : 'bg-gray-700'
                                                         }`}>
-                                                        <Package size={20} className="text-white" />
+                                                        <Package size={20} className={isEnabled ? 'text-black' : 'text-white'} />
                                                     </div>
                                                     <div>
                                                         <h4 className="font-bold text-white text-sm">{warehouse.name}</h4>
@@ -540,6 +580,7 @@ export default function GamificationSettings() {
                                                 </div>
                                                 <button
                                                     onClick={() => toggleStoreBonusEligibility(warehouse, 'warehouseBonusEnabled')}
+                                                    title={isEnabled ? `Disable bonus for ${warehouse.name}` : `Enable bonus for ${warehouse.name}`}
                                                     className={`p-2 rounded-lg transition-all ${isEnabled
                                                         ? 'bg-cyber-primary/20 text-cyber-primary hover:bg-cyber-primary/30'
                                                         : 'bg-gray-500/20 text-gray-500 hover:bg-gray-500/30'
@@ -650,12 +691,31 @@ export default function GamificationSettings() {
                                     Configure how many points workers earn for different activities
                                 </p>
                             </div>
-                            <button
-                                onClick={() => handleResetDefaults('warehouse')}
-                                className="px-3 py-2 text-xs bg-gray-600/30 hover:bg-gray-600/50 text-gray-300 rounded-lg transition-all"
-                            >
-                                Reset Defaults
-                            </button>
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={() => {
+                                        setEditingWarehouseRule(null);
+                                        setEditedWarehouseRule({
+                                            id: `wpr-${Date.now()}`,
+                                            action: 'PICK' as any,
+                                            points: 10,
+                                            description: '',
+                                            enabled: true,
+                                        });
+                                        setIsWarehouseRuleModalOpen(true);
+                                    }}
+                                    className="px-4 py-2 bg-gradient-to-r from-cyber-primary to-cyber-accent text-black rounded-lg text-sm font-bold flex items-center gap-2 hover:opacity-90 transition-opacity"
+                                >
+                                    <Plus size={16} />
+                                    Add Rule
+                                </button>
+                                <button
+                                    onClick={() => handleResetDefaults('warehouse')}
+                                    className="px-3 py-2 text-xs bg-gray-600/30 hover:bg-gray-600/50 text-gray-300 rounded-lg transition-all"
+                                >
+                                    Reset Defaults
+                                </button>
+                            </div>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -670,10 +730,10 @@ export default function GamificationSettings() {
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-3">
                                             <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${rule.enabled
-                                                ? 'bg-gradient-to-br from-cyber-primary to-green-400'
+                                                ? 'bg-cyber-primary'
                                                 : 'bg-gray-700'
                                                 }`}>
-                                                {rule.action.includes('STREAK') ? <TrendingUp size={18} className="text-white" /> : <Package size={18} className="text-white" />}
+                                                {rule.action.includes('STREAK') ? <TrendingUp size={18} className={rule.enabled ? 'text-black' : 'text-white'} /> : <Package size={18} className={rule.enabled ? 'text-black' : 'text-white'} />}
                                             </div>
                                             <div>
                                                 <h4 className="font-bold text-white text-sm">{rule.action}</h4>
@@ -714,6 +774,14 @@ export default function GamificationSettings() {
                                             >
                                                 {rule.enabled ? <ToggleRight size={18} /> : <ToggleLeft size={18} />}
                                             </button>
+                                            <button
+                                                onClick={() => setWarehousePointRules(prev => prev.filter(r => r.id !== rule.id))}
+                                                className="p-1.5 bg-red-500/20 hover:bg-red-500/40 text-red-400 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                                                title={`Delete ${rule.action} rule`}
+                                                aria-label={`Delete ${rule.action} rule`}
+                                            >
+                                                <Trash2 size={14} />
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
@@ -733,21 +801,13 @@ export default function GamificationSettings() {
                                     Define point ranges and corresponding bonus amounts
                                 </p>
                             </div>
-                            <div className="flex gap-2">
-                                <button
-                                    onClick={() => handleResetDefaults('warehouse')}
-                                    className="px-3 py-2 text-xs bg-gray-600/30 hover:bg-gray-600/50 text-gray-300 rounded-lg transition-all"
-                                >
-                                    Reset Defaults
-                                </button>
-                                <button
-                                    onClick={() => openAddModal('warehouse')}
-                                    className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg text-sm font-bold flex items-center gap-2 hover:opacity-90 transition-opacity"
-                                >
-                                    <Plus size={16} />
-                                    Add Tier
-                                </button>
-                            </div>
+                            <button
+                                onClick={() => openAddModal('warehouse')}
+                                className="px-4 py-2 bg-cyber-primary text-black rounded-lg text-sm font-bold flex items-center gap-2 hover:opacity-90 transition-opacity"
+                            >
+                                <Plus size={16} />
+                                Add Tier
+                            </button>
                         </div>
 
                         {/* Tiers Grid */}
@@ -796,12 +856,14 @@ export default function GamificationSettings() {
                                             <button
                                                 onClick={() => openEditModal(tier)}
                                                 className="p-2 bg-blue-500/20 hover:bg-blue-500/40 text-blue-400 rounded-lg transition-all"
+                                                title={`Edit ${tier.tierName}`}
                                             >
                                                 <Edit2 size={16} />
                                             </button>
                                             <button
                                                 onClick={() => handleDeleteTier(tier.id)}
                                                 className="p-2 bg-red-500/20 hover:bg-red-500/40 text-red-400 rounded-lg transition-all"
+                                                title={`Delete ${tier.tierName}`}
                                             >
                                                 <Trash2 size={16} />
                                             </button>
@@ -867,7 +929,7 @@ export default function GamificationSettings() {
                         <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center">
+                                    <div className="w-10 h-10 rounded-xl bg-blue-500 flex items-center justify-center">
                                         <ShoppingBag size={20} className="text-white" />
                                     </div>
                                     <div>
@@ -875,12 +937,13 @@ export default function GamificationSettings() {
                                         <p className="text-[10px] text-gray-400">Enable store bonuses</p>
                                     </div>
                                 </div>
-                                <label className="relative inline-flex items-center cursor-pointer">
+                                <label className="relative inline-flex items-center cursor-pointer" title="Toggle POS bonuses">
                                     <input
                                         type="checkbox"
                                         className="sr-only peer"
                                         checked={posBonusEnabled}
                                         onChange={(e) => setPosBonusEnabled(e.target.checked)}
+                                        title="Enable POS team bonuses"
                                     />
                                     <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
                                 </label>
@@ -890,7 +953,7 @@ export default function GamificationSettings() {
                         {/* Payout Frequency */}
                         <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4">
                             <div className="flex items-center gap-3 mb-3">
-                                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center">
+                                <div className="w-10 h-10 rounded-xl bg-purple-500 flex items-center justify-center">
                                     <Calendar size={20} className="text-white" />
                                 </div>
                                 <div>
@@ -899,6 +962,7 @@ export default function GamificationSettings() {
                                 </div>
                             </div>
                             <select
+                                title="Select POS payout frequency"
                                 value={posPayoutFrequency}
                                 onChange={(e) => setPosPayoutFrequency(e.target.value as any)}
                                 className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-blue-500 focus:outline-none"
@@ -1156,12 +1220,14 @@ export default function GamificationSettings() {
                                             <button
                                                 onClick={() => openRoleModal(role)}
                                                 className="p-1.5 bg-blue-500/20 hover:bg-blue-500/40 text-blue-400 rounded-lg transition-all"
+                                                title={`Edit ${role.role} role`}
                                             >
                                                 <Edit2 size={14} />
                                             </button>
                                             <button
                                                 onClick={() => handleDeleteRole(role.id)}
                                                 className="p-1.5 bg-red-500/20 hover:bg-red-500/40 text-red-400 rounded-lg transition-all"
+                                                title={`Delete ${role.role} role`}
                                             >
                                                 <Trash2 size={14} />
                                             </button>
@@ -1675,10 +1741,11 @@ export default function GamificationSettings() {
                             <input
                                 type="text"
                                 value={editedPointRule.name || ''}
-                                onChange={(e) => setEditedPointRule({ ...editedPointRule, name: e.target.value })}
+                                onChange={(e) => { setEditedPointRule({ ...editedPointRule, name: e.target.value }); setRuleNameError(false); }}
                                 placeholder="e.g., Premium Electronics"
-                                className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-yellow-500 focus:outline-none"
+                                className={`w-full bg-black/40 border rounded-lg px-4 py-3 text-white focus:border-yellow-500 focus:outline-none ${ruleNameError ? 'border-red-500' : 'border-white/10'}`}
                             />
+                            {ruleNameError && <p className="text-xs text-red-400 mt-1">Rule name is required</p>}
                         </div>
                         <div>
                             <label className="text-xs text-gray-400 uppercase font-bold mb-1 block">
@@ -1930,17 +1997,38 @@ export default function GamificationSettings() {
             <Modal
                 isOpen={isWarehouseRuleModalOpen}
                 onClose={() => setIsWarehouseRuleModalOpen(false)}
-                title="Edit Warehouse Point Rule"
+                title={editingWarehouseRule ? 'Edit Warehouse Point Rule' : 'Add New Warehouse Rule'}
             >
                 <div className="space-y-4 pr-2">
                     <div>
                         <label className="text-xs text-gray-400 uppercase font-bold mb-1 block">
                             Action
                         </label>
-                        <div className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-gray-400">
-                            {editedWarehouseRule.action}
-                        </div>
-                        <p className="text-[10px] text-gray-500 mt-1">Actions are system-defined and cannot be changed.</p>
+                        {editingWarehouseRule ? (
+                            <div className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-gray-400">
+                                {editedWarehouseRule.action}
+                            </div>
+                        ) : (
+                            <select
+                                value={editedWarehouseRule.action || 'PICK'}
+                                onChange={(e) => setEditedWarehouseRule({ ...editedWarehouseRule, action: e.target.value as any })}
+                                className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-cyber-primary focus:outline-none"
+                                aria-label="Select warehouse action"
+                            >
+                                <option value="PICK">PICK</option>
+                                <option value="PACK">PACK</option>
+                                <option value="PUTAWAY">PUTAWAY</option>
+                                <option value="TRANSFER">TRANSFER</option>
+                                <option value="DISPATCH">DISPATCH</option>
+                                <option value="ITEM_BONUS">ITEM_BONUS</option>
+                                <option value="ACCURACY_100">ACCURACY_100</option>
+                                <option value="ACCURACY_95">ACCURACY_95</option>
+                                <option value="STREAK_3">STREAK_3</option>
+                                <option value="STREAK_7">STREAK_7</option>
+                                <option value="STREAK_30">STREAK_30</option>
+                            </select>
+                        )}
+                        <p className="text-[10px] text-gray-500 mt-1">{editingWarehouseRule ? 'Actions are system-defined and cannot be changed.' : 'Select the warehouse action to award points for.'}</p>
                     </div>
 
                     <div>

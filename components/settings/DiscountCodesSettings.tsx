@@ -9,7 +9,7 @@ import { useStore } from '../../contexts/CentralStore';
 import { DiscountCode } from '../../types';
 import Modal from '../Modal';
 import { CURRENCY_SYMBOL } from '../../constants';
-import { formatCompactNumber } from '../../utils/formatting';
+import { formatCompactNumber, formatDateTime } from '../../utils/formatting';
 
 const DiscountCodesSettings: React.FC = () => {
   const { user } = useStore();
@@ -279,10 +279,10 @@ const DiscountCodesSettings: React.FC = () => {
                   <div className="col-span-2">
                     <div className="flex items-center gap-1 text-xs text-gray-400">
                       <Calendar size={12} />
-                      <span>{new Date(code.validFrom).toLocaleDateString()}</span>
+                      <span>{formatDateTime(code.validFrom)}</span>
                     </div>
                     <div className="flex items-center gap-1 text-xs text-gray-500 mt-1">
-                      <span>→ {new Date(code.validUntil).toLocaleDateString()}</span>
+                      <span>→ {formatDateTime(code.validUntil)}</span>
                     </div>
                   </div>
 

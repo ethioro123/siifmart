@@ -23,7 +23,6 @@ import GeneralSettings from '../components/settings/GeneralSettings';
 import WMSSettings from '../components/settings/WMSSettings';
 import POSSettings from '../components/settings/POSSettings';
 import FinanceSettings from '../components/settings/FinanceSettings';
-import TaxSettings from '../components/settings/TaxSettings';
 import InfrastructureSettings from '../components/settings/InfrastructureSettings';
 import IntegrationsSettings from '../components/settings/IntegrationsSettings';
 import SecuritySettings from '../components/settings/SecuritySettings';
@@ -34,7 +33,7 @@ import RoleSettings from '../components/settings/RoleSettings';
 import GamificationSettings from '../components/settings/GamificationSettings';
 import DiscountCodesSettings from '../components/settings/DiscountCodesSettings';
 
-type SettingsTab = 'general' | 'inventory' | 'pos' | 'discounts' | 'finance' | 'roles' | 'locations' | 'infrastructure' | 'integrations' | 'security' | 'notifications' | 'tax' | 'data' | 'audit' | 'gamification';
+type SettingsTab = 'general' | 'inventory' | 'pos' | 'discounts' | 'finance' | 'roles' | 'locations' | 'infrastructure' | 'integrations' | 'security' | 'notifications' | 'data' | 'audit' | 'gamification';
 
 // --- REUSABLE COMPONENTS ---
 
@@ -78,7 +77,7 @@ const ToggleGroup = ({ label, sub, checked = false, onChange, warning }: any) =>
                 className="flex items-center cursor-pointer"
                 onClick={onChange}
                 role="switch"
-                aria-checked={checked ? 'true' : 'false'}
+                aria-checked={checked}
                 tabIndex={0}
                 aria-label={label}
                 onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onChange(); } }}
@@ -102,6 +101,7 @@ export default function SettingsPage() {
     const { settings, updateSettings, resetData, sites, addSite, updateSite, deleteSite, systemLogs, exportSystemData, addNotification, cleanupAdminProducts, addProduct } = useData();
     const [activeTab, setActiveTab] = useState<SettingsTab>('general');
     const [isSaving, setIsSaving] = useState(false);
+    const [isNavOpen, setIsNavOpen] = useState(false);
 
 
 
@@ -156,6 +156,9 @@ export default function SettingsPage() {
                     manager: newSite.manager,
                     capacity: newSite.capacity,
                     terminalCount: newSite.terminalCount,
+                    zoneCount: newSite.zoneCount,
+                    aisleCount: newSite.aisleCount,
+                    binCount: newSite.binCount,
                     code: newSite.code || newSite.name?.substring(0, 3).toUpperCase() || 'UNK' // Use existing code if available
                 };
                 console.log('📝 Updating site:', siteData);
@@ -170,6 +173,9 @@ export default function SettingsPage() {
                     manager: newSite.manager,
                     capacity: newSite.capacity,
                     terminalCount: newSite.terminalCount,
+                    zoneCount: newSite.zoneCount,
+                    aisleCount: newSite.aisleCount,
+                    binCount: newSite.binCount,
                     code: 'GENERATED_BY_DB' // Placeholder, will be overwritten by sitesService
                 };
                 console.log('➕ Creating new site:', siteData);
@@ -227,7 +233,10 @@ export default function SettingsPage() {
 
     const TabButton = ({ id, icon: Icon, label }: { id: SettingsTab, icon: any, label: string }) => (
         <button
-            onClick={() => setActiveTab(id)}
+            onClick={() => {
+                setActiveTab(id);
+                setIsNavOpen(false);
+            }}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-sm font-medium mb-2 ${activeTab === id
                 ? 'bg-cyber-primary text-black shadow-[0_0_15px_rgba(0,255,157,0.3)] font-bold'
                 : 'text-gray-400 hover:text-white hover:bg-white/5'
@@ -240,9 +249,28 @@ export default function SettingsPage() {
 
     return (
         <div className="flex flex-col lg:flex-row gap-8 h-[calc(100vh-140px)]">
+            {/* Sidebar Overlay */}
+            {isNavOpen && (
+                <div
+                    className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[40] animate-in fade-in duration-300"
+                    onClick={() => setIsNavOpen(false)}
+                />
+            )}
+
             {/* Sidebar */}
-            <div className="w-full lg:w-64 shrink-0">
-                <div className="bg-cyber-gray border border-white/5 rounded-2xl p-4 h-full overflow-y-auto custom-scrollbar">
+            <div className={`
+                fixed inset-y-0 left-0 w-72 z-[50]
+                transition-all duration-500 ease-out transform
+                ${isNavOpen ? 'translate-x-0' : '-translate-x-full'}
+            `}>
+                <div className="bg-cyber-gray border border-white/5 rounded-2xl p-4 h-full overflow-y-auto custom-scrollbar shadow-2xl">
+                    <div className="flex items-center justify-between mb-6 px-2">
+                        <p className="text-xs font-black text-cyber-primary uppercase tracking-widest">Configuration</p>
+                        <button onClick={() => setIsNavOpen(false)} title="Close Menu" className="text-gray-500 hover:text-white">
+                            <Plus className="rotate-45" size={24} />
+                        </button>
+                    </div>
+
                     <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-4 px-2">System Config</p>
                     <Protected permission="ACCESS_SETTINGS">
                         <TabButton id="general" icon={Globe} label="General" />
@@ -261,9 +289,6 @@ export default function SettingsPage() {
                     </Protected>
                     <Protected permission="ACCESS_FINANCE">
                         <TabButton id="finance" icon={DollarSign} label="Finance" />
-                    </Protected>
-                    <Protected permission="ACCESS_FINANCE">
-                        <TabButton id="tax" icon={Percent} label="Tax Matrix" />
                     </Protected>
                     <Protected permission="EDIT_SYSTEM_SETTINGS">
                         <TabButton id="infrastructure" icon={Printer} label="Infrastructure" />
@@ -299,12 +324,21 @@ export default function SettingsPage() {
             </div>
 
             {/* Main Content */}
-            <div className="flex-1 bg-cyber-gray border border-white/5 rounded-2xl flex flex-col relative overflow-hidden">
+            <div className="flex-1 bg-cyber-gray border border-white/5 rounded-2xl flex flex-col relative overflow-hidden h-full">
 
                 {/* Toolbar */}
                 <div className="p-4 border-b border-white/5 flex justify-between items-center bg-black/20 backdrop-blur-md z-10 sticky top-0">
-                    <div className="text-xs text-gray-500">
-                        Configuration / <span className="text-white capitalize">{activeTab}</span>
+                    <div className="flex items-center gap-3">
+                        <button
+                            onClick={() => setIsNavOpen(true)}
+                            title="Open Configuration Menu"
+                            className="p-2 bg-white/5 rounded-lg text-gray-400 hover:text-white transition-colors"
+                        >
+                            <List size={20} />
+                        </button>
+                        <div className="text-xs text-gray-500">
+                            Configuration / <span className="text-white capitalize">{activeTab}</span>
+                        </div>
                     </div>
                 </div>
 
@@ -319,7 +353,7 @@ export default function SettingsPage() {
                                 <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-8 text-center">
                                     <Lock className="w-16 h-16 text-red-400 mx-auto mb-4" />
                                     <h3 className="text-xl font-bold text-white mb-2">Access Restricted</h3>
-                                    <p className="text-gray-400">Only Super Administrators can manage locations.</p>
+                                    <p className="text-gray-400">Only the CEO can manage locations.</p>
                                 </div>
                             </div>
                         }>
@@ -481,13 +515,11 @@ export default function SettingsPage() {
                     {/* --- AUDIT LOG --- */}
                     {activeTab === 'audit' && <AuditSettings />}
 
-                    {/* --- TAX RULES --- */}
-                    {activeTab === 'tax' && <TaxSettings />}
+                    {/* --- TAX RULES moved to Finance --- */}
 
                     {/* --- NOTIFICATIONS --- */}
                     {activeTab === 'notifications' && <NotificationSettings />}
 
-                    {/* --- WMS RULES --- */}
                     {/* --- WMS RULES --- */}
                     {activeTab === 'inventory' && <WMSSettings />}
 
@@ -653,6 +685,49 @@ export default function SettingsPage() {
                                             onChange={(e) => setNewSite({ ...newSite, terminalCount: e.target.value === '' ? undefined : parseInt(e.target.value) })}
                                             aria-label="Loading Docks"
                                         />
+                                    </div>
+
+                                    <div className="md:col-span-2 pt-4 border-t border-white/5 mt-2">
+                                        <label className="text-xs text-cyber-primary uppercase font-bold mb-3 block">Warehouse Structure</label>
+                                        <div className="grid grid-cols-3 gap-4">
+                                            <div>
+                                                <label className="text-[10px] text-gray-500 uppercase font-bold mb-1 block">Number of Zones</label>
+                                                <input
+                                                    type="number"
+                                                    min="1"
+                                                    max="26"
+                                                    placeholder="A-Z"
+                                                    className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white text-sm outline-none focus:border-cyber-primary"
+                                                    value={newSite.zoneCount || ''}
+                                                    onChange={(e) => setNewSite({ ...newSite, zoneCount: e.target.value === '' ? undefined : parseInt(e.target.value) })}
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="text-[10px] text-gray-500 uppercase font-bold mb-1 block">Aisles per Zone</label>
+                                                <input
+                                                    type="number"
+                                                    min="1"
+                                                    placeholder="e.g. 10"
+                                                    className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white text-sm outline-none focus:border-cyber-primary"
+                                                    value={newSite.aisleCount || ''}
+                                                    onChange={(e) => setNewSite({ ...newSite, aisleCount: e.target.value === '' ? undefined : parseInt(e.target.value) })}
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="text-[10px] text-gray-500 uppercase font-bold mb-1 block">Bins per Aisle</label>
+                                                <input
+                                                    type="number"
+                                                    min="1"
+                                                    placeholder="e.g. 50"
+                                                    className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white text-sm outline-none focus:border-cyber-primary"
+                                                    value={newSite.binCount || ''}
+                                                    onChange={(e) => setNewSite({ ...newSite, binCount: e.target.value === '' ? undefined : parseInt(e.target.value) })}
+                                                />
+                                            </div>
+                                        </div>
+                                        <p className="text-[10px] text-gray-500 mt-2 italic">
+                                            Structure: [Zone]-[Aisle]-[Bin] (e.g. A-01-05). Max 26 zones (A-Z).
+                                        </p>
                                     </div>
                                 </>
                             ) : (

@@ -15,11 +15,18 @@ import type {
     ExpenseRecord,
     WMSJob,
     Site,
+    WarehouseZone,
+    FulfillmentStrategy,
+    FulfillmentPlan,
+    CartItem,
     TransferRecord,
     WorkerPoints,
     PointsTransaction,
+    StorePoints,
     PendingInventoryChange,
-    SystemConfig
+    SystemConfig,
+    DiscrepancyResolution,
+    DiscrepancyClaim
 } from '../types';
 
 // ============================================================================
@@ -39,6 +46,12 @@ export const sitesService = {
             terminalCount: s.terminal_count,
             bonusEnabled: s.bonus_enabled,
             warehouseBonusEnabled: s.warehouse_bonus_enabled,
+            zoneCount: s.zone_count,
+            aisleCount: s.aisle_count,
+            binCount: s.bin_count,
+            taxJurisdictionId: s.tax_jurisdiction_id,
+            fulfillmentStrategy: s.fulfillment_strategy,
+            isFulfillmentNode: s.is_fulfillment_node,
             code: s.code || s.id.substring(0, 8).toUpperCase() // Use database code or fallback to short UUID
         }));
     },
@@ -56,6 +69,11 @@ export const sitesService = {
             terminalCount: data.terminal_count,
             bonusEnabled: data.bonus_enabled,
             warehouseBonusEnabled: data.warehouse_bonus_enabled,
+            zoneCount: data.zone_count,
+            aisleCount: data.aisle_count,
+            binCount: data.bin_count,
+            fulfillmentStrategy: data.fulfillment_strategy,
+            isFulfillmentNode: data.is_fulfillment_node,
             code: data.code || data.id.substring(0, 8).toUpperCase() // Use database code or fallback to short UUID
         };
     },
@@ -93,7 +111,12 @@ export const sitesService = {
             capacity: site.capacity,
             terminal_count: site.terminalCount,
             bonus_enabled: site.bonusEnabled,
-            warehouse_bonus_enabled: site.warehouseBonusEnabled
+            warehouse_bonus_enabled: site.warehouseBonusEnabled,
+            zone_count: site.zoneCount,
+            aisle_count: site.aisleCount,
+            bin_count: site.binCount,
+            fulfillment_strategy: site.fulfillmentStrategy || 'NEAREST',
+            is_fulfillment_node: site.isFulfillmentNode !== undefined ? site.isFulfillmentNode : true
         };
         const { data, error } = await supabase
             .from('sites')
@@ -107,6 +130,9 @@ export const sitesService = {
             terminalCount: data.terminal_count,
             bonusEnabled: data.bonus_enabled,
             warehouseBonusEnabled: data.warehouse_bonus_enabled,
+            zoneCount: data.zone_count,
+            aisleCount: data.aisle_count,
+            binCount: data.bin_count,
             code: data.code // Return the real DB code
         };
     },
@@ -129,6 +155,30 @@ export const sitesService = {
             dbUpdates.warehouse_bonus_enabled = updates.warehouseBonusEnabled;
             delete dbUpdates.warehouseBonusEnabled;
         }
+        if (updates.zoneCount !== undefined) {
+            dbUpdates.zone_count = updates.zoneCount;
+            delete dbUpdates.zoneCount;
+        }
+        if (updates.aisleCount !== undefined) {
+            dbUpdates.aisle_count = updates.aisleCount;
+            delete dbUpdates.aisleCount;
+        }
+        if (updates.binCount !== undefined) {
+            dbUpdates.bin_count = updates.binCount;
+            delete dbUpdates.binCount;
+        }
+        if (updates.taxJurisdictionId !== undefined) {
+            dbUpdates.tax_jurisdiction_id = updates.taxJurisdictionId;
+            delete dbUpdates.taxJurisdictionId;
+        }
+        if (updates.fulfillmentStrategy !== undefined) {
+            dbUpdates.fulfillment_strategy = updates.fulfillmentStrategy;
+            delete dbUpdates.fulfillmentStrategy;
+        }
+        if (updates.isFulfillmentNode !== undefined) {
+            dbUpdates.is_fulfillment_node = updates.isFulfillmentNode;
+            delete dbUpdates.isFulfillmentNode;
+        }
 
         const { data, error } = await supabase
             .from('sites')
@@ -143,6 +193,9 @@ export const sitesService = {
             terminalCount: data.terminal_count,
             bonusEnabled: data.bonus_enabled,
             warehouseBonusEnabled: data.warehouse_bonus_enabled,
+            taxJurisdictionId: data.tax_jurisdiction_id,
+            fulfillmentStrategy: data.fulfillment_strategy,
+            isFulfillmentNode: data.is_fulfillment_node,
             code: data.id?.substring(0, 8).toUpperCase() || 'UNK' // Generate code from ID
         };
     },
@@ -154,6 +207,101 @@ export const sitesService = {
             .eq('id', id);
 
         if (error) throw error;
+    },
+
+    async getAllActiveFulfillmentNodes() {
+        const { data, error } = await supabase
+            .from('sites')
+            .select('*')
+            .eq('status', 'Active')
+            .or('type.eq.Warehouse,is_fulfillment_node.eq.true');
+
+        if (error) throw error;
+        return data.map((s: any) => ({
+            ...s,
+            fulfillmentStrategy: s.fulfillment_strategy,
+            isFulfillmentNode: s.is_fulfillment_node
+        }));
+    }
+};
+
+// ============================================================================
+// WAREHOUSE ZONES
+// ============================================================================
+
+export const warehouseZonesService = {
+    async getAll(siteId?: string) {
+        try {
+            let query = supabase.from('warehouse_zones').select('*');
+            if (siteId) query = query.eq('site_id', siteId);
+
+            const { data, error } = await query.order('picking_priority', { ascending: true });
+
+            if (error) {
+                // If picking_priority column is missing, Supabase might return 400
+                // We check message for "column" and "does not exist" or specific PostgREST error codes
+                const isColumnError = error.message.toLowerCase().includes('column') ||
+                    error.message.toLowerCase().includes('does not exist') ||
+                    error.code === '42703'; // PostgreSQL error code for undefined_column
+
+                if (isColumnError) {
+                    console.warn('⚠️ Schema mismatch in warehouse_zones: picking_priority column missing. Falling back to default order.');
+                    let retryQuery = supabase.from('warehouse_zones').select('*');
+                    if (siteId) retryQuery = retryQuery.eq('site_id', siteId);
+                    const { data: retryData, error: retryError } = await retryQuery;
+                    if (retryError) throw retryError;
+                    return (retryData || []).map((z: any) => ({
+                        ...z,
+                        siteId: z.site_id,
+                        pickingPriority: 10, // Default fallback
+                        zoneType: z.zone_type || 'STANDARD'
+                    }));
+                }
+                throw error;
+            }
+
+            return data.map((z: any) => ({
+                ...z,
+                siteId: z.site_id,
+                pickingPriority: z.picking_priority,
+                zoneType: z.zone_type
+            }));
+        } catch (err) {
+            console.error('❌ Critical error in warehouseZonesService.getAll:', err);
+            return []; // Fail gracefully with empty array
+        }
+    },
+
+    async update(id: string, updates: Partial<WarehouseZone>) {
+        const dbUpdates: any = { ...updates };
+        if (updates.siteId) {
+            dbUpdates.site_id = updates.siteId;
+            delete dbUpdates.siteId;
+        }
+        if (updates.pickingPriority !== undefined) {
+            dbUpdates.picking_priority = updates.pickingPriority;
+            delete dbUpdates.pickingPriority;
+        }
+        if (updates.zoneType) {
+            dbUpdates.zone_type = updates.zoneType;
+            delete dbUpdates.zoneType;
+        }
+        delete dbUpdates.id;
+
+        const { data, error } = await supabase
+            .from('warehouse_zones')
+            .update(dbUpdates)
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) throw error;
+        return {
+            ...data,
+            siteId: data.site_id,
+            pickingPriority: data.picking_priority,
+            zoneType: data.zone_type
+        };
     }
 };
 
@@ -163,14 +311,29 @@ export const sitesService = {
 
 export const systemConfigService = {
     async getSettings(): Promise<SystemConfig> {
-        const { data, error } = await supabase
-            .from('system_config')
-            .select('*')
-            .eq('id', '00000000-0000-0000-0000-000000000001')
-            .single();
+        try {
+            const { data, error } = await supabase
+                .from('system_config')
+                .select('*')
+                .eq('id', '00000000-0000-0000-0000-000000000001')
+                .maybeSingle();
 
-        if (error) throw error;
-        return this._mapSettings(data);
+            if (error) {
+                console.error('⚠️ Supabase error loading settings:', error);
+                throw error;
+            }
+
+            // If no record found, return the default mapped object
+            if (!data) {
+                console.warn('⚠️ No system_config record found. Using default application settings.');
+                return this._mapSettings({}); // _mapSettings handles empty object
+            }
+
+            return this._mapSettings(data);
+        } catch (err) {
+            console.warn('⚠️ Settings load failed, using fallback logic:', err);
+            return this._mapSettings({});
+        }
     },
 
     async updateSettings(updates: Partial<SystemConfig>, userName: string): Promise<SystemConfig> {
@@ -198,8 +361,6 @@ export const systemConfigService = {
             enableWMS: 'enable_wms',
             multiCurrency: 'multi_currency',
             requireShiftClosure: 'require_shift_closure',
-            posReceiptHeader: 'pos_receipt_header',
-            posReceiptFooter: 'pos_receipt_footer',
             posTerminalId: 'pos_terminal_id',
             posRegisterMode: 'pos_register_mode',
             posGuestCheckout: 'pos_guest_checkout',
@@ -229,8 +390,38 @@ export const systemConfigService = {
             strictScanning: 'strict_scanning',
             dateFormat: 'date_format',
             numberFormat: 'number_format',
+            currency: 'currency',
+            timezone: 'timezone',
+            language: 'language',
             logo_url: 'logo_url', // fallback
-            tax_vat_number: 'tax_vat_number' // fallback
+            tax_vat_number: 'tax_vat_number', // fallback
+            posReceiptLogo: 'pos_receipt_logo',
+            posReceiptShowLogo: 'pos_receipt_show_logo',
+            posReceiptHeader: 'pos_receipt_header',
+            posReceiptFooter: 'pos_receipt_footer',
+            posReceiptAddress: 'pos_receipt_address',
+            posReceiptPhone: 'pos_receipt_phone',
+            posReceiptEmail: 'pos_receipt_email',
+            posReceiptTaxId: 'pos_receipt_tax_id',
+            posReceiptPolicy: 'pos_receipt_policy',
+            posReceiptSocialHandle: 'pos_receipt_social_handle',
+            posReceiptEnableQR: 'pos_receipt_enable_qr',
+            posReceiptQRLink: 'pos_receipt_qr_link',
+            posReceiptWidth: 'pos_receipt_width',
+            posReceiptFont: 'pos_receipt_font',
+            taxJurisdictions: 'tax_jurisdictions',
+            exchangeRates: 'exchange_rates',
+            // Gamification fields
+            bonusEnabled: 'bonus_enabled',
+            bonusTiers: 'bonus_tiers',
+            bonusPayoutFrequency: 'bonus_payout_frequency',
+            warehousePointsEligibleRoles: 'warehouse_points_eligible_roles',
+            warehousePointRules: 'warehouse_point_rules',
+            posBonusEnabled: 'pos_bonus_enabled',
+            posBonusTiers: 'pos_bonus_tiers',
+            posBonusPayoutFrequency: 'pos_bonus_payout_frequency',
+            posRoleDistribution: 'pos_role_distribution',
+            posPointRules: 'pos_point_rules'
         };
 
         const finalUpdates: any = {};
@@ -244,13 +435,34 @@ export const systemConfigService = {
 
         const { data, error } = await supabase
             .from('system_config')
-            .update(finalUpdates)
-            .eq('id', '00000000-0000-0000-0000-000000000001')
+            .upsert({
+                ...finalUpdates,
+                id: '00000000-0000-0000-0000-000000000001',
+                updated_at: new Date().toISOString()
+            })
             .select()
             .single();
 
         if (error) throw error;
         return this._mapSettings(data);
+    },
+
+    async uploadFile(file: File, path: string): Promise<string> {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`;
+        const filePath = `${path}/${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+            .from('system-assets')
+            .upload(filePath, file);
+
+        if (uploadError) throw uploadError;
+
+        const { data } = supabase.storage
+            .from('system-assets')
+            .getPublicUrl(filePath);
+
+        return data.publicUrl;
     },
 
     _mapSettings(data: any): SystemConfig {
@@ -277,8 +489,6 @@ export const systemConfigService = {
             enableWMS: data.enable_wms,
             multiCurrency: data.multi_currency,
             requireShiftClosure: data.require_shift_closure,
-            posReceiptHeader: data.pos_receipt_header,
-            posReceiptFooter: data.pos_receipt_footer,
             posTerminalId: data.pos_terminal_id,
             posRegisterMode: data.pos_register_mode,
             posGuestCheckout: data.pos_guest_checkout,
@@ -304,6 +514,7 @@ export const systemConfigService = {
             rotationPolicy: data.rotation_policy,
             requireExpiry: data.require_expiry,
             cycleCountStrategy: data.cycle_count_strategy,
+            exchangeRates: data.exchange_rates,
             pickingMethod: data.picking_method,
             strictScanning: data.strict_scanning,
             reserveStockBuffer: data.reserve_stock_buffer,
@@ -311,7 +522,33 @@ export const systemConfigService = {
             webhookInventoryLow: data.webhook_inventory_low,
             webhookCustomerSignup: data.webhook_customer_signup,
             scaleIpAddress: data.scale_ip_address,
-            scannerComPort: data.scanner_com_port
+            scannerComPort: data.scanner_com_port,
+            posReceiptLogo: data.pos_receipt_logo,
+            posReceiptShowLogo: data.pos_receipt_show_logo,
+            posReceiptHeader: data.pos_receipt_header,
+            posReceiptFooter: data.pos_receipt_footer,
+            posReceiptAddress: data.pos_receipt_address,
+            posReceiptPhone: data.pos_receipt_phone,
+            posReceiptEmail: data.pos_receipt_email,
+            posReceiptTaxId: data.pos_receipt_tax_id,
+            posReceiptPolicy: data.pos_receipt_policy,
+            posReceiptSocialHandle: data.pos_receipt_social_handle,
+            posReceiptEnableQR: data.pos_receipt_enable_qr,
+            posReceiptQRLink: data.pos_receipt_qr_link,
+            posReceiptWidth: data.pos_receipt_width,
+            posReceiptFont: data.pos_receipt_font,
+            taxJurisdictions: data.tax_jurisdictions || [],
+            // Gamification fields
+            bonusEnabled: data.bonus_enabled ?? true,
+            bonusTiers: data.bonus_tiers || [],
+            bonusPayoutFrequency: data.bonus_payout_frequency || 'monthly',
+            warehousePointsEligibleRoles: data.warehouse_points_eligible_roles || [],
+            warehousePointRules: data.warehouse_point_rules || [],
+            posBonusEnabled: data.pos_bonus_enabled ?? true,
+            posBonusTiers: data.pos_bonus_tiers || [],
+            posBonusPayoutFrequency: data.pos_bonus_payout_frequency || 'monthly',
+            posRoleDistribution: data.pos_role_distribution || [],
+            posPointRules: data.pos_point_rules || []
         };
     }
 };
@@ -321,11 +558,112 @@ export const systemConfigService = {
 // ============================================================================
 
 export const productsService = {
-    async getAll(siteId?: string) {
+    async getAll(siteId?: string, limit?: number, offset?: number, filters?: any, sort?: { key: string, direction: 'asc' | 'desc' }) {
+        let query = supabase
+            .from('products')
+            .select('*', { count: 'exact' });
+
+        // Apply Sorting
+        if (sort && sort.key) {
+            let column = sort.key;
+            // Map camelCase to snake_case
+            if (sort.key === 'createdAt') column = 'created_at';
+            else if (sort.key === 'costPrice') column = 'cost_price';
+            else if (sort.key === 'salePrice') column = 'sale_price';
+            else if (sort.key === 'siteId') column = 'site_id';
+            // Handle cases where sort key doesn't match DB column directly (e.g. calculated fields)
+            // For now, fallback to created_at if unknown, or keep simple columns
+
+            // Avoid sorting by computed fields on server for now to avoid crashes
+            if (['assetValue', 'abc'].includes(sort.key)) {
+                query = query.order('created_at', { ascending: false });
+            } else {
+                query = query.order(column, { ascending: sort.direction === 'asc' });
+            }
+        } else {
+            query = query.order('created_at', { ascending: false });
+        }
+
+        if (siteId && siteId !== 'All') {
+            query = query.eq('site_id', siteId);
+        }
+
+        if (filters) {
+            if (filters.search) {
+                const search = filters.search;
+                query = query.or(`name.ilike.%${search}%,sku.ilike.%${search}%,barcode.eq.${search}`);
+            }
+            if (filters.category && filters.category !== 'All') {
+                query = query.eq('category', filters.category);
+            }
+            if (filters.status && filters.status !== 'All') {
+                if (filters.status === 'Active') query = query.eq('status', 'active');
+                else if (filters.status === 'Low Stock') query = query.eq('status', 'low_stock');
+                else if (filters.status === 'Out of Stock') query = query.eq('status', 'out_of_stock');
+            }
+        }
+
+        if (limit) {
+            const from = offset || 0;
+            const to = from + limit - 1;
+            query = query.range(from, to);
+        }
+
+        const { data, error, count } = await query;
+        if (error) throw error;
+
+        const mappedData = data.map((p: any) => ({
+            ...p,
+            siteId: p.site_id,
+            costPrice: p.cost_price,
+            salePrice: p.sale_price,
+            isOnSale: p.is_on_sale,
+            expiryDate: p.expiry_date,
+            batchNumber: p.batch_number,
+            shelfPosition: p.shelf_position,
+            competitorPrice: p.competitor_price,
+            salesVelocity: p.sales_velocity,
+            posReceivedAt: p.pos_received_at,
+            pos_received_at: p.pos_received_at,
+            posReceivedBy: p.pos_received_by,
+            pos_received_by: p.pos_received_by,
+            approvalStatus: p.approval_status,
+            approval_status: p.approval_status,
+            createdBy: p.created_by,
+            approvedBy: p.approved_by,
+            approvedAt: p.approved_at,
+            rejectedBy: p.rejected_by,
+            rejectedAt: p.rejected_at,
+            rejectionReason: p.rejection_reason
+        }));
+
+        return { data: mappedData, count: count || 0 };
+    },
+
+    async getMetrics(siteId?: string) {
+        const { data, error } = await supabase.rpc('get_inventory_metrics', {
+            p_site_id: siteId && siteId !== 'All' ? siteId : null
+        });
+        if (error) throw error;
+        return data;
+    },
+
+    async getFinancialMetrics(siteId?: string, startDate?: string, endDate?: string) {
+        const { data, error } = await supabase.rpc('get_financial_metrics', {
+            p_site_id: siteId && siteId !== 'All' ? siteId : null,
+            p_start_date: startDate,
+            p_end_date: endDate
+        });
+        if (error) throw error;
+        return data;
+    },
+
+    async search(term: string, siteId?: string, limit: number = 20) {
         let query = supabase
             .from('products')
             .select('*')
-            .order('created_at', { ascending: false });
+            .or(`name.ilike.%${term}%,sku.ilike.%${term}%`)
+            .limit(limit);
 
         if (siteId) {
             query = query.eq('site_id', siteId);
@@ -581,7 +919,7 @@ export const productsService = {
     },
 
     // Cascade delete - removes all related records first, then deletes the product
-    // Only for super admin use when absolutely necessary
+    // Only for CEO use when absolutely necessary
     async cascadeDelete(id: string) {
         console.log('🗑️ Starting cascade delete for product:', id);
 
@@ -638,7 +976,27 @@ export const productsService = {
 
     async adjustStock(productId: string, quantity: number, type: 'IN' | 'OUT' | 'ADJUSTMENT', reason: string = 'Stock Adjustment', user: string = 'System') {
         const product = await this.getById(productId);
-        const newStock = type === 'OUT' ? product.stock - quantity : product.stock + quantity;
+
+        const currentStock = Number(product.stock || 0);
+        const adjustQty = Number(quantity);
+
+        console.log(`📦 SERVICE: Adjusting Stock for ${product.id} (${product.name})`);
+        console.log(`   Current: ${currentStock}, Adjust: ${adjustQty}, Type: ${type}`);
+
+        let newStock = currentStock;
+        if (type === 'OUT') {
+            newStock = currentStock - adjustQty;
+        } else {
+            newStock = currentStock + adjustQty;
+        }
+
+        console.log(`   New Stock Bound: ${newStock}`);
+
+        if (isNaN(newStock)) {
+            console.error('❌ CRITICAL: Stock calculation resulted in NaN', { currentStock, adjustQty, type, product });
+            throw new Error('Stock calculation resulted in NaN');
+        }
+
         const updated = await this.update(productId, { stock: newStock });
 
         await stockMovementsService.create({
@@ -646,7 +1004,7 @@ export const productsService = {
             product_id: productId,
             product_name: product.name,
             type: type === 'ADJUSTMENT' ? 'IN' : type,
-            quantity,
+            quantity: adjustQty,
             movement_date: new Date().toISOString(),
             performed_by: user,
             reason: reason || `Stock ${type.toLowerCase()}`
@@ -669,7 +1027,44 @@ export const productsService = {
         const { data, error } = await query;
         if (error) throw error;
         return data;
+    },
+
+    /**
+     * Finds products across all sites that are below their minStock threshold.
+     * This is used by the Distribution Hub to identify store needs.
+     */
+    async getLowStockAcrossSites() {
+        // We select all products and filter locally for stock < minStock
+        // since Supabase doesn't easily support cross-column comparison in client libraries
+        // without a raw RPC or complex filter string.
+        const { data, error } = await supabase
+            .from('products')
+            .select('*')
+            .not('status', 'eq', 'archived');
+
+        if (error) throw error;
+
+        // Filter for items below threshold (minStock or default 10)
+        return data
+            .map(p => this._mapProduct(p))
+            .filter(p => p.stock < (p.minStock || 10));
+    },
+
+    /**
+     * Finds all site locations that have stock for a specific SKU.
+     * Used to suggest warehouse sources for replenishment.
+     */
+    async getWarehouseStock(sku: string) {
+        const { data, error } = await supabase
+            .from('products')
+            .select('*')
+            .eq('sku', sku)
+            .gt('stock', 0);
+
+        if (error) throw error;
+        return data.map((p: any) => this._mapProduct(p));
     }
+
 };
 
 // ============================================================================
@@ -677,11 +1072,32 @@ export const productsService = {
 // ============================================================================
 
 export const customersService = {
-    async getAll() {
-        const { data, error } = await supabase
+    async getAll(limit?: number) {
+        let query = supabase
             .from('customers')
             .select('*')
             .order('created_at', { ascending: false });
+
+        if (limit) {
+            query = query.limit(limit);
+        }
+
+        const { data, error } = await query;
+        if (error) throw error;
+        return data.map((c: any) => ({
+            ...c,
+            loyaltyPoints: c.loyalty_points || 0,
+            totalSpent: c.total_spent || 0,
+            lastVisit: c.last_visit
+        }));
+    },
+
+    async search(term: string, limit: number = 20) {
+        const { data, error } = await supabase
+            .from('customers')
+            .select('*')
+            .or(`name.ilike.%${term}%,phone.ilike.%${term}%,email.ilike.%${term}%`)
+            .limit(limit);
 
         if (error) throw error;
         return data.map((c: any) => ({
@@ -828,6 +1244,119 @@ export const employeesService = {
         }));
     },
 
+    async getPaginated(siteId?: string, page: number = 1, limit: number = 20, searchTerm: string = '', filters?: any) {
+        // Step 1: Fetch ALL matching lightweight data (ID, Role, Name) to sort globally
+        let query = supabase
+            .from('employees')
+            .select('id, role, name, created_at', { count: 'exact' });
+
+        // Filters
+        if (siteId && siteId !== 'All') query = query.eq('site_id', siteId);
+        if (filters?.role && filters.role !== 'All') query = query.eq('role', filters.role);
+        if (filters?.status && filters.status !== 'All') query = query.eq('status', filters.status);
+        if (filters?.department && filters.department !== 'All') query = query.eq('department', filters.department);
+
+        // Search
+        if (searchTerm) {
+            query = query.or(`name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%,phone.ilike.%${searchTerm}%`);
+        }
+
+        const { data: allIds, error: idError, count } = await query;
+        if (idError) throw idError;
+
+        // Step 2: Sort globally by Hierarchy in Memory
+        const ROLE_HIERARCHY: Record<string, number> = {
+            // Level 1 - Executive (100)
+            'super_admin': 100,
+            // Level 2 - Regional/Directors (80-95)
+            'regional_manager': 95,
+            'operations_manager': 90,
+            'finance_manager': 85,
+            'hr_manager': 85,
+            'procurement_manager': 82,
+            'supply_chain_manager': 80,
+            // Level 3 - Site Managers (50-70)
+            'store_manager': 70,
+            'warehouse_manager': 68,
+            'dispatch_manager': 65,
+            'logistics_manager': 65,
+            'inventory_manager': 65,
+            'assistant_manager': 60,
+            'shift_lead': 55,
+            'cs_manager': 60,
+            // Level 4 - Staff (10-40)
+            'supervisor': 50,
+            'auditor': 40,
+            'staff': 40,
+            'associate': 40,
+            'it_support': 35,
+            'dispatcher': 35,
+            'accountant': 35,
+            'data_analyst': 35,
+            'training_coordinator': 35,
+            'cashier': 30,
+            'loss_prevention': 30,
+            'driver': 30, // Elevated slightly from 20 to grouping
+            'sales_associate': 28,
+            'pos': 28,
+            'stock_clerk': 25,
+            'inventory_specialist': 25,
+            'customer_service': 25,
+            'merchandiser': 25,
+            'picker': 22,
+            'packer': 22,
+            'receiver': 22,
+            'returns_clerk': 22,
+            'forklift_operator': 20,
+            'security': 20,
+            'maintenance': 20,
+            'cleaner': 10,
+            'admin': 90, // Legacy
+            'manager': 65, // Legacy
+            'hr': 85 // Legacy
+        };
+
+        const sortedData = (allIds || []).sort((a: any, b: any) => {
+            const rankA = ROLE_HIERARCHY[a.role] || 0;
+            const rankB = ROLE_HIERARCHY[b.role] || 0;
+
+            if (rankA !== rankB) return rankB - rankA; // Highest rank first
+            return a.name.localeCompare(b.name); // Then alphabetical
+        });
+
+        // Step 3: Slice for current page
+        const from = (page - 1) * limit;
+        const to = from + limit;
+        const pageIds = sortedData.slice(from, to).map((e: any) => e.id);
+
+        if (pageIds.length === 0) {
+            return { data: [], count: count || 0 };
+        }
+
+        // Step 4: Fetch full details for the sliced IDs
+        // We order by field to maintain the sort order (requires manual re-sort or fetch and map)
+        const { data: details, error: detailsError } = await supabase
+            .from('employees')
+            .select('*')
+            .in('id', pageIds);
+
+        if (detailsError) throw detailsError;
+
+        // Step 5: Re-sort details to match the pageIds order (since .in() doesn't guarantee order)
+        const sortedDetails = pageIds.map(id => details.find((d: any) => d.id === id)).filter(Boolean);
+
+        return {
+            data: sortedDetails.map((e: any) => ({
+                ...e,
+                siteId: e.site_id,
+                joinDate: e.join_date,
+                performanceScore: e.performance_score,
+                attendanceRate: e.attendance_rate
+            })),
+            count: count || 0
+        };
+    },
+
     async getById(id: string) {
         const { data, error } = await supabase
             .from('employees')
@@ -936,19 +1465,22 @@ export const employeesService = {
 // ============================================================================
 
 export const suppliersService = {
-    async getAll() {
-        const { data, error } = await supabase
+    async getAll(limit: number = 50, offset: number = 0) {
+        const { data, error, count } = await supabase
             .from('suppliers')
-            .select('*')
-            .order('created_at', { ascending: false });
+            .select('*', { count: 'exact' })
+            .order('created_at', { ascending: false })
+            .range(offset, offset + limit - 1);
 
         if (error) throw error;
-        return data.map((s: any) => ({
+        const mappedData = data.map((s: any) => ({
             ...s,
             leadTime: s.lead_time,
             taxId: s.tax_id,
             nationalId: s.national_id
         }));
+
+        return { data: mappedData, count: count || 0 };
     },
 
     async getById(id: string) {
@@ -1034,19 +1566,47 @@ export const suppliersService = {
 // ============================================================================
 
 export const purchaseOrdersService = {
-    async getAll(siteId?: string) {
+    async getAll(siteId?: string, limit: number = 50, offset: number = 0, filters?: any) {
         let query = supabase
             .from('purchase_orders')
-            .select('*, po_items(*)')
-            .order('created_at', { ascending: false });
+            .select('*, po_items(*)', { count: 'exact' });
 
         if (siteId) {
             query = query.eq('site_id', siteId);
         }
 
-        const { data, error } = await query;
+        // Apply Filters
+        if (filters) {
+            if (filters.status && filters.status !== 'All') {
+                query = query.eq('status', filters.status === 'Draft' || filters.status === 'Approved' ? 'Pending' : filters.status);
+            }
+            if (filters.startDate) {
+                query = query.gte('created_at', filters.startDate);
+            }
+            if (filters.endDate) {
+                query = query.lte('created_at', `${filters.endDate}T23:59:59`);
+            }
+            if (filters.search) {
+                const term = filters.search;
+                query = query.or(`po_number.ilike.%${term}%,supplier_name.ilike.%${term}%`);
+            }
+            // Filter Purchase Requests vs actual POs
+            if (filters.isRequest === true) {
+                query = query.ilike('notes', '%[PR]%');
+            } else if (filters.isRequest === false) {
+                // Return everything that DOES NOT have [PR] in notes
+                // Use * as wildcard in .or() string for PostgREST
+                query = query.or('notes.is.null,notes.not.ilike.%[PR]%');
+            }
+        }
+
+        query = query.order('created_at', { ascending: false })
+            .range(offset, offset + limit - 1);
+
+        const { data, error, count } = await query;
         if (error) throw error;
-        return data.map((p: any) => {
+
+        const mappedData = data.map((p: any) => {
             // Parse approval info from notes (stored as [APPROVED_BY:name:date] tag)
             let approvedBy = null;
             let approvedAt = null;
@@ -1069,6 +1629,8 @@ export const purchaseOrdersService = {
             return {
                 ...p,
                 status: frontendStatus,
+                requestedBy: p.requested_by,
+                createdBy: p.created_by,
                 approvedBy,
                 approvedAt,
                 notes,
@@ -1085,7 +1647,7 @@ export const purchaseOrdersService = {
                 shelfLife: p.shelf_life,
                 dockSlot: p.dock_slot,
                 poNumber: p.po_number,
-                lineItems: p.po_items.map((i: any) => ({
+                lineItems: (p.po_items || []).map((i: any) => ({
                     ...i,
                     productId: i.product_id,
                     productName: i.product_name,
@@ -1094,6 +1656,37 @@ export const purchaseOrdersService = {
                 }))
             };
         });
+
+        return { data: mappedData, count: count || 0 };
+    },
+
+    async getMetrics(siteId?: string, filters?: any) {
+        const params: any = {};
+        if (siteId) params.p_site_id = siteId;
+        if (filters?.startDate) params.p_start_date = `${filters.startDate}T00:00:00`;
+        if (filters?.endDate) params.p_end_date = `${filters.endDate}T23:59:59`;
+
+        // DEBUG: Log exact parameters being sent 
+        console.log('[DEBUG] getMetrics called with:', { siteId, filters, params });
+
+        const { data, error } = await supabase.rpc('get_procurement_metrics', params);
+
+        // DEBUG: Log the raw response
+        console.log('[DEBUG] getMetrics RPC response:', { data, error });
+
+        if (error) {
+            console.error('Error fetching procurement metrics:', error);
+            // Fallback to empty structure to prevent crash
+            return {
+                totalSpend: 0,
+                openPO: 0,
+                pendingValue: 0,
+                potentialRevenue: 0,
+                categoryData: [],
+                trendData: []
+            };
+        }
+        return data;
     },
 
     async getById(id: string) {
@@ -1127,6 +1720,8 @@ export const purchaseOrdersService = {
         return {
             ...data,
             status: frontendStatus,
+            requestedBy: data.requested_by,
+            createdBy: data.created_by,
             approvedBy,
             approvedAt,
             notes,
@@ -1219,7 +1814,9 @@ export const purchaseOrdersService = {
             temp_req: po.tempReq,
             shelf_life: po.shelfLife,
             dock_slot: po.dockSlot,
-            po_number: poNumber
+            po_number: poNumber,
+            requested_by: po.requestedBy,
+            created_by: po.createdBy
             // Note: approval tracking is handled via notes field (see update function)
         };
         const { error: poError } = await supabase
@@ -1308,6 +1905,7 @@ export const purchaseOrdersService = {
         if (updates.shelfLife !== undefined) { dbUpdates.shelf_life = updates.shelfLife; }
         if (updates.dockSlot !== undefined) { dbUpdates.dock_slot = updates.dockSlot; }
         if (updates.createdBy !== undefined) { dbUpdates.created_by = updates.createdBy; }
+        if (updates.requestedBy !== undefined) { dbUpdates.requested_by = updates.requestedBy; }
         if (updates.poNumber !== undefined) { dbUpdates.po_number = updates.poNumber; }
         if (updates.notes !== undefined && !dbUpdates.notes) { dbUpdates.notes = updates.notes; }
         if (updates.date !== undefined) { dbUpdates.order_date = updates.date; }
@@ -1366,19 +1964,44 @@ export const purchaseOrdersService = {
 // ============================================================================
 
 export const salesService = {
-    async getAll(siteId?: string) {
+    async getAll(siteId?: string, limit: number = 50, offset: number = 0, filters?: any) {
         let query = supabase
             .from('sales')
-            .select('*, sale_items(*), customers(*)')
-            .order('sale_date', { ascending: false });
+            .select('*, sale_items(*), customers!left(*)', { count: 'exact' });
 
         if (siteId) {
             query = query.eq('site_id', siteId);
         }
 
-        const { data, error } = await query;
+        // Apply Filters
+        if (filters) {
+            if (filters.status && filters.status !== 'All') {
+                query = query.eq('status', filters.status);
+            }
+            if (filters.method && filters.method !== 'All') {
+                query = query.eq('payment_method', filters.method);
+            }
+            if (filters.startDate) {
+                query = query.gte('sale_date', filters.startDate);
+            }
+            if (filters.endDate) {
+                query = query.lte('sale_date', `${filters.endDate}T23:59:59`);
+            }
+            if (filters.search) {
+                const term = filters.search;
+                query = query.or(`receipt_number.ilike.%${term}%,cashier_name.ilike.%${term}%`);
+            }
+        }
+
+        // Apply Sort and Pagination
+        query = query
+            .order('sale_date', { ascending: false })
+            .range(offset, offset + limit - 1);
+
+        const { data, error, count } = await query;
         if (error) throw error;
-        return data.map((s: any) => ({
+
+        const mappedData = data.map((s: any) => ({
             ...s,
             siteId: s.site_id,
             date: s.sale_date,
@@ -1392,8 +2015,11 @@ export const salesService = {
                 name: i.product_name,
                 costPrice: i.cost_price
             })),
-            receiptNumber: s.receipt_number
+            receiptNumber: s.receipt_number,
+            customerName: s.customers?.name
         }));
+
+        return { data: mappedData, count: count || 0 };
     },
 
     async getById(id: string) {
@@ -1491,14 +2117,21 @@ export const salesService = {
         // in WarehouseOperations.tsx when items are physically picked from shelves.
         // This is proper WMS flow: Sale → PICK Job → Physical Pick → Stock Deducted
 
-        // Update customer if provided
+        // Update customer if provided - wrapped in try-catch to prevent blocking
         if ((sale as any).customer_id) {
-            const customerId = (sale as any).customer_id;
-            const customer = await customersService.getById(customerId);
-            await customersService.update(customerId, {
-                total_spent: (customer.totalSpent || 0) + sale.total,
-                last_visit: new Date().toISOString().split('T')[0]
-            } as any);
+            try {
+                const customerId = (sale as any).customer_id;
+                const customer = await customersService.getById(customerId);
+                if (customer) {
+                    await customersService.update(customerId, {
+                        total_spent: (customer.totalSpent || 0) + sale.total,
+                        last_visit: new Date().toISOString().split('T')[0]
+                    } as any);
+                }
+            } catch (customerError) {
+                console.warn('Failed to update customer stats (non-blocking):', customerError);
+                // Non-critical: sale still completes even if customer update fails
+            }
         }
 
         return {
@@ -1583,6 +2216,248 @@ export const salesService = {
         const { data, error } = await query;
         if (error) throw error;
         return data;
+    },
+
+    async calculateFulfillmentPlan(requestingSiteId: string, cart: any[]): Promise<FulfillmentPlan[]> {
+        // 1. Fetch requesting site to get its strategy
+        const { data: requestingSite, error: siteError } = await supabase
+            .from('sites')
+            .select('*')
+            .eq('id', requestingSiteId)
+            .single();
+
+        if (siteError) throw siteError;
+
+        const strategy = requestingSite.fulfillment_strategy || 'NEAREST';
+
+        // 2. Fetch all active candidate nodes
+        const { data: candidates, error: candError } = await supabase
+            .from('sites')
+            .select('*')
+            .eq('status', 'Active')
+            .or('type.eq.Warehouse,is_fulfillment_node.eq.true');
+
+        if (candError) throw candError;
+
+        // 3. Distance calculation helper (Haversine)
+        const getDistance = (lat1?: number, lon1?: number, lat2?: number, lon2?: number): number => {
+            if (!lat1 || !lon1 || !lat2 || !lon2) return 99999;
+            const R = 6371;
+            const dLat = (lat2 - lat1) * (Math.PI / 180);
+            const dLon = (lon2 - lon1) * (Math.PI / 180);
+            const a =
+                Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) *
+                Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            return R * c;
+        };
+
+        const sortedCandidates = candidates.map((wh: any) => ({
+            ...wh,
+            distance: getDistance(requestingSite.latitude, requestingSite.longitude, wh.latitude, wh.longitude)
+        })).sort((a, b) => a.distance - b.distance);
+
+        // 4. Helper: Stock check across specific site
+        const checkSiteStock = async (siteId: string, productId: string, requestedQty: number): Promise<boolean> => {
+            const { data, error } = await supabase
+                .from('products')
+                .select('stock')
+                .eq('id', productId)
+                .eq('site_id', siteId)
+                .single();
+
+            if (error || !data) return false;
+            return data.stock >= requestedQty;
+        };
+
+        let plan: FulfillmentPlan[] = [];
+
+        // 5. Strategy Implementation
+        if (strategy === 'LOCAL_ONLY') {
+            plan.push({
+                siteId: requestingSiteId,
+                isSplit: false,
+                strategy: 'LOCAL_ONLY',
+                items: cart.map((i: any) => ({
+                    productId: i.id || i.productId,
+                    sku: i.sku || 'UNK',
+                    name: i.name,
+                    quantity: i.quantity,
+                    sourceSiteId: requestingSiteId
+                }))
+            });
+        }
+        else if (strategy === 'NEAREST' || strategy === 'MANUAL') {
+            let bestWhId = requestingSiteId;
+            for (const cand of sortedCandidates) {
+                let allItemsAvailable = true;
+                for (const item of cart) {
+                    const hasStock = await checkSiteStock(cand.id, item.id || item.productId, item.quantity);
+                    if (!hasStock) {
+                        allItemsAvailable = false;
+                        break;
+                    }
+                }
+                if (allItemsAvailable) {
+                    bestWhId = cand.id;
+                    break;
+                }
+            }
+
+            plan.push({
+                siteId: requestingSiteId,
+                isSplit: false,
+                strategy: strategy as any,
+                items: cart.map((i: any) => ({
+                    productId: i.id || i.productId,
+                    sku: i.sku || 'UNK',
+                    name: i.name,
+                    quantity: i.quantity,
+                    sourceSiteId: bestWhId
+                }))
+            });
+        }
+        else if (strategy === 'SPLIT') {
+            const siteMap = new Map<string, any[]>();
+
+            for (const item of cart) {
+                let foundSource = false;
+                for (const cand of sortedCandidates) {
+                    if (await checkSiteStock(cand.id, item.id || item.productId, item.quantity)) {
+                        const existing = siteMap.get(cand.id) || [];
+                        siteMap.set(cand.id, [...existing, {
+                            productId: item.id || item.productId,
+                            sku: item.sku || 'UNK',
+                            name: item.name,
+                            quantity: item.quantity,
+                            sourceSiteId: cand.id
+                        }]);
+                        foundSource = true;
+                        break;
+                    }
+                }
+                if (!foundSource) {
+                    const existing = siteMap.get(requestingSiteId) || [];
+                    siteMap.set(requestingSiteId, [...existing, {
+                        productId: item.id || item.productId,
+                        sku: item.sku || 'UNK',
+                        name: item.name,
+                        quantity: item.quantity,
+                        sourceSiteId: requestingSiteId
+                    }]);
+                }
+            }
+
+            siteMap.forEach((items, sourceId) => {
+                plan.push({
+                    siteId: requestingSiteId,
+                    isSplit: siteMap.size > 1,
+                    strategy: 'SPLIT',
+                    items
+                });
+            });
+        }
+
+        return plan;
+    },
+
+    async releaseOrder(saleId: string) {
+        // 1. Fetch sale with items
+        const { data: sale, error: saleError } = await supabase
+            .from('sales')
+            .select(`
+                *,
+                sale_items (*)
+            `)
+            .eq('id', saleId)
+            .single();
+
+        if (saleError) throw saleError;
+
+        const cartItems = sale.sale_items.map((si: any) => ({
+            productId: si.product_id,
+            name: si.product_name,
+            sku: si.product_sku || 'UNK',
+            quantity: si.quantity
+        }));
+
+        // 2. Calculate fulfillment plan
+        const plans = await this.calculateFulfillmentPlan(sale.site_id, cartItems);
+
+        // 3. Create WMS Jobs for each plan
+        for (const plan of plans) {
+            const warehouseId = plan.items[0]?.sourceSiteId || sale.site_id;
+
+            // Find best zone in that warehouse
+            const { data: zones } = await supabase
+                .from('warehouse_zones')
+                .select('*')
+                .eq('site_id', warehouseId)
+                .order('picking_priority', { ascending: true })
+                .limit(1);
+
+            const primaryZone = zones?.[0];
+
+            // Create PICK Job
+            const pickJob = {
+                siteId: warehouseId,
+                type: 'PICK' as const,
+                status: 'Pending' as const,
+                priority: 'High' as const,
+                location: primaryZone?.name || 'Zone A',
+                items: plan.items.length,
+                lineItems: plan.items.map(i => ({
+                    productId: i.productId,
+                    name: i.name,
+                    sku: i.sku,
+                    expectedQty: i.quantity,
+                    pickedQty: 0,
+                    status: 'Pending' as const
+                })),
+                orderRef: sale.id,
+                sourceSiteId: warehouseId,
+                destSiteId: sale.site_id,
+                createdAt: new Date().toISOString()
+            };
+
+            await wmsJobsService.create(pickJob as any);
+
+            // Create PACK Job if cross-site or for delivery/pickup
+            if (warehouseId !== sale.site_id || sale.type !== 'In-Store') {
+                const packJob = {
+                    siteId: warehouseId,
+                    type: 'PACK' as const,
+                    status: 'Pending' as const,
+                    priority: 'Normal' as const,
+                    location: 'Packing Station 1',
+                    items: plan.items.length,
+                    lineItems: plan.items.map(i => ({
+                        productId: i.productId,
+                        name: i.name,
+                        sku: i.sku,
+                        expectedQty: i.quantity,
+                        pickedQty: 0,
+                        status: 'Pending' as const
+                    })),
+                    orderRef: sale.id,
+                    sourceSiteId: warehouseId,
+                    destSiteId: sale.site_id,
+                    createdAt: new Date().toISOString()
+                };
+                await wmsJobsService.create(packJob as any);
+            }
+        }
+
+        // 4. Update sale status
+        const { error: updateError } = await supabase
+            .from('sales')
+            .update({ release_status: 'RELEASED' })
+            .eq('id', saleId);
+
+        if (updateError) throw updateError;
+
+        return true;
     }
 };
 
@@ -1591,11 +2466,12 @@ export const salesService = {
 // ============================================================================
 
 export const stockMovementsService = {
-    async getAll(siteId?: string, productId?: string) {
+    async getAll(siteId?: string, productId?: string, limit: number = 50, offset: number = 0) {
         let query = supabase
             .from('stock_movements')
-            .select('*')
-            .order('movement_date', { ascending: false });
+            .select('*', { count: 'exact' })
+            .order('movement_date', { ascending: false })
+            .range(offset, offset + limit - 1);
 
         if (siteId) {
             query = query.eq('site_id', siteId);
@@ -1605,9 +2481,10 @@ export const stockMovementsService = {
             query = query.eq('product_id', productId);
         }
 
-        const { data, error } = await query;
+        const { data, error, count } = await query;
         if (error) throw error;
-        return data.map((m: any) => ({
+
+        const mappedData = data.map((m: any) => ({
             ...m,
             siteId: m.site_id,
             productId: m.product_id,
@@ -1616,6 +2493,8 @@ export const stockMovementsService = {
             performedBy: m.performed_by,
             batchNumber: m.batch_number
         }));
+
+        return { data: mappedData, count: count || 0 };
     },
 
     async create(movement: Omit<StockMovement, 'id' | 'created_at'>) {
@@ -1627,6 +2506,21 @@ export const stockMovementsService = {
 
         if (error) throw error;
         return data;
+    },
+
+    // NEW: Server-Side Warehouse Analytics
+    async getAnalytics(siteId?: string, startDate?: string, endDate?: string) {
+        const params: any = {};
+        if (siteId && siteId !== 'All') params.p_site_id = siteId;
+        if (startDate) params.p_start_date = startDate;
+        if (endDate) params.p_end_date = `${endDate}T23:59:59`;
+
+        const { data, error } = await supabase.rpc('get_warehouse_metrics', params);
+        if (error) {
+            console.error('Error fetching warehouse metrics:', error);
+            return null;
+        }
+        return data;
     }
 };
 
@@ -1635,24 +2529,48 @@ export const stockMovementsService = {
 // ============================================================================
 
 export const expensesService = {
-    async getAll(siteId?: string) {
+    async getAll(siteId?: string, limit: number = 50, offset: number = 0, filters?: { startDate?: string; endDate?: string; category?: string; status?: string; search?: string }) {
         let query = supabase
             .from('expenses')
-            .select('*')
-            .order('expense_date', { ascending: false });
+            .select('*', { count: 'exact' })
+            .order('expense_date', { ascending: false })
+            .range(offset, offset + limit - 1);
 
         if (siteId) {
             query = query.eq('site_id', siteId);
         }
 
-        const { data, error } = await query;
+        if (filters?.startDate) {
+            query = query.gte('expense_date', filters.startDate);
+        }
+
+        if (filters?.endDate) {
+            query = query.lte('expense_date', filters.endDate);
+        }
+
+        if (filters?.category && filters.category !== 'All') {
+            query = query.eq('category', filters.category);
+        }
+
+        if (filters?.status && filters.status !== 'All') {
+            query = query.eq('status', filters.status);
+        }
+
+        if (filters?.search) {
+            query = query.ilike('description', `%${filters.search}%`);
+        }
+
+        const { data, error, count } = await query;
         if (error) throw error;
-        return data.map((e: any) => ({
+
+        const mappedData = data.map((e: any) => ({
             ...e,
             siteId: e.site_id,
             date: e.expense_date,
             approvedBy: e.approved_by
         }));
+
+        return { data: mappedData, count: count || 0 };
     },
 
     async create(expense: Omit<ExpenseRecord, 'id' | 'created_at' | 'updated_at'>) {
@@ -1709,6 +2627,22 @@ export const expensesService = {
             .eq('id', id);
 
         if (error) throw error;
+        return true;
+    },
+
+    // NEW: Server-Side Financial Analytics
+    async getFinancialMetrics(siteId?: string, startDate?: string, endDate?: string) {
+        // Construct params, handling undefined which RPC might not like if not default, but we set defaults to NULL in SQL
+        const params: any = {};
+        if (siteId && siteId !== 'All') params.p_site_id = siteId;
+        if (startDate) params.p_start_date = startDate;
+        if (endDate) params.p_end_date = endDate;
+
+        const { data, error } = await supabase
+            .rpc('get_financial_metrics', params);
+
+        if (error) throw error;
+        return data;
     }
 };
 
@@ -1717,21 +2651,43 @@ export const expensesService = {
 // ============================================================================
 
 export const wmsJobsService = {
-    async getAll(siteId?: string) {
-        let query = supabase
+    async getAll(siteId?: string, limit: number = 50) {
+        // 1. Fetch ALL Active Jobs (Pending/In-Progress) for the site
+        // We don't limit these because they represent the operational backlog that MUST be visible
+        let activeQuery = supabase
             .from('wms_jobs')
             .select('*')
-            .order('created_at', { ascending: false });
+            .not('status', 'in', '("Completed","Cancelled")')
+            .order('created_at', { ascending: true }); // Oldest first for FIFO
 
         if (siteId) {
-            // Get jobs where site is source (site_id) OR destination (dest_site_id)
-            // This ensures stores see incoming transfers destined for them
-            query = query.or(`site_id.eq.${siteId},dest_site_id.eq.${siteId}`);
+            activeQuery = activeQuery.or(`site_id.eq.${siteId},dest_site_id.eq.${siteId}`);
         }
 
-        const { data, error } = await query;
-        if (error) throw error;
-        return data.map((j: any) => ({
+        // 2. Fetch Recent Historical Jobs (Completed/Cancelled)
+        // We limit these to prevent bloating the client state
+        let historyQuery = supabase
+            .from('wms_jobs')
+            .select('*')
+            .in('status', ['Completed', 'Cancelled'])
+            .order('created_at', { ascending: false })
+            .limit(limit);
+
+        if (siteId) {
+            historyQuery = historyQuery.or(`site_id.eq.${siteId},dest_site_id.eq.${siteId}`);
+        }
+
+        // Execute parallel queries
+        const [activeRes, historyRes] = await Promise.all([activeQuery, historyQuery]);
+
+        if (activeRes.error) throw activeRes.error;
+        if (historyRes.error) throw historyRes.error;
+
+        // Combine datasets
+        const combinedData = [...(activeRes.data || []), ...(historyRes.data || [])];
+
+        // Map to domain model
+        return combinedData.map((j: any) => ({
             ...j,
             siteId: j.site_id,
             items: j.items_count,
@@ -1745,7 +2701,49 @@ export const wmsJobsService = {
             requestedBy: j.requested_by,
             approvedBy: j.approved_by,
             shippedAt: j.shipped_at,
-            receivedAt: j.received_at
+            receivedAt: j.received_at,
+            createdAt: j.created_at,
+            updatedAt: j.updated_at,
+            deliveryMethod: j.delivery_method,
+            hasDiscrepancy: j.has_discrepancy,
+            discrepancyDetails: j.discrepancy_details,
+            notes: j.notes
+        }));
+    },
+    async getDiscrepancies(siteId: string): Promise<WMSJob[]> {
+        let query = supabase
+            .from('wms_jobs')
+            .select('*')
+            .contains('line_items', JSON.stringify([{ status: 'Discrepancy' }]));
+
+        if (siteId) {
+            query = query.or(`site_id.eq.${siteId},dest_site_id.eq.${siteId}`);
+        }
+
+        const { data, error } = await query;
+        if (error) throw error;
+
+        return (data || []).map((j: any) => ({
+            ...j,
+            siteId: j.site_id,
+            items: j.items_count,
+            assignedTo: j.assigned_to,
+            orderRef: j.order_ref,
+            lineItems: j.line_items || [],
+            jobNumber: j.job_number,
+            sourceSiteId: j.source_site_id,
+            destSiteId: j.dest_site_id,
+            transferStatus: j.transfer_status,
+            requestedBy: j.requested_by,
+            approvedBy: j.approved_by,
+            shippedAt: j.shipped_at,
+            receivedAt: j.received_at,
+            createdAt: j.created_at,
+            updatedAt: j.updated_at,
+            deliveryMethod: j.delivery_method,
+            hasDiscrepancy: j.has_discrepancy,
+            discrepancyDetails: j.discrepancy_details,
+            notes: j.notes
         }));
     },
 
@@ -1759,53 +2757,34 @@ export const wmsJobsService = {
             assigned_to: job.assignedTo,
             location: job.location,
             order_ref: job.orderRef,
-            line_items: job.lineItems,
+            // DATA OPTIMIZATION: Sanitize line items (strip images)
+            line_items: job.lineItems.map((item: any) => ({
+                ...item,
+                image: '' // Strip image to save storage
+            })),
             source_site_id: job.sourceSiteId,
             dest_site_id: job.destSiteId,
             transfer_status: job.transferStatus,
             requested_by: job.requestedBy,
             approved_by: job.approvedBy,
-            job_number: (job as any).jobNumber // Will be populated below if not present
+            job_number: (job as any).jobNumber, // Will be populated below if not present
+            delivery_method: job.deliveryMethod
         };
 
         // Generate sequential Job Number if not provided
+        // SCALABILITY OPTIMIZATION: O(1) Job Number Generation
+        // Removed table scan (O(N)) which times out at scale.
+        // New format: PREFIX-YYMMDD-XXXX (Timestamp + Random)
         if (!(dbJob as any).job_number) {
-            try {
-                // Query ALL jobs globally to get the highest number for this type
-                // This ensures unique job numbers across all sites
-                const typePrefix = dbJob.type === 'TRANSFER' ? 'TRF' :
-                    dbJob.type === 'PICK' ? 'PK' :
-                        dbJob.type === 'PACK' ? 'PA' :
-                            dbJob.type === 'PUTAWAY' ? 'PU' :
-                                dbJob.type === 'DISPATCH' ? 'DS' : 'JB';
+            const typePrefix = dbJob.type === 'TRANSFER' ? 'TRF' :
+                dbJob.type === 'PICK' ? 'PK' :
+                    dbJob.type === 'PACK' ? 'PA' :
+                        dbJob.type === 'PUTAWAY' ? 'PU' :
+                            dbJob.type === 'DISPATCH' ? 'DS' : 'JB';
 
-                const { data: existingJobs, error: fetchError } = await supabase
-                    .from('wms_jobs')
-                    .select('job_number')
-                    .eq('type', dbJob.type)
-                    .not('job_number', 'is', null)
-                    .ilike('job_number', `${typePrefix}-%`)
-                    .order('created_at', { ascending: false })
-                    .limit(1);
-
-                let nextNumber = 1;
-                if (!fetchError && existingJobs && existingJobs.length > 0) {
-                    const lastNum = existingJobs[0].job_number;
-                    // Extract number from format like "PK-0001"
-                    const match = lastNum?.match(/-(\d+)$/);
-                    if (match) {
-                        nextNumber = parseInt(match[1], 10) + 1;
-                    }
-                }
-
-                // Simple, clean job number format: PREFIX-nnnn
-                (dbJob as any).job_number = `${typePrefix}-${String(nextNumber).padStart(4, '0')}`;
-            } catch (error) {
-                console.warn('Failed to generate sequential Job Number:', error);
-                // Fallback: Use a short timestamp-based ID
-                const shortId = Date.now().toString(36).toUpperCase().slice(-6);
-                (dbJob as any).job_number = `JB-${shortId}`;
-            }
+            const dateStr = new Date().toISOString().slice(2, 10).replace(/-/g, ''); // YYMMDD
+            const randomSuffix = Math.floor(1000 + Math.random() * 9000); // 4 digit random
+            (dbJob as any).job_number = `${typePrefix}-${dateStr}-${randomSuffix}`;
         }
 
         console.log('📤 Inserting WMS Job:', dbJob);
@@ -1837,7 +2816,10 @@ export const wmsJobsService = {
             requestedBy: data.requested_by,
             approvedBy: data.approved_by,
             shippedAt: data.shipped_at,
-            receivedAt: data.received_at
+            receivedAt: data.received_at,
+            createdAt: data.created_at,
+            updatedAt: data.updated_at,
+            deliveryMethod: data.delivery_method
         };
     },
 
@@ -1852,6 +2834,9 @@ export const wmsJobsService = {
         if (updates.approvedBy !== undefined) { dbUpdates.approved_by = updates.approvedBy; delete dbUpdates.approvedBy; }
         if (updates.shippedAt !== undefined) { dbUpdates.shipped_at = updates.shippedAt; delete dbUpdates.shippedAt; }
         if (updates.receivedAt !== undefined) { dbUpdates.received_at = updates.receivedAt; delete dbUpdates.receivedAt; }
+        if (updates.deliveryMethod !== undefined) { dbUpdates.delivery_method = updates.deliveryMethod; delete dbUpdates.deliveryMethod; }
+        if (updates.hasDiscrepancy !== undefined) { dbUpdates.has_discrepancy = updates.hasDiscrepancy; delete dbUpdates.hasDiscrepancy; }
+        if (updates.discrepancyDetails !== undefined) { dbUpdates.discrepancy_details = updates.discrepancyDetails; delete dbUpdates.discrepancyDetails; }
 
         const { data, error } = await supabase
             .from('wms_jobs')
@@ -1874,7 +2859,12 @@ export const wmsJobsService = {
             requestedBy: data.requested_by,
             approvedBy: data.approved_by,
             shippedAt: data.shipped_at,
-            receivedAt: data.received_at
+            receivedAt: data.received_at,
+            createdAt: data.created_at,
+            updatedAt: data.updated_at,
+            hasDiscrepancy: data.has_discrepancy,
+            discrepancyDetails: data.discrepancy_details,
+            notes: data.notes
         };
     },
 
@@ -1901,33 +2891,40 @@ export const wmsJobsService = {
 // ============================================================================
 
 export const transfersService = {
-    async getAll(siteId?: string) {
-        let query = supabase
+    async getAll(siteId?: string, limit: number = 50) {
+        // 1. Active Transfers (Not Received/Cancelled) - Full List
+        let activeQuery = supabase
             .from('transfers')
             .select('*')
-            .order('created_at', { ascending: false });
+            .not('status', 'in', '("Received","Cancelled")')
+            .order('created_at', { ascending: true });
 
         if (siteId) {
-            // Get transfers where site is source OR destination
-            query = query.or(`source_site_id.eq.${siteId},dest_site_id.eq.${siteId}`);
+            activeQuery = activeQuery.or(`source_site_id.eq.${siteId},dest_site_id.eq.${siteId}`);
         }
 
-        const { data, error } = await query;
-        if (error) throw error;
+        // 2. Historical Transfers (Received/Cancelled) - Limited
+        let historyQuery = supabase
+            .from('transfers')
+            .select('*')
+            .in('status', ['Received', 'Cancelled'])
+            .order('created_at', { ascending: false })
+            .limit(limit);
 
-        return data.map((t: any) => ({
-            id: t.id,
-            sourceSiteId: t.source_site_id,
-            destSiteId: t.dest_site_id,
-            status: t.status,
-            transferStatus: t.status, // Map status to transferStatus for POS compatibility
-            date: t.transfer_date,
-            items: t.items || [],
-            createdAt: t.created_at,
-            sourceSiteName: 'Loading...',
-            destSiteName: 'Loading...'
-        }));
+        if (siteId) {
+            historyQuery = historyQuery.or(`source_site_id.eq.${siteId},dest_site_id.eq.${siteId}`);
+        }
+
+        const [activeRes, historyRes] = await Promise.all([activeQuery, historyQuery]);
+
+        if (activeRes.error) throw activeRes.error;
+        if (historyRes.error) throw historyRes.error;
+
+        const combinedData = [...(activeRes.data || []), ...(historyRes.data || [])];
+        return combinedData; // Transfers might not need mapping if matching type
     },
+
+
 
     async create(transfer: Omit<TransferRecord, 'id' | 'sourceSiteName' | 'destSiteName'>) {
         const dbTransfer = {
@@ -1956,6 +2953,9 @@ export const transfersService = {
     async update(id: string, updates: Partial<TransferRecord>) {
         const dbUpdates: any = { ...updates };
         if (updates.status) dbUpdates.status = updates.status;
+        if (updates.hasDiscrepancy !== undefined) { dbUpdates.has_discrepancy = updates.hasDiscrepancy; delete dbUpdates.hasDiscrepancy; }
+        if (updates.discrepancyDetails !== undefined) { dbUpdates.discrepancy_details = updates.discrepancyDetails; delete dbUpdates.discrepancyDetails; }
+        if (updates.transferStatus !== undefined) { dbUpdates.transfer_status = updates.transferStatus; delete dbUpdates.transferStatus; }
 
         const { data, error } = await supabase
             .from('transfers')
@@ -1969,8 +2969,21 @@ export const transfersService = {
             ...data,
             sourceSiteId: data.source_site_id,
             destSiteId: data.dest_site_id,
-            date: data.transfer_date
+            date: data.transfer_date,
+            hasDiscrepancy: data.has_discrepancy,
+            discrepancyDetails: data.discrepancy_details,
+            notes: data.notes,
+            transferStatus: data.transfer_status
         };
+    },
+
+    async delete(id: string) {
+        const { error } = await supabase
+            .from('transfers')
+            .delete()
+            .eq('id', id);
+
+        if (error) throw error;
     }
 };
 
@@ -2022,7 +3035,7 @@ export const systemLogsService = {
 // ============================================================================
 
 export const jobAssignmentsService = {
-    async getAll(siteId?: string, employeeId?: string) {
+    async getAll(siteId?: string, employeeId?: string, limit?: number) {
         let query = supabase
             .from('job_assignments')
             .select(`
@@ -2037,6 +3050,10 @@ export const jobAssignmentsService = {
 
         if (employeeId) {
             query = query.eq('employee_id', employeeId);
+        }
+
+        if (limit) {
+            query = query.limit(limit);
         }
 
         const { data, error } = await query;
@@ -2349,7 +3366,11 @@ export const workerPointsService = {
             bonus_period_points: points.bonusPeriodPoints
         };
 
-        const { data, error } = await supabase.from('worker_points').insert(dbPoints).select().single();
+        const { data, error } = await supabase
+            .from('worker_points')
+            .upsert(dbPoints, { onConflict: 'employee_id' })
+            .select()
+            .single();
         if (error) throw error;
 
         // Return mapped object or just assume it worked and return input with ID if new
@@ -2399,9 +3420,10 @@ export const pointsTransactionsService = {
         return { ...transaction, id: data.id };
     },
 
-    async getAll(employeeId?: string) {
+    async getAll(employeeId?: string, limit?: number) {
         let query = supabase.from('points_transactions').select('*').order('timestamp', { ascending: false });
         if (employeeId) query = query.eq('employee_id', employeeId);
+        if (limit) query = query.limit(limit);
 
         const { data, error } = await query;
         if (error) {
@@ -2418,6 +3440,75 @@ export const pointsTransactionsService = {
             description: t.description,
             timestamp: t.timestamp
         }));
+    }
+};
+
+export const storePointsService = {
+    async getAll() {
+        const { data, error } = await supabase.from('store_points').select('*');
+        if (error) {
+            console.error('Error fetching store points:', error);
+            return [];
+        }
+        return data.map((sp: any) => ({
+            id: sp.id,
+            siteId: sp.site_id,
+            siteName: sp.site_name,
+            totalPoints: sp.total_points,
+            weeklyPoints: sp.weekly_points,
+            monthlyPoints: sp.monthly_points,
+            todayPoints: sp.today_points,
+            totalTransactions: sp.total_transactions,
+            totalRevenue: sp.total_revenue,
+            averageTicketSize: sp.average_ticket_size,
+            customerSatisfaction: sp.customer_satisfaction,
+            lastTransactionAt: sp.last_transaction_at,
+            lastUpdated: sp.last_updated,
+            currentTier: sp.current_tier,
+            estimated_bonus: sp.estimated_bonus
+        }));
+    },
+
+    async create(points: StorePoints) {
+        const dbPoints = {
+            site_id: points.siteId,
+            site_name: points.siteName,
+            total_points: points.totalPoints,
+            weekly_points: points.weeklyPoints,
+            monthly_points: points.monthlyPoints,
+            today_points: points.todayPoints,
+            total_transactions: points.totalTransactions,
+            total_revenue: points.totalRevenue,
+            average_ticket_size: points.averageTicketSize,
+            customer_satisfaction: points.customerSatisfaction,
+            last_transaction_at: points.lastTransactionAt,
+            last_updated: points.lastUpdated,
+            current_tier: points.currentTier,
+            estimated_bonus: points.estimatedBonus
+        };
+        const { data, error } = await supabase.from('store_points').insert(dbPoints).select().single();
+        if (error) throw error;
+        return { ...points, id: data.id };
+    },
+
+    async update(id: string, updates: Partial<StorePoints>) {
+        const dbUpdates: any = {};
+        if (updates.totalPoints !== undefined) dbUpdates.total_points = updates.totalPoints;
+        if (updates.weeklyPoints !== undefined) dbUpdates.weekly_points = updates.weeklyPoints;
+        if (updates.monthlyPoints !== undefined) dbUpdates.monthly_points = updates.monthlyPoints;
+        if (updates.todayPoints !== undefined) dbUpdates.today_points = updates.todayPoints;
+        if (updates.totalTransactions !== undefined) dbUpdates.total_transactions = updates.totalTransactions;
+        if (updates.totalRevenue !== undefined) dbUpdates.total_revenue = updates.totalRevenue;
+        if (updates.averageTicketSize !== undefined) dbUpdates.average_ticket_size = updates.averageTicketSize;
+        if (updates.customerSatisfaction !== undefined) dbUpdates.customer_satisfaction = updates.customerSatisfaction;
+        if (updates.lastTransactionAt !== undefined) dbUpdates.last_transaction_at = updates.lastTransactionAt;
+        if (updates.lastUpdated !== undefined) dbUpdates.last_updated = updates.lastUpdated;
+        if (updates.currentTier !== undefined) dbUpdates.current_tier = updates.currentTier;
+        if (updates.estimatedBonus !== undefined) dbUpdates.estimated_bonus = updates.estimatedBonus;
+
+        const { data, error } = await supabase.from('store_points').update(dbUpdates).eq('id', id).select().single();
+        if (error) throw error;
+        return data;
     }
 };
 
@@ -2521,7 +3612,7 @@ export const inventoryRequestsService = {
 };
 
 // ============================================================================
-// BRAINSTORM NODES (Super Admin Canvas)
+// BRAINSTORM NODES (CEO Canvas)
 // ============================================================================
 
 export interface BrainstormNodeDB {
@@ -2568,13 +3659,20 @@ export const brainstormService = {
             .insert({
                 title: node.title,
                 description: node.description,
+                notes: node.notes,
                 department: node.department,
                 priority: node.priority,
                 status: node.status,
+                tags: node.tags,
+                is_starred: node.is_starred,
                 x: node.x,
                 y: node.y,
                 connections: node.connections,
-                created_by: node.created_by
+                created_by: node.created_by,
+                due_date: node.due_date,
+                progress: node.progress,
+                completed_at: node.completed_at,
+                color: node.color
             })
             .select()
             .single();
@@ -2589,12 +3687,19 @@ export const brainstormService = {
             .update({
                 title: updates.title,
                 description: updates.description,
+                notes: updates.notes,
                 department: updates.department,
                 priority: updates.priority,
                 status: updates.status,
+                tags: updates.tags,
+                is_starred: updates.is_starred,
                 x: updates.x,
                 y: updates.y,
                 connections: updates.connections,
+                due_date: updates.due_date,
+                progress: updates.progress,
+                completed_at: updates.completed_at,
+                color: updates.color,
                 updated_at: new Date().toISOString()
             })
             .eq('id', id)
@@ -2644,3 +3749,425 @@ export const brainstormService = {
         }
     }
 };
+
+// ============================================================================
+// DISCREPANCY RESOLUTIONS & CLAIMS
+// ============================================================================
+
+export const discrepancyService = {
+    async createResolution(
+        resolution: Omit<DiscrepancyResolution, 'id' | 'createdAt' | 'resolvedAt'>
+    ): Promise<DiscrepancyResolution> {
+        const dbResolution = {
+            transfer_id: resolution.transferId,
+            line_item_index: resolution.lineItemIndex,
+            product_id: resolution.productId,
+            expected_qty: resolution.expectedQty,
+            received_qty: resolution.receivedQty,
+            discrepancy_type: resolution.discrepancyType,
+            resolution_type: resolution.resolutionType,
+            resolution_status: resolution.resolutionStatus,
+            resolution_notes: resolution.resolutionNotes,
+            reason_code: resolution.reasonCode,
+            estimated_value: resolution.estimatedValue,
+            claim_amount: resolution.claimAmount,
+            photo_urls: resolution.photoUrls,
+            reported_by: resolution.reportedBy,
+            site_id: resolution.siteId,
+            resolve_qty: resolution.resolveQty,
+            replacement_job_id: resolution.replacementJobId
+        };
+        const { data, error } = await supabase
+            .from('discrepancy_resolutions')
+            .insert(dbResolution)
+            .select()
+            .single();
+
+        if (error) throw error;
+        return this._mapResolution(data);
+    },
+
+    async updateResolution(
+        id: string,
+        updates: Partial<DiscrepancyResolution>
+    ): Promise<DiscrepancyResolution> {
+        const dbUpdates: any = { ...updates };
+
+        // Map fields
+        if (updates.resolutionStatus) dbUpdates.resolution_status = updates.resolutionStatus;
+        if (updates.resolutionType) dbUpdates.resolution_type = updates.resolutionType;
+        if (updates.resolutionNotes) dbUpdates.resolution_notes = updates.resolutionNotes;
+        if (updates.approvedBy) dbUpdates.approved_by = updates.approvedBy;
+        if (updates.resolvedBy) dbUpdates.resolved_by = updates.resolvedBy;
+        if (updates.resolvedAt) dbUpdates.resolved_at = updates.resolvedAt;
+
+        // Cleanup
+        delete dbUpdates.resolutionStatus;
+        delete dbUpdates.resolutionType;
+        delete dbUpdates.resolutionNotes;
+        delete dbUpdates.approvedBy;
+        delete dbUpdates.resolvedBy;
+        delete dbUpdates.resolvedAt;
+        delete dbUpdates.transferId;
+        delete dbUpdates.lineItemIndex;
+        delete dbUpdates.productId;
+
+        const { data, error } = await supabase
+            .from('discrepancy_resolutions')
+            .update(dbUpdates)
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) throw error;
+        return this._mapResolution(data);
+    },
+
+    async getByTransferId(transferId: string): Promise<DiscrepancyResolution[]> {
+        const { data, error } = await supabase
+            .from('discrepancy_resolutions')
+            .select('*')
+            .eq('transfer_id', transferId);
+
+        if (error) throw error;
+        return (data || []).map((r: any) => this._mapResolution(r));
+    },
+
+    async createClaim(
+        claim: Omit<DiscrepancyClaim, 'id' | 'submittedAt' | 'paidAt' | 'reviewedAt'>
+    ): Promise<DiscrepancyClaim> {
+        const dbClaim = {
+            resolution_id: claim.resolutionId,
+            claim_type: claim.claimType,
+            claim_amount: claim.claimAmount,
+            carrier_name: claim.carrierName,
+            tracking_number: claim.trackingNumber,
+            notes: claim.notes,
+            documents: claim.documents
+        };
+
+        const { data, error } = await supabase
+            .from('discrepancy_claims')
+            .insert(dbClaim)
+            .select()
+            .single();
+
+        if (error) throw error;
+        return this._mapClaim(data);
+    },
+
+    async getClaimByResolutionId(resolutionId: string): Promise<DiscrepancyClaim | null> {
+        const { data, error } = await supabase
+            .from('discrepancy_claims')
+            .select('*')
+            .eq('resolution_id', resolutionId)
+            .maybeSingle();
+
+        if (error) throw error;
+        return data ? this._mapClaim(data) : null;
+    },
+
+    _mapResolution(data: any): DiscrepancyResolution {
+        return {
+            id: data.id,
+            transferId: data.transfer_id,
+            lineItemIndex: data.line_item_index,
+            productId: data.product_id,
+            expectedQty: data.expected_qty,
+            receivedQty: data.received_qty,
+            variance: data.variance,
+            discrepancyType: data.discrepancy_type,
+            resolveQty: data.resolve_qty,
+            resolutionType: data.resolution_type,
+            resolutionStatus: data.resolution_status,
+            resolutionNotes: data.resolution_notes,
+            reasonCode: data.reason_code,
+            estimatedValue: data.estimated_value,
+            claimAmount: data.claim_amount,
+            photoUrls: data.photo_urls,
+            reportedBy: data.reported_by,
+            resolvedBy: data.resolved_by,
+            approvedBy: data.approved_by,
+            createdAt: data.created_at,
+            resolvedAt: data.resolved_at,
+            siteId: data.site_id,
+            replacementJobId: data.replacement_job_id,
+            replacement_job_id: data.replacement_job_id
+        };
+    },
+
+    _mapClaim(data: any): DiscrepancyClaim {
+        return {
+            id: data.id,
+            resolutionId: data.resolution_id,
+            claimType: data.claim_type,
+            claimNumber: data.claim_number,
+            claimStatus: data.claim_status,
+            claimAmount: data.claim_amount,
+            approvedAmount: data.approved_amount,
+            submittedAt: data.submitted_at,
+            reviewedAt: data.reviewed_at,
+            paidAt: data.paid_at,
+            carrierName: data.carrier_name,
+            trackingNumber: data.tracking_number,
+            documents: data.documents,
+            notes: data.notes
+        };
+    }
+};
+
+// ============================================================================
+// EMPLOYEE TASKS
+// ============================================================================
+
+import type { EmployeeTask } from '../types';
+
+export const tasksService = {
+    async getAll(siteId?: string, limit?: number): Promise<EmployeeTask[]> {
+        try {
+            let query = supabase
+                .from('employee_tasks')
+                .select('*')
+                .order('due_date', { ascending: true });
+
+            if (siteId) {
+                query = query.eq('site_id', siteId);
+            }
+
+            if (limit) {
+                query = query.limit(limit);
+            }
+
+            const { data, error } = await query;
+
+            if (error) {
+                console.error('Error fetching tasks:', error);
+                return [];
+            }
+
+            return (data || []).map(this._mapTask);
+        } catch (error) {
+            console.error('Error in tasksService.getAll:', error);
+            return [];
+        }
+    },
+
+    async getById(id: string): Promise<EmployeeTask | null> {
+        try {
+            const { data, error } = await supabase
+                .from('employee_tasks')
+                .select('*')
+                .eq('id', id)
+                .single();
+
+            if (error) {
+                console.error('Error fetching task:', error);
+                return null;
+            }
+
+            return this._mapTask(data);
+        } catch (error) {
+            console.error('Error in tasksService.getById:', error);
+            return null;
+        }
+    },
+
+    async getByEmployee(employeeId: string): Promise<EmployeeTask[]> {
+        try {
+            const { data, error } = await supabase
+                .from('employee_tasks')
+                .select('*')
+                .eq('assigned_to', employeeId)
+                .order('due_date', { ascending: true });
+
+            if (error) {
+                console.error('Error fetching tasks for employee:', error);
+                return [];
+            }
+
+            return (data || []).map(this._mapTask);
+        } catch (error) {
+            console.error('Error in tasksService.getByEmployee:', error);
+            return [];
+        }
+    },
+
+    async create(task: Omit<EmployeeTask, 'id'>): Promise<EmployeeTask | null> {
+        try {
+            const dbTask = {
+                title: task.title,
+                description: task.description,
+                assigned_to: task.assignedTo,
+                status: task.status || 'Pending',
+                priority: task.priority || 'Medium',
+                due_date: task.dueDate
+            };
+
+            const { data, error } = await supabase
+                .from('employee_tasks')
+                .insert(dbTask)
+                .select()
+                .single();
+
+            if (error) {
+                console.error('Error creating task:', error);
+                return null;
+            }
+
+            return this._mapTask(data);
+        } catch (error) {
+            console.error('Error in tasksService.create:', error);
+            return null;
+        }
+    },
+
+    async update(id: string, updates: Partial<EmployeeTask>): Promise<EmployeeTask | null> {
+        try {
+            const dbUpdates: any = {};
+
+            if (updates.title !== undefined) dbUpdates.title = updates.title;
+            if (updates.description !== undefined) dbUpdates.description = updates.description;
+            if (updates.assignedTo !== undefined) dbUpdates.assigned_to = updates.assignedTo;
+            if (updates.status !== undefined) dbUpdates.status = updates.status;
+            if (updates.priority !== undefined) dbUpdates.priority = updates.priority;
+            if (updates.dueDate !== undefined) dbUpdates.due_date = updates.dueDate;
+
+            dbUpdates.updated_at = new Date().toISOString();
+
+            const { data, error } = await supabase
+                .from('employee_tasks')
+                .update(dbUpdates)
+                .eq('id', id)
+                .select()
+                .single();
+
+            if (error) {
+                console.error('Error updating task:', error);
+                return null;
+            }
+
+            return this._mapTask(data);
+        } catch (error) {
+            console.error('Error in tasksService.update:', error);
+            return null;
+        }
+    },
+
+    async delete(id: string): Promise<boolean> {
+        try {
+            const { error } = await supabase
+                .from('employee_tasks')
+                .delete()
+                .eq('id', id);
+
+            if (error) {
+                console.error('Error deleting task:', error);
+                return false;
+            }
+
+            return true;
+        } catch (error) {
+            console.error('Error in tasksService.delete:', error);
+            return false;
+        }
+    },
+
+    _mapTask(data: any): EmployeeTask {
+        return {
+            id: data.id,
+            title: data.title,
+            description: data.description || '',
+            assignedTo: data.assigned_to,
+            status: data.status as EmployeeTask['status'],
+            priority: data.priority as EmployeeTask['priority'],
+            dueDate: data.due_date,
+            createdBy: data.created_by
+        };
+    }
+};
+
+// ============================================================================
+// STAFF SCHEDULES (E-ROSTERING)
+// ============================================================================
+
+import type { StaffSchedule } from '../types';
+
+export const schedulesService = {
+    async getAll(siteId?: string): Promise<StaffSchedule[]> {
+        let query = supabase.from('staff_schedules').select('*');
+        if (siteId) query = query.eq('site_id', siteId);
+
+        const { data, error } = await query.order('date', { ascending: true });
+        if (error) {
+            console.warn('staff_schedules table unreachable:', error.message);
+            return [];
+        }
+        return (data || []).map(this._mapSchedule);
+    },
+
+    async create(schedule: Omit<StaffSchedule, 'id'>): Promise<StaffSchedule | null> {
+        const dbSchedule = {
+            site_id: schedule.siteId,
+            employee_id: schedule.employeeId,
+            employee_name: schedule.employeeName,
+            date: schedule.date,
+            start_time: schedule.startTime,
+            end_time: schedule.endTime,
+            role: schedule.role,
+            notes: schedule.notes,
+            status: schedule.status
+        };
+
+        const { data, error } = await supabase
+            .from('staff_schedules')
+            .insert(dbSchedule)
+            .select()
+            .single();
+
+        if (error) throw error;
+        return this._mapSchedule(data);
+    },
+
+    async update(id: string, updates: Partial<StaffSchedule>): Promise<StaffSchedule | null> {
+        const dbUpdates: any = {};
+        if (updates.date) dbUpdates.date = updates.date;
+        if (updates.startTime) dbUpdates.start_time = updates.startTime;
+        if (updates.endTime) dbUpdates.end_time = updates.endTime;
+        if (updates.role) dbUpdates.role = updates.role;
+        if (updates.notes) dbUpdates.notes = updates.notes;
+        if (updates.status) dbUpdates.status = updates.status;
+
+        const { data, error } = await supabase
+            .from('staff_schedules')
+            .update(dbUpdates)
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) throw error;
+        return this._mapSchedule(data);
+    },
+
+    async delete(id: string): Promise<void> {
+        const { error } = await supabase.from('staff_schedules').delete().eq('id', id);
+        if (error) throw error;
+    },
+
+    _mapSchedule(data: any): StaffSchedule {
+        return {
+            id: data.id,
+            siteId: data.site_id,
+            employeeId: data.employee_id,
+            employeeName: data.employee_name,
+            date: data.date,
+            startTime: data.start_time,
+            endTime: data.end_time,
+            role: data.role,
+            notes: data.notes,
+            status: data.status,
+            created_at: data.created_at,
+            updated_at: data.updated_at
+        };
+    }
+};
+

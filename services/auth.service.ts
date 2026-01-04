@@ -18,7 +18,24 @@ import {
     type Permission
 } from './permissions.service';
 
-export type UserRole = 'super_admin' | 'admin' | 'manager' | 'warehouse_manager' | 'dispatcher' | 'pos' | 'picker' | 'packer' | 'hr' | 'auditor' | 'driver' | 'finance_manager' | 'procurement_manager' | 'store_supervisor' | 'inventory_specialist' | 'cs_manager' | 'it_support';
+// 4-Level Role Hierarchy for Multi-Store/Warehouse Operations
+export type UserRole =
+    // Level 1 - Executive
+    | 'super_admin'
+    // Level 2 - Regional/Directors
+    | 'regional_manager' | 'operations_manager' | 'finance_manager'
+    | 'hr_manager' | 'procurement_manager' | 'supply_chain_manager'
+    // Level 3 - Site Managers
+    | 'store_manager' | 'warehouse_manager' | 'dispatch_manager'
+    | 'assistant_manager' | 'shift_lead'
+    // Level 4 - Staff
+    | 'cashier' | 'sales_associate' | 'stock_clerk' | 'picker' | 'packer'
+    | 'receiver' | 'driver' | 'forklift_operator' | 'inventory_specialist'
+    | 'customer_service' | 'auditor' | 'it_support'
+    // Legacy (backwards compatibility)
+    | 'admin' | 'manager' | 'hr' | 'pos' | 'dispatcher'
+    | 'cs_manager' | 'returns_clerk' | 'merchandiser' | 'loss_prevention'
+    | 'accountant' | 'data_analyst' | 'training_coordinator' | 'store_supervisor';
 
 export interface UserProfile {
     id: string;
@@ -254,10 +271,17 @@ export const authService = {
     },
 
     /**
-     * Check if user is admin or super admin
+     * Check if user is admin level (L1 or L2)
      */
     isAdmin(userRole: UserRole): boolean {
-        return ['super_admin', 'admin'].includes(userRole);
+        const adminRoles: UserRole[] = [
+            'super_admin',
+            'regional_manager', 'operations_manager', 'finance_manager',
+            'hr_manager', 'procurement_manager', 'supply_chain_manager',
+            // Legacy
+            'admin', 'hr'
+        ];
+        return adminRoles.includes(userRole);
     },
 
     /**
@@ -332,62 +356,131 @@ export const authService = {
 // ROLE-BASED ACCESS CONTROL
 // ============================================================================
 
-export const ROLE_PERMISSIONS = {
+export const ROLE_PERMISSIONS: Record<string, string[]> = {
+    // ═══ LEVEL 1 - EXECUTIVE ═══
     super_admin: ['*'], // CEO / Owner - Full Access to EVERYTHING
-    admin: [
-        'dashboard', 'settings', 'employees', 'profile'  // System admin - technical/IT access only
+
+    // ═══ LEVEL 2 - REGIONAL/DIRECTORS ═══
+    regional_manager: [
+        'dashboard', 'pos', 'inventory', 'warehouse', 'sales', 'customers', 'employees', 'finance', 'procurement', 'settings', 'profile'
     ],
-    manager: [
-        'dashboard', 'pos', 'inventory', 'sales', 'customers', 'pricing', 'profile'  // Store operations only (NO warehouse, NO procurement)
-    ],
-    warehouse_manager: [
-        'dashboard', 'inventory', 'warehouse', 'procurement', 'profile'
-    ],
-    dispatcher: [
-        'dashboard', 'inventory', 'warehouse', 'procurement', 'profile'
+    operations_manager: [
+        'dashboard', 'pos', 'inventory', 'warehouse', 'sales', 'customers', 'employees', 'finance', 'procurement', 'settings', 'profile'
     ],
     finance_manager: [
         'dashboard', 'finance', 'sales', 'procurement', 'employees', 'profile'
     ],
+    hr_manager: [
+        'dashboard', 'employees', 'finance', 'profile'
+    ],
     procurement_manager: [
         'dashboard', 'procurement', 'inventory', 'warehouse', 'finance', 'profile'
     ],
-    cs_manager: [
-        'dashboard', 'customers', 'sales', 'profile'
+    supply_chain_manager: [
+        'dashboard', 'inventory', 'warehouse', 'procurement', 'finance', 'profile'
     ],
-    it_support: [
-        'dashboard', 'settings', 'employees', 'profile'
+
+    // ═══ LEVEL 3 - SITE MANAGERS ═══
+    store_manager: [
+        'dashboard', 'pos', 'inventory', 'sales', 'customers', 'employees', 'pricing', 'profile'
     ],
-    store_supervisor: [
-        'dashboard', 'pos', 'inventory', 'sales', 'customers', 'profile'  // Added inventory
+    warehouse_manager: [
+        'dashboard', 'inventory', 'warehouse', 'procurement', 'employees', 'profile'
     ],
-    inventory_specialist: [
-        'dashboard', 'inventory', 'warehouse', 'profile'
+    dispatch_manager: [
+        'dashboard', 'warehouse', 'inventory', 'employees', 'profile'
     ],
-    pos: [
-        'dashboard', 'pos', 'customers', 'inventory', 'profile'  // Added inventory (read-only)
+    assistant_manager: [
+        'dashboard', 'pos', 'inventory', 'sales', 'customers', 'profile'
+    ],
+    shift_lead: [
+        'dashboard', 'pos', 'inventory', 'customers', 'profile'
+    ],
+
+    // ═══ LEVEL 4 - STAFF ═══
+    cashier: [
+        'dashboard', 'pos', 'profile'
+    ],
+    sales_associate: [
+        'dashboard', 'pos', 'customers', 'inventory', 'profile'
+    ],
+    stock_clerk: [
+        'dashboard', 'inventory', 'profile'
     ],
     picker: [
-        'dashboard', 'warehouse', 'inventory', 'profile'  // Added inventory (read-only)
+        'dashboard', 'warehouse', 'inventory', 'profile'
     ],
-    hr: [
-        'dashboard', 'employees', 'finance', 'profile'  // HR - employee and payroll management
+    packer: [
+        'dashboard', 'warehouse', 'inventory', 'profile'
     ],
-    auditor: [
-        'dashboard', 'sales', 'inventory', 'finance', 'profile'  // Auditor - read-only financial oversight
+    receiver: [
+        'dashboard', 'warehouse', 'inventory', 'profile'
     ],
     driver: [
         'dashboard', 'warehouse', 'profile'
     ],
-    packer: [
+    forklift_operator: [
         'dashboard', 'warehouse', 'inventory', 'profile'
+    ],
+    inventory_specialist: [
+        'dashboard', 'inventory', 'warehouse', 'profile'
+    ],
+    customer_service: [
+        'dashboard', 'customers', 'sales', 'profile'
+    ],
+    auditor: [
+        'dashboard', 'sales', 'inventory', 'finance', 'profile'
+    ],
+    it_support: [
+        'dashboard', 'settings', 'employees', 'profile'
+    ],
+
+    // ═══ LEGACY ROLES (backwards compatibility) ═══
+    admin: [
+        'dashboard', 'settings', 'employees', 'profile'
+    ],
+    manager: [
+        'dashboard', 'pos', 'inventory', 'sales', 'customers', 'pricing', 'profile'
+    ],
+    hr: [
+        'dashboard', 'employees', 'finance', 'profile'
+    ],
+    pos: [
+        'dashboard', 'pos', 'customers', 'inventory', 'profile'
+    ],
+    dispatcher: [
+        'dashboard', 'inventory', 'warehouse', 'procurement', 'profile'
+    ],
+    cs_manager: [
+        'dashboard', 'customers', 'sales', 'profile'
+    ],
+    store_supervisor: [
+        'dashboard', 'pos', 'inventory', 'sales', 'customers', 'profile'
+    ],
+    returns_clerk: [
+        'dashboard', 'warehouse', 'inventory', 'customers', 'profile'
+    ],
+    merchandiser: [
+        'dashboard', 'inventory', 'pricing', 'profile'
+    ],
+    loss_prevention: [
+        'dashboard', 'inventory', 'sales', 'profile'
+    ],
+    accountant: [
+        'dashboard', 'finance', 'sales', 'profile'
+    ],
+    data_analyst: [
+        'dashboard', 'sales', 'inventory', 'finance', 'profile'
+    ],
+    training_coordinator: [
+        'dashboard', 'employees', 'profile'
     ]
 };
 
 export function canAccessRoute(userRole: UserRole, route: string): boolean {
     const permissions = ROLE_PERMISSIONS[userRole];
 
-    // Super admin has access to everything
+    // CEO has access to everything
     if (permissions.includes('*')) return true;
 
     // Check if route is in permissions
@@ -403,7 +496,7 @@ export function canAccessRoute(userRole: UserRole, route: string): boolean {
 export function getAvailableSections(userRole: UserRole, siteType?: string): string[] {
     const basePermissions = ROLE_PERMISSIONS[userRole];
 
-    // Super admin always gets all permissions
+    // CEO always gets all permissions
     if (basePermissions.includes('*')) return basePermissions;
 
     // If no site type provided, return base permissions
@@ -429,12 +522,18 @@ export function getAvailableSections(userRole: UserRole, siteType?: string): str
  * Enforces site-level data isolation
  */
 export function canAccessSite(userRole: UserRole, userSiteId: string, targetSiteId: string): boolean {
-    // Super admin can access all sites
+    // CEO can access all sites
     if (userRole === 'super_admin') return true;
 
-    // Admin, HR, Finance Manager, Procurement Manager, CS Manager, IT Support, and Auditor can access all sites (Admin roles)
-    const adminRoles: UserRole[] = ['admin', 'hr', 'finance_manager', 'procurement_manager', 'cs_manager', 'it_support', 'auditor'];
-    if (adminRoles.includes(userRole)) return true;
+    // Level 2 roles + super_admin can access all sites
+    const multiSiteRoles: UserRole[] = [
+        'super_admin',
+        'regional_manager', 'operations_manager', 'finance_manager',
+        'hr_manager', 'procurement_manager', 'supply_chain_manager',
+        // Legacy
+        'admin', 'hr', 'cs_manager', 'it_support', 'auditor'
+    ];
+    if (multiSiteRoles.includes(userRole)) return true;
 
     // All other roles can only access their assigned site
     return userSiteId === targetSiteId;
