@@ -300,12 +300,13 @@ export default function TopBar() {
    };
 
    return (
-      <header className="h-16 bg-cyber-dark/30 backdrop-blur-xl sticky top-0 z-30 px-6 flex items-center justify-between">
-         <div className="flex items-center space-x-4">
-            <button onClick={toggleSidebar} className="text-gray-400 hover:text-white" aria-label="Toggle sidebar">
-               <Menu size={24} />
+      <header className="h-14 md:h-16 bg-cyber-dark/30 backdrop-blur-xl sticky top-0 z-30 px-2 sm:px-4 md:px-6 flex items-center justify-between">
+         <div className="flex items-center space-x-2 sm:space-x-4">
+            <button onClick={toggleSidebar} className="text-gray-400 hover:text-white p-1" aria-label="Toggle sidebar">
+               <Menu size={20} className="md:w-6 md:h-6" />
             </button>
-            <div className="relative hidden md:block">
+            {/* Desktop Search */}
+            <div className="relative hidden lg:block">
                <form onSubmit={handleSearch} className="flex items-center bg-cyber-gray rounded-full px-4 py-1.5 border border-white/5 focus-within:border-cyber-primary/50 transition-colors">
                   <Search className="w-4 h-4 text-gray-400" />
                   <input
@@ -498,17 +499,17 @@ export default function TopBar() {
 
                // User sees static badge indicating current location context
                return (
-                  <div className={`flex items-center gap-2 px-2 md:px-3 py-1 md:py-1.5 rounded-full border mx-auto md:mx-0 ${isWarehouse
+                  <div className={`hidden sm:flex items-center gap-1.5 md:gap-2 px-2 md:px-3 py-1 md:py-1.5 rounded-full border ${isWarehouse
                      ? 'bg-blue-900/20 border-blue-500/30 text-blue-400'
                      : 'bg-green-900/20 border-green-500/30 text-green-400'
                      }`}>
-                     {isWarehouse ? <Building size={14} /> : <Store size={14} />}
-                     <span className="text-[10px] md:text-xs font-bold uppercase tracking-wide whitespace-nowrap truncate max-w-[100px] md:max-w-none">
+                     {isWarehouse ? <Building size={12} className="md:w-[14px] md:h-[14px]" /> : <Store size={12} className="md:w-[14px] md:h-[14px]" />}
+                     <span className="text-[9px] md:text-xs font-bold uppercase tracking-wide whitespace-nowrap truncate max-w-[60px] sm:max-w-[100px] md:max-w-none">
                         {locationName}
                      </span>
                      {displaySite?.code && (
-                        <div className={`ml-1 md:ml-2 flex items-center gap-1 md:gap-1.5 pl-2 border-l ${isWarehouse ? 'border-blue-500/30' : 'border-green-500/30'}`}>
-                           <span className="hidden sm:inline text-[10px] text-gray-500 font-bold uppercase tracking-wider">ID</span>
+                        <div className={`hidden md:flex ml-1 md:ml-2 items-center gap-1 md:gap-1.5 pl-2 border-l ${isWarehouse ? 'border-blue-500/30' : 'border-green-500/30'}`}>
+                           <span className="hidden lg:inline text-[10px] text-gray-500 font-bold uppercase tracking-wider">ID</span>
                            <span className={`font-mono text-[10px] md:text-xs font-bold tracking-widest ${isWarehouse ? 'text-blue-200' : 'text-green-200'} shadow-sm`}>
                               {displaySite.code}
                            </span>
@@ -519,15 +520,24 @@ export default function TopBar() {
             })()}
          </div>
 
-         <div className="flex items-center space-x-4">
+         <div className="flex items-center space-x-1 sm:space-x-2 md:space-x-4">
+            {/* Mobile Search Button */}
+            <button
+               onClick={() => setIsSearchOpen(!isSearchOpen)}
+               className="lg:hidden p-2 rounded-full text-gray-400 hover:text-white hover:bg-white/5 transition-colors"
+               aria-label="Search"
+            >
+               <Search size={18} />
+            </button>
+
             {/* USER INFO & DROPDOWN */}
             <div className="relative" ref={dropdownRef}>
                <div
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                  className={`hidden md:flex items-center gap-3 px-4 py-2 rounded-full border transition-all duration-300 cursor-pointer hover:shadow-[0_0_15px_rgba(0,255,157,0.1)] ${isUserMenuOpen ? 'bg-white/10 border-cyber-primary/50' : 'bg-gradient-to-r from-white/5 to-transparent border-white/10 hover:border-cyber-primary/50'}`}
+                  className={`hidden sm:flex items-center gap-2 md:gap-3 px-2 md:px-4 py-1.5 md:py-2 rounded-full border transition-all duration-300 cursor-pointer hover:shadow-[0_0_15px_rgba(0,255,157,0.1)] ${isUserMenuOpen ? 'bg-white/10 border-cyber-primary/50' : 'bg-gradient-to-r from-white/5 to-transparent border-white/10 hover:border-cyber-primary/50'}`}
                >
                   <div className="relative">
-                     <div className="w-9 h-9 rounded-full bg-gradient-to-br from-cyber-primary to-blue-600 flex items-center justify-center text-black font-black text-sm shadow-lg group-hover:scale-105 transition-transform overflow-hidden border border-white/20">
+                     <div className="w-7 h-7 md:w-9 md:h-9 rounded-full bg-gradient-to-br from-cyber-primary to-blue-600 flex items-center justify-center text-black font-black text-xs md:text-sm shadow-lg group-hover:scale-105 transition-transform overflow-hidden border border-white/20">
                         {user.avatar ? (
                            <img
                               src={user.avatar}
@@ -542,15 +552,15 @@ export default function TopBar() {
                            user.name.charAt(0).toUpperCase()
                         )}
                      </div>
-                     <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 border-2 border-black rounded-full animate-pulse"></div>
+                     <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 md:w-3 md:h-3 bg-green-500 border-2 border-black rounded-full animate-pulse"></div>
                   </div>
 
-                  <div className="flex flex-col">
+                  <div className="hidden md:flex flex-col">
                      <span className="text-sm font-bold text-white leading-none group-hover:text-cyber-primary transition-colors">{user.name}</span>
                      <span className="text-[10px] font-mono text-gray-400 uppercase tracking-wider mt-0.5 leading-none">{formatRole(user.role)}</span>
                   </div>
 
-                  <ChevronDown size={14} className={`text-gray-500 transition-colors duration-300 ${isUserMenuOpen ? 'rotate-180 text-white' : ''}`} />
+                  <ChevronDown size={14} className={`hidden md:block text-gray-500 transition-colors duration-300 ${isUserMenuOpen ? 'rotate-180 text-white' : ''}`} />
                </div>
 
                {/* Dropdown Menu */}
@@ -653,10 +663,10 @@ export default function TopBar() {
 
             <button
                onClick={toggleTheme}
-               className="p-2 rounded-full text-gray-400 hover:text-white hover:bg-white/5 transition-colors"
+               className="p-1.5 md:p-2 rounded-full text-gray-400 hover:text-white hover:bg-white/5 transition-colors"
                title="Toggle Theme"
             >
-               {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+               {theme === 'dark' ? <Sun size={18} className="md:w-5 md:h-5" /> : <Moon size={18} className="md:w-5 md:h-5" />}
             </button>
 
 
@@ -664,9 +674,9 @@ export default function TopBar() {
             <div className="relative" ref={notifRef}>
                <button
                   onClick={() => setIsNotifOpen(!isNotifOpen)}
-                  className={`relative text-gray-400 hover:text-white transition-colors p-2 rounded-full ${isNotifOpen ? 'bg-white/10 text-white' : ''}`}
+                  className={`relative text-gray-400 hover:text-white transition-colors p-1.5 md:p-2 rounded-full ${isNotifOpen ? 'bg-white/10 text-white' : ''}`}
                >
-                  <Bell className="w-6 h-6" />
+                  <Bell className="w-5 h-5 md:w-6 md:h-6" />
                   {totalAlerts > 0 && (
                      <span className="absolute top-1 right-1 min-w-[18px] h-[18px] flex items-center justify-center bg-cyber-primary text-black text-[10px] font-bold rounded-full px-1">
                         {totalAlerts > 9 ? '9+' : totalAlerts}
@@ -678,7 +688,7 @@ export default function TopBar() {
                   <>
                      <div className="fixed inset-0 z-30" onClick={() => setIsNotifOpen(false)} />
                      <div
-                        className="absolute right-0 mt-2 w-96 bg-cyber-gray border border-white/10 rounded-xl shadow-2xl z-40 animate-in fade-in slide-in-from-top-2 overflow-hidden"
+                        className="absolute right-0 mt-2 w-[calc(100vw-1rem)] sm:w-96 max-w-[400px] bg-cyber-gray border border-white/10 rounded-xl shadow-2xl z-40 animate-in fade-in slide-in-from-top-2 overflow-hidden"
                         onClick={(e) => e.stopPropagation()}
                      >
                         {/* Header with Tabs */}
