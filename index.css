@@ -44,6 +44,7 @@ html,
 body {
   overscroll-behavior-y: none;
   touch-action: manipulation;
+  overflow-x: hidden;
 }
 
 body {

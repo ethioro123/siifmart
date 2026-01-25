@@ -8106,8 +8106,8 @@ export default function WarehouseOperations() {
 
                                 {/* Selected Job Details */}
                                 {selectedJob && isDetailsOpen && (
-                                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xl p-4 animate-in fade-in zoom-in duration-300">
-                                        <div className="bg-[#0a0a0b]/90 border border-white/10 rounded-[32px] w-full max-w-2xl max-h-[85vh] overflow-hidden shadow-[0_24px_80px_rgba(0,0,0,0.8),0_0_20px_rgba(0,255,157,0.05)] flex flex-col relative">
+                                    <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/60 backdrop-blur-xl p-0 md:p-4 animate-in fade-in zoom-in duration-300">
+                                        <div className="bg-[#0a0a0b]/90 border border-white/10 rounded-t-[32px] md:rounded-[32px] w-full md:max-w-2xl max-h-[85vh] overflow-hidden shadow-[0_24px_80px_rgba(0,0,0,0.8),0_0_20px_rgba(0,255,157,0.05)] flex flex-col relative">
                                             {/* Top Accent Bar */}
                                             <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-cyber-primary/40 to-transparent" />
 
@@ -11427,8 +11427,8 @@ export default function WarehouseOperations() {
                 {/* Transfer Archive Modal - Search Historical Transfers */}
                 {
                     showTransferArchive && (
-                        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
-                            <div className="bg-cyber-gray rounded-2xl border border-white/10 w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+                        <div className="fixed inset-0 z-50 bg-black/80 flex items-end md:items-center justify-center p-0 md:p-4">
+                            <div className="bg-cyber-gray rounded-t-2xl md:rounded-2xl border border-white/10 w-full md:max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
                                 {/* Header */}
                                 <div className="p-4 md:p-6 border-b border-white/10">
                                     <div className="flex justify-between items-center">
@@ -11567,7 +11567,7 @@ export default function WarehouseOperations() {
                 {/* Transfer Request Modal */}
                 {
                     showTransferModal && (
-                        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
+                        <div className="fixed inset-0 z-50 bg-black/80 flex items-end md:items-center justify-center p-0 md:p-4">
                             <div className="bg-cyber-gray rounded-2xl border border-white/10 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
                                 {/* Header */}
                                 <div className="p-6 border-b border-white/10">
@@ -12289,8 +12289,8 @@ export default function WarehouseOperations() {
                 {/* Labels Not Printed Confirmation Modal */}
                 {
                     showLabelsNotPrintedModal && (
-                        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[9999] p-4">
-                            <div className="bg-cyber-gray border border-red-500/30 rounded-2xl p-6 max-w-lg w-full shadow-[0_0_50px_rgba(239,68,68,0.3)]" onClick={(e) => e.stopPropagation()}>
+                        <div className="fixed inset-0 bg-black/80 flex items-end md:items-center justify-center z-[9999] p-0 md:p-4">
+                            <div className="bg-cyber-gray border border-red-500/30 rounded-t-2xl md:rounded-2xl p-6 max-w-lg w-full shadow-[0_0_50px_rgba(239,68,68,0.3)]" onClick={(e) => e.stopPropagation()}>
                                 <div className="flex items-center gap-3 mb-4">
                                     <div className="p-3 bg-red-500/20 rounded-lg">
                                         <AlertTriangle className="text-red-400 animate-pulse" size={32} />
@@ -12335,8 +12335,8 @@ export default function WarehouseOperations() {
                             const packedCount = activeJob?.lineItems.filter(i => i.status === 'Picked' || i.status === 'Completed').length || 0;
                             const totalItems = activeJob?.lineItems.length || 0;
                             return (
-                                <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[9999] p-4">
-                                    <div className="bg-cyber-gray border border-yellow-500/30 rounded-2xl p-6 max-w-md w-full shadow-[0_0_50px_rgba(255,193,7,0.3)]" onClick={(e) => e.stopPropagation()}>
+                                <div className="fixed inset-0 bg-black/80 flex items-end md:items-center justify-center z-[9999] p-0 md:p-4">
+                                    <div className="bg-cyber-gray border border-yellow-500/30 rounded-t-2xl md:rounded-2xl p-6 max-w-md w-full shadow-[0_0_50px_rgba(255,193,7,0.3)]" onClick={(e) => e.stopPropagation()}>
                                         <div className="flex items-center gap-3 mb-4">
                                             <div className="p-3 bg-yellow-500/20 rounded-lg">
                                                 <AlertTriangle className="text-yellow-400" size={24} />
@@ -12394,7 +12394,7 @@ export default function WarehouseOperations() {
                 {/* Missing Ice Packs Confirmation Modal */}
                 {
                     showMissingIcePacksModal && (
-                        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[9999] p-4">
+                        <div className="fixed inset-0 bg-black/80 flex items-end md:items-center justify-center z-[9999] p-0 md:p-4">
                             <div className="bg-cyber-gray border border-blue-500/30 rounded-2xl p-6 max-w-md w-full shadow-[0_0_50px_rgba(59,130,246,0.3)]" onClick={(e) => e.stopPropagation()}>
                                 <div className="flex items-center gap-3 mb-4">
                                     <div className="p-3 bg-blue-500/20 rounded-lg">
@@ -12444,7 +12444,7 @@ export default function WarehouseOperations() {
                 {/* Missing Protective Materials Confirmation Modal */}
                 {
                     showMissingProtectiveModal && (
-                        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[9999] p-4">
+                        <div className="fixed inset-0 bg-black/80 flex items-end md:items-center justify-center z-[9999] p-0 md:p-4">
                             <div className="bg-cyber-gray border border-orange-500/30 rounded-2xl p-6 max-w-md w-full shadow-[0_0_50px_rgba(249,115,22,0.3)]" onClick={(e) => e.stopPropagation()}>
                                 <div className="flex items-center gap-3 mb-4">
                                     <div className="p-3 bg-orange-500/20 rounded-lg">
@@ -12494,7 +12494,7 @@ export default function WarehouseOperations() {
                 {/* Bulk Distribution Modal-Wave Transfer to Multiple Stores */}
                 {
                     showBulkDistributionModal && (
-                        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4" onClick={() => setShowBulkDistributionModal(false)}>
+                        <div className="fixed inset-0 z-50 bg-black/80 flex items-end md:items-center justify-center p-0 md:p-4" onClick={() => setShowBulkDistributionModal(false)}>
                             <div className="bg-gray-900 rounded-2xl border border-white/10 max-w-4xl w-full max-h-[90vh] overflow-hidden" onClick={(e) => e.stopPropagation()}>
                                 {/* Header */}
                                 <div className="p-6 border-b border-white/10 flex justify-between items-center">
