@@ -677,17 +677,25 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
   }, [user, sites]); // Removed activeSiteId from dependencies to prevent loops
 
   // --- INITIAL LOAD ---
+  // Only load sites and settings AFTER user is authenticated (RLS requires auth)
   useEffect(() => {
-    loadSites();
-    loadSettings();
-  }, []);
+    if (user) {
+      loadSites();
+      loadSettings();
+    } else {
+      // No user = show login page, don't block on data loading
+      setIsDataInitialLoading(false);
+    }
+  }, [user]);
 
   // --- LOAD SITE DATA WHEN ACTIVE SITE CHANGES ---
   // React Query Hook (useDataQueries) now handles site data loading 
   // automatically when activeSiteId changes.
 
-  // Load Global Data once on mount (background)
+  // Load Global Data once on mount (background) - only if user exists
   useEffect(() => {
+    if (!user) return; // Skip if not authenticated
+
     loadGlobalData();
 
     // FAIL-SAFE: If hydration takes more than 15s (slow network), we warn but DO NOT unblock
@@ -706,7 +714,7 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
     }, 15000);
 
     return () => clearTimeout(timeout);
-  }, []);
+  }, [user]);
 
   // --- SYNC TIMEZONE ---
   useEffect(() => {
