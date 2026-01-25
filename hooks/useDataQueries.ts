@@ -161,7 +161,7 @@ export const useDataQueries = ({ siteId, enabled, onProgress }: UseDataQueriesPr
             },
             {
                 queryKey: DATA_KEYS.systemLogs(),
-                queryFn: trackProgress('systemLogs', () => systemLogsService.getAll()),
+                queryFn: trackProgress('systemLogs', () => systemLogsService.getAll().catch(() => [])),
                 enabled: enabled
             }
         ]
