@@ -90,7 +90,6 @@ export function isHeicFormat(file: File): boolean {
  */
 async function convertHeicToJpeg(file: File): Promise<Blob> {
   try {
-    console.log('🔄 Converting HEIC to JPEG...');
     const result = await heic2any({
       blob: file,
       toType: 'image/jpeg',
@@ -199,7 +198,6 @@ export async function processImageFile(
       try {
         processedFile = await convertHeicToJpeg(file);
         wasConverted = true;
-        console.log('✅ HEIC conversion successful');
       } catch (error) {
         return { 
           success: false, 

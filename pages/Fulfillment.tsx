@@ -1,13 +1,13 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import {
-    ClipboardList, Box, Search, CheckCircle, Truck, AlertTriangle, RotateCcw,
+    ClipboardList, Box, Search, CheckCircle, Check, Truck, AlertTriangle, RotateCcw,
     Thermometer, Calendar, Scan, ArrowRight, Package, Archive, Layers,
     RefreshCw, Trash2, Lock, Printer, Grid, ChevronRight, ChevronDown, Play,
     StopCircle, PauseCircle, Shield, ShoppingBag, Snowflake, Sun, Layout,
-    Droplet, Anchor, Map, FileText, X, Clock, ClipboardCheck,
+    Droplet, Anchor, Map as MapIcon, FileText, X, Clock, ClipboardCheck,
     AlertOctagon, ArrowDown, Camera, ArrowLeft, MapPin, LayoutList, Zap, User as UserIcon, Plus, Minus, History as HistoryIcon,
     Download, Upload, Navigation, Phone, QrCode, Smartphone, Eye, Loader2, Gift, Crown, List, Hash, Users as UsersIcon, ListFilter, Filter, Activity,
-    ShieldCheck, XCircle, Warehouse, Rocket
+    ShieldCheck, XCircle, Warehouse, Rocket, Database, Link, GitBranch, Barcode, LogOut
 } from 'lucide-react';
 import { WMSJob, JobItem, PurchaseOrder, ReceivingItem, WorkerPoints, PendingInventoryChange, DiscrepancyType, ResolutionType, User, StockMovement, TransferRecord, SaleRecord, Product, Site } from '../types';
 import { playBeep } from '../utils/audioUtils';
@@ -21,7 +21,10 @@ import { useData } from '../contexts/DataContext';
 import { LeaderboardWidget, PointsEarnedPopup } from '../components/WorkerPointsDisplay';
 import Pagination from '../components/shared/Pagination';
 import Button from '../components/shared/Button';
+import { OutboundJobModal } from '../components/OutboundJobModal';
 import { DEFAULT_BONUS_TIERS } from '../types';
+import { useAdjustStockMutation } from '../hooks/useAdjustStockMutation';
+import { useRelocateProductMutation } from '../hooks/useRelocateProductMutation';
 import { CURRENCY_SYMBOL } from '../constants';
 import { wmsJobsService, purchaseOrdersService, productsService, inventoryRequestsService, discrepancyService } from '../services/supabase.service';
 import { filterBySite } from '../utils/locationAccess';
@@ -29,7 +32,7 @@ import { generateQRCodeLabelHTML, generateQRCode, generateQRCodeImage } from '..
 import { generateBarcodeSVG, generateBarcodeLabelHTML, generateBatchBarcodeLabelsHTML, generateBarcodeImage } from '../utils/barcodeGenerator';
 import { generateUnifiedBatchLabelsHTML, generatePackLabelHTML, LabelSize, LabelFormat, PackLabelData } from '../utils/unifiedLabelGenerator';
 import { generateCODE128FromSKU, formatForCODE128 } from '../utils/barcodeFormatter';
-import { formatJobId, formatOrderRef, formatTransferId } from '../utils/jobIdFormatter';
+import { formatJobId, formatOrderRef, formatTransferId, generateTrackingNumber } from '../utils/jobIdFormatter';
 import { formatCompactNumber, formatDateTime, formatRelativeTime } from '../utils/formatting';
 
 
@@ -52,6 +55,8 @@ const TAB_PERMISSIONS: Record<OpTab, string[]> = {
 };
 
 // --- SUB-COMPONENTS ---
+
+const isUUID = (id: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id.trim());
 
 const MetricBadge = ({ label, value, color }: { label: string, value: string | number, color: string }) => (
     <div className={`flex flex-col px-4 py-2 rounded-xl border ${color} bg-opacity-10`}>
@@ -121,11 +126,48 @@ export default function WarehouseOperations() {
     const { t } = useLanguage();
     const {
         jobs, orders, products, allProducts, settings, sales, processReturn, employees, jobAssignments, activeSite, sites, movements, transfers,
-        receivePO, assignJob, updateJobItem, completeJob, resetJob, adjustStock, relocateProduct, addNotification, updateJobStatus, addProduct, refreshData, logSystemEvent,
-        workerPoints, getWorkerPoints, getLeaderboard
+        receivePO, receivePOSplit, assignJob, updateJobItem, completeJob, resetJob, addNotification, updateJobStatus, addProduct, refreshData, logSystemEvent,
+        workerPoints, getWorkerPoints, getLeaderboard, deleteJob
     } = useData();
 
+    const adjustStockMutation = useAdjustStockMutation();
+    const relocateProductMutation = useRelocateProductMutation();
+
+    const canApprove = ['super_admin', 'CEO', 'Admin'].includes(user?.role || '');
+
     const [isSubmitting, setIsSubmitting] = useState(false); // Global loading state for actions
+    const [isMobileTabMenuOpen, setIsMobileTabMenuOpen] = useState(false); // Mobile Tab Selector Toggle
+
+    // 🛡️ PO UUID RESOLUTION HELPER
+    // Maps UUIDs (orderRef) back to readable PO Numbers for display
+    const poNumberMap = useMemo(() => {
+        const map = new Map<string, string>();
+        orders?.forEach(o => {
+            if (o.id) {
+                // Prioritize real PO number from procurement if it exists
+                const poRef = o.poNumber || o.po_number;
+                map.set(o.id.toLowerCase(), poRef || o.id.slice(-4).toUpperCase());
+            }
+        });
+        sales?.forEach(s => {
+            if (s.id) map.set(s.id.toLowerCase(), s.receiptNumber || s.id.slice(-4).toUpperCase());
+        });
+        transfers?.forEach(t => {
+            if (t.id) map.set(t.id.toLowerCase(), t.jobNumber || t.id.slice(-4).toUpperCase());
+        });
+        return map;
+    }, [orders, sales, transfers]);
+
+    const resolveOrderRef = (ref: string | undefined): string => {
+        if (!ref) return '';
+        // Try direct lookup
+        const found = poNumberMap.get(ref.toLowerCase());
+        if (found) return found;
+
+        // Fallback: If it's a UUID, shorten it. Otherwise return as is.
+        if (isUUID(ref)) return ref.slice(-4).toUpperCase();
+        return ref;
+    };
 
     // --- SHARED FILTRATION & PAGINATION STATES ---
     // RECEIVE Tab States
@@ -245,7 +287,7 @@ export default function WarehouseOperations() {
     const [showPointsPopup, setShowPointsPopup] = useState(false);
     const [earnedPoints, setEarnedPoints] = useState({ points: 0, message: '', bonuses: [] as { label: string; points: number }[] });
 
-
+    const [printQty, setPrintQty] = useState<number>(0);
 
 
 
@@ -302,15 +344,21 @@ export default function WarehouseOperations() {
     }, [filteredJobs]);
 
     // DOCK HISTORY Logic
+    // DOCK HISTORY Logic (Unloaded POs)
     const filteredDockHistory = useMemo(() => {
-        return filteredMovements.filter((m: StockMovement) => {
+        return orders.filter((po: any) => {
+            // Keep POs that have been approved (unloaded)
+            const isUnloaded = (po.status === 'Approved' || po.status === 'Partially Received' || po.status === 'Received') && po.approvedAt;
+            if (!isUnloaded) return false;
+
             const matchesSearch = !dockSearch ||
-                m.productName.toLowerCase().includes(dockSearch.toLowerCase()) ||
-                m.id.toLowerCase().includes(dockSearch.toLowerCase()) ||
-                m.reason.toLowerCase().includes(dockSearch.toLowerCase());
+                po.poNumber?.toLowerCase().includes(dockSearch.toLowerCase()) ||
+                po.supplierName?.toLowerCase().includes(dockSearch.toLowerCase()) ||
+                (po.approvedBy && po.approvedBy.toLowerCase().includes(dockSearch.toLowerCase()));
+
             return matchesSearch;
-        });
-    }, [filteredMovements, dockSearch]);
+        }).sort((a: any, b: any) => new Date(b.approvedAt).getTime() - new Date(a.approvedAt).getTime());
+    }, [orders, dockSearch]);
 
     const dockHistoryTotalPages = Math.ceil(filteredDockHistory.length / DOCK_HISTORY_PER_PAGE);
     const paginatedDockHistory = useMemo(() => {
@@ -320,13 +368,47 @@ export default function WarehouseOperations() {
 
     // RECEIVE HISTORY Logic
     const filteredReceiveHistory = useMemo(() => {
-        const receivedOrders = orders.filter(o => o.status === 'Received');
-        return receivedOrders.filter(o => {
-            return !receiveHistorySearch ||
-                o.id.toLowerCase().includes(receiveHistorySearch.toLowerCase()) ||
-                (o.supplierName || '').toLowerCase().includes(receiveHistorySearch.toLowerCase());
-        });
-    }, [orders, receiveHistorySearch]);
+        // 1. Get fully received POs
+        const receivedOrders = orders.filter(o => {
+            const isFullyReceived = (o.lineItems || []).length > 0 &&
+                (o.lineItems || []).every(li => (li.receivedQty || 0) >= li.quantity);
+            const isMarkedReceived = o.status === 'Received' || (o.status as any) === 'Closed';
+            return isFullyReceived || isMarkedReceived;
+        }).map(o => ({
+            id: o.id,
+            reference: o.poNumber || o.po_number || o.id.slice(0, 8),
+            type: 'PO',
+            status: o.status === 'Approved' ? 'Received' : o.status, // Show as Received if fully received
+            subtitle: o.supplierName,
+            date: o.updatedAt || o.updated_at || o.createdAt || o.created_at || new Date().toISOString(),
+            items: (o.lineItems || []).length,
+            rawData: o
+        }));
+
+        // 2. Get completed RECEIVE jobs
+        const receiveJobs = historicalJobs.filter(j => j.type === 'RECEIVE').map(j => ({
+            id: j.id,
+            reference: resolveOrderRef(j.orderRef) || j.jobNumber || j.id.slice(0, 8), // Use resolved ref
+            type: 'JOB',
+            status: j.status,
+            subtitle: j.notes || 'Inbound Receipt',
+            date: j.updatedAt || j.updated_at || j.createdAt || j.created_at || new Date().toISOString(),
+            items: j.items || j.lineItems?.length || 0,
+            rawData: j
+        }));
+
+        // 3. Combine and sort
+        const combined = [...receivedOrders, ...receiveJobs].sort((a, b) =>
+            new Date(b.date).getTime() - new Date(a.date).getTime()
+        );
+
+        // 4. Filter
+        return combined.filter(item =>
+            !receiveHistorySearch ||
+            item.reference.toLowerCase().includes(receiveHistorySearch.toLowerCase()) ||
+            (item.subtitle && item.subtitle.toLowerCase().includes(receiveHistorySearch.toLowerCase()))
+        );
+    }, [orders, historicalJobs, receiveHistorySearch]);
 
     const receiveHistoryTotalPages = Math.ceil(filteredReceiveHistory.length / RECEIVE_HISTORY_PER_PAGE);
     const paginatedReceiveHistory = useMemo(() => {
@@ -340,7 +422,7 @@ export default function WarehouseOperations() {
             j.type === 'PICK' && (
                 !pickHistorySearch ||
                 j.id.toLowerCase().includes(pickHistorySearch.toLowerCase()) ||
-                (j.orderRef && j.orderRef.toLowerCase().includes(pickHistorySearch.toLowerCase()))
+                (j.orderRef && (j.orderRef.toLowerCase().includes(pickHistorySearch.toLowerCase()) || resolveOrderRef(j.orderRef).toLowerCase().includes(pickHistorySearch.toLowerCase())))
             )
         );
     }, [historicalJobs, pickHistorySearch]);
@@ -357,7 +439,7 @@ export default function WarehouseOperations() {
             j.type === 'PACK' && (
                 !packHistorySearch ||
                 j.id.toLowerCase().includes(packHistorySearch.toLowerCase()) ||
-                (j.orderRef && j.orderRef.toLowerCase().includes(packHistorySearch.toLowerCase()))
+                (j.orderRef && (j.orderRef.toLowerCase().includes(packHistorySearch.toLowerCase()) || resolveOrderRef(j.orderRef).toLowerCase().includes(packHistorySearch.toLowerCase())))
             )
         );
     }, [historicalJobs, packHistorySearch]);
@@ -373,7 +455,7 @@ export default function WarehouseOperations() {
             j.type === 'PUTAWAY' && (
                 !putawayHistorySearch ||
                 j.id.toLowerCase().includes(putawayHistorySearch.toLowerCase()) ||
-                (j.orderRef && j.orderRef.toLowerCase().includes(putawayHistorySearch.toLowerCase()))
+                (j.orderRef && (j.orderRef.toLowerCase().includes(putawayHistorySearch.toLowerCase()) || resolveOrderRef(j.orderRef).toLowerCase().includes(putawayHistorySearch.toLowerCase())))
             )
         );
     }, [historicalJobs, putawayHistorySearch]);
@@ -455,7 +537,7 @@ export default function WarehouseOperations() {
             (j.type === 'DISPATCH' || j.type === 'DRIVER') && (
                 !driverHistorySearch ||
                 j.id.toLowerCase().includes(driverHistorySearch.toLowerCase()) ||
-                (j.orderRef && j.orderRef.toLowerCase().includes(driverHistorySearch.toLowerCase()))
+                (j.orderRef && (j.orderRef.toLowerCase().includes(driverHistorySearch.toLowerCase()) || resolveOrderRef(j.orderRef).toLowerCase().includes(driverHistorySearch.toLowerCase())))
             )
         );
     }, [historicalJobs, driverHistorySearch]);
@@ -472,7 +554,7 @@ export default function WarehouseOperations() {
             j.type === 'RETURNS' && (
                 !returnHistorySearch ||
                 j.id.toLowerCase().includes(returnHistorySearch.toLowerCase()) ||
-                (j.orderRef && j.orderRef.toLowerCase().includes(returnHistorySearch.toLowerCase()))
+                (j.orderRef && (j.orderRef.toLowerCase().includes(returnHistorySearch.toLowerCase()) || resolveOrderRef(j.orderRef).toLowerCase().includes(returnHistorySearch.toLowerCase())))
             )
         );
     }, [historicalJobs, returnHistorySearch]);
@@ -560,7 +642,7 @@ export default function WarehouseOperations() {
     const [lastCompletedStatus, setLastCompletedStatus] = useState<JobItem['status'] | null>(null); // For completion animation
 
     // --- LOCATION PICKER STATE ---
-    const [selectedZone, setSelectedZone] = useState('A');
+    const [selectedZone, setSelectedZone] = useState('All');
     const [selectedAisle, setSelectedAisle] = useState('01');
     const [selectedBin, setSelectedBin] = useState('01');
     const [locationSearch, setLocationSearch] = useState('');
@@ -579,21 +661,76 @@ export default function WarehouseOperations() {
     // Ensure labels are printed before finishing a reception
     const [hasPrintedReceivingLabels, setHasPrintedReceivingLabels] = useState(false);
     // New Receive Flow States
-    const [focusedItem, setFocusedItem] = useState<any | null>(null); // Use any temporarily or ReceivingItem if consistent
+    const [focusedItem, setFocusedItem] = useState<any | null>(null);
+
+    // Derived Confidence Score for Receiving
+
+
     const [showPrintSuccess, setShowPrintSuccess] = useState(false);
     const [scannedSkus, setScannedSkus] = useState<Record<string, string>>({});
     const [skuDecisions, setSkuDecisions] = useState<Record<string, 'keep' | 'generate'>>({});
     const [labelSize, setLabelSize] = useState<'TINY' | 'SMALL' | 'MEDIUM' | 'LARGE' | 'XL'>('SMALL');
     const [labelFormat, setLabelFormat] = useState<'BARCODE' | 'QR'>('BARCODE');
+    const [printOptions, setPrintOptions] = useState({ showPrice: true, showCategory: true, showDate: true });
     const [finalizedSkus, setFinalizedSkus] = useState<Record<string, string>>({});
 
+    // --- UNRESOLVED SCANS QUEUE (Group C from Business Logic Spec) ---
+    const [unresolvedScans, setUnresolvedScans] = useState<Array<{ barcode: string; scannedAt: Date; qty: number }>>([]);
+    const [resolvingBarcode, setResolvingBarcode] = useState<{ barcode: string; qty: number } | null>(null);
+    const [resolutionSearch, setResolutionSearch] = useState('');
+    const [resolutionMode, setResolutionMode] = useState<'map' | 'new' | 'hold'>('map');
+
+    const scanInputRef = useRef<HTMLInputElement>(null);
+
+    // --- SPLIT RECEIVING STATES ---
+    const [isSplitReceiving, setIsSplitReceiving] = useState(false);
+    const [splitReceivingItem, setSplitReceivingItem] = useState<any | null>(null);
+    const [splitReceivingPO, setSplitReceivingPO] = useState<any | null>(null);
+    const [splitVariants, setSplitVariants] = useState<Array<{
+        id: string;
+        sku: string;
+        skuType: 'existing' | 'new';
+        productId?: string;
+        productName?: string;
+        quantity: number;
+        barcode?: string;
+    }>>([]);
+
+    // Derived Confidence Score for Receiving
+    const confidenceScore = useMemo(() => {
+        if (!focusedItem) return 0;
+        let score = 50; // Base trust
+        if (focusedItem.receivedQty === focusedItem.expectedQty) score += 20;
+
+        // SKU Match Check
+        const pid = focusedItem.productId;
+        const currentScanned = scannedSkus[pid];
+        const product = products.find(p => p.id === pid);
+        if (currentScanned && product?.sku && currentScanned === product.sku) score += 20;
+        else if (currentScanned && currentScanned.length > 5) score += 10; // Partial trust for new scan
+
+        // Data Entry Checks
+        if (focusedItem.expiryDate) score += 10;
+        if (focusedItem.batchNumber) score += 5;
+
+        return Math.min(100, score);
+    }, [focusedItem, scannedSkus, products]);
+
     // Filtered and paginated receive orders
+    // Only show POs that are Approved AND have items still to receive
     const filteredReceiveOrders = useMemo(() => {
         return orders.filter(o => {
             const isApproved = o.status === 'Approved';
             const matchesSearch = o.id.toLowerCase().includes(receiveSearch.toLowerCase()) ||
                 (o.supplierName || '').toLowerCase().includes(receiveSearch.toLowerCase());
-            return isApproved && matchesSearch;
+
+            // Check if there are any items still to receive
+            const hasItemsToReceive = (o.lineItems || []).some(item => {
+                const remaining = item.quantity - (item.receivedQty || 0);
+                return remaining > 0;
+            });
+
+            return isApproved && matchesSearch && hasItemsToReceive;
         });
     }, [orders, receiveSearch]);
 
@@ -720,6 +857,168 @@ export default function WarehouseOperations() {
         });
     }, [receivingPO, receivedQuantities]);
 
+    const handleGlobalScan = (val: string) => {
+        if (!val || !products || !orders) return;
+
+        // [FIX] Normalize scanned value for case-insensitive matching
+        const normalizedVal = val.trim().toUpperCase();
+
+        // PRIORITY 1: Scan-to-Increment Logic (If Receive Modal is open)
+        if (isSplitReceiving && splitReceivingItem && splitVariants.length > 0) {
+            // 1. Identify what we are scanning - support SKU, barcode, and barcode aliases
+            const scannedProduct = products.find(p => {
+                const matchSku = p.sku?.trim().toUpperCase() === normalizedVal;
+                const matchBarcode = p.barcode?.trim().toUpperCase() === normalizedVal;
+                const matchAliases = p.barcodes?.some((b: string) => b.trim().toUpperCase() === normalizedVal);
+                return matchSku || matchBarcode || matchAliases;
+            });
+
+            // 2. Is this the SAME product we are currently receiving?
+            const splitItemSku = splitReceivingItem.sku?.trim().toUpperCase();
+            const isSameProduct = scannedProduct?.id === splitReceivingItem.productId ||
+                normalizedVal === splitItemSku ||
+                splitVariants.some(v => {
+                    const vSku = v.sku?.trim().toUpperCase();
+                    const vBarcode = v.barcode?.trim().toUpperCase();
+                    return vSku === normalizedVal || vBarcode === normalizedVal;
+                });
+
+            if (isSameProduct) {
+                const totalCurrentlyAllocated = splitVariants.reduce((sum, v) => sum + v.quantity, 0);
+
+                if (totalCurrentlyAllocated < splitReceivingItem.quantity) {
+                    // Find the best variant to increment (same barcode/sku, or first one)
+                    const targetIdx = splitVariants.findIndex(v => {
+                        const vSku = v.sku?.trim().toUpperCase();
+                        const vBarcode = v.barcode?.trim().toUpperCase();
+                        return vSku === normalizedVal || vBarcode === normalizedVal;
+                    });
+                    const idxToUpdate = targetIdx === -1 ? 0 : targetIdx;
+
+                    setSplitVariants(prev => prev.map((v, idx) =>
+                        idx === idxToUpdate ? { ...v, quantity: v.quantity + 1, barcode: v.barcode || val } : v
+                    ));
+
+                    addNotification('success', `Incremented ${splitReceivingItem.productName} to ${totalCurrentlyAllocated + 1} units`);
+                } else {
+                    addNotification('alert', `Cannot exceed PO quantity (${splitReceivingItem.quantity})`);
+                }
+
+                setReceiveSearch('');
+                return;
+            } else {
+                // Scanned a DIFFERENT product while modal is open
+                addNotification('alert', `Warning: Scanned ${scannedProduct?.name || val} but currently receiving ${splitReceivingItem.productName}. Finish or Cancel first.`);
+                setReceiveSearch('');
+                return;
+            }
+        }
+
+        // PRIORITY 2: Normal Global Scan Logic
+        // 1. Identify Product
+        const product = products.find(p =>
+            p.sku === val ||
+            p.barcode === val ||
+            (p.barcodes && p.barcodes.includes(val))
+        );
+
+        if (product) {
+            // 2. Find Open PO (Approved) containing this product
+            const relevantPO = orders.find(po =>
+                po.status === 'Approved' &&
+                po.lineItems?.some((li: any) => li.productId === product.id)
+            );
+
+            if (relevantPO) {
+                // Success: Open receive for this item
+                const lineItem = relevantPO.lineItems?.find((li: any) => li.productId === product.id);
+                if (lineItem) {
+                    const remainingQty = lineItem.quantity - (lineItem.receivedQty || 0);
+
+                    // Open the unified receive modal
+                    setSplitReceivingItem(lineItem);
+                    setSplitReceivingPO(relevantPO);
+                    setSplitVariants([{
+                        id: `variant-${Date.now()}`,
+                        sku: product.sku,
+                        skuType: 'existing',
+                        quantity: 1, // Start with 1 for scan-to-increment flow
+                        productId: product.id,
+                        productName: product.name,
+                        barcode: val // Pre-populate with scanned barcode
+                    }]);
+                    setIsSplitReceiving(true);
+
+                    addNotification('success', `Opening receive for ${product.name}`);
+                    setReceiveSearch('');
+                    return;
+                }
+            } else {
+                // Product found but not on any Approved PO
+                addNotification('alert', `${product.name} not expected on any active PO`);
+                setReceiveSearch('');
+                return;
+            }
+        }
+
+        // 3. Unknown Barcode - Add to Unresolved Queue with Smart Analysis
+        const alreadyUnresolved = unresolvedScans.some(s => s.barcode === val);
+        if (!alreadyUnresolved) {
+            // 🔍 SMART BARCODE ANALYSIS
+            const scannedBarcode = val.toUpperCase();
+            const suggestions: string[] = [];
+
+            // Check if barcode looks like an existing SKU
+            const skuMatch = products.find(p =>
+                p.sku && (
+                    scannedBarcode.includes(p.sku.toUpperCase()) ||
+                    p.sku.toUpperCase().includes(scannedBarcode)
+                )
+            );
+            if (skuMatch) {
+                suggestions.push(`💡 Similar to SKU: ${skuMatch.sku} (${skuMatch.name})`);
+            }
+
+            // Detect barcode format
+            if (/^\d{13}$/.test(scannedBarcode)) {
+                suggestions.push(`📊 EAN-13 barcode detected`);
+            } else if (/^\d{12}$/.test(scannedBarcode)) {
+                suggestions.push(`📊 UPC-A barcode detected`);
+            } else if (/^\d{8}$/.test(scannedBarcode)) {
+                suggestions.push(`📊 EAN-8 barcode detected`);
+            } else if (/^[A-Z0-9]{6,20}$/i.test(scannedBarcode)) {
+                suggestions.push(`📊 CODE128 format detected`);
+            }
+
+            // Check if any PO line item name partially matches
+            const activeReceivePOs = orders.filter(po => po.status === 'Approved');
+            if (activeReceivePOs.length > 0) {
+                const poLineMatch = activeReceivePOs
+                    .flatMap(po => po.lineItems || [])
+                    .find(li =>
+                        scannedBarcode.toLowerCase().includes(li.productName.toLowerCase().substring(0, 4)) ||
+                        li.sku?.toLowerCase() === scannedBarcode.toLowerCase()
+                    );
+                if (poLineMatch) {
+                    suggestions.push(`🎯 Might be: ${poLineMatch.productName}`);
+                }
+            }
+
+            setUnresolvedScans(prev => [...prev, {
+                barcode: val,
+                scannedAt: new Date(),
+                qty: 1,
+                suggestions // Store smart suggestions
+            }]);
+
+            const suggestionText = suggestions.length > 0
+                ? ` - ${suggestions[0]}`
+                : '';
+            addNotification('alert', `Unknown barcode${suggestionText} - click to resolve`);
+        }
+        setReceiveSearch('');
+    };
+
     // --- RETURNS DATA ---
     const [foundSale, setFoundSale] = useState<any | null>(null); // Using any to avoid type complexity for now, or import SaleRecord
     const [returnItems, setReturnItems] = useState<any[]>([]); // Using any for ReturnItem[] compatibility
@@ -768,12 +1067,25 @@ export default function WarehouseOperations() {
     const [showReviewModal, setShowReviewModal] = useState(false);
 
     // --- REPRINT OPTIONS STATE ---
-    const [reprintItem, setReprintItem] = useState<{ sku: string; name: string; qty: number } | null>(null);
-    const [reprintSize, setReprintSize] = useState<'TINY' | 'SMALL' | 'MEDIUM' | 'LARGE'>('MEDIUM');
-    const [reprintFormat, setReprintFormat] = useState<'QR' | 'Barcode' | 'Both'>('Barcode');
+    const [reprintItem, setReprintItem] = useState<{
+        sku: string;
+        name: string;
+        qty: number;
+        price?: string | number;
+        category?: string;
+        expiry?: string;
+    } | null>(null);
+    const [reprintSize, setReprintSize] = useState<'TINY' | 'SMALL' | 'MEDIUM' | 'LARGE' | 'XL'>('XL');
+    const [reprintFormat, setReprintFormat] = useState<'QR' | 'Barcode' | 'Both'>('Both');
+    const [reprintOptions, setReprintOptions] = useState({
+        showPrice: true,
+        showExpiry: true,
+        showCategory: true,
+        showName: true
+    });
 
     // Pack Job Reprint State (uses same size/format as above)-Rich data for detailed labels
-    const [packReprintJob, setPackReprintJob] = useState<PackLabelData & { id: string } | null>(null);
+    const [packReprintJob, setPackReprintJob] = useState<(PackLabelData & { id: string, siteId?: string, poNumber?: string, items?: number, updatedAt?: string, createdAt?: string }) | null>(null);
 
     // --- LOADING STATES (prevent double-clicking) ---
     const [isReceiving, setIsReceiving] = useState(false);
@@ -794,11 +1106,21 @@ export default function WarehouseOperations() {
         try {
             const labelsToPrint = [];
             // Use quantity to generate "1 of X" labels
-            labelsToPrint.push({ value: reprintItem.sku, label: reprintItem.name, quantity: reprintItem.qty });
+            labelsToPrint.push({
+                value: reprintItem.sku,
+                label: reprintItem.name,
+                quantity: reprintItem.qty,
+                price: (reprintItem.price || '0.00').toString(),
+                category: reprintItem.category || 'General',
+                date: reprintItem.expiry || new Date().toISOString().split('T')[0]
+            });
 
             const html = await generateUnifiedBatchLabelsHTML(labelsToPrint, {
                 size: reprintSize as LabelSize,
-                format: reprintFormat as LabelFormat
+                format: reprintFormat as LabelFormat,
+                showPrice: reprintOptions.showPrice,
+                showCategory: reprintOptions.showCategory,
+                showDate: reprintOptions.showExpiry
             });
 
             const printWin = window.open('', '_blank');
@@ -864,35 +1186,140 @@ export default function WarehouseOperations() {
     const [hasIcePack, setHasIcePack] = useState(false);
 
     // --- DOCK STATE ---
-    const [dockStatus, setDockStatus] = useState<Record<string, { status: 'Empty' | 'Occupied' | 'Maintenance', assignedPoId?: string, vesselName?: string, eta?: string }>>({
-        'D1': { status: 'Occupied', assignedPoId: 'PO-1001', vesselName: 'Cargo Vessel #101', eta: 'Live' },
+    const [dockStatus, setDockStatus] = useState<Record<string, { status: 'Empty' | 'Occupied' | 'Maintenance', assignedPoId?: string, assignedJobId?: string, vesselName?: string, eta?: string }>>({
+        'D1': { status: 'Empty' },
         'D2': { status: 'Empty' },
         'D3': { status: 'Empty' },
-        'D4': { status: 'Maintenance' }
+        'D4': { status: 'Empty' }
     });
 
-    const [inboundQueue, setInboundQueue] = useState([
-        { id: 'v1', vesselName: 'Cargo Vessel #102', poId: 'PO-1002', origin: 'Overseas Terminal', eta: '0:20M', priority: 'High' },
-        { id: 'v2', vesselName: 'Cargo Vessel #103', poId: 'PO-1003', origin: 'Regional Hub', eta: '0:45M', priority: 'Normal' },
-        { id: 'v3', vesselName: 'Cargo Vessel #104', poId: 'PO-1004', origin: 'Manufacturer A', eta: '1:15H', priority: 'Normal' }
-    ]);
+    // Derive Inbound Queue from 'Ordered' POs
+    // Exclude POs that are already assigned to a dock
+    const inboundQueue = useMemo(() => {
+        const assignedPOIds = Object.values(dockStatus)
+            .map(d => d.assignedPoId)
+            .filter(Boolean);
+
+
+        return orders
+            .filter(o => o.status === 'Ordered' && !assignedPOIds.includes(o.id))
+            .map(po => ({
+                id: po.id,
+                vesselName: po.poNumber || `PO-${po.id.slice(0, 4).toUpperCase()}`,
+                poId: po.poNumber || po.id,
+                origin: po.supplierName || 'Unknown Supplier',
+                eta: po.expectedDelivery ? formatRelativeTime(po.expectedDelivery) : 'Unknown',
+                priority: 'Normal', // Could derive from PO priority if added
+                originalPO: po
+            }));
+    }, [orders, dockStatus]);
 
     const [selectedQueueVessel, setSelectedQueueVessel] = useState<any | null>(null);
     const [selectedDockId, setSelectedDockId] = useState<string | null>(null);
+
+    // Manifest Confirmation Modal State
+    const [manifestModalOpen, setManifestModalOpen] = useState(false);
+    const [selectedManifestPO, setSelectedManifestPO] = useState<PurchaseOrder | null>(null);
+    const [selectedDockForManifest, setSelectedDockForManifest] = useState<string | null>(null);
 
     const assignVesselToDock = (dockId: string, vessel: any) => {
         setDockStatus(prev => ({
             ...prev,
             [dockId]: {
                 status: 'Occupied',
-                assignedPoId: vessel.poId,
+                assignedPoId: vessel.id, // Store PO ID
                 vesselName: vessel.vesselName,
                 eta: 'Docked'
             }
         }));
-        setInboundQueue(prev => prev.filter(v => v.id !== vessel.id));
         setSelectedQueueVessel(null);
         addNotification('success', `${vessel.vesselName} successfully assigned to ${dockId}.`);
+    };
+
+    const handleOpenManifest = (dockId: string) => {
+        const dock = dockStatus[dockId];
+        if (!dock.assignedPoId) return;
+
+        const po = orders.find(o => o.id === dock.assignedPoId);
+
+        if (po) {
+            setSelectedManifestPO(po);
+            setSelectedDockForManifest(dockId);
+            setManifestModalOpen(true);
+        } else {
+            addNotification('alert', 'Error: Associated PO not found.');
+        }
+    };
+
+    const confirmUnloadAndReceive = async () => {
+        if (!selectedManifestPO || !selectedDockForManifest) return;
+
+        try {
+            // Update PO Status to 'Approved' to "Unlock" it in the Receive Tab
+            // This satisfies the requirement: "lock the recieve card until its confirmed unloaded fully"
+            await purchaseOrdersService.update(selectedManifestPO.id, { status: 'Approved' });
+
+            // Release the Dock (Physical Unload Complete)
+            setDockStatus(prev => ({
+                ...prev,
+                [selectedDockForManifest]: { ...prev[selectedDockForManifest], status: 'Empty', assignedPoId: undefined, vesselName: undefined }
+            }));
+
+            await refreshData(); // Refresh to update lists
+
+            // Transition to Receive Tab with the newly approved PO selected
+            setActiveTab('RECEIVE');
+            setReceivingPO({ ...selectedManifestPO, status: 'Approved' }); // Optimistic update for UI
+
+            setManifestModalOpen(false);
+            addNotification('success', `Goods Unloaded. PO-${selectedManifestPO.poNumber} is now unlocked for receiving.`);
+        } catch (error) {
+            console.error('Failed to confirm unload:', error);
+            addNotification('alert', 'Failed to update PO status. Please try again.');
+        }
+    };
+
+    // [NEW] Quick one-click unload confirmation - stays on DOCKS tab
+    const quickConfirmUnload = async (dockId: string) => {
+        const dock = dockStatus[dockId];
+        if (!dock?.assignedPoId) return;
+
+        const po = orders.find(o => o.id === dock.assignedPoId);
+        if (!po) {
+            addNotification('alert', 'Error: Associated PO not found.');
+            return;
+        }
+
+        try {
+            // Update PO Status to 'Approved' to unlock it in Receive
+            await purchaseOrdersService.update(po.id, {
+                status: 'Approved',
+                approvedAt: new Date().toISOString(),
+                approvedBy: user?.name || 'Dock Operator'
+            });
+
+            // Release the Dock (full state reset)
+            setDockStatus(prev => ({
+                ...prev,
+                [dockId]: { status: 'Empty' } // Complete reset, not spread
+            }));
+
+            // Log to system event history for audit trail
+            logSystemEvent(
+                'Dock Unload Confirmed',
+                `PO-${po.poNumber || po.id.slice(0, 8)} unloaded at ${dockId}. Ready for receiving.`,
+                user?.name || 'Operator',
+                'Logistics'
+            );
+
+            await refreshData();
+
+            // Stay on DOCKS tab - no navigation to RECEIVE
+            addNotification('success', `✅ Dock ${dockId} unloaded. PO-${po.poNumber || po.id.slice(0, 8)} is now ready for receiving.`);
+        } catch (error) {
+            console.error('Failed to quick confirm unload:', error);
+            addNotification('alert', 'Failed to confirm unload. Please try again.');
+        }
     };
 
     const releaseDock = (dockId: string) => {
@@ -942,7 +1369,7 @@ export default function WarehouseOperations() {
         return filteredJobs.filter(j => {
             if (j.type !== 'PACK') return false;
             if (packSearch && !j.id.toLowerCase().includes(packSearch.toLowerCase())) return false;
-            if (packJobFilter === 'all') return true;
+            if (packJobFilter === 'all') return j.status !== 'Completed' && j.status !== 'Cancelled'; // Exclude completed from active view
             if (packJobFilter === 'pending') return j.status === 'Pending';
             if (packJobFilter === 'in-progress') return j.status === 'In-Progress';
             if (packJobFilter === 'completed') return j.status === 'Completed';
@@ -997,14 +1424,61 @@ export default function WarehouseOperations() {
 
     // --- PUTAWAY STATE ---
 
+    // [New] Auto-release docks when their assigned POs are unloaded (Approved/Received)
+    useEffect(() => {
+        const occupiedDocks = Object.entries(dockStatus).filter(([_, data]) => data.status === 'Occupied' && data.assignedPoId);
+
+        if (occupiedDocks.length === 0) return;
+
+        let hasChanges = false;
+        const updates: any = {};
+
+        occupiedDocks.forEach(([dockId, data]) => {
+            const po = orders.find(o => o.id === data.assignedPoId);
+            // If PO is not found OR it's no longer "Ordered" or "Pending" (meaning it has been unloaded/approved)
+            // release the dock.
+            if (!po || (po.status !== 'Ordered' && po.status !== 'Pending')) {
+                // Determine reason for logging (optional, focusing on release logic first)
+                updates[dockId] = { status: 'Empty' };
+                hasChanges = true;
+            }
+        });
+
+        if (hasChanges) {
+            setDockStatus(prev => ({
+                ...prev,
+                ...updates
+            }));
+        }
+    }, [orders, dockStatus]); // Dependencies: updates when orders change (e.g. unloading) or dock status changes
+
     // Putaway Logic (Extracted from JSX to fix Hook Violation)
     const sortedPutawayJobs = useMemo(() => {
-        let filtered = filteredJobs.filter(j => (j.type === 'PUTAWAY' || j.type === 'REPLENISH') && j.status !== 'Completed');
+        let filtered = filteredJobs.filter(j => {
+            // Basic Type Check
+            if (j.type !== 'PUTAWAY' && j.type !== 'REPLENISH') return false;
+
+            // Status Check (Case-insensitive & Robust)
+            const status = j.status?.toLowerCase() || 'pending';
+            if (status === 'completed' || status === 'cancelled') return false;
+
+            // ZOMBIE CHECK: If all items are picked/short, hide it even if status is 'In-Progress'
+            // This fixes UI clutter from jobs that failed to auto-complete in DB
+            if (j.lineItems && j.lineItems.length > 0) {
+                const allDone = j.lineItems.every(i =>
+                    i.status === 'Picked' || i.status === 'Short' || i.status === 'Discontinued'
+                );
+                if (allDone) return false;
+            }
+
+            return true;
+        });
+
         if (putawayStatusFilter !== 'All') filtered = filtered.filter(j => j.status === putawayStatusFilter);
         if (putawaySearch) {
             filtered = filtered.filter(j =>
                 j.id.toLowerCase().includes(putawaySearch.toLowerCase()) ||
-                (j.orderRef && orders.find(o => o.id === j.orderRef)?.po_number?.toLowerCase().includes(putawaySearch.toLowerCase()))
+                (j.orderRef && resolveOrderRef(j.orderRef).toLowerCase().includes(putawaySearch.toLowerCase()))
             );
         }
 
@@ -1133,7 +1607,7 @@ export default function WarehouseOperations() {
                 // Search filter
                 if (archiveSearchQuery) {
                     const query = archiveSearchQuery.toLowerCase();
-                    const transferId = formatTransferId(j).toLowerCase();
+                    const transferId = formatJobId(j).toLowerCase();
                     const sourceName = (sites.find(s => s.id === j.sourceSiteId)?.name || '').toLowerCase();
                     const destName = (sites.find(s => s.id === j.destSiteId)?.name || '').toLowerCase();
                     return transferId.includes(query) || sourceName.includes(query) || destName.includes(query);
@@ -1380,6 +1854,8 @@ export default function WarehouseOperations() {
                     items: 1,
                     lineItems: [{
                         productId: srcProd.id,
+                        sku: srcProd.sku,
+                        name: srcProd.name,
                         expectedQty: draft.qty,
                         receivedQty: 0,
                         status: 'Pending'
@@ -1397,15 +1873,18 @@ export default function WarehouseOperations() {
                     destSiteId: draft.destSiteId,
                     priority: 'Normal',
                     status: 'Pending',
-                    orderRef: createdTransfer.id,
+                    // Master ID: Use the formatted Transfer ID as orderRef for tracking continuity
+                    orderRef: formatJobId(createdTransfer),
                     items: 1,
                     lineItems: [{
                         productId: srcProd.id,
+                        sku: srcProd.sku,
+                        name: srcProd.name,
                         expectedQty: draft.qty,
                         pickedQty: 0,
                         status: 'Pending'
                     }],
-                    jobNumber: `PICK-${(createdTransfer.jobNumber || '').replace('TRF-', '')}`
+                    jobNumber: formatJobId(createdTransfer)
                 };
 
                 await wmsJobsService.create(pickJob);
@@ -1448,7 +1927,7 @@ export default function WarehouseOperations() {
         };
 
         // Find recommended zone
-        const recommendedZone = categoryZoneMap[product.category] || 'A';
+        const recommendedZone = categoryZoneMap[product.category] || null;
 
         // If product already has a location, suggest nearby locations
         if (product.location) {
@@ -1591,7 +2070,9 @@ export default function WarehouseOperations() {
                 i.status === 'Picked' || i.status === 'Short'
             );
 
-            if (allItemsAlreadyProcessed) {
+            // Fix: Only block if job is also marked as Completed in DB.
+            // If it's In-Progress but items are done, we must allow opening so user can finish it.
+            if (allItemsAlreadyProcessed && job.status === 'Completed') {
                 addNotification('info', 'This job is already complete');
                 return;
             }
@@ -1604,7 +2085,7 @@ export default function WarehouseOperations() {
 
             logSystemEvent(
                 'Job Started',
-                `Started ${job.type} job ${job.jobNumber || job.id} with ${optimizedJob.lineItems.length} items`,
+                `Started ${job.type} job ${formatJobId(job)} with ${optimizedJob.lineItems.length} items`,
                 user?.name || 'Worker',
                 'Inventory'
             );
@@ -1650,11 +2131,28 @@ export default function WarehouseOperations() {
     };
 
     // Handle location selection
-    const handleLocationSelect = (location: string) => {
+    // Handle location selection
+    const handleLocationSelect = async (location: string) => {
         if (!location || location.trim() === '') {
             addNotification('alert', t('warehouse.pleaseSelectLocation'));
             return;
         }
+
+        // Fix: Update PUTAWAY job with selected location so completeJob sees it
+        if (selectedJob && selectedJob.type === 'PUTAWAY') {
+            try {
+                // Update DB
+                await wmsJobsService.update(selectedJob.id, { location });
+
+                // Update local selectedJob state
+                setSelectedJob(prev => prev ? ({ ...prev, location }) : prev);
+
+            } catch (err) {
+                console.error('Failed to update job location:', err);
+                // Continue anyway - scanner flow shouldn't block hard, but completeJob might fail to update inventory
+            }
+        }
+
         setScannedBin(location);
         setShowLocationPicker(false);
         setScannerStep('SCAN');
@@ -1698,7 +2196,42 @@ export default function WarehouseOperations() {
                 const originalIdx = (item as any).originalIndex;
                 const updateTargetIndex = typeof originalIdx === 'number' ? originalIdx : itemIndex;
 
-                console.log(`🔍 Scanning Item: ${item.name} at Sorted Idx: ${itemIndex}, Original Idx: ${updateTargetIndex} `);
+                // ═══════════════════════════════════════════════════════════════
+                // SKU VALIDATION FOR PICK, PACK, AND PUTAWAY
+                // [FIX] Extended validation to all scan-based operations
+                // ═══════════════════════════════════════════════════════════════
+                const scanJobTypes: string[] = ['PICK', 'PACK', 'PUTAWAY'];
+                if (scanJobTypes.includes(selectedJob.type) && scannedItem && scannedItem.trim()) {
+                    const scannedValue = scannedItem.trim().toUpperCase();
+                    const product = allProducts.find(p => p.id === item.productId);
+
+                    // [FIX] SKU is the authoritative identifier
+                    const expectedSku = (item.sku || product?.sku || '').trim().toUpperCase();
+                    const expectedBarcode = (product?.barcode || '').trim().toUpperCase();
+                    const barcodeAliases = (product?.barcodes || []).map((b: string) => b.trim().toUpperCase());
+
+                    // Check if scanned value matches SKU, primary barcode, or any barcode alias
+                    const isValidScan =
+                        (expectedSku && scannedValue === expectedSku) ||
+                        (expectedBarcode && scannedValue === expectedBarcode) ||
+                        barcodeAliases.includes(scannedValue);
+
+                    if (!isValidScan) {
+                        addNotification('alert', `❌ Wrong item! Expected: ${item.name} (SKU: ${expectedSku || 'N/A'})`);
+                        playBeep('error');
+                        setScannedItem(''); // Clear the invalid scan
+                        setIsProcessingScan(false);
+                        setIsSubmitting(false);
+                        return;
+                    }
+
+                } else if (scanJobTypes.includes(selectedJob.type) && !scannedItem?.trim()) {
+                    // [FIX] Require a barcode/SKU scan for these job types
+                    addNotification('alert', 'Please scan the product barcode before confirming');
+                    setIsProcessingScan(false);
+                    setIsSubmitting(false);
+                    return;
+                }
 
                 // Validate location for PUTAWAY jobs
                 if (selectedJob.type === 'PUTAWAY' && !scannedBin) {
@@ -1707,148 +2240,209 @@ export default function WarehouseOperations() {
                     return;
                 }
 
-                // Perform Putaway Logic: Update Product Location AND Stock
-                if (selectedJob.type === 'PUTAWAY' && scannedBin) {
-                    try {
-                        const qtyToAdd = actualQty !== undefined ? actualQty : item.expectedQty;
-                        let productId = item.productId;
-
-                        // If productId is null, auto-create the product first
-                        if (!productId) {
-                            console.log(`🆕 Product ID is null.Auto-creating product: ${item.name} `);
-
-                            // Determine product category (fallback to 'General' if not available)
-                            const productCategory = 'General'; // Can be enhanced to extract from context if available
-
-                            // Generate a proper SKU or use existing from item
-                            // Generate a proper SKU or use existing from item
-                            const { generateSKU } = await import('../utils/skuGenerator');
-                            const generatedSKU = item.sku && item.sku.trim() !== '' && item.sku !== 'MISC'
-                                ? item.sku
-                                : generateSKU(productCategory, allProducts);
-
-                            // AUTO-CREATE: Now requires approval
-                            console.log(`📝 Creating auto-create request for: ${item.name} `);
-                            const request: Omit<PendingInventoryChange, 'id'> = {
-                                productId: '', // New product
-                                productName: item.name,
-                                productSku: generatedSKU,
-                                siteId: selectedJob.siteId || selectedJob.site_id || '',
-                                changeType: 'create',
-                                requestedBy: user?.name || 'WMS Worker',
-                                requestedAt: new Date().toISOString(),
-                                status: 'pending',
-                                proposedChanges: {
-                                    name: item.name,
-                                    sku: generatedSKU,
-                                    category: productCategory,
-                                    price: 0,
-                                    cost: 0,
-                                    stock: 0, // Initial stock should be 0, Putaway Job will add the real stock
-                                    minStock: 0,
-                                    siteId: selectedJob.siteId || selectedJob.site_id,
-                                    location: scannedBin,
-                                    image: item.image || '/placeholder.png',
-                                    barcode: '',
-                                    unit: 'pcs',
-                                    status: 'active'
-                                } as any,
-                                adjustmentType: 'IN',
-                                adjustmentQty: qtyToAdd,
-                                adjustmentReason: 'Auto-create during Putaway'
-                            };
-
-                            await inventoryRequestsService.create(request);
-                            addNotification('success', `✅ Creation request for "${item.name}" submitted for approval.`);
-
-                            // Since we didn't actually create the product yet, we cannot continue with stock adjustment.
-                            // We should stop here or mark item as 'Pending Approval' in UI?
-                            // For now, let's stop and notify.
-                            return;
-                        } else {
-                            // Updatethe product's location
-
-                            await relocateProduct(productId, scannedBin, user?.name || 'WMS Worker');
-                        }
-
-                        // Add stock to inventory (increases the stock count)
-                        console.log(`📦 PUTAWAY: Adding ${qtyToAdd} units of ${item.name} to inventory at ${scannedBin} `);
-                        await adjustStock(
-                            productId,
-                            qtyToAdd,
-                            'IN',
-                            `PUTAWAY from PO - stored at ${scannedBin} `,
-                            user?.name || 'WMS Worker'
-                        );
-
-                        addNotification('success', `✅ Added ${qtyToAdd}x ${item.name} to inventory at ${scannedBin} `);
-                        playBeep('success');
-                    } catch (error) {
-                        console.error('Putaway Error:', error);
-                        addNotification('alert', 'Failed to complete putaway operation. Please try again.');
-                        playBeep('error');
-                        return; // Stop execution if putaway fails
-                    }
-                }
-
-                // Perform Pick Logic: Deduct stock from inventory when items are picked
-                if (selectedJob.type === 'PICK' && item.productId) {
-                    try {
-                        const qtyToDeduct = actualQty !== undefined ? actualQty : item.expectedQty;
-
-                        // Deduct stock from inventory (decreases the stock count)
-                        console.log(`📤 PICK: Deducting ${qtyToDeduct} units of ${item.name} from inventory`);
-                        await adjustStock(
-                            item.productId,
-                            qtyToDeduct,
-                            'OUT',
-                            `PICK for Order ${selectedJob.orderRef || selectedJob.id}`,
-                            user?.name || 'Picker'
-                        );
-
-                        addNotification('success', `✅ Picked ${qtyToDeduct}x ${item.name} `);
-                        playBeep('success');
-
-                        // EXPANDED LOGGING: Log that the user picked an item
-                        logSystemEvent(
-                            'Item Picked',
-                            `Picked ${qtyToDeduct}x ${item.name} for Job ${selectedJob.jobNumber || selectedJob.id}`,
-                            user?.name || 'Picker',
-                            'Inventory'
-                        );
-
-                        // Update UI State (for Job Progress)
-                    } catch (error) {
-                        console.error('Pick Error:', error);
-                        addNotification('alert', 'Failed to deduct stock. Please try again.');
-                        playBeep('error');
-                        return; // Stop execution if pick fails
-                    }
-                }
-
+                // ═══════════════════════════════════════════════════════════════
+                // CRITICAL FIX: Update Job Item Status FIRST
+                // This ensures the job item is marked as 'Picked' even if
+                // subsequent inventory operations fail. Prevents stuck jobs.
+                // ═══════════════════════════════════════════════════════════════
                 const qtyToRecord = actualQty !== undefined ? actualQty : item.expectedQty;
                 const statusToRecord = forcedStatus || ((actualQty !== undefined && actualQty < item.expectedQty) ? 'Short' : 'Picked');
 
                 await updateJobItem(selectedJob.id, updateTargetIndex, statusToRecord, qtyToRecord);
 
+                // Update local state to reflect change immediately
+                const updatedJob = { ...selectedJob };
+                updatedJob.lineItems = [...selectedJob.lineItems];
+                updatedJob.lineItems[itemIndex] = { ...item, status: statusToRecord, pickedQty: qtyToRecord };
+                setSelectedJob(updatedJob);
+
                 // Show completion feedback for this item
                 setLastCompletedItem({ name: item.name, qty: qtyToRecord });
                 setLastCompletedStatus(statusToRecord);
 
-                // Update local state to reflect change immediately (Using sorted index is fine for UI, but DB needs original)
-                const updatedJob = { ...selectedJob };
-                updatedJob.lineItems = [...selectedJob.lineItems]; // Shallow copy array
-                updatedJob.lineItems[itemIndex] = { ...item, status: statusToRecord, pickedQty: qtyToRecord };
-                setSelectedJob(updatedJob);
+                // ═══════════════════════════════════════════════════════════════
+                // STEP 2: Perform Putaway Logic (AFTER job item is updated)
+                // ═══════════════════════════════════════════════════════════════
+                if (selectedJob.type === 'PUTAWAY' && scannedBin) {
+                    try {
+                        const qtyToAdd = actualQty !== undefined ? actualQty : item.expectedQty;
+                        let productId = item.productId;
 
-                // Check if job is truly complete-ALL items must be processed
+                        // If productId is null, try to find by SKU first, then auto-create
+                        if (!productId) {
+                            // CRITICAL FIX: Try to find existing product by SKU first
+                            if (item.sku && item.sku !== 'N/A' && item.sku !== 'UNKNOWN') {
+                                const existingProduct = allProducts.find(p =>
+                                    p.sku === item.sku ||
+                                    p.sku?.toLowerCase() === item.sku.toLowerCase()
+                                );
+
+                                if (existingProduct) {
+                                    productId = existingProduct.id;
+
+                                    // Update job item immediately to prevent future lookups
+                                    updatedJob.lineItems[itemIndex] = {
+                                        ...updatedJob.lineItems[itemIndex],
+                                        productId: productId
+                                    };
+                                    setSelectedJob(updatedJob);
+                                }
+                            }
+                        }
+
+                        // If still no productId, auto-create the product directly (PO is the authorization)
+                        if (!productId) {
+
+                            const productCategory = 'General';
+                            const { generateSKU } = await import('../utils/skuGenerator');
+                            const generatedSKU = item.sku && item.sku.trim() !== '' && item.sku !== 'MISC' && item.sku !== 'N/A'
+                                ? item.sku
+                                : generateSKU(productCategory, allProducts);
+
+                            // Create the product directly - PO is the authorization, no approval needed
+                            const newProduct: any = {
+                                name: item.name,
+                                sku: generatedSKU,
+                                category: productCategory,
+                                price: 0,
+                                costPrice: (item as any).cost || 0,
+                                stock: qtyToAdd,
+                                minStock: 0,
+                                siteId: selectedJob.siteId || selectedJob.site_id || activeSite?.id || '',
+                                location: scannedBin,
+                                image: item.image || '/placeholder.png',
+                                barcode: '',
+                                barcodes: [],
+                                unit: 'pcs',
+                                status: 'active'
+                            };
+
+                            const createdProduct = await addProduct(newProduct);
+
+                            if (createdProduct && createdProduct.id) {
+                                productId = createdProduct.id;
+
+                                // Update the job item with the new productId
+                                updatedJob.lineItems[itemIndex] = {
+                                    ...updatedJob.lineItems[itemIndex],
+                                    productId: productId,
+                                    sku: generatedSKU
+                                };
+                                setSelectedJob(updatedJob);
+
+                                // Also update in DB
+                                await updateJobItem(selectedJob.id, updateTargetIndex, statusToRecord, qtyToRecord);
+
+                                addNotification('success', `✅ Product "${item.name}" auto-created and put away at ${scannedBin}`);
+                                playBeep('success');
+                            } else {
+                                console.error('❌ Failed to auto-create product - no ID returned');
+                                addNotification('alert', 'Failed to auto-create product. Please try again.');
+                            }
+                        } else {
+                            await relocateProductMutation.mutateAsync({
+                                productId,
+                                newLocation: scannedBin,
+                                user: user?.name || 'WMS Worker'
+                            });
+
+                            const product = allProducts.find(p => p.id === productId);
+                            await adjustStockMutation.mutateAsync({
+                                productId,
+                                productName: product?.name || 'Unknown',
+                                productSku: product?.sku || 'N/A',
+                                siteId: activeSite?.id || '',
+                                quantity: qtyToAdd,
+                                type: 'IN',
+                                reason: `PUTAWAY from PO - stored at ${scannedBin}`,
+                                canApprove: true // WMS workers put away directly
+                            });
+
+                            addNotification('success', `✅ Added ${qtyToAdd}x ${item.name} to inventory at ${scannedBin}`);
+                            playBeep('success');
+                        }
+                    } catch (error) {
+                        console.error('Putaway Inventory Error (Job item already marked):', error);
+                        addNotification('alert', 'Inventory update failed - but job item was marked. Please verify stock manually.');
+                        // Don't return - let the completion check run
+                    }
+                }
+
+                // ═══════════════════════════════════════════════════════════════
+                // STEP 2.5: AUTO-COMPLETE CHECK (For Putaway)
+                // ═══════════════════════════════════════════════════════════════
+                if (selectedJob.type === 'PUTAWAY') {
+                    const isJobDone = updatedJob.lineItems.every(i => i.status === 'Picked' || i.status === 'Short' || i.status === 'Discontinued');
+
+                    if (isJobDone) {
+
+                        // Small delay to let the UI update for the last item scan
+                        setTimeout(async () => {
+                            playBeep('success');
+                            // CORE FIX: Pass the optimistic (updated) line items directly to completeJob
+                            // This bypasses the React state race condition where DataContext's 'jobs'
+                            // might still show pending items.
+                            await completeJob(selectedJob.id, user?.name || 'WMS Worker', false, updatedJob.lineItems);
+
+                            addNotification('success', 'Job Complete! All items processed.');
+
+                            // Reset Scanner
+                            setScannerStep('NAV'); // Corrected type from 'Search' to 'NAV'
+                            setScannedItem('');
+                            setScannedBin('');
+                            setIsProcessingScan(false);
+                            setIsSubmitting(false);
+                        }, 500);
+
+                        return;
+                    }
+                }
+
+                // ═══════════════════════════════════════════════════════════════
+                // STEP 3: Perform Pick Logic (AFTER job item is updated)
+                // ═══════════════════════════════════════════════════════════════
+                if (selectedJob.type === 'PICK' && item.productId) {
+                    try {
+                        const qtyToDeduct = actualQty !== undefined ? actualQty : item.expectedQty;
+
+                        const product = allProducts.find(p => p.id === item.productId);
+                        await adjustStockMutation.mutateAsync({
+                            productId: item.productId,
+                            productName: product?.name || item.name || 'Unknown',
+                            productSku: product?.sku || item.sku || 'N/A',
+                            siteId: activeSite?.id || '',
+                            quantity: qtyToDeduct,
+                            type: 'OUT',
+                            reason: `PICK for Order ${selectedJob.orderRef || selectedJob.id}`,
+                            canApprove: true // Picks are direct
+                        });
+
+                        addNotification('success', `✅ Picked ${qtyToDeduct}x ${item.name}`);
+                        playBeep('success');
+
+                        logSystemEvent(
+                            'Item Picked',
+                            `Picked ${qtyToDeduct}x ${item.name} for Job ${formatJobId(selectedJob)}`,
+                            user?.name || 'Picker',
+                            'Inventory'
+                        );
+                    } catch (error) {
+                        console.error('Pick Inventory Error (Job item already marked):', error);
+                        addNotification('alert', 'Stock deduction failed - but job item was marked. Please verify stock manually.');
+                        // Don't return - let the completion check run
+                    }
+                }
+
+                // ═══════════════════════════════════════════════════════════════
+                // STEP 4: Check if job is complete
+                // ═══════════════════════════════════════════════════════════════
                 const allItemsProcessed = updatedJob.lineItems.every(i =>
                     i.status === 'Picked' || i.status === 'Short' || i.status === 'Discontinued'
                 );
 
                 if (allItemsProcessed) {
-                    console.log(`✅ Job ${selectedJob.jobNumber || selectedJob.id} -All items processed, completing job`);
-                    const result = await completeJob(selectedJob.id, user?.name || 'Worker', true); // skipValidation=true since we already verified
+                    // Fix: Pass optimistic items to completeJob to avoid race condition
+                    const result = await completeJob(selectedJob.id, user?.name || 'Worker', true, updatedJob.lineItems);
 
                     if (result && result.points > 0) {
                         setEarnedPoints({
@@ -1869,14 +2463,14 @@ export default function WarehouseOperations() {
 
                     if (nextJob) {
                         // Automatically start next job
-                        addNotification('success', t('warehouse.jobCompleteStartingNext').replace('{id}', selectedJob.id));
+                        addNotification('success', t('warehouse.jobCompleteStartingNext').replace('{id}', formatJobId(selectedJob)));
                         setSelectedJob(nextJob);
                         setScannerStep('NAV');
                         setScannedBin('');
                         setScannedItem('');
                     } else {
                         // No more jobs, close scanner
-                        addNotification('success', t('warehouse.jobCompleteAllDone').replace('{id}', selectedJob.id).replace('{type}', selectedJob.type));
+                        addNotification('success', t('warehouse.jobCompleteAllDone').replace('{id}', formatJobId(selectedJob)).replace('{type}', selectedJob.type));
                         setIsScannerMode(false);
                         setSelectedJob(null);
                     }
@@ -2091,21 +2685,27 @@ export default function WarehouseOperations() {
                                 <div className="flex justify-end">
                                     <Button
                                         variant="ghost"
+                                        disabled={isSubmitting || isProcessingScan}
                                         onClick={async () => {
-                                            if (!selectedJob || isProcessingScan) return;
+                                            if (!selectedJob || isProcessingScan || isSubmitting) return;
+                                            setIsSubmitting(true);
                                             setIsProcessingScan(true);
                                             try {
                                                 // Deduct stock for each item
                                                 for (const item of selectedJob.lineItems) {
                                                     if (item.productId && item.status === 'Pending') {
                                                         try {
-                                                            await adjustStock(
-                                                                item.productId,
-                                                                item.expectedQty,
-                                                                'OUT',
-                                                                `PICK for Order ${selectedJob.orderRef || selectedJob.id}`,
-                                                                user?.name || 'Admin'
-                                                            );
+                                                            const product = allProducts.find(p => p.id === item.productId);
+                                                            await adjustStockMutation.mutateAsync({
+                                                                productId: item.productId,
+                                                                productName: product?.name || item.name || 'Unknown',
+                                                                productSku: product?.sku || item.sku || 'N/A',
+                                                                siteId: activeSite?.id || '',
+                                                                quantity: item.expectedQty,
+                                                                type: 'OUT',
+                                                                reason: `PICK for Order ${selectedJob.orderRef || selectedJob.id}`,
+                                                                canApprove: true
+                                                            });
                                                         } catch (error) {
                                                             console.error('Failed to deduct stock for:', item.name, error);
                                                         }
@@ -2125,7 +2725,8 @@ export default function WarehouseOperations() {
                                                 addNotification('success', 'All items picked and stock deducted!');
 
                                                 // Complete the job
-                                                const result = await completeJob(selectedJob.id, user?.name || 'Worker');
+                                                // Fix: Pass skipValidation=true and optimistic items
+                                                const result = await completeJob(selectedJob.id, user?.name || 'Worker', true, updatedItems);
 
                                                 if (result && result.points > 0) {
                                                     setEarnedPoints({
@@ -2140,12 +2741,13 @@ export default function WarehouseOperations() {
                                                 setShowList(false);
                                             } finally {
                                                 setIsProcessingScan(false);
+                                                setIsSubmitting(false);
                                             }
                                         }}
-                                        icon={<CheckCircle size={14} />}
+                                        icon={isSubmitting ? <RefreshCw className="animate-spin" size={14} /> : <CheckCircle size={14} />}
                                         className="flex items-center gap-2 px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-xs font-bold text-cyber-primary transition-colors mb-2"
                                     >
-                                        {t('warehouse.pickAllAdmin')}
+                                        {isSubmitting ? 'Processing...' : t('warehouse.pickAllAdmin')}
                                     </Button>
                                 </div>
                             )}
@@ -2203,100 +2805,146 @@ export default function WarehouseOperations() {
                                                 {selectedJob.type === 'PUTAWAY' ? t('warehouse.selectStorage') : t('warehouse.locateItem')}
                                             </h1>
                                             <p className="text-gray-400 text-lg">
-                                                Scan Location or Type: <span className="text-blue-400 font-mono font-bold">A-Z-B</span> (e.g. 1-A-1)
+                                                Scan Location or Type: <span className="text-blue-400 font-mono font-bold">Z-A-B</span> (e.g. A-01-05)
                                             </p>
                                         </div>
                                     </div>
 
                                     {/* Simplified Location Input Container */}
-                                    <div className="bg-gray-900/60 backdrop-blur-2xl rounded-[2.5rem] border border-white/10 p-10 shadow-2xl relative overflow-hidden group">
-                                        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                                    <div className="bg-gray-900/80 backdrop-blur-2xl rounded-[2.5rem] border border-white/10 p-8 md:p-12 shadow-2xl relative overflow-hidden group">
+                                        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
 
                                         <div className="relative space-y-8">
-                                            <div className="relative">
-                                                <div className="absolute inset-y-0 left-6 flex items-center pointer-events-none text-gray-500 group-focus-within:text-cyber-primary transition-colors duration-300">
-                                                    <Scan size={32} />
+                                            <div className="relative group/input">
+                                                <div className="absolute inset-y-0 left-6 flex items-center pointer-events-none text-gray-500 group-focus-within/input:text-blue-400 transition-colors duration-300">
+                                                    <Scan size={32} strokeWidth={1.5} />
                                                 </div>
                                                 <input
                                                     type="text"
-                                                    placeholder="1-A-1"
+                                                    placeholder="A-01-05"
                                                     value={locationSearch}
                                                     onChange={(e) => {
-                                                        const val = e.target.value.toUpperCase();
-                                                        setLocationSearch(val);
+                                                        // Smart Input: Auto-format to 1-A-1 format
+                                                        let val = e.target.value.toUpperCase().replace(/[^0-9A-Z]/g, ''); // Strip non-alphanumeric
 
-                                                        // Auto-parse on valid pattern (e.g. 1-A-1 to 20-Z-20)
-                                                        const match = val.match(/^(\d{1,2})-([A-Z])-(\d{1,2})$/);
+                                                        // Logic to insert dashes intelligently
+                                                        // Expecting: Number(s) - Letter - Number(s)
+                                                        let formatted = val;
+
+                                                        // This is a simple heuristic:
+                                                        // 1. If we have digits at start, keep them.
+                                                        // 2. If we encounter a letter, put a dash before it.
+                                                        // 3. If we encounter digits after a letter, put a dash before them.
+
+                                                        // Regex: Starts with Letter (Zone), then Digits (Aisle), then Digits (Bin)
+                                                        const parts = val.match(/^([A-Z])(\d{0,2})(\d{0,2})$/);
+
+                                                        if (parts) {
+                                                            const p1 = parts[1]; // Zone
+                                                            const p2 = parts[2]; // Aisle
+                                                            const p3 = parts[3]; // Bin
+
+                                                            formatted = p1;
+                                                            if (p2) formatted += `-${p2}`;
+                                                            if (p3.length > 0 && p2.length >= 1) formatted += `-${p3}`;
+                                                        }
+
+                                                        // Allow user to delete back to empty
+                                                        if (val.length < locationSearch.replace(/-/g, '').length) {
+                                                            formatted = e.target.value.toUpperCase(); // Allow raw deletion if smart format gets in way
+                                                        }
+
+                                                        setLocationSearch(formatted);
+
+                                                        // Validation & Auto-submit
+                                                        // Regex: Zone-Aisle-Bin
+                                                        const match = formatted.match(/^([A-Z])-(\d{1,2})-(\d{1,2})$/);
                                                         if (match) {
-                                                            const aisleNum = parseInt(match[1]);
-                                                            const zoneLetter = match[2];
+                                                            const zoneLetter = match[1];
+                                                            const aisleNum = parseInt(match[2]);
                                                             const binNum = parseInt(match[3]);
 
-                                                            if (aisleNum >= 1 && aisleNum <= 20 && binNum >= 1 && binNum <= 20) {
-                                                                // Debounced auto-submit for smooth UX
-                                                                const loc = generateLocation(zoneLetter, String(aisleNum), String(binNum));
+                                                            // Expanded validation limits (Max 99 for flexibility)
+                                                            if (aisleNum >= 1 && aisleNum <= 99 && binNum >= 1 && binNum <= 99) {
+                                                                // Debounced auto-submit
                                                                 setTimeout(() => {
-                                                                    if (locationSearch === val) {
-                                                                        handleLocationSelect(loc);
-                                                                        setLocationSearch('');
+                                                                    if (locationSearch === formatted) { // Check if value hasn't changed
+                                                                        // trigger submit
+                                                                        const confirmButton = document.getElementById('location-confirm-btn');
+                                                                        if (confirmButton) confirmButton.click();
                                                                     }
-                                                                }, 400);
+                                                                }, 600);
                                                             }
                                                         }
                                                     }}
-                                                    className="w-full bg-black/60 border-2 border-white/10 rounded-3xl py-8 pl-16 pr-8 text-4xl font-mono text-white placeholder:text-gray-800 focus:border-cyber-primary focus:outline-none focus:ring-8 focus:ring-cyber-primary/10 transition-all text-center tracking-[0.2em] shadow-inner"
-                                                    onKeyPress={(e) => {
-                                                        if (e.key === 'Enter' && locationSearch) {
+                                                    className="w-full bg-black/40 border-2 border-white/10 rounded-2xl py-8 pl-16 pr-8 text-4xl md:text-5xl font-mono text-white placeholder:text-gray-800 focus:border-blue-500/50 focus:outline-none focus:ring-4 focus:ring-blue-500/10 transition-all text-center tracking-[0.1em] shadow-inner uppercase"
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === 'Enter') {
                                                             e.preventDefault();
-                                                            const match = locationSearch.match(/^(\d{1,2})-([A-Z])-(\d{1,2})$/);
-                                                            if (match) {
-                                                                const aisleNum = parseInt(match[1]);
-                                                                const zoneLetter = match[2];
-                                                                const binNum = parseInt(match[3]);
-                                                                if (aisleNum >= 1 && aisleNum <= 20 && binNum >= 1 && binNum <= 20) {
-                                                                    handleLocationSelect(generateLocation(zoneLetter, String(aisleNum), String(binNum)));
-                                                                    setLocationSearch('');
-                                                                } else {
-                                                                    addNotification('alert', 'Aisle/Bin must be 1-20');
-                                                                }
-                                                            } else {
-                                                                handleLocationSelect(locationSearch); // Fallback for raw legacy scans
-                                                                setLocationSearch('');
-                                                            }
+                                                            document.getElementById('location-confirm-btn')?.click();
                                                         }
                                                     }}
                                                     autoFocus
                                                     aria-label="Location Scanner Input"
                                                 />
+                                                {/* Parsing Feedback */}
+                                                {(() => {
+                                                    const match = locationSearch.match(/^([A-Z])-(\d{1,2})-(\d{1,2})$/);
+                                                    if (match) {
+                                                        return (
+                                                            <div className="absolute -bottom-6 left-0 right-0 flex justify-center gap-4 text-[10px] font-bold uppercase tracking-widest text-blue-400 animate-in fade-in slide-in-from-top-1">
+                                                                <span>Zone {match[1]}</span>
+                                                                <span className="text-gray-600">•</span>
+                                                                <span>Aisle {match[2]}</span>
+                                                                <span className="text-gray-600">•</span>
+                                                                <span>Bin {match[3]}</span>
+                                                            </div>
+                                                        )
+                                                    }
+                                                    return null;
+                                                })()}
                                             </div>
 
-                                            <div className="grid grid-cols-2 gap-4">
+                                            <div className="grid grid-cols-2 gap-4 pt-2">
                                                 <button
-                                                    onClick={() => {
-                                                        if (locationSearch) {
-                                                            const match = locationSearch.match(/^(\d{1,2})-([A-Z])-(\d{1,2})$/);
+                                                    id="location-confirm-btn"
+                                                    disabled={isSubmitting || !locationSearch}
+                                                    onClick={async () => {
+                                                        if (isSubmitting || !locationSearch) return;
+                                                        setIsSubmitting(true);
+                                                        try {
+                                                            // Regex: Zone-Aisle-Bin
+                                                            const match = locationSearch.match(/^([A-Z])-(\d{1,2})-(\d{1,2})$/);
                                                             if (match) {
-                                                                handleLocationSelect(generateLocation(match[2], match[1], match[3]));
+                                                                // generateLocation(zone, aisle, bin)
+                                                                await handleLocationSelect(generateLocation(match[1], match[2], match[3]));
                                                             } else {
-                                                                handleLocationSelect(locationSearch);
+                                                                // Fallback for full barcodes
+                                                                await handleLocationSelect(locationSearch);
                                                             }
                                                             setLocationSearch('');
+                                                        } finally {
+                                                            setIsSubmitting(false);
                                                         }
                                                     }}
-                                                    className="py-6 bg-cyber-primary hover:bg-cyber-accent text-black font-black text-xl rounded-2xl transition-all uppercase tracking-widest shadow-xl shadow-cyber-primary/20 flex items-center justify-center gap-3"
+                                                    className="group relative py-5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 disabled:from-gray-600 disabled:to-gray-700 text-white font-bold text-xl rounded-xl transition-all shadow-lg shadow-blue-500/20 active:scale-[0.98] overflow-hidden"
                                                 >
-                                                    <CheckCircle size={24} strokeWidth={4} />
-                                                    {t('common.confirm')}
+                                                    <div className="flex items-center justify-center gap-3 relative z-10">
+                                                        {isSubmitting ? <RefreshCw className="animate-spin w-6 h-6" /> : <CheckCircle className="w-6 h-6 group-hover:scale-110 transition-transform" />}
+                                                        <span>{isSubmitting ? 'Processing...' : 'Confirm'}</span>
+                                                    </div>
+                                                    <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
                                                 </button>
+
                                                 <button
                                                     onClick={() => {
                                                         setQRScannerMode('location');
                                                         setIsQRScannerOpen(true);
                                                     }}
-                                                    className="py-6 bg-gray-800 hover:bg-gray-700 text-white font-bold text-xl rounded-2xl border border-white/10 transition-all flex items-center justify-center gap-3 shadow-xl"
+                                                    className="group py-5 bg-gray-800/80 hover:bg-gray-700/80 text-white font-bold text-xl rounded-xl border border-white/10 transition-all flex items-center justify-center gap-3 shadow-lg hover:border-white/20 active:scale-[0.98]"
                                                 >
-                                                    <Camera size={24} />
-                                                    Camera
+                                                    <Camera className="w-6 h-6 text-gray-400 group-hover:text-white transition-colors" />
+                                                    <span>Camera</span>
                                                 </button>
                                             </div>
                                         </div>
@@ -2353,7 +3001,12 @@ export default function WarehouseOperations() {
                                             </div>
 
                                             <div>
-                                                <h2 className="text-xl md:text-2xl font-bold text-white line-clamp-2">{currentItem.name}</h2>
+                                                <div className="flex items-center justify-center gap-2 mb-1">
+                                                    <h2 className="text-xl md:text-2xl font-bold text-white line-clamp-2">{currentItem.name}</h2>
+                                                    <span className="px-2 py-0.5 bg-cyber-primary/20 text-cyber-primary text-[10px] font-mono font-black rounded border border-cyber-primary/40 uppercase tracking-widest shrink-0">
+                                                        {formatJobId(selectedJob)}
+                                                    </span>
+                                                </div>
                                                 <div className="flex justify-center gap-4 mt-4">
                                                     <MetricBadge label={t('warehouse.qty')} value={currentItem.expectedQty} color="border-blue-500 text-blue-400 bg-blue-500" />
                                                     <MetricBadge label={t('warehouse.stock')} value={product?.stock || 0} color="border-gray-500 text-gray-400 bg-gray-500" />
@@ -2472,28 +3125,7 @@ export default function WarehouseOperations() {
                                         disabled={isProcessingScan || isSubmitting}
                                         onClick={() => {
                                             if (isProcessingScan || isSubmitting) return;
-                                            if (selectedJob?.type === 'PUTAWAY') {
-                                                const normalize = (s: string | undefined | null) => s?.trim().toUpperCase() || '';
-                                                const input = normalize(scannedItem);
-                                                const expectedSku = normalize(currentItem?.sku);
-                                                const product = filteredProducts.find(p => p.id === currentItem?.productId);
-                                                const expectedProductSku = normalize(product?.sku);
-
-                                                if (!input) {
-                                                    addNotification('alert', 'Please scan or enter the Product SKU');
-                                                    return;
-                                                }
-
-                                                // Strict check: Input must match valid SKU
-                                                const isValid = (input === expectedSku && expectedSku !== '') ||
-                                                    (input === expectedProductSku && expectedProductSku !== '');
-
-                                                if (!isValid) {
-                                                    addNotification('alert', `Incorrect SKU.Expected: ${expectedSku || expectedProductSku} `);
-                                                    setScannedItem('');
-                                                    return;
-                                                }
-                                            }
+                                            // [FIX] Validation is now handled inside handleItemScan for all job types
                                             handleItemScan();
                                         }}
                                         className={`w-full py-6 bg-green-500 text-black font-bold text-xl rounded-2xl shadow-[0_0_30px_rgba(34, 197, 94, 0.4)] flex items-center justify-center gap-3 ${isProcessingScan || isSubmitting ? 'opacity-50 cursor-not-allowed' : 'hover:bg-green-400'} `}
@@ -2533,7 +3165,7 @@ export default function WarehouseOperations() {
                                                 setShortPickResolution('standard');
                                                 setShowShortPickModal(true);
                                             }}
-                                            className={`py-4 bg-red-900 / 30 text-red-400 font-bold rounded-xl border border-red-500 / 30 flex flex-col items-center justify-center gap-1 ${isProcessingScan ? 'opacity-50 cursor-not-allowed' : 'hover:bg-red-900/50'} `}
+                                            className={`py-4 bg-red-900/30 text-red-400 font-bold rounded-xl border border-red-500/30 flex flex-col items-center justify-center gap-1 ${isProcessingScan ? 'opacity-50 cursor-not-allowed' : 'hover:bg-red-900/50'} `}
                                         >
                                             <AlertTriangle size={20} />
                                             <span className="text-sm">{t('warehouse.shortPick')}</span>
@@ -2590,12 +3222,12 @@ export default function WarehouseOperations() {
                                         <span>{job.type}</span>
                                     </div>
                                     <div className="flex items-center gap-2 text-sm text-gray-300">
-                                        <Map size={14} className="text-cyber-primary" />
+                                        <MapIcon size={14} className="text-cyber-primary" />
                                         <span>{job.location}</span>
                                     </div>
                                     <div className="flex items-center gap-2 text-sm text-gray-300">
                                         <FileText size={14} className="text-cyber-primary" />
-                                        <span>{t('warehouse.reference')}: {formatOrderRef(job.orderRef, job.id)}</span>
+                                        <span>{t('warehouse.reference')}: {resolveOrderRef(job.orderRef)}</span>
                                     </div>
                                 </div>
 
@@ -2642,7 +3274,76 @@ export default function WarehouseOperations() {
 
                 {/* Header Tabs */}
                 {/* Header Tabs-Scrollable on Mobile */}
-                <div className="flex items-center gap-2 overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-0 md:pb-0 bg-cyber-gray md:bg-transparent rounded-none md:rounded-xl shrink-0 no-scrollbar touch-pan-x">
+                {/* --- MOBILE TAB SELECTOR (Creative & Simple) --- */}
+                <div className="md:hidden relative z-40 mb-2">
+                    <button
+                        onClick={() => setIsMobileTabMenuOpen(!isMobileTabMenuOpen)}
+                        className="w-full bg-[#1a1a1a] border border-white/10 rounded-2xl p-4 flex items-center justify-between shadow-lg active:scale-[0.98] transition-all group"
+                    >
+                        <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white shadow-[0_0_15px_rgba(6,182,212,0.3)]">
+                                <Layout size={20} />
+                            </div>
+                            <div className="text-left">
+                                <p className="text-[9px] text-gray-500 font-bold uppercase tracking-[0.2em]">Current Section</p>
+                                <p className="text-lg font-black text-white uppercase tracking-tighter">
+                                    {t(`warehouse.tabs.${activeTab.toLowerCase()}`)}
+                                </p>
+                            </div>
+                        </div>
+                        <div className={`w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center transition-transform duration-300 ${isMobileTabMenuOpen ? 'rotate-180 bg-cyan-500/20 text-cyan-400 border-cyan-500/30' : 'text-gray-400'}`}>
+                            <ChevronDown size={16} />
+                        </div>
+                    </button>
+
+                    {/* Mobile Dropdown Grid */}
+                    {isMobileTabMenuOpen && (
+                        <>
+                            <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-40" onClick={() => setIsMobileTabMenuOpen(false)} />
+                            <div className="absolute top-full left-0 right-0 mt-3 bg-[#121212] border border-white/10 rounded-3xl p-4 grid grid-cols-2 gap-3 shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-200 ring-1 ring-white/10">
+                                {visibleTabs.map((tab) => {
+                                    const isActive = activeTab === tab;
+                                    // Discrepancy Logic
+                                    const hasTransferDiscrepancies = tab === 'TRANSFER' && filteredJobs
+                                        .filter(j => j.type === 'TRANSFER')
+                                        .some(j => (j.lineItems || []).some((item: any) =>
+                                            item.receivedQty !== undefined && item.receivedQty !== item.expectedQty &&
+                                            !['Resolved', 'Completed'].includes(item.status)
+                                        ));
+                                    const discrepancyCount = tab === 'TRANSFER'
+                                        ? filteredJobs.filter(j => j.type === 'TRANSFER' &&
+                                            (j.lineItems || []).some((item: any) =>
+                                                item.receivedQty !== undefined && item.receivedQty !== item.expectedQty &&
+                                                !['Resolved', 'Completed'].includes(item.status)
+                                            )).length
+                                        : 0;
+
+                                    return (
+                                        <button
+                                            key={tab}
+                                            onClick={() => {
+                                                setActiveTab(tab);
+                                                setIsMobileTabMenuOpen(false);
+                                            }}
+                                            className={`p-4 rounded-2xl flex flex-col items-center justify-center gap-2 transition-all border relative ${isActive
+                                                ? 'bg-cyan-500 text-black border-cyan-400 shadow-[0_0_20px_rgba(6,182,212,0.4)]'
+                                                : 'bg-white/5 text-gray-400 border-white/5 hover:bg-white/10 hover:text-white'
+                                                }`}
+                                        >
+                                            <span className="text-[10px] font-black uppercase tracking-widest leading-tight text-center">{t(`warehouse.tabs.${tab.toLowerCase()}`)}</span>
+                                            {hasTransferDiscrepancies && (
+                                                <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                                            )}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </>
+                    )}
+                </div>
+
+                {/* --- DESKTOP TABS (Hidden on Mobile) --- */}
+                <div className="hidden md:flex items-center gap-2 overflow-x-auto pb-0 -mx-0 px-0 bg-transparent rounded-xl shrink-0 no-scrollbar touch-pan-x">
                     <div className="flex gap-2 min-w-max">
                         {visibleTabs.map((tab) => {
                             // Check for discrepancies in TRANSFER tab
@@ -2793,7 +3494,30 @@ export default function WarehouseOperations() {
                                                             {isSelectedForAssignment ? 'Select Dock' : status === 'Empty' ? t('warehouse.docks.empty') : status === 'Occupied' ? t('warehouse.docks.occupied') : t('warehouse.docks.maintenance')}
                                                         </span>
                                                         {status === 'Occupied' && data.vesselName && (
-                                                            <p className="text-[8px] text-gray-500 font-bold uppercase mt-2 tracking-tighter max-w-[80px] truncate">{data.vesselName}</p>
+                                                            <div className="flex flex-col items-center gap-2 mt-2">
+                                                                <p className="text-[8px] text-gray-500 font-bold uppercase tracking-tighter max-w-[80px] truncate">{data.vesselName}</p>
+                                                                {/* [NEW] Quick Confirm Unload - One-click, stays on DOCKS */}
+                                                                <button
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        quickConfirmUnload(dock);
+                                                                    }}
+                                                                    className="px-3 py-1.5 bg-green-600 hover:bg-green-500 text-white text-[8px] font-black uppercase tracking-widest rounded-lg shadow-lg shadow-green-600/20 transition-all active:scale-95 whitespace-nowrap flex items-center gap-1"
+                                                                >
+                                                                    <Check size={12} />
+                                                                    Confirm Unload
+                                                                </button>
+                                                                {/* View Manifest - Optional detail view */}
+                                                                <button
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        handleOpenManifest(dock);
+                                                                    }}
+                                                                    className="px-3 py-1 bg-white/5 hover:bg-white/10 text-gray-400 text-[7px] font-bold uppercase tracking-widest rounded-lg border border-white/10 transition-all active:scale-95 whitespace-nowrap"
+                                                                >
+                                                                    View Manifest
+                                                                </button>
+                                                            </div>
                                                         )}
                                                     </div>
                                                 </div>
@@ -2808,6 +3532,66 @@ export default function WarehouseOperations() {
                                         </button>
                                     </div>
                                 </div>
+
+                                {/* MANIFEST MODAL */}
+                                <Modal
+                                    isOpen={manifestModalOpen}
+                                    onClose={() => setManifestModalOpen(false)}
+                                    title={`MANIFEST: ${selectedManifestPO?.poNumber || 'Unknown PO'}`}
+                                >
+                                    <div className="p-6">
+                                        <div className="flex justify-between items-center mb-6">
+                                            <div>
+                                                <p className="text-sm text-gray-400 font-bold uppercase tracking-widest">Expected Goods</p>
+                                                <p className="text-xs text-gray-600">Please confirm the unload manifest.</p>
+                                            </div>
+                                            <div className="text-right">
+                                                <p className="text-xl font-black text-white">{selectedManifestPO?.lineItems?.length || 0}</p>
+                                                <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Line Items</p>
+                                            </div>
+                                        </div>
+
+                                        <div className="bg-black/40 rounded-xl border border-white/10 overflow-hidden mb-8 max-h-[300px] overflow-y-auto custom-scrollbar">
+                                            <table className="w-full text-left">
+                                                <thead className="bg-white/5">
+                                                    <tr>
+                                                        <th className="px-4 py-2 text-[10px] text-gray-500 font-black uppercase tracking-widest">Item / SKU</th>
+                                                        <th className="px-4 py-2 text-[10px] text-gray-500 font-black uppercase tracking-widest text-right">Qty</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody className="divide-y divide-white/5">
+                                                    {selectedManifestPO?.lineItems?.map((item, idx) => (
+                                                        <tr key={idx} className="hover:bg-white/5 transition-colors">
+                                                            <td className="px-4 py-2">
+                                                                <p className="text-xs font-bold text-white">{item.productName}</p>
+                                                                <p className="text-[10px] text-gray-500 font-mono">{item.sku || 'NO SKU'}</p>
+                                                            </td>
+                                                            <td className="px-4 py-2 text-right text-xs font-mono font-bold text-blue-400">
+                                                                {item.quantity}
+                                                            </td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+
+                                        <div className="flex gap-3">
+                                            <button
+                                                onClick={() => setManifestModalOpen(false)}
+                                                className="flex-1 py-3 rounded-xl border border-white/10 text-gray-400 text-xs font-bold uppercase tracking-widest hover:bg-white/5 transition-all"
+                                            >
+                                                Cancel
+                                            </button>
+                                            <button
+                                                onClick={confirmUnloadAndReceive}
+                                                className="flex-1 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-black uppercase tracking-widest shadow-lg shadow-blue-600/20 transition-all active:scale-95 flex items-center justify-center gap-2"
+                                            >
+                                                <Download size={16} />
+                                                Confirm Unload & Receive
+                                            </button>
+                                        </div>
+                                    </div>
+                                </Modal>
 
                                 {/* INBOUND LOGISTICS QUEUE */}
                                 <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-[2rem] p-6 flex flex-col shadow-2xl relative overflow-hidden">
@@ -2835,9 +3619,6 @@ export default function WarehouseOperations() {
                                                             <p className="text-xs font-black text-white uppercase tracking-widest">{vessel.vesselName}</p>
                                                             {vessel.priority === 'High' && <div className="px-1.5 py-0.5 bg-yellow-500/20 text-yellow-500 text-[8px] font-black rounded border border-yellow-500/20">{t('warehouse.priority')}</div>}
                                                         </div>
-                                                        <p className="text-[10px] text-gray-500 font-bold mt-1 uppercase tracking-tighter">
-                                                            Origin: {vessel.origin}
-                                                        </p>
                                                     </div>
                                                     <div className="text-right">
                                                         <span className="text-[10px] font-mono font-black text-blue-400 bg-blue-600/10 px-2 py-1 rounded-lg">ETA {vessel.eta}</span>
@@ -2854,11 +3635,113 @@ export default function WarehouseOperations() {
                                         ))}
                                     </div>
                                 </div>
+
+                                {/* DOCK HISTORY SECTION */}
+                                <div className="lg:col-span-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-[2rem] p-8 mt-6 relative overflow-hidden group shadow-2xl">
+                                    <div className="absolute -top-24 -right-24 w-64 h-64 bg-blue-600/10 blur-[100px] rounded-full pointer-events-none" />
+
+                                    <div className="flex justify-between items-center mb-8 relative z-10">
+                                        <h3 className="text-xl font-black text-white tracking-tight uppercase flex items-center gap-3">
+                                            <div className="p-2 bg-blue-600/20 rounded-xl">
+                                                <HistoryIcon className="text-blue-400" size={20} />
+                                            </div>
+                                            {t('warehouse.docks.history') || 'Dock History'}
+                                        </h3>
+
+                                        <div className="flex items-center gap-4">
+                                            <div className="relative group">
+                                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-blue-400 transition-colors" size={16} />
+                                                <input
+                                                    type="text"
+                                                    value={dockSearch}
+                                                    onChange={(e) => setDockSearch(e.target.value)}
+                                                    placeholder="Search PO, Supplier..."
+                                                    className="w-64 bg-black/40 border border-white/10 rounded-xl py-2.5 pl-10 pr-4 text-xs font-bold text-white placeholder-gray-600 focus:outline-none focus:border-blue-500/50 focus:bg-blue-500/5 transition-all"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="overflow-x-auto">
+                                        <table className="w-full">
+                                            <thead>
+                                                <tr className="border-b border-white/5">
+                                                    <th className="px-6 py-4 text-left text-[10px] font-black text-gray-500 uppercase tracking-widest">Unloaded At</th>
+                                                    <th className="px-6 py-4 text-left text-[10px] font-black text-gray-500 uppercase tracking-widest">PO Number</th>
+                                                    <th className="px-6 py-4 text-left text-[10px] font-black text-gray-500 uppercase tracking-widest">Supplier</th>
+                                                    <th className="px-6 py-4 text-left text-[10px] font-black text-gray-500 uppercase tracking-widest">Approved By</th>
+                                                    <th className="px-6 py-4 text-left text-[10px] font-black text-gray-500 uppercase tracking-widest">Items</th>
+                                                    <th className="px-6 py-4 text-right text-[10px] font-black text-gray-500 uppercase tracking-widest">Status</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-white/5">
+                                                {paginatedDockHistory.length === 0 ? (
+                                                    <tr>
+                                                        <td colSpan={6} className="px-6 py-8 text-center text-gray-500 text-xs font-bold">
+                                                            No unloaded POs found.
+                                                        </td>
+                                                    </tr>
+                                                ) : (
+                                                    paginatedDockHistory.map((po: any) => (
+                                                        <tr key={po.id} className="hover:bg-white/5 transition-colors group">
+                                                            <td className="px-6 py-4">
+                                                                <div className="flex items-center gap-2">
+                                                                    <Clock size={12} className="text-gray-600" />
+                                                                    <span className="text-xs font-mono font-bold text-gray-400">
+                                                                        {po.approvedAt ? new Date(po.approvedAt).toLocaleString() : '-'}
+                                                                    </span>
+                                                                </div>
+                                                            </td>
+                                                            <td className="px-6 py-4">
+                                                                <span className="text-xs font-black text-white">{po.poNumber || po.id.slice(0, 8)}</span>
+                                                            </td>
+                                                            <td className="px-6 py-4">
+                                                                <span className="text-xs font-bold text-gray-400">{po.supplierName}</span>
+                                                            </td>
+                                                            <td className="px-6 py-4">
+                                                                <div className="flex items-center gap-2">
+                                                                    <div className="w-5 h-5 rounded-full bg-blue-500/10 flex items-center justify-center border border-blue-500/20">
+                                                                        <UserIcon size={10} className="text-blue-400" />
+                                                                    </div>
+                                                                    <span className="text-xs font-bold text-gray-400">{po.approvedBy || '-'}</span>
+                                                                </div>
+                                                            </td>
+                                                            <td className="px-6 py-4">
+                                                                <span className="text-xs font-mono font-bold text-gray-400">{po.lineItems?.length || 0} items</span>
+                                                            </td>
+                                                            <td className="px-6 py-4 text-right">
+                                                                <span className={`inline-flex px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest ${po.status === 'Approved' ? 'bg-green-500/10 text-green-400 border border-green-500/20' :
+                                                                    po.status === 'Received' ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' :
+                                                                        'bg-gray-500/10 text-gray-400 border border-gray-500/20'
+                                                                    }`}>
+                                                                    {po.status}
+                                                                </span>
+                                                            </td>
+                                                        </tr>
+                                                    ))
+                                                )}
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    {/* Pagination */}
+                                    {dockHistoryTotalPages > 1 && (
+                                        <div className="mt-6 flex justify-center">
+                                            <Pagination
+                                                currentPage={dockHistoryPage}
+                                                totalPages={dockHistoryTotalPages}
+                                                totalItems={filteredDockHistory.length}
+                                                itemsPerPage={DOCK_HISTORY_PER_PAGE}
+                                                onPageChange={setDockHistoryPage}
+                                            />
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         )}
 
                         {dockTab === 'OUTBOUND' && (
-                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 overflow-y-auto md:overflow-hidden pr-2 custom-scrollbar">
+                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 overflow-y-auto custom-scrollbar pr-2">
                                 <div className="lg:col-span-2 bg-white/5 backdrop-blur-xl border border-white/10 rounded-[2rem] p-8 relative overflow-hidden group shadow-2xl">
                                     <div className="absolute -top-24 -right-24 w-64 h-64 bg-purple-600/10 blur-[100px] rounded-full pointer-events-none" />
 
@@ -2872,32 +3755,149 @@ export default function WarehouseOperations() {
                                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-12 relative z-10">
                                         {Object.entries(dockStatus).filter(([k]) => ['D3', 'D4'].includes(k)).map(([dock, data]) => {
                                             const status = data.status;
+                                            const assignedJob = jobs.find(j => j.id === data.assignedJobId);
+                                            const destSite = sites.find(s => s.id === assignedJob?.destSiteId);
+
                                             return (
-                                                <div key={dock} className={`aspect-square rounded-3xl border-2 flex flex-col items-center justify-center gap-4 relative group cursor-pointer transition-all duration-500 hover:scale-[1.02] active: scale-95 shadow-2xl ${status === 'Empty' ? 'border-green-500/20 bg-green-500/5 shadow-green-500/5' :
-                                                    status === 'Occupied' ? 'border-purple-500/20 bg-purple-500/5 shadow-purple-500/5' :
-                                                        'border-orange-500/20 bg-orange-500/5 shadow-orange-500/5'
-                                                    } `}>
-                                                    <span className="absolute top-4 left-5 font-black text-white/20 text-xl tracking-tighter">{dock}</span>
+                                                <div
+                                                    key={dock}
+                                                    onClick={() => {
+                                                        if (assignedJob) {
+                                                            setSelectedJob(assignedJob);
+                                                            setIsDetailsOpen(true);
+                                                        } else if (data.assignedJobId) {
+                                                            // Ghost Job Handling
+                                                            const ghostJob: WMSJob = {
+                                                                id: data.assignedJobId,
+                                                                type: 'DISPATCH',
+                                                                status: 'Cancelled',
+                                                                priority: 'Normal',
+                                                                siteId: activeSite?.id || '',
+                                                                location: 'Unknown',
+                                                                items: 0,
+                                                                lineItems: [],
+                                                                orderRef: 'UNKNOWN',
+                                                                transferStatus: 'Cancelled',
+                                                                sys_ghost: true
+                                                            } as any;
+                                                            setSelectedJob(ghostJob);
+                                                            setIsDetailsOpen(true);
+                                                        }
+                                                    }}
+                                                    className={`relative flex flex-col rounded-[2.5rem] border-2 transition-all duration-500 overflow-hidden shadow-2xl group cursor-pointer ${status === 'Empty' ? 'border-dashed border-white/5 bg-black/20' : 'border-purple-500/30 bg-purple-500/5 hover:bg-purple-500/10'}`}
+                                                >
+                                                    <span className="absolute top-4 left-5 font-black text-white/10 text-xl tracking-tighter z-0">{dock}</span>
 
-                                                    <div className="relative">
-                                                        {status === 'Occupied' ? (
-                                                            <div className="relative">
-                                                                <Truck size={48} className="text-purple-400 drop-shadow-[0_0_15px_rgba(192,132,252,0.4)]" />
-                                                                <div className="absolute -top-1 -right-1 w-3 h-3 bg-purple-500 rounded-full border-2 border-black animate-ping" />
+                                                    {status === 'Empty' ? (
+                                                        <div className="flex-1 flex flex-col items-center justify-center p-8 gap-4 opacity-40 group-hover:opacity-60 transition-opacity">
+                                                            <div className="w-16 h-16 rounded-3xl border-2 border-white/10 border-dashed flex items-center justify-center">
+                                                                <Upload size={24} className="text-gray-600" />
                                                             </div>
-                                                        ) : status === 'Empty' ? (
-                                                            <div className="w-16 h-16 rounded-3xl border-2 border-green-500/10 border-dashed flex items-center justify-center" />
-                                                        ) : (
-                                                            <AlertTriangle size={48} className="text-orange-400" />
-                                                        )}
-                                                    </div>
+                                                            <span className="text-[10px] font-black uppercase tracking-widest text-gray-500">{t('warehouse.docks.empty')}</span>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="flex-1 flex flex-col p-6 z-10">
+                                                            <div className="flex justify-between items-start mb-4">
+                                                                <div className="p-2 bg-purple-500/20 rounded-xl">
+                                                                    <Truck size={24} className="text-purple-400 drop-shadow-[0_0_15px_rgba(192,132,252,0.4)]" />
+                                                                </div>
+                                                                <button
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        setDockStatus(prev => ({ ...prev, [dock]: { ...prev[dock], status: 'Empty', assignedJobId: undefined } }));
+                                                                        addNotification('info', `Dock ${dock} Released`);
+                                                                    }}
+                                                                    className="p-1.5 hover:bg-white/10 rounded-lg text-gray-500 hover:text-white transition-colors"
+                                                                    title="Release Dock"
+                                                                >
+                                                                    <X size={14} />
+                                                                </button>
+                                                            </div>
 
-                                                    <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full border ${status === 'Empty' ? 'text-green-400 bg-green-500/10 border-green-500/20' :
-                                                        status === 'Occupied' ? 'text-purple-400 bg-purple-500/10 border-purple-500/20' :
-                                                            'text-orange-400 bg-orange-500/10 border-orange-500/20'
-                                                        } `}>
-                                                        {status === 'Empty' ? t('warehouse.docks.empty') : 'Loading'}
-                                                    </span>
+                                                            <div className="mb-4">
+                                                                <p className="text-[10px] text-purple-400 font-black tracking-widest uppercase mb-1">{assignedJob ? formatJobId(assignedJob) : 'Unknown Shipment'}</p>
+                                                                <p className="text-sm font-black text-white uppercase truncate">{destSite?.name || 'In-Transport'}</p>
+                                                            </div>
+
+                                                            <div className="grid grid-cols-2 gap-3 mb-6">
+                                                                <div className="bg-white/5 rounded-2xl p-2.5 border border-white/5">
+                                                                    <p className="text-[8px] text-gray-500 font-black uppercase tracking-wider mb-1">Payload</p>
+                                                                    {/* Fix: Check lineItems vs line_items vs items count */}
+                                                                    <p className="text-xs font-mono font-bold text-white">
+                                                                        {assignedJob ? (
+                                                                            (assignedJob.lineItems?.length || 0) > 0 ? assignedJob.lineItems.length :
+                                                                                (assignedJob.line_items?.length || 0) > 0 ? assignedJob.line_items?.length :
+                                                                                    (assignedJob.items || 0)
+                                                                        ) : 0} Units
+                                                                    </p>
+                                                                </div>
+                                                                <div className="bg-white/5 rounded-2xl p-2.5 border border-white/5">
+                                                                    <p className="text-[8px] text-gray-500 font-black uppercase tracking-wider mb-1">Status</p>
+                                                                    <p className="text-[10px] font-black text-green-400 uppercase tracking-widest">DOCK LOADED</p>
+                                                                </div>
+                                                            </div>
+
+                                                            <div className="mt-auto space-y-3">
+                                                                <div className="relative" onClick={e => e.stopPropagation()}>
+                                                                    <div className="flex items-center gap-2 mb-2">
+                                                                        <UserIcon size={12} className="text-gray-500" />
+                                                                        <span className="text-[9px] text-gray-500 font-black uppercase tracking-widest">Assign Driver</span>
+                                                                    </div>
+                                                                    <select
+                                                                        title="Assign Driver"
+                                                                        value={assignedJob?.assignedTo || ''}
+                                                                        onChange={async (e) => {
+                                                                            if (!assignedJob) return;
+                                                                            const driverId = e.target.value;
+                                                                            try {
+                                                                                await wmsJobsService.update(assignedJob.id, { assignedTo: driverId } as any);
+                                                                                await refreshData();
+                                                                                addNotification('success', `Assigned to Driver`);
+                                                                            } catch (err) {
+                                                                                addNotification('alert', 'Assignment Failed');
+                                                                            }
+                                                                        }}
+                                                                        className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-[10px] font-bold text-white outline-none focus:border-purple-500/50 transition-all appearance-none cursor-pointer"
+                                                                    >
+                                                                        <option value="">Select Carrier...</option>
+                                                                        {employees
+                                                                            .filter(e => (e.role === 'driver' || e.role === 'dispatcher') && e.status === 'Active')
+                                                                            .map(e => (
+                                                                                <option key={e.id} value={e.id}>{e.name} ({e.role.toUpperCase()})</option>
+                                                                            ))}
+                                                                    </select>
+                                                                </div>
+
+                                                                <button
+                                                                    onClick={async (e) => {
+                                                                        e.stopPropagation();
+                                                                        if (!assignedJob) return;
+
+                                                                        // Robust: handle both property cases
+                                                                        const itemsToPrint = assignedJob.lineItems || assignedJob.line_items || [];
+                                                                        const itemCount = itemsToPrint.length || assignedJob.items || 0;
+
+                                                                        const html = await generatePackLabelHTML({
+                                                                            orderRef: assignedJob.id,
+                                                                            destSiteName: destSite?.name,
+                                                                            itemCount: itemCount,
+                                                                            packDate: new Date().toISOString(),
+                                                                            trackingNumber: assignedJob.trackingNumber || assignedJob.id,
+                                                                            lineItems: itemsToPrint.map((li: any) => ({ name: li.name, sku: li.sku, quantity: li.pickedQty }))
+                                                                        }, { size: 'XL', format: 'Both' });
+
+                                                                        const printWindow = window.open('', '_blank');
+                                                                        printWindow?.document.write(html);
+                                                                        printWindow?.document.close();
+                                                                        setTimeout(() => printWindow?.print(), 500);
+                                                                    }}
+                                                                    className="w-full bg-purple-600 hover:bg-purple-500 text-white text-[9px] font-black uppercase tracking-[0.2em] py-2.5 rounded-xl flex items-center justify-center gap-2 transition-all active:scale-95 shadow-lg shadow-purple-600/20"
+                                                                >
+                                                                    <Printer size={14} /> Print Manifest
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    )}
                                                 </div>
                                             );
                                         })}
@@ -2907,26 +3907,67 @@ export default function WarehouseOperations() {
                                         <h4 className="text-sm font-black text-white uppercase tracking-widest flex items-center gap-2 mb-6">
                                             <Package size={16} className="text-orange-500" />
                                             {t('warehouse.docks.stagingArea')}
+                                            <span className="text-[10px] text-gray-500 bg-white/5 px-2 py-0.5 rounded-full ml-auto">
+                                                {jobs.filter(j => j.type === 'DISPATCH' && j.transferStatus === 'Packed' && !Object.values(dockStatus).some(d => d.assignedJobId === j.id)).length} READY
+                                            </span>
                                         </h4>
                                         <div className="bg-black/30 rounded-[2rem] p-6 border border-white/5 shadow-inner">
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                {[1, 2].map(i => (
-                                                    <div key={i} className="bg-white/5 p-4 rounded-2xl border border-white/5 flex justify-between items-center group hover:bg-white/10 hover:border-purple-500/30 transition-all cursor-pointer shadow-lg">
-                                                        <div className="flex items-center gap-4">
-                                                            <div className="w-12 h-12 bg-purple-500/20 rounded-xl flex items-center justify-center text-purple-400 shadow-[0_0_10px_rgba(168,85,247,0.2)]">
-                                                                <Package size={24} />
-                                                            </div>
-                                                            <div>
-                                                                <p className="text-[11px] font-black text-white uppercase tracking-widest">Shipment #202{i}</p>
-                                                                <p className="text-[9px] text-gray-500 font-bold uppercase mt-1">Dest: {t('common.activeSite')?.split(': ')[1] || 'Regional Hub'}</p>
-                                                            </div>
-                                                        </div>
-                                                        <div className="text-right">
-                                                            <p className="text-[10px] text-gray-400 font-mono font-bold tracking-tighter">24 Units</p>
-                                                            <p className="text-[9px] text-green-400 font-black tracking-widest uppercase mt-1">{t('warehouse.readyForDispatch')}</p>
-                                                        </div>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[300px] overflow-y-auto custom-scrollbar pr-2">
+                                                {jobs.filter(j => j.type === 'DISPATCH' && j.transferStatus === 'Packed' && !Object.values(dockStatus).some(d => d.assignedJobId === j.id)).length === 0 ? (
+                                                    <div className="col-span-full py-12 text-center">
+                                                        <Box size={40} className="text-gray-800 mx-auto mb-4" />
+                                                        <p className="text-xs text-gray-600 font-bold uppercase tracking-widest">No Shipments in Staging</p>
                                                     </div>
-                                                ))}
+                                                ) : (
+                                                    jobs.filter(j => j.type === 'DISPATCH' && j.transferStatus === 'Packed' && !Object.values(dockStatus).some(d => d.assignedJobId === j.id)).map(job => {
+                                                        const destSite = sites.find(s => s.id === job.destSiteId);
+                                                        return (
+                                                            <div
+                                                                key={job.id}
+                                                                onClick={() => {
+                                                                    setSelectedJob(job);
+                                                                    setIsDetailsOpen(true);
+                                                                }}
+                                                                className="bg-white/5 p-4 rounded-2xl border border-white/5 flex justify-between items-center group hover:bg-white/10 hover:border-purple-500/30 transition-all cursor-pointer shadow-lg"
+                                                            >
+                                                                <div className="flex items-center gap-4">
+                                                                    <div className="w-12 h-12 bg-purple-500/20 rounded-xl flex items-center justify-center text-purple-400 shadow-[0_0_10px_rgba(168,85,247,0.2)]">
+                                                                        <Package size={24} />
+                                                                    </div>
+                                                                    <div>
+                                                                        <div className="flex items-center gap-2">
+                                                                            <p className="text-[11px] font-black text-white uppercase tracking-widest">{formatJobId(job)}</p>
+                                                                            <span className="px-1.5 py-0.5 bg-purple-500/10 text-purple-400 text-[8px] font-black rounded border border-purple-500/20">READY</span>
+                                                                        </div>
+                                                                        <p className="text-[9px] text-gray-500 font-bold uppercase mt-1">Dest: {destSite?.name || 'Unknown'}</p>
+                                                                    </div>
+                                                                </div>
+                                                                <div className="text-right">
+                                                                    <p className="text-[10px] text-gray-400 font-mono font-bold tracking-tighter">{job.items || job.lineItems?.length || 0} Units</p>
+                                                                    <button
+                                                                        onClick={(e) => {
+                                                                            e.stopPropagation();
+                                                                            // Quick Assign to Dock logic
+                                                                            const availableDock = Object.keys(dockStatus).find(k => ['D3', 'D4'].includes(k) && dockStatus[k].status === 'Empty');
+                                                                            if (availableDock) {
+                                                                                setDockStatus(prev => ({
+                                                                                    ...prev,
+                                                                                    [availableDock]: { ...prev[availableDock], status: 'Occupied', assignedJobId: job.id }
+                                                                                }));
+                                                                                addNotification('success', `Assigned ${formatJobId(job)} to ${availableDock}`);
+                                                                            } else {
+                                                                                addNotification('alert', 'All Outbound Docks Occupied');
+                                                                            }
+                                                                        }}
+                                                                        className="text-[9px] text-purple-400 font-black tracking-widest uppercase mt-2 hover:text-purple-300 transition-colors"
+                                                                    >
+                                                                        DOCK LOAD →
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    })
+                                                )}
                                             </div>
                                         </div>
                                     </div>
@@ -2940,14 +3981,106 @@ export default function WarehouseOperations() {
                                         </button>
                                     </div>
                                     <div className="flex-1 overflow-y-auto space-y-4 custom-scrollbar pr-2">
-                                        <div className="p-6 bg-black/40 rounded-3xl border border-white/10 relative overflow-hidden group hover:border-purple-500/30 transition-all duration-500">
-                                            <div className="absolute top-0 right-0 w-24 h-24 bg-purple-500/5 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
-                                            <div className="flex justify-between items-start mb-4">
-                                                <span className="text-[10px] bg-purple-600/20 text-purple-400 px-3 py-1 rounded-lg font-black uppercase tracking-widest border border-purple-600/20">14:00 PM</span>
-                                                <span className="text-[9px] text-gray-500 font-black uppercase tracking-widest">{t('warehouse.pendingSync')}</span>
+                                        {jobs.filter(j => j.type === 'DISPATCH' && ['Shipped', 'In-Transit'].includes(j.transferStatus || '')).length === 0 ? (
+                                            <div className="col-span-full py-8 text-center bg-black/20 rounded-2xl border border-dashed border-white/5 opacity-40">
+                                                <p className="text-[10px] text-gray-600 font-bold uppercase tracking-widest">No Active Shipments</p>
                                             </div>
-                                            <p className="text-xs font-black text-white uppercase tracking-widest mb-1">Weekly Supply-Chain Ops</p>
-                                            <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Unit: Heavy-Lifter T-1000</p>
+                                        ) : (
+                                            jobs.filter(j => j.type === 'DISPATCH' && ['Shipped', 'In-Transit'].includes(j.transferStatus || '')).map(job => {
+                                                const destSite = sites.find(s => s.id === job.destSiteId);
+                                                const driver = employees.find(e => e.id === job.assignedTo);
+                                                return (
+                                                    <div key={job.id} className="p-6 bg-black/40 rounded-3xl border border-white/10 relative overflow-hidden group hover:border-purple-500/30 transition-all duration-500">
+                                                        <div className="absolute top-0 right-0 w-24 h-24 bg-purple-500/5 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
+                                                        <div className="flex justify-between items-start mb-4">
+                                                            <span className="text-[10px] bg-purple-600/20 text-purple-400 px-3 py-1 rounded-lg font-black uppercase tracking-widest border border-purple-600/20">
+                                                                {job.shippedAt ? new Date(job.shippedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Pending'}
+                                                            </span>
+                                                            <span className="text-[9px] text-green-500 font-black uppercase tracking-widest">{job.transferStatus?.toUpperCase()}</span>
+                                                        </div>
+                                                        <p className="text-xs font-black text-white uppercase tracking-widest mb-1">{destSite?.name || 'External Hub'}</p>
+                                                        <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Carrier: {driver?.name || 'Not Assigned'}</p>
+                                                    </div>
+                                                );
+                                            })
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* OUTBOUND HISTORY SECTION (Full Width) */}
+                                <div className="col-span-1 lg:col-span-3 mt-6">
+                                    <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-[2rem] p-6">
+                                        <div className="flex justify-between items-center mb-6">
+                                            <h3 className="text-sm font-black text-white tracking-widest uppercase flex items-center gap-2">
+                                                <HistoryIcon size={18} className="text-purple-400" />
+                                                {t('warehouse.docks.history') || 'Dispatch Output Logs'}
+                                            </h3>
+                                            <div className="relative">
+                                                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+                                                <input
+                                                    type="text"
+                                                    placeholder="Search logs..."
+                                                    className="bg-black/40 border border-white/10 rounded-xl pl-9 pr-4 py-2 text-xs text-white focus:border-purple-500/50 outline-none"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="overflow-x-auto">
+                                            <table className="w-full text-left border-collapse">
+                                                <thead>
+                                                    <tr className="text-[10px] text-gray-500 font-black uppercase tracking-widest border-b border-white/5">
+                                                        <th className="pb-4 pl-4">Job ID</th>
+                                                        <th className="pb-4">Destination</th>
+                                                        <th className="pb-4">Carrier</th>
+                                                        <th className="pb-4">Shipped At</th>
+                                                        <th className="pb-4">Type</th>
+                                                        <th className="pb-4">Items</th>
+                                                        <th className="pb-4 pr-4 text-right">Status</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody className="text-sm">
+                                                    {historicalJobs.filter(j => j.type === 'DISPATCH').length === 0 ? (
+                                                        <tr>
+                                                            <td colSpan={7} className="py-8 text-center text-gray-500 text-xs font-bold uppercase tracking-widest">
+                                                                No Dispatch History Records
+                                                            </td>
+                                                        </tr>
+                                                    ) : (
+                                                        historicalJobs.filter(j => j.type === 'DISPATCH').slice(0, 10).map(job => (
+                                                            <tr
+                                                                key={job.id}
+                                                                onClick={() => { setSelectedJob(job); setIsDetailsOpen(true); }}
+                                                                className="border-b border-white/5 hover:bg-white/5 transition-colors cursor-pointer group"
+                                                            >
+                                                                <td className="py-4 pl-4 font-mono text-purple-400 font-bold">{formatJobId(job)}</td>
+                                                                <td className="py-4 font-bold text-white">
+                                                                    {sites.find(s => s.id === job.destSiteId)?.name || 'Unknown'}
+                                                                </td>
+                                                                <td className="py-4 text-gray-400 text-xs">
+                                                                    {employees.find(e => e.id === job.assignedTo)?.name || '-'}
+                                                                </td>
+                                                                <td className="py-4 text-gray-400 text-xs font-mono">
+                                                                    {job.shippedAt ? new Date(job.shippedAt).toLocaleString() : '-'}
+                                                                </td>
+                                                                <td className="py-4">
+                                                                    <span className="px-2 py-0.5 bg-purple-500/10 border border-purple-500/20 text-purple-400 rounded-md text-[10px] font-black uppercase tracking-wider">
+                                                                        {job.priority}
+                                                                    </span>
+                                                                </td>
+                                                                <td className="py-4 font-mono text-white">
+                                                                    {job.items || job.lineItems?.length || 0}
+                                                                </td>
+                                                                <td className="py-4 pr-4 text-right">
+                                                                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-green-500/10 border border-green-500/20 text-green-400 text-[10px] font-black uppercase tracking-widest">
+                                                                        <CheckCircle size={12} />
+                                                                        {job.status}
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        ))
+                                                    )}
+                                                </tbody>
+                                            </table>
                                         </div>
                                     </div>
                                 </div>
@@ -2959,35 +4092,46 @@ export default function WarehouseOperations() {
                 {/* --- DRIVER TAB --- */}
                 {/* --- DRIVER TAB --- */}
                 {activeTab === 'DRIVER' && (
-                    <div className="flex-1 overflow-hidden flex flex-col space-y-6">
-                        {/* DRIVER HUB CONTROL */}
-                        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 shadow-2xl relative overflow-hidden group">
-                            {/* Animated Background Gradients */}
-                            <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/10 blur-[100px] -mr-32 -mt-32 rounded-full animate-pulse" />
-                            <div className="absolute bottom-0 left-0 w-48 h-48 bg-blue-500/5 blur-[80px] -ml-24 -mb-24 rounded-full" />
+                    <div className="flex-1 overflow-y-auto space-y-8 pr-2 custom-scrollbar pb-12">
+                        {/* DRIVER COMMAND CENTER HEADER */}
+                        <div className="bg-gradient-to-br from-black/60 via-cyber-black/40 to-black/60 backdrop-blur-3xl border border-white/10 rounded-[1.5rem] lg:rounded-[2.5rem] p-5 lg:p-8 shadow-2xl relative overflow-hidden group">
+                            {/* Dynamic Background Effects */}
+                            <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-cyan-500/10 blur-[120px] -mr-48 -mt-48 rounded-full animate-pulse-slow" />
+                            <div className="absolute -bottom-20 -left-20 w-80 h-80 bg-blue-600/5 blur-[100px] rounded-full" />
+                            <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-[0.03] pointer-events-none" />
 
-                            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative z-10">
-                                <div className="flex items-center gap-4">
-                                    <div className="p-3 bg-cyan-500/20 rounded-2xl shadow-[0_0_15px_rgba(6,182,212,0.2)]">
-                                        <Truck className="text-cyan-400" size={24} />
+                            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8 relative z-10">
+                                <div className="flex items-center gap-6">
+                                    <div className="relative group">
+                                        <div className="absolute inset-0 bg-cyan-500 blur-xl opacity-20 group-hover:opacity-40 transition-opacity animate-pulse" />
+                                        <div className="relative p-5 bg-gradient-to-br from-cyan-500/20 to-blue-500/10 rounded-3xl border border-cyan-500/30 shadow-[0_0_30px_rgba(6,182,212,0.2)]">
+                                            <Truck className="text-cyan-400 group-hover:scale-110 transition-transform duration-500" size={32} />
+                                        </div>
                                     </div>
                                     <div>
-                                        <div className="flex items-center gap-2">
-                                            <h3 className="text-xl font-black text-white tracking-tight uppercase">Driver Command</h3>
-                                            <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.6)]" />
+                                        <div className="flex items-center gap-3">
+                                            <h2 className="text-2xl lg:text-3xl font-black text-white tracking-tighter uppercase mb-1">
+                                                Driver <span className="text-cyan-400">Hub</span>
+                                            </h2>
+                                            <div className="px-2 py-0.5 rounded-md bg-cyan-500/20 border border-cyan-500/30">
+                                                <p className="text-[8px] lg:text-[10px] font-black text-cyan-400 uppercase tracking-widest leading-none">V4.0</p>
+                                            </div>
                                         </div>
-                                        <div className="flex items-center gap-3 mt-1">
-                                            <p className="text-xs text-gray-500 font-black uppercase tracking-widest">{t('warehouse.docks.welcome')?.replace('{name}', user?.name || 'Driver') || `Welcome, ${user?.name || 'Driver'} `}</p>
-                                            <div className="h-3 w-px bg-white/10" />
+                                        <div className="flex flex-wrap items-center gap-4 mt-2">
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse shadow-[0_0_10px_#22c55e]" />
+                                                <p className="text-xs text-gray-400 font-bold uppercase tracking-widest">{t('warehouse.docks.welcome')?.replace('{name}', user?.name || 'Driver') || `Welcome, ${user?.name || 'Driver'} `}</p>
+                                            </div>
+                                            <div className="h-4 w-px bg-white/10 hidden sm:block" />
                                             {(() => {
                                                 const currentEmployee = employees.find(e => e.email === user?.email);
                                                 const driverType = currentEmployee?.driverType || 'internal';
                                                 return (
-                                                    <span className={`text-[9px] px-2 py-0.5 rounded-full font-black uppercase tracking-widest border ${driverType === 'internal' ? 'bg-green-500/10 text-green-400 border-green-500/20' :
+                                                    <span className={`text-[10px] px-3 py-1 rounded-2xl font-black uppercase tracking-[0.1em] border shadow-sm ${driverType === 'internal' ? 'bg-green-500/10 text-green-400 border-green-500/20' :
                                                         driverType === 'subcontracted' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' :
                                                             'bg-purple-500/10 text-purple-400 border-purple-500/20'
                                                         } `}>
-                                                        {driverType === 'internal' ? 'Internal Fleet' : driverType === 'subcontracted' ? 'Contractor' : 'Partner'}
+                                                        {driverType === 'internal' ? 'Unit: Internal Fleet' : driverType === 'subcontracted' ? 'Unit: Contractor' : 'Unit: Partner'}
                                                     </span>
                                                 );
                                             })()}
@@ -2995,31 +4139,39 @@ export default function WarehouseOperations() {
                                     </div>
                                 </div>
 
-                                <div className="flex items-center gap-4 w-full md:w-auto">
-                                    <div className="bg-black/40 px-4 py-2 rounded-2xl border border-white/5 flex items-center gap-4">
-                                        <div className="text-right border-r border-white/10 pr-4">
-                                            <p className="text-sm font-black text-white font-mono">{formatDateTime(new Date(), { showTime: true })}</p>
-                                            <p className="text-[9px] text-gray-500 uppercase tracking-widest font-bold">{activeSite?.name || 'Global'}</p>
+                                <div className="flex items-center gap-4 w-full lg:w-auto">
+                                    <div className="flex-1 lg:flex-none bg-black/40 backdrop-blur-md px-6 py-3 rounded-2xl border border-white/5 flex items-center justify-between lg:justify-end gap-6 shadow-inner">
+                                        <div className="text-right">
+                                            <p className="text-lg font-black text-white font-mono tracking-tighter">{formatDateTime(new Date(), { showTime: true })}</p>
+                                            <div className="flex items-center justify-end gap-2 text-[10px] text-gray-500 uppercase tracking-widest font-black">
+                                                <MapPin size={10} className="text-cyan-500" />
+                                                {activeSite?.name || 'Central Ops Area'}
+                                            </div>
                                         </div>
+                                        <div className="w-px h-8 bg-white/10" />
                                         <button
                                             onClick={() => refreshData()}
                                             disabled={isSubmitting}
-                                            title="Refresh Hub"
-                                            className="p-2.5 bg-white/5 hover:bg-white/10 rounded-xl text-cyan-400 transition-all hover:scale-110 active:scale-95 group"
+                                            title="REFRESH MISSION DATA"
+                                            className="p-3 bg-white/5 hover:bg-cyan-500 hover:text-black rounded-xl text-cyan-400 transition-all duration-500 hover:shadow-[0_0_20px_rgba(6,182,212,0.4)] group"
                                         >
-                                            <RefreshCw size={18} className={`${isSubmitting ? 'animate-spin' : 'group-hover:rotate-180 transition-transform duration-500'} `} />
+                                            <RefreshCw size={20} className={`${isSubmitting ? 'animate-spin' : 'group-hover:rotate-180 transition-transform duration-700'} `} />
                                         </button>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        {/* MAIN OPERATIONAL GRID */}
-                        <div className="flex-1 overflow-hidden grid grid-cols-1 lg:grid-cols-3 gap-6">
-                            {/* LEFT COLUMN: MISSION QUEUE */}
-                            <div className="lg:col-span-2 space-y-6 overflow-y-auto pr-2 custom-scrollbar">
-
-                                {/* ACTIVE MISSIONS */}
+                        {/* UPPER OPERATIONAL DASHBOARD: 3-Column Tactical Display */}
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            {/* COLUMN 1: ACTIVE MISSION (Priority focus) */}
+                            <div className="space-y-4">
+                                <div className="flex items-center justify-between px-2">
+                                    <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] flex items-center gap-2">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-pulse" />
+                                        {t('warehouse.docks.currentMission') || 'Active Mission'}
+                                    </h4>
+                                </div>
                                 {(() => {
                                     const currentEmployee = employees.find(e => e.email === user?.email);
                                     const myJobs = filteredJobs.filter(j =>
@@ -3028,426 +4180,607 @@ export default function WarehouseOperations() {
                                         j.status !== 'Completed'
                                     );
 
-                                    if (myJobs.length === 0) return null;
-
-                                    return (
-                                        <div className="space-y-4">
-                                            <div className="flex items-center justify-between px-2">
-                                                <h4 className="text-xs font-black text-white uppercase tracking-[0.2em] flex items-center gap-2">
-                                                    <span className="w-2 h-2 rounded-full bg-cyan-500" />
-                                                    {t('warehouse.docks.currentMission') || 'Current Mission'}
-                                                    <span className="text-cyan-500/50">[{myJobs.length}]</span>
-                                                </h4>
-                                            </div>
-
-                                            <div className="space-y-4">
-                                                {myJobs.map((job, idx) => {
-                                                    const destSite = sites.find(s => s.id === job.destSiteId);
-                                                    const isPending = job.status === 'Pending';
-                                                    const isFirst = idx === 0 && !isPending;
-
-                                                    return (
-                                                        <div
-                                                            key={job.id}
-                                                            onClick={() => {
-                                                                setSelectedJob(job);
-                                                                setIsDetailsOpen(true);
-                                                            }}
-                                                            className={`group relative rounded-3xl transition-all duration-300 overflow-hidden border ${isPending
-                                                                ? 'bg-black/20 border-white/5 opacity-60 cursor-not-allowed'
-                                                                : isFirst
-                                                                    ? 'bg-gradient-to-br from-cyan-900/20 via-black to-black border-cyan-500/30 hover:border-cyan-500/60 shadow-[0_0_30px_rgba(6,182,212,0.1)]'
-                                                                    : 'bg-white/5 border-white/10 hover:border-white/20'
-                                                                } `}
-                                                        >
-                                                            {isFirst && (
-                                                                <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/10 blur-[40px] -mr-16 -mt-16 rounded-full" />
-                                                            )}
-
-                                                            <div className="p-6 relative z-10">
-                                                                <div className="flex justify-between items-start mb-6">
-                                                                    <div>
-                                                                        <div className="flex items-center gap-3 mb-2">
-                                                                            <span className={`px-2 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-widest ${isPending ? 'bg-gray-500/10 text-gray-500 border border-gray-500/20' : 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30'} `}>
-                                                                                {isPending ? 'Pending Approval' : isFirst ? 'Live Route' : `Queued Job ${idx + 1} `}
-                                                                            </span>
-                                                                            <span className="text-[10px] font-mono text-gray-600 font-bold">{formatJobId(job)}</span>
-                                                                        </div>
-                                                                        <h3 className={`font-black tracking-tight ${isFirst ? 'text-3xl text-white' : 'text-xl text-gray-300'} `}>
-                                                                            {destSite?.name || 'Unknown Destination'}
-                                                                        </h3>
-                                                                        <div className="flex items-center gap-2 mt-2 text-gray-500 text-xs font-bold uppercase tracking-wider">
-                                                                            <MapPin size={12} className="text-cyan-500" />
-                                                                            <span>{destSite?.address || 'Location Coordinates Encrypted'}</span>
-                                                                        </div>
-                                                                    </div>
-
-                                                                    <div className="text-right">
-                                                                        <p className="text-2xl font-black text-white tracking-tighter">{job.items || job.lineItems?.length || 0}</p>
-                                                                        <p className="text-[9px] text-gray-600 font-bold uppercase tracking-tighter">Payload Items</p>
-                                                                    </div>
-                                                                </div>
-
-                                                                {!isPending && (
-                                                                    <div className="flex gap-3">
-                                                                        <button
-                                                                            onClick={(e) => {
-                                                                                e.stopPropagation();
-                                                                                if (destSite?.address) {
-                                                                                    window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(destSite.address)}`, '_blank');
-                                                                                } else {
-                                                                                    addNotification('info', 'Address Coordinates Encrypted. Using manual navigation.');
-                                                                                }
-                                                                            }}
-                                                                            title="Activate GPS Navigation"
-                                                                            className="flex-1 py-4 bg-white/5 border border-white/10 rounded-2xl text-xs font-black text-white uppercase tracking-widest hover:bg-white/10 transition-all flex items-center justify-center gap-3 group/btn" >
-                                                                            <Navigation size={16} className="text-cyan-400 group-hover/btn:scale-125 transition-transform" />
-                                                                            Activate GPS
-                                                                        </button >
-                                                                        <button
-                                                                            disabled={processingJobIds.has(job.id)}
-                                                                            onClick={async (e) => {
-                                                                                e.stopPropagation();
-                                                                                setProcessingJobIds(prev => new Set(prev).add(job.id));
-                                                                                try {
-                                                                                    await wmsJobsService.update(job.id, {
-                                                                                        status: 'Completed',
-                                                                                        transferStatus: 'Delivered'
-                                                                                    });
-                                                                                    await refreshData();
-                                                                                    addNotification('success', `Mission Successful. Delivered to ${destSite?.name}.`);
-                                                                                } catch (err) {
-                                                                                    addNotification('alert', 'Transmission Interrupted. Failed to log delivery.');
-                                                                                } finally {
-                                                                                    setProcessingJobIds(prev => {
-                                                                                        const next = new Set(prev);
-                                                                                        next.delete(job.id);
-                                                                                        return next;
-                                                                                    });
-                                                                                }
-                                                                            }}
-                                                                            className="flex-1 py-4 bg-cyan-500 text-black rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-cyan-400 transition-all flex items-center justify-center gap-3 shadow-[0_0_20px_rgba(6,182,212,0.3)] disabled:opacity-50"
-                                                                        >
-                                                                            {processingJobIds.has(job.id) ? <RefreshCw className="animate-spin" size={16} /> : <CheckCircle size={16} />}
-                                                                            {processingJobIds.has(job.id) ? 'LOGGING...' : 'Finalize Drop'}
-                                                                        </button>
-                                                                    </div >
-                                                                )}
-
-                                                                {
-                                                                    isPending && (
-                                                                        <div className="mt-4 p-4 bg-black/40 rounded-2xl border border-white/5 text-center">
-                                                                            <p className="text-[10px] text-gray-500 font-bold uppercase tracking-[0.2em] animate-pulse">Scanning for Dispatch Authentication...</p>
-                                                                        </div>
-                                                                    )
-                                                                }
-                                                            </div >
-                                                        </div >
-                                                    );
-                                                })}
-                                            </div >
-                                        </div >
-                                    );
-                                })()}
-
-                                {/* AVAILABLE DISPATCH INTAKE */}
-                                {
-                                    (() => {
-                                        const currentEmployee = employees.find(e => e.email === user?.email);
-                                        const isInternal = !currentEmployee?.driverType || currentEmployee?.driverType === 'internal';
-
+                                    if (myJobs.length === 0) {
                                         return (
-                                            <div className="space-y-4">
-                                                <div className="flex items-center justify-between px-2">
-                                                    <h4 className="text-xs font-black text-white uppercase tracking-[0.2em] flex items-center gap-2">
-                                                        <span className="w-2 h-2 rounded-full bg-yellow-500" />
-                                                        Intake Marketplace
-                                                        <span className="text-yellow-500/50">[{filteredDispatchJobs.length}]</span>
-                                                    </h4>
-                                                    {!isInternal && (
-                                                        <span className="text-[9px] text-orange-400 font-black uppercase tracking-widest px-2 py-0.5 bg-orange-500/10 border border-orange-500/20 rounded-full">
-                                                            Auth Required
-                                                        </span>
-                                                    )}
+                                            <div className="bg-black/20 border border-dashed border-white/5 rounded-3xl p-6 lg:p-8 text-center">
+                                                <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                                                    <Shield className="text-gray-700" size={24} />
                                                 </div>
-
-                                                {filteredDispatchJobs.length === 0 ? (
-                                                    <div className="bg-black/20 rounded-3xl p-10 border border-white/5 text-center">
-                                                        <Shield size={40} className="text-gray-800 mx-auto mb-4" />
-                                                        <p className="text-sm text-gray-600 font-bold uppercase tracking-widest">No Active Dispatch Requests</p>
-                                                    </div>
-                                                ) : (
-                                                    <>
-                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                            {paginatedDispatchJobs.map(job => {
-                                                                const dest = sites.find(s => s.id === job.destSiteId);
-                                                                const source = sites.find(s => s.id === job.sourceSiteId || s.id === job.siteId);
-
-                                                                return (
-                                                                    <div
-                                                                        key={job.id}
-                                                                        onClick={() => {
-                                                                            setSelectedJob(job);
-                                                                            setIsDetailsOpen(true);
-                                                                        }}
-                                                                        className="bg-white/5 border border-white/10 rounded-[28px] p-5 hover:border-yellow-500/30 transition-all group relative overflow-hidden flex flex-col h-full"
-                                                                    >
-                                                                        <div className="flex justify-between items-start mb-4">
-                                                                            <div>
-                                                                                <p className="text-[9px] font-mono text-gray-500 font-bold mb-1">{formatJobId(job)}</p>
-                                                                                <h5 className="font-black text-white text-lg leading-tight truncate w-full max-w-[150px]">{dest?.name || 'Direct Delivery'}</h5>
-                                                                            </div>
-                                                                            <div className={`px-2 py-1 rounded-lg text-[8px] font-black uppercase tracking-tighter ${job.priority === 'Critical' ? 'bg-red-500/10 text-red-500 border border-red-500/20' :
-                                                                                job.priority === 'High' ? 'bg-orange-500/10 text-orange-400 border border-orange-500/20' :
-                                                                                    'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20'
-                                                                                }`}>
-                                                                                {job.priority}
-                                                                            </div>
-                                                                        </div>
-
-                                                                        <div className="flex-1 space-y-3 mb-6">
-                                                                            <div className="flex items-center gap-3">
-                                                                                <div className="flex flex-col items-center gap-1">
-                                                                                    <div className="w-1.5 h-1.5 rounded-full bg-gray-600" />
-                                                                                    <div className="w-px h-3 bg-white/5" />
-                                                                                    <div className="w-1.5 h-1.5 rounded-full bg-cyan-500" />
-                                                                                </div>
-                                                                                <div className="flex flex-col gap-1">
-                                                                                    <p className="text-[9px] text-gray-600 font-bold uppercase">{source?.name || 'Logistics Hub'}</p>
-                                                                                    <p className="text-[10px] text-white font-bold">{dest?.name || 'Site Alpha'}</p>
-                                                                                </div>
-                                                                            </div>
-                                                                        </div>
-
-                                                                        <button
-                                                                            disabled={processingJobIds.has(job.id)}
-                                                                            onClick={async (e) => {
-                                                                                e.stopPropagation();
-                                                                                if (!currentEmployee) return;
-                                                                                setProcessingJobIds(prev => new Set(prev).add(job.id));
-                                                                                try {
-                                                                                    await wmsJobsService.update(job.id, {
-                                                                                        assignedTo: currentEmployee.id,
-                                                                                        status: isInternal ? 'In-Progress' : 'Pending'
-                                                                                    });
-                                                                                    await refreshData();
-                                                                                    addNotification('success', isInternal ? 'Mission claim successful.' : 'Dispatch request transmitted for auth.');
-                                                                                } catch (err) {
-                                                                                    addNotification('alert', 'Claim process failed. Retrying sync.');
-                                                                                } finally {
-                                                                                    setProcessingJobIds(prev => {
-                                                                                        const next = new Set(prev);
-                                                                                        next.delete(job.id);
-                                                                                        return next;
-                                                                                    });
-                                                                                }
-                                                                            }}
-                                                                            className={`w-full py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${isInternal ? 'bg-white text-black hover:bg-cyan-400' : 'bg-orange-500/10 text-orange-400 border border-orange-500/30'
-                                                                                } disabled:opacity-50`}
-                                                                        >
-                                                                            {processingJobIds.has(job.id) ? <RefreshCw className="animate-spin mx-auto" size={14} /> : (isInternal ? 'Initiate Claim' : 'Request Auth')}
-                                                                        </button>
-                                                                    </div>
-                                                                );
-                                                            })}
-                                                        </div>
-
-                                                        {filteredDispatchJobs.length > 0 && (
-                                                            <div className="mt-4">
-                                                                <Pagination
-                                                                    currentPage={dispatchCurrentPage}
-                                                                    totalPages={dispatchTotalPages}
-                                                                    totalItems={filteredDispatchJobs.length}
-                                                                    itemsPerPage={DISPATCH_ITEMS_PER_PAGE}
-                                                                    onPageChange={setDispatchCurrentPage}
-                                                                    isLoading={false}
-                                                                    itemName="requests"
-                                                                />
-                                                            </div>
-                                                        )}
-                                                    </>
-                                                )}
+                                                <p className="text-[10px] text-gray-500 font-black uppercase tracking-widest">No Active Job</p>
                                             </div>
                                         );
-                                    })()
-                                }
-                            </div >
+                                    }
 
-                            {/* RIGHT COLUMN: OPERATIONAL INTELLIGENCE */}
-                            < div className="space-y-6" >
-                                {/* UNIT HUB (Quick Actions) */}
-                                < div className="bg-white/5 border border-white/10 rounded-3xl p-6 relative overflow-hidden" >
-                                    <div className="absolute top-0 left-0 w-1 bg-cyan-500 h-full opacity-50" />
-                                    <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] mb-4">Operations Hub</h4>
-                                    <div className="grid grid-cols-2 gap-3">
+                                    return myJobs.map((job, idx) => {
+                                        const destSite = sites.find(s => s.id === job.destSiteId);
+                                        const isPending = job.status === 'Pending';
+                                        const isFirst = idx === 0 && !isPending;
+
+                                        return (
+                                            <div
+                                                key={job.id}
+                                                onClick={() => {
+                                                    setSelectedJob(job);
+                                                    setIsDetailsOpen(true);
+                                                }}
+                                                className={`group relative rounded-[2rem] transition-all duration-500 overflow-hidden border cursor-pointer active:scale-95 ${isPending
+                                                    ? 'bg-black/30 border-white/5 opacity-60'
+                                                    : isFirst
+                                                        ? 'bg-gradient-to-br from-cyan-950/40 via-black to-black border-cyan-500/50 hover:border-cyan-400 shadow-[0_0_50px_rgba(6,182,212,0.15)] animate-cockpit-breathing'
+                                                        : 'bg-white/5 border-white/10 hover:border-white/20'
+                                                    }`}
+                                            >
+                                                {/* Tactical Corner Accent */}
+                                                <div className="absolute top-0 right-0 w-24 h-24 bg-cyan-500/10 blur-[40px] -mr-12 -mt-12 rounded-full" />
+                                                <div className="absolute top-0 right-0 p-4 opacity-20 group-hover:opacity-100 transition-opacity">
+                                                    <ChevronRight size={16} className="text-cyan-400" />
+                                                </div>
+
+                                                <div className="p-6 relative z-10">
+                                                    <div className="flex flex-col gap-4">
+                                                        <div className="flex justify-between items-start">
+                                                            <div className="flex items-center gap-2">
+                                                                <span className={`px-2 py-0.5 rounded-md text-[8px] font-black uppercase tracking-widest border ${isPending ? 'bg-gray-500/10 text-gray-500 border-gray-500/20' : 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30'} `}>
+                                                                    {isPending ? 'PENDING' : 'READY'}
+                                                                </span>
+                                                                <span className="text-[10px] font-mono text-gray-600 font-bold uppercase tracking-widest">{formatJobId(job)}</span>
+                                                            </div>
+                                                            <div className="text-right">
+                                                                <p className="text-2xl font-black text-white leading-none">{job.items || job.lineItems?.length || 0}</p>
+                                                                <p className="text-[8px] text-cyan-500/60 font-black uppercase tracking-widest mt-0.5">Units</p>
+                                                            </div>
+                                                        </div>
+
+                                                        <div>
+                                                            <h3 className="text-2xl font-black text-white tracking-tighter uppercase leading-none group-hover:text-cyan-400 transition-colors">
+                                                                {destSite?.name || 'Unknown Hub'}
+                                                            </h3>
+                                                            <div className="flex items-center gap-2 mt-1.5 text-gray-500 text-[10px] font-bold uppercase tracking-wider">
+                                                                <MapPin size={10} className="text-cyan-500/50" />
+                                                                <span className="truncate max-w-[150px]">{destSite?.address || 'Address Unavailable'}</span>
+                                                            </div>
+                                                        </div>
+
+                                                        {!isPending && (
+                                                            <div className="grid grid-cols-2 gap-2 mt-2">
+                                                                <button
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        if (destSite?.address) {
+                                                                            window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(destSite.address)}`, '_blank');
+                                                                        } else {
+                                                                            addNotification('info', 'Address pending. Coordinates currently unavailable.');
+                                                                        }
+                                                                    }}
+                                                                    className="py-3 bg-white/5 border border-white/10 rounded-2xl text-[9px] font-black text-white uppercase tracking-widest hover:bg-white/10 transition-all flex items-center justify-center gap-2"
+                                                                >
+                                                                    <Navigation size={14} className="text-cyan-400" />
+                                                                    NAV
+                                                                </button>
+                                                                {job.transferStatus !== 'In-Transit' && job.transferStatus !== 'Delivered' ? (
+                                                                    <button
+                                                                        disabled={processingJobIds.has(job.id) || job.status === 'Completed'}
+                                                                        onClick={async (e) => {
+                                                                            e.stopPropagation();
+                                                                            setProcessingJobIds(prev => new Set(prev).add(job.id));
+                                                                            try {
+                                                                                await wmsJobsService.update(job.id, { transferStatus: 'In-Transit', shippedAt: new Date().toISOString() } as any);
+                                                                                if (job.orderRef) {
+                                                                                    const parentTransfer = jobs.find(j => j.id === job.orderRef && j.type === 'TRANSFER');
+                                                                                    if (parentTransfer) await wmsJobsService.update(parentTransfer.id, { transferStatus: 'In-Transit' } as any);
+                                                                                }
+                                                                                await refreshData();
+                                                                                addNotification('success', 'Pickup confirmed. Job started.');
+                                                                            } catch (err) { addNotification('alert', 'Cloud sync failed.'); } finally {
+                                                                                setProcessingJobIds(prev => {
+                                                                                    const next = new Set(prev);
+                                                                                    next.delete(job.id);
+                                                                                    return next;
+                                                                                });
+                                                                            }
+                                                                        }}
+                                                                        className="py-3 bg-cyan-500 text-black rounded-2xl text-[9px] font-black uppercase tracking-widest hover:bg-cyan-400 transition-all flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(6,182,212,0.3)] disabled:opacity-50"
+                                                                    >
+                                                                        {processingJobIds.has(job.id) ? <RefreshCw className="animate-spin" size={12} /> : <Truck size={12} />}
+                                                                        PICKUP
+                                                                    </button>
+                                                                ) : job.transferStatus === 'In-Transit' ? (
+                                                                    <button
+                                                                        disabled={processingJobIds.has(job.id) || job.status === 'Completed'}
+                                                                        onClick={async (e) => {
+                                                                            e.stopPropagation();
+                                                                            setProcessingJobIds(prev => new Set(prev).add(job.id));
+                                                                            try {
+                                                                                await wmsJobsService.update(job.id, { transferStatus: 'Delivered', deliveredAt: new Date().toISOString() } as any);
+                                                                                if (job.orderRef) {
+                                                                                    const parentTransfer = jobs.find(j => j.id === job.orderRef && j.type === 'TRANSFER');
+                                                                                    if (parentTransfer) await wmsJobsService.update(parentTransfer.id, { transferStatus: 'Delivered' } as any);
+                                                                                }
+                                                                                await refreshData();
+                                                                                addNotification('success', 'Delivered.');
+                                                                            } catch (err) { addNotification('alert', 'Cloud sync failed.'); } finally {
+                                                                                setProcessingJobIds(prev => {
+                                                                                    const next = new Set(prev);
+                                                                                    next.delete(job.id);
+                                                                                    return next;
+                                                                                });
+                                                                            }
+                                                                        }}
+                                                                        className="py-3 bg-purple-600 text-white rounded-2xl text-[9px] font-black uppercase tracking-widest hover:bg-purple-500 transition-all flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(168,85,247,0.3)] disabled:opacity-50"
+                                                                    >
+                                                                        {processingJobIds.has(job.id) ? <RefreshCw className="animate-spin" size={12} /> : <CheckCircle size={12} />}
+                                                                        ARRIVED
+                                                                    </button>
+                                                                ) : job.transferStatus === 'Delivered' ? (
+                                                                    <button
+                                                                        disabled={processingJobIds.has(job.id) || job.status === 'Completed'}
+                                                                        onClick={async (e) => {
+                                                                            e.stopPropagation();
+                                                                            setProcessingJobIds(prev => new Set(prev).add(job.id));
+                                                                            try {
+                                                                                // 1. Mark job as Completed
+                                                                                await wmsJobsService.update(job.id, {
+                                                                                    status: 'Completed',
+                                                                                    transferStatus: 'Received',
+                                                                                    receivedAt: new Date().toISOString(),
+                                                                                    receivedBy: user?.name || 'Driver'
+                                                                                } as any);
+
+                                                                                // 2. Update parent TRANSFER if exists
+                                                                                if (job.orderRef) {
+                                                                                    const parentJob = jobs.find(j => j.id === job.orderRef);
+                                                                                    if (parentJob) {
+                                                                                        await wmsJobsService.update(parentJob.id, {
+                                                                                            status: 'Completed',
+                                                                                            transferStatus: 'Received'
+                                                                                        } as any);
+                                                                                    }
+                                                                                }
+
+                                                                                // 3. Adjust inventory at destination site
+                                                                                const destSiteId = job.destSiteId || (job as any).dest_site_id;
+                                                                                const lineItems = job.lineItems || (job as any).line_items || [];
+
+                                                                                for (const item of lineItems) {
+                                                                                    const qty = item.receivedQty || item.quantity || item.expectedQty || item.pickedQty || 0;
+                                                                                    if (qty > 0 && destSiteId) {
+                                                                                        // Find product at destination
+                                                                                        const destProduct = products.find(p =>
+                                                                                            (p.sku === item.sku || p.id === item.productId || p.productId === item.productId) &&
+                                                                                            (p.siteId === destSiteId || p.site_id === destSiteId)
+                                                                                        );
+
+                                                                                        if (destProduct) {
+                                                                                            await adjustStockMutation.mutateAsync({
+                                                                                                productId: destProduct.id,
+                                                                                                productName: destProduct.name || item.name || 'Product',
+                                                                                                productSku: destProduct.sku || item.sku || '',
+                                                                                                siteId: destSiteId,
+                                                                                                quantity: qty,
+                                                                                                type: 'IN',
+                                                                                                reason: `Driver Delivery: ${formatJobId(job)}`,
+                                                                                                canApprove: true
+                                                                                            });
+                                                                                        } else {
+                                                                                            // Auto-create product at destination if missing
+                                                                                            const templateProduct = products.find(p =>
+                                                                                                p.sku === item.sku || p.id === item.productId
+                                                                                            );
+                                                                                            if (templateProduct) {
+                                                                                                await addProduct({
+                                                                                                    name: item.name || templateProduct?.name || 'Product',
+                                                                                                    sku: item.sku || templateProduct?.sku,
+                                                                                                    price: templateProduct?.price || 0,
+                                                                                                    costPrice: (templateProduct as any)?.costPrice || 0,
+                                                                                                    stock: qty,
+                                                                                                    unit: templateProduct?.unit || 'pcs',
+                                                                                                    siteId: destSiteId,
+                                                                                                    category: templateProduct?.category || 'Uncategorized',
+                                                                                                    productId: templateProduct?.productId || templateProduct?.id
+                                                                                                } as any);
+                                                                                            }
+                                                                                        }
+                                                                                    }
+                                                                                }
+
+                                                                                await refreshData();
+                                                                                addNotification('success', 'Delivery Complete! Stock transferred.');
+                                                                            } catch (err) {
+                                                                                console.error('Failed to complete delivery:', err);
+                                                                                addNotification('alert', 'Failed to finalize delivery.');
+                                                                            } finally {
+                                                                                setProcessingJobIds(prev => {
+                                                                                    const next = new Set(prev);
+                                                                                    next.delete(job.id);
+                                                                                    return next;
+                                                                                });
+                                                                            }
+                                                                        }}
+                                                                        className="py-3 bg-green-600 text-white rounded-2xl text-[9px] font-black uppercase tracking-widest hover:bg-green-500 transition-all flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(34,197,94,0.3)] disabled:opacity-50"
+                                                                    >
+                                                                        {processingJobIds.has(job.id) ? <RefreshCw className="animate-spin" size={12} /> : <CheckCircle size={12} />}
+                                                                        COMPLETE
+                                                                    </button>
+                                                                ) : job.status === 'Completed' ? (
+                                                                    <div className="py-2.5 bg-green-500/10 border border-green-500/30 rounded-2xl text-[8px] font-black text-green-400 uppercase tracking-widest flex items-center justify-center gap-2">
+                                                                        <CheckCircle size={12} /> DONE
+                                                                    </div>
+                                                                ) : null}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        );
+                                    });
+                                })()}
+                            </div>
+
+                            {/* COLUMN 2: OPERATIONS HUB (Tools) */}
+                            <div className="space-y-4">
+                                <div className="flex items-center justify-between px-2">
+                                    <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] flex items-center gap-2">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                                        Driver Actions
+                                    </h4>
+                                </div>
+                                <div className="bg-gradient-to-br from-white/5 to-transparent border border-white/10 rounded-[2rem] p-6 relative overflow-hidden group h-full">
+                                    <div className="grid grid-cols-2 gap-3 h-full content-start">
                                         {[
                                             {
-                                                icon: QrCode, label: 'Scan', color: 'blue',
+                                                icon: QrCode, label: 'SCAN', color: 'cyan',
                                                 action: () => setDriverScannerOpen(true)
                                             },
                                             {
-                                                icon: AlertTriangle, label: 'Report', color: 'orange',
-                                                action: () => addNotification('alert', 'Maintenance & Incident protocol active. Dispatch notified.')
+                                                icon: AlertTriangle, label: 'REPORT', color: 'orange',
+                                                action: () => addNotification('alert', 'Incident Reported to Dispatch.')
                                             },
                                             {
-                                                icon: FileText, label: 'Docs', color: 'purple',
-                                                action: () => addNotification('info', 'Digital manifest & BOL documents encrypted for security.')
+                                                icon: FileText, label: 'DOCS', color: 'blue',
+                                                action: () => addNotification('info', 'Manifest loaded.')
                                             },
                                             {
-                                                icon: CheckCircle, label: 'Finish', color: 'green',
+                                                icon: LogOut, label: 'FINISH', color: 'red',
                                                 action: () => {
-                                                    const finished = window.confirm("Finalize shift and logout of Driver Hub?");
-                                                    if (finished) setActiveTab('PICK');
+                                                    if (window.confirm("Complete shift and logout?")) setActiveTab('PICK');
                                                 }
                                             }
                                         ].map((act, i) => (
                                             <button
                                                 key={i}
                                                 onClick={act.action}
-                                                className={`aspect-square bg-${act.color}-500/10 border border-${act.color}-500/20 rounded-2xl flex flex-col items-center justify-center gap-2 hover:bg-${act.color}-500/20 transition-all hover:scale-105 active:scale-95 group`}
+                                                className="group/btn relative aspect-square bg-white/5 border border-white/10 rounded-2xl flex flex-col items-center justify-center gap-3 hover:bg-white/10 transition-all hover:scale-105 active:scale-95 overflow-hidden"
                                             >
-                                                <act.icon size={24} className={`text-${act.color}-400 group-hover:drop-shadow-[0_0_8px_rgba(var(--${act.color}-rgb),0.5)]`} />
-                                                <span className={`text-[9px] font-black text-${act.color}-100 uppercase tracking-widest`}>{act.label}</span>
+                                                <div className={`absolute inset-0 bg-${act.color}-500 blur-2xl opacity-0 group-hover/btn:opacity-10 transition-opacity`} />
+                                                <act.icon size={28} className={`text-${act.color}-400 group-hover/btn:scale-110 transition-transform`} />
+                                                <span className="text-[10px] font-black text-white uppercase tracking-widest">{act.label}</span>
                                             </button>
                                         ))}
                                     </div>
-                                </div >
+                                </div>
+                            </div>
 
-                                {/* PERFORMANCE TELEMETRY */}
-                                {
-                                    (() => {
-                                        const currentEmployee = employees.find(e => e.email === user?.email);
-                                        const stats = {
-                                            completed: filteredJobs.filter(j => j.type === 'DISPATCH' && j.assignedTo === currentEmployee?.id && j.status === 'Completed').length,
-                                            active: filteredJobs.filter(j => j.type === 'DISPATCH' && j.assignedTo === currentEmployee?.id && j.status !== 'Completed').length,
-                                            items: filteredJobs.filter(j => j.type === 'DISPATCH' && j.assignedTo === currentEmployee?.id).reduce((sum, j) => sum + (j.items || j.lineItems?.length || 0), 0)
-                                        };
+                            {/* COLUMN 3: PERFORMANCE TELEMETRY */}
+                            <div className="space-y-4">
+                                <div className="flex items-center justify-between px-2">
+                                    <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] flex items-center gap-2">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
+                                        Performance Metrics
+                                    </h4>
+                                </div>
+                                {(() => {
+                                    const currentEmployee = employees.find(e => e.email === user?.email);
+                                    const stats = {
+                                        completed: filteredJobs.filter(j => j.type === 'DISPATCH' && j.assignedTo === currentEmployee?.id && j.status === 'Completed').length,
+                                        active: filteredJobs.filter(j => j.type === 'DISPATCH' && j.assignedTo === currentEmployee?.id && j.status !== 'Completed').length,
+                                        items: filteredJobs.filter(j => j.type === 'DISPATCH' && j.assignedTo === currentEmployee?.id).reduce((sum, j) => sum + (j.items || j.lineItems?.length || 0), 0)
+                                    };
 
-                                        return (
-                                            <div className="bg-white/5 border border-white/10 rounded-3xl p-6 relative overflow-hidden">
-                                                <div className="absolute bottom-0 right-0 w-32 h-32 bg-cyan-500/5 blur-[40px] -mr-16 -mb-16 rounded-full" />
-                                                <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] mb-6">Performance Telemetry</h4>
-
-                                                <div className="space-y-6 relative z-10">
-                                                    <div className="flex items-end justify-between">
-                                                        <div>
-                                                            <p className="text-[9px] text-gray-500 font-bold uppercase tracking-widest mb-1">Total Payload</p>
-                                                            <p className="text-3xl font-black text-white leading-none">{stats.items}</p>
-                                                        </div>
-                                                        <div className="text-right">
-                                                            <p className="text-[9px] text-green-500 font-bold uppercase tracking-widest mb-1">Efficiency</p>
-                                                            <p className="text-xl font-black text-white leading-none">98<span className="text-[10px] text-gray-600">%</span></p>
-                                                        </div>
+                                    return (
+                                        <div className="bg-gradient-to-br from-white/5 to-transparent border border-white/10 rounded-[2rem] p-5 lg:p-6 relative overflow-hidden h-full">
+                                            <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/black-linen.png')] opacity-10 pointer-events-none" />
+                                            <div className="space-y-6 relative z-10">
+                                                <div className="flex items-end justify-between border-b border-white/5 pb-6">
+                                                    <div>
+                                                        <p className="text-[9px] text-gray-500 font-bold uppercase tracking-[0.2em] mb-1">TOTAL ITEMS</p>
+                                                        <p className="text-4xl font-black text-white leading-none tracking-tighter">{stats.items}</p>
                                                     </div>
-
-                                                    <div className="grid grid-cols-2 gap-4">
-                                                        <div className="bg-black/30 rounded-2xl p-4 border border-white/5">
-                                                            <p className="text-[8px] text-gray-600 font-black uppercase mb-1">Missions</p>
-                                                            <p className="text-lg font-black text-cyan-400">{stats.completed + stats.active}</p>
-                                                        </div>
-                                                        <div className="bg-black/30 rounded-2xl p-4 border border-white/5">
-                                                            <p className="text-[8px] text-gray-600 font-black uppercase mb-1">Completed</p>
-                                                            <p className="text-lg font-black text-green-400">{stats.completed}</p>
-                                                        </div>
+                                                    <div className="text-right">
+                                                        <p className="text-[9px] text-cyan-400 font-bold uppercase tracking-[0.2em] mb-1">RATING</p>
+                                                        <p className="text-2xl font-black text-white leading-none">9.8</p>
                                                     </div>
+                                                </div>
 
-                                                    <div className="pt-2">
-                                                        <div className="flex justify-between items-center mb-2">
-                                                            <span className="text-[9px] text-gray-500 font-bold uppercase tracking-widest">Shift Progress</span>
-                                                            <span className="text-[9px] text-cyan-500 font-bold">75%</span>
-                                                        </div>
-                                                        <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
-                                                            <div className="h-full bg-cyan-500 rounded-full w-3/4 shadow-[0_0_8px_rgba(6,182,212,0.5)]" />
-                                                        </div>
+                                                <div className="grid grid-cols-2 gap-4">
+                                                    <div className="bg-black/40 rounded-2xl p-4 border border-white/5">
+                                                        <p className="text-[8px] text-gray-500 font-black uppercase tracking-wider mb-1">TOTAL JOBS</p>
+                                                        <p className="text-xl font-black text-white">{stats.completed + stats.active}</p>
+                                                    </div>
+                                                    <div className="bg-black/40 rounded-2xl p-4 border border-white/5">
+                                                        <p className="text-[8px] text-gray-500 font-black uppercase tracking-wider mb-1">COMPLETED</p>
+                                                        <p className="text-xl font-black text-green-400">{stats.completed}</p>
+                                                    </div>
+                                                </div>
+
+                                                <div className="pt-2">
+                                                    <div className="flex justify-between items-center mb-2 px-1">
+                                                        <span className="text-[9px] text-gray-500 font-bold uppercase tracking-widest">Shift Progress</span>
+                                                        <span className="text-[9px] text-cyan-400 font-black uppercase">Alpha Stage</span>
+                                                    </div>
+                                                    <div className="h-1.5 bg-white/5 rounded-full overflow-hidden border border-white/5 p-[1px]">
+                                                        <div className="h-full bg-gradient-to-r from-cyan-600 to-blue-500 rounded-full w-3/4 shadow-[0_0_10px_rgba(6,182,212,0.5)]" />
                                                     </div>
                                                 </div>
                                             </div>
-                                        );
-                                    })()
-                                }
-                            </div >
+                                        </div>
+                                    );
+                                })()}
+                            </div>
+                        </div>
 
-                            {/* Standardized DRIVER History Section */}
-                            <div className="bg-white/[0.02] border border-white/10 rounded-3xl p-6 mt-6">
-                                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-                                    <div>
-                                        <h4 className="text-sm font-black text-white flex items-center gap-2 uppercase tracking-widest">
-                                            <HistoryIcon size={18} className="text-cyan-400" />
-                                            Mission History
-                                        </h4>
-                                        <p className="text-gray-500 text-[10px] uppercase font-bold tracking-tight">Recent logistics and delivery completions</p>
-                                    </div>
-
-                                    {/* History Search */}
-                                    <div className="relative w-full md:w-72">
-                                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={14} />
-                                        <input
-                                            type="text"
-                                            placeholder="Search mission logs..."
-                                            value={driverHistorySearch}
-                                            onChange={(e) => setDriverHistorySearch(e.target.value)}
-                                            className="w-full bg-black/40 border border-white/10 rounded-xl pl-9 pr-4 py-2 text-xs text-white focus:outline-none focus:border-cyan-500/50 transition-all font-mono"
-                                        />
-                                    </div>
+                        {/* FULL WIDTH SECTION: INTAKE MARKETPLACE */}
+                        <div className="space-y-6 pt-4">
+                            <div className="flex items-center justify-between px-2">
+                                <div className="space-y-1">
+                                    <h4 className="text-sm font-black text-white uppercase tracking-[0.3em] flex items-center gap-3">
+                                        <div className="w-2 h-2 rounded-full bg-yellow-500 shadow-[0_0_10px_#eab308] animate-pulse" />
+                                        Job Board
+                                        <span className="text-yellow-500/40 ml-2 font-mono">[{filteredDispatchJobs.length} AVAILABLE]</span>
+                                    </h4>
+                                    <p className="text-[10px] text-gray-500 uppercase font-bold tracking-widest pl-5 opacity-60">Available delivery assignments</p>
                                 </div>
+                                <div className="h-px flex-1 bg-gradient-to-r from-yellow-500/20 via-white/5 to-transparent mx-8 hidden lg:block" />
+                            </div>
 
-                                {paginatedDriverHistory.length > 0 ? (
-                                    <>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                                            {paginatedDriverHistory.map((job: any) => {
-                                                const destSite = sites.find(s => s.id === job.destSiteId);
-                                                return (
-                                                    <div
-                                                        key={job.id}
-                                                        onClick={() => {
-                                                            setSelectedJob(job);
-                                                            setIsDetailsOpen(true);
-                                                        }}
-                                                        className="bg-black/20 border border-white/5 rounded-2xl p-4 hover:border-cyan-500/30 transition-all group cursor-pointer"
-                                                    >
-                                                        <div className="flex justify-between items-start mb-3">
-                                                            <span className="text-[10px] font-mono text-cyan-400 font-bold">{job.id.slice(0, 8)}</span>
-                                                            <div className="flex items-center gap-1.5">
-                                                                <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
-                                                                <span className="text-[9px] text-green-400 uppercase font-black">Delivered</span>
+                            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+                                {paginatedDispatchJobs.length === 0 ? (
+                                    <div className="col-span-full bg-white/[0.02] backdrop-blur-md rounded-[2.5rem] p-8 lg:p-20 border border-dashed border-white/10 text-center relative overflow-hidden group">
+                                        <div className="absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
+                                        <div className="w-24 h-24 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-6 border border-white/5 shadow-inner">
+                                            <Shield size={48} className="text-gray-600" />
+                                        </div>
+                                        <h3 className="text-xl font-black text-white uppercase tracking-widest mb-2">No Jobs Available</h3>
+                                        <p className="text-gray-600 font-bold uppercase tracking-widest text-xs">Check back later for new assignments...</p>
+                                    </div>
+                                ) : (
+                                    paginatedDispatchJobs.map(job => {
+                                        const dest = sites.find(s => s.id === job.destSiteId);
+                                        const source = sites.find(s => s.id === job.sourceSiteId || s.id === job.siteId);
+                                        const isCritical = job.priority === 'Critical';
+
+                                        return (
+                                            <div
+                                                key={job.id}
+                                                onClick={() => {
+                                                    setSelectedJob(job);
+                                                    setIsDetailsOpen(true);
+                                                }}
+                                                className={`group relative bg-gradient-to-br from-white/5 to-white/[0.02] border ${isCritical ? 'border-red-500/20 hover:border-red-500/50' : 'border-white/10 hover:border-yellow-500/40'} rounded-[2rem] lg:rounded-[2.5rem] p-6 lg:p-8 transition-all duration-500 flex flex-col h-full cursor-pointer overflow-hidden shadow-2xl hover:-translate-y-2`}
+                                            >
+                                                {/* Card Accents */}
+                                                <div className="absolute top-0 right-0 w-32 h-32 bg-yellow-500/5 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity" />
+                                                <div className="absolute top-4 right-4 flex gap-1 opacity-20 group-hover:opacity-60 transition-opacity">
+                                                    <div className="w-1 h-3 bg-white/20 rounded-full" />
+                                                    <div className="w-1 h-3 bg-white/20 rounded-full" />
+                                                </div>
+
+                                                <div className="flex justify-between items-start mb-6 relative z-10">
+                                                    <div className="space-y-1">
+                                                        <div className="flex items-center gap-2">
+                                                            <div className={`w-2 h-2 rounded-full ${isCritical ? 'bg-red-500 animate-ping' : 'bg-cyan-500'}`} />
+                                                            <p className="text-[10px] font-mono text-gray-400 font-bold tracking-tighter uppercase">REF: {formatJobId(job)}</p>
+                                                        </div>
+                                                        <h5 className="font-black text-white text-2xl leading-none uppercase tracking-tighter group-hover:text-yellow-400 transition-colors">{dest?.name || 'Local Hub'}</h5>
+                                                    </div>
+                                                    <div className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${isCritical ? 'bg-red-500 text-white shadow-[0_0_15px_rgba(239,68,68,0.4)]' :
+                                                        job.priority === 'High' ? 'bg-orange-500/20 text-orange-400' :
+                                                            'bg-cyan-500/20 text-cyan-400'
+                                                        }`}>
+                                                        {job.priority}
+                                                    </div>
+                                                </div>
+
+                                                <div className="flex-1 space-y-6 mb-8 relative z-10">
+                                                    <div className="grid grid-cols-2 gap-3">
+                                                        <div className="bg-black/40 backdrop-blur-md p-4 rounded-3xl border border-white/5 group-hover:border-white/10 transition-colors">
+                                                            <p className="text-[9px] text-gray-500 font-black uppercase mb-1 tracking-widest">Items</p>
+                                                            <div className="flex items-baseline gap-1">
+                                                                <span className="text-2xl font-black text-white leading-none">{job.items || 0}</span>
+                                                                <span className="text-[9px] text-gray-600 font-bold uppercase">Units</span>
                                                             </div>
                                                         </div>
-                                                        <div className="space-y-2">
-                                                            <div className="flex items-center gap-2">
-                                                                <ArrowRight size={10} className="text-gray-600" />
-                                                                <p className="text-[10px] text-gray-400 font-bold uppercase truncate">{destSite?.name || 'Unknown Hub'}</p>
+                                                        <div className="bg-black/40 backdrop-blur-md p-4 rounded-3xl border border-white/5 group-hover:border-white/10 transition-colors">
+                                                            <p className="text-[9px] text-gray-500 font-black uppercase mb-1 tracking-widest">Est. Earn</p>
+                                                            <div className="flex items-baseline gap-1">
+                                                                <span className="text-xl font-black text-green-400 leading-none">$12.50</span>
                                                             </div>
-                                                            <div className="flex justify-between items-end mt-4">
-                                                                <p className="text-[9px] text-gray-600 font-mono italic">{formatDateTime(job.updatedAt || job.createdAt)}</p>
-                                                                <div className="text-right">
-                                                                    <p className="text-white font-black text-xs leading-none">{job.items}</p>
-                                                                    <p className="text-[8px] text-gray-500 uppercase font-black tracking-tighter">Units</p>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="space-y-3 px-2">
+                                                        <div className="flex items-center gap-4">
+                                                            <div className="flex flex-col items-center gap-1">
+                                                                <div className="w-2 h-2 rounded-full border border-gray-600" />
+                                                                <div className="w-[1px] h-8 bg-gradient-to-b from-gray-600 to-yellow-500/50" />
+                                                                <div className="w-2 h-2 rounded-full bg-yellow-500 shadow-[0_0_8px_rgba(234,179,8,0.5)]" />
+                                                            </div>
+                                                            <div className="flex-1 min-w-0">
+                                                                <div className="mb-3">
+                                                                    <p className="text-[8px] text-gray-600 font-black uppercase tracking-widest mb-0.5">Origin</p>
+                                                                    <p className="text-[11px] text-gray-400 font-bold uppercase truncate">{source?.name || 'Unknown Origin'}</p>
+                                                                </div>
+                                                                <div>
+                                                                    <p className="text-[8px] text-yellow-500 font-black uppercase tracking-widest mb-0.5">Destination</p>
+                                                                    <p className="text-[13px] text-white font-black uppercase truncate tracking-tight">{dest?.name || 'Unknown Destination'}</p>
                                                                 </div>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                );
-                                            })}
+                                                </div>
+
+                                                <button
+                                                    onClick={async (e) => {
+                                                        e.stopPropagation();
+                                                        const currentEmployee = employees.find(e => e.email === user?.email);
+                                                        if (!currentEmployee) return;
+                                                        const isInternal = !currentEmployee?.driverType || currentEmployee?.driverType === 'internal';
+                                                        setProcessingJobIds(prev => new Set(prev).add(job.id));
+                                                        try {
+                                                            await wmsJobsService.update(job.id, { assignedTo: currentEmployee.id, status: isInternal ? 'In-Progress' : 'Pending' });
+                                                            await refreshData();
+                                                            addNotification('success', 'Job successfully accepted.');
+                                                        } catch (err) { addNotification('alert', 'Failed to accept job.'); } finally {
+                                                            setProcessingJobIds(prev => {
+                                                                const next = new Set(prev);
+                                                                next.delete(job.id);
+                                                                return next;
+                                                            });
+                                                        }
+                                                    }}
+                                                    className={`w-full py-5 rounded-[1.5rem] text-[10px] font-black uppercase tracking-[0.3em] transition-all relative overflow-hidden flex items-center justify-center gap-3
+                                                        ${isCritical ? 'bg-red-600 hover:bg-red-500 text-white' : 'bg-white hover:bg-yellow-400 text-black'}
+                                                        group/btn hover:shadow-[0_0_30px_rgba(255,255,255,0.1)] active:scale-95`}
+                                                >
+                                                    {processingJobIds.has(job.id) ? (
+                                                        <RefreshCw className="animate-spin" size={16} />
+                                                    ) : (
+                                                        <>
+                                                            <Zap size={14} className={isCritical ? 'text-white' : 'text-black'} />
+                                                            ACCEPT JOB
+                                                        </>
+                                                    )}
+                                                </button>
+                                            </div>
+                                        );
+                                    })
+                                )}
+                            </div>
+
+                            {filteredDispatchJobs.length > 0 && (
+                                <div className="mt-4">
+                                    <Pagination
+                                        currentPage={dispatchCurrentPage}
+                                        totalPages={dispatchTotalPages}
+                                        totalItems={filteredDispatchJobs.length}
+                                        itemsPerPage={DISPATCH_ITEMS_PER_PAGE}
+                                        onPageChange={setDispatchCurrentPage}
+                                        isLoading={false}
+                                        itemName="requests"
+                                    />
+                                </div>
+                            )}
+                        </div>
+
+                        {/* FULL WIDTH SECTION: MISSION LOG (History) */}
+                        <div className="bg-gradient-to-b from-white/5 to-transparent border border-white/10 rounded-[1.5rem] lg:rounded-[2.5rem] p-5 lg:p-10 shadow-2xl relative overflow-hidden group/log">
+                            {/* Scanline effect for log aesthetic */}
+                            <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.1)_50%),linear-gradient(90deg,rgba(255,0,0,0.03),rgba(0,255,0,0.01),rgba(0,0,255,0.03))] z-0 pointer-events-none bg-[length:100%_4px,3px_100%] opacity-20" />
+
+                            <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-8 mb-10 relative z-10">
+                                <div className="flex items-center gap-5">
+                                    <div className="p-4 bg-cyan-500/10 rounded-2xl border border-cyan-500/20 shadow-[0_0_20px_rgba(6,182,212,0.1)]">
+                                        <HistoryIcon size={24} className="text-cyan-400" />
+                                    </div>
+                                    <div>
+                                        <h4 className="text-2xl font-black text-white uppercase tracking-tighter">Job History</h4>
+                                        <div className="flex items-center gap-2 mt-1">
+                                            <div className="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-pulse" />
+                                            <p className="text-gray-500 text-[10px] uppercase font-bold tracking-[0.2em]">Past assignment records</p>
                                         </div>
+                                    </div>
+                                </div>
+
+                                <div className="relative w-full xl:w-96 group">
+                                    <div className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-cyan-400 transition-colors">
+                                        <Search size={18} />
+                                    </div>
+                                    <input
+                                        type="text"
+                                        placeholder="SEARCH HISTORY..."
+                                        value={driverHistorySearch}
+                                        onChange={(e) => setDriverHistorySearch(e.target.value)}
+                                        className="w-full bg-black/60 border border-white/10 rounded-2xl pl-14 pr-6 py-4 text-sm text-white focus:outline-none focus:border-cyan-500/50 transition-all font-mono uppercase tracking-widest placeholder:text-gray-700 shadow-inner"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="relative z-10">
+                                {paginatedDriverHistory.length > 0 ? (
+                                    <div className="space-y-4">
+                                        {paginatedDriverHistory.map((job: any) => {
+                                            const destSite = sites.find(s => s.id === job.destSiteId);
+                                            return (
+                                                <div
+                                                    key={job.id}
+                                                    onClick={() => {
+                                                        setSelectedJob(job);
+                                                        setIsDetailsOpen(true);
+                                                    }}
+                                                    className="flex flex-col md:flex-row items-center gap-4 md:gap-6 bg-white/[0.03] hover:bg-white/[0.06] border border-white/5 hover:border-cyan-500/30 rounded-2xl lg:rounded-3xl p-4 lg:p-6 transition-all group/item cursor-pointer shadow-lg hover:shadow-cyan-500/5"
+                                                >
+                                                    <div className="w-full md:w-32 flex flex-col justify-center">
+                                                        <span className="text-[10px] font-mono text-cyan-500/50 group-hover/item:text-cyan-400 transition-colors font-bold uppercase tracking-tighter">REF: {formatJobId(job)}</span>
+                                                        <p className="text-[9px] text-gray-600 font-mono mt-1 font-bold">{formatDateTime(job.updatedAt || job.createdAt)}</p>
+                                                    </div>
+
+                                                    <div className="h-10 w-px bg-white/5 hidden md:block" />
+
+                                                    <div className="flex-1 flex items-center gap-4 min-w-0 w-full">
+                                                        <div className="p-3 bg-black/40 rounded-xl border border-white/5">
+                                                            <Package size={18} className="text-gray-500 group-hover/item:text-white transition-colors" />
+                                                        </div>
+                                                        <div className="min-w-0">
+                                                            <p className="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-0.5">Destination</p>
+                                                            <h6 className="text-lg font-black text-white uppercase tracking-tighter truncate">{destSite?.name || 'Unknown Hub'}</h6>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="flex items-center gap-4 md:gap-8 w-full md:w-auto justify-between md:justify-end border-t md:border-t-0 border-white/5 pt-4 md:pt-0 mt-2 md:mt-0">
+                                                        <div className="text-right">
+                                                            <p className="text-gray-500 text-[10px] font-black uppercase tracking-widest mb-0.5">Item Count</p>
+                                                            <div className="flex items-center gap-2 justify-end">
+                                                                <span className="text-white font-black text-lg">{job.items}</span>
+                                                                <span className="text-[10px] text-gray-600 font-black uppercase">Qty</span>
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="flex items-center gap-3 bg-green-500/5 px-4 py-2 rounded-2xl border border-green-500/10">
+                                                            <div className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_#22c55e]" />
+                                                            <span className="text-[10px] text-green-400 uppercase font-black tracking-widest">COMPLETED</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                ) : (
+                                    <div className="text-center py-32 bg-white/[0.02] rounded-[2rem] border border-dashed border-white/5 relative overflow-hidden">
+                                        <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent opacity-10" />
+                                        <div className="relative z-10 flex flex-col items-center">
+                                            <div className="p-6 bg-white/5 rounded-full mb-6 border border-white/5">
+                                                <Archive className="text-gray-700" size={48} />
+                                            </div>
+                                            <h3 className="text-xl font-black text-gray-500 uppercase tracking-[0.3em]">No Log Data Found</h3>
+                                            <p className="text-gray-700 font-bold uppercase tracking-widest text-[10px] mt-2">Archive contains no matching relay records</p>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {filteredDriverHistory.length > 0 && (
+                                    <div className="mt-10 flex justify-center">
                                         <Pagination
                                             currentPage={driverHistoryPage}
                                             totalPages={driverHistoryTotalPages}
                                             totalItems={filteredDriverHistory.length}
                                             itemsPerPage={DRIVER_HISTORY_PER_PAGE}
                                             onPageChange={setDriverHistoryPage}
-                                            itemName="history"
+                                            isLoading={false}
+                                            itemName="HISTORY"
                                         />
-                                    </>
-                                ) : (
-                                    <div className="text-center py-16 bg-black/20 rounded-2xl border border-dashed border-white/5">
-                                        <div className="inline-flex p-4 bg-white/5 rounded-full mb-4">
-                                            <Package className="text-gray-700" size={32} />
-                                        </div>
-                                        <p className="text-gray-500 text-xs font-black uppercase tracking-widest">No matching mission history found</p>
                                     </div>
                                 )}
                             </div>
-                        </div >
+                        </div>
 
                         {/* DRIVER SCANNER OVERLAY */}
                         {
@@ -3471,8 +4804,8 @@ export default function WarehouseOperations() {
                                         </div>
 
                                         <div>
-                                            <h3 className="text-2xl font-black text-white uppercase tracking-tighter">Initializing Optics</h3>
-                                            <p className="text-gray-500 font-bold uppercase tracking-widest text-xs mt-2">Scan delivery QR code to finalize mission</p>
+                                            <h3 className="text-2xl font-black text-white uppercase tracking-tighter">Ready to Scan</h3>
+                                            <p className="text-gray-500 font-bold uppercase tracking-widest text-xs mt-2">Scan QR code to complete delivery</p>
                                         </div>
 
                                         <div className="grid grid-cols-1 gap-4">
@@ -3480,14 +4813,18 @@ export default function WarehouseOperations() {
                                                 onClick={async () => {
                                                     if (selectedJob) {
                                                         try {
+                                                            if (selectedJob.status === 'Completed') {
+                                                                addNotification('info', 'Job already finalized.');
+                                                                return;
+                                                            }
                                                             await wmsJobsService.update(selectedJob.id, {
-                                                                status: 'Completed',
-                                                                transferStatus: 'Delivered'
-                                                            });
-                                                            addNotification('success', 'Mission Finalized: Logs Synced to HQ.');
+                                                                transferStatus: 'Delivered',
+                                                                deliveredAt: new Date().toISOString()
+                                                            } as any);
+                                                            addNotification('success', 'Job Completed Successfully.');
                                                             await refreshData();
                                                         } catch (err) {
-                                                            addNotification('alert', 'Cloud Sync Failed. Local relay active.');
+                                                            addNotification('alert', 'Error completing delivery.');
                                                         }
                                                     }
                                                     setDriverScannerOpen(false);
@@ -3495,7 +4832,7 @@ export default function WarehouseOperations() {
                                                 }}
                                                 className="w-full py-4 bg-cyan-500 text-black font-black uppercase tracking-widest rounded-2xl shadow-[0_0_20px_rgba(6,182,212,0.4)] hover:bg-cyan-400 transition-all active:scale-95"
                                             >
-                                                Authenticate Mission
+                                                Complete Delivery
                                             </button>
                                             <button
                                                 onClick={() => setDriverScannerOpen(false)}
@@ -3515,34 +4852,130 @@ export default function WarehouseOperations() {
                                 </div>
                             )
                         }
-                    </div >
+                    </div>
                 )}
 
                 {/* --- RECEIVE TAB --- */}
                 {
                     activeTab === 'RECEIVE' && (
-                        <div className="flex-1 overflow-hidden flex flex-col space-y-6">
-                            {/* RECEIVE INTELLIGENCE HEADER */}
-                            <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-[2rem] p-6 shadow-2xl relative overflow-hidden group">
-                                <div className="absolute -top-24 -right-24 w-64 h-64 bg-green-500/10 blur-[120px] rounded-full pointer-events-none" />
+                        <div className="flex-1 overflow-hidden flex flex-col space-y-4 md:space-y-6">
+                            {/* Global Scan Input for Active Receive */}
+                            <div className="p-4 md:p-6 bg-gradient-to-br from-blue-500/10 via-transparent to-cyan-500/5 rounded-2xl border border-white/10 shrink-0 backdrop-blur-sm">
+                                <div className="flex flex-col sm:flex-row gap-3">
+                                    <div className="flex-1 relative group">
+                                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-blue-400 group-focus-within:text-cyan-400 transition-colors">
+                                            <Scan size={20} />
+                                        </div>
+                                        <input
+                                            ref={scanInputRef}
+                                            autoFocus
+                                            type="text"
+                                            placeholder="Scan barcode or enter SKU..."
+                                            className="w-full h-12 pl-12 pr-4 bg-black/50 border border-white/10 rounded-xl text-white font-mono text-sm focus:border-cyan-500/50 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:bg-black/60 transition-all placeholder:text-gray-500"
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter') {
+                                                    const val = e.currentTarget.value.trim();
+                                                    handleGlobalScan(val);
+                                                    e.currentTarget.value = '';
+                                                }
+                                            }}
+                                        />
+                                    </div>
+                                    <button
+                                        onClick={() => {
+                                            if (scanInputRef.current) {
+                                                const val = scanInputRef.current.value.trim();
+                                                handleGlobalScan(val);
+                                                scanInputRef.current.value = '';
+                                            }
+                                        }}
+                                        className="h-12 px-8 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white font-bold rounded-xl transition-all shadow-lg hover:shadow-cyan-500/25 active:scale-[0.98]">
+                                        <span className="hidden sm:inline">Submit</span>
+                                        <span className="sm:hidden">Go</span>
+                                    </button>
+                                </div>
+                            </div>
 
-                                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative z-10">
+                            {/* UNRESOLVED ITEMS QUEUE (Group C) */}
+                            {unresolvedScans.length > 0 && (
+                                <div className="bg-gradient-to-br from-red-500/10 to-orange-500/5 border border-red-500/20 rounded-2xl p-4 md:p-5 shrink-0 backdrop-blur-sm">
+                                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
+                                        <div className="flex items-center gap-3">
+                                            <div className="p-2 bg-red-500/20 rounded-lg">
+                                                <AlertTriangle size={18} className="text-red-400" />
+                                            </div>
+                                            <div>
+                                                <span className="text-sm font-bold text-red-400">Unresolved Barcodes</span>
+                                                <span className="ml-2 px-2.5 py-0.5 bg-red-500/20 text-red-400 text-xs font-bold rounded-full border border-red-500/30">{unresolvedScans.length}</span>
+                                            </div>
+                                        </div>
+                                        <button
+                                            onClick={() => setUnresolvedScans([])}
+                                            className="text-xs text-gray-400 hover:text-red-400 font-bold uppercase tracking-wider transition-colors hover:underline"
+                                        >
+                                            Clear All
+                                        </button>
+                                    </div>
+                                    <div className="flex flex-wrap gap-2">
+                                        {unresolvedScans.map((scan, idx) => (
+                                            <div
+                                                key={idx}
+                                                className="bg-black/60 border border-red-500/30 rounded-xl px-4 py-2.5 flex items-center gap-3 group hover:border-red-500/50 hover:bg-black/80 cursor-pointer transition-all"
+                                                onClick={() => {
+                                                    // Try to detect active PO for auto-suggestions
+                                                    if (filteredReceiveOrders.length === 1) {
+                                                        // If there's only one filtered PO, use it
+                                                        setReceivingPO(filteredReceiveOrders[0]);
+                                                    } else if (filteredReceiveOrders.length > 0 && receiveSearch) {
+                                                        // If user is searching, use the first matching PO
+                                                        setReceivingPO(filteredReceiveOrders[0]);
+                                                    }
+                                                    setResolvingBarcode({ barcode: scan.barcode, qty: scan.qty });
+                                                    setResolutionSearch('');
+                                                    setResolutionMode('map');
+                                                }}
+                                            >
+                                                <div className="flex flex-col">
+                                                    <span className="text-sm font-mono font-bold text-white">{scan.barcode}</span>
+                                                    <span className="text-[10px] text-gray-400">Qty: {scan.qty}</span>
+                                                </div>
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setUnresolvedScans(prev => prev.filter((_, i) => i !== idx));
+                                                    }}
+                                                    className="p-1.5 hover:bg-red-500/20 rounded-lg transition-colors"
+                                                    title="Remove"
+                                                >
+                                                    <X size={14} className="text-gray-400 group-hover:text-red-400" />
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* RECEIVE INTELLIGENCE HEADER */}
+                            <div className="bg-gradient-to-br from-white/[0.07] to-white/[0.02] backdrop-blur-xl border border-white/10 rounded-2xl p-5 md:p-6 relative overflow-hidden">
+                                <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-transparent pointer-events-none" />
+
+                                <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 lg:gap-6 relative z-10">
                                     <div className="flex items-center gap-4">
-                                        <div className="p-3 bg-green-500/20 rounded-2xl shadow-[0_0_15px_rgba(34,197,94,0.2)]">
-                                            <Truck className="text-green-400" size={24} />
+                                        <div className="p-3 bg-gradient-to-br from-green-500/20 to-emerald-500/20 rounded-xl border border-green-500/20">
+                                            <Truck className="text-green-400" size={22} />
                                         </div>
                                         <div>
-                                            <h3 className="text-xl font-black text-white tracking-tight uppercase">{t('warehouse.receivingQueue')}</h3>
+                                            <h3 className="text-lg md:text-xl font-bold text-white">{t('warehouse.receivingQueue')}</h3>
                                             <div className="flex items-center gap-2 mt-1">
                                                 <span className="flex h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-                                                <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">{t('warehouse.approvedPOsWillAppear')}</p>
+                                                <p className="text-xs text-gray-400">{t('warehouse.approvedPOsWillAppear')}</p>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div className="flex gap-4 items-center">
-                                        <div className="relative group">
-                                            <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-gray-500 group-focus-within:text-green-400 transition-colors">
+                                    <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto items-stretch sm:items-center">
+                                        <div className="relative group flex-1 sm:flex-none">
+                                            <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-gray-500 group-focus-within:text-green-400 transition-colors">
                                                 <Search size={16} />
                                             </div>
                                             <input
@@ -3550,48 +4983,50 @@ export default function WarehouseOperations() {
                                                 placeholder="Search Manifest / Supplier..."
                                                 value={receiveSearch}
                                                 onChange={(e) => setReceiveSearch(e.target.value)}
-                                                className="bg-white/5 border border-white/10 rounded-2xl py-2.5 pl-12 pr-6 text-xs text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500/30 transition-all w-64"
+                                                className="w-full sm:w-64 bg-black/30 border border-white/10 rounded-xl py-2.5 pl-10 pr-10 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500/30 focus:bg-black/40 transition-all"
                                             />
                                             {receiveSearch && (
                                                 <button
                                                     onClick={() => setReceiveSearch('')}
-                                                    className="absolute inset-y-0 right-4 flex items-center text-gray-500 hover:text-white"
+                                                    className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-white transition-colors"
                                                     title="Clear search"
                                                 >
-                                                    <X size={14} />
+                                                    <X size={16} />
                                                 </button>
                                             )}
                                         </div>
 
-                                        <div className="px-5 py-2 bg-white/5 border border-white/10 rounded-2xl">
-                                            <p className="text-[9px] font-black text-gray-500 uppercase tracking-widest mb-0.5">Pending Units</p>
-                                            <p className="text-lg font-mono font-black text-green-400">
-                                                {orders.filter(o => o.status === 'Approved').reduce((sum, o) => sum + (o.lineItems?.length || 0), 0)}
-                                            </p>
-                                        </div>
-                                        <div className="px-5 py-2 bg-white/5 border border-white/10 rounded-2xl">
-                                            <p className="text-[9px] font-black text-gray-500 uppercase tracking-widest mb-0.5">Throughput</p>
-                                            <p className="text-lg font-mono font-black text-blue-400">94%</p>
+                                        <div className="flex gap-3">
+                                            <div className="flex-1 sm:flex-none px-4 py-2.5 bg-black/30 border border-white/10 rounded-xl">
+                                                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">Pending Units</p>
+                                                <p className="text-xl font-bold text-green-400 tabular-nums">
+                                                    {orders.filter(o => o.status === 'Approved').reduce((sum, o) => sum + (o.lineItems?.length || 0), 0)}
+                                                </p>
+                                            </div>
+                                            <div className="flex-1 sm:flex-none px-4 py-2.5 bg-black/30 border border-white/10 rounded-xl">
+                                                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">Throughput</p>
+                                                <p className="text-xl font-bold text-blue-400 tabular-nums">94%</p>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
                             {/* RECEIVE QUEUE */}
-                            <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar space-y-6 pb-6">
+                            <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar space-y-4 pb-6">
                                 {filteredReceiveOrders.length === 0 ? (
-                                    <div className="flex flex-col items-center justify-center py-24 text-center space-y-4 bg-white/5 rounded-[2rem] border border-dashed border-white/10">
-                                        <div className="p-8 bg-white/5 rounded-full border border-white/10">
-                                            <Package size={64} className="text-gray-700" />
+                                    <div className="flex flex-col items-center justify-center py-20 text-center space-y-4 bg-gradient-to-br from-white/[0.02] to-transparent rounded-2xl border border-dashed border-white/10">
+                                        <div className="p-8 bg-gradient-to-br from-white/[0.05] to-transparent rounded-2xl border border-white/5">
+                                            <Package size={48} className="text-gray-600" />
                                         </div>
                                         <div>
-                                            <p className="text-gray-300 font-black uppercase tracking-[0.2em] text-sm">{t('warehouse.noApprovedPOs')}</p>
-                                            <p className="text-gray-600 text-xs mt-2 font-bold uppercase tracking-widest">{t('warehouse.approvedPOsWillAppear')}</p>
+                                            <p className="text-gray-300 font-bold text-base">{t('warehouse.noApprovedPOs')}</p>
+                                            <p className="text-gray-500 text-sm mt-2">{t('warehouse.approvedPOsWillAppear')}</p>
                                         </div>
                                     </div>
                                 ) : (
                                     <>
-                                        <div className="grid grid-cols-1 gap-6">
+                                        <div className="grid grid-cols-1 gap-4">
                                             {paginatedReceiveOrders.map(po => {
                                                 const poJobs = jobs.filter(j => j.orderRef === po.id);
                                                 const receivedMap: Record<string, number> = {};
@@ -3607,143 +5042,201 @@ export default function WarehouseOperations() {
                                                 });
 
                                                 const allItemsReceived = po.lineItems?.every(item => {
-                                                    const received = item.productId ? (receivedMap[item.productId] || 0) : 0;
-                                                    return received >= item.quantity;
+                                                    const dbReceived = item.receivedQty || 0;
+                                                    const mapReceived = item.productId ? (receivedMap[item.productId] || 0) : 0;
+                                                    const totalReceived = Math.max(dbReceived, mapReceived);
+                                                    return totalReceived >= item.quantity;
                                                 }) || false;
 
                                                 return (
-                                                    <div key={po.id} className={`group bg-white/5 backdrop-blur-xl border rounded-[2rem] p-8 hover:bg-white/10 transition-all duration-700 relative overflow-hidden shadow-2xl ${allItemsReceived ? 'border-green-500/30' : 'border-white/10 hover:border-blue-500/30'
+                                                    <div key={po.id} className={`group bg-gradient-to-br from-white/[0.07] to-white/[0.02] backdrop-blur-sm border rounded-2xl p-5 md:p-6 hover:from-white/[0.09] hover:to-white/[0.04] transition-all relative overflow-hidden ${allItemsReceived ? 'border-green-500/30 shadow-lg shadow-green-500/5' : 'border-white/10 hover:border-blue-500/20'
                                                         }`}>
-                                                        <div className="absolute top-0 right-0 w-32 h-32 bg-green-500/5 blur-3xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
+                                                        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-cyan-500/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
 
                                                         {/* Shipment Header */}
-                                                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8 relative z-10">
-                                                            <div className="flex items-center gap-5">
-                                                                <div className={`p-4 rounded-2xl shadow-xl ${allItemsReceived ? 'bg-green-500/20 text-green-400' : 'bg-blue-600/20 text-blue-400'}`}>
-                                                                    <Layers size={24} />
+                                                        <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-5 relative z-10">
+                                                            <div className="flex items-center gap-4 flex-1 min-w-0">
+                                                                <div className={`p-3 rounded-xl flex-shrink-0 ${allItemsReceived ? 'bg-gradient-to-br from-green-500/20 to-emerald-500/20 border border-green-500/20' : 'bg-gradient-to-br from-blue-500/20 to-cyan-500/20 border border-blue-500/20'}`}>
+                                                                    <Layers size={20} className={allItemsReceived ? 'text-green-400' : 'text-blue-400'} />
                                                                 </div>
-                                                                <div>
-                                                                    <div className="flex items-center gap-3">
-                                                                        <h3 className="text-lg font-black text-white tracking-widest uppercase">{po.supplierName}</h3>
+                                                                <div className="min-w-0 flex-1">
+                                                                    <div className="flex items-center gap-2 flex-wrap">
+                                                                        <h3 className="text-base md:text-lg font-bold text-white truncate">{po.supplierName}</h3>
                                                                         {(() => {
                                                                             const assignedDock = Object.entries(dockStatus).find(([_, data]) => data.assignedPoId === po.id)?.[0];
                                                                             return assignedDock && (
-                                                                                <span className="px-2 py-0.5 bg-blue-500/20 text-blue-400 text-[8px] font-black uppercase tracking-widest rounded-full border border-blue-500/30 flex items-center gap-1.5">
-                                                                                    <Anchor size={8} /> Dock {assignedDock}
+                                                                                <span className="px-2 py-0.5 bg-blue-500/20 text-blue-400 text-[9px] font-bold rounded-lg border border-blue-500/30 flex items-center gap-1 flex-shrink-0">
+                                                                                    <Anchor size={10} /> Dock {assignedDock}
                                                                                 </span>
                                                                             );
                                                                         })()}
                                                                     </div>
-                                                                    <p className="text-[10px] text-gray-500 font-mono font-black uppercase mt-1 tracking-widest">
-                                                                        Manifest: {po.po_number || po.id.slice(0, 8)} • {po.lineItems?.length || 0} Cargo Units
+                                                                    <p className="text-[11px] text-gray-400 font-mono mt-1 truncate">
+                                                                        #{po.po_number || po.id.slice(0, 8)} • {po.lineItems?.length || 0} Items
                                                                     </p>
                                                                 </div>
                                                             </div>
-                                                            <div className={`px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-[0.2em] border ${allItemsReceived
+                                                            <div className={`px-3 py-1.5 rounded-lg text-[10px] font-bold border flex-shrink-0 ${allItemsReceived
                                                                 ? 'bg-green-500/10 text-green-400 border-green-500/20'
-                                                                : 'bg-blue-600/10 text-blue-400 border-blue-600/20'
+                                                                : 'bg-blue-500/10 text-blue-400 border-blue-500/20'
                                                                 }`}>
-                                                                {allItemsReceived ? 'Ready for Audit' : 'Inbound Processing'}
+                                                                {allItemsReceived ? '✓ Ready' : 'Processing'}
                                                             </div>
                                                         </div>
 
                                                         {/* Item Matrix */}
                                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 relative z-10">
                                                             {(po.lineItems || []).map((item, idx) => {
-                                                                const receivedQty = item.productId ? (receivedMap[item.productId] || 0) : 0;
+                                                                // Use the ACTUAL received quantity from the database item, or fallback to map if 0
+                                                                const dbReceivedQty = item.receivedQty || 0;
+                                                                const mapReceivedQty = item.productId ? (receivedMap[item.productId] || 0) : 0;
+                                                                const receivedQty = Math.max(dbReceivedQty, mapReceivedQty);
+
+                                                                // Check for existing active job to prevent duplicates
+                                                                const activeJob = jobs.find(j =>
+                                                                    (j.orderRef === po.id || j.orderRef === (po.poNumber || po.po_number || po.id)) &&
+                                                                    j.type === 'PUTAWAY' &&
+                                                                    j.lineItems?.some((li: any) => li.productId === item.productId)
+                                                                );
+
                                                                 const remainingQty = Math.max(0, item.quantity - receivedQty);
-                                                                const isComplete = receivedQty >= item.quantity;
+                                                                const isComplete = remainingQty <= 0; // Only mark complete if fully received
+
                                                                 const product = products.find(p => p.id === item.productId);
 
                                                                 return (
-                                                                    <div key={item.productId || idx} className={`group/item p-6 rounded-[2rem] border transition-all duration-700 relative overflow-hidden ${isComplete
-                                                                        ? 'bg-green-500/5 border-green-500/10 opacity-70'
-                                                                        : 'bg-black/40 border-white/5 hover:border-blue-500/30 hover:bg-black/60 shadow-xl'
+                                                                    <div key={item.productId || idx} className={`group/item p-4 rounded-xl border transition-all relative overflow-hidden ${isComplete
+                                                                        ? 'bg-green-500/5 border-green-500/10 opacity-60'
+                                                                        : 'bg-black/30 border-white/10 hover:border-blue-500/30 hover:bg-black/40'
                                                                         }`}>
 
                                                                         {/* Item Progress Glow */}
                                                                         {!isComplete && (
-                                                                            <div className="absolute inset-0 bg-blue-500/[0.02] group-hover/item:bg-blue-500/[0.05] transition-colors" />
+                                                                            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/[0.03] to-transparent group-hover/item:from-blue-500/[0.06] transition-colors pointer-events-none" />
                                                                         )}
 
-                                                                        <div className="flex flex-col gap-5 relative z-10">
-                                                                            <div className="flex justify-between items-start gap-4">
+                                                                        <div className="flex flex-col gap-4 relative z-10">
+                                                                            <div className="flex justify-between items-start gap-3">
                                                                                 <div className="flex-1 min-w-0">
-                                                                                    <div className="flex items-center gap-2">
-                                                                                        <p className={`text-xs font-black uppercase tracking-widest truncate ${isComplete ? 'text-gray-500' : 'text-white'}`}>
+                                                                                    <div className="flex items-center gap-2 flex-wrap mb-1">
+                                                                                        <p className={`text-sm font-bold truncate ${isComplete ? 'text-gray-500' : 'text-white'}`}>
                                                                                             {item.productName}
                                                                                         </p>
-                                                                                        {isComplete && <CheckCircle size={14} className="text-green-500 shadow-glow" />}
+                                                                                        {receivedQty >= item.quantity && <CheckCircle size={14} className="text-green-500 flex-shrink-0" />}
+                                                                                        {activeJob && receivedQty < item.quantity && (
+                                                                                            <div className="flex items-center gap-1 px-2 py-0.5 bg-blue-500/10 border border-blue-500/20 rounded-lg flex-shrink-0">
+                                                                                                <RefreshCw size={10} className="text-blue-400 animate-spin" />
+                                                                                                <span className="text-[9px] font-bold text-blue-400">Processing</span>
+                                                                                            </div>
+                                                                                        )}
                                                                                     </div>
-                                                                                    <p className="text-[10px] text-gray-500 font-mono mt-1 font-bold uppercase tracking-widest">
-                                                                                        ID: {jobSkuMap[item.productId || ''] || finalizedSkus[item.productId || ''] || product?.sku || item.sku || 'PENDING'}
-                                                                                    </p>
+                                                                                    <div className="flex items-center gap-2 flex-wrap">
+                                                                                        <p className="text-[11px] text-gray-400 font-mono">
+                                                                                            {jobSkuMap[item.productId || ''] || finalizedSkus[item.productId || ''] || product?.sku || item.sku || 'PENDING'}
+                                                                                        </p>
+                                                                                        {/* Identity Badge from PO */}
+                                                                                        {(item as any).identityType === 'known' && <span className="text-[9px] bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded font-bold">🔒</span>}
+                                                                                        {(item as any).identityType === 'variant' && <span className="text-[9px] bg-yellow-500/20 text-yellow-400 px-1.5 py-0.5 rounded font-bold">Variant</span>}
+                                                                                        {(item as any).identityType === 'new' && <span className="text-[9px] bg-green-500/20 text-green-400 px-1.5 py-0.5 rounded font-bold">New</span>}
+                                                                                    </div>
                                                                                 </div>
 
-                                                                                {isComplete ? (
-                                                                                    <button
-                                                                                        onClick={() => {
-                                                                                            const sku = jobSkuMap[item.productId || ''] || finalizedSkus[item.productId || ''] || product?.sku || item.sku || 'UNKNOWN';
-                                                                                            setReprintItem({ sku, name: item.productName, qty: receivedQty });
-                                                                                        }}
-                                                                                        className="p-2.5 bg-white/5 hover:bg-white/10 text-white rounded-xl border border-white/10 transition-all active:scale-90"
-                                                                                        title="Reprint Tag"
-                                                                                    >
-                                                                                        <Printer size={14} />
-                                                                                    </button>
+                                                                                {activeJob ? (
+                                                                                    <div className="flex flex-col items-end flex-shrink-0">
+                                                                                        <span className="text-[10px] font-bold text-blue-400 bg-blue-500/10 px-2 py-1 rounded-lg border border-blue-500/20">
+                                                                                            #{activeJob.jobNumber}
+                                                                                        </span>
+                                                                                    </div>
                                                                                 ) : (
-                                                                                    <Protected permission="RECEIVE_PO">
-                                                                                        <button
-                                                                                            onClick={() => {
-                                                                                                setFocusedItem({
-                                                                                                    id: item.id,
-                                                                                                    productId: item.productId,
-                                                                                                    productName: item.productName || '',
-                                                                                                    expectedQty: item.quantity,
-                                                                                                    receivedQty: remainingQty
-                                                                                                });
-                                                                                                setReceivingPO(po);
-                                                                                                setShowPrintSuccess(false);
-                                                                                            }}
-                                                                                            className="p-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl shadow-lg active:scale-95 transition-all group-hover/item:scale-110"
-                                                                                            title="Initialize Inbound"
-                                                                                        >
-                                                                                            <Plus size={16} />
-                                                                                        </button>
-                                                                                    </Protected>
+                                                                                    <div className="flex flex-col items-end flex-shrink-0">
+                                                                                        <span className={`text-xl font-bold tabular-nums ${isComplete ? 'text-gray-500' : 'text-white'}`}>
+                                                                                            {receivedQty}/{item.quantity}
+                                                                                        </span>
+                                                                                        <span className="text-[10px] text-gray-500">Units</span>
+                                                                                    </div>
                                                                                 )}
                                                                             </div>
 
-                                                                            <div className="space-y-3">
-                                                                                <div className="flex justify-between items-center text-[9px] font-black uppercase tracking-widest">
-                                                                                    <span className="text-gray-500">Logistics Status</span>
-                                                                                    <span className={isComplete ? 'text-green-400' : 'text-blue-400'}>
-                                                                                        {receivedQty} / {item.quantity} UNITS
+                                                                            {/* Progress Bar */}
+                                                                            <div className="space-y-2">
+                                                                                <div className="flex justify-between items-center text-[10px]">
+                                                                                    <span className="text-gray-500 font-medium">Progress</span>
+                                                                                    <span className={`font-bold ${isComplete ? 'text-green-400' : 'text-blue-400'}`}>
+                                                                                        {Math.round((receivedQty / item.quantity) * 100)}%
                                                                                     </span>
                                                                                 </div>
-                                                                                <div className="h-2 bg-white/5 rounded-full overflow-hidden border border-white/5">
+                                                                                <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
                                                                                     <div
-                                                                                        className={`h-full transition-all duration-1000 ease-out rounded-full ${isComplete ? 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.4)]' : 'bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.4)]'
-                                                                                            } w-[${Math.round((receivedQty / item.quantity) * 100)}%]`}
+                                                                                        className={`h-full w-dynamic transition-all duration-500 ease-out ${isComplete ? 'bg-gradient-to-r from-green-500 to-emerald-500' : 'bg-gradient-to-r from-blue-500 to-cyan-500'}`}
+                                                                                        ref={el => el?.style.setProperty('--progress', `${Math.round((receivedQty / item.quantity) * 100)}%`)}
                                                                                     />
                                                                                 </div>
                                                                             </div>
+
+                                                                            {/* Action Button */}
+                                                                            {isComplete ? (
+                                                                                <button
+                                                                                    onClick={() => {
+                                                                                        const sku = jobSkuMap[item.productId || ''] || finalizedSkus[item.productId || ''] || product?.sku || item.sku || 'UNKNOWN';
+                                                                                        const fullProduct = products.find(p => p.id === item.productId);
+                                                                                        setReprintItem({
+                                                                                            sku,
+                                                                                            name: item.productName,
+                                                                                            qty: receivedQty,
+                                                                                            price: fullProduct?.retailPrice || fullProduct?.price,
+                                                                                            category: fullProduct?.category,
+                                                                                            expiry: (item as any).expiryDate || (item as any).expiry
+                                                                                        });
+                                                                                    }}
+                                                                                    className="w-full h-9 px-4 bg-white/5 border border-white/10 hover:bg-white/10 text-white text-xs font-bold rounded-lg flex items-center justify-center gap-2 transition-all"
+                                                                                    title="Reprint Tag"
+                                                                                >
+                                                                                    <Printer size={14} className="text-cyan-400" />
+                                                                                    Reprint Label
+                                                                                </button>
+                                                                            ) : (
+                                                                                <Protected permission="RECEIVE_PO">
+                                                                                    {/* Unified Receive Button */}
+                                                                                    <button
+                                                                                        onClick={() => {
+                                                                                            // Use enhanced modal for all receiving
+                                                                                            setSplitReceivingItem(item);
+                                                                                            setSplitReceivingPO(po);
+                                                                                            setSplitVariants([{
+                                                                                                id: `variant-${Date.now()}`,
+                                                                                                sku: item.sku || (item.productId ? (allProducts.find(p => p.id === item.productId)?.sku || '') : ''),
+                                                                                                skuType: 'existing',
+                                                                                                quantity: remainingQty,
+                                                                                                productId: item.productId,
+                                                                                                productName: item.productName
+                                                                                            }]);
+                                                                                            setIsSplitReceiving(true);
+                                                                                        }}
+                                                                                        className="w-full h-10 px-3 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white text-xs font-bold rounded-lg shadow-lg hover:shadow-blue-500/25 transition-all flex items-center justify-center gap-1.5 active:scale-[0.98]"
+                                                                                        title="Receive Item"
+                                                                                    >
+                                                                                        <Plus size={14} />
+                                                                                        Receive
+                                                                                    </button>
+                                                                                </Protected>
+                                                                            )}
                                                                         </div>
                                                                     </div>
+
                                                                 );
                                                             })}
                                                         </div>
 
                                                         {/* Audit Control */}
                                                         {allItemsReceived && (
-                                                            <div className="mt-8 pt-8 border-t border-green-500/20 flex flex-col md:flex-row justify-between items-center gap-6 relative z-10">
+                                                            <div className="mt-6 pt-6 border-t border-green-500/20 flex flex-col sm:flex-row justify-between items-center gap-4 relative z-10">
                                                                 <div className="flex items-center gap-3 text-green-400">
-                                                                    <div className="p-2 bg-green-500/20 rounded-xl">
-                                                                        <CheckCircle size={20} />
+                                                                    <div className="p-2.5 bg-gradient-to-br from-green-500/20 to-emerald-500/20 rounded-lg border border-green-500/20">
+                                                                        <CheckCircle size={18} />
                                                                     </div>
                                                                     <div>
-                                                                        <p className="text-xs font-black uppercase tracking-widest">Inbound Authenticated</p>
-                                                                        <p className="text-[9px] text-gray-500 font-bold uppercase mt-1">Cargo integrity verified across all units</p>
+                                                                        <p className="text-sm font-bold">Inbound Authenticated</p>
+                                                                        <p className="text-xs text-gray-400 mt-0.5">All items received and verified</p>
                                                                     </div>
                                                                 </div>
                                                                 <button
@@ -3751,7 +5244,7 @@ export default function WarehouseOperations() {
                                                                         setReviewPO(po);
                                                                         setShowReviewModal(true);
                                                                     }}
-                                                                    className="w-full md:w-auto px-8 py-4 bg-green-600 hover:bg-green-500 text-white text-[10px] font-black uppercase tracking-[0.3em] rounded-2xl transition-all shadow-xl shadow-green-600/20 active:scale-[0.98]"
+                                                                    className="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white text-sm font-bold rounded-xl transition-all shadow-lg shadow-green-600/20 active:scale-[0.98]"
                                                                 >
                                                                     Finalize Manifest
                                                                 </button>
@@ -3774,55 +5267,94 @@ export default function WarehouseOperations() {
                                 )}
 
                                 {/* RECEIVE History Section */}
-                                <div className="border-t border-white/10 mt-12 pt-8 pb-10">
-                                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+                                <div className="border-t border-white/10 mt-8 pt-6">
+                                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-5">
                                         <div>
-                                            <h4 className="text-sm font-bold text-white flex items-center gap-2 uppercase tracking-wide">
+                                            <h4 className="text-base font-bold text-white flex items-center gap-2">
                                                 <HistoryIcon size={18} className="text-gray-400" />
-                                                Logistics History
+                                                Recent History
                                             </h4>
-                                            <p className="text-gray-500 text-[10px]">Recent completed and finalized manifests</p>
+                                            <p className="text-gray-400 text-xs mt-0.5">Completed and finalized shipments</p>
                                         </div>
 
                                         {/* History Search */}
-                                        <div className="relative w-full md:w-72">
+                                        <div className="relative w-full sm:w-64">
                                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={14} />
                                             <input
                                                 type="text"
                                                 placeholder="Search history..."
                                                 value={receiveHistorySearch}
                                                 onChange={(e) => setReceiveHistorySearch(e.target.value)}
-                                                className="w-full bg-black/40 border border-white/10 rounded-xl pl-9 pr-4 py-2 text-xs text-white focus:outline-none focus:border-cyber-primary/50 transition-all"
+                                                className="w-full bg-black/30 border border-white/10 rounded-xl pl-9 pr-4 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500/30 focus:ring-2 focus:ring-blue-500/20 transition-all placeholder:text-gray-500"
                                             />
                                         </div>
                                     </div>
 
+
                                     {paginatedReceiveHistory.length > 0 ? (
                                         <>
-                                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-                                                {paginatedReceiveHistory.map((po: any) => (
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                                                {paginatedReceiveHistory.map((item: any) => (
                                                     <div
-                                                        key={po.id}
+                                                        key={`${item.type}-${item.id}`}
                                                         onClick={() => {
-                                                            setSelectedJob(po);
+                                                            setSelectedJob(item.rawData);
                                                             setIsDetailsOpen(true);
                                                         }}
-                                                        className="bg-white/[0.02] border border-white/5 rounded-xl p-3 hover:bg-white/[0.04] transition-all group cursor-pointer"
+                                                        className="bg-gradient-to-br from-white/[0.04] to-white/[0.01] border border-white/10 rounded-xl p-3.5 hover:from-white/[0.06] hover:to-white/[0.02] hover:border-white/20 transition-all group cursor-pointer"
                                                     >
-                                                        <div className="flex justify-between items-start mb-2">
-                                                            <span className="text-[10px] font-mono text-cyber-primary font-bold">{po.po_number || po.id.slice(0, 8)}</span>
-                                                            <span className="text-[9px] px-1.5 py-0.5 rounded uppercase font-black bg-green-500/10 text-green-400">
-                                                                {po.status}
+                                                        <div className="flex justify-between items-start mb-3">
+                                                            <div className="flex flex-col">
+                                                                <span className="text-[10px] uppercase font-bold text-gray-500 mb-0.5">{item.type}</span>
+                                                                <span className="text-xs font-mono text-blue-400 font-bold">
+                                                                    {item.reference}
+                                                                    {(item.status === 'Completed' || item.status === 'Received') && item.date && (
+                                                                        <span className="opacity-60 text-[9px] font-normal text-gray-400 ml-2">
+                                                                            ({new Date(item.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })})
+                                                                        </span>
+                                                                    )}
+                                                                </span>
+                                                            </div>
+                                                            <span className={`text-[9px] px-2 py-0.5 rounded-lg font-bold border ${item.status === 'Completed' || item.status === 'Received'
+                                                                ? 'bg-green-500/10 text-green-400 border-green-500/20'
+                                                                : 'bg-blue-500/10 text-blue-400 border-blue-500/20'
+                                                                }`}>
+                                                                {item.status}
                                                             </span>
                                                         </div>
-                                                        <div className="flex justify-between items-end">
-                                                            <div>
-                                                                <p className="text-[10px] text-gray-500 truncate max-w-[100px]">{po.supplierName}</p>
-                                                                <p className="text-[9px] text-gray-600 mt-0.5">{formatDateTime(po.receivedAt || po.updatedAt || po.createdAt || po.date)}</p>
+                                                        <div>
+                                                            <p className="text-sm text-white font-medium truncate mb-1">{item.subtitle}</p>
+                                                            {item.type === 'JOB' && item.rawData?.orderRef && item.rawData?.type !== 'PICK' && (
+                                                                <p className="text-[10px] text-gray-400 font-mono mb-0.5">PO: {item.rawData.orderRef}</p>
+                                                            )}
+                                                            <p className="text-[10px] text-gray-500">{formatDateTime(item.date)}</p>
+                                                        </div>
+                                                        <div className="flex justify-between items-center mt-3 pt-3 border-t border-white/5">
+                                                            <div className="flex items-center gap-2">
+                                                                {/* Recovery: Resolve Discrepancy Button (Only for PO-type entries) */}
+                                                                {item.type === 'PO' && (item.rawData.lineItems || []).some((li: any) => li.status === 'Discrepancy' || li.status === 'Pending') && (
+                                                                    <button
+                                                                        onClick={(e) => {
+                                                                            e.stopPropagation();
+                                                                            const badItem = (item.rawData.lineItems || []).find((li: any) => li.status === 'Discrepancy' || li.status === 'Pending');
+                                                                            const idx = (item.rawData.lineItems || []).findIndex((li: any) => li.status === 'Discrepancy' || li.status === 'Pending');
+                                                                            if (badItem) {
+                                                                                setSelectedJob(item.rawData);
+                                                                                setResolvingItem({ item: badItem, index: idx });
+                                                                                setIsResolutionModalOpen(true);
+                                                                            }
+                                                                        }}
+                                                                        className="p-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg border border-red-500/20 transition-all"
+                                                                        title="Resolve Discrepancy"
+                                                                    >
+                                                                        <AlertTriangle size={12} />
+                                                                    </button>
+                                                                )}
                                                             </div>
-                                                            <div className="text-right text-white font-bold text-xs">
-                                                                {(po.lineItems || []).length} <span className="text-[9px] text-gray-500 font-normal">lines</span>
-                                                            </div>
+                                                            <span className="text-[10px] text-gray-400 font-medium">
+                                                                {item.items} {item.items === 1 ? 'item' : 'items'}
+                                                            </span>
+                                                            <ChevronRight size={14} className="text-gray-500 group-hover:text-blue-400 transition-colors" />
                                                         </div>
                                                     </div>
                                                 ))}
@@ -3837,319 +5369,497 @@ export default function WarehouseOperations() {
                                             />
                                         </>
                                     ) : (
-                                        <div className="text-center py-10 bg-white/[0.01] rounded-2xl border border-dashed border-white/5">
-                                            <p className="text-gray-500 text-xs">No matching history found</p>
+                                        <div className="text-center py-12 bg-gradient-to-br from-white/[0.02] to-transparent rounded-xl border border-dashed border-white/10">
+                                            <HistoryIcon size={32} className="text-gray-600 mx-auto mb-3" />
+                                            <p className="text-gray-400 text-sm">No history found</p>
                                         </div>
                                     )}
                                 </div>
+
+
                             </div>
                         </div>
                     )
                 }
-                {/* Receiving Modal-Opens when clicking Receive on a product */}
-                {
-                    focusedItem && receivingPO && (
-                        <div className="fixed inset-0 bg-black/60 backdrop-blur-2xl flex items-center justify-center p-4 z-[200] animate-in fade-in duration-500">
-                            <div className="bg-white/5 border border-white/10 rounded-[3rem] w-full max-w-lg shadow-[0_0_100px_rgba(0,0,0,0.5)] relative overflow-hidden flex flex-col max-h-[90vh]">
-                                <div className="absolute -top-24 -right-24 w-64 h-64 bg-blue-500/10 blur-[120px] rounded-full pointer-events-none" />
-                                <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-cyan-500/10 blur-[120px] rounded-full pointer-events-none" />
 
-                                {/* Modal Header */}
-                                <div className="p-8 pb-4 flex justify-between items-start relative z-10">
-                                    <div>
-                                        <div className="flex items-center gap-3 mb-2">
-                                            <div className="p-2 bg-blue-500/20 rounded-xl">
-                                                <Package size={20} className="text-blue-400" />
+
+                {/* Receiving Modal (handles both single and split scenarios) */}
+                {
+                    isSplitReceiving && splitReceivingItem && splitReceivingPO && (
+                        <div className="fixed inset-0 bg-black/70 backdrop-blur-xl flex items-center justify-center p-4 z-[200] animate-in fade-in duration-300">
+                            <div className="bg-gradient-to-br from-gray-900 to-black border border-white/10 rounded-3xl w-full max-w-6xl shadow-2xl relative overflow-hidden flex flex-col max-h-[90vh]">
+                                {/* Glow Effects */}
+                                <div className="absolute -top-32 -right-32 w-96 h-96 bg-blue-500/10 blur-[150px] rounded-full pointer-events-none" />
+                                <div className="absolute -bottom-32 -left-32 w-96 h-96 bg-cyan-500/10 blur-[150px] rounded-full pointer-events-none" />
+
+                                {/* Header */}
+                                <div className="p-8 pb-6 border-b border-white/10 relative z-10">
+                                    <div className="flex justify-between items-start">
+                                        <div>
+                                            <div className="flex items-center gap-3 mb-2">
+                                                <div className="p-2.5 bg-blue-500/20 rounded-xl">
+                                                    <Package size={22} className="text-blue-400" />
+                                                </div>
+                                                <h3 className="text-2xl font-black text-white">Receive Items</h3>
+                                                {splitVariants.length > 1 && (
+                                                    <span className="px-2 py-1 bg-blue-500/20 text-blue-400 text-xs font-bold rounded-lg border border-blue-500/30">
+                                                        <GitBranch size={12} className="inline mr-1" />
+                                                        Split Mode
+                                                    </span>
+                                                )}
                                             </div>
-                                            <h3 className="text-lg font-black text-white uppercase tracking-tighter">Inbound Logistics</h3>
+                                            <p className="text-sm text-gray-400">
+                                                {splitReceivingItem.productName} • {splitReceivingItem.quantity} units expected
+                                            </p>
                                         </div>
-                                        <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest leading-relaxed">
-                                            Validating Cargo Manifest • {focusedItem.productName}
-                                        </p>
+                                        <button
+                                            onClick={() => {
+                                                setIsSplitReceiving(false);
+                                                setSplitReceivingItem(null);
+                                                setSplitReceivingPO(null);
+                                                setSplitVariants([]);
+                                            }}
+                                            className="p-3 bg-white/5 hover:bg-white/10 text-white rounded-xl transition-all"
+                                            title="Close Receive Modal"
+                                        >
+                                            <X size={20} />
+                                        </button>
                                     </div>
-                                    <button
-                                        onClick={() => { setFocusedItem(null); setReceivingPO(null); }}
-                                        className="p-3 bg-white/5 hover:bg-white/10 text-white rounded-2xl transition-all"
-                                        title="Abort Mission"
-                                    >
-                                        <X size={20} />
-                                    </button>
                                 </div>
 
-                                <div className="p-8 pt-0 space-y-8 overflow-y-auto relative z-10 custom-scrollbar">
-                                    {!showPrintSuccess ? (
-                                        <>
-                                            {/* Quantity Engine */}
-                                            <div className="bg-black/40 rounded-[2rem] p-8 border border-white/5 space-y-6">
-                                                <div className="flex justify-between items-end">
-                                                    <div>
-                                                        <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest mb-1">Quantity Engine</p>
-                                                        <p className="text-3xl font-black text-white">{focusedItem.receivedQty}<span className="text-sm text-gray-600 ml-2">UNITS</span></p>
+                                {/* Variants List */}
+                                <div className="flex-1 overflow-y-auto p-8 pt-6 space-y-4 relative z-10 custom-scrollbar">
+                                    {splitVariants.map((variant, index) => (
+                                        <div key={variant.id} className="bg-white/5 border border-white/10 rounded-2xl p-6 space-y-4">
+                                            <div className="flex justify-between items-start mb-4">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center">
+                                                        <span className="text-sm font-bold text-blue-400">#{index + 1}</span>
                                                     </div>
-                                                    <div className="text-right">
-                                                        <p className="text-[10px] text-blue-500 font-black uppercase tracking-widest mb-1">Expected</p>
-                                                        <p className="text-xl font-black text-gray-400">{focusedItem.expectedQty}</p>
-                                                    </div>
+                                                    <h4 className="text-sm font-bold text-white">Variant {index + 1}</h4>
                                                 </div>
+                                                {splitVariants.length > 1 && (
+                                                    <button
+                                                        onClick={() => {
+                                                            setSplitVariants(prev => prev.filter(v => v.id !== variant.id));
+                                                        }}
+                                                        className="p-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg transition-all"
+                                                        title="Remove variant"
+                                                    >
+                                                        <Trash2 size={14} />
+                                                    </button>
+                                                )}
+                                            </div>
 
-                                                <div className="grid grid-cols-4 gap-3">
-                                                    {[1, 5, 10, 50].map(val => (
+                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                                {/* SKU Type Toggle */}
+                                                <div>
+                                                    <label className="block text-xs font-bold text-gray-400 mb-2 uppercase tracking-wider">SKU Type</label>
+                                                    <div className="grid grid-cols-2 gap-2">
                                                         <button
-                                                            key={val}
-                                                            onClick={() => setFocusedItem({ ...focusedItem, receivedQty: Math.min(focusedItem.expectedQty, focusedItem.receivedQty + val) })}
-                                                            className="py-3 bg-white/5 hover:bg-white/10 text-white text-[10px] font-black uppercase rounded-xl border border-white/5 transition-all active:scale-95"
+                                                            disabled={variant.skuType === 'existing' && !!variant.productId}
+                                                            onClick={() => {
+                                                                setSplitVariants(prev => prev.map(v =>
+                                                                    v.id === variant.id ? { ...v, skuType: 'existing', sku: '', productId: undefined } : v
+                                                                ));
+                                                            }}
+                                                            className={`py-2.5 px-3 rounded-lg text-xs font-bold transition-all ${variant.skuType === 'existing'
+                                                                ? 'bg-blue-500/20 text-blue-400 border-2 border-blue-500/50'
+                                                                : 'bg-white/5 text-gray-400 border-2 border-transparent hover:bg-white/10'
+                                                                } ${(variant.skuType === 'existing' && !!variant.productId) ? 'opacity-50 cursor-not-allowed' : ''}`}
                                                         >
-                                                            +{val}
+                                                            <Link size={12} className="inline mr-1" />
+                                                            Map Existing
                                                         </button>
-                                                    ))}
+                                                        <button
+                                                            disabled={variant.skuType === 'existing' && !!variant.productId}
+                                                            onClick={async () => {
+                                                                const { generateSKU } = await import('../utils/skuGenerator');
+                                                                const newSku = generateSKU('General', allProducts);
+                                                                setSplitVariants(prev => prev.map(v =>
+                                                                    v.id === variant.id ? { ...v, skuType: 'new', sku: newSku, productId: undefined } : v
+                                                                ));
+                                                            }}
+                                                            className={`py-2.5 px-3 rounded-lg text-xs font-bold transition-all ${variant.skuType === 'new'
+                                                                ? 'bg-green-500/20 text-green-400 border-2 border-green-500/50'
+                                                                : 'bg-white/5 text-gray-400 border-2 border-transparent hover:bg-white/10'
+                                                                } ${(variant.skuType === 'existing' && !!variant.productId) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                                        >
+                                                            <Plus size={12} className="inline mr-1" />
+                                                            Generate New
+                                                        </button>
+                                                    </div>
                                                 </div>
 
+                                                {/* SKU Input/Search */}
+                                                <div className="md:col-span-2">
+                                                    <div className="flex justify-between items-center mb-2">
+                                                        <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider">
+                                                            {variant.skuType === 'existing' ? 'Search & Map SKU' : 'Generated SKU'}
+                                                            {variant.skuType === 'existing' && !!variant.productId && (
+                                                                <span className="ml-2 text-blue-400 font-black animate-pulse flex items-center gap-1 inline-flex">
+                                                                    <Lock size={10} /> LOCKED
+                                                                </span>
+                                                            )}
+                                                        </label>
+                                                        {variant.skuType === 'existing' && !variant.productId && (splitReceivingItem.sku || splitReceivingItem.productId) && (
+                                                            <button
+                                                                onClick={() => {
+                                                                    const suggestedSku = splitReceivingItem.sku || allProducts.find(p => p.id === splitReceivingItem.productId)?.sku;
+                                                                    if (suggestedSku) {
+                                                                        setSplitVariants(prev => prev.map(v =>
+                                                                            v.id === variant.id ? {
+                                                                                ...v,
+                                                                                sku: suggestedSku,
+                                                                                productId: splitReceivingItem.productId,
+                                                                                productName: splitReceivingItem.productName
+                                                                            } : v
+                                                                        ));
+                                                                    }
+                                                                }}
+                                                                className="flex items-center gap-1.5 px-2 py-1 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 text-[10px] font-bold rounded-lg border border-blue-500/20 transition-all group/suggest"
+                                                            >
+                                                                <span className="opacity-60">Try:</span>
+                                                                <span className="font-mono">{splitReceivingItem.sku || allProducts.find(p => p.id === splitReceivingItem.productId)?.sku || 'N/A'}</span>
+                                                                <ArrowRight size={10} className="group-hover/suggest:translate-x-0.5 transition-transform" />
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                    {variant.skuType === 'existing' ? (
+                                                        <div className="relative">
+                                                            <input
+                                                                type="text"
+                                                                value={variant.sku || (variant.productId ? (allProducts.find(p => p.id === variant.productId)?.sku || '') : '')}
+                                                                disabled={variant.skuType === 'existing' && !!variant.productId}
+                                                                onChange={(e) => {
+                                                                    const searchValue = e.target.value;
+                                                                    setSplitVariants(prev => prev.map(v =>
+                                                                        v.id === variant.id ? { ...v, sku: searchValue } : v
+                                                                    ));
+                                                                }}
+                                                                placeholder="Type SKU or product name..."
+                                                                className={`w-full bg-black/40 border border-white/10 rounded-xl p-3 pr-10 text-sm text-white font-mono focus:border-blue-500/50 focus:outline-none ${variant.skuType === 'existing' && !!variant.productId ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                                            />
+                                                            <Search size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500" />
+
+                                                            {/* Autocomplete Dropdown - Only show when typing, hide after selection */}
+                                                            {variant.sku && variant.sku.length >= 1 && !variant.productId && (() => {
+                                                                const searchResults = allProducts
+                                                                    .filter(p =>
+                                                                        p.sku && (
+                                                                            p.sku.toLowerCase().includes(variant.sku.toLowerCase()) ||
+                                                                            p.name.toLowerCase().includes(variant.sku.toLowerCase())
+                                                                        )
+                                                                    )
+                                                                    .slice(0, 5);
+
+
+                                                                return (
+                                                                    <div className="absolute top-full left-0 right-0 mt-2 bg-gray-900 border-2 border-blue-500/50 rounded-xl shadow-2xl max-h-48 overflow-y-auto z-[9999]">
+                                                                        {searchResults.length === 0 ? (
+                                                                            <div className="p-4 text-center text-gray-500 text-xs">
+                                                                                No products found. Try a different search term.
+                                                                                <div className="text-[10px] text-gray-600 mt-1">
+                                                                                    Searching {allProducts.length} products
+                                                                                </div>
+                                                                            </div>
+                                                                        ) : (
+                                                                            searchResults.map(product => (
+                                                                                <button
+                                                                                    key={product.id}
+                                                                                    onClick={() => {
+                                                                                        setSplitVariants(prev => prev.map(v =>
+                                                                                            v.id === variant.id ? {
+                                                                                                ...v,
+                                                                                                sku: product.sku,
+                                                                                                productId: product.id,
+                                                                                                productName: product.name,
+                                                                                                skuType: 'existing' as const // CRITICAL: Mark as existing product
+                                                                                            } : v
+                                                                                        ));
+                                                                                    }}
+                                                                                    className="w-full p-3 hover:bg-white/10 text-left transition-colors border-b border-white/5 last:border-0"
+                                                                                >
+                                                                                    <div className="text-sm font-mono text-blue-400">{product.sku}</div>
+                                                                                    <div className="text-xs text-gray-400 mt-0.5">{product.name}</div>
+                                                                                    <div className="text-xs text-gray-600 mt-0.5">Stock: {product.stock || 0}</div>
+                                                                                </button>
+                                                                            ))
+                                                                        )}
+                                                                    </div>
+                                                                );
+                                                            })()}
+                                                        </div>
+                                                    ) : (
+                                                        <div className="bg-black/40 border border-green-500/30 rounded-xl p-3 flex items-center justify-between">
+                                                            <span className="text-sm font-mono text-green-400">{variant.sku}</span>
+                                                            <span className="text-xs text-gray-500">Auto-generated</span>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            <div>
+                                                <label className="block text-xs font-bold text-gray-400 mb-2 uppercase tracking-wider">Quantity</label>
                                                 <input
-                                                    title="Target Quantity"
+                                                    key={`qty-${variant.id}-${variant.quantity}`}
+                                                    title="Quantity to Receive"
                                                     type="number"
-                                                    value={focusedItem.receivedQty}
-                                                    onChange={(e) => setFocusedItem({
-                                                        ...focusedItem,
-                                                        receivedQty: Math.min(focusedItem.expectedQty, Math.max(0, parseInt(e.target.value) || 0))
-                                                    })}
-                                                    className="w-full bg-black/40 border border-white/10 rounded-2xl p-6 text-4xl text-center text-white font-black focus:border-blue-500/50 focus:outline-none transition-all shadow-inner"
+                                                    min="1"
+                                                    placeholder="Enter quantity"
+                                                    value={variant.quantity}
+                                                    onChange={(e) => {
+                                                        setSplitVariants(prev => prev.map(v =>
+                                                            v.id === variant.id ? { ...v, quantity: Math.max(1, parseInt(e.target.value) || 1) } : v
+                                                        ));
+                                                    }}
+                                                    className="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-lg text-white font-bold text-center focus:border-blue-500/50 focus:outline-none animate-in fade-in zoom-in-95 duration-300"
                                                 />
                                             </div>
 
-                                            {/* SKU Assignment Engine */}
-                                            <div className="bg-white/5 border border-white/10 rounded-[2rem] p-6 space-y-6 relative overflow-hidden group/sku">
-                                                <div className="flex justify-between items-center mb-2">
-                                                    <div className="flex items-center gap-2">
-                                                        <Scan size={14} className="text-gray-400" />
-                                                        <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest">SKU Assignment Engine</p>
-                                                    </div>
-                                                    {(() => {
-                                                        const product = products.find(p => p.id === focusedItem.productId);
-                                                        const isExisting = product?.sku === scannedSkus[focusedItem.productId] && product?.sku !== 'MISC';
-                                                        return isExisting ? (
-                                                            <span className="text-[8px] bg-green-500/10 text-green-400 px-2.5 py-1 rounded-full border border-green-500/20 flex items-center gap-1.5 font-black uppercase tracking-widest">
-                                                                <CheckCircle size={8} /> Existing Record
-                                                            </span>
-                                                        ) : (
-                                                            <span className="text-[8px] bg-blue-500/10 text-blue-400 px-2.5 py-1 rounded-full border border-blue-500/20 flex items-center gap-1.5 font-black uppercase tracking-widest">
-                                                                <RefreshCw size={8} /> New Generation
-                                                            </span>
-                                                        );
-                                                    })()}
-                                                </div>
-
-                                                <div className="space-y-4">
-                                                    <div className="relative">
-                                                        <input
-                                                            title="Supplier SKU"
-                                                            type="text"
-                                                            value={scannedSkus[focusedItem.productId] || ''}
-                                                            onChange={(e) => {
-                                                                const val = e.target.value.trim().toUpperCase();
-                                                                setScannedSkus(prev => ({ ...prev, [focusedItem.productId]: val }));
-                                                                setSkuDecisions(prev => ({ ...prev, [focusedItem.productId]: 'keep' }));
-                                                            }}
-                                                            className={`w-full bg-black/40 border rounded-2xl p-5 pr-12 text-white font-mono font-bold focus:outline-none transition-all ${scannedSkus[focusedItem.productId] ? 'border-blue-500/50 shadow-[0_0_15px_rgba(59,130,246,0.1)]' : 'border-white/10'
-                                                                }`}
-                                                            placeholder="Scan Supplier Barcode..."
-                                                        />
-                                                        {scannedSkus[focusedItem.productId] && (
-                                                            <div className="absolute right-5 top-1/2 -translate-y-1/2 text-blue-400">
-                                                                <CheckCircle size={18} />
-                                                            </div>
-                                                        )}
-                                                    </div>
-
-                                                    <div className="flex items-center gap-4">
-                                                        <div className="h-px flex-1 bg-white/5" />
-                                                        <span className="text-[8px] text-gray-600 font-black uppercase tracking-widest">OR</span>
-                                                        <div className="h-px flex-1 bg-white/5" />
-                                                    </div>
-
-                                                    <button
-                                                        onClick={async () => {
-                                                            const product = products.find(p => p.id === focusedItem.productId);
-                                                            const { generateSKU } = await import('../utils/skuGenerator');
-                                                            const newSku = generateSKU(product?.category || 'General', allProducts);
-                                                            setScannedSkus(prev => ({ ...prev, [focusedItem.productId]: newSku }));
-                                                            setSkuDecisions(prev => ({ ...prev, [focusedItem.productId]: 'generate' }));
-                                                        }}
-                                                        className="w-full py-4 bg-white/5 hover:bg-white/10 rounded-2xl border border-white/10 text-xs text-gray-300 font-black uppercase tracking-widest transition-all flex items-center justify-center gap-3 active:scale-[0.98]"
-                                                    >
-                                                        <RefreshCw size={14} className="group-hover/sku:rotate-180 transition-transform duration-700" />
-                                                        Auto-Generate Logistics SKU
-                                                    </button>
-                                                </div>
-                                            </div>
-
-                                            {/* Telemetry & Labels */}
-                                            <div className="grid grid-cols-2 gap-4">
-                                                <div className="bg-white/5 border border-white/10 rounded-[1.5rem] p-4">
-                                                    <label className="block text-[8px] font-black text-gray-500 mb-3 uppercase tracking-widest">Thermal Output</label>
-                                                    <select
-                                                        title="Thermal Size"
-                                                        value={labelSize}
-                                                        onChange={(e) => setLabelSize(e.target.value as any)}
-                                                        className="w-full bg-black/40 border border-white/10 rounded-xl p-2.5 text-[10px] text-white font-bold focus:border-blue-500/50 focus:outline-none"
-                                                    >
-                                                        <option value="Tiny">1.25" x 1"</option>
-                                                        <option value="Small">2.25" x 1.25"</option>
-                                                        <option value="Medium">3" x 2"</option>
-                                                        <option value="Large">4" x 3"</option>
-                                                    </select>
-                                                </div>
-                                                <div className="bg-white/5 border border-white/10 rounded-[1.5rem] p-4">
-                                                    <label className="block text-[8px] font-black text-gray-500 mb-3 uppercase tracking-widest">Optic format</label>
-                                                    <select
-                                                        title="Optic Format"
-                                                        value={labelFormat}
-                                                        onChange={(e) => setLabelFormat(e.target.value as any)}
-                                                        className="w-full bg-black/40 border border-white/10 rounded-xl p-2.5 text-[10px] text-white font-bold focus:border-blue-500/50 focus:outline-none"
-                                                    >
-                                                        <option value="QR">QR Matrix</option>
-                                                        <option value="Barcode">CODE 128</option>
-                                                        {(labelSize === 'MEDIUM' || labelSize === 'LARGE') && <option value="Both">Hybrid</option>}
-                                                    </select>
-                                                </div>
-                                            </div>
-
-                                            {/* Buttons */}
-                                            <div className="flex gap-3 pt-2">
-                                                <button
-                                                    onClick={() => { setFocusedItem(null); setReceivingPO(null); }}
-                                                    className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-white font-bold rounded-xl transition-colors"
-                                                >
-                                                    Cancel
-                                                </button>
-                                                <button
-                                                    disabled={isReceiving}
-                                                    onClick={async () => {
-                                                        if (!receivingPO || !focusedItem || isReceiving) return;
-                                                        if (focusedItem.receivedQty <= 0) {
-                                                            addNotification('alert', 'Quantity must be greater than 0');
-                                                            return;
-                                                        }
-
-                                                        setIsReceiving(true);
-                                                        try {
-                                                            const singleItem: ReceivingItem = {
-                                                                ...focusedItem,
-                                                                quantity: focusedItem.receivedQty
-                                                            };
-
-                                                            const skus = await receivePO(
-                                                                receivingPO.id,
-                                                                [singleItem],
-                                                                skuDecisions,
-                                                                scannedSkus
-                                                            );
-
-                                                            if (skus) {
-                                                                setFinalizedSkus(prev => ({ ...prev, ...skus }));
-                                                                setShowPrintSuccess(true);
-                                                                // Log User Action
-                                                                logSystemEvent(
-                                                                    'Stock Received',
-                                                                    `Received ${focusedItem.receivedQty}x ${focusedItem.productName} (PO: ${receivingPO.po_number || receivingPO.id})`,
-                                                                    user?.name || 'Receiver',
-                                                                    'Inventory'
-                                                                );
-                                                            }
-                                                        } finally {
-                                                            setIsReceiving(false);
-                                                        }
-                                                    }}
-                                                    className={`flex-1 py-3 bg-cyber-primary text-black font-bold rounded-xl transition-colors flex flex-col items-center justify-center leading-none ${isReceiving ? 'opacity-50 cursor-not-allowed' : 'hover:bg-cyber-accent'} `}
-                                                >
-                                                    {isReceiving ? (
-                                                        <>
-                                                            <RefreshCw size={18} className="animate-spin" />
-                                                            <span className="text-[10px] opacity-70 mt-1">Processing...</span>
-                                                        </>
-                                                    ) : (
-                                                        <>
-                                                            <span>Confirm Receive</span>
-                                                            <span className="text-[10px] opacity-70 mt-1">Next: Print Labels</span>
-                                                        </>
+                                            {/* Barcode (Optional) */}
+                                            <div>
+                                                <label className="block text-xs font-bold text-gray-400 mb-2 uppercase tracking-wider">
+                                                    Barcode {variant.barcode && (
+                                                        <span className="text-green-400 text-[10px] ml-2">
+                                                            <CheckCircle size={10} className="inline mr-1" />
+                                                            Captured
+                                                        </span>
                                                     )}
-                                                </button>
-                                            </div>
-                                        </>
-                                    ) : (
-                                        /* Success Screen: Logistics Intake Verified */
-                                        <div className="flex flex-col items-center justify-center py-12 text-center animate-in zoom-in duration-700">
-                                            <div className="relative mb-8">
-                                                <div className="absolute inset-0 bg-green-500/20 blur-3xl rounded-full scale-150 animate-pulse" />
-                                                <div className="p-8 bg-green-500/20 rounded-full border border-green-500/30 relative">
-                                                    <CheckCircle size={64} className="text-green-400" />
+                                                </label>
+                                                <div className="relative">
+                                                    <input
+                                                        type="text"
+                                                        value={variant.barcode || ''}
+                                                        onChange={(e) => {
+                                                            setSplitVariants(prev => prev.map(v =>
+                                                                v.id === variant.id ? { ...v, barcode: e.target.value } : v
+                                                            ));
+                                                        }}
+                                                        placeholder="Scan or enter barcode..."
+                                                        className={`w-full bg-black/40 border rounded-xl p-3 pr-10 text-sm text-white font-mono focus:border-blue-500/50 focus:outline-none transition-all ${variant.barcode
+                                                            ? 'border-green-500/50 shadow-[0_0_10px_rgba(34,197,94,0.2)]'
+                                                            : 'border-white/10'
+                                                            }`}
+                                                    />
+                                                    {variant.barcode && (
+                                                        <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                                                            <CheckCircle size={16} className="text-green-400" />
+                                                        </div>
+                                                    )}
+                                                    {!variant.barcode && (
+                                                        <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                                                            <Scan size={16} className="text-gray-600 animate-pulse" />
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </div>
 
-                                            <h3 className="text-2xl font-black text-white uppercase tracking-tighter mb-2">Intake Verified</h3>
-                                            <p className="text-xs text-gray-500 font-bold uppercase tracking-[0.2em] mb-8">
-                                                {focusedItem.receivedQty} UNITS • {focusedItem.productName}
-                                            </p>
-
-                                            <div className="w-full grid grid-cols-1 gap-4">
-                                                <button
-                                                    disabled={isPrinting}
-                                                    onClick={async () => {
-                                                        if (isPrinting) return;
-                                                        setIsPrinting(true);
-                                                        try {
-                                                            const labelsToPrint: Array<{ value: string; label: string; quantity: number }> = [];
-                                                            const product = products.find(p => p.id === focusedItem.productId);
-                                                            const finalSku = finalizedSkus[focusedItem.productId] || scannedSkus[focusedItem.productId] || product?.sku || 'UNKNOWN';
-                                                            labelsToPrint.push({ value: finalSku, label: focusedItem.productName, quantity: focusedItem.receivedQty });
-
-                                                            const html = await generateUnifiedBatchLabelsHTML(labelsToPrint, {
-                                                                size: labelSize as LabelSize,
-                                                                format: labelFormat as LabelFormat
-                                                            });
-
-                                                            const printWin = window.open('', '_blank');
-                                                            if (printWin) {
-                                                                printWin.document.write(html);
-                                                                printWin.document.close();
-                                                            }
-                                                        } catch (e) {
-                                                            addNotification('alert', 'Print failed');
-                                                        } finally {
-                                                            setIsPrinting(false);
-                                                        }
-                                                    }}
-                                                    className={`w-full py-5 bg-blue-600 text-white font-black uppercase tracking-[0.3em] rounded-2xl shadow-xl shadow-blue-600/20 transition-all flex items-center justify-center gap-3 ${isPrinting ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-50 hover:scale-[1.02] active:scale-[0.98]'} `}
-                                                >
-                                                    {isPrinting ? <RefreshCw size={20} className="animate-spin" /> : <Printer size={20} />}
-                                                    {isPrinting ? 'Generating...' : 'Execute Print Run'}
-                                                </button>
-
-                                                <button
-                                                    onClick={async () => {
-                                                        if (receivingPO && focusedItem && focusedItem.productId) {
-                                                            const currentReceived = receivedQuantities[focusedItem.productId] || 0;
-                                                            const newTotal = currentReceived + focusedItem.receivedQty;
-                                                            const updatedReceivedMap: Record<string, number> = { ...receivedQuantities, [focusedItem.productId]: newTotal };
-                                                            const isComplete = receivingPO.lineItems.every(item => {
-                                                                const rec = item.productId ? (updatedReceivedMap[item.productId] || 0) : 0;
-                                                                return rec >= item.quantity;
-                                                            });
-                                                            if (isComplete) {
-                                                                setReviewPO(receivingPO);
-                                                                setShowReviewModal(true);
-                                                            }
-                                                        }
-                                                        setFocusedItem(null);
-                                                        setReceivingPO(null);
-                                                        setShowPrintSuccess(false);
-                                                    }}
-                                                    className="w-full py-5 bg-white/5 hover:bg-white/10 text-white font-black uppercase tracking-[0.3em] rounded-2xl border border-white/10 transition-all"
-                                                >
-                                                    Finalize & Close
-                                                </button>
+                                            {/* Advanced Logistics Data */}
+                                            <div className="md:col-span-3 bg-white/5 border border-white/10 rounded-xl p-4">
+                                                <div className="flex items-center gap-2 mb-3">
+                                                    <Database size={14} className="text-gray-400" />
+                                                    <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">Advanced Logistics</p>
+                                                </div>
+                                                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                                    <div>
+                                                        <label className="block text-[10px] font-bold text-gray-500 mb-1 uppercase tracking-widest">Expiry Date</label>
+                                                        <input
+                                                            title="Expiry Date"
+                                                            type="date"
+                                                            value={(variant as any).expiryDate || ''}
+                                                            onChange={(e) => {
+                                                                setSplitVariants(prev => prev.map(v =>
+                                                                    v.id === variant.id ? { ...v, expiryDate: e.target.value } : v
+                                                                ));
+                                                            }}
+                                                            className="w-full bg-black/40 border border-white/10 rounded-lg p-2 text-xs text-white font-bold focus:border-blue-500/50 focus:outline-none"
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-[10px] font-bold text-gray-500 mb-1 uppercase tracking-widest">Batch / Lot #</label>
+                                                        <input
+                                                            title="Batch Number"
+                                                            type="text"
+                                                            placeholder="L-2024-..."
+                                                            value={(variant as any).batchNumber || ''}
+                                                            onChange={(e) => {
+                                                                setSplitVariants(prev => prev.map(v =>
+                                                                    v.id === variant.id ? { ...v, batchNumber: e.target.value } : v
+                                                                ));
+                                                            }}
+                                                            className="w-full bg-black/40 border border-white/10 rounded-lg p-2 text-xs text-white font-bold focus:border-blue-500/50 focus:outline-none"
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-[10px] font-bold text-gray-500 mb-1 uppercase tracking-widest">Temperature (°C)</label>
+                                                        <input
+                                                            title="Temperature in Celsius"
+                                                            type="number"
+                                                            placeholder="4°C"
+                                                            value={(variant as any).temperature || ''}
+                                                            onChange={(e) => {
+                                                                setSplitVariants(prev => prev.map(v =>
+                                                                    v.id === variant.id ? { ...v, temperature: e.target.value } : v
+                                                                ));
+                                                            }}
+                                                            className="w-full bg-black/40 border border-white/10 rounded-lg p-2 text-xs text-white font-bold focus:border-blue-500/50 focus:outline-none"
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-[10px] font-bold text-gray-500 mb-1 uppercase tracking-widest">Condition</label>
+                                                        <select
+                                                            title="Item Condition"
+                                                            value={(variant as any).condition || 'Good'}
+                                                            onChange={(e) => {
+                                                                setSplitVariants(prev => prev.map(v =>
+                                                                    v.id === variant.id ? { ...v, condition: e.target.value } : v
+                                                                ));
+                                                            }}
+                                                            className="w-full bg-black/40 border border-white/10 rounded-lg p-2 text-xs text-white font-bold focus:border-blue-500/50 focus:outline-none"
+                                                        >
+                                                            <option value="Good">Good</option>
+                                                            <option value="Damaged">Damaged</option>
+                                                            <option value="Short">Short</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
-                                    )}
+                                    ))}
+
+                                    {/* Add Variant Button */}
+                                    <button
+                                        onClick={() => {
+                                            setSplitVariants(prev => [...prev, {
+                                                id: `variant-${Date.now()}`,
+                                                sku: '',
+                                                skuType: 'existing',
+                                                quantity: 1
+                                            }]);
+                                        }}
+                                        className="w-full py-4 bg-white/5 hover:bg-white/10 border-2 border-dashed border-white/20 hover:border-blue-500/50 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2"
+                                    >
+                                        <Plus size={18} />
+                                        Add Another Variant
+                                    </button>
+                                </div>
+
+                                {/* Footer with Validation */}
+                                <div className="p-8 pt-6 border-t border-white/10 space-y-4 relative z-10">
+                                    {/* Quantity Summary */}
+                                    <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-sm text-gray-400">Total Allocated:</span>
+                                            <span className={`text-lg font-bold ${splitVariants.reduce((sum, v) => sum + v.quantity, 0) === splitReceivingItem.quantity
+                                                ? 'text-green-400'
+                                                : splitVariants.reduce((sum, v) => sum + v.quantity, 0) < splitReceivingItem.quantity && (user?.role === 'manager' || user?.role === 'super_admin' || user?.role === 'warehouse_manager')
+                                                    ? 'text-blue-400'
+                                                    : 'text-yellow-400'
+                                                }`}>
+                                                {splitVariants.reduce((sum, v) => sum + v.quantity, 0)} / {splitReceivingItem.quantity}
+                                            </span>
+                                        </div>
+                                        {splitVariants.reduce((sum, v) => sum + v.quantity, 0) !== splitReceivingItem.quantity && (
+                                            <div className="mt-2 space-y-1">
+                                                {splitVariants.reduce((sum, v) => sum + v.quantity, 0) < splitReceivingItem.quantity ? (
+                                                    (user?.role === 'manager' || user?.role === 'super_admin' || user?.role === 'warehouse_manager') ? (
+                                                        <p className="text-xs text-blue-400 flex items-center gap-2 font-bold">
+                                                            <CheckCircle size={12} />
+                                                            Authorized: Short-receiving allowed for {user?.role}.
+                                                        </p>
+                                                    ) : (
+                                                        <p className="text-xs text-yellow-400 flex items-center gap-2">
+                                                            <AlertTriangle size={12} />
+                                                            Short receiving requires Manager approval.
+                                                        </p>
+                                                    )
+                                                ) : (
+                                                    <p className="text-xs text-red-400 flex items-center gap-2">
+                                                        <AlertTriangle size={12} />
+                                                        Cannot receive more than {splitReceivingItem.quantity} units.
+                                                    </p>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Action Buttons */}
+                                    <div className="flex gap-3">
+                                        <button
+                                            onClick={() => {
+                                                setIsSplitReceiving(false);
+                                                setSplitReceivingItem(null);
+                                                setSplitReceivingPO(null);
+                                                setSplitVariants([]);
+                                            }}
+                                            className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-white font-bold rounded-xl transition-all"
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button
+                                            disabled={
+                                                isSubmitting ||
+                                                (splitVariants.reduce((sum, v) => sum + v.quantity, 0) !== splitReceivingItem.quantity &&
+                                                    !(splitVariants.reduce((sum, v) => sum + v.quantity, 0) < splitReceivingItem.quantity && (user?.role === 'manager' || user?.role === 'super_admin' || user?.role === 'warehouse_manager'))) ||
+                                                splitVariants.some(v => !v.sku)
+                                            }
+                                            onClick={async () => {
+                                                if (isSubmitting) return;
+
+                                                // CRITICAL Validation: Ensure all new variants have a SKU
+                                                const invalidNewVariants = splitVariants.filter(v =>
+                                                    v.skuType === 'new' && (!v.sku || v.sku.trim() === '')
+                                                );
+
+                                                if (invalidNewVariants.length > 0) {
+                                                    addNotification('alert', `Please generate SKUs for all new items before confirming.`);
+                                                    return;
+                                                }
+
+                                                // Validation: Ensure all existing variants have a product mapped
+                                                const invalidExistingVariants = splitVariants.filter(v =>
+                                                    v.skuType === 'existing' && !v.productId
+                                                );
+
+                                                if (invalidExistingVariants.length > 0) {
+                                                    addNotification('alert', `Please map a product for all existing items before confirming.`);
+                                                    return;
+                                                }
+
+                                                setIsSubmitting(true);
+                                                try {
+                                                    await receivePOSplit(
+                                                        splitReceivingPO.id,
+                                                        splitReceivingItem.id,
+                                                        splitVariants
+                                                    );
+                                                    // Close modal on success
+                                                    setIsSplitReceiving(false);
+                                                    setSplitReceivingItem(null);
+                                                    setSplitReceivingPO(null);
+                                                    setSplitVariants([]);
+                                                } catch (error) {
+                                                    console.error('Split receiving error:', error);
+                                                } finally {
+                                                    setIsSubmitting(false);
+                                                }
+                                            }}
+                                            className="flex-1 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed text-white font-bold rounded-xl shadow-lg transition-all flex items-center justify-center gap-2"
+                                        >
+                                            {isSubmitting ? (
+                                                <>
+                                                    <RefreshCw className="animate-spin" size={18} />
+                                                    Processing...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <CheckCircle size={18} />
+                                                    Confirm Split Receive
+                                                </>
+                                            )}
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -4287,89 +5997,505 @@ export default function WarehouseOperations() {
                     )
                 }
 
+                {/* BARCODE RESOLUTION MODAL */}
+                {
+                    resolvingBarcode && (
+                        <div className="fixed inset-0 bg-black/90 z-[100] flex items-center justify-center p-4">
+                            <div className="bg-cyber-gray border border-white/10 w-full max-w-2xl shadow-2xl rounded-3xl overflow-hidden">
+                                {/* Header */}
+                                <div className="p-6 border-b border-white/10 bg-red-500/5">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-3">
+                                            <div className="p-2 bg-red-500/20 rounded-xl">
+                                                <AlertTriangle size={20} className="text-red-400" />
+                                            </div>
+                                            <div>
+                                                <h3 className="text-lg font-black text-white uppercase tracking-widest">Resolve Unknown Barcode</h3>
+                                                <p className="text-xs text-gray-500 font-mono mt-1">{resolvingBarcode.barcode} × {resolvingBarcode.qty}</p>
+                                            </div>
+                                        </div>
+                                        <button
+                                            onClick={() => setResolvingBarcode(null)}
+                                            className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                                            aria-label="Close resolution modal"
+                                        >
+                                            <X size={20} className="text-gray-400" />
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* Resolution Options Tabs */}
+                                <div className="flex border-b border-white/10">
+                                    {[
+                                        { key: 'map', label: 'Map to Existing', icon: Link },
+                                        { key: 'new', label: 'Create New', icon: Plus },
+                                        { key: 'hold', label: 'Hold/Quarantine', icon: Archive }
+                                    ].map(opt => (
+                                        <button
+                                            key={opt.key}
+                                            onClick={() => setResolutionMode(opt.key as 'map' | 'new' | 'hold')}
+                                            className={`flex-1 py-3 px-4 flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-widest transition-all ${resolutionMode === opt.key
+                                                ? 'bg-white/5 text-white border-b-2 border-cyber-primary'
+                                                : 'text-gray-500 hover:text-white hover:bg-white/5'
+                                                }`}
+                                        >
+                                            <opt.icon size={14} />
+                                            {opt.label}
+                                        </button>
+                                    ))}
+                                </div>
+
+                                {/* Content */}
+                                <div className="p-6">
+                                    {resolutionMode === 'map' && (
+                                        <div className="space-y-4">
+                                            <p className="text-xs text-gray-400">
+                                                {receivingPO ? 'Search for a product to link this barcode. PO items shown first.' : 'Search for an existing product to link this barcode as an alias.'}
+                                            </p>
+                                            <div className="relative">
+                                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
+                                                <input
+                                                    type="text"
+                                                    placeholder="Search by name or SKU..."
+                                                    value={resolutionSearch}
+                                                    onChange={(e) => setResolutionSearch(e.target.value)}
+                                                    className="w-full bg-black/40 border border-white/10 rounded-xl pl-11 pr-4 py-3 text-sm text-white focus:outline-none focus:border-cyber-primary/50"
+                                                    autoFocus
+                                                />
+                                            </div>
+                                            <div className="max-h-64 overflow-y-auto space-y-2">
+                                                {(() => {
+                                                    // If we have an active PO, show PO LINE ITEMS as primary suggestions
+                                                    if (receivingPO?.lineItems) {
+                                                        // Filter PO line items based on search
+                                                        const filteredPoLineItems = receivingPO.lineItems.filter((li: any) => {
+                                                            // Only show items that still have remaining quantity
+                                                            const remaining = li.quantity - (li.receivedQty || 0);
+                                                            const hasRemaining = remaining > 0;
+                                                            const matchesSearch = !resolutionSearch || (
+                                                                (li.productName || '').toLowerCase().includes(resolutionSearch.toLowerCase()) ||
+                                                                (li.sku || '').toLowerCase().includes(resolutionSearch.toLowerCase())
+                                                            );
+                                                            return hasRemaining && matchesSearch;
+                                                        });
+
+                                                        // Also get existing products for secondary options (only when searching)
+                                                        const filteredProducts = resolutionSearch ? products.filter(p =>
+                                                            p.name.toLowerCase().includes(resolutionSearch.toLowerCase()) ||
+                                                            p.sku.toLowerCase().includes(resolutionSearch.toLowerCase())
+                                                        ) : [];
+
+                                                        // Remove products that match PO line items
+                                                        const poProductIds = new Set(receivingPO.lineItems.map((li: any) => li.productId).filter(Boolean));
+                                                        const otherProducts = filteredProducts.filter(p => !poProductIds.has(p.id));
+
+                                                        const renderPoLineItem = (lineItem: any) => (
+                                                            <div
+                                                                key={lineItem.id || lineItem.productName}
+                                                                onClick={async () => {
+                                                                    const scannedBarcode = resolvingBarcode.barcode;
+
+                                                                    // Map barcode to PO line item
+                                                                    // If line item has productId, add barcode to that product
+                                                                    if (lineItem.productId) {
+                                                                        const product = products.find(p => p.id === lineItem.productId);
+                                                                        if (product) {
+                                                                            const updatedBarcodes = [...(product.barcodes || []), scannedBarcode];
+                                                                            await productsService.update(product.id, { barcodes: updatedBarcodes });
+                                                                            addNotification('success', `Barcode mapped to ${product.name}`);
+
+                                                                            // Open receive modal for this item
+                                                                            const remainingQty = lineItem.quantity - (lineItem.receivedQty || 0);
+
+                                                                            // CRITICAL FIX: Store the expected quantity for validation
+                                                                            const adjustedLineItem = { ...lineItem, quantity: remainingQty };
+
+                                                                            setSplitReceivingItem(adjustedLineItem);
+                                                                            setSplitReceivingPO(receivingPO);
+                                                                            setSplitVariants([{
+                                                                                id: `variant-${Date.now()}`,
+                                                                                sku: product.sku,
+                                                                                skuType: 'existing',
+                                                                                quantity: remainingQty,
+                                                                                productId: product.id,
+                                                                                productName: product.name,
+                                                                                barcode: scannedBarcode // Pre-populate with scanned barcode
+                                                                            }]);
+                                                                            setIsSplitReceiving(true);
+                                                                        }
+                                                                    } else {
+                                                                        // Line item has no product yet - this is a new/unlinked item
+                                                                        // Create a variant for this new item
+                                                                        const remainingQty = lineItem.quantity - (lineItem.receivedQty || 0);
+
+                                                                        // CRITICAL FIX: Store the expected quantity for validation
+                                                                        const adjustedLineItem = { ...lineItem, quantity: remainingQty };
+
+                                                                        setSplitReceivingItem(adjustedLineItem);
+                                                                        setSplitReceivingPO(receivingPO);
+                                                                        setSplitVariants([{
+                                                                            id: `variant-${Date.now()}`,
+                                                                            sku: lineItem.sku || '',
+                                                                            skuType: 'new',
+                                                                            quantity: remainingQty,
+                                                                            productId: undefined,
+                                                                            productName: lineItem.productName,
+                                                                            barcode: scannedBarcode // Pre-populate with scanned barcode
+                                                                        }]);
+                                                                        setIsSplitReceiving(true);
+                                                                        addNotification('info', `Opening receive for new item: ${lineItem.productName}`);
+                                                                    }
+
+                                                                    // Remove from unresolved
+                                                                    setUnresolvedScans(prev => prev.filter(s => s.barcode !== scannedBarcode));
+                                                                    setResolvingBarcode(null);
+                                                                    await refreshData();
+                                                                }}
+                                                                className="border border-blue-500/30 bg-blue-500/10 rounded-xl p-3 flex items-center gap-3 cursor-pointer hover:border-blue-500/50 hover:bg-blue-500/20 transition-all"
+                                                            >
+                                                                <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-blue-500/20">
+                                                                    <Package size={18} className="text-blue-400" />
+                                                                </div>
+                                                                <div className="flex-1">
+                                                                    <div className="flex items-center gap-2">
+                                                                        <p className="text-sm font-bold text-white">{lineItem.productName}</p>
+                                                                        <span className="text-[8px] bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded-full border border-blue-500/30 font-black uppercase tracking-wider">
+                                                                            Inbound
+                                                                        </span>
+                                                                    </div>
+                                                                    <div className="flex items-center gap-2 text-xs text-gray-400">
+                                                                        {lineItem.sku && <span className="font-mono">{lineItem.sku}</span>}
+                                                                        <span>•</span>
+                                                                        <span>Qty: {lineItem.quantity}</span>
+                                                                        {!lineItem.productId && (
+                                                                            <>
+                                                                                <span>•</span>
+                                                                                <span className="text-yellow-400">New Item</span>
+                                                                            </>
+                                                                        )}
+                                                                    </div>
+                                                                </div>
+                                                                <ChevronRight size={16} className="text-blue-400" />
+                                                            </div>
+                                                        );
+
+                                                        const renderProduct = (product: any) => (
+                                                            <div
+                                                                key={product.id}
+                                                                onClick={async () => {
+                                                                    // Add barcode as alias to existing product (not on PO)
+                                                                    const updatedBarcodes = [...(product.barcodes || []), resolvingBarcode.barcode];
+                                                                    await productsService.update(product.id, { barcodes: updatedBarcodes });
+
+                                                                    // Remove from unresolved
+                                                                    setUnresolvedScans(prev => prev.filter(s => s.barcode !== resolvingBarcode.barcode));
+                                                                    setResolvingBarcode(null);
+                                                                    addNotification('success', `Barcode mapped to ${product.name}`);
+                                                                    await refreshData();
+                                                                }}
+                                                                className="bg-white/5 border border-white/10 rounded-xl p-3 flex items-center gap-3 cursor-pointer hover:border-cyber-primary/50 hover:bg-white/10 transition-all"
+                                                            >
+                                                                <div className="w-10 h-10 bg-black/40 rounded-lg flex items-center justify-center">
+                                                                    <Package size={18} className="text-gray-500" />
+                                                                </div>
+                                                                <div className="flex-1">
+                                                                    <p className="text-sm font-bold text-white">{product.name}</p>
+                                                                    <p className="text-xs text-gray-500 font-mono">{product.sku}</p>
+                                                                </div>
+                                                                <ChevronRight size={16} className="text-gray-500" />
+                                                            </div>
+                                                        );
+
+                                                        return (
+                                                            <>
+                                                                {/* Auto-suggestion prompt when no search */}
+                                                                {!resolutionSearch && filteredPoLineItems.length > 0 && (
+                                                                    <div className="bg-blue-500/5 border border-blue-500/20 rounded-xl p-3 mb-2">
+                                                                        <p className="text-xs text-blue-300 font-medium flex items-center gap-2">
+                                                                            <AlertTriangle size={14} className="text-blue-400" />
+                                                                            Is this barcode for one of these inbound items?
+                                                                        </p>
+                                                                    </div>
+                                                                )}
+
+                                                                {/* PO Line Items Section */}
+                                                                {filteredPoLineItems.length > 0 && (
+                                                                    <>
+                                                                        {filteredPoLineItems.map(li => renderPoLineItem(li))}
+                                                                        {resolutionSearch && otherProducts.length > 0 && (
+                                                                            <div className="flex items-center gap-3 py-2">
+                                                                                <div className="flex-1 h-px bg-white/10"></div>
+                                                                                <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Other Inventory</span>
+                                                                                <div className="flex-1 h-px bg-white/10"></div>
+                                                                            </div>
+                                                                        )}
+                                                                    </>
+                                                                )}
+                                                                {/* Other Products Section (only when searching) */}
+                                                                {resolutionSearch && otherProducts.slice(0, 5).map(p => renderProduct(p))}
+                                                                {/* No Results */}
+                                                                {resolutionSearch && filteredPoLineItems.length === 0 && otherProducts.length === 0 && (
+                                                                    <p className="text-center text-gray-500 text-xs py-4">No items found</p>
+                                                                )}
+                                                            </>
+                                                        );
+                                                    }
+
+                                                    // No active PO - show products only when searching
+                                                    const filteredProducts = resolutionSearch ? products.filter(p =>
+                                                        p.name.toLowerCase().includes(resolutionSearch.toLowerCase()) ||
+                                                        p.sku.toLowerCase().includes(resolutionSearch.toLowerCase())
+                                                    ) : [];
+
+                                                    return (
+                                                        <>
+                                                            {filteredProducts.slice(0, 10).map(product => (
+                                                                <div
+                                                                    key={product.id}
+                                                                    onClick={async () => {
+                                                                        // Add barcode as alias to product
+                                                                        const updatedBarcodes = [...(product.barcodes || []), resolvingBarcode.barcode];
+                                                                        await productsService.update(product.id, { barcodes: updatedBarcodes });
+
+                                                                        // Remove from unresolved
+                                                                        setUnresolvedScans(prev => prev.filter(s => s.barcode !== resolvingBarcode.barcode));
+                                                                        setResolvingBarcode(null);
+                                                                        addNotification('success', `Barcode mapped to ${product.name}`);
+                                                                        await refreshData();
+                                                                    }}
+                                                                    className="bg-white/5 border border-white/10 rounded-xl p-3 flex items-center gap-3 cursor-pointer hover:border-cyber-primary/50 hover:bg-white/10 transition-all"
+                                                                >
+                                                                    <div className="w-10 h-10 bg-black/40 rounded-lg flex items-center justify-center">
+                                                                        <Package size={18} className="text-gray-500" />
+                                                                    </div>
+                                                                    <div className="flex-1">
+                                                                        <p className="text-sm font-bold text-white">{product.name}</p>
+                                                                        <p className="text-xs text-gray-500 font-mono">{product.sku}</p>
+                                                                    </div>
+                                                                    <ChevronRight size={16} className="text-gray-500" />
+                                                                </div>
+                                                            ))}
+                                                            {resolutionSearch && filteredProducts.length === 0 && (
+                                                                <p className="text-center text-gray-500 text-xs py-4">No products found</p>
+                                                            )}
+                                                            {!resolutionSearch && (
+                                                                <p className="text-center text-gray-500 text-xs py-4">Start typing to search for products...</p>
+                                                            )}
+                                                        </>
+                                                    );
+                                                })()}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {resolutionMode === 'new' && (
+                                        <div className="space-y-4">
+                                            <p className="text-xs text-gray-400">This barcode represents a genuinely new product. Create it now.</p>
+                                            <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-4 flex items-start gap-3">
+                                                <AlertTriangle size={16} className="text-yellow-400 mt-0.5" />
+                                                <p className="text-xs text-yellow-300">New product creation requires additional details. You will be redirected to the Inventory module.</p>
+                                            </div>
+                                            <button
+                                                onClick={() => {
+                                                    // For now, just remove and notify
+                                                    setUnresolvedScans(prev => prev.filter(s => s.barcode !== resolvingBarcode.barcode));
+                                                    setResolvingBarcode(null);
+                                                    addNotification('info', 'Navigate to Inventory → Add Product to create new item');
+                                                }}
+                                                className="w-full py-3 bg-cyber-primary text-black font-bold rounded-xl hover:bg-cyber-accent transition-colors"
+                                            >
+                                                Create New Product
+                                            </button>
+                                        </div>
+                                    )}
+
+                                    {resolutionMode === 'hold' && (
+                                        <div className="space-y-4">
+                                            <p className="text-xs text-gray-400">Place this item on hold for later review. It will not affect inventory.</p>
+                                            <div className="bg-orange-500/10 border border-orange-500/20 rounded-xl p-4">
+                                                <p className="text-xs text-orange-300">Held items are quarantined and require manual review before being added to inventory.</p>
+                                            </div>
+                                            <button
+                                                onClick={() => {
+                                                    // Remove from queue with notification
+                                                    setUnresolvedScans(prev => prev.filter(s => s.barcode !== resolvingBarcode.barcode));
+                                                    setResolvingBarcode(null);
+                                                    addNotification('info', `Barcode ${resolvingBarcode.barcode} placed on hold`);
+                                                }}
+                                                className="w-full py-3 bg-orange-500/20 text-orange-400 font-bold rounded-xl border border-orange-500/30 hover:bg-orange-500/30 transition-colors"
+                                            >
+                                                Place on Hold
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    )
+                }
+
                 {/* Reprint Options Modal */}
                 {
                     reprintItem && (
-                        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-end md:items-center justify-center p-0 md:p-4 z-50">
-                            <div className="bg-[#1a1a1a] border-t md:border border-white/10 rounded-t-2xl md:rounded-2xl w-full max-w-md p-6 shadow-2xl max-h-[85vh] md:max-h-auto overflow-y-auto">
-                                <div className="flex items-center justify-between mb-6">
-                                    <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                                        <Printer className="text-cyber-primary" size={24} />
-                                        Reprint Labels
+                        <div className="fixed inset-0 bg-[#000000f0] z-[100] flex items-center justify-center p-4">
+                            <div className="bg-[#050505] border border-white/10 w-full max-w-lg shadow-2xl rounded-[2.5rem] overflow-hidden">
+                                <div className="flex items-center justify-between p-4 border-b border-white/10 bg-white/[0.02]">
+                                    <h3 className="text-sm font-mono font-bold text-white uppercase tracking-widest flex items-center gap-2">
+                                        <Printer className="text-cyber-primary" size={16} />
+                                        // LABEL_SEQUENCE
                                     </h3>
-                                    <button onClick={() => setReprintItem(null)} className="text-gray-400 hover:text-white" title="Close">
-                                        <X size={24} />
+                                    <button onClick={() => setReprintItem(null)} className="text-gray-500 hover:text-white" title="Close">
+                                        <X size={20} />
                                     </button>
                                 </div>
 
-                                <div className="mb-4 p-3 bg-white/5 rounded-lg border border-white/10">
-                                    <p className="font-bold text-white">{reprintItem.name}</p>
-                                    <p className="text-sm text-gray-400">SKU: {reprintItem.sku}</p>
-                                    <p className="text-sm text-cyber-primary font-bold mt-1">{reprintItem.qty} labels</p>
-                                </div>
+                                <div className="p-6">
+                                    {/* Data Grid */}
+                                    <div className="grid grid-cols-2 gap-px bg-white/10 border border-white/10 mb-8 rounded-2xl overflow-hidden">
+                                        <div className="bg-[#050505] p-3">
+                                            <p className="text-[9px] text-gray-500 font-mono uppercase tracking-widest mb-1">Product</p>
+                                            <p className="text-xs font-bold text-white truncate font-mono">{reprintItem.name}</p>
+                                        </div>
+                                        <div className="bg-[#050505] p-3">
+                                            <p className="text-[9px] text-gray-500 font-mono uppercase tracking-widest mb-1">SKU Identity</p>
+                                            <p className="text-xs font-bold text-cyber-primary font-mono">{reprintItem.sku}</p>
+                                        </div>
+                                        <div className="bg-[#050505] p-3">
+                                            <p className="text-[9px] text-gray-500 font-mono uppercase tracking-widest mb-1">Price</p>
+                                            <p className="text-xs font-bold text-white font-mono">{reprintItem.price ? `$${reprintItem.price}` : 'N/A'}</p>
+                                        </div>
+                                        <div className="bg-[#050505] p-3">
+                                            <p className="text-[9px] text-gray-500 font-mono uppercase tracking-widest mb-1">Expiry</p>
+                                            <p className="text-xs font-bold text-white font-mono">{reprintItem.expiry || 'N/A'}</p>
+                                        </div>
+                                    </div>
 
-                                {/* Size Selection */}
-                                <div className="mb-4">
-                                    <label className="text-sm text-gray-400 mb-2 block">Label Size</label>
-                                    <div className="grid grid-cols-4 gap-2">
-                                        {(['TINY', 'SMALL', 'MEDIUM', 'LARGE'] as const).map(s => (
+                                    {/* Quantity Control - Static & Linear */}
+                                    <div className="mb-6">
+                                        <label className="text-[9px] text-gray-500 font-mono uppercase tracking-widest mb-2 block">Output Quantity</label>
+                                        <div className="flex items-center border border-white/10 bg-white/[0.02] rounded-xl overflow-hidden">
                                             <button
-                                                key={s}
-                                                onClick={() => setReprintSize(s)}
-                                                className={`py-2 px-3 rounded-lg text-sm font-bold transition-all ${reprintSize === s
-                                                    ? 'bg-cyber-primary text-black'
-                                                    : 'bg-white/5 text-white hover:bg-white/10 border border-white/10'
+                                                onClick={() => reprintItem && setReprintItem({ ...reprintItem, qty: Math.max(0, reprintItem.qty - 1) })}
+                                                className="p-3 hover:bg-white/5 hover:text-white text-gray-500 border-r border-white/10 bg-transparent active:bg-white/10"
+                                                title="Decrease Quantity"
+                                            >
+                                                <Minus size={14} />
+                                            </button>
+                                            <input
+                                                title="Reprint Quantity"
+                                                placeholder="QTY"
+                                                type="number"
+                                                value={reprintItem.qty}
+                                                onChange={(e) => reprintItem && setReprintItem({ ...reprintItem, qty: Math.max(0, parseInt(e.target.value) || 0) })}
+                                                className="flex-1 bg-transparent text-center text-white font-mono font-bold outline-none h-full"
+                                            />
+                                            <button
+                                                onClick={() => reprintItem && setReprintItem({ ...reprintItem, qty: reprintItem.qty + 1 })}
+                                                className="p-3 hover:bg-white/5 hover:text-white text-gray-500 border-l border-white/10 bg-transparent active:bg-white/10"
+                                                title="Increase Quantity"
+                                            >
+                                                <Plus size={14} />
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    {/* Size Selection - Static Grid */}
+                                    <div className="mb-6">
+                                        <label className="text-[9px] text-gray-500 font-mono uppercase tracking-widest mb-2 block">Dimensions</label>
+                                        <div className="grid grid-cols-4 gap-1">
+                                            {(['SMALL', 'MEDIUM', 'LARGE', 'XL'] as const).map(s => (
+                                                <button
+                                                    key={s}
+                                                    onClick={() => setReprintSize(s)}
+                                                    className={`py-2 text-[9px] font-mono font-bold uppercase tracking-wider border rounded-lg transition-all ${reprintSize === s
+                                                        ? 'bg-cyber-primary text-black border-cyber-primary'
+                                                        : 'bg-transparent text-gray-500 border-white/10 hover:border-white/30 hover:text-white'
+                                                        } `}
+                                                >
+                                                    {s}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* Format Selection - Static Grid */}
+                                    <div className="mb-6">
+                                        <label className="text-[9px] text-gray-500 font-mono uppercase tracking-widest mb-2 block">Visible Data</label>
+                                        <div className="grid grid-cols-4 gap-1">
+                                            <button
+                                                onClick={() => setReprintOptions(prev => ({ ...prev, showPrice: !prev.showPrice }))}
+                                                className={`py-2 text-[9px] font-mono font-bold uppercase tracking-wider border rounded-lg transition-all ${reprintOptions.showPrice
+                                                    ? 'bg-cyber-primary text-black border-cyber-primary'
+                                                    : 'bg-transparent text-gray-500 border-white/10 hover:border-white/30 hover:text-white'
                                                     } `}
                                             >
-                                                {s}
+                                                Price
                                             </button>
-                                        ))}
-                                    </div>
-                                    <p className="text-xs text-gray-500 mt-1">
-                                        {reprintSize === 'TINY' && '1.25" × 1"-SKU Tags'}
-                                        {reprintSize === 'SMALL' && '2.25" × 1.25"-Multipurpose'}
-                                        {reprintSize === 'MEDIUM' && '3" × 2"-Shelf Labels'}
-                                        {reprintSize === 'LARGE' && '4" × 3"-Carton Tags'}
-                                    </p>
-                                </div>
-
-                                {/* Format Selection */}
-                                <div className="mb-6">
-                                    <label className="text-sm text-gray-400 mb-2 block">Code Format</label>
-                                    <div className="grid grid-cols-3 gap-2">
-                                        {(['QR', 'Barcode', 'Both'] as const).map(f => (
                                             <button
-                                                key={f}
-                                                onClick={() => setReprintFormat(f)}
-                                                className={`py-2 px-3 rounded-lg text-sm font-bold transition-all ${reprintFormat === f
-                                                    ? 'bg-cyber-primary text-black'
-                                                    : 'bg-white/5 text-white hover:bg-white/10 border border-white/10'
+                                                onClick={() => setReprintOptions(prev => ({ ...prev, showExpiry: !prev.showExpiry }))}
+                                                className={`py-2 text-[9px] font-mono font-bold uppercase tracking-wider border rounded-lg transition-all ${reprintOptions.showExpiry
+                                                    ? 'bg-cyber-primary text-black border-cyber-primary'
+                                                    : 'bg-transparent text-gray-500 border-white/10 hover:border-white/30 hover:text-white'
                                                     } `}
                                             >
-                                                {f === 'QR' && '📱 QR'}
-                                                {f === 'Barcode' && '▮▯▮ Barcode'}
-                                                {f === 'Both' && '📱+▮ Both'}
+                                                Expiry
                                             </button>
-                                        ))}
+                                            <button
+                                                onClick={() => setReprintOptions(prev => ({ ...prev, showCategory: !prev.showCategory }))}
+                                                className={`py-2 text-[9px] font-mono font-bold uppercase tracking-wider border rounded-lg transition-all ${reprintOptions.showCategory
+                                                    ? 'bg-cyber-primary text-black border-cyber-primary'
+                                                    : 'bg-transparent text-gray-500 border-white/10 hover:border-white/30 hover:text-white'
+                                                    } `}
+                                            >
+                                                Cat.
+                                            </button>
+                                            <button
+                                                onClick={() => setReprintOptions(prev => ({ ...prev, showName: !prev.showName }))}
+                                                className={`py-2 text-[9px] font-mono font-bold uppercase tracking-wider border rounded-lg transition-all ${reprintOptions.showName
+                                                    ? 'bg-cyber-primary text-black border-cyber-primary'
+                                                    : 'bg-transparent text-gray-500 border-white/10 hover:border-white/30 hover:text-white'
+                                                    } `}
+                                            >
+                                                Name
+                                            </button>
+                                        </div>
                                     </div>
-                                </div>
 
-                                {/* Action Buttons */}
-                                <div className="flex gap-3">
-                                    <button
-                                        onClick={() => setReprintItem(null)}
-                                        className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-white font-bold rounded-xl border border-white/10"
-                                    >
-                                        Cancel
-                                    </button>
-                                    <button
-                                        disabled={isPrinting}
-                                        onClick={handleReprintLabels}
-                                        className={`flex-1 py-3 bg-cyber-primary text-black font-bold rounded-xl flex items-center justify-center gap-2 ${isPrinting ? 'opacity-50 cursor-not-allowed' : 'hover:bg-cyber-accent'} `}
-                                    >
-                                        {isPrinting ? <RefreshCw size={18} className="animate-spin" /> : <Printer size={18} />}
-                                        {isPrinting ? 'Generating...' : `Print ${reprintItem.qty} Labels`}
-                                    </button>
+                                    <div className="mb-8">
+                                        <label className="text-[9px] text-gray-500 font-mono uppercase tracking-widest mb-2 block">Ecoding</label>
+                                        <div className="grid grid-cols-3 gap-1">
+                                            {(['QR', 'Barcode', 'Both'] as const).map(f => (
+                                                <button
+                                                    key={f}
+                                                    onClick={() => setReprintFormat(f)}
+                                                    className={`py-2 text-[9px] font-mono font-bold uppercase tracking-wider border rounded-lg transition-all ${reprintFormat === f
+                                                        ? 'bg-cyber-primary text-black border-cyber-primary'
+                                                        : 'bg-transparent text-gray-500 border-white/10 hover:border-white/30 hover:text-white'
+                                                        } `}
+                                                >
+                                                    {f.toUpperCase()}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* Action Buttons - Static Block */}
+                                    <div className="flex gap-2 pt-4 border-t border-white/10">
+                                        <button
+                                            onClick={() => setReprintItem(null)}
+                                            className="px-6 py-3 bg-transparent text-gray-400 font-mono text-xs font-bold uppercase tracking-widest hover:text-white hover:bg-white/5 border border-transparent hover:border-white/10 rounded-xl transition-all"
+                                        >
+                                            Abort
+                                        </button>
+                                        <button
+                                            disabled={isPrinting}
+                                            onClick={handleReprintLabels}
+                                            className={`flex-1 py-3 bg-cyber-primary text-black font-mono text-xs font-black uppercase tracking-[0.2em] flex items-center justify-center gap-3 hover:bg-[#25D3D3] rounded-xl transition-all ${isPrinting ? 'opacity-50' : ''} `}
+                                        >
+                                            {isPrinting ? <RefreshCw size={14} className="animate-spin" /> : <Printer size={14} />}
+                                            {isPrinting ? 'PROCESSING...' : 'INITIATE PRINT'}
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -4455,7 +6581,7 @@ export default function WarehouseOperations() {
                                             if (reviewPO && !isCompleting) {
                                                 setIsCompleting(true);
                                                 try {
-                                                    await purchaseOrdersService.receive(reviewPO.id);
+                                                    await purchaseOrdersService.receive(reviewPO.id, false);
                                                     addNotification('success', 'PO Completed!');
                                                 } catch (e) {
                                                     console.error(e);
@@ -4478,7 +6604,7 @@ export default function WarehouseOperations() {
                                             setIsCompleting(true);
                                             try {
                                                 await handlePrintReceivingLabels(reviewPO);
-                                                await purchaseOrdersService.receive(reviewPO.id);
+                                                await purchaseOrdersService.receive(reviewPO.id, false);
                                                 addNotification('success', 'PO Completed & Labels Generated');
                                             } catch (e) {
                                                 console.error(e);
@@ -4600,12 +6726,27 @@ export default function WarehouseOperations() {
                                                             {/* Job Header */}
                                                             <div className="flex items-start justify-between gap-2 mb-4">
                                                                 <div className="min-w-0">
-                                                                    <p className="text-cyber-primary font-mono font-bold text-base md:text-sm truncate">
-                                                                        {formatJobId(job)}
-                                                                    </p>
-                                                                    <p className="text-gray-500 text-xs mt-1 truncate">
-                                                                        {job.orderRef?.startsWith('TRF') ? 'Transfer Pick' : 'Order Pick'}
-                                                                    </p>
+                                                                    <div className="flex items-center gap-2">
+                                                                        <span className="text-sm font-black text-white tracking-widest uppercase">{formatJobId(job)}</span>
+                                                                    </div>
+                                                                    <div className="flex items-center gap-2 mt-1">
+                                                                        <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
+                                                                            {totalItems} Items
+                                                                        </span>
+                                                                        <span className="w-1 h-1 rounded-full bg-gray-600" />
+                                                                        <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
+                                                                            {lineItems[0]?.sku || 'N/A'}
+                                                                        </span>
+                                                                        <span className="w-1 h-1 rounded-full bg-gray-600" />
+                                                                        <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
+                                                                            {(() => {
+                                                                                const loc = (job as any).zone || job.location;
+                                                                                if (!loc) return 'Unassigned';
+                                                                                if (loc.toLowerCase().startsWith('zone')) return loc;
+                                                                                return `Zone ${loc}`;
+                                                                            })()}
+                                                                        </span>
+                                                                    </div>
                                                                 </div>
                                                                 <span className={`text-[10px] px-2.5 py-1 rounded-full font-bold whitespace-nowrap shrink-0 ${job.status === 'In-Progress'
                                                                     ? 'bg-blue-500/20 text-blue-400 md:animate-pulse'
@@ -4660,12 +6801,20 @@ export default function WarehouseOperations() {
                                                             <div className="mt-auto flex items-center justify-between">
                                                                 <div className="flex items-center gap-2">
                                                                     {job.assignedTo ? (
-                                                                        <>
-                                                                            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-                                                                                <span className="text-[10px] font-bold text-white">{job.assignedTo.charAt(0)}</span>
-                                                                            </div>
-                                                                            <span className="text-xs text-gray-400">{job.assignedTo}</span>
-                                                                        </>
+                                                                        (() => {
+                                                                            const employee = employees.find(e => e.id === job.assignedTo || e.name === job.assignedTo || e.email === job.assignedTo);
+                                                                            const displayName = employee?.name || (isUUID(job.assignedTo) ? job.assignedTo.slice(-4).toUpperCase() : job.assignedTo);
+                                                                            const displayInitial = displayName.charAt(0).toUpperCase();
+
+                                                                            return (
+                                                                                <>
+                                                                                    <div className="w-6 h-6 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+                                                                                        <span className="text-[10px] font-bold text-white">{displayInitial}</span>
+                                                                                    </div>
+                                                                                    <span className="text-xs text-gray-400 truncate max-w-[100px]">{displayName}</span>
+                                                                                </>
+                                                                            );
+                                                                        })()
                                                                     ) : (
                                                                         <span className="text-xs text-gray-600 italic">Unassigned</span>
                                                                     )}
@@ -4736,26 +6885,50 @@ export default function WarehouseOperations() {
                                 {paginatedPickHistory.length > 0 ? (
                                     <>
                                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-                                            {paginatedPickHistory.map(job => (
-                                                <div key={job.id} className="bg-white/[0.02] border border-white/5 rounded-xl p-3 hover:bg-white/[0.04] transition-all group">
-                                                    <div className="flex justify-between items-start mb-2">
-                                                        <span className="text-[10px] font-mono text-cyber-primary font-bold">{formatJobId(job)}</span>
-                                                        <span className={`text-[9px] px-1.5 py-0.5 rounded uppercase font-black ${job.status === 'Completed' ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'
-                                                            }`}>
-                                                            {job.status}
-                                                        </span>
-                                                    </div>
-                                                    <div className="flex justify-between items-end">
-                                                        <div>
-                                                            <p className="text-[10px] text-gray-500 truncate max-w-[100px]">{job.orderRef || 'No Ref'}</p>
-                                                            <p className="text-[9px] text-gray-600 mt-0.5">{formatDateTime(job.createdAt || '')}</p>
+                                            {paginatedPickHistory.map(job => {
+                                                const formattedId = formatJobId(job);
+                                                const simpleRef = resolveOrderRef(job.orderRef) || '';
+
+                                                // Robust Redundancy Check: Normalize everything to uppercase/trimmed
+                                                const normFormattedId = formattedId.toUpperCase().trim();
+                                                const normSimpleRef = simpleRef.toUpperCase().trim();
+                                                const normJobNumber = (job.jobNumber || '').toUpperCase().trim();
+
+                                                const isRefRedundant =
+                                                    normFormattedId.includes(normSimpleRef) ||
+                                                    (normJobNumber && normJobNumber.includes(normSimpleRef));
+
+                                                return (
+                                                    <div key={job.id} onClick={() => { setSelectedJob(job); setIsDetailsOpen(true); }} className="bg-white/[0.02] border border-white/5 rounded-xl p-3 hover:bg-white/[0.04] transition-all group cursor-pointer relative overflow-hidden">
+                                                        <div className="flex justify-between items-start mb-2 relative z-10">
+                                                            <span className="text-sm font-black text-white tracking-tight">
+                                                                {formattedId}
+                                                            </span>
+                                                            <span className={`text-[9px] px-1.5 py-0.5 rounded uppercase font-black ${job.status === 'Completed' ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'
+                                                                }`}>
+                                                                {job.status}
+                                                            </span>
                                                         </div>
-                                                        <div className="text-right text-white font-bold text-xs">
-                                                            {job.items} <span className="text-[9px] text-gray-500 font-normal">items</span>
+
+                                                        <div className="flex justify-between items-end relative z-10">
+                                                            <div className="flex flex-col gap-0.5">
+                                                                <div className="flex items-center gap-2 mt-1">
+                                                                    <span className="text-[10px] text-gray-600 font-bold flex items-center gap-1">
+                                                                        <Calendar size={10} />
+                                                                        {formatDateTime(job.updatedAt || job.createdAt || '', { showTime: true })}
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+
+                                                            <div className="text-right">
+                                                                <span className="text-[10px] font-black text-cyber-primary bg-cyber-primary/10 px-2 py-1 rounded-lg border border-cyber-primary/20">
+                                                                    {job.items} {job.items === 1 ? 'Item' : 'Items'}
+                                                                </span>
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                </div>
-                                            ))}
+                                                );
+                                            })}
                                         </div>
                                         <Pagination
                                             currentPage={pickHistoryPage}
@@ -4873,6 +7046,14 @@ export default function WarehouseOperations() {
                                             return null;
                                         }
 
+                                        // Auto-generate tracking number if missing
+                                        if (!currentPackJob.trackingNumber && !currentPackJob.status.includes('Completed')) {
+                                            const trackingNum = generateTrackingNumber();
+                                            wmsJobsService.update(currentPackJob.id, { trackingNumber: trackingNum }).catch(console.error);
+                                            // Update local state if needed, but since we rely on 'jobs' from context, 
+                                            // it should refresh via Supabase subscription or parent re-fetch.
+                                        }
+
                                         const packedCount = currentPackJob.lineItems.filter(i => i.status === 'Picked' || i.status === 'Completed').length;
                                         const totalItems = currentPackJob.lineItems.length;
                                         const progress = totalItems > 0 ? (packedCount / totalItems) * 100 : 0;
@@ -4902,7 +7083,15 @@ export default function WarehouseOperations() {
                                                             </button>
                                                             <div>
                                                                 <h3 className="font-bold text-white text-lg">{formatJobId(currentPackJob)}</h3>
-                                                                <p className="text-xs text-gray-400">Order Ref: {formatOrderRef(currentPackJob.orderRef, currentPackJob.id)}</p>
+                                                                <div className="flex items-center gap-3">
+                                                                    <p className="text-xs text-gray-400">Order Ref: {resolveOrderRef(currentPackJob.orderRef) || formatJobId(currentPackJob)}</p>
+                                                                    {currentPackJob.trackingNumber && (
+                                                                        <div className="flex items-center gap-1.5 px-2 py-0.5 bg-cyber-primary/10 border border-cyber-primary/20 rounded text-[10px] font-black text-cyber-primary uppercase tracking-wider">
+                                                                            <Barcode size={10} />
+                                                                            {currentPackJob.trackingNumber}
+                                                                        </div>
+                                                                    )}
+                                                                </div>
                                                             </div>
                                                         </div>
                                                         <div className="flex items-center gap-2">
@@ -4981,7 +7170,7 @@ export default function WarehouseOperations() {
                                                                     </div>
                                                                     <div className="flex-1">
                                                                         <p className={`font-medium ${isPacked ? 'text-gray-400 line-through' : 'text-white'}`}>{item.name}</p>
-                                                                        <p className="text-xs text-gray-500">Qty: {item.expectedQty} • SKU: {product?.sku || 'N/A'}</p>
+                                                                        <p className="text-xs text-gray-500">Qty: {item.expectedQty} • SKU: {product?.sku || item.sku || 'N/A'}</p>
                                                                     </div>
                                                                     {(product?.category === 'Frozen' || product?.category === 'Dairy') && <Snowflake size={16} className="text-blue-400" />}
                                                                 </div>
@@ -5031,13 +7220,35 @@ export default function WarehouseOperations() {
                                                                 if (loadingActions[`print-${currentPackJob.id}`]) return;
                                                                 setLoadingActions(prev => ({ ...prev, [`print-${currentPackJob.id}`]: true }));
                                                                 try {
+                                                                    // Ensure tracking number exists
+                                                                    let trackingNum = currentPackJob.trackingNumber;
+                                                                    if (!trackingNum) {
+                                                                        trackingNum = generateTrackingNumber();
+                                                                        // Update DB - silent failure is okay as we just want to print
+                                                                        await wmsJobsService.update(currentPackJob.id, { trackingNumber: trackingNum }).catch(console.error);
+                                                                    }
+
+                                                                    const sourceSite = sites.find(s => s.id === currentPackJob.siteId);
+                                                                    const destSite = currentPackJob.destSiteId ? sites.find(s => s.id === currentPackJob.destSiteId) : undefined;
                                                                     const packLabelData: PackLabelData = {
                                                                         orderRef: currentPackJob.orderRef || currentPackJob.id,
+                                                                        originalOrderRef: resolveOrderRef(currentPackJob.orderRef) || currentPackJob.poNumber,
+                                                                        fromName: sourceSite?.name,
+                                                                        fromAddress: sourceSite?.address,
+                                                                        trackingNumber: trackingNum,
                                                                         itemCount: totalItems,
+                                                                        customerName: (currentPackJob as any).customerName,
+                                                                        shippingAddress: (currentPackJob as any).shippingAddress || destSite?.address,
+                                                                        city: (currentPackJob as any).city,
                                                                         packDate: formatDateTime(new Date()),
                                                                         packerName: user?.name,
                                                                         specialHandling: { coldChain: hasColdItems, fragile: packingMaterials.bubbleWrap || packingMaterials.fragileStickers, perishable: hasColdItems },
-                                                                        destSiteName: currentPackJob.destSiteId ? sites.find(s => s.id === currentPackJob.destSiteId)?.name : undefined
+                                                                        destSiteName: destSite?.name,
+                                                                        lineItems: currentPackJob.lineItems?.map((i: any) => ({
+                                                                            name: i.name || 'Unknown Product',
+                                                                            sku: i.sku || 'N/A',
+                                                                            quantity: i.pickedQty || i.expectedQty || 0
+                                                                        }))
                                                                     };
                                                                     const html = await generatePackLabelHTML(packLabelData, { size: reprintSize, format: reprintFormat });
                                                                     const printWindow = window.open('', '_blank');
@@ -5061,7 +7272,7 @@ export default function WarehouseOperations() {
                                                                 if (hasColdItems && !hasIcePack) { addNotification('alert', 'Ice packs required!'); return; }
                                                                 setLoadingActions(prev => ({ ...prev, [currentPackJob.id]: true }));
                                                                 try {
-                                                                    const result = await completeJob(currentPackJob.id, user?.name || 'Packer', true);
+                                                                    const result = await completeJob(currentPackJob.id, user?.name || 'Packer', true, currentPackJob.lineItems);
                                                                     if (result && result.points > 0) {
                                                                         setEarnedPoints({ points: result.points, message: `Order Packed!`, bonuses: result.breakdown });
                                                                         setShowPointsPopup(true);
@@ -5124,8 +7335,27 @@ export default function WarehouseOperations() {
                                                                                     <div className="flex items-center gap-2 mt-1">
                                                                                         <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${job.status === 'In-Progress' ? 'bg-blue-500/20 text-blue-400' : 'bg-yellow-500/20 text-yellow-400'}`}>{job.status}</span>
                                                                                         <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${job.priority === 'Critical' ? 'bg-red-500/20 text-red-400' : job.priority === 'High' ? 'bg-orange-500/20 text-orange-400' : 'bg-white/5 text-gray-400'}`}>{job.priority}</span>
+                                                                                        <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-white/5 text-gray-400">{job.lineItems?.[0]?.sku || 'No SKU'}</span>
                                                                                     </div>
                                                                                 </div>
+                                                                            </div>
+
+                                                                            {/* Items Preview (New for PACK) */}
+                                                                            <div className="flex gap-2 mb-4">
+                                                                                {(job.lineItems || []).slice(0, 3).map((item: any, idx: number) => (
+                                                                                    <div key={idx} className="w-10 h-10 rounded-lg bg-black/30 border border-white/10 flex items-center justify-center overflow-hidden">
+                                                                                        {item.image && !item.image.includes('placeholder.com') ? (
+                                                                                            <img src={item.image} alt="" className="w-full h-full object-cover" />
+                                                                                        ) : (
+                                                                                            <Package size={14} className="text-gray-600" />
+                                                                                        )}
+                                                                                    </div>
+                                                                                ))}
+                                                                                {(job.lineItems || []).length > 3 && (
+                                                                                    <div className="w-10 h-10 rounded-lg bg-cyber-primary/10 border border-cyber-primary/30 flex items-center justify-center">
+                                                                                        <span className="text-cyber-primary text-[10px] font-bold">+{(job.lineItems || []).length - 3}</span>
+                                                                                    </div>
+                                                                                )}
                                                                             </div>
 
                                                                             {destSite && (
@@ -5150,9 +7380,23 @@ export default function WarehouseOperations() {
                                                                                             e.stopPropagation();
                                                                                             setPackReprintJob({
                                                                                                 id: job.id,
+                                                                                                siteId: job.siteId,
+                                                                                                poNumber: (job as any).poNumber,
                                                                                                 orderRef: job.orderRef || job.id,
                                                                                                 itemCount: totalItems,
-                                                                                                destSiteName: destSite?.name
+                                                                                                destSiteName: destSite?.name,
+                                                                                                lineItems: job.lineItems?.map((i: any) => ({
+                                                                                                    name: i.name,
+                                                                                                    sku: i.sku,
+                                                                                                    quantity: i.pickedQty || i.expectedQty
+                                                                                                })),
+                                                                                                customerName: (job as any).customerName,
+                                                                                                shippingAddress: (job as any).shippingAddress || destSite?.address,
+                                                                                                city: (job as any).city,
+                                                                                                specialHandling: {
+                                                                                                    fragile: job.lineItems?.some((i: any) => i.name?.toLowerCase().includes('fragile')),
+                                                                                                    coldChain: job.lineItems?.some((i: any) => i.category === 'Frozen' || i.category === 'Dairy')
+                                                                                                }
                                                                                             });
                                                                                         }}
                                                                                         className="flex items-center gap-1 bg-white/5 hover:bg-white/10 text-white text-xs font-bold uppercase py-1.5 px-3 rounded transition-all"
@@ -5218,6 +7462,18 @@ export default function WarehouseOperations() {
                                                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                                                     {paginatedPackHistory.map((job: any) => {
                                                                         const destSite = sites.find(s => s.id === job.destSiteId);
+                                                                        const formattedId = formatJobId(job);
+                                                                        const simpleRef = resolveOrderRef(job.orderRef) || '';
+
+                                                                        // Robust Redundancy Check
+                                                                        const normFormattedId = formattedId.toUpperCase().trim();
+                                                                        const normSimpleRef = simpleRef.toUpperCase().trim();
+                                                                        const normJobNumber = (job.jobNumber || '').toUpperCase().trim();
+
+                                                                        const isRefRedundant =
+                                                                            normFormattedId.includes(normSimpleRef) ||
+                                                                            (normJobNumber && normJobNumber.includes(normSimpleRef));
+
                                                                         return (
                                                                             <div
                                                                                 key={job.id}
@@ -5225,34 +7481,59 @@ export default function WarehouseOperations() {
                                                                                     setSelectedJob(job);
                                                                                     setIsDetailsOpen(true);
                                                                                 }}
-                                                                                className="bg-black/20 border border-white/5 rounded-2xl p-4 hover:border-cyber-primary/30 transition-all group cursor-pointer"
+                                                                                className="bg-black/20 border border-white/5 rounded-2xl p-4 hover:border-cyber-primary/30 transition-all group cursor-pointer relative overflow-hidden"
                                                                             >
-                                                                                <div className="flex justify-between items-start mb-3">
-                                                                                    <span className="text-[10px] font-mono text-cyber-primary font-bold">{job.id.slice(0, 8)}</span>
-                                                                                    <div className="flex items-center gap-1.5">
-                                                                                        <span className={`w-1.5 h-1.5 rounded-full ${job.status === 'Cancelled' ? 'bg-red-500' : 'bg-green-500'}`} />
-                                                                                        <span className={`text-[9px] uppercase font-black ${job.status === 'Cancelled' ? 'text-red-400' : 'text-green-400'}`}>{job.status}</span>
+                                                                                <div className="flex justify-between items-start mb-3 relative z-10">
+                                                                                    <span className="text-sm font-black text-white tracking-tight">{formattedId}</span>
+                                                                                    <span className={`text-[9px] px-1.5 py-0.5 rounded uppercase font-black ${job.status === 'Cancelled' ? 'bg-red-500/10 text-red-500 border border-red-500/20' : 'bg-green-500/10 text-green-400 border border-green-500/20'
+                                                                                        }`}>
+                                                                                        {job.status}
+                                                                                    </span>
+                                                                                </div>
+
+                                                                                <div className="flex justify-between items-end relative z-10">
+                                                                                    <div className="flex flex-col gap-0.5">
+                                                                                        {/* Destination */}
+                                                                                        {destSite && (
+                                                                                            <span className="text-[10px] text-gray-500 font-bold uppercase flex items-center gap-1 mt-0.5">
+                                                                                                <MapPin size={10} />
+                                                                                                {destSite.name}
+                                                                                            </span>
+                                                                                        )}
+
+                                                                                        <span className="text-[10px] text-gray-600 font-bold flex items-center gap-1 mt-1">
+                                                                                            <Calendar size={10} />
+                                                                                            {formatDateTime(job.updatedAt || job.createdAt, { showTime: true })}
+                                                                                        </span>
+                                                                                    </div>
+
+                                                                                    <div className="flex flex-col items-end gap-2">
+                                                                                        <span className="text-[10px] font-black text-cyber-primary bg-cyber-primary/10 px-2 py-1 rounded-lg border border-cyber-primary/20">
+                                                                                            {(job.lineItems?.length || job.items || 0)} {(job.lineItems?.length || job.items || 0) === 1 ? 'Item' : 'Items'}
+                                                                                        </span>
+
+                                                                                        <button
+                                                                                            onClick={(e) => {
+                                                                                                e.stopPropagation();
+                                                                                                setPackReprintJob(job);
+                                                                                            }}
+                                                                                            className="flex items-center gap-1.5 px-3 py-1.5 bg-white/5 hover:bg-cyber-primary/20 border border-white/10 hover:border-cyber-primary/30 rounded-lg text-[9px] font-black text-gray-400 hover:text-cyber-primary transition-all uppercase tracking-widest"
+                                                                                        >
+                                                                                            <Printer size={12} />
+                                                                                            Reprint
+                                                                                        </button>
                                                                                     </div>
                                                                                 </div>
-                                                                                <div className="space-y-2">
-                                                                                    <div className="flex items-center gap-2">
-                                                                                        <Package size={10} className="text-gray-600" />
-                                                                                        <p className="text-[10px] text-gray-400 font-bold uppercase truncate">REF: {job.orderRef || 'INTERNAL'}</p>
-                                                                                    </div>
-                                                                                    {destSite && (
-                                                                                        <div className="flex items-center gap-2">
-                                                                                            <MapPin size={10} className="text-gray-600" />
-                                                                                            <p className="text-[10px] text-gray-500 font-bold uppercase truncate">{destSite.name}</p>
+
+                                                                                {job.trackingNumber && (
+                                                                                    <div className="mt-3 pt-3 border-t border-white/5 flex items-center justify-between">
+                                                                                        <div className="flex items-center gap-1.5 px-2 py-0.5 bg-cyber-primary/10 border border-cyber-primary/20 rounded text-[9px] font-black text-cyber-primary uppercase tracking-wider">
+                                                                                            <Barcode size={10} />
+                                                                                            {job.trackingNumber}
                                                                                         </div>
-                                                                                    )}
-                                                                                    <div className="flex justify-between items-end mt-4">
-                                                                                        <p className="text-[9px] text-gray-600 font-mono italic">{formatDateTime(job.updatedAt || job.createdAt)}</p>
-                                                                                        <div className="text-right">
-                                                                                            <p className="text-white font-black text-xs leading-none">{job.items || 0}</p>
-                                                                                            <p className="text-[8px] text-gray-500 uppercase font-black tracking-tighter">Payload items</p>
-                                                                                        </div>
+                                                                                        <span className="text-[8px] text-gray-600 font-mono uppercase">Tracking</span>
                                                                                     </div>
-                                                                                </div>
+                                                                                )}
                                                                             </div>
                                                                         );
                                                                     })}
@@ -5504,7 +7785,14 @@ export default function WarehouseOperations() {
                                                                             </span>
                                                                         )}
                                                                     </div>
-                                                                    <span className="text-[10px] text-gray-500 font-mono font-medium tracking-widest">{formatJobId(job)}</span>
+                                                                    <div className="flex items-center gap-2">
+                                                                        <span className="text-[10px] text-cyber-primary font-mono font-black tracking-widest">{formatJobId(job)}</span>
+                                                                        {job.orderRef && job.type !== 'PICK' && (
+                                                                            <span className="text-[9px] text-gray-500 font-bold border-l border-white/10 pl-2">
+                                                                                PO: {resolveOrderRef(job.orderRef)}
+                                                                            </span>
+                                                                        )}
+                                                                    </div>
                                                                 </div>
                                                                 <div className="flex gap-2">
                                                                     {bestMatchEmployee && bestMatchEmployee.workload < 3 && !jobZoneLocked && (
@@ -5828,7 +8116,12 @@ export default function WarehouseOperations() {
                                                 <div>
                                                     <div className="flex items-center gap-4 mb-2">
                                                         <h2 className="text-2xl font-black text-white tracking-tight">Job Intelligence</h2>
-                                                        <span className="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-[10px] font-mono font-bold text-gray-500 uppercase tracking-widest">{selectedJob.id}</span>
+                                                        <div className="flex flex-col gap-1">
+                                                            <span className="px-3 py-1 bg-cyber-primary/10 border border-cyber-primary/20 rounded-full text-[10px] font-mono font-bold text-cyber-primary uppercase tracking-widest flex items-center justify-center">{formatJobId(selectedJob)}</span>
+                                                            {selectedJob.orderRef && selectedJob.type !== 'PICK' && (
+                                                                <span className="text-[10px] text-gray-500 font-bold text-center uppercase tracking-widest">PO: {resolveOrderRef(selectedJob.orderRef)}</span>
+                                                            )}
+                                                        </div>
                                                     </div>
                                                     <div className="flex items-center gap-3">
                                                         <span className={`px-2.5 py-1 rounded-lg text-[10px] uppercase font-black tracking-widest border ${selectedJob.type === 'TRANSFER' ? 'border-cyber-primary/30 text-cyber-primary bg-cyber-primary/10' : 'border-blue-500/30 text-blue-400 bg-blue-500/10'} `}>
@@ -5923,12 +8216,17 @@ export default function WarehouseOperations() {
                                                                 {selectedJob.lineItems && selectedJob.lineItems.length > 0 ? selectedJob.lineItems.map((item: any, idx: number) => (
                                                                     <tr key={idx} className="hover:bg-white/[0.03] transition-colors group">
                                                                         <td className="px-6 py-4">
-                                                                            <p className="text-gray-200 font-black mb-0.5">{item.name}</p>
+                                                                            <div className="flex items-center gap-2 mb-0.5">
+                                                                                <p className="text-gray-200 font-black">{item.name}</p>
+                                                                                <span className="px-1.5 py-0.5 bg-blue-500/10 text-blue-400 text-[8px] font-mono font-bold rounded border border-blue-500/20 uppercase">
+                                                                                    {formatJobId(selectedJob)}
+                                                                                </span>
+                                                                            </div>
                                                                             <p className="text-[10px] text-gray-600 font-mono tracking-tighter uppercase">{item.sku}</p>
                                                                         </td>
                                                                         <td className="px-6 py-4 text-center">
                                                                             <span className="font-black text-gray-400 bg-white/5 px-2 py-1 rounded-lg border border-white/5">
-                                                                                {item.expectedQty}
+                                                                                {item.expectedQty || item.quantity || item.pickedQty || 0}
                                                                             </span>
                                                                         </td>
                                                                         <td className="px-6 py-4 text-right">
@@ -6072,7 +8370,7 @@ export default function WarehouseOperations() {
                                     {labelMode === 'BIN' ? (
                                         <div className="space-y-4">
                                             <div className="grid grid-cols-3 gap-4">
-                                                <input title="Bin Zone" id="bin-zone-input" className="bg-black/30 border border-white/10 rounded-lg p-3 text-white text-sm" placeholder="Zone (A)" />
+                                                <input title="Bin Zone" id="bin-zone-input" className="bg-black/30 border border-white/10 rounded-lg p-3 text-white text-sm" placeholder="Zone (e.g. A)" />
                                                 <input title="Aisle Number" id="bin-aisle-input" className="bg-black/30 border border-white/10 rounded-lg p-3 text-white text-sm" placeholder="Aisle (01)" />
                                                 <input title="Bin Range" id="bin-bin-input" className="bg-black/30 border border-white/10 rounded-lg p-3 text-white text-sm" placeholder="Bin Range (01-10)" />
                                             </div>
@@ -6101,7 +8399,7 @@ export default function WarehouseOperations() {
                                                     const aisleInput = document.getElementById('bin-aisle-input') as HTMLInputElement;
                                                     const binInput = document.getElementById('bin-bin-input') as HTMLInputElement;
 
-                                                    const zone = zoneInput?.value.trim().toUpperCase() || 'A';
+                                                    const zone = zoneInput?.value.trim().toUpperCase() || '';
                                                     const aisle = aisleInput?.value.trim().padStart(2, '0') || '01';
                                                     const binValue = binInput?.value.trim() || '01';
 
@@ -6292,7 +8590,7 @@ export default function WarehouseOperations() {
                                                                 });
 
                                                                 const labelHTML = `
-    < div class="label-container" >
+    <div class="label-container" >
                                                                 <div class="product-name" style="font-size: ${parseInt(sizeConfig.fontSize) + 2}px; font-weight:bold; margin-bottom: 5px;">${product?.name || 'Product'}</div>
                                                                 <div class="barcode-container">
                                                                     ${barcodeSVG}
@@ -6464,9 +8762,16 @@ export default function WarehouseOperations() {
                                             <>
                                                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
                                                     {paginatedPackHistory.map((job: WMSJob) => (
-                                                        <div key={job.id} className="bg-white/[0.02] border border-white/5 rounded-xl p-3 hover:bg-white/[0.04] transition-all group">
+                                                        <div key={job.id} onClick={() => { setSelectedJob(job); setIsDetailsOpen(true); }} className="bg-white/[0.02] border border-white/5 rounded-xl p-3 hover:bg-white/[0.04] transition-all group cursor-pointer">
                                                             <div className="flex justify-between items-start mb-2">
-                                                                <span className="text-[10px] font-mono text-cyber-primary font-bold">{formatJobId(job)}</span>
+                                                                <span className="text-[10px] font-mono text-cyber-primary font-bold">
+                                                                    {formatJobId(job)}
+                                                                    {job.status === 'Completed' && job.updatedAt && (
+                                                                        <span className="opacity-60 text-[9px] font-normal text-gray-500 ml-2">
+                                                                            ({new Date(job.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })})
+                                                                        </span>
+                                                                    )}
+                                                                </span>
                                                                 <span className={`text-[9px] px-1.5 py-0.5 rounded uppercase font-black ${job.status === 'Completed' ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'
                                                                     }`}>
                                                                     {job.status}
@@ -6474,7 +8779,7 @@ export default function WarehouseOperations() {
                                                             </div>
                                                             <div className="flex justify-between items-end">
                                                                 <div>
-                                                                    <p className="text-[10px] text-gray-500 truncate max-w-[80px]">{job.orderRef || 'No Ref'}</p>
+                                                                    <p className="text-[10px] text-gray-500 truncate max-w-[80px]">{formatJobId(job)}</p>
                                                                     <p className="text-[9px] text-gray-600 mt-0.5">{formatDateTime(job.createdAt || '')}</p>
                                                                 </div>
                                                                 <div className="text-right text-white font-bold text-xs">
@@ -6620,6 +8925,11 @@ export default function WarehouseOperations() {
                                                             <div>
                                                                 <div className="flex items-center gap-2">
                                                                     <span className="text-sm font-black text-white tracking-widest uppercase">{formatJobId(job)}</span>
+                                                                    {job.orderRef && (
+                                                                        <span className="text-[10px] text-gray-400 font-bold border-l border-white/10 pl-2 uppercase tracking-widest">
+                                                                            PO: {resolveOrderRef(job.orderRef)}
+                                                                        </span>
+                                                                    )}
                                                                     {isCritical && (
                                                                         <div className="flex items-center gap-1 bg-red-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded uppercase tracking-wider animate-pulse">
                                                                             <Zap size={8} className="fill-current" />
@@ -6633,7 +8943,16 @@ export default function WarehouseOperations() {
                                                                     </span>
                                                                     <span className="w-1 h-1 rounded-full bg-gray-600" />
                                                                     <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
-                                                                        Zone {(job as any).zone || 'A'}
+                                                                        {(job.lineItems || [])[0]?.sku || 'No SKU'}
+                                                                    </span>
+                                                                    <span className="w-1 h-1 rounded-full bg-gray-600" />
+                                                                    <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
+                                                                        {(() => {
+                                                                            const loc = (job as any).zone || job.location;
+                                                                            if (!loc) return 'Unassigned';
+                                                                            if (loc.toLowerCase().startsWith('zone')) return loc;
+                                                                            return `Zone ${loc}`;
+                                                                        })()}
                                                                     </span>
                                                                 </div>
                                                             </div>
@@ -6665,26 +8984,76 @@ export default function WarehouseOperations() {
                                                                 </div>
                                                             )}
 
-                                                            <button
-                                                                disabled={!!(job.assignedTo && job.assignedTo !== (user?.name || user?.email))}
-                                                                onClick={() => handleStartJob(job)}
-                                                                className={`w-full py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-3 shadow-xl ${job.assignedTo && job.assignedTo !== (user?.name || user?.email)
-                                                                    ? 'bg-white/5 text-gray-500 border border-white/10 cursor-not-allowed'
-                                                                    : 'bg-blue-600 text-white hover:bg-blue-500 hover:scale-[1.02] active:scale-[0.98] shadow-blue-600/20'
-                                                                    }`}
-                                                            >
-                                                                {job.assignedTo && job.assignedTo !== (user?.name || user?.email) ? (
-                                                                    <>
-                                                                        <Lock size={14} />
-                                                                        Occupied by {job.assignedTo}
-                                                                    </>
-                                                                ) : (
-                                                                    <>
-                                                                        <Play size={14} />
-                                                                        {job.assignedTo ? 'Continue Job' : 'Start Putaway'}
-                                                                    </>
-                                                                )}
-                                                            </button>
+                                                            <div className="flex items-center justify-between mt-2 mb-4">
+                                                                <div className="flex items-center gap-2">
+                                                                    {job.assignedTo ? (
+                                                                        (() => {
+                                                                            const employee = employees.find(e => e.id === job.assignedTo || e.name === job.assignedTo || e.email === job.assignedTo);
+                                                                            const displayName = employee?.name || (isUUID(job.assignedTo) ? job.assignedTo.slice(-4).toUpperCase() : job.assignedTo);
+                                                                            const displayInitial = displayName.charAt(0).toUpperCase();
+
+                                                                            return (
+                                                                                <>
+                                                                                    <div className="w-5 h-5 rounded-full bg-gradient-to-br from-indigo-500 to-blue-500 flex items-center justify-center">
+                                                                                        <span className="text-[9px] font-bold text-white">{displayInitial}</span>
+                                                                                    </div>
+                                                                                    <span className="text-[10px] text-gray-400 truncate max-w-[80px]">{displayName}</span>
+                                                                                </>
+                                                                            );
+                                                                        })()
+                                                                    ) : (
+                                                                        <span className="text-[10px] text-gray-600 italic">Unassigned</span>
+                                                                    )}
+                                                                </div>
+                                                                <div className="text-[9px] text-gray-500 font-bold uppercase tracking-wider">
+                                                                    {Math.round(progress)}% Complete
+                                                                </div>
+                                                            </div>
+
+                                                            {(() => {
+                                                                // Check if job is assigned to current user (by ID, name, or email)
+                                                                const isOwnJob = !job.assignedTo ||
+                                                                    job.assignedTo === user?.id ||
+                                                                    job.assignedTo === user?.name ||
+                                                                    job.assignedTo === user?.email;
+                                                                const isLocked = !!(job.assignedTo && !isOwnJob);
+
+                                                                return (
+                                                                    <button
+                                                                        disabled={isLocked || isSubmitting}
+                                                                        onClick={async () => {
+                                                                            if (isSubmitting) return;
+                                                                            setIsSubmitting(true);
+                                                                            try {
+                                                                                await handleStartJob(job);
+                                                                            } finally {
+                                                                                setIsSubmitting(false);
+                                                                            }
+                                                                        }}
+                                                                        className={`w-full py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-3 shadow-xl ${isLocked || isSubmitting
+                                                                            ? 'bg-white/5 text-gray-500 border border-white/10 cursor-not-allowed'
+                                                                            : 'bg-blue-600 text-white hover:bg-blue-500 hover:scale-[1.02] active:scale-[0.98] shadow-blue-600/20'
+                                                                            }`}
+                                                                    >
+                                                                        {isLocked ? (
+                                                                            <>
+                                                                                <Lock size={14} />
+                                                                                Occupied by {employees.find(e => e.id === job.assignedTo)?.name || 'Another User'}
+                                                                            </>
+                                                                        ) : isSubmitting ? (
+                                                                            <>
+                                                                                <RefreshCw className="animate-spin" size={14} />
+                                                                                Starting...
+                                                                            </>
+                                                                        ) : (
+                                                                            <>
+                                                                                <Play size={14} />
+                                                                                {job.assignedTo ? 'Continue Job' : 'Start Putaway'}
+                                                                            </>
+                                                                        )}
+                                                                    </button>
+                                                                );
+                                                            })()}
                                                         </div>
                                                     </div>
                                                 );
@@ -6698,12 +9067,13 @@ export default function WarehouseOperations() {
                                                 itemsPerPage={PUTAWAY_ITEMS_PER_PAGE}
                                                 onPageChange={setPutawayCurrentPage}
                                                 itemName="jobs"
+                                                className="col-span-full"
                                             />
                                         </>
                                     )}
 
                                     {/* PUTAWAY History Section */}
-                                    <div className="border-t border-white/10 mt-10 pt-8 pb-10 px-6">
+                                    <div className="col-span-full border-t border-white/10 mt-10 pt-8 pb-10 px-6">
                                         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
                                             <div>
                                                 <h3 className="item-title font-bold text-white flex items-center gap-2">
@@ -6730,9 +9100,16 @@ export default function WarehouseOperations() {
                                             <>
                                                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
                                                     {paginatedPutawayHistory.map((job: WMSJob) => (
-                                                        <div key={job.id} className="bg-white/[0.02] border border-white/5 rounded-xl p-3 hover:bg-white/[0.04] transition-all group">
+                                                        <div key={job.id} onClick={() => { setSelectedJob(job); setIsDetailsOpen(true); }} className="bg-white/[0.02] border border-white/5 rounded-xl p-3 hover:bg-white/[0.04] transition-all group cursor-pointer">
                                                             <div className="flex justify-between items-start mb-2">
-                                                                <span className="text-[10px] font-mono text-cyber-primary font-bold">{formatJobId(job)}</span>
+                                                                <span className="text-[10px] font-mono text-cyber-primary font-bold">
+                                                                    {formatJobId(job)}
+                                                                    {job.status === 'Completed' && job.updatedAt && (
+                                                                        <span className="opacity-60 text-[9px] font-normal text-gray-500 ml-2">
+                                                                            ({new Date(job.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })})
+                                                                        </span>
+                                                                    )}
+                                                                </span>
                                                                 <span className={`text-[9px] px-1.5 py-0.5 rounded uppercase font-black ${job.status === 'Completed' ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'
                                                                     }`}>
                                                                     {job.status}
@@ -6740,7 +9117,10 @@ export default function WarehouseOperations() {
                                                             </div>
                                                             <div className="flex justify-between items-end">
                                                                 <div>
-                                                                    <p className="text-[10px] text-gray-500 truncate max-w-[80px]">{job.orderRef || 'No Ref'}</p>
+                                                                    <p className="text-[10px] text-gray-500 truncate max-w-[100px]">
+                                                                        {job.orderRef && `PO: ${resolveOrderRef(job.orderRef)}`}
+                                                                        {job.jobNumber && <span className="text-cyber-primary ml-1">• {job.jobNumber}</span>}
+                                                                    </p>
                                                                     <p className="text-[9px] text-gray-600 mt-0.5">{formatDateTime(job.createdAt || '')}</p>
                                                                 </div>
                                                                 <div className="text-right text-white font-bold text-xs">
@@ -6893,6 +9273,7 @@ export default function WarehouseOperations() {
                                                                     pickedQty: 0,
                                                                     status: 'Pending'
                                                                 }],
+                                                                jobNumber: (p.sku || 'UNKNOWN').toUpperCase(),
                                                                 orderRef: `REPLENISH-${p.sku}`
                                                             };
                                                             await wmsJobsService.create(job);
@@ -7038,7 +9419,7 @@ export default function WarehouseOperations() {
 
                                                             <div className="bg-black/30 rounded-2xl p-4 border border-white/5 shadow-inner">
                                                                 <p className="text-[9px] text-gray-600 font-black uppercase tracking-widest mb-2 flex items-center gap-2">
-                                                                    <Map size={10} className="text-purple-400" /> Source Intelligence
+                                                                    <MapIcon size={10} className="text-purple-400" /> Source Intelligence
                                                                 </p>
                                                                 <p className="text-xs text-white font-bold mb-1">Bulk Storage: <span className="text-purple-400">ZONE-B-041</span></p>
                                                                 <p className="text-[10px] text-gray-500 font-medium">Standard pallets only</p>
@@ -7093,6 +9474,7 @@ export default function WarehouseOperations() {
                                                                                     pickedQty: 0,
                                                                                     status: 'Pending'
                                                                                 }],
+                                                                                jobNumber: (p.sku || 'UNKNOWN').toUpperCase(),
                                                                                 orderRef: `REPLENISH-${p.sku}`
                                                                             };
                                                                             await wmsJobsService.create(job);
@@ -7173,14 +9555,17 @@ export default function WarehouseOperations() {
                                                         className="bg-white/[0.02] border border-white/5 rounded-xl p-3 hover:bg-white/[0.04] transition-all group cursor-pointer"
                                                     >
                                                         <div className="flex justify-between items-start mb-2">
-                                                            <span className="text-[10px] font-mono text-cyber-primary font-bold">{job.id}</span>
+                                                            <span className="text-[10px] font-mono text-cyber-primary font-bold">{formatJobId(job)}</span>
                                                             <span className="text-[9px] px-1.5 py-0.5 rounded uppercase font-black bg-green-500/10 text-green-400">
                                                                 {job.status}
                                                             </span>
                                                         </div>
                                                         <div className="flex justify-between items-end">
                                                             <div>
-                                                                <p className="text-[10px] text-gray-500 truncate max-w-[100px]">{job.orderRef || 'Internal'}</p>
+                                                                <p className="text-[10px] text-gray-500 truncate max-w-[100px]">
+                                                                    {job.orderRef || 'Internal'}
+                                                                    {job.jobNumber && <span className="text-cyber-primary ml-1">• {job.jobNumber}</span>}
+                                                                </p>
                                                                 <p className="text-[9px] text-gray-600 mt-0.5">{formatDateTime(job.updatedAt || job.createdAt || '')}</p>
                                                             </div>
                                                             <div className="text-right text-white font-bold text-xs">
@@ -8656,7 +11041,7 @@ export default function WarehouseOperations() {
                                                         {/* Left: ID only */}
                                                         <div className="flex items-center gap-2">
                                                             {hasDisc && <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />}
-                                                            <span className="font-mono font-bold text-white text-sm">{formatTransferId(transfer)}</span>
+                                                            <span className="font-mono font-bold text-white text-sm">{formatJobId(transfer)}</span>
                                                         </div>
                                                         {/* Right: Status + Chevron */}
                                                         <div className="flex items-center gap-3">
@@ -8759,14 +11144,17 @@ export default function WarehouseOperations() {
                                                                             className="bg-white/[0.02] border border-white/5 rounded-xl p-3 hover:bg-white/[0.04] transition-all group cursor-pointer"
                                                                         >
                                                                             <div className="flex justify-between items-start mb-2">
-                                                                                <span className="text-[10px] font-mono text-cyber-primary font-bold">{formatTransferId(transfer as any)}</span>
+                                                                                <span className="text-[10px] font-mono text-cyber-primary font-bold">{formatJobId(transfer)}</span>
                                                                                 <span className="text-[9px] px-1.5 py-0.5 rounded uppercase font-black bg-green-500/10 text-green-400">
                                                                                     {transfer.status}
                                                                                 </span>
                                                                             </div>
                                                                             <div className="flex justify-between items-end">
                                                                                 <div>
-                                                                                    <p className="text-[10px] text-gray-500 truncate max-w-[100px]">{transfer.id}</p>
+                                                                                    <p className="text-[10px] text-gray-500 truncate max-w-[100px]">
+                                                                                        REF: {formatJobId({ ...transfer, type: 'TRANSFER' })}
+                                                                                        {(transfer as any).jobNumber && <span className="text-cyber-primary ml-1">• {(transfer as any).jobNumber}</span>}
+                                                                                    </p>
                                                                                     <p className="text-[9px] text-gray-600 mt-0.5">{formatDateTime(transfer.date)}</p>
                                                                                 </div>
                                                                                 <div className="text-right text-white font-bold text-xs">
@@ -8803,7 +11191,7 @@ export default function WarehouseOperations() {
                                         <div>
                                             <h3 className="font-bold text-white flex items-center gap-2 text-xl">
                                                 <ClipboardCheck className="text-green-400" size={24} />
-                                                Receive Transfer {activeTransferJob ? formatTransferId(activeTransferJob) : ''}
+                                                Receive Transfer {activeTransferJob ? formatJobId(activeTransferJob) : ''}
                                             </h3>
                                             <p className="text-sm text-gray-400 mt-1">Verify items and quantities from {sites.find(s => s.id === activeTransferJob?.sourceSiteId)?.name}</p>
                                         </div>
@@ -8963,14 +11351,16 @@ export default function WarehouseOperations() {
 
                                                             if (destProduct) {
                                                                 // Product exists at destination-update its stock
-                                                                await adjustStock(
-                                                                    destProduct.id,
-                                                                    item.receivedQty,
-                                                                    'IN',
-                                                                    `Transfer Received: ${formatJobId(activeTransferJob)} (${item.condition})`,
-                                                                    user?.name || 'System'
-                                                                );
-                                                                console.log(`📥 Added ${item.receivedQty} of ${destProduct.name} to ${destProduct.id} `);
+                                                                await adjustStockMutation.mutateAsync({
+                                                                    productId: destProduct.id,
+                                                                    productName: destProduct.name,
+                                                                    productSku: destProduct.sku,
+                                                                    siteId: destSiteId,
+                                                                    quantity: item.receivedQty,
+                                                                    type: 'IN',
+                                                                    reason: `Transfer Received: ${formatJobId(activeTransferJob)} (${item.condition})`,
+                                                                    canApprove: true
+                                                                });
                                                             } else {
                                                                 // Product doesn't exist at destination-create it
                                                                 try {
@@ -8989,7 +11379,6 @@ export default function WarehouseOperations() {
                                                                         location: 'Receiving Dock',
                                                                         image: sourceProduct.image
                                                                     } as any);
-                                                                    console.log(`📦 Created new product ${sourceProduct.name} at destination with ${item.receivedQty} units`);
                                                                 } catch (createErr) {
                                                                     console.error('Failed to create product at destination:', createErr);
                                                                     addNotification('alert', `Failed to add ${sourceProduct.name} to inventory`);
@@ -9027,7 +11416,7 @@ export default function WarehouseOperations() {
                                                     Finalize Receipt
                                                 </>
                                             )}
-                                        </button >
+                                        </button>
                                     </div>
                                 </div>
                             )}
@@ -9114,7 +11503,7 @@ export default function WarehouseOperations() {
                                             >
                                                 <div className="flex items-center justify-between gap-4">
                                                     <div className="flex items-center gap-3">
-                                                        <span className="text-sm font-mono font-bold text-white">{formatTransferId(transfer)}</span>
+                                                        <span className="text-sm font-mono font-bold text-white">{formatJobId(transfer)}</span>
                                                         <span className={`text-[10px] px-2 py-0.5 rounded font-bold uppercase ${transfer.transferStatus === 'Received' ? 'bg-green-500/20 text-green-400' :
                                                             transfer.transferStatus === 'In-Transit' ? 'bg-purple-500/20 text-purple-400' :
                                                                 'bg-gray-500/20 text-gray-400'
@@ -9584,16 +11973,12 @@ export default function WarehouseOperations() {
                                                             status: 'Pending'
                                                         };
                                                     }),
-                                                    orderRef: new Date().toISOString(),
+                                                    orderRef: `MTR-${Date.now()}`,
                                                     transferStatus: 'Requested',
                                                     requestedBy: user?.name || 'System'
                                                 };
-                                                // console.log('📦 Creating Transfer Job:', transferJob);
-                                                // console.log('📦 Transfer Items:', transferItems);
-                                                // console.log('📦 Line Items:', transferJob.lineItems);
 
                                                 const createdJob = await wmsJobsService.create(transferJob);
-                                                // console.log('✅ Transfer Job Created:', createdJob);
 
                                                 addNotification('success', t('warehouse.transferRequestCreated'));
 
@@ -9794,15 +12179,17 @@ export default function WarehouseOperations() {
                                                         } as any);
 
                                                         // 2. Adjust Stock Record (Log the write-off)
-                                                        await adjustStock(
-                                                            currentItem.productId,
-                                                            0, // Set to 0? Or just leave as is since we are archiving? 
-                                                            // Logic: The item count expected was X, we found Y (likely 0). 
-                                                            // We should record the 0 pick.
-                                                            'OUT',
-                                                            `DISCONTINUING PRODUCT - Not Found during Job ${selectedJob.jobNumber}`,
-                                                            user?.name || 'System'
-                                                        );
+                                                        const product = allProducts.find(p => p.id === currentItem.productId);
+                                                        await adjustStockMutation.mutateAsync({
+                                                            productId: currentItem.productId,
+                                                            productName: product?.name || 'Unknown',
+                                                            productSku: product?.sku || 'N/A',
+                                                            siteId: activeSite?.id || '',
+                                                            quantity: 0,
+                                                            type: 'OUT',
+                                                            reason: `DISCONTINUING PRODUCT - Not Found during Job ${formatJobId(selectedJob)}`,
+                                                            canApprove: true
+                                                        });
 
                                                         // 3. Complete Item as Discontinued (Qty 0)
                                                         handleItemScan(0, 'Discontinued');
@@ -10754,9 +13141,48 @@ export default function WarehouseOperations() {
                     )
                 }
 
-                {/* Global Job Details Modal-Works from any tab (only show when NOT in scanner mode) */}
+                {/* Outbound Job Modal (PICK / PACK / DISPATCH) */}
+                {selectedJob && isDetailsOpen && !isScannerMode && ['PICK', 'PACK', 'DISPATCH'].includes(selectedJob.type) && (
+                    <OutboundJobModal
+                        isOpen={!!selectedJob}
+                        onClose={() => setSelectedJob(null)}
+                        job={selectedJob}
+                        user={user}
+                        sites={sites}
+                        products={products}
+                        activeTab={activeTab}
+                        onRefresh={refreshData}
+                        onUpdateJob={async (id, updates) => {
+                            try {
+                                await wmsJobsService.update(id, updates as any);
+                                await refreshData();
+                                addNotification('success', 'Job updated');
+                            } catch (e) {
+                                addNotification('alert', 'Failed to update job');
+                            }
+                        }}
+                        onStartPicking={(job) => {
+                            // Update status and open scanner
+                            if (job.status === 'Pending') updateJobStatus(job.id, 'In-Progress');
+                            if (!job.assignedTo && user) assignJob(job.id, user.id || user.name);
+                            setSelectedJob({ ...job, status: 'In-Progress' as const });
+                            setIsScannerMode(true);
+                            setScannerStep('SCAN');
+                        }}
+                        onStartPacking={(job) => {
+                            // Update status and open scanner
+                            if (job.status === 'Pending') updateJobStatus(job.id, 'In-Progress');
+                            if (!job.assignedTo && user) assignJob(job.id, user.id || user.name);
+                            setSelectedJob({ ...job, status: 'In-Progress' as const });
+                            setIsScannerMode(true);
+                            setScannerStep('SCAN');
+                        }}
+                    />
+                )}
+
+                {/* Legacy Inbound Job Modal (RECEIVE / PUTAWAY / TRANSFER / REPLENISH) */}
                 {
-                    selectedJob && isDetailsOpen && !isScannerMode && (
+                    selectedJob && isDetailsOpen && !isScannerMode && !['PICK', 'PACK', 'DISPATCH'].includes(selectedJob.type) && (
                         <div className="fixed inset-0 z-[60] flex items-end md:items-center justify-center bg-black/80 backdrop-blur-sm p-0 md:p-4 animate-in fade-in duration-200">
                             <div className="bg-cyber-gray border-t md:border border-white/10 rounded-t-2xl md:rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl shadow-cyber-primary/10 flex flex-col pb-[env(safe-area-inset-bottom)] md:pb-0">
                                 {/* Header */}
@@ -10781,56 +13207,88 @@ export default function WarehouseOperations() {
 
                                 {/* Body */}
                                 <div className="p-6 space-y-6 flex-1 overflow-y-auto">
-                                    {/* Route/Info Grid */}
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        {/* Source/Dest */}
-                                        {(selectedJob.sourceSiteId || selectedJob.destSiteId) && (
-                                            <div className="bg-black/20 rounded-xl p-4 border border-white/5">
-                                                <p className="text-xs text-gray-500 uppercase font-bold mb-3">Route</p>
-                                                <div className="flex items-center gap-3">
-                                                    <div className="flex-1">
-                                                        <p className="text-xs text-gray-400">From</p>
-                                                        <p className="font-bold text-white truncate">{sites.find(s => s.id === selectedJob.sourceSiteId)?.name || selectedJob.sourceSiteId || 'N/A'}</p>
-                                                    </div>
-                                                    <ArrowRight className="text-cyber-primary opacity-50 flex-shrink-0" />
-                                                    <div className="flex-1 text-right">
-                                                        <p className="text-xs text-gray-400">To</p>
-                                                        <p className="font-bold text-white truncate">{sites.find(s => s.id === selectedJob.destSiteId)?.name || selectedJob.destSiteId || 'N/A'}</p>
-                                                    </div>
+                                    {/* Ultra-Streamlined Info Header */}
+                                    <div className="flex flex-wrap items-center gap-8 py-2 border-b border-white/5">
+                                        {/* Priority */}
+                                        <div className="flex flex-col">
+                                            <span className="text-[9px] text-gray-500 uppercase font-black tracking-widest mb-0.5">Priority</span>
+                                            <span className={`text-sm font-bold ${selectedJob.priority === 'Critical' ? 'text-red-400' : selectedJob.priority === 'High' ? 'text-orange-400' : 'text-blue-400'}`}>
+                                                {selectedJob.priority || 'Normal'}
+                                            </span>
+                                        </div>
+
+                                        {/* Users */}
+                                        <div className="flex flex-col">
+                                            <span className="text-[9px] text-gray-500 uppercase font-black tracking-widest mb-0.5">Requested By</span>
+                                            <span className="text-sm font-bold text-white">{selectedJob.requestedBy || 'System'}</span>
+                                        </div>
+
+                                        {selectedJob.approvedBy && (
+                                            <div className="flex flex-col">
+                                                <span className="text-[9px] text-gray-500 uppercase font-black tracking-widest mb-0.5">Approved By</span>
+                                                <div className="flex items-center gap-1.5">
+                                                    <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
+                                                    <span className="text-sm font-bold text-white">{selectedJob.approvedBy}</span>
                                                 </div>
                                             </div>
                                         )}
 
-                                        {/* People/Dates */}
-                                        <div className="bg-black/20 rounded-xl p-4 border border-white/5 space-y-2 text-sm">
-                                            <div className="flex justify-between">
-                                                <span className="text-gray-400">Priority</span>
-                                                <span className={`font-bold ${selectedJob.priority === 'Critical' ? 'text-red-400' : selectedJob.priority === 'High' ? 'text-orange-400' : 'text-blue-400'}`}>{selectedJob.priority || 'Normal'}</span>
+                                        {/* Dates (Compact) */}
+                                        {(selectedJob.receivedAt || selectedJob.shippedAt) && (
+                                            <div className="flex flex-col">
+                                                <span className="text-[9px] text-gray-500 uppercase font-black tracking-widest mb-0.5">Date</span>
+                                                <span className="text-sm font-mono text-gray-400">
+                                                    {new Date(selectedJob.receivedAt || selectedJob.shippedAt || Date.now()).toLocaleDateString()}
+                                                </span>
                                             </div>
-                                            <div className="flex justify-between">
-                                                <span className="text-gray-400">Requested By</span>
-                                                <span className="text-white font-bold">{selectedJob.requestedBy || 'System'}</span>
+                                        )}
+
+                                        {/* [NEW] Robust DISPATCH Actions */}
+                                        {selectedJob.type === 'DISPATCH' && (
+                                            <div className="flex items-center gap-4 ml-auto">
+                                                <button
+                                                    onClick={async () => {
+                                                        const destSite = sites.find(s => s.id === selectedJob.destSiteId);
+                                                        const html = await generatePackLabelHTML({
+                                                            orderRef: selectedJob.id,
+                                                            destSiteName: destSite?.name,
+                                                            itemCount: selectedJob.items || selectedJob.lineItems?.length || 0,
+                                                            packDate: selectedJob.shippedAt || new Date().toISOString(),
+                                                            trackingNumber: selectedJob.trackingNumber || selectedJob.id,
+                                                            lineItems: selectedJob.lineItems?.map(li => ({ name: li.name, sku: li.sku, quantity: li.pickedQty }))
+                                                        }, { size: 'XL', format: 'Both' });
+
+                                                        const printWindow = window.open('', '_blank');
+                                                        printWindow?.document.write(html);
+                                                        printWindow?.document.close();
+                                                        setTimeout(() => printWindow?.print(), 500);
+                                                    }}
+                                                    className="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white text-[10px] font-black uppercase tracking-widest rounded-xl flex items-center gap-2 transition-all active:scale-95 shadow-lg shadow-purple-600/20"
+                                                >
+                                                    <Printer size={14} /> Reprint Shipping Label (XL)
+                                                </button>
+
+                                                {(['super_admin', 'warehouse_manager', 'dispatcher'].includes(user?.role || '') && !activeTab.includes('driver')) && (
+                                                    <button
+                                                        onClick={async () => {
+                                                            const newTracking = prompt('Enter New Tracking Number:', selectedJob.trackingNumber || '');
+                                                            if (newTracking !== null) {
+                                                                try {
+                                                                    await wmsJobsService.update(selectedJob.id, { trackingNumber: newTracking } as any);
+                                                                    addNotification('success', 'Tracking Updated');
+                                                                    await refreshData();
+                                                                } catch (err) {
+                                                                    addNotification('alert', 'Update Failed');
+                                                                }
+                                                            }
+                                                        }}
+                                                        className="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 text-gray-400 hover:text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all"
+                                                    >
+                                                        Edit Tracking
+                                                    </button>
+                                                )}
                                             </div>
-                                            {selectedJob.approvedBy && (
-                                                <div className="flex justify-between">
-                                                    <span className="text-gray-400">Approved By</span>
-                                                    <span className="text-green-400 font-bold">{selectedJob.approvedBy}</span>
-                                                </div>
-                                            )}
-                                            <div className="h-px bg-white/5 my-2" />
-                                            {selectedJob.shippedAt && (
-                                                <div className="flex justify-between">
-                                                    <span className="text-gray-400">Shipped</span>
-                                                    <span className="text-purple-400 font-mono">{new Date(selectedJob.shippedAt).toLocaleDateString()}</span>
-                                                </div>
-                                            )}
-                                            {selectedJob.receivedAt && (
-                                                <div className="flex justify-between">
-                                                    <span className="text-gray-400">Received</span>
-                                                    <span className="text-green-400 font-mono">{new Date(selectedJob.receivedAt).toLocaleDateString()}</span>
-                                                </div>
-                                            )}
-                                        </div>
+                                        )}
                                     </div>
 
                                     {/* Items List */}
@@ -10839,63 +13297,112 @@ export default function WarehouseOperations() {
                                             <Package size={16} className="text-cyber-primary" />
                                             Items ({selectedJob.lineItems?.length || selectedJob.items || 0})
                                         </h3>
-                                        <div className="bg-black/20 rounded-xl border border-white/5 overflow-hidden">
-                                            <table className="w-full text-sm text-left">
-                                                <thead className="text-xs text-gray-500 bg-white/5 uppercase font-bold">
-                                                    <tr>
-                                                        <th className="p-3">{t('warehouse.product')}</th>
-                                                        <th className="p-3 text-center">{t('warehouse.expectedAbbr')}</th>
-                                                        {selectedJob.type === 'TRANSFER' && <th className="p-3 text-center">{t('warehouse.receivedAbbr')}</th>}
-                                                        <th className="p-3 text-center">{t('warehouse.statusAction')}</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody className="divide-y divide-white/5">
-                                                    {selectedJob.lineItems && selectedJob.lineItems.length > 0 ? selectedJob.lineItems.map((item: any, idx: number) => {
-                                                        const isTransfer = selectedJob.type === 'TRANSFER';
-                                                        const isResolved = ['Resolved', 'Completed'].includes(item.status);
-                                                        const hasDiscrepancy = isTransfer && !isResolved && item.receivedQty !== undefined && item.receivedQty !== item.expectedQty;
+                                        <div className="space-y-3">
+                                            {selectedJob.lineItems && selectedJob.lineItems.length > 0 ? selectedJob.lineItems.map((item: any, idx: number) => {
+                                                const isTransfer = selectedJob.type === 'TRANSFER';
+                                                const isResolved = ['Resolved', 'Completed'].includes(item.status);
+                                                const hasDiscrepancy = isTransfer && !isResolved && item.receivedQty !== undefined && item.receivedQty !== item.expectedQty;
+                                                // Fix: Lookup product by ID first (more reliable), then fallback to SKUs
+                                                const product = products.find(p => p.id === item.productId) || products.find(p => p.sku === item.sku);
 
-                                                        return (
-                                                            <tr key={idx} className="hover:bg-white/5 transition-colors">
-                                                                <td className="p-3">
-                                                                    <p className="text-white font-medium">{item.name}</p>
-                                                                    <p className="text-xs text-gray-500">{item.sku}</p>
-                                                                </td>
-                                                                <td className="p-3 text-center font-mono text-white font-bold">{item.expectedQty}</td>
-                                                                {isTransfer && (
-                                                                    <td className={`p-3 text-center font-mono font-bold ${hasDiscrepancy ? 'text-red-400' : 'text-green-400'}`}>
-                                                                        {item.receivedQty ?? '-'}
-                                                                    </td>
-                                                                )}
-                                                                <td className="p-3 text-center">
-                                                                    {hasDiscrepancy ? (
-                                                                        <button
-                                                                            onClick={() => {
-                                                                                setResolvingItem({ item, index: idx });
-                                                                                setIsResolutionModalOpen(true);
-                                                                            }}
-                                                                            className="text-[10px] px-2 py-1 rounded bg-red-500/20 text-red-400 border border-red-500/50 hover:bg-red-500/30 flex items-center gap-1 mx-auto transition-colors font-bold uppercase tracking-wider"
-                                                                        >
-                                                                            <AlertTriangle size={10} /> Resolve
-                                                                        </button>
-                                                                    ) : (
-                                                                        <span className={`text-[10px] px-2 py-1 rounded flex items-center justify-center gap-1 ${item.status === 'Discontinued' ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30' :
-                                                                            isResolved ? 'bg-green-500/20 text-green-400' :
-                                                                                'bg-white/10 text-gray-300'
-                                                                            }`}>
-                                                                            {item.status === 'Discontinued' && <Archive size={10} />}
-                                                                            {item.status === 'Discontinued' ? t('warehouse.archived') : (item.status || t('warehouse.pending'))}
-                                                                        </span>
+                                                // Normalize item data (PO vs WMS Job)
+                                                const itemName = item.name || item.productName || 'Unknown Item';
+                                                const itemQty = item.expectedQty || item.quantity || item.pickedQty || 0;
+                                                const itemSku = item.sku || product?.sku || 'N/A';
+
+                                                // [NEW] Robust: Handle Received Qty & Status for both WMS and PO types
+                                                const receivedQty = item.receivedQty || item.quantity || item.pickedQty || 0;
+                                                // Only show received quantity if the job is actually in a receiving state or completed
+                                                // For Drivers/In-Transit, "Received: 0" is confusing and irrelevant.
+                                                const showReceived = (receivedQty !== undefined || isTransfer) &&
+                                                    ((selectedJob as any).status === 'Received' || selectedJob.status === 'Completed' || selectedJob.transferStatus === 'Delivered');
+
+                                                // Derive Status: PO Items inherit 'Completed' if parent is Received
+                                                let displayStatus = item.status || 'PENDING';
+                                                if (!item.status && (selectedJob as any).status === 'Received') displayStatus = 'COMPLETED';
+                                                const isCompleted = displayStatus === 'Completed' || displayStatus === 'COMPLETED';
+
+                                                // Hide internal item status for Drivers (they don't care about 'Pending' items, they care about the whole package)
+                                                // We checking activeTab to clean up view for Admins testing Driver Hub too
+                                                const showStatus = !(selectedJob.type === 'DISPATCH' && (user?.role === 'driver' || activeTab.includes('driver')));
+
+                                                return (
+                                                    <div key={idx} className="bg-white/[0.03] rounded-2xl p-4 border border-white/10 flex flex-col md:flex-row gap-4 items-start md:items-center group hover:bg-white/[0.05] transition-colors">
+                                                        {/* Icon & Info */}
+                                                        <div className="flex items-center gap-4 flex-1 w-full">
+                                                            <div className="w-10 h-10 rounded-xl bg-black/40 border border-white/10 flex items-center justify-center text-gray-500 shrink-0">
+                                                                <Box size={18} />
+                                                            </div>
+                                                            <div className="min-w-0 flex-1">
+                                                                <p className="text-white font-bold truncate text-sm">{itemName}</p>
+                                                                <div className="flex items-center gap-2 mt-0.5">
+                                                                    <p className="text-[10px] text-cyber-primary font-mono bg-cyber-primary/10 px-1.5 py-0.5 rounded">{itemSku}</p>
+                                                                    {!activeTab.includes('driver') && (
+                                                                        <p className="text-[10px] text-gray-500 font-mono italic">
+                                                                            {item.barcodes?.length ? `${item.barcodes.length} Aliases` : 'Primary Identity'}
+                                                                        </p>
                                                                     )}
-                                                                </td>
-                                                            </tr>
-                                                        );
-                                                    }) : (
-                                                        <tr><td colSpan={selectedJob.type === 'TRANSFER' ? 4 : 3} className="p-4 text-center text-gray-500">No detailed item list available</td></tr>
-                                                    )}
-                                                </tbody>
-                                            </table>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        {/* Qty & Status */}
+                                                        <div className="flex items-center gap-6 w-full md:w-auto justify-between md:justify-end">
+                                                            <div className="flex flex-col items-end">
+                                                                <span className="text-[9px] text-gray-500 uppercase font-bold tracking-wider">Expected</span>
+                                                                <span className="text-lg font-mono font-bold text-white">{itemQty}</span>
+                                                            </div>
+
+                                                            {showReceived && (
+                                                                <div className="flex flex-col items-end">
+                                                                    <span className="text-[9px] text-gray-500 uppercase font-bold tracking-wider">Received</span>
+                                                                    <span className={`text-lg font-mono font-bold ${hasDiscrepancy ? 'text-red-400' : 'text-green-400'}`}>
+                                                                        {receivedQty ?? '-'}
+                                                                    </span>
+                                                                </div>
+                                                            )}
+
+                                                            <div className="flex items-center gap-2 pl-4 border-l border-white/10">
+                                                                {/* Status Badge */}
+                                                                {showStatus && (
+                                                                    <div className={`px-2 py-1 rounded-lg text-[10px] uppercase font-bold tracking-wider border ${hasDiscrepancy ? 'border-red-500/30 text-red-400 bg-red-500/10' :
+                                                                        isCompleted ? 'border-green-500/30 text-green-400 bg-green-500/10' :
+                                                                            'border-white/10 text-gray-400 bg-white/5'
+                                                                        }`}>
+                                                                        {hasDiscrepancy ? 'ATTENTION' : displayStatus}
+                                                                    </div>
+                                                                )}
+
+                                                                {/* Reprint Button */}
+                                                                {!(selectedJob.type === 'DISPATCH' && user?.role === 'driver') && (
+                                                                    <button
+                                                                        onClick={() => {
+                                                                            setReprintItem({
+                                                                                sku: itemSku,
+                                                                                name: itemName,
+                                                                                qty: 1,
+                                                                                price: (product?.price || 0).toString(),
+                                                                                category: product?.category || 'General',
+                                                                                expiry: (item as any).expiry || (item as any).expiryDate || product?.expiryDate
+                                                                            });
+                                                                        }}
+                                                                        className="w-8 h-8 rounded-lg bg-cyber-primary text-black flex items-center justify-center hover:bg-[#25D3D3] transition-colors shadow-[0_0_10px_rgba(0,255,157,0.2)]"
+                                                                        title="Reprint Label"
+                                                                    >
+                                                                        <Printer size={14} />
+                                                                    </button>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            }) : (
+                                                <div className="text-center py-8 text-gray-500 italic bg-white/[0.02] rounded-2xl border border-white/5">
+                                                    No items recorded for this operation.
+                                                </div>
+                                            )}
                                         </div>
+
                                     </div>
                                 </div>
 
@@ -10905,55 +13412,126 @@ export default function WarehouseOperations() {
                                         {/* Show Start Picking button for PICK/PACK/PUTAWAY jobs that aren't completed */}
                                         {['PICK', 'PACK', 'PUTAWAY', 'pick', 'pack', 'putaway'].includes(selectedJob.type) && selectedJob.status !== 'Completed' ? (
                                             <Button
+                                                disabled={isSubmitting}
                                                 onClick={async (e) => {
                                                     e.preventDefault();
                                                     e.stopPropagation();
-                                                    console.log('🎯 Start Picking clicked!', selectedJob);
+                                                    if (isSubmitting) return;
 
-                                                    // Normalize lineItems for the job
-                                                    const jobLineItems = selectedJob.lineItems || (selectedJob as any).line_items || [];
-                                                    const normalizedJob = { ...selectedJob, lineItems: jobLineItems };
+                                                    setIsSubmitting(true);
+                                                    try {
 
-                                                    // Sort items by bin location
-                                                    const sortedItems = [...jobLineItems].sort((a: any, b: any) => {
-                                                        const prodA = products.find(p => p.id === a.productId);
-                                                        const prodB = products.find(p => p.id === b.productId);
-                                                        return (prodA?.location || '').localeCompare(prodB?.location || '');
-                                                    });
+                                                        // Normalize lineItems for the job
+                                                        const jobLineItems = selectedJob.lineItems || (selectedJob as any).line_items || [];
+                                                        const normalizedJob = { ...selectedJob, lineItems: jobLineItems };
 
-                                                    const optimizedJob = {
-                                                        ...normalizedJob,
-                                                        lineItems: sortedItems,
-                                                        status: 'In-Progress' as const,
-                                                        assignedTo: selectedJob.assignedTo || user?.name
-                                                    };
+                                                        // Sort items by bin location
+                                                        const sortedItems = [...jobLineItems].sort((a: any, b: any) => {
+                                                            const prodA = products.find(p => p.id === a.productId);
+                                                            const prodB = products.find(p => p.id === b.productId);
+                                                            return (prodA?.location || '').localeCompare(prodB?.location || '');
+                                                        });
 
-                                                    // Update job status if pending
-                                                    if (selectedJob.status === 'Pending') {
-                                                        updateJobStatus(selectedJob.id, 'In-Progress');
+                                                        const optimizedJob = {
+                                                            ...normalizedJob,
+                                                            lineItems: sortedItems,
+                                                            status: 'In-Progress' as const,
+                                                            assignedTo: selectedJob.assignedTo || user?.name
+                                                        };
+
+                                                        // Update job status if pending
+                                                        if (selectedJob.status === 'Pending') {
+                                                            await updateJobStatus(selectedJob.id, 'In-Progress');
+                                                        }
+
+                                                        // Auto-assign if not assigned
+                                                        if (!selectedJob.assignedTo && user) {
+                                                            await assignJob(selectedJob.id, user.id || user.name);
+                                                        }
+
+                                                        // Open scanner
+                                                        setSelectedJob(optimizedJob);
+                                                        setIsScannerMode(true);
+                                                        setScannerStep(selectedJob.type === 'PUTAWAY' ? 'NAV' : 'SCAN');
+                                                        setScannedBin('');
+                                                        setScannedItem('');
+                                                        setPickQty(0);
+                                                    } finally {
+                                                        setIsSubmitting(false);
                                                     }
-
-                                                    // Auto-assign if not assigned
-                                                    if (!selectedJob.assignedTo && user) {
-                                                        await assignJob(selectedJob.id, user.id || user.name);
-                                                    }
-
-                                                    // Open scanner
-                                                    setSelectedJob(optimizedJob);
-                                                    setIsScannerMode(true);
-                                                    setScannerStep(selectedJob.type === 'PUTAWAY' ? 'NAV' : 'SCAN');
-                                                    setScannedBin('');
-                                                    setScannedItem('');
-                                                    setPickQty(0);
                                                 }}
-                                                icon={<Scan size={18} />}
+                                                icon={isSubmitting ? <RefreshCw className="animate-spin" size={18} /> : <Scan size={18} />}
                                                 className="px-6 py-3 bg-gradient-to-r from-cyber-primary to-green-400 text-black rounded-xl font-bold transition-all duration-300 hover:shadow-lg hover:shadow-cyber-primary/30 flex items-center gap-2"
                                             >
-                                                {selectedJob.type?.toUpperCase() === 'PICK' ? t('warehouse.startPicking') :
-                                                    selectedJob.type?.toUpperCase() === 'PACK' ? t('warehouse.startPacking') :
-                                                        t('warehouse.startPutaway')}
+                                                {isSubmitting ? 'Starting...' :
+                                                    selectedJob.type?.toUpperCase() === 'PICK' ? t('warehouse.startPicking') :
+                                                        selectedJob.type?.toUpperCase() === 'PACK' ? t('warehouse.startPacking') :
+                                                            t('warehouse.startPutaway')}
                                             </Button>
                                         ) : null}
+
+                                        {/* Force Complete Button (Admin Override) */}
+                                        {['super_admin', 'admin'].includes(user?.role || '') &&
+                                            ['PICK', 'PACK', 'PUTAWAY'].includes(selectedJob.type?.toUpperCase() || '') &&
+                                            selectedJob.status !== 'Completed' && (
+                                                <Button
+                                                    variant="ghost"
+                                                    disabled={isSubmitting}
+                                                    onClick={async () => {
+                                                        if (isSubmitting) return;
+                                                        if (!confirm('Are you sure you want to force complete this job? This will mark all items as "Picked" regardless of their current status.')) return;
+
+                                                        setIsSubmitting(true);
+                                                        try {
+                                                            const result = await completeJob(selectedJob.id, user?.name || 'Admin', true, selectedJob.lineItems); // skipValidation = true
+
+                                                            if (result && result.points > 0) {
+                                                                addNotification('success', `Job force-completed! +${result.points} points earned.`);
+                                                            } else {
+                                                                addNotification('success', 'Job force-completed successfully.');
+                                                            }
+                                                            setSelectedJob(null);
+                                                        } catch (error) {
+                                                            console.error('Force complete error:', error);
+                                                            addNotification('alert', 'Failed to force complete job.');
+                                                        } finally {
+                                                            setIsSubmitting(false);
+                                                        }
+                                                    }}
+                                                    icon={isSubmitting ? <RefreshCw className="animate-spin" size={16} /> : <AlertTriangle size={16} />}
+                                                    className="px-4 py-2 bg-amber-500/20 text-amber-400 rounded-xl font-bold hover:bg-amber-500/30 border border-amber-500/30 flex items-center gap-2"
+                                                >
+                                                    {isSubmitting ? 'Completing...' : 'Force Complete'}
+                                                </Button>
+                                            )}
+
+                                        {/* Delete Job Button (Admin Only - Hide in Driver Hub for focus) */}
+                                        {['super_admin'].includes(user?.role || '') && !activeTab.includes('driver') && (
+                                            <Button
+                                                variant="ghost"
+                                                disabled={isSubmitting}
+                                                onClick={async () => {
+                                                    if (isSubmitting) return;
+                                                    if (!confirm(`Are you sure you want to DELETE job ${selectedJob.jobNumber || selectedJob.id}? This action cannot be undone.`)) return;
+
+                                                    setIsSubmitting(true);
+                                                    try {
+                                                        await deleteJob(selectedJob.id);
+                                                        addNotification('success', 'Job deleted successfully.');
+                                                        setSelectedJob(null);
+                                                    } catch (error) {
+                                                        console.error('Delete job error:', error);
+                                                        addNotification('alert', 'Failed to delete job.');
+                                                    } finally {
+                                                        setIsSubmitting(false);
+                                                    }
+                                                }}
+                                                icon={isSubmitting ? <RefreshCw className="animate-spin" size={16} /> : <Trash2 size={16} />}
+                                                className="px-4 py-2 bg-red-500/20 text-red-400 rounded-xl font-bold hover:bg-red-500/30 border border-red-500/30 flex items-center gap-2"
+                                            >
+                                                {isSubmitting ? 'Deleting...' : 'Delete Job'}
+                                            </Button>
+                                        )}
 
                                         {/* DISPATCH Actions for Drivers */}
                                         {selectedJob.type === 'DISPATCH' && selectedJob.status !== 'Completed' && (
@@ -10973,26 +13551,67 @@ export default function WarehouseOperations() {
                                                     <Navigation size={18} />
                                                     Navigate
                                                 </button>
-                                                <button
-                                                    onClick={async (e) => {
-                                                        e.stopPropagation();
-                                                        try {
-                                                            await wmsJobsService.update(selectedJob.id, {
-                                                                status: 'Completed',
-                                                                transferStatus: 'Delivered'
-                                                            });
-                                                            await refreshData();
-                                                            setSelectedJob(null);
-                                                            addNotification('success', 'Job marked as Delivered');
-                                                        } catch (err) {
-                                                            addNotification('alert', 'Failed to update job status');
-                                                        }
-                                                    }}
-                                                    className="px-6 py-3 bg-cyber-primary text-black rounded-xl font-bold transition-all hover:bg-cyber-accent flex items-center gap-2"
-                                                >
+                                                {selectedJob.transferStatus === 'Packed' && (
+                                                    <button
+                                                        onClick={async () => {
+                                                            try {
+                                                                await wmsJobsService.update(selectedJob.id, {
+                                                                    transferStatus: 'In-Transit',
+                                                                    shippedAt: new Date().toISOString()
+                                                                } as any);
+                                                                await refreshData();
+                                                                addNotification('success', 'Pickup Confirmed. Mission Started.');
+                                                            } catch (e) {
+                                                                addNotification('alert', 'Failed to update dispatch status');
+                                                            }
+                                                        }}
+                                                        className="px-6 py-3 bg-purple-500/20 text-purple-400 rounded-xl font-bold transition-all hover:bg-purple-500/30 flex items-center gap-2 border border-purple-500/30"
+                                                    >
+                                                        <Truck size={18} />
+                                                        Confirm Pickup
+                                                    </button>
+                                                )}
+                                                {selectedJob.transferStatus === 'In-Transit' && (
+                                                    <button
+                                                        onClick={async (e) => {
+                                                            e.stopPropagation();
+                                                            try {
+                                                                await wmsJobsService.update(selectedJob.id, {
+                                                                    transferStatus: 'Delivered'
+                                                                });
+                                                                await refreshData();
+                                                                addNotification('success', 'Arrival Registered (Awaiting Verification)');
+                                                            } catch (err) {
+                                                                addNotification('alert', 'Failed to update job status');
+                                                            }
+                                                        }}
+                                                        className="px-6 py-3 bg-cyber-primary text-black rounded-xl font-bold transition-all hover:bg-cyber-accent flex items-center gap-2"
+                                                    >
+                                                        <CheckCircle size={18} />
+                                                        Signal Arrival
+                                                    </button>
+                                                )}
+                                                {selectedJob.transferStatus === 'Delivered' && (
+                                                    <div className="px-6 py-3 bg-green-500/10 text-green-400 rounded-xl font-bold border border-green-500/30 flex items-center gap-2">
+                                                        <CheckCircle size={18} />
+                                                        Arrival Registered (Awaiting POS)
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+
+                                        {/* DISPATCH Final Status (Completed) */}
+                                        {selectedJob.type === 'DISPATCH' && selectedJob.status === 'Completed' && (
+                                            <div className="flex items-center gap-3">
+                                                <div className="px-6 py-3 bg-green-500/20 text-green-400 rounded-xl font-bold border border-green-500/30 flex items-center gap-2">
                                                     <CheckCircle size={18} />
-                                                    Mark as Delivered
-                                                </button>
+                                                    Mission Verified & Completed at POS
+                                                </div>
+                                                {selectedJob.receivedBy && (
+                                                    <div className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">
+                                                        Received by: {selectedJob.receivedBy}
+                                                    </div>
+                                                )}
                                             </div>
                                         )}
 
@@ -11026,8 +13645,9 @@ export default function WarehouseOperations() {
                                                                     assignedTo: '',
                                                                     items: transferLineItems.length,
                                                                     lineItems: transferLineItems.map((item: any) => ({ ...item, status: 'Pending', pickedQty: 0 })),
-                                                                    orderRef: selectedJob.id,
-                                                                    jobNumber: `PICK-${formatTransferId(selectedJob).replace('TRF-', '')}`
+                                                                    // Master ID: Use formatted Transfer ID for tracking continuity
+                                                                    orderRef: formatJobId(selectedJob),
+                                                                    jobNumber: formatJobId(selectedJob)
                                                                 };
 
                                                                 await wmsJobsService.create(pickJob);
@@ -11049,13 +13669,16 @@ export default function WarehouseOperations() {
                                                     </button>
                                                 )}
 
-                                                {/* Mark Shipped */}
+                                                {/* Confirm Pickup */}
                                                 {selectedJob.transferStatus === 'Packed' && (
                                                     <button
                                                         onClick={async () => {
                                                             setShippingTransferId(selectedJob.id);
                                                             try {
-                                                                await wmsJobsService.update(selectedJob.id, { transferStatus: 'In-Transit' } as any);
+                                                                await wmsJobsService.update(selectedJob.id, {
+                                                                    transferStatus: 'In-Transit',
+                                                                    shippedAt: new Date().toISOString()
+                                                                } as any);
                                                                 await refreshData();
                                                                 addNotification('success', 'Transfer marked as shipped');
                                                                 setSelectedJob(null);
@@ -11069,7 +13692,7 @@ export default function WarehouseOperations() {
                                                         className="px-4 py-2 bg-purple-500/20 text-purple-400 rounded-lg font-bold hover:bg-purple-500/30 border border-purple-500/30 flex items-center gap-2"
                                                     >
                                                         {shippingTransferId === selectedJob.id ? <RefreshCw className="animate-spin" size={14} /> : <Truck size={14} />}
-                                                        Mark Shipped
+                                                        Confirm Pickup
                                                     </button>
                                                 )}
 
@@ -11142,9 +13765,9 @@ export default function WarehouseOperations() {
                                 </div>
 
                                 <div className="mb-4 p-3 bg-white/5 rounded-lg border border-white/10">
-                                    <p className="font-bold text-white text-lg">{t('warehouse.orderColon')} {formatOrderRef(packReprintJob.orderRef)}</p>
+                                    <p className="font-bold text-white text-lg">{t('warehouse.orderColon')} {formatJobId(packReprintJob)}</p>
                                     <div className="flex items-center gap-4 text-sm text-gray-400 mt-2">
-                                        <span>📦 {packReprintJob.itemCount || 0} items</span>
+                                        <span>📦 {(packReprintJob.lineItems?.length || packReprintJob.items || 0)} items</span>
                                         {packReprintJob.destSiteName && (
                                             <span>→ {packReprintJob.destSiteName}</span>
                                         )}
@@ -11152,46 +13775,46 @@ export default function WarehouseOperations() {
                                     <p className="text-xs text-gray-500 mt-1">Job: {formatJobId(packReprintJob)}</p>
                                 </div>
 
-                                {/* Size Selection */}
-                                <div className="mb-4">
-                                    <label className="text-sm text-gray-400 mb-2 block">Label Size</label>
-                                    <div className="grid grid-cols-4 gap-2">
-                                        {(['TINY', 'SMALL', 'MEDIUM', 'LARGE'] as const).map(s => (
+                                {/* Size Selection - Static Grid */}
+                                <div className="mb-6">
+                                    <label className="text-[9px] text-gray-500 font-mono uppercase tracking-widest mb-2 block">Dimensions</label>
+                                    <div className="grid grid-cols-4 gap-1">
+                                        {(['SMALL', 'MEDIUM', 'LARGE', 'XL'] as const).map(s => (
                                             <button
                                                 key={s}
                                                 onClick={() => setReprintSize(s)}
-                                                className={`py-2 px-3 rounded-lg text-sm font-bold transition-all ${reprintSize === s
-                                                    ? 'bg-green-500 text-black'
-                                                    : 'bg-white/5 text-white hover:bg-white/10 border border-white/10'
-                                                    }`}
+                                                className={`py-2 text-[9px] font-mono font-bold uppercase tracking-wider border rounded-lg transition-all ${reprintSize === s
+                                                    ? 'bg-cyber-primary text-black border-cyber-primary'
+                                                    : 'bg-transparent text-gray-500 border-white/10 hover:border-white/30 hover:text-white'
+                                                    } `}
                                             >
                                                 {s}
                                             </button>
                                         ))}
                                     </div>
-                                    <p className="text-xs text-gray-500 mt-1">
-                                        {reprintSize === 'TINY' && '1.25" × 1"-SKU Tags'}
-                                        {reprintSize === 'SMALL' && '2.25" × 1.25"-Multipurpose'}
-                                        {reprintSize === 'MEDIUM' && '3" × 2"-Shelf Labels'}
-                                        {reprintSize === 'LARGE' && '4" × 3"-Carton Tags'}
+                                    <p className="text-[8px] text-gray-600 mt-1 font-mono uppercase tracking-tighter">
+                                        {reprintSize === 'SMALL' && '2.25" × 1.25" - Quick Tags'}
+                                        {reprintSize === 'MEDIUM' && '3" × 2" - Shelf Labels'}
+                                        {reprintSize === 'LARGE' && '4" × 3" - Carton Tags'}
+                                        {reprintSize === 'XL' && '4" × 6" - Shipping Labels'}
                                     </p>
                                 </div>
 
-                                {/* Format Selection */}
+                                {/* Format Selection - Static Grid */}
                                 <div className="mb-6">
-                                    <label className="text-sm text-gray-400 mb-2 block">Code Format</label>
-                                    <div className="grid grid-cols-3 gap-2">
+                                    <label className="text-[9px] text-gray-500 font-mono uppercase tracking-widest mb-2 block">Visible Data</label>
+                                    <div className="grid grid-cols-3 gap-1">
                                         {(['QR', 'Barcode', 'Both'] as const).map(f => (
                                             <button
                                                 key={f}
                                                 onClick={() => setReprintFormat(f)}
-                                                className={`py-2 px-3 rounded-lg text-sm font-bold transition-all ${reprintFormat === f
-                                                    ? 'bg-green-500 text-black'
-                                                    : 'bg-white/5 text-white hover:bg-white/10 border border-white/10'
-                                                    }`}
+                                                className={`py-2 text-[9px] font-mono font-bold uppercase tracking-wider border rounded-lg transition-all ${reprintFormat === f
+                                                    ? 'bg-cyber-primary text-black border-cyber-primary'
+                                                    : 'bg-transparent text-gray-500 border-white/10 hover:border-white/30 hover:text-white'
+                                                    } `}
                                             >
                                                 {f === 'QR' && '📱 QR'}
-                                                {f === 'Barcode' && '▮▯▮ Barcode'}
+                                                {f === 'Barcode' && '▮ Barcode'}
                                                 {f === 'Both' && '📱+▮ Both'}
                                             </button>
                                         ))}
@@ -11199,10 +13822,10 @@ export default function WarehouseOperations() {
                                 </div>
 
                                 {/* Action Buttons */}
-                                <div className="flex gap-3">
+                                <div className="flex gap-2">
                                     <button
                                         onClick={() => setPackReprintJob(null)}
-                                        className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-white font-bold rounded-xl border border-white/10"
+                                        className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-gray-500 hover:text-white text-[10px] font-black uppercase tracking-widest rounded-xl border border-white/10 transition-all"
                                     >
                                         {t('common.cancel')}
                                     </button>
@@ -11212,17 +13835,44 @@ export default function WarehouseOperations() {
                                             if (!packReprintJob || isPrinting) return;
                                             setIsPrinting(true);
                                             try {
+                                                // Ensure tracking number exists
+                                                let trackingNum = packReprintJob.trackingNumber;
+                                                if (!trackingNum) {
+                                                    trackingNum = generateTrackingNumber();
+                                                    await wmsJobsService.update(packReprintJob.id, { trackingNumber: trackingNum }).catch(console.error);
+                                                }
+
+                                                // Derive special handling from line items if missing
+                                                const hasCold = packReprintJob.lineItems?.some((item: any) => {
+                                                    const product = filteredProducts.find(p => p.id === item.productId);
+                                                    return product?.category === 'Frozen' || product?.category === 'Dairy';
+                                                }) || false;
+                                                const hasFragile = packReprintJob.lineItems?.some((item: any) => {
+                                                    const product = filteredProducts.find(p => p.id === item.productId);
+                                                    return product && ['Electronics', 'Glass', 'Beverages'].some(cat => product.category.includes(cat));
+                                                }) || false;
+
                                                 // Use the rich pack label generator
+                                                const sourceSite = sites.find(s => s.id === packReprintJob.siteId);
                                                 const html = await generatePackLabelHTML({
                                                     orderRef: packReprintJob.orderRef,
-                                                    itemCount: packReprintJob.itemCount || 0,
+                                                    originalOrderRef: resolveOrderRef(packReprintJob.orderRef) || packReprintJob.poNumber,
+                                                    fromName: sourceSite?.name,
+                                                    fromAddress: sourceSite?.address,
+                                                    trackingNumber: trackingNum,
+                                                    itemCount: packReprintJob.lineItems?.length || packReprintJob.items || 0,
                                                     destSiteName: packReprintJob.destSiteName,
-                                                    packDate: new Date().toLocaleDateString(),
+                                                    packDate: formatDateTime(packReprintJob.updatedAt || packReprintJob.createdAt || new Date()),
                                                     packerName: user?.name,
                                                     customerName: packReprintJob.customerName,
                                                     shippingAddress: packReprintJob.shippingAddress,
                                                     city: packReprintJob.city,
-                                                    specialHandling: packReprintJob.specialHandling
+                                                    specialHandling: packReprintJob.specialHandling || { coldChain: hasCold, fragile: hasFragile, perishable: hasCold },
+                                                    lineItems: packReprintJob.lineItems?.map((i: any) => ({
+                                                        name: i.name || 'Unknown Product',
+                                                        sku: i.sku || 'N/A',
+                                                        quantity: i.pickedQty || i.expectedQty || 0
+                                                    }))
                                                 }, {
                                                     size: reprintSize,
                                                     format: reprintFormat
@@ -11245,9 +13895,9 @@ export default function WarehouseOperations() {
                                                 setPackReprintJob(null);
                                             }
                                         }}
-                                        className={`flex-1 py-3 bg-green-500 text-black font-bold rounded-xl flex items-center justify-center gap-2 ${isPrinting ? 'opacity-50 cursor-not-allowed' : 'hover:bg-green-400'}`}
+                                        className={`flex-1 py-3 bg-cyber-primary text-black text-[10px] font-black uppercase tracking-widest rounded-xl flex items-center justify-center gap-2 transition-all ${isPrinting ? 'opacity-50 cursor-not-allowed shadow-none' : 'hover:bg-cyan-400 hover:shadow-[0_0_20px_rgba(0,255,255,0.3)] shadow-[0_0_10px_rgba(0,255,255,0.1)]'}`}
                                     >
-                                        {isPrinting ? <RefreshCw size={18} className="animate-spin" /> : <Printer size={18} />}
+                                        {isPrinting ? <RefreshCw size={14} className="animate-spin" /> : <Printer size={14} />}
                                         {isPrinting ? t('warehouse.generating') : t('warehouse.printLabel')}
                                     </button>
                                 </div>
@@ -11264,7 +13914,6 @@ export default function WarehouseOperations() {
                 job={selectedJob!}
                 item={resolvingItem}
                 currentUser={user}
-                adjustStock={adjustStock}
                 refreshData={refreshData}
                 activeSite={activeSite}
             />
@@ -11306,7 +13955,11 @@ export default function WarehouseOperations() {
                                 <div className="flex items-center gap-2 mt-1">
                                     <div className="flex items-end gap-0.5 h-3">
                                         {[0.4, 0.7, 0.5, 0.9, 0.6].map((h, i) => (
-                                            <div key={i} className="w-0.5 bg-cyber-primary/40 rounded-full" style={{ height: `${h * 100}%` }} />
+                                            <div
+                                                key={i}
+                                                className="w-0.5 h-dynamic bg-cyber-primary/40 rounded-full"
+                                                ref={el => el?.style.setProperty('--progress', `${h * 100}%`)}
+                                            />
                                         ))}
                                     </div>
                                     <span className="text-xl font-mono font-black text-cyber-primary leading-none">{distHubSectorIntegrity.toFixed(1)}%</span>
@@ -11443,11 +14096,11 @@ export default function WarehouseOperations() {
                                                 </div>
                                                 <div className="h-1.5 bg-black/60 rounded-full overflow-hidden border border-white/5 p-[1px] relative shadow-inner">
                                                     <div
-                                                        className={`h-full rounded-full transition-all duration-1000 relative group-hover/card:animate-pulse ${isCritical
+                                                        className={`h-full w-dynamic rounded-full transition-all duration-1000 relative group-hover/card:animate-pulse ${isCritical
                                                             ? 'bg-gradient-to-r from-red-600 via-red-400 to-red-500 shadow-[0_0_15px_rgba(239,68,68,0.4)]'
                                                             : 'bg-gradient-to-r from-amber-600 via-amber-400 to-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.3)]'
                                                             }`}
-                                                        style={{ width: `${Math.min(100, (item.stock / (item.minStock || 10)) * 100)}%` }}
+                                                        ref={el => el?.style.setProperty('--progress', `${Math.min(100, (item.stock / (item.minStock || 10)) * 100)}%`)}
                                                     >
                                                         <div className="absolute inset-0 bg-white/20 animate-[shimmer_2s_infinite]" />
                                                     </div>
@@ -11563,7 +14216,7 @@ export default function WarehouseOperations() {
                                                                     <div className="text-lg font-black text-white uppercase tracking-tighter group-hover/item:text-cyber-primary transition-colors leading-none">{source.site?.name}</div>
                                                                     <div className="flex items-center gap-3">
                                                                         <div className="text-[9px] text-white/40 font-black uppercase tracking-widest flex items-center gap-1.5">
-                                                                            <Map size={10} className="text-cyber-primary opacity-50" />
+                                                                            <MapIcon size={10} className="text-cyber-primary opacity-50" />
                                                                             Zone: {source.location || 'GLOBAL OPS'}
                                                                         </div>
                                                                     </div>
@@ -11911,7 +14564,6 @@ function DiscrepancyResolutionModal({
     job,
     item,
     currentUser,
-    adjustStock,
     refreshData,
     activeSite
 }: {
@@ -11920,14 +14572,18 @@ function DiscrepancyResolutionModal({
     job: WMSJob;
     item: { item: any, index: number } | null;
     currentUser: User | null;
-    adjustStock: (productId: string, qty: number, type: 'IN' | 'OUT', reason: string, user: string) => void;
     refreshData: () => Promise<void>;
     activeSite: any;
 }) {
+    // --- MUTATIONS ---
+    const adjustStockMutation = useAdjustStockMutation();
     // --- STATE ---
     const [step, setStep] = useState<'TYPE' | 'ACTION' | 'DETAILS' | 'REVIEW'>('TYPE');
     const [discrepancyType, setDiscrepancyType] = useState<DiscrepancyType | null>(null);
     const [resolutionAction, setResolutionAction] = useState<ResolutionType | null>(null);
+
+    // Fix: Access products context for fallback lookups
+    const { products } = useData();
 
     // Details
     const [notes, setNotes] = useState('');
@@ -12009,24 +14665,54 @@ function DiscrepancyResolutionModal({
 
             // --- PHASE 1: SIDE EFFECTS & REPLACEMENTS ---
             const reasons = {
-                overage: `Resolution: Reject Overage (Trf: ${job.id})`,
-                damaged: `Resolution: Damaged/Defective (Trf: ${job.id})`,
-                waste: `Resolution: Disposed (Trf: ${job.id})`,
-                shortage: `Resolution: Found Shortage (Trf: ${job.id})`
+                overage: `Resolution: Reject Overage (Trf: ${formatJobId(job)})`,
+                damaged: `Resolution: Damaged/Defective (Trf: ${formatJobId(job)})`,
+                waste: `Resolution: Disposed (Trf: ${formatJobId(job)})`,
+                shortage: `Resolution: Found Shortage (Trf: ${formatJobId(job)})`
             };
 
             if (qty > 0) {
                 // Reject (Return) - Reduces Stock
                 if (resolutionAction === 'reject') {
-                    await adjustStock(item.item.productId || item.item.id, qty, 'OUT', reasons.overage, currentUser?.name || 'System');
+                    const product = products.find((p: any) => p.id === (item.item.productId || item.item.id));
+                    await adjustStockMutation.mutateAsync({
+                        productId: item.item.productId || item.item.id,
+                        productName: product?.name || item.item.name || 'Unknown',
+                        productSku: product?.sku || item.item.sku || 'N/A',
+                        siteId: activeSite?.id || '',
+                        quantity: qty,
+                        type: 'OUT',
+                        reason: reasons.overage,
+                        canApprove: true
+                    });
                 }
                 // Dispose (Waste) - Reduces Stock
                 if (resolutionAction === 'dispose') {
-                    await adjustStock(item.item.productId || item.item.id, qty, 'OUT', reasons.waste, currentUser?.name || 'System');
+                    const product = products.find((p: any) => p.id === (item.item.productId || item.item.id));
+                    await adjustStockMutation.mutateAsync({
+                        productId: item.item.productId || item.item.id,
+                        productName: product?.name || item.item.name || 'Unknown',
+                        productSku: product?.sku || item.item.sku || 'N/A',
+                        siteId: activeSite?.id || '',
+                        quantity: qty,
+                        type: 'OUT',
+                        reason: reasons.waste,
+                        canApprove: true
+                    });
                 }
                 // Adjust (Shortage Found) - Adds Stock
                 if (resolutionAction === 'adjust' && discrepancyType === 'shortage') {
-                    await adjustStock(item.item.productId || item.item.id, qty, 'IN', reasons.shortage, currentUser?.name || 'System');
+                    const product = products.find((p: any) => p.id === (item.item.productId || item.item.id));
+                    await adjustStockMutation.mutateAsync({
+                        productId: item.item.productId || item.item.id,
+                        productName: product?.name || item.item.name || 'Unknown',
+                        productSku: product?.sku || item.item.sku || 'N/A',
+                        siteId: activeSite?.id || '',
+                        quantity: qty,
+                        type: 'IN',
+                        reason: reasons.shortage,
+                        canApprove: true
+                    });
                 }
                 // Resend Missing Items - Creates new replacement job
                 if (resolutionAction === 'replace') {
@@ -12039,7 +14725,8 @@ function DiscrepancyResolutionModal({
                         lineItems: [{
                             productId: item.item.productId || item.item.id,
                             name: item.item.name || 'Unknown',
-                            sku: item.item.sku || 'N/A',
+                            // Fix: Ensure SKU is populated from product registry if missing on item
+                            sku: item.item.sku || products.find((p: any) => p.id === (item.item.productId || item.item.id))?.sku || 'N/A',
                             image: item.item.image || '',
                             expectedQty: qty,
                             pickedQty: 0,
@@ -12338,4 +15025,6 @@ function DiscrepancyResolutionModal({
         </Modal>
     );
 }
+
+
 

@@ -249,6 +249,8 @@ const DiscountCodesSettings: React.FC = () => {
                       <button
                         onClick={() => handleCopyCode(code.code)}
                         className="p-1 text-gray-500 hover:text-cyber-primary transition-colors"
+                        title="Copy Code"
+                        aria-label="Copy code to clipboard"
                       >
                         <Copy size={14} />
                       </button>

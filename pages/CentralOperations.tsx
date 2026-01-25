@@ -171,7 +171,7 @@ const SystemLoadWidget = () => {
                             {/* eslint-disable-next-line react/forbid-dom-props */}
                             <div
                                 className={`h-full bg-gradient-to-r ${m.from} ${m.to} shadow-[0_0_10px_rgba(0,0,0,0.5)] transition-all duration-1000 ease-out relative`}
-                                style={{ width: `${m.value}%` }}
+                                ref={(el) => { if (el) el.style.width = `${m.value}%`; }}
                             >
                                 <div className="absolute inset-0 bg-white/20 animate-pulse"></div>
                             </div>
@@ -298,7 +298,7 @@ const TopProductsWidget = ({ products }: { products: any[] }) => {
                                 {/* eslint-disable-next-line react/forbid-dom-props */}
                                 <div
                                     className="h-full bg-gradient-to-r from-cyber-primary to-cyan-400 rounded-full transition-all duration-1000"
-                                    style={{ width: `${(p.sales / products[0].sales) * 100}%` }}
+                                    ref={(el) => { if (el) el.style.width = `${(p.sales / products[0].sales) * 100}%`; }}
                                 ></div>
                             </div>
                         </div>

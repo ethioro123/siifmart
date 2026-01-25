@@ -1,10 +1,10 @@
-
 import React, { useState, useMemo, useEffect } from 'react';
 import {
   Search, Plus, Minus, Trash2, CreditCard, Printer, User, RotateCcw, Lock, Box, Check, Mail,
   ArrowLeft, Smartphone, Banknote, CheckCircle, RefreshCcw, Share2, AlertTriangle,
   ArrowRight, LogOut, FileText, PauseCircle, PlayCircle, Tag, ShoppingBag, Scan, Package, Camera,
-  MapPin, Store, Truck, Loader2, Trophy, Gift, Settings, Layers, Percent, DollarSign, Archive
+  MapPin, Store, Truck, Loader2, Trophy, Gift, Settings, Layers, Percent, DollarSign, Archive,
+  RefreshCw, WifiOff, CloudOff, Link
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { CURRENCY_SYMBOL } from '../constants';
@@ -13,6 +13,7 @@ import { Product, CartItem, PaymentMethod, SaleRecord, ReturnCondition, ReturnRe
 import { useStore } from '../contexts/CentralStore';
 import { useData } from '../contexts/DataContext'; // Use Live Data
 import Modal from '../components/Modal';
+import UnknownBarcodeModal from '../components/UnknownBarcodeModal';
 import { Protected, ProtectedButton } from '../components/Protected';
 import { useLanguage } from '../contexts/LanguageContext';
 import { QRScanner } from '../components/QRScanner';
@@ -28,7 +29,9 @@ export default function POS() {
     products, activeSite, shifts, startShift, addNotification,
     processSale, processReturn, holdOrder, releaseHold, heldOrders,
     updateCustomer, customers, promotions, sales, transfers, closeShift,
-    updateProduct, sites, refreshData, settings, getStorePoints, storePoints,
+    updateProduct, sites, refreshData, settings, updateSettings,
+    allProducts, storePoints, getStorePoints, awardStorePoints,
+    posSyncStatus, posPendingSyncCount, triggerSync,
     discountCodes, validateDiscountCode, useDiscountCode, getTaxForSite
   } = useData();
 
@@ -70,7 +73,23 @@ export default function POS() {
   const [miscItem, setMiscItem] = useState({ name: 'Misc Item', price: '' });
   const [roundingAdjustment, setRoundingAdjustment] = useState(0); // Rounding adjustment to nearest 5
 
-  // --- Returns Logic State ---
+  // --- Returns State ---
+  const [isReturnMode, setIsReturnMode] = useState(false);
+  const [returnStep, setReturnStep] = useState<'search' | 'items' | 'reason' | 'refund'>('search');
+  const [returnOrder, setReturnOrder] = useState<any>(null);
+  const [returnItems, setReturnItems] = useState<any[]>([]);
+
+  // --- Price Updates State ---
+  const [isPriceUpdatesModalOpen, setIsPriceUpdatesModalOpen] = useState(false);
+  const priceUpdatedProducts = useMemo(() => {
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    return products.filter(p => {
+      if (!p.priceUpdatedAt && !p.price_updated_at) return false;
+      const date = new Date(p.priceUpdatedAt || p.price_updated_at || '');
+      return date > twentyFourHoursAgo;
+    });
+  }, [products]);
+
   const [isReturnModalOpen, setIsReturnModalOpen] = useState(false);
   const [returnSearchId, setReturnSearchId] = useState('');
   const [foundSaleForReturn, setFoundSaleForReturn] = useState<SaleRecord | null>(null);
@@ -141,6 +160,24 @@ export default function POS() {
   // --- Receipt Preview State ---
   const [isReceiptPreviewOpen, setIsReceiptPreviewOpen] = useState(false);
   const [receiptPreviewHTML, setReceiptPreviewHTML] = useState('');
+
+  // --- Unknown Barcode State ---
+  const [isUnknownBarcodeModalOpen, setIsUnknownBarcodeModalOpen] = useState(false);
+  const [unknownBarcode, setUnknownBarcode] = useState('');
+  const [capturedBarcodeForModal, setCapturedBarcodeForModal] = useState(''); // Fixed barcode for modal (doesn't change while modal is open)
+
+
+
+  // --- Search Input Ref for controlled focus ---
+  const searchInputRef = React.useRef<HTMLInputElement>(null);
+
+  // --- Auto-focus search input on mount only ---
+  useEffect(() => {
+    // Focus search input only once on initial mount
+    if (searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  }, []); // Empty dependency array = run only once on mount
 
   // --- Keyboard Shortcuts ---
   useEffect(() => {
@@ -218,6 +255,7 @@ export default function POS() {
     return () => clearTimeout(timer);
   }, [customerSearchTerm]);
 
+
   // --- Customer Handlers ---
   const filteredCustomers = useMemo(() => {
     if (!customerSearchTerm.trim()) return customers;
@@ -254,26 +292,45 @@ export default function POS() {
   };
 
   // Unified Search & SKU Handler
-  const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && searchTerm.trim()) {
-      // First check for exact SKU/Barcode match
-      const exactMatch = products.find(p =>
-        p.sku.toLowerCase() === searchTerm.toLowerCase() ||
-        p.barcode?.toLowerCase() === searchTerm.toLowerCase()
-      );
+  const handleSearchKeyDown = async (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault(); // Prevent form submission
 
-      if (exactMatch) {
-        addToCart(exactMatch);
+      // Use the input's current value directly (React state might be one keystroke behind)
+      const inputValue = searchInputRef.current?.value?.trim() || searchTerm.trim();
+
+      if (!inputValue) return;
+
+      // Minimum barcode length check (most barcodes are 6+ characters)
+      if (inputValue.length < 3) {
+        console.warn('⚠️ Input too short for barcode lookup:', inputValue);
+        addNotification('alert', `Input "${inputValue}" is too short. Please scan the full barcode.`);
+        // Clear and refocus for next scan
         setSearchTerm('');
-        addNotification('success', `Added ${exactMatch.name}`);
+        if (searchInputRef.current) {
+          searchInputRef.current.value = '';
+        }
         return;
       }
 
-      // If no exact match but only one filtered result, add that
-      if (filteredProducts.length === 1) {
-        addToCart(filteredProducts[0]);
-        setSearchTerm('');
-        addNotification('success', `Added ${filteredProducts[0].name}`);
+      // Process the scan/search
+      const productFound = await handleScanProduct(inputValue);
+
+      // ALWAYS clear input after processing - enables continuous scanning
+      // The unknown barcode is captured in the dropdown, so we can clear the input
+      setSearchTerm('');
+      if (searchInputRef.current) {
+        searchInputRef.current.value = ''; // Also clear the native input
+      }
+
+      // Refocus after a short delay to ready for next scan
+      setTimeout(() => {
+        if (searchInputRef.current) {
+          searchInputRef.current.focus();
+        }
+      }, 100);
+
+      if (!productFound) {
       }
     }
   };
@@ -348,11 +405,13 @@ export default function POS() {
     }
 
     return baseList.filter(p => {
-      // Search by name, SKU, or barcode
+      // Search by name, SKU, barcode, OR barcode aliases
+      const searchLower = searchTerm.toLowerCase();
       const matchesSearch =
-        p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        p.sku.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        p.barcode?.toLowerCase().includes(searchTerm.toLowerCase()); // Search by barcode
+        p.name.toLowerCase().includes(searchLower) ||
+        p.sku.toLowerCase().includes(searchLower) ||
+        p.barcode?.toLowerCase().includes(searchLower) || // Single barcode field
+        p.barcodes?.some(b => b.toLowerCase().includes(searchLower)); // Barcode aliases array
       const matchesCategory = selectedCategory === 'All' || p.category === selectedCategory;
       const hasStock = p.stock > 0; // Only show products with available stock
 
@@ -376,14 +435,13 @@ export default function POS() {
         // Fallback: require location for any other site type
         hasBeenReceived = !!p.location && p.location.trim() !== '';
       }
-
       return matchesSearch && matchesCategory && hasStock && hasBeenReceived;
     });
   }, [searchTerm, selectedCategory, products, activeSite, transfers, serverSearchResults]);
 
   // --- Cart Functions ---
 
-  const addToCart = (product: Product) => {
+  const addToCart = React.useCallback((product: Product) => {
     const effectivePrice = product.isOnSale && product.salePrice ? product.salePrice : product.price;
 
     setCart(prev => {
@@ -398,7 +456,156 @@ export default function POS() {
       }
       return [...prev, { ...product, price: effectivePrice, quantity: 1 }];
     });
-  };
+  }, [addNotification]);
+
+  const handleScanProduct = React.useCallback(async (barcode: string): Promise<boolean> => {
+    if (!barcode) return false;
+
+    // Debug: Log products that have the barcodes array populated
+    const productsWithBarcodes = products.filter(p => p.barcodes && p.barcodes.length > 0);
+    productsWithBarcodes.slice(0, 5).forEach(p => {
+    });
+
+    // Search local products first (exact matches only for barcode scanning)
+    const product = products.find(p => {
+      const matchSku = p.sku.toLowerCase() === barcode.toLowerCase();
+      const matchBarcode = p.barcode?.toLowerCase() === barcode.toLowerCase();
+      const matchBarcodes = p.barcodes?.some(b => b.toLowerCase() === barcode.toLowerCase());
+      const matchId = p.id === barcode;
+
+      if (matchBarcodes) {
+      }
+
+      return matchSku || matchBarcode || matchBarcodes || matchId;
+    });
+
+    if (!product) {
+      // Attempt server search if possible
+      try {
+        const serverResults = await productsService.getByBarcode(barcode, activeSite?.id);
+
+        if (serverResults.length > 0) {
+          const sp = serverResults[0];
+          addToCart(sp);
+          addNotification('success', `Added ${sp.name} (Found via server)`);
+          return true;
+        }
+      } catch (err) {
+        console.error('❌ Server fallback search failed:', err);
+        // Continue to unknown barcode logic
+      }
+
+      // Unknown Barcode Logic
+      if (barcode.trim().length > 0) {
+        setUnknownBarcode(barcode);
+        setSearchTerm(''); // Clear search input for next scan
+        addNotification('alert', `Unknown Barcode: ${barcode}. Click 'Link Item' to map it.`);
+      }
+      return false;
+    }
+
+    // Clear unknown barcode state if it was set from a previous scan
+    if (unknownBarcode) {
+      setUnknownBarcode('');
+    }
+    // For now, proceed to add to cart
+    addToCart(product);
+    addNotification('success', `Added ${product.name}`);
+    return true;
+  }, [products, activeSite, addToCart, addNotification, unknownBarcode]);
+
+  // --- Global Scan Listener (for handheld scanners) ---
+  useEffect(() => {
+    let buffer = '';
+    let lastKeyTime = Date.now();
+    let scanTimeout: NodeJS.Timeout;
+
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      // Use capturing to see keys before they might be stopped
+      const char = e.key;
+      const now = Date.now();
+
+      // If the search input is focused, let it handle the input natively!
+      // This prevents "Enter-less" timeout logic from cutting off manual typing
+      // and prevents double-handling of Enter keys.
+      if (document.activeElement === searchInputRef.current) {
+        return;
+      }
+
+      // IMPORTANT: Disable global scan listener when modal is open
+      // This prevents the modal's search input from affecting the barcode state
+      if (isUnknownBarcodeModalOpen) {
+        return;
+      }
+
+      // Ignore modifier keys
+      if (char === 'Shift' || char === 'Control' || char === 'Alt' || char === 'Meta' || char === 'Tab' || char === 'CapsLock') return;
+
+      // Reset buffer if too much time passed (manual typing detection)
+      // Using 100ms for scanner detection (most scanners type within 50ms between chars)
+      if (now - lastKeyTime > 100) {
+        if (buffer.length > 0) {
+        }
+        buffer = '';
+      }
+      lastKeyTime = now;
+
+      clearTimeout(scanTimeout);
+
+      if (char === 'Enter') {
+        // If the search input is focused, let handleSearchKeyDown handle it instead
+        if (document.activeElement === searchInputRef.current) {
+          buffer = '';
+          return;
+        }
+
+        if (buffer.length > 0) {
+          handleScanProduct(buffer);
+
+          // Only clear search term if the search input is NOT focused (i.e., this was a global scan)
+          if (document.activeElement !== searchInputRef.current) {
+            setSearchTerm('');
+          }
+
+          buffer = '';
+          // If we were in an input, don't let the Enter key trigger other things (like form submit)
+          if (e.target instanceof HTMLInputElement) {
+            e.preventDefault();
+            e.stopPropagation();
+          }
+        }
+      } else if (char.length === 1) {
+        // Accept all printable characters for Code 128 compatibility
+        // Code 128 can encode: ASCII 0-127 including special characters
+        const isValidBarcodeChar = /^[a-zA-Z0-9\-_\/\.\+\*\$\%\@\!\#\^\&\(\)\[\]\{\}\|\:\;\'\"\,\<\>\?\=\~\`\\ ]$/.test(char);
+
+        if (isValidBarcodeChar) {
+          buffer += char;
+
+          // Auto-submit for "Enter-less" scanners (longer timeout for slower scanners)
+          scanTimeout = setTimeout(() => {
+            if (buffer.length > 0) {
+              handleScanProduct(buffer);
+
+              // Only clear search term if the search input is NOT focused
+              if (document.activeElement !== searchInputRef.current) {
+                setSearchTerm('');
+              }
+
+              buffer = '';
+            }
+          }, 300); // Increased to 300ms for slower scanners
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleGlobalKeyDown, true);
+    return () => {
+      window.removeEventListener('keydown', handleGlobalKeyDown, true);
+      clearTimeout(scanTimeout);
+    };
+  }, [products, activeSite, handleScanProduct, isUnknownBarcodeModalOpen]);
+
 
   const addMiscItem = () => {
     if (!miscItem.price) return;
@@ -621,6 +828,22 @@ export default function POS() {
       const tendered = selectedPaymentMethod === 'Cash' ? parseFloat(amountTendered) : total;
       const change = selectedPaymentMethod === 'Cash' ? changeDue : 0;
 
+      // Generate Sequential Receipt Number (REC-XXXX)
+      // 1. Find max existing number
+      let maxNum = 0;
+      sales.forEach(s => {
+        if (s.receiptNumber && s.receiptNumber.startsWith('REC-')) {
+          const numPart = parseInt(s.receiptNumber.split('-')[1]);
+          if (!isNaN(numPart) && numPart > maxNum) {
+            maxNum = numPart;
+          }
+        }
+      });
+
+      // 2. Increment and pad
+      const nextNum = maxNum + 1;
+      const receiptNumber = `REC-${nextNum.toString().padStart(4, '0')}`;
+
       // Process sale and get points result
       const { saleId, pointsResult } = await processSale(
         cart,
@@ -631,8 +854,10 @@ export default function POS() {
         selectedCustomer?.id,
         undefined, // pointsRedeemed
         'In-Store',
-        taxBreakdown // Pass the local tax breakdown
+        taxBreakdown, // Pass the local tax breakdown
+        receiptNumber // Pass generated Receipt Number
       );
+
 
       const saleObj: SaleRecord = {
         id: saleId,
@@ -648,7 +873,8 @@ export default function POS() {
         amountTendered: tendered,
         change: change,
         cashierName: user?.name,
-        customerId: selectedCustomer?.id || undefined
+        customerId: selectedCustomer?.id || undefined,
+        receiptNumber
       };
 
       setLastSale(saleObj);
@@ -793,7 +1019,7 @@ export default function POS() {
           </div>
 
           <div class="border-y py-3 mb-4 space-y-2">
-            ${cart.map(item => `
+            ${(lastSale?.items || []).map(item => `
               <div class="flex justify-between text-[10px]">
                 <div>
                   <div class="font-bold">${item.name}</div>
@@ -805,23 +1031,21 @@ export default function POS() {
           </div>
 
           <div class="space-y-1 text-right mb-4">
-            <div class="flex justify-between text-[10px] opacity-60"><span>Subtotal</span><span>${CURRENCY_SYMBOL}${subtotal.toLocaleString()}</span></div>
-            ${cartDiscount > 0 ? `<div class="flex justify-between text-[10px] opacity-60"><span>DISCOUNT${appliedDiscountCodeDetails ? ` (${appliedDiscountCodeDetails.code})` : ''}</span> <span>-${CURRENCY_SYMBOL}${cartDiscount.toLocaleString()}</span></div>` : ''}
-            
-            ${taxBreakdown.map(rule => `
+            <div class="flex justify-between text-[10px] opacity-60"><span>Subtotal</span><span>${CURRENCY_SYMBOL}${(lastSale?.subtotal || 0).toLocaleString()}</span></div>
+            ${(lastSale?.taxBreakdown || []).length > 0 ? (lastSale?.taxBreakdown || []).map(rule => `
               <div class="flex justify-between text-[10px] opacity-60">
                 <span>${rule.name} (${rule.rate}%)</span>
                 <span>${CURRENCY_SYMBOL}${rule.amount.toLocaleString()}</span>
               </div>
-            `).join('')}
+            `).join('') : `<div class="flex justify-between text-[10px] opacity-60"><span>Standard Tax (0%)</span><span>${CURRENCY_SYMBOL}0</span></div>`}
 
-            <div class="flex justify-between font-black text-base border-t-black pt-2 mt-2"><span>TOTAL</span> <span>${CURRENCY_SYMBOL}${total.toLocaleString()}</span></div>
+            <div class="flex justify-between font-black text-base border-t-black pt-2 mt-2"><span>TOTAL</span> <span>${CURRENCY_SYMBOL}${(lastSale?.total || 0).toLocaleString()}</span></div>
           </div>
 
           <div class="text-[10px] font-bold border-t-dashed pt-4 mb-4">
             <div class="flex justify-between">
-              <span>PAID (${selectedPaymentMethod.toUpperCase()})</span>
-              <span>${CURRENCY_SYMBOL}${total.toLocaleString()}</span>
+              <span>PAID (${(lastSale?.method || 'CASH').toUpperCase()})</span>
+              <span>${CURRENCY_SYMBOL}${(lastSale?.amountTendered || lastSale?.total || 0).toLocaleString()}</span>
             </div>
           </div>
 
@@ -908,64 +1132,6 @@ export default function POS() {
   };
 
   // --- POS Receiving Handlers ---
-  const handleScanProduct = async (barcode: string) => {
-    // Find product by SKU, barcode field, or ID
-    const product = products.find(p =>
-      p.sku.toLowerCase() === barcode.toLowerCase() ||
-      p.barcode?.toLowerCase() === barcode.toLowerCase() || // Search by external barcode
-      p.id === barcode ||
-      p.name.toLowerCase().includes(barcode.toLowerCase())
-    );
-
-    if (!product) {
-      addNotification('alert', `Product not found: ${barcode}`);
-      return;
-    }
-
-    // Check if product is at this site
-    const isAtThisSite = product.siteId === activeSite?.id || product.site_id === activeSite?.id;
-    if (!isAtThisSite) {
-      addNotification('alert', `Product ${product.name} is not at this location`);
-      return;
-    }
-
-    // Check if product has already been POS-received
-    const alreadyPosReceived = product.posReceivedAt || product.pos_received_at;
-    if (alreadyPosReceived) {
-      addNotification('info', `${product.name} has already been received and is available for sale.`);
-      return;
-    }
-
-    // Check if product is from a completed/delivered transfer (location should be STORE-RECEIVED or Receiving Dock)
-    const isFromTransfer = product.location === 'STORE-RECEIVED' ||
-      product.location === 'Receiving Dock' ||
-      product.location?.toLowerCase().includes('receiv');
-    if (!isFromTransfer) {
-      addNotification('alert', `${product.name} has not arrived at the store yet. Check transfer status.`);
-      return;
-    }
-
-    // Check if already received in this session
-    const alreadyReceived = receivedItems.some(item => item.product.id === product.id);
-    if (alreadyReceived) {
-      // Update quantity
-      setReceivedItems(prev => prev.map(item =>
-        item.product.id === product.id
-          ? { ...item, qty: item.qty + 1, timestamp: new Date().toISOString() }
-          : item
-      ));
-      addNotification('success', `Updated quantity for ${product.name}`);
-    } else {
-      // Add new item
-      setReceivedItems(prev => [...prev, {
-        product,
-        qty: 1,
-        timestamp: new Date().toISOString()
-      }]);
-      addNotification('success', `Added ${product.name} to received items`);
-    }
-  };
-
   const handleConfirmReceiving = async () => {
     if (receivedItems.length === 0) {
       addNotification('alert', 'No items to confirm');
@@ -1283,17 +1449,61 @@ export default function POS() {
                 aria-label="Exit to Dashboard"
                 className="p-3 bg-white/5 hover:bg-white/10 rounded-xl border border-white/5 text-gray-400 hover:text-white transition-colors"
               />
-              <div className="flex-1 flex items-center bg-white/5 border border-white/10 rounded-2xl px-4 py-3 focus-within:border-cyber-primary/50 focus-within:bg-white/10 transition-all duration-300 group">
-                <Search className="w-5 h-5 text-gray-500 group-focus-within:text-cyber-primary transition-colors" />
-                <input
-                  type="text"
-                  placeholder="Search products or scan SKU..."
-                  className="bg-transparent border-none ml-3 flex-1 text-white outline-none placeholder-gray-500 font-medium"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  onKeyDown={handleSearchKeyDown}
-                  autoFocus
-                />
+              <div className="flex-1 relative">
+                <div className="flex items-center bg-white/5 border border-white/10 rounded-2xl px-4 py-2 focus-within:border-cyber-primary/50 focus-within:bg-white/10 transition-all duration-300 group">
+                  <Search className="w-5 h-5 text-gray-500 group-focus-within:text-cyber-primary transition-colors flex-shrink-0" />
+                  <input
+                    ref={searchInputRef}
+                    type="text"
+                    placeholder="Search products or scan SKU..."
+                    className="bg-transparent border-none ml-3 flex-1 text-white outline-none placeholder-gray-500 font-medium min-w-0"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onKeyDown={handleSearchKeyDown}
+                  />
+                  {/* Submit Button - Modern, Elegant & Highly Visible */}
+                  <button
+                    onClick={() => {
+                      const inputValue = searchInputRef.current?.value?.trim() || searchTerm.trim();
+                      if (inputValue) {
+                        handleScanProduct(inputValue);
+                      }
+                    }}
+                    disabled={!searchTerm.trim()}
+                    className="ml-3 px-6 py-2.5 bg-gradient-to-r from-[#00ff9d] via-cyber-primary to-cyan-400 text-black font-extrabold rounded-xl text-sm 
+                      hover:from-[#05ff9f] hover:to-[#00f0ff] hover:scale-[1.03] hover:shadow-[0_0_25px_rgba(0,255,157,0.5)]
+                      active:scale-95 transition-all duration-300 disabled:opacity-20 disabled:grayscale disabled:cursor-not-allowed
+                      flex items-center gap-2 flex-shrink-0 border border-white/20 shadow-lg"
+                    aria-label="Search"
+                  >
+                    <ArrowRight size={18} className="stroke-[3] drop-shadow-sm" />
+                    <span className="hidden sm:inline tracking-tight">GO</span>
+                  </button>
+                </div>
+
+                {/* Unknown Barcode Alert - Below Search Bar */}
+                {unknownBarcode && (
+                  <div className="absolute left-0 right-0 top-full mt-2 z-50">
+                    <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-2xl p-4 backdrop-blur-md shadow-lg animate-in fade-in slide-in-from-top-2">
+                      <div className="flex flex-col items-center gap-3">
+                        <div className="text-center">
+                          <p className="text-yellow-400 text-sm font-medium mb-1">Unknown Barcode Detected</p>
+                          <p className="text-yellow-300 text-2xl font-mono font-bold tracking-wider">{unknownBarcode}</p>
+                        </div>
+                        <button
+                          onClick={() => {
+                            setCapturedBarcodeForModal(unknownBarcode); // Capture the barcode
+                            setIsUnknownBarcodeModalOpen(true);
+                          }}
+                          className="px-6 py-2.5 bg-yellow-500 text-black hover:bg-yellow-400 rounded-xl text-sm font-bold flex items-center gap-2 transition-all hover:scale-105 shadow-lg"
+                        >
+                          <Link size={16} />
+                          Link This Barcode
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
               <Protected permission="ADD_PRODUCT">
                 <Button
@@ -1306,6 +1516,32 @@ export default function POS() {
                 </Button>
               </Protected>
               <div className="hidden md:block">
+                {/* Sync Status Badge */}
+                {/* Sync Status Badge (Click to Sync) */}
+                <button
+                  onClick={() => triggerSync()}
+                  className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold border transition-all duration-300 hover:scale-105 active:scale-95 ${posSyncStatus === 'offline' ? 'bg-red-500/10 border-red-500/20 text-red-500' :
+                    posSyncStatus === 'syncing' ? 'bg-blue-500/10 border-blue-500/20 text-blue-500' :
+                      (posPendingSyncCount || 0) > 0 ? 'bg-yellow-500/10 border-yellow-500/20 text-yellow-500' :
+                        'bg-green-500/10 border-green-500/20 text-green-500' // Synced state
+                    }`}>
+                  {posSyncStatus === 'syncing' ? (
+                    <RefreshCw size={14} className="animate-spin" />
+                  ) : posSyncStatus === 'offline' ? (
+                    <WifiOff size={14} />
+                  ) : (posPendingSyncCount || 0) > 0 ? (
+                    <CloudOff size={14} />
+                  ) : (
+                    <CheckCircle size={14} />
+                  )}
+                  <span>
+                    {posSyncStatus === 'offline' ? 'Offline' :
+                      posSyncStatus === 'syncing' ? 'Syncing...' :
+                        (posPendingSyncCount || 0) > 0 ? 'Sync Pending' :
+                          'Online'}
+                    {((posPendingSyncCount || 0) > 0) && ` (${posPendingSyncCount})`}
+                  </span>
+                </button>
               </div>
 
               {/* Store Bonus Widget */}
@@ -1692,6 +1928,22 @@ export default function POS() {
                 <span className="text-[8px] font-black uppercase tracking-widest text-gray-500 group-hover:text-purple-400 transition-colors uppercase">REPRINT</span>
               </button>
 
+              {/* Price Updates Button */}
+              <button
+                onClick={() => setIsPriceUpdatesModalOpen(true)}
+                className="group relative flex flex-col items-center justify-center p-2.5 bg-white/[0.03] hover:bg-yellow-500/[0.05] rounded-2xl border border-white/5 hover:border-yellow-500/20 transition-all duration-300 active:scale-[0.97]"
+              >
+                <div className="relative">
+                  <DollarSign size={14} className="text-yellow-400/60 group-hover:text-yellow-400 mb-1 group-hover:scale-110 transition-transform" />
+                  {priceUpdatedProducts.length > 0 && (
+                    <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full flex items-center justify-center text-[6px] font-bold text-white shadow-sm border border-black/50">
+                      {priceUpdatedProducts.length}
+                    </span>
+                  )}
+                </div>
+                <span className="text-[8px] font-black uppercase tracking-widest text-gray-500 group-hover:text-yellow-400 transition-colors uppercase">PRICES</span>
+              </button>
+
               <div className="bg-white/[0.01] rounded-2xl border border-white/[0.02] flex items-center justify-center">
                 <Settings size={12} className="text-white/5" />
               </div>
@@ -1756,6 +2008,7 @@ export default function POS() {
             ].map(method => (
               <button
                 key={method.id}
+                title={`Pay with ${method.label}`}
                 onClick={() => setSelectedPaymentMethod(method.id as PaymentMethod)}
                 className={`p-6 rounded-[1.8rem] border-2 flex flex-col items-center justify-center gap-3 transition-all duration-300 group hover:scale-[1.02] active:scale-[0.98] ${selectedPaymentMethod === method.id
                   ? 'bg-cyber-primary/10 border-cyber-primary text-cyber-primary shadow-[0_0_20px_rgba(0,255,157,0.2)]'
@@ -1773,8 +2026,9 @@ export default function POS() {
           {selectedPaymentMethod === 'Cash' && (
             <div className="space-y-4 animate-in fade-in slide-in-from-top-2">
               <div>
-                <label className="block text-sm text-gray-400 mb-2">{t('pos.amountTendered')}</label>
+                <label htmlFor="amount-tendered-input" className="block text-sm text-gray-400 mb-2">{t('pos.amountTendered')}</label>
                 <input
+                  id="amount-tendered-input"
                   type="number"
                   value={amountTendered}
                   onChange={(e) => setAmountTendered(e.target.value)}
@@ -1783,7 +2037,20 @@ export default function POS() {
                   autoFocus
                 />
               </div>
-
+              <div className="flex-1 max-w-xl relative">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                <input
+                  onKeyDown={handleSearchKeyDown}
+                  placeholder="Search products or scan barcode..."
+                  title="Search products or scan barcode"
+                  className="w-full pl-12 pr-4 py-4 bg-white/5 border border-white/10 rounded-2xl text-white placeholder-gray-500 focus:outline-none focus:border-cyber-primary/50 focus:ring-1 focus:ring-cyber-primary/50 transition-all font-medium"
+                />
+                {!unknownBarcode && (
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-gray-600 font-mono">
+                    ENTER
+                  </div>
+                )}
+              </div>
               <div className="flex gap-3 overflow-x-auto pb-2">
                 {[100, 500, 1000, total].map((amt, i) => (
                   <button
@@ -2664,6 +2931,99 @@ export default function POS() {
           />
         )
       }
+      {/* Price Updates Modal */}
+      <Modal
+        isOpen={isPriceUpdatesModalOpen}
+        onClose={() => setIsPriceUpdatesModalOpen(false)}
+        title="Recent Price Changes (24h)"
+        size="lg"
+      >
+        <div className="p-4 space-y-4">
+          <div className="flex justify-between items-center text-sm text-gray-400 mb-2">
+            <span>Checking {products.length} products...</span>
+            <span className="text-yellow-400 font-bold">{priceUpdatedProducts.length} changes found</span>
+          </div>
+
+          {priceUpdatedProducts.length === 0 ? (
+            <div className="text-center py-10 text-gray-500">
+              <CheckCircle size={48} className="mx-auto mb-2 opacity-20" />
+              <p>No price changes in the last 24 hours.</p>
+            </div>
+          ) : (
+            <div className="max-h-[60vh] overflow-y-auto border border-white/10 rounded-xl">
+              <table className="w-full text-left bg-black/20">
+                <thead className="bg-white/5 text-xs uppercase text-gray-500 sticky top-0 backdrop-blur-md">
+                  <tr>
+                    <th className="p-3">Product</th>
+                    <th className="p-3 text-right">Old Price</th>
+                    <th className="p-3 text-right">New Price</th>
+                    <th className="p-3 text-right">Update Time</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/5">
+                  {priceUpdatedProducts.map(p => (
+                    <tr key={p.id} className="hover:bg-white/5">
+                      <td className="p-3">
+                        <div className="font-bold text-white">{p.name}</div>
+                        <div className="text-xs text-gray-500">{p.sku}</div>
+                      </td>
+                      <td className="p-3 text-right text-gray-400 font-mono text-sm opacity-50">
+                        {p.oldPrice !== undefined && p.oldPrice !== null ? `${Number(p.oldPrice).toLocaleString()} ${CURRENCY_SYMBOL}` : '-'}
+                      </td>
+                      <td className="p-3 text-right text-yellow-400 font-bold font-mono text-sm">
+                        {p.price.toLocaleString()} {CURRENCY_SYMBOL}
+                      </td>
+                      <td className="p-3 text-right text-xs text-cyber-primary">
+                        {new Date(p.priceUpdatedAt || p.price_updated_at || '').toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          <div className="flex justify-end gap-3 pt-4 border-t border-white/10">
+            <Button
+              variant="secondary"
+              onClick={() => setIsPriceUpdatesModalOpen(false)}
+            >
+              Close
+            </Button>
+            <Button
+              variant="primary"
+              onClick={() => {
+                // Creating a 'Price Check' list or labels feature could go here
+                setIsPriceUpdatesModalOpen(false);
+              }}
+            >
+              Acknowledge Updates
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Unknown Barcode Mapping Modal */}
+      <UnknownBarcodeModal
+        isOpen={isUnknownBarcodeModalOpen}
+        onClose={() => {
+          setIsUnknownBarcodeModalOpen(false);
+          setCapturedBarcodeForModal('');
+        }}
+        barcode={capturedBarcodeForModal}
+        onMapProduct={(product) => {
+          // Refresh products or add to cart immediately
+          addToCart(product);
+          setIsUnknownBarcodeModalOpen(false);
+          setUnknownBarcode(''); // Clear unknown barcode state
+          setCapturedBarcodeForModal(''); // Clear captured barcode
+          setSearchTerm(''); // Clear search input
+          addNotification('success', `Mapped ${capturedBarcodeForModal} to ${product.name}`);
+          // Trigger a data refresh to pull the new alias
+          refreshData();
+        }}
+        products={products}
+      />
     </>
   );
 }

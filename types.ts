@@ -455,12 +455,14 @@ export interface Product {
   name: string;
   category: string;
   price: number; // Retail Price
+  retailPrice?: number; // Alias for price (common in integrations)
   costPrice?: number; // COGS
   salePrice?: number; // Discounted Price
   isOnSale?: boolean;
   stock: number;
   sku: string; // Internal SKU (generated or manual)
-  barcode?: string; // External barcode (EAN-13, UPC, supplier barcode)
+  barcode?: string; // Legacy: Primary External Barcode
+  barcodes?: string[]; // [NEW] Multi-Barcode Support (Aliases)
   barcodeType?: 'EAN-13' | 'UPC-A' | 'CODE128' | 'CODE39' | 'QR' | 'OTHER'; // Type of barcode
   barcode_type?: string; // Supabase compatibility
   image: string;
@@ -498,6 +500,13 @@ export interface Product {
   rejectionReason?: string;
   rejection_reason?: string; // Supabase compatibility
 
+  // Price Change Tracking
+  priceUpdatedAt?: string;
+  price_updated_at?: string; // Supabase compatibility
+  oldPrice?: number;
+  old_price?: number; // Supabase compatibility
+
+
   // Extended fields for PO consistency
   brand?: string;
   size?: string;
@@ -506,6 +515,32 @@ export interface Product {
   needsReview?: boolean;
   receivingNotes?: string;
   pack_quantity?: number; // Supabase compatibility
+}
+
+export interface BarcodeApproval {
+  id: string;
+  productId: string;
+  product_id?: string;
+  barcode: string;
+  imageUrl?: string;
+  image_url?: string;
+  status: 'pending' | 'approved' | 'rejected';
+  siteId: string;
+  site_id?: string;
+  createdBy: string;
+  created_by?: string;
+  createdAt: string;
+  created_at?: string;
+  reviewedBy?: string;
+  reviewed_by?: string;
+  reviewedAt?: string;
+  reviewed_at?: string;
+  rejectionReason?: string;
+  rejection_reason?: string;
+  resolutionTime?: number; // seconds
+  resolution_time?: number; // Supabase compatibility
+  // Join data
+  product?: Partial<Product>;
 }
 
 // Pending Inventory Change Request - for edits, deletes, and stock adjustments awaiting approval
@@ -627,6 +662,7 @@ export interface JobItem {
   sku: string;
   image: string;
   expectedQty: number;
+  quantity?: number; // Legacy fallback
   pickedQty: number;
   status: 'Pending' | 'Picked' | 'Short' | 'Skipped' | 'Completed' | 'Resolved' | 'Discrepancy' | 'Discontinued';
   batchNumber?: string;
@@ -640,7 +676,7 @@ export interface WMSJob {
   id: string;
   siteId: string;
   site_id?: string; // Supabase compatibility - Warehouse/Site where job is fulfilled
-  type: 'PICK' | 'PACK' | 'PUTAWAY' | 'TRANSFER' | 'DISPATCH' | 'REPLENISH' | 'COUNT' | 'WASTE' | 'RETURNS' | 'DRIVER';
+  type: 'PICK' | 'PACK' | 'PUTAWAY' | 'TRANSFER' | 'DISPATCH' | 'REPLENISH' | 'COUNT' | 'WASTE' | 'RETURNS' | 'DRIVER' | 'RECEIVE';
   priority: 'Critical' | 'High' | 'Normal';
   status: 'Pending' | 'In-Progress' | 'Completed' | 'Cancelled';
   items: number;
@@ -656,13 +692,21 @@ export interface WMSJob {
   destSiteId?: string; // Store/Site where goods are going / items shipped TO
   dest_site_id?: string; // Supabase compatibility
   jobNumber?: string; // Friendly ID (e.g., JOB-0001)
+  poNumber?: string; // Human-readable PO number enriched from DataContext
   // Transfer-specific fields
   transferStatus?: 'Requested' | 'Approved' | 'Picking' | 'Picked' | 'Packed' | 'Shipped' | 'In-Transit' | 'Delivered' | 'Received' | 'Completed' | 'Cancelled' | 'Rejected';
   requestedBy?: string; // Who requested the transfer
   approvedBy?: string; // Who approved the transfer
   shippedAt?: string; // When items were shipped
+  shipped_at?: string; // Supabase compatibility
+  deliveredAt?: string; // When driver signals arrival/presented
+  delivered_at?: string; // Supabase compatibility
   receivedAt?: string; // When items were received at destination
+  receivedBy?: string; // Who received the items at destination
+  received_by?: string; // Supabase compatibility
   trackingNumber?: string; // Optional tracking/reference number
+  tracking_number?: string; // Supabase compatibility
+
   hasDiscrepancy?: boolean;
   discrepancyDetails?: string;
   createdAt?: string;
@@ -843,18 +887,21 @@ export interface POItem {
   packQuantity?: number; // Added for PO consistency
   category?: string;
   sku?: string; // Missing but used in DataContext
+  receivedQty?: number;
+  rejectedQty?: number;
+  identityType?: 'known' | 'variant' | 'new'; // Product identity declaration for receiving
 }
 
 export interface PurchaseOrder {
   id: string;
-  po_number?: string; // Simple sequential number (PO-0001, PO-0002)
+  po_number?: string; // Sequential identifier (AAAA0000 format)
   poNumber?: string; // Camel case alias
   siteId: string;
   site_id?: string; // Supabase compatibility
   supplierId: string;
   supplierName: string;
   date: string;
-  status: 'Draft' | 'Pending' | 'Approved' | 'Received' | 'Cancelled';
+  status: 'Draft' | 'Pending' | 'Approved' | 'Received' | 'Partially Received' | 'Ordered' | 'Cancelled' | 'Rejected';
   totalAmount: number;
   itemsCount: number;
   expectedDelivery: string;
@@ -881,6 +928,9 @@ export interface PurchaseOrder {
   priority?: 'Low' | 'Normal' | 'High' | 'Urgent';
   createdAt?: string;
   created_at?: string; // Supabase compatibility
+  updatedAt?: string;
+  updated_at?: string; // Supabase compatibility
+  isRequest?: boolean; // Distinguishes between PO and PR
 }
 
 export interface ReceivingItem {
@@ -896,6 +946,11 @@ export interface ReceivingItem {
   vendorLotNumber?: string; // External Supplier Lot
   temperature?: string;
   damageNote?: string;
+  condition?: 'Good' | 'Damaged' | 'Short';
+  // Adaptive Receiving Fields
+  verifiedCount?: number; // Scanned quantity
+  manualCount?: number;   // Typed quantity
+  barcode?: string;       // Barcode used for verification
 }
 
 export interface Customer {
@@ -1102,6 +1157,8 @@ export interface TransferRecord {
   createdAt?: string;
   hasDiscrepancy?: boolean;
   discrepancyDetails?: string;
+  jobNumber?: string;
+  orderRef?: string;
 }
 
 export enum NavSection {

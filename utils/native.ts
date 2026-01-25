@@ -18,7 +18,6 @@ export const native = {
         if (window.AndroidNative) {
             window.AndroidNative.showToast(message);
         } else {
-            console.log('Native Toast:', message);
         }
     },
 

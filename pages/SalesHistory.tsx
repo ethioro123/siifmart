@@ -4,7 +4,8 @@ import {
    Search, Filter, Download, Calendar, ChevronRight,
    FileText, CheckCircle, XCircle, RotateCcw, Clock, Printer,
    ChevronLeft, ChevronDown, MoreHorizontal, CreditCard, User, Tag,
-   ArrowUpRight, ArrowDownRight, Shield, Loader
+   ArrowUpRight, ArrowDownRight, Shield, Loader,
+   RefreshCw, WifiOff, CloudOff
 } from 'lucide-react';
 import { CURRENCY_SYMBOL } from '../constants';
 import { SaleRecord } from '../types';
@@ -17,8 +18,11 @@ import { formatDateTime } from '../utils/formatting';
 // Pagination Config
 const ITEMS_PER_PAGE = 20;
 
+import { realtimeService } from '../services/realtime.service';
+import { useStore } from '../contexts/CentralStore';
+
 export default function SalesHistory() {
-   const { movements, sites, addNotification, settings } = useData();
+   const { movements, sites, addNotification, settings, allSales, posSyncStatus, posPendingSyncCount } = useData();
 
    // --- DATA STATE ---
    const [sales, setSales] = useState<SaleRecord[]>([]);
@@ -48,6 +52,11 @@ export default function SalesHistory() {
    const fetchSales = useCallback(async () => {
       setLoading(true);
       try {
+         // Check if online before attempting fetch
+         if (!navigator.onLine) {
+            throw new Error('Offline');
+         }
+
          const offset = (currentPage - 1) * ITEMS_PER_PAGE;
          const filters = {
             search: searchTerm,
@@ -68,12 +77,54 @@ export default function SalesHistory() {
          setSales(data);
          setTotalCount(count);
       } catch (error) {
-         console.error('Error fetching sales history:', error);
-         addNotification('alert', 'Failed to load sales history.');
+         console.warn('Network fetch failed or offline, falling back to local data:', error);
+
+         // Fallback to local allSales filtering
+         let filtered = [...(allSales || [])];
+
+         // Apply Filters Locally
+         if (storeFilter !== 'All') {
+            filtered = filtered.filter(s => s.siteId === storeFilter);
+         }
+         if (statusFilter !== 'All') {
+            filtered = filtered.filter(s => s.status === statusFilter);
+         }
+         if (methodFilter !== 'All') {
+            filtered = filtered.filter(s => s.method === methodFilter);
+         }
+         if (searchTerm) {
+            const lower = searchTerm.toLowerCase();
+            filtered = filtered.filter(s =>
+               (s.receiptNumber && s.receiptNumber.toLowerCase().includes(lower)) ||
+               (s.id && s.id.toLowerCase().includes(lower)) ||
+               (s.cashierName && s.cashierName.toLowerCase().includes(lower))
+            );
+         }
+         if (dateRange.start) {
+            filtered = filtered.filter(s => s.date >= dateRange.start);
+         }
+         if (dateRange.end) {
+            // Add one day to end date to include the full day
+            const nextDay = new Date(dateRange.end);
+            nextDay.setDate(nextDay.getDate() + 1);
+            filtered = filtered.filter(s => s.date < nextDay.toISOString());
+         }
+
+         // Sort by Date Descending
+         filtered.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+         // Apply Pagination
+         const offset = (currentPage - 1) * ITEMS_PER_PAGE;
+         setTotalCount(filtered.length);
+         setSales(filtered.slice(offset, offset + ITEMS_PER_PAGE));
+
+         if (navigator.onLine) {
+            addNotification('info', 'Loaded from local cache (Network Error)');
+         }
       } finally {
          setLoading(false);
       }
-   }, [currentPage, searchTerm, statusFilter, methodFilter, storeFilter, dateRange, addNotification]);
+   }, [currentPage, searchTerm, statusFilter, methodFilter, storeFilter, dateRange, addNotification, allSales]);
 
    // Debounce Search
    useEffect(() => {
@@ -374,6 +425,30 @@ export default function SalesHistory() {
                <p className="text-gray-400 text-sm">Search, audit, and report on full transaction history.</p>
             </div>
             <div className="flex items-center gap-3">
+               {/* Sync Status Badge */}
+               <div className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold border transition-colors duration-300 ${posSyncStatus === 'offline' ? 'bg-red-500/10 border-red-500/20 text-red-500' :
+                  posSyncStatus === 'syncing' ? 'bg-blue-500/10 border-blue-500/20 text-blue-500' :
+                     (posPendingSyncCount || 0) > 0 ? 'bg-yellow-500/10 border-yellow-500/20 text-yellow-500' :
+                        'bg-green-500/10 border-green-500/20 text-green-500'
+                  }`}>
+                  {posSyncStatus === 'syncing' ? (
+                     <RefreshCw size={14} className="animate-spin" />
+                  ) : posSyncStatus === 'offline' ? (
+                     <WifiOff size={14} />
+                  ) : (posPendingSyncCount || 0) > 0 ? (
+                     <CloudOff size={14} />
+                  ) : (
+                     <CheckCircle size={14} />
+                  )}
+                  <span>
+                     {posSyncStatus === 'offline' ? 'Offline Mode' :
+                        posSyncStatus === 'syncing' ? 'Syncing...' :
+                           (posPendingSyncCount || 0) > 0 ? 'Sync Pending' :
+                              'System Online'}
+                     {((posPendingSyncCount || 0) > 0) && ` (${posPendingSyncCount})`}
+                  </span>
+               </div>
+
                <Protected permission="EXPORT_SALES_DATA">
                   <button
                      onClick={handleExportCSV}

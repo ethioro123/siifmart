@@ -66,7 +66,15 @@ const InputGroup = ({ label, type = "text", defaultValue, value, onChange, place
     </div>
 );
 
-const ToggleGroup = ({ label, sub, checked = false, onChange, warning }: any) => (
+interface ToggleGroupProps {
+    label: string;
+    sub?: string;
+    checked?: boolean;
+    onChange: () => void;
+    warning?: string;
+}
+
+const ToggleGroup = ({ label, sub, checked = false, onChange, warning }: ToggleGroupProps) => (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center py-4 border-b border-white/5 last:border-0 group">
         <div>
             <label className="text-sm text-gray-300 font-bold block group-hover:text-white transition-colors">{label}</label>
@@ -77,7 +85,7 @@ const ToggleGroup = ({ label, sub, checked = false, onChange, warning }: any) =>
                 className="flex items-center cursor-pointer"
                 onClick={onChange}
                 role="switch"
-                aria-checked={checked}
+                aria-checked={checked ? true : false}
                 tabIndex={0}
                 aria-label={label}
                 onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onChange(); } }}
@@ -133,16 +141,12 @@ export default function SettingsPage() {
 
 
     const handleSaveSite = async () => {
-        console.log('🔍 handleSaveSite called with newSite:', newSite);
-        console.log('Validation check - name:', newSite.name, 'type:', newSite.type);
 
         if (!newSite.name || !newSite.type) {
-            console.log('❌ Validation failed!');
             addNotification('alert', "Name and Type are required");
             return;
         }
 
-        console.log('✅ Validation passed, attempting to save site:', newSite);
         setIsSavingSite(true);
         try {
             if (newSite.id) {
@@ -161,7 +165,6 @@ export default function SettingsPage() {
                     binCount: newSite.binCount,
                     code: newSite.code || newSite.name?.substring(0, 3).toUpperCase() || 'UNK' // Use existing code if available
                 };
-                console.log('📝 Updating site:', siteData);
                 await updateSite(siteData, user?.name || 'Admin');
             } else {
                 // Create new site (don't include ID, let Supabase generate it)
@@ -178,10 +181,8 @@ export default function SettingsPage() {
                     binCount: newSite.binCount,
                     code: 'GENERATED_BY_DB' // Placeholder, will be overwritten by sitesService
                 };
-                console.log('➕ Creating new site:', siteData);
                 await addSite(siteData as Site, user?.name || 'Admin');
             }
-            console.log('✅ Site saved successfully');
             setIsSiteModalOpen(false);
             setNewSite({});
         } catch (error: any) {
@@ -807,7 +808,6 @@ export default function SettingsPage() {
                         <button
                             type="button"
                             onClick={() => {
-                                console.log('🖱️ Save button clicked!');
                                 handleSaveSite();
                             }}
                             disabled={isSavingSite || !newSite.name || !newSite.type}

@@ -67,7 +67,6 @@ export function useSessionManager(onSessionWarning?: (minutesLeft: number) => vo
             refreshIntervalRef.current = setInterval(async () => {
                 if (!document.hidden && isActive) {
                     await checkAndRefreshSession();
-                    console.log('Session auto-refreshed');
                 }
             }, APP_CONFIG.SESSION_REFRESH_INTERVAL);
 

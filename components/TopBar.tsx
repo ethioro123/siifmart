@@ -1,6 +1,6 @@
 
 import React, { useState, useMemo } from 'react';
-import { Menu, Search, Sun, Moon, Bell, X, AlertTriangle, CheckCircle, Info, MapPin, ChevronDown, Building, Store, Package, Users, ShoppingCart, FileText, LayoutDashboard, LogOut, User, Crown, Zap, Trophy, TrendingUp, ClipboardCheck, Clock, Play, Check, Plus, Send, UserPlus, Trash2 } from 'lucide-react';
+import { Menu, Search, Sun, Moon, Bell, X, AlertTriangle, CheckCircle, Info, MapPin, ChevronDown, Building, Store, Package, Users, ShoppingCart, FileText, LayoutDashboard, LogOut, User, Crown, Zap, Trophy, TrendingUp, ClipboardCheck, Clock, Play, Check, Plus, Send, UserPlus, Trash2, RefreshCw } from 'lucide-react';
 import { useStore } from '../contexts/CentralStore';
 import { useData } from '../contexts/DataContext';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -15,7 +15,7 @@ export default function TopBar() {
    const {
       activeSite, sites, setActiveSite, notifications, markNotificationsRead,
       addNotification, clearNotification, clearAllNotifications, employees, allProducts, customers, allOrders, allSales,
-      workerPoints, getWorkerPoints, tasks, setTasks
+      workerPoints, getWorkerPoints, tasks, setTasks, refreshData
    } = useData();
    const navigate = useNavigate();
    const location = useLocation();
@@ -24,11 +24,13 @@ export default function TopBar() {
    const [notifTab, setNotifTab] = useState<'notifications' | 'tasks'>('notifications');
    const [searchValue, setSearchValue] = useState('');
    const [isSearchOpen, setIsSearchOpen] = useState(false);
+   const [isMobileSearchVisible, setIsMobileSearchVisible] = useState(false);
    const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
    const [showQuickAssign, setShowQuickAssign] = useState(false);
    const [quickTaskTitle, setQuickTaskTitle] = useState('');
    const [quickTaskPriority, setQuickTaskPriority] = useState<'High' | 'Medium' | 'Low'>('Medium');
    const [quickTaskAssignee, setQuickTaskAssignee] = useState('');
+   const [isRefreshing, setIsRefreshing] = useState(false);
    const dropdownRef = React.useRef<HTMLDivElement>(null);
    const notifRef = React.useRef<HTMLDivElement>(null);
 
@@ -299,8 +301,22 @@ export default function TopBar() {
       setIsNotifOpen(false);
    };
 
+   const handleRefresh = async () => {
+      if (isRefreshing) return;
+      setIsRefreshing(true);
+      try {
+         await refreshData();
+         addNotification('success', 'Data refreshed successfully');
+      } catch (error) {
+         console.error('Refresh failed:', error);
+         addNotification('alert', 'Failed to refresh data');
+      } finally {
+         setTimeout(() => setIsRefreshing(false), 800); // Min 800ms spin for visual feedback
+      }
+   };
+
    return (
-      <header className="h-14 md:h-16 bg-cyber-dark/30 backdrop-blur-xl sticky top-0 z-30 px-2 sm:px-4 md:px-6 flex items-center justify-between">
+      <header className="h-14 md:h-16 bg-cyber-black/95 backdrop-blur-sm sticky top-0 z-30 px-2 sm:px-4 md:px-6 flex items-center justify-between">
          <div className="flex items-center space-x-2 sm:space-x-4">
             <button onClick={toggleSidebar} className="text-gray-400 hover:text-white p-1" aria-label="Toggle sidebar">
                <Menu size={20} className="md:w-6 md:h-6" />
@@ -523,7 +539,7 @@ export default function TopBar() {
          <div className="flex items-center space-x-1 sm:space-x-2 md:space-x-4">
             {/* Mobile Search Button */}
             <button
-               onClick={() => setIsSearchOpen(!isSearchOpen)}
+               onClick={() => setIsMobileSearchVisible(true)}
                className="lg:hidden p-2 rounded-full text-gray-400 hover:text-white hover:bg-white/5 transition-colors"
                aria-label="Search"
             >
@@ -667,6 +683,15 @@ export default function TopBar() {
                title="Toggle Theme"
             >
                {theme === 'dark' ? <Sun size={18} className="md:w-5 md:h-5" /> : <Moon size={18} className="md:w-5 md:h-5" />}
+            </button>
+
+            <button
+               onClick={handleRefresh}
+               className={`p-1.5 md:p-2 rounded-full text-gray-400 hover:text-white hover:bg-white/5 transition-colors ${isRefreshing ? 'animate-spin text-cyber-primary' : ''}`}
+               title="Refresh Data"
+               disabled={isRefreshing}
+            >
+               <RefreshCw size={18} className="md:w-5 md:h-5" />
             </button>
 
 
@@ -978,6 +1003,198 @@ export default function TopBar() {
                )}
             </div>
          </div>
+
+         {/* Mobile Search Overlay */}
+         {isMobileSearchVisible && (
+            <div className="lg:hidden fixed inset-0 z-[100] bg-cyber-dark/98 backdrop-blur-2xl flex flex-col animate-in fade-in zoom-in-95 duration-200">
+               <div className="p-4 flex items-center gap-4 bg-cyber-gray/50 border-b border-white/10">
+                  <button
+                     onClick={() => { setIsMobileSearchVisible(false); setSearchValue(''); }}
+                     className="p-2 -ml-2 text-gray-400 hover:text-white transition-colors"
+                     aria-label="Close"
+                  >
+                     <X size={24} />
+                  </button>
+                  <div className="flex-1 relative">
+                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-cyber-primary" />
+                     <input
+                        autoFocus
+                        type="text"
+                        placeholder="Search products, orders, customers..."
+                        className="w-full bg-black/40 border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-white placeholder-gray-500 outline-none focus:border-cyber-primary/50 transition-all font-medium"
+                        value={searchValue}
+                        onChange={(e) => setSearchValue(e.target.value)}
+                     />
+                  </div>
+               </div>
+
+               <div className="flex-1 overflow-y-auto pb-safe">
+                  {searchValue.trim().length >= 2 ? (
+                     searchResults && searchResults.total > 0 ? (
+                        <div className="pb-8">
+                           {/* Products */}
+                           {searchResults.products.length > 0 && (
+                              <div className="border-b border-white/5">
+                                 <div className="px-4 py-3 bg-black/20">
+                                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                                       <Package size={12} className="text-cyber-primary" />
+                                       Products ({searchResults.products.length})
+                                    </p>
+                                 </div>
+                                 {searchResults.products.map(p => (
+                                    <button
+                                       key={p.id}
+                                       onClick={() => { handleResultClick('product', p.id); setIsMobileSearchVisible(false); }}
+                                       className="w-full px-4 py-4 hover:bg-white/5 flex items-center gap-3 text-left border-b border-white/5 last:border-0 active:bg-white/10"
+                                    >
+                                       <div className="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center flex-shrink-0">
+                                          <Package size={20} className="text-green-400" />
+                                       </div>
+                                       <div className="flex-1 min-w-0">
+                                          <p className="text-sm font-bold text-white truncate">{p.name}</p>
+                                          <p className="text-xs text-gray-500 truncate">{p.sku} • Stock: {p.stock}</p>
+                                       </div>
+                                    </button>
+                                 ))}
+                              </div>
+                           )}
+
+                           {/* Orders */}
+                           {searchResults.orders.length > 0 && (
+                              <div className="border-b border-white/5">
+                                 <div className="px-4 py-3 bg-black/20">
+                                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                                       <FileText size={12} className="text-cyber-primary" />
+                                       Purchase Orders ({searchResults.orders.length})
+                                    </p>
+                                 </div>
+                                 {searchResults.orders.map(o => (
+                                    <button
+                                       key={o.id}
+                                       onClick={() => { handleResultClick('order', o.id); setIsMobileSearchVisible(false); }}
+                                       className="w-full px-4 py-4 hover:bg-white/5 flex items-center gap-3 text-left border-b border-white/5 last:border-0 active:bg-white/10"
+                                    >
+                                       <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center flex-shrink-0">
+                                          <FileText size={20} className="text-blue-400" />
+                                       </div>
+                                       <div className="flex-1 min-w-0">
+                                          <p className="text-sm font-bold text-white truncate">{o.poNumber || o.po_number}</p>
+                                          <p className="text-xs text-gray-500 truncate">{o.status} • {o.supplierName}</p>
+                                       </div>
+                                    </button>
+                                 ))}
+                              </div>
+                           )}
+
+                           {/* Sales */}
+                           {searchResults.sales.length > 0 && (
+                              <div className="border-b border-white/5">
+                                 <div className="px-4 py-3 bg-black/20">
+                                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                                       <ShoppingCart size={12} className="text-cyber-primary" />
+                                       Sales Tracks ({searchResults.sales.length})
+                                    </p>
+                                 </div>
+                                 {searchResults.sales.map(s => (
+                                    <button
+                                       key={s.id}
+                                       onClick={() => { handleResultClick('sale', s.id); setIsMobileSearchVisible(false); }}
+                                       className="w-full px-4 py-4 hover:bg-white/5 flex items-center gap-3 text-left border-b border-white/5 last:border-0 active:bg-white/10"
+                                    >
+                                       <div className="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center flex-shrink-0">
+                                          <ShoppingCart size={20} className="text-purple-400" />
+                                       </div>
+                                       <div className="flex-1 min-w-0">
+                                          <p className="text-sm font-bold text-white truncate">{s.receiptNumber || `SALE-${s.id.substring(0, 8).toUpperCase()}`}</p>
+                                          <p className="text-xs text-gray-500 truncate">${s.total} • {s.date}</p>
+                                       </div>
+                                    </button>
+                                 ))}
+                              </div>
+                           )}
+
+                           {/* Customers */}
+                           {searchResults.customers.length > 0 && (
+                              <div className="border-b border-white/5">
+                                 <div className="px-4 py-3 bg-black/20">
+                                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                                       <Users size={12} className="text-cyber-primary" />
+                                       Customers ({searchResults.customers.length})
+                                    </p>
+                                 </div>
+                                 {searchResults.customers.map(c => (
+                                    <button
+                                       key={c.id}
+                                       onClick={() => { handleResultClick('customer', c.id); setIsMobileSearchVisible(false); }}
+                                       className="w-full px-4 py-4 hover:bg-white/5 flex items-center gap-3 text-left border-b border-white/5 last:border-0 active:bg-white/10"
+                                    >
+                                       <div className="w-10 h-10 rounded-lg bg-cyan-500/10 flex items-center justify-center flex-shrink-0">
+                                          <Users size={20} className="text-cyan-400" />
+                                       </div>
+                                       <div className="flex-1 min-w-0">
+                                          <p className="text-sm font-bold text-white truncate">{c.name}</p>
+                                          <p className="text-xs text-gray-500 truncate">{c.email || c.phone}</p>
+                                       </div>
+                                    </button>
+                                 ))}
+                              </div>
+                           )}
+
+                           {/* Employees */}
+                           {searchResults.employees.length > 0 && (
+                              <div className="border-b border-white/5">
+                                 <div className="px-4 py-3 bg-black/20">
+                                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                                       <Users size={12} className="text-cyber-primary" />
+                                       Team Members ({searchResults.employees.length})
+                                    </p>
+                                 </div>
+                                 {searchResults.employees.map(e => (
+                                    <button
+                                       key={e.id}
+                                       onClick={() => { handleResultClick('employee', e.id); setIsMobileSearchVisible(false); }}
+                                       className="w-full px-4 py-4 hover:bg-white/5 flex items-center gap-3 text-left border-b border-white/5 last:border-0 active:bg-white/10"
+                                    >
+                                       <div className="w-10 h-10 rounded-lg bg-yellow-500/10 flex items-center justify-center flex-shrink-0">
+                                          <Users size={20} className="text-yellow-400" />
+                                       </div>
+                                       <div className="flex-1 min-w-0">
+                                          <p className="text-sm font-bold text-white truncate">{e.name}</p>
+                                          <p className="text-xs text-gray-500 truncate">{e.role} • {e.email}</p>
+                                       </div>
+                                    </button>
+                                 ))}
+                              </div>
+                           )}
+                        </div>
+                     ) : (
+                        <div className="flex flex-col items-center justify-center h-64 text-center p-8">
+                           <div className="w-20 h-20 rounded-full bg-white/5 flex items-center justify-center mb-6">
+                              <Search size={40} className="text-gray-600" />
+                           </div>
+                           <h3 className="text-lg font-bold text-white mb-2">No intelligence found</h3>
+                           <p className="text-gray-500 text-sm max-w-[240px]">We couldn't find any records matching "{searchValue}" in the network.</p>
+                        </div>
+                     )
+                  ) : (
+                     <div className="flex flex-col items-center justify-center h-full text-center p-8">
+                        <div className="w-20 h-20 rounded-full bg-cyber-primary/10 flex items-center justify-center mb-6 animate-pulse">
+                           <Zap size={40} className="text-cyber-primary" />
+                        </div>
+                        <h3 className="text-lg font-bold text-white mb-2">Omniscient Search</h3>
+                        <p className="text-gray-500 text-sm max-w-[280px]">
+                           Type at least 2 characters to scan across products, orders, customers, and team members.
+                        </p>
+                        <div className="mt-8 flex flex-wrap justify-center gap-2">
+                           <span className="px-3 py-1 bg-white/5 rounded-full text-[10px] text-gray-400 border border-white/5 font-mono">PRODUCTS</span>
+                           <span className="px-3 py-1 bg-white/5 rounded-full text-[10px] text-gray-400 border border-white/5 font-mono">ORDERS</span>
+                           <span className="px-3 py-1 bg-white/5 rounded-full text-[10px] text-gray-400 border border-white/5 font-mono">CUSTOMERS</span>
+                        </div>
+                     </div>
+                  )}
+               </div>
+            </div>
+         )}
       </header>
    );
 }

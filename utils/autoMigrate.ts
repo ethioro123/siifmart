@@ -31,11 +31,9 @@ const MIGRATION_KEY = 'friendly_ids_migrated_supabase_v1';
 export async function runAutoMigration() {
     // Check if already migrated
     if (localStorage.getItem(MIGRATION_KEY) === 'true') {
-        console.log('✅ Friendly IDs already migrated');
         return;
     }
 
-    console.log('🚀 Running Friendly ID Auto-Migration (Supabase)...\n');
 
     let totalUpdated = 0;
 
@@ -47,7 +45,6 @@ export async function runAutoMigration() {
             .or('poNumber.is.null,po_number.is.null');
 
         if (orders && orders.length > 0) {
-            console.log(`🔄 Migrating ${orders.length} Purchase Orders...`);
             for (const order of orders) {
                 const friendlyId = generatePOId();
                 await supabase
@@ -59,7 +56,6 @@ export async function runAutoMigration() {
                     .eq('id', order.id);
             }
             totalUpdated += orders.length;
-            console.log(`✅ Updated ${orders.length} Purchase Orders`);
         }
 
         // 2. Migrate Sales
@@ -77,7 +73,6 @@ export async function runAutoMigration() {
                     .is('receipt_number', null);
 
                 if (allSales && allSales.length > 0) {
-                    console.log(`🔄 Migrating ${allSales.length} Sales Records...`);
                     for (const sale of allSales) {
                         const friendlyId = generateSaleId();
                         await supabase
@@ -86,7 +81,6 @@ export async function runAutoMigration() {
                             .eq('id', sale.id);
                     }
                     totalUpdated += allSales.length;
-                    console.log(`✅ Updated ${allSales.length} Sales Records`);
                 }
             } else {
                 console.warn('⚠️ Skipping Sales migration: "receipt_number" column likely missing in DB.');
@@ -110,7 +104,6 @@ export async function runAutoMigration() {
                     .is('job_number', null);
 
                 if (allJobs && allJobs.length > 0) {
-                    console.log(`🔄 Migrating ${allJobs.length} Warehouse Jobs...`);
                     for (const job of allJobs) {
                         const prefix = job.type === 'JOB' ? 'J' : (job.type ? job.type.charAt(0) : 'J');
                         const friendlyId = generateJobId(prefix);
@@ -120,7 +113,6 @@ export async function runAutoMigration() {
                             .eq('id', job.id);
                     }
                     totalUpdated += allJobs.length;
-                    console.log(`✅ Updated ${allJobs.length} Warehouse Jobs`);
                 }
             } else {
                 console.warn('⚠️ Skipping Jobs migration: "job_number" column likely missing in DB.');
@@ -134,10 +126,7 @@ export async function runAutoMigration() {
         localStorage.setItem(MIGRATION_KEY, 'true');
 
         if (totalUpdated > 0) {
-            console.log(`\n✨ Migration Complete! ${totalUpdated} records updated`);
-            console.log('🔄 Please reload the page to see changes\n');
         } else {
-            console.log('✅ No records needed migration');
         }
 
     } catch (error) {

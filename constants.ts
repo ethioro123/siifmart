@@ -10,7 +10,7 @@ export const GROCERY_CATEGORIES: Record<string, string[]> = {
   'Meat & Seafood': ['Fresh Meat', 'Poultry', 'Seafood', 'Deli Meats', 'Frozen Meat', 'Sausages & Bacon'],
   'Dairy & Eggs': ['Milk', 'Cheese', 'Yogurt', 'Butter & Margarine', 'Eggs', 'Cream', 'Plant-Based Dairy'],
   'Bakery': ['Bread', 'Pastries', 'Cakes', 'Cookies', 'Donuts', 'Tortillas & Wraps', 'Buns & Rolls'],
-  'Beverages': ['Soft Drinks', 'Juices', 'Water', 'Coffee & Tea', 'Energy Drinks', 'Alcohol', 'Sports Drinks'],
+  'Beverages': ['Soft Drinks', 'Juices', 'Water', 'Coffee & Tea', 'Energy Drinks', 'Sports Drinks'],
   'Pantry Staples': ['Rice & Grains', 'Pasta', 'Flour & Baking', 'Cooking Oil', 'Canned Goods', 'Sauces & Condiments', 'Spices & Seasonings', 'Jams & Spreads'],
   'Snacks & Sweets': ['Chips & Crisps', 'Chocolate', 'Candy', 'Nuts & Seeds', 'Popcorn', 'Biscuits', 'Crackers', 'Dried Fruit'],
   'Frozen Foods': ['Ice Cream', 'Frozen Vegetables', 'Frozen Meals', 'Frozen Pizza', 'Frozen Desserts', 'Frozen Fruit'],
@@ -35,7 +35,7 @@ export const COMMON_UNITS = [
 ];
 
 // Get all categories as flat list for simple dropdowns
-export const ALL_CATEGORY_OPTIONS = Object.entries(GROCERY_CATEGORIES).flatMap(([main, subs]) => [main, ...subs]);
+export const ALL_CATEGORY_OPTIONS = Array.from(new Set(Object.entries(GROCERY_CATEGORIES).flatMap(([main, subs]) => [main, ...subs])));
 
 export const MOCK_USERS: User[] = [
   // ============================================================================
@@ -850,10 +850,10 @@ export const MOCK_PRICING_RULES: PricingRule[] = [
 ];
 
 export const MOCK_ZONES: WarehouseZone[] = [
-  { id: 'Z1', name: 'Zone A (General)', capacity: 1000, occupied: 750, siteId: 'WH-001', type: 'Dry' },
-  { id: 'Z2', name: 'Zone B (Small Items)', capacity: 5000, occupied: 1200, siteId: 'WH-001', type: 'Dry' },
-  { id: 'Z3', name: 'Zone C (Cold Chain)', capacity: 500, occupied: 450, siteId: 'WH-001', temperature: '-4°C', type: 'Cold' },
-  { id: 'Z4', name: 'Zone S (Secure)', capacity: 100, occupied: 25, siteId: 'WH-001', type: 'Secure' },
+  { id: 'Z1', name: 'Zone A (General)', capacity: 1000, occupied: 750, siteId: 'WH-001', type: 'Dry', pickingPriority: 10, zoneType: 'Standard', status: 'Active' },
+  { id: 'Z2', name: 'Zone B (Small Items)', capacity: 5000, occupied: 1200, siteId: 'WH-001', type: 'Dry', pickingPriority: 5, zoneType: 'Pick Facade', status: 'Active' },
+  { id: 'Z3', name: 'Zone C (Cold Chain)', capacity: 500, occupied: 450, siteId: 'WH-001', temperature: '-4°C', type: 'Cold', pickingPriority: 1, zoneType: 'Cold Storage', status: 'Active' },
+  { id: 'Z4', name: 'Zone S (Secure)', capacity: 100, occupied: 25, siteId: 'WH-001', type: 'Secure', pickingPriority: 20, zoneType: 'Secure Vault', status: 'Active' },
 ];
 
 export const MOCK_MOVEMENTS: StockMovement[] = [

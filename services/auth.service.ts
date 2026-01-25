@@ -97,7 +97,6 @@ export const authService = {
      * Sign in with email/username and password
      */
     async signIn(identifier: string, password: string) {
-        console.log('AuthService: Signing in...', identifier);
 
         let email = identifier;
 
@@ -105,7 +104,6 @@ export const authService = {
         const isEmail = identifier.includes('@');
 
         if (!isEmail) {
-            console.log('AuthService: Identifier is username, looking up email...');
 
             // Try standard lookup first
             let { data: employee, error } = await supabase
@@ -120,7 +118,6 @@ export const authService = {
             }
 
             email = employee.email;
-            console.log('AuthService: Found email for username:', email);
         }
 
         const { data, error } = await supabase.auth.signInWithPassword({
@@ -133,7 +130,6 @@ export const authService = {
             throw error;
         }
 
-        console.log('AuthService: Sign in successful', data.user?.id);
 
         // Log the signin
         if (data.user) {

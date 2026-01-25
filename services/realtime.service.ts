@@ -38,7 +38,6 @@ export const realtimeService = {
                     filter: siteId ? `site_id=eq.${siteId}` : undefined
                 },
                 (payload) => {
-                    console.log('Product change:', payload);
                     callback(payload.eventType, payload.new || payload.old);
                 }
             )
@@ -68,7 +67,6 @@ export const realtimeService = {
                     filter: siteId ? `site_id=eq.${siteId}` : undefined
                 },
                 (payload) => {
-                    console.log('Sale change:', payload);
                     callback(payload.eventType, payload.new || payload.old);
                 }
             )
@@ -98,7 +96,6 @@ export const realtimeService = {
                     filter: siteId ? `site_id=eq.${siteId}` : undefined
                 },
                 (payload) => {
-                    console.log('Stock movement:', payload);
                     callback(payload.eventType, payload.new || payload.old);
                 }
             )
@@ -126,7 +123,6 @@ export const realtimeService = {
                     table: 'customers'
                 },
                 (payload) => {
-                    console.log('Customer change:', payload);
                     callback(payload.eventType, payload.new || payload.old);
                 }
             )
@@ -159,7 +155,6 @@ export const realtimeService = {
                     const data = (payload.new || payload.old) as any;
                     // Filter in callback to support dual-site logic
                     if (!siteId || data.site_id === siteId || data.dest_site_id === siteId) {
-                        console.log('WMS job (filtered) change:', data);
                         callback(payload.eventType, data);
                     }
                 }
@@ -192,7 +187,6 @@ export const realtimeService = {
                     const data = (payload.new || payload.old) as any;
                     // Dual-site filtering (source OR destination)
                     if (!siteId || data.source_site_id === siteId || data.dest_site_id === siteId) {
-                        console.log('Transfer (filtered) change:', data);
                         callback(payload.eventType, data);
                     }
                 }
@@ -224,7 +218,6 @@ export const realtimeService = {
                     filter: siteId ? `site_id=eq.${siteId}` : undefined
                 },
                 (payload) => {
-                    console.log('Purchase order change:', payload);
                     callback(payload.eventType, payload.new || payload.old);
                 }
             )
@@ -254,7 +247,6 @@ export const realtimeService = {
                     filter: siteId ? `site_id=eq.${siteId}` : undefined
                 },
                 (payload) => {
-                    console.log('Employee change:', payload);
                     callback(payload.eventType, payload.new || payload.old);
                 }
             )
@@ -283,7 +275,6 @@ export const realtimeService = {
                     table: 'job_assignments'
                 },
                 (payload) => {
-                    console.log('Job assignment change:', payload);
                     callback(payload.eventType, payload.new || payload.old);
                 }
             )
@@ -313,7 +304,6 @@ export const realtimeService = {
                     filter: siteId ? `site_id=eq.${siteId}` : undefined
                 },
                 (payload) => {
-                    console.log('Inventory request change:', payload);
                     callback(payload.eventType, payload.new || payload.old);
                 }
             )
@@ -338,6 +328,7 @@ export const realtimeService = {
             onWMSJobChange?: (event: string, payload: any) => void;
             onJobAssignmentChange?: (event: string, payload: any) => void;
             onTransferChange?: (event: string, payload: any) => void;
+            onPurchaseOrderChange?: (event: string, payload: any) => void;
         }
     ): RealtimeSubscription[] {
         const subscriptions: RealtimeSubscription[] = [];
@@ -368,6 +359,10 @@ export const realtimeService = {
 
         if (callbacks.onTransferChange) {
             subscriptions.push(this.subscribeToTransfers(callbacks.onTransferChange, siteId));
+        }
+
+        if (callbacks.onPurchaseOrderChange) {
+            subscriptions.push(this.subscribeToPurchaseOrders(callbacks.onPurchaseOrderChange, siteId));
         }
 
 
@@ -414,16 +409,13 @@ export const realtimeService = {
 
         ch.on('presence', { event: 'sync' }, () => {
             const state = ch.presenceState();
-            console.log('Online users:', state);
         });
 
         ch.on('presence', { event: 'join' }, ({ key, newPresences }) => {
-            console.log('User joined:', key, newPresences);
             if (onJoin) onJoin(newPresences[0]);
         });
 
         ch.on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
-            console.log('User left:', key, leftPresences);
             if (onLeave) onLeave(leftPresences[0]);
         });
 

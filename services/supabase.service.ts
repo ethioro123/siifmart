@@ -28,6 +28,7 @@ import type {
     DiscrepancyResolution,
     DiscrepancyClaim
 } from '../types';
+import { generateNextPONumber } from '../utils/jobIdFormatter';
 
 // ============================================================================
 // SITES
@@ -112,9 +113,9 @@ export const sitesService = {
             terminal_count: site.terminalCount,
             bonus_enabled: site.bonusEnabled,
             warehouse_bonus_enabled: site.warehouseBonusEnabled,
-            zone_count: site.zoneCount,
-            aisle_count: site.aisleCount,
-            bin_count: site.binCount,
+            // zone_count: site.zoneCount, // Schema missing
+            // aisle_count: site.aisleCount, // Schema missing
+            // bin_count: site.binCount, // Schema missing
             fulfillment_strategy: site.fulfillmentStrategy || 'NEAREST',
             is_fulfillment_node: site.isFulfillmentNode !== undefined ? site.isFulfillmentNode : true
         };
@@ -155,6 +156,14 @@ export const sitesService = {
             dbUpdates.warehouse_bonus_enabled = updates.warehouseBonusEnabled;
             delete dbUpdates.warehouseBonusEnabled;
         }
+        // SCHEMA MISMATCH: These columns do not exist in 'sites' table yet.
+        // We must delete the camelCase keys to prevent "column does not exist" errors
+        // and NOT map them to snake_case.
+        delete dbUpdates.zoneCount;
+        delete dbUpdates.aisleCount;
+        delete dbUpdates.binCount;
+
+        /* Temporarily disabled until schema update
         if (updates.zoneCount !== undefined) {
             dbUpdates.zone_count = updates.zoneCount;
             delete dbUpdates.zoneCount;
@@ -167,6 +176,7 @@ export const sitesService = {
             dbUpdates.bin_count = updates.binCount;
             delete dbUpdates.binCount;
         }
+        */
         if (updates.taxJurisdictionId !== undefined) {
             dbUpdates.tax_jurisdiction_id = updates.taxJurisdictionId;
             delete dbUpdates.taxJurisdictionId;
@@ -465,6 +475,42 @@ export const systemConfigService = {
         return data.publicUrl;
     },
 
+    async initializeStorage(): Promise<void> {
+        try {
+            const BUCKET_NAME = 'system-assets';
+            const { data: buckets, error: listError } = await supabase.storage.listBuckets();
+
+            if (listError) {
+                // If we can't list buckets, it's likely an RLS/Permission issue on the Storage API
+                if (listError.message.toLowerCase().includes('row-level security') || listError.message.toLowerCase().includes('permission')) {
+                } else {
+                    console.warn(`[Storage] Could not list buckets: ${listError.message}`);
+                }
+                return;
+            }
+
+            const exists = buckets?.some(b => b.name === BUCKET_NAME);
+
+            if (!exists) {
+                const { error: createError } = await supabase.storage.createBucket(BUCKET_NAME, {
+                    public: true,
+                    fileSizeLimit: 10 * 1024 * 1024 // 10MB
+                });
+
+                if (createError) {
+                    if (createError.message.toLowerCase().includes('row-level security')) {
+                        console.warn(`[Storage] RLS Restriction: Cannot create '${BUCKET_NAME}' bucket from client. Please run the SQL migration or create it manually.`);
+                    } else {
+                        console.warn(`[Storage] Could not create '${BUCKET_NAME}' bucket:`, createError.message);
+                    }
+                } else {
+                }
+            }
+        } catch (err) {
+            console.warn('[Storage] Error in initializeStorage:', err);
+        }
+    },
+
     _mapSettings(data: any): SystemConfig {
         return {
             storeName: data.store_name,
@@ -571,15 +617,15 @@ export const productsService = {
             else if (sort.key === 'costPrice') column = 'cost_price';
             else if (sort.key === 'salePrice') column = 'sale_price';
             else if (sort.key === 'siteId') column = 'site_id';
-            // Handle cases where sort key doesn't match DB column directly (e.g. calculated fields)
-            // For now, fallback to created_at if unknown, or keep simple columns
-
-            // Avoid sorting by computed fields on server for now to avoid crashes
-            if (['assetValue', 'abc'].includes(sort.key)) {
-                query = query.order('created_at', { ascending: false });
-            } else {
-                query = query.order(column, { ascending: sort.direction === 'asc' });
+            // Avoid sorting by computed fields on server directly to avoid crashes.
+            // Using proxy columns (cost_price/price) provides better relevance than created_at.
+            if (sort.key === 'assetValue') {
+                column = 'cost_price';
+            } else if (sort.key === 'abc') {
+                column = 'price';
             }
+
+            query = query.order(column, { ascending: sort.direction === 'asc' });
         } else {
             query = query.order('created_at', { ascending: false });
         }
@@ -591,7 +637,7 @@ export const productsService = {
         if (filters) {
             if (filters.search) {
                 const search = filters.search;
-                query = query.or(`name.ilike.%${search}%,sku.ilike.%${search}%,barcode.eq.${search}`);
+                query = query.or(`name.ilike.%${search}%,sku.ilike.%${search}%,location.ilike.%${search}%,barcode.eq.${search}`);
             }
             if (filters.category && filters.category !== 'All') {
                 query = query.eq('category', filters.category);
@@ -634,7 +680,10 @@ export const productsService = {
             approvedAt: p.approved_at,
             rejectedBy: p.rejected_by,
             rejectedAt: p.rejected_at,
-            rejectionReason: p.rejection_reason
+            rejectionReason: p.rejection_reason,
+            oldPrice: p.old_price,
+            old_price: p.old_price,
+            priceUpdatedAt: p.price_updated_at
         }));
 
         return { data: mappedData, count: count || 0 };
@@ -656,6 +705,26 @@ export const productsService = {
         });
         if (error) throw error;
         return data;
+    },
+
+    /**
+     * Strict search for barcode (Exact match on primary OR alias)
+     */
+    async getByBarcode(barcode: string, siteId?: string) {
+        let query = supabase
+            .from('products')
+            .select('*');
+
+        if (siteId) {
+            query = query.eq('site_id', siteId);
+        }
+
+        // Exact match on 'barcode' column OR inclusion in 'barcodes' array
+        // Syntax: barcode.eq.VALUE,barcodes.cs.{VALUE}
+        const { data, error } = await query.or(`barcode.eq.${barcode},barcodes.cs.{${barcode}}`);
+
+        if (error) throw error;
+        return data.map((p: any) => this._mapProduct(p));
     },
 
     async search(term: string, siteId?: string, limit: number = 20) {
@@ -697,12 +766,17 @@ export const productsService = {
         }));
     },
 
-    async getById(id: string) {
-        const { data, error } = await supabase
+    async getById(id: string, siteId?: string) {
+        let query = supabase
             .from('products')
             .select('*')
-            .eq('id', id)
-            .single();
+            .eq('id', id);
+
+        if (siteId) {
+            query = query.eq('site_id', siteId);
+        }
+
+        const { data, error } = await query.single();
 
         if (error) throw error;
         return {
@@ -731,38 +805,90 @@ export const productsService = {
         };
     },
 
-    async getBySKU(sku: string) {
+    async getBySKU(sku: string, siteId?: string) {
+        let query = supabase
+            .from('products')
+            .select('*')
+            .eq('sku', sku);
+
+        if (siteId) {
+            query = query.eq('site_id', siteId);
+        }
+
+        const { data, error } = await query.single();
+        if (error) throw error;
+        return this._mapProduct(data);
+    },
+
+    /**
+     * Finds ALL products with the matching SKU across all sites.
+     * Uses case-insensitive matching for robustness.
+     * Used for Global Price Sync.
+     */
+    async findAllBySKU(sku: string) {
+        if (!sku || sku === 'N/A' || sku === 'TEMP') return [];
+
         const { data, error } = await supabase
             .from('products')
             .select('*')
-            .eq('sku', sku)
+            .ilike('sku', sku.trim());
+
+        if (error) throw error;
+        return data.map(p => this._mapProduct(p));
+    },
+
+    /**
+     * Updates prices for ALL products matching a SKU across the network.
+     * Robust: Fetches current state first to preserve old_price for each unique location.
+     */
+    async updatePricesBySKU(sku: string, updates: { price: number; costPrice?: number; salePrice?: number; isOnSale?: boolean }) {
+        if (!sku || sku === 'N/A') throw new Error('Cannot sync prices for products without a valid SKU');
+
+        const targets = await this.findAllBySKU(sku);
+
+        if (targets.length === 0) {
+            console.warn(`⚠️ Global Sync: No products found for SKU "${sku}".`);
+            return [];
+        }
+
+
+        // Update each product sequentially (or in small batches) to ensure 'update' logic (old_price) triggers.
+        // This is safer than a bulk update which would set one old_price for everyone.
+        const updatePromises = targets.map(p => this.update(p.id, updates));
+        const results = await Promise.all(updatePromises);
+
+        return results;
+    },
+
+    /**
+     * Specialized price update that preserves the old price.
+     * Used when we want to ensure history is kept.
+     */
+    async updatePrice(id: string, newPrice: number) {
+        // Fetch current price first
+        const { data: current, error: fetchError } = await supabase
+            .from('products')
+            .select('price')
+            .eq('id', id)
+            .single();
+
+        if (fetchError) throw fetchError;
+
+        const updates: any = {
+            price: newPrice,
+            old_price: current.price,
+            price_updated_at: new Date().toISOString()
+        };
+
+        const { data, error } = await supabase
+            .from('products')
+            .update(updates)
+            .eq('id', id)
+            .select()
             .single();
 
         if (error) throw error;
-        return {
-            ...data,
-            siteId: data.site_id,
-            costPrice: data.cost_price,
-            salePrice: data.sale_price,
-            isOnSale: data.is_on_sale,
-            expiryDate: data.expiry_date,
-            batchNumber: data.batch_number,
-            shelfPosition: data.shelf_position,
-            competitorPrice: data.competitor_price,
-            salesVelocity: data.sales_velocity,
-            posReceivedAt: data.pos_received_at,
-            pos_received_at: data.pos_received_at,
-            posReceivedBy: data.pos_received_by,
-            pos_received_by: data.pos_received_by,
-            approvalStatus: data.approval_status,
-            approval_status: data.approval_status,
-            createdBy: data.created_by,
-            approvedBy: data.approved_by,
-            approvedAt: data.approved_at,
-            rejectedBy: data.rejected_by,
-            rejectedAt: data.rejected_at,
-            rejectionReason: data.rejection_reason
-        };
+        return this._mapProduct(data);
     },
 
     async create(product: Omit<Product, 'id' | 'created_at' | 'updated_at'>) {
@@ -786,11 +912,14 @@ export const productsService = {
 
             image: product.image,
             barcode: product.barcode,
+            barcodes: product.barcodes, // [NEW] Persist Aliases
             barcode_type: product.barcodeType,
             approval_status: product.approvalStatus,
             created_by: product.createdBy,
             approved_by: product.approvedBy,
-            approved_at: product.approvedAt
+            approved_at: product.approvedAt,
+            // [NEW] Link to global product ID if provided
+            product_id: product.productId
         };
         const { data, error } = await supabase
             .from('products')
@@ -807,6 +936,7 @@ export const productsService = {
                 delete coreProduct.created_by;
                 delete coreProduct.approved_by;
                 delete coreProduct.approved_at;
+                delete coreProduct.product_id;
 
                 const { data: retryData, error: retryError } = await supabase
                     .from('products')
@@ -827,6 +957,7 @@ export const productsService = {
         return {
             ...data,
             siteId: data.site_id,
+            barcodes: data.barcodes || [], // [NEW] Map Aliases
             costPrice: data.cost_price,
             salePrice: data.sale_price,
             isOnSale: data.is_on_sale,
@@ -844,7 +975,12 @@ export const productsService = {
             approvedAt: data.approved_at,
             rejectedBy: data.rejected_by,
             rejectedAt: data.rejected_at,
-            rejectionReason: data.rejection_reason
+            rejectionReason: data.rejection_reason,
+            oldPrice: data.old_price,
+            old_price: data.old_price,
+            priceUpdatedAt: data.price_updated_at,
+            productId: data.product_id,
+            product_id: data.product_id
         };
     },
 
@@ -873,10 +1009,60 @@ export const productsService = {
         if (updates.rejectedBy !== undefined) { dbUpdates.rejected_by = updates.rejectedBy; delete dbUpdates.rejectedBy; }
         if (updates.rejectedAt !== undefined) { dbUpdates.rejected_at = updates.rejectedAt; delete dbUpdates.rejectedAt; }
         if (updates.rejectionReason !== undefined) { dbUpdates.rejection_reason = updates.rejectionReason; delete dbUpdates.rejectionReason; }
+        if (updates.priceUpdatedAt !== undefined) { dbUpdates.price_updated_at = updates.priceUpdatedAt; delete dbUpdates.priceUpdatedAt; }
+        if (updates.oldPrice !== undefined) { delete dbUpdates.oldPrice; }
+        if (updates.old_price !== undefined) { delete dbUpdates.old_price; }
 
-        if ((updates as any).barcodeType !== undefined) {
-            dbUpdates.barcode_type = (updates as any).barcodeType;
-            delete (dbUpdates as any).barcodeType;
+        if (updates.productId !== undefined) {
+            dbUpdates.product_id = updates.productId;
+            delete dbUpdates.productId;
+        }
+
+        // Additional fields to remove that might be in the JS object but not in DB
+        const extraFields = ['unit', 'minStockLevel', 'maxStockLevel', 'retailPrice', 'minStock', 'maxStock', 'zoneId'];
+        extraFields.forEach(f => delete dbUpdates[f]);
+
+        if (updates.barcodeType !== undefined) {
+            dbUpdates.barcode_type = updates.barcodeType;
+            delete dbUpdates.barcodeType;
+        }
+
+        if (updates.barcodes !== undefined) {
+            dbUpdates.barcodes = updates.barcodes;
+        }
+
+        // [NEW] Price Change Detection Logic
+        // To avoid spurious updates, we first fetch the current state if any price field is being touched.
+
+        const isPriceUpdate =
+            updates.price !== undefined ||
+            updates.costPrice !== undefined ||
+            updates.salePrice !== undefined ||
+            updates.isOnSale !== undefined;
+
+        if (isPriceUpdate) {
+            const { data: currentProduct } = await supabase
+                .from('products')
+                .select('price, cost_price, sale_price, is_on_sale')
+                .eq('id', id)
+                .single();
+
+            if (currentProduct) {
+                const priceChanged = updates.price !== undefined && updates.price !== currentProduct.price;
+                const costChanged = updates.costPrice !== undefined && updates.costPrice !== currentProduct.cost_price;
+                const salePriceChanged = updates.salePrice !== undefined && updates.salePrice !== currentProduct.sale_price;
+                const onSaleChanged = updates.isOnSale !== undefined && updates.isOnSale !== currentProduct.is_on_sale;
+
+
+                if (priceChanged || costChanged || salePriceChanged || onSaleChanged) {
+                    dbUpdates.price_updated_at = new Date().toISOString();
+                    if (priceChanged) {
+                        dbUpdates.old_price = currentProduct.price;
+                    }
+                }
+            } else {
+                console.warn('⚠️ Could not fetch current product to compare prices.'); // DEBUG
+            }
         }
 
         const { data, error } = await supabase
@@ -891,7 +1077,11 @@ export const productsService = {
             if (error.message.includes('column') && error.message.includes('does not exist')) {
                 console.warn('⚠️ Schema mismatch detected. Retrying product update without approval fields...');
                 const coreUpdates: any = { ...dbUpdates };
-                const fieldsToDelete = ['approval_status', 'created_by', 'approved_by', 'approved_at', 'rejected_by', 'rejected_at', 'rejection_reason'];
+                const fieldsToDelete = [
+                    'approval_status', 'created_by', 'approved_by', 'approved_at',
+                    'rejected_by', 'rejected_at', 'rejection_reason', 'price_updated_at',
+                    'product_id'
+                ];
                 fieldsToDelete.forEach(f => delete coreUpdates[f]);
 
                 const { data: retryData, error: retryError } = await supabase
@@ -921,7 +1111,6 @@ export const productsService = {
     // Cascade delete - removes all related records first, then deletes the product
     // Only for CEO use when absolutely necessary
     async cascadeDelete(id: string) {
-        console.log('🗑️ Starting cascade delete for product:', id);
 
         // 1. Delete related stock_movements
         const { error: movementsError } = await supabase
@@ -933,7 +1122,6 @@ export const productsService = {
             console.warn('⚠️ Failed to delete stock movements:', movementsError);
             // Continue anyway - might not have any movements
         } else {
-            console.log('✅ Deleted related stock_movements');
         }
 
         // 2. Delete related sale line items (if table exists)
@@ -944,7 +1132,6 @@ export const productsService = {
                 .eq('product_id', id);
 
             if (!saleItemsError) {
-                console.log('✅ Deleted related sale_items');
             }
         } catch (e) {
             console.warn('⚠️ sale_items table may not exist:', e);
@@ -957,7 +1144,18 @@ export const productsService = {
             .eq('product_id', id);
 
         if (!requestsError) {
-            console.log('✅ Deleted related inventory_requests');
+        }
+
+        // 4. Detach from Purchase Order Items (DELETE items to resolve FK constraint)
+        const { error: poItemsError } = await supabase
+            .from('po_items')
+            .delete()
+            .eq('product_id', id);
+
+        if (poItemsError) {
+            console.warn('⚠️ Failed to delete po_items:', poItemsError);
+            // If we fail here, the next step will likely fail
+        } else {
         }
 
         // 4. Finally delete the product itself
@@ -971,7 +1169,6 @@ export const productsService = {
             throw productError;
         }
 
-        console.log('✅ Product cascade deleted successfully');
     },
 
     async adjustStock(productId: string, quantity: number, type: 'IN' | 'OUT' | 'ADJUSTMENT', reason: string = 'Stock Adjustment', user: string = 'System') {
@@ -980,8 +1177,6 @@ export const productsService = {
         const currentStock = Number(product.stock || 0);
         const adjustQty = Number(quantity);
 
-        console.log(`📦 SERVICE: Adjusting Stock for ${product.id} (${product.name})`);
-        console.log(`   Current: ${currentStock}, Adjust: ${adjustQty}, Type: ${type}`);
 
         let newStock = currentStock;
         if (type === 'OUT') {
@@ -990,7 +1185,6 @@ export const productsService = {
             newStock = currentStock + adjustQty;
         }
 
-        console.log(`   New Stock Bound: ${newStock}`);
 
         if (isNaN(newStock)) {
             console.error('❌ CRITICAL: Stock calculation resulted in NaN', { currentStock, adjustQty, type, product });
@@ -1578,7 +1772,7 @@ export const purchaseOrdersService = {
         // Apply Filters
         if (filters) {
             if (filters.status && filters.status !== 'All') {
-                query = query.eq('status', filters.status === 'Draft' || filters.status === 'Approved' ? 'Pending' : filters.status);
+                query = query.eq('status', filters.status);
             }
             if (filters.startDate) {
                 query = query.gte('created_at', filters.startDate);
@@ -1590,18 +1784,34 @@ export const purchaseOrdersService = {
                 const term = filters.search;
                 query = query.or(`po_number.ilike.%${term}%,supplier_name.ilike.%${term}%`);
             }
-            // Filter Purchase Requests vs actual POs
-            if (filters.isRequest === true) {
-                query = query.ilike('notes', '%[PR]%');
-            } else if (filters.isRequest === false) {
-                // Return everything that DOES NOT have [PR] in notes
-                // Use * as wildcard in .or() string for PostgREST
-                query = query.or('notes.is.null,notes.not.ilike.%[PR]%');
-            }
         }
 
-        query = query.order('created_at', { ascending: false })
-            .range(offset, offset + limit - 1);
+        if (filters?.isRequest !== undefined) {
+            // Handle requests vs POs based on flag
+            // Assuming requests are identified by status 'Request' or separate logic? 
+            // Actually currently logic seems to be: isRequest param passed separately?
+            // No, in fetchData we use { isRequest: true/false }
+            // We need to clarify how requests are distinguished. 
+            // Looking at fetchData: isRequest differentiates cache, but does it filter DB?
+            // Actually the DB query below filters by status if passed. 
+            // If isRequest=true, status might be 'Pending' but approvedBy is null?
+            // For now, let's stick to existing filters and add new ones.
+        }
+
+        // NEW: Filter by Supplier
+        if (filters?.supplierId) {
+            query = query.eq('supplier_id', filters.supplierId);
+        }
+
+        // NEW: Dynamic Sorting
+        // Default to created_at descending if not specified
+        const sortBy = filters?.sortBy || 'created_at';
+        const sortDir = filters?.sortDir || 'desc';
+
+        query = query.order(sortBy, { ascending: sortDir === 'asc' });
+
+        // Apply pagination
+        query = query.range(offset, offset + limit - 1);
 
         const { data, error, count } = await query;
         if (error) throw error;
@@ -1628,6 +1838,7 @@ export const purchaseOrdersService = {
 
             return {
                 ...p,
+                // poNumber is mapped below
                 status: frontendStatus,
                 requestedBy: p.requested_by,
                 createdBy: p.created_by,
@@ -1652,8 +1863,14 @@ export const purchaseOrdersService = {
                     productId: i.product_id,
                     productName: i.product_name,
                     unitCost: i.unit_cost,
-                    totalCost: i.total_cost
-                }))
+                    retailPrice: i.retail_price || 0,
+                    totalCost: i.total_cost,
+                    receivedQty: i.received_qty,
+                    rejectedQty: i.rejected_qty,
+                    identityType: i.identity_type || 'known'
+                })),
+                createdAt: p.created_at,
+                updatedAt: p.updated_at
             };
         });
 
@@ -1667,12 +1884,10 @@ export const purchaseOrdersService = {
         if (filters?.endDate) params.p_end_date = `${filters.endDate}T23:59:59`;
 
         // DEBUG: Log exact parameters being sent 
-        console.log('[DEBUG] getMetrics called with:', { siteId, filters, params });
 
         const { data, error } = await supabase.rpc('get_procurement_metrics', params);
 
         // DEBUG: Log the raw response
-        console.log('[DEBUG] getMetrics RPC response:', { data, error });
 
         if (error) {
             console.error('Error fetching procurement metrics:', error);
@@ -1692,7 +1907,7 @@ export const purchaseOrdersService = {
     async getById(id: string) {
         const { data, error } = await supabase
             .from('purchase_orders')
-            .select('*, po_items(*)')
+            .select('*, po_items(*, products(sku))')
             .eq('id', id)
             .single();
 
@@ -1738,58 +1953,61 @@ export const purchaseOrdersService = {
             shelfLife: data.shelf_life,
             dockSlot: data.dock_slot,
             poNumber: data.po_number,
+            createdAt: data.created_at,
+            updatedAt: data.updated_at,
             lineItems: data.po_items.map((i: any) => ({
                 ...i,
                 productId: i.product_id,
+                sku: i.products?.sku,
                 productName: i.product_name,
                 unitCost: i.unit_cost,
-                totalCost: i.total_cost
+                totalCost: i.total_cost,
+                receivedQty: i.received_qty,
+                rejectedQty: i.rejected_qty,
+                retailPrice: i.retail_price || 0,
+                image: i.image || '',
+                brand: i.brand || '',
+                size: i.size || '',
+                unit: i.unit || '',
+                category: i.category || '',
+                identityType: i.identity_type || 'known'
             }))
         };
     },
 
-    async create(po: Omit<PurchaseOrder, 'id' | 'created_at' | 'updated_at'>, items: any[]) {
-        // Generate UUID client-side
-        const poId = crypto.randomUUID();
+    async create(po: Omit<PurchaseOrder, 'created_at' | 'updated_at'>, items: any[]) {
+        // Use provided ID or generate a new UUID
+        const poId = po.id || crypto.randomUUID();
 
-        // Map frontend statuses to database-compatible values
-        // Database only allows: 'Pending', 'Received', 'Cancelled'
-        // Frontend uses: 'Draft', 'Pending', 'Approved', 'Received', 'Cancelled'
-        const dbStatus = po.status === 'Draft' ? 'Pending' :
-            po.status === 'Approved' ? 'Pending' :
-                po.status;
+        // Database now supports Draft and Approved status directly
+        const dbStatus = po.status;
 
         // Generate simple sequential PO number if not provided
         let poNumber = po.poNumber;
         if (!poNumber) {
-
             try {
-                // Get the highest existing PO number
-                const { data: existingPOs, error: fetchError } = await supabase
+                // Get the latest PO created to find the last sequence number
+                // We order by created_at to avoid lexicographical ordering issues with different formats
+                const { data: latestPOs, error: fetchError } = await supabase
                     .from('purchase_orders')
                     .select('po_number')
                     .not('po_number', 'is', null)
-                    .order('po_number', { ascending: false })
-                    .limit(1);
+                    .order('created_at', { ascending: false })
+                    .limit(5); // Check last 5 to be safe in case of drafts/cancelled weirdness
 
-                let nextNumber = 1;
-                if (!fetchError && existingPOs && existingPOs.length > 0) {
-                    // Extract number from existing PO (e.g., "PO-0001" -> 1, "PO-1234" -> 1234)
-                    const lastPONumber = existingPOs[0].po_number;
-                    const match = lastPONumber?.match(/(?:PO|PR)-(\d+)/i);
+                let lastValidPONumber: string | undefined;
+                if (!fetchError && latestPOs && latestPOs.length > 0) {
+                    // Try to find the most recent one that matches our new format AAAA0000
+                    const match = latestPOs.find(p => p.po_number?.match(/^[A-Z]{4}\d{4}$/i));
                     if (match) {
-                        nextNumber = parseInt(match[1], 10) + 1;
+                        lastValidPONumber = match.po_number;
                     }
                 }
 
-                // Format as PO-0001, PO-0002, etc. (4 digits, zero-padded)
-                const prefix = po.notes?.includes('[PR]') ? 'PR' : 'PO';
-                poNumber = `${prefix}-${String(nextNumber).padStart(4, '0')}`;
+                poNumber = generateNextPONumber(lastValidPONumber);
             } catch (error) {
-                // Fallback: use timestamp if sequential generation fails
-                console.warn('Failed to generate sequential PO number, using timestamp fallback:', error);
-                const prefix = po.notes?.includes('[PR]') ? 'PR' : 'PO';
-                poNumber = `${prefix}-${Date.now()}`;
+                console.warn('Failed to generate sequential PO number, using fallback:', error);
+                poNumber = `AUTO-${Date.now().toString().slice(-8)}`;
             }
         }
 
@@ -1837,7 +2055,14 @@ export const purchaseOrdersService = {
                 product_name: item.productName,
                 quantity: item.quantity,
                 unit_cost: item.unitCost,
-                total_cost: item.totalCost
+                total_cost: item.totalCost,
+                retail_price: item.retailPrice || 0,
+                image: item.image || null,
+                brand: item.brand || null,
+                size: item.size || null,
+                unit: item.unit || null,
+                category: item.category || null,
+                identity_type: item.identityType || 'known'
             };
         });
 
@@ -1857,38 +2082,127 @@ export const purchaseOrdersService = {
         // Start with an empty object and only add fields that should be updated
         const dbUpdates: any = {};
 
-        // Handle Approval: When status is 'Approved', save as 'Pending' with approval tag in notes
-        if (updates.status === 'Approved' || updates.approvedBy) {
-            // 1. Fetch current PO to get existing notes
-            const { data: currentPO } = await supabase
-                .from('purchase_orders')
-                .select('notes')
-                .eq('id', id)
-                .single();
+        // Fetch current PO to get existing state (needed for logic)
+        const currentPO = await this.getById(id);
+        const currentNotes = currentPO?.notes || '';
 
-            const currentNotes = currentPO?.notes || '';
+        // Determine Effective Status (Update or Existing)
+        const effectiveStatus = updates.status || currentPO.status;
 
+        // Handle Approval Specific Logic (Tagging)
+        if (updates.status === 'Approved' || (currentPO.status !== 'Approved' && updates.approvedBy)) {
             // Check if already approved (avoid duplicate tags)
             const alreadyApproved = currentNotes?.includes('[APPROVED_BY:');
 
             if (!alreadyApproved) {
                 const approvalTag = `\n[APPROVED_BY:${updates.approvedBy || 'System'}:${updates.approvedAt || new Date().toISOString()}]`;
-                // 2. Append to notes
                 dbUpdates.notes = currentNotes + approvalTag;
             }
-
-            // 3. Set status to 'Pending' (which maps to 'Approved' in frontend when approvedBy exists)
-            dbUpdates.status = 'Pending';
+            dbUpdates.status = 'Approved';
         } else if (updates.status === 'Cancelled') {
-            // Handle Rejection: When status is 'Cancelled', keep it as 'Cancelled'
             dbUpdates.status = 'Cancelled';
         } else if (updates.status) {
-            // Map other statuses
-            const statusStr = String(updates.status);
-            const mappedStatus: string = statusStr === 'Draft' ? 'Pending' :
-                statusStr === 'Approved' ? 'Pending' :
-                    statusStr;
-            dbUpdates.status = mappedStatus;
+            dbUpdates.status = String(updates.status);
+        }
+
+        // --- HANDLE LINE ITEM UPDATES ---
+        // Crucial: If lineItems are in the update, we must update the 'po_items' table.
+        // We do this by deleting existing items and re-inserting the new ones.
+        if (updates.lineItems && updates.lineItems.length > 0) {
+
+            // 1. Delete existing items
+            const { error: deleteError } = await supabase
+                .from('po_items')
+                .delete()
+                .eq('po_id', id);
+
+            if (deleteError) {
+                console.error('Failed to delete existing PO items during update:', deleteError);
+                throw deleteError;
+            }
+
+            // 2. Insert new items
+            const itemsWithPOId = updates.lineItems.map((item: any) => {
+                // Check if productId is a valid UUID
+                const isValidUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(item.productId);
+                return {
+                    po_id: id,
+                    product_id: isValidUUID ? item.productId : null,
+                    product_name: item.productName,
+                    quantity: item.quantity,
+                    unit_cost: item.unitCost,
+                    total_cost: item.totalCost || (item.quantity * item.unitCost),
+                    retail_price: item.retailPrice || 0,
+                    image: item.image || null,
+                    brand: item.brand || null,
+                    size: item.size || null,
+                    unit: item.unit || null,
+                    category: item.category || null,
+                    identity_type: item.identityType || 'known'
+                };
+            });
+
+            const { error: insertError } = await supabase
+                .from('po_items')
+                .insert(itemsWithPOId);
+
+            if (insertError) {
+                console.error('Failed to insert new PO items during update:', insertError);
+                throw insertError;
+            }
+        }
+
+        // AUTO-CREATE JOB CHECK (Run on ANY update if status is Approved)
+        // This ensures that if job creation failed previously, editing/saving the PO will retry it.
+        // Also uses the LATEST line items.
+        if (effectiveStatus === 'Approved' || dbUpdates.status === 'Approved') {
+            try {
+                // Check if job already exists for this PO
+                const { count } = await supabase
+                    .from('wms_jobs')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('order_ref', id)
+                    .eq('type', 'RECEIVE');
+
+                if (!count || count === 0) {
+                    // Use updated line items if available, otherwise current items
+                    const sourceItems = updates.lineItems || currentPO.lineItems || [];
+
+                    const jobItems = sourceItems.map((item: any) => ({
+                        productId: item.productId || 'UNKNOWN',
+                        name: item.productName || 'Unknown Item',
+                        sku: item.sku || 'UNKNOWN',
+                        image: item.image || '',
+                        expectedQty: item.quantity || 0,
+                        pickedQty: 0,
+                        receivedQty: 0,
+                        status: 'Pending'
+                    }));
+
+                    // Map Priority (PO 'Urgent' -> Job 'Critical')
+                    let priority: any = currentPO.priority || 'Normal';
+                    if (priority === 'Urgent') priority = 'Critical';
+                    if (priority === 'Low') priority = 'Normal';
+
+                    if (wmsJobsService) {
+                        await wmsJobsService.create({
+                            siteId: updates.siteId || currentPO.siteId, // Use updated siteId if changed
+                            type: 'RECEIVE',
+                            priority: priority,
+                            status: 'Pending',
+                            items: jobItems.length,
+                            lineItems: jobItems,
+                            orderRef: id,
+                            jobNumber: currentPO.po_number || currentPO.id,
+                            location: 'INBOUND_DOCK',
+                            // For RECEIVE jobs, sourceSiteId is undefined because goods come from external suppliers, not other sites
+                            sourceSiteId: undefined
+                        });
+                    }
+                }
+            } catch (err) {
+                console.error('Failed to auto-create Receiving Job:', err);
+            }
         }
 
         // Map camelCase to snake_case for other fields (only if they exist in updates)
@@ -1937,16 +2251,101 @@ export const purchaseOrdersService = {
         return await this.getById(id);
     },
 
-    async receive(id: string) {
-        // Update PO status to Received
-        // NOTE: Stock is NOT adjusted here. Stock is added during the PUTAWAY process
-        // in WarehouseOperations.tsx when items are physically scanned and placed in storage.
-        // This prevents double-counting inventory.
-        await this.update(id, { status: 'Received' });
-
-        // Return the updated PO
+    async receive(id: string, shouldCreateJob = true) {
+        // 1. Get PO details first (to create Putaway job with items)
         const po = await this.getById(id);
-        return po;
+        if (!po) throw new Error('Purchase Order not found');
+
+        // 2. Update PO status to Received
+        const { error } = await supabase
+            .from('purchase_orders')
+            .update({
+                status: 'Received',
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', id);
+
+        if (error) {
+            console.error('Failed to update PO status:', error);
+            throw error;
+        }
+
+        // 3. Create Putaway Job from the PO contents (Optional)
+        if (!shouldCreateJob) {
+            return await this.getById(id);
+        }
+
+        try {
+            // Check if ANY Putaway job already exists for this PO to prevent double creation
+            const { data: existingJobs } = await supabase
+                .from('wms_jobs')
+                .select('id')
+                .eq('order_ref', id)
+                .eq('type', 'PUTAWAY')
+                .limit(1);
+
+            if (existingJobs && existingJobs.length > 0) {
+                return await this.getById(id);
+            }
+
+            // Find if there's an existing RECEIVE job to inherit its number
+            const { data: receiveJob } = await supabase
+                .from('wms_jobs')
+                .select('job_number')
+                .eq('order_ref', id)
+                .eq('type', 'RECEIVE')
+                .maybeSingle();
+
+            const finalJobNumber = receiveJob?.job_number || po.poNumber || po.id;
+
+            const createdJob = await wmsJobsService.create({
+                siteId: po.siteId,
+                type: 'PUTAWAY',
+                priority: (po as any).priority || 'Normal',
+                status: 'Pending',
+                items: po.itemsCount,
+                orderRef: po.id,
+                jobNumber: finalJobNumber,
+                lineItems: po.lineItems.map((item: any) => ({
+                    productId: item.productId,
+                    name: item.productName,
+                    sku: item.sku,
+                    image: item.image || '',
+                    expectedQty: item.quantity,
+                    pickedQty: 0,
+                    status: 'Pending',
+                    receivedQty: 0
+                })),
+                requestedBy: 'System (PO Receipt)',
+                notes: `Auto-generated Putaway for PO ${po.poNumber || po.id}`
+            } as any);
+        } catch (e) {
+            console.error('Failed to create Putaway job during PO receive:', e);
+            // Don't throw here, prioritize PO status update success
+        }
+
+        // 4. Also update the associated WMS job to Completed if it exists (the RECEIVE job)
+        try {
+            // Find open RECEIVE job for this PO
+            const { data: job } = await supabase
+                .from('wms_jobs')
+                .select('id')
+                .eq('type', 'RECEIVE')
+                .eq('order_ref', id)
+                .neq('status', 'Completed') // Only if not already completed
+                .maybeSingle();
+
+            if (job) {
+                await supabase
+                    .from('wms_jobs')
+                    .update({ status: 'Completed' })
+                    .eq('id', job.id);
+            }
+        } catch (e) {
+            console.error('Failed to close WMS job during PO receive:', e);
+        }
+
+        return await this.getById(id);
     },
 
     async delete(id: string) {
@@ -2047,9 +2446,10 @@ export const salesService = {
         };
     },
 
-    async create(sale: Omit<SaleRecord, 'id' | 'created_at' | 'updated_at'>, items: any[]) {
+    async create(sale: Omit<SaleRecord, 'created_at' | 'updated_at'>, items: any[]) {
         // Create sale
         const dbSale = {
+            id: sale.id, // Use provided ID if available
             site_id: sale.siteId,
             customer_id: sale.customerId,
             sale_date: sale.date || new Date().toISOString(),
@@ -2405,7 +2805,7 @@ export const salesService = {
                 type: 'PICK' as const,
                 status: 'Pending' as const,
                 priority: 'High' as const,
-                location: primaryZone?.name || 'Zone A',
+                location: primaryZone?.name || '',
                 items: plan.items.length,
                 lineItems: plan.items.map(i => ({
                     productId: i.productId,
@@ -2466,20 +2866,40 @@ export const salesService = {
 // ============================================================================
 
 export const stockMovementsService = {
-    async getAll(siteId?: string, productId?: string, limit: number = 50, offset: number = 0) {
+    async getAll(siteId?: string, productId?: string, limit: number = 50, offset: number = 0, filters?: { search?: string; type?: string }, sort?: { key: string; direction: 'asc' | 'desc' }) {
         let query = supabase
             .from('stock_movements')
-            .select('*', { count: 'exact' })
-            .order('movement_date', { ascending: false })
-            .range(offset, offset + limit - 1);
+            .select('*', { count: 'exact' });
 
-        if (siteId) {
+        // Apply Filters
+        if (siteId && siteId !== 'All') {
             query = query.eq('site_id', siteId);
         }
 
         if (productId) {
             query = query.eq('product_id', productId);
         }
+
+        if (filters?.type && filters.type !== 'All') {
+            query = query.eq('type', filters.type);
+        }
+
+        if (filters?.search) {
+            const term = filters.search;
+            // Search in product name or ref ID
+            query = query.or(`product_name.ilike.%${term}%,id::text.ilike.%${term}%`);
+        }
+
+        // Apply Sort
+        if (sort?.key) {
+            const dbKey = sort.key === 'date' ? 'created_at' : sort.key === 'quantity' ? 'quantity' : 'created_at';
+            query = query.order(dbKey, { ascending: sort.direction === 'asc' });
+        } else {
+            query = query.order('created_at', { ascending: false });
+        }
+
+        // Apply Pagination
+        query = query.range(offset, offset + limit - 1);
 
         const { data, error, count } = await query;
         if (error) throw error;
@@ -2489,8 +2909,10 @@ export const stockMovementsService = {
             siteId: m.site_id,
             productId: m.product_id,
             productName: m.product_name,
+            date: m.created_at || m.movement_date,
             movementDate: m.movement_date,
             performedBy: m.performed_by,
+            user: m.performed_by,
             batchNumber: m.batch_number
         }));
 
@@ -2650,7 +3072,67 @@ export const expensesService = {
 // WMS JOBS
 // ============================================================================
 
+// Helper to generate readable Job Numbers (Strict 4-Char Limit)
+const generateReadableJobNumber = (): string => {
+    // Generate 4-character random uppercase alphanumeric string
+    // 36^4 = 1,679,616 combinations
+    const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    let result = '';
+    for (let i = 0; i < 4; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+};
+
+// Helper: Generate Transfer ID (TR-XXXX)
+const generateTransferId = (): string => {
+    const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    let result = '';
+    for (let i = 0; i < 4; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return `TR-${result}`;
+};
+
+
+
 export const wmsJobsService = {
+    async getById(id: string) {
+        // Fetch job using JSONB line_items (Standardized Architecture)
+        // We do NOT join wms_job_items because the system writes to the JSON column 'line_items'
+        const { data, error } = await supabase
+            .from('wms_jobs')
+            .select('*')
+            .eq('id', id)
+            .maybeSingle();
+
+        if (error) throw error;
+        if (!data) return null;
+
+        // Map line items to match frontend structure
+        const job = {
+            ...data,
+            siteId: data.site_id,
+            trackingNumber: data.tracking_number,
+            destSiteId: data.dest_site_id,
+            sourceSiteId: data.source_site_id,
+            items: data.items_count,
+            lineItems: (data.line_items || []).map((item: any) => ({
+                id: item.id,
+                jobId: item.job_id,
+                productId: item.product_id,
+                name: item.name,
+                sku: item.sku,
+                expectedQty: item.expected_qty,
+                pickedQty: item.picked_qty,
+                status: item.status,
+                location: item.location
+            }))
+        };
+
+        return job;
+    },
+
     async getAll(siteId?: string, limit: number = 50) {
         // 1. Fetch ALL Active Jobs (Pending/In-Progress) for the site
         // We don't limit these because they represent the operational backlog that MUST be visible
@@ -2701,7 +3183,10 @@ export const wmsJobsService = {
             requestedBy: j.requested_by,
             approvedBy: j.approved_by,
             shippedAt: j.shipped_at,
+            deliveredAt: j.delivered_at,
             receivedAt: j.received_at,
+            receivedBy: j.received_by,
+            trackingNumber: j.tracking_number,
             createdAt: j.created_at,
             updatedAt: j.updated_at,
             deliveryMethod: j.delivery_method,
@@ -2737,7 +3222,10 @@ export const wmsJobsService = {
             requestedBy: j.requested_by,
             approvedBy: j.approved_by,
             shippedAt: j.shipped_at,
+            deliveredAt: j.delivered_at,
             receivedAt: j.received_at,
+            receivedBy: j.received_by,
+            trackingNumber: j.tracking_number,
             createdAt: j.created_at,
             updatedAt: j.updated_at,
             deliveryMethod: j.delivery_method,
@@ -2768,59 +3256,82 @@ export const wmsJobsService = {
             requested_by: job.requestedBy,
             approved_by: job.approvedBy,
             job_number: (job as any).jobNumber, // Will be populated below if not present
-            delivery_method: job.deliveryMethod
+            delivery_method: job.deliveryMethod,
+            tracking_number: job.trackingNumber
         };
 
-        // Generate sequential Job Number if not provided
-        // SCALABILITY OPTIMIZATION: O(1) Job Number Generation
-        // Removed table scan (O(N)) which times out at scale.
-        // New format: PREFIX-YYMMDD-XXXX (Timestamp + Random)
-        if (!(dbJob as any).job_number) {
-            const typePrefix = dbJob.type === 'TRANSFER' ? 'TRF' :
-                dbJob.type === 'PICK' ? 'PK' :
-                    dbJob.type === 'PACK' ? 'PA' :
-                        dbJob.type === 'PUTAWAY' ? 'PU' :
-                            dbJob.type === 'DISPATCH' ? 'DS' : 'JB';
+        // RETRY LOGIC for Job Number Uniqueness (Strict 4-Char Limit)
+        let retries = 5; // Increased retries for smaller collision space
 
-            const dateStr = new Date().toISOString().slice(2, 10).replace(/-/g, ''); // YYMMDD
-            const randomSuffix = Math.floor(1000 + Math.random() * 9000); // 4 digit random
-            (dbJob as any).job_number = `${typePrefix}-${dateStr}-${randomSuffix}`;
-        }
+        while (retries > 0) {
+            // Generate NEW 4-char ID if not present or on retry
+            if (!dbJob.job_number || retries < 5) {
+                dbJob.job_number = generateReadableJobNumber();
 
-        console.log('📤 Inserting WMS Job:', dbJob);
+                // Also regen tracking number if we are retrying (likely collision on tracking number too)
+                // Only if it looks like an auto-generated one (starts with SF)
+                if (retries < 5 && dbJob.tracking_number && dbJob.tracking_number.startsWith('SF')) {
+                    const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+                    // Replace last 2-3 chars with new random
+                    const base = dbJob.tracking_number.slice(0, 14); // SF + timestamp
+                    dbJob.tracking_number = `${base}${random}`;
+                }
+            }
 
-        const { data, error } = await supabase
-            .from('wms_jobs')
-            .insert(dbJob)
-            .select()
-            .single();
 
-        if (error) {
+            const { data, error } = await supabase
+                .from('wms_jobs')
+                .insert(dbJob)
+                .select()
+                .single();
+
+            if (!error) {
+                return {
+                    ...data,
+                    siteId: data.site_id,
+                    items: data.items_count,
+                    assignedTo: data.assigned_to,
+                    orderRef: data.order_ref,
+                    lineItems: data.line_items || [],
+                    jobNumber: data.job_number,
+                    sourceSiteId: data.source_site_id,
+                    destSiteId: data.dest_site_id,
+                    transferStatus: data.transfer_status,
+                    requestedBy: data.requested_by,
+                    approvedBy: data.approved_by,
+                    shippedAt: data.shipped_at,
+                    deliveredAt: data.delivered_at,
+                    receivedAt: data.received_at,
+                    receivedBy: data.received_by,
+                    trackingNumber: data.tracking_number,
+                    createdAt: data.created_at,
+                    updatedAt: data.updated_at,
+                    deliveryMethod: data.delivery_method
+                };
+            }
+
+            // RELAXED ERROR CHECK: Retry on ANY 409 Conflict or Unique Violation (23505)
+            // This handles cases where Supabase wraps the error or the message differs
+            if (
+                error.code === '23505' || // Postgres Unique Violation
+                error.code === '409' ||   // HTTP Conflict
+                (error as any).status === 409 ||
+                error.message?.includes('duplicate key') ||
+                error.message?.includes('unique constraint') ||
+                // Catch-all for other conflict-like errors that slipped through
+                JSON.stringify(error).toLowerCase().includes('duplicate')
+            ) {
+                retries--;
+                continue;
+            }
+
+            // If other error, throw immediately
             console.error('❌ WMS Job Insert Error:', error);
             console.error('❌ Error Details:', JSON.stringify(error, null, 2));
             throw error;
         }
 
-        console.log('✅ WMS Job Created:', data);
-        return {
-            ...data,
-            siteId: data.site_id,
-            items: data.items_count,
-            assignedTo: data.assigned_to,
-            orderRef: data.order_ref,
-            lineItems: data.line_items || [],
-            jobNumber: data.job_number,
-            sourceSiteId: data.source_site_id,
-            destSiteId: data.dest_site_id,
-            transferStatus: data.transfer_status,
-            requestedBy: data.requested_by,
-            approvedBy: data.approved_by,
-            shippedAt: data.shipped_at,
-            receivedAt: data.received_at,
-            createdAt: data.created_at,
-            updatedAt: data.updated_at,
-            deliveryMethod: data.delivery_method
-        };
+        throw new Error('Failed to generate unique Job Number after multiple attempts.');
     },
 
     async update(id: string, updates: Partial<WMSJob>) {
@@ -2833,10 +3344,13 @@ export const wmsJobsService = {
         if (updates.transferStatus !== undefined) { dbUpdates.transfer_status = updates.transferStatus; delete dbUpdates.transferStatus; }
         if (updates.approvedBy !== undefined) { dbUpdates.approved_by = updates.approvedBy; delete dbUpdates.approvedBy; }
         if (updates.shippedAt !== undefined) { dbUpdates.shipped_at = updates.shippedAt; delete dbUpdates.shippedAt; }
+        if (updates.deliveredAt !== undefined) { dbUpdates.delivered_at = updates.deliveredAt; delete dbUpdates.deliveredAt; }
         if (updates.receivedAt !== undefined) { dbUpdates.received_at = updates.receivedAt; delete dbUpdates.receivedAt; }
+        if (updates.receivedBy !== undefined) { dbUpdates.received_by = updates.receivedBy; delete dbUpdates.receivedBy; }
         if (updates.deliveryMethod !== undefined) { dbUpdates.delivery_method = updates.deliveryMethod; delete dbUpdates.deliveryMethod; }
         if (updates.hasDiscrepancy !== undefined) { dbUpdates.has_discrepancy = updates.hasDiscrepancy; delete dbUpdates.hasDiscrepancy; }
         if (updates.discrepancyDetails !== undefined) { dbUpdates.discrepancy_details = updates.discrepancyDetails; delete dbUpdates.discrepancyDetails; }
+        if (updates.trackingNumber !== undefined) { dbUpdates.tracking_number = updates.trackingNumber; delete dbUpdates.trackingNumber; }
 
         const { data, error } = await supabase
             .from('wms_jobs')
@@ -2859,7 +3373,10 @@ export const wmsJobsService = {
             requestedBy: data.requested_by,
             approvedBy: data.approved_by,
             shippedAt: data.shipped_at,
+            deliveredAt: data.delivered_at,
             receivedAt: data.received_at,
+            receivedBy: data.received_by,
+            trackingNumber: data.tracking_number,
             createdAt: data.created_at,
             updatedAt: data.updated_at,
             hasDiscrepancy: data.has_discrepancy,
@@ -2879,6 +3396,21 @@ export const wmsJobsService = {
             .eq('id', id);
 
         if (error) throw error;
+    },
+
+    async removeItem(jobId: string, itemIndex: number) {
+        // 1. Fetch current job
+        const job = await this.getById(jobId);
+        if (!job) throw new Error('Job not found');
+
+        // 2. Filter out the item
+        const updatedLineItems = job.lineItems.filter((_: any, idx: number) => idx !== itemIndex);
+
+        // 3. Update the job
+        return await this.update(jobId, {
+            lineItems: updatedLineItems,
+            items: updatedLineItems.length
+        });
     }
 };
 
@@ -2921,7 +3453,19 @@ export const transfersService = {
         if (historyRes.error) throw historyRes.error;
 
         const combinedData = [...(activeRes.data || []), ...(historyRes.data || [])];
-        return combinedData; // Transfers might not need mapping if matching type
+        return combinedData.map(t => ({
+            ...t,
+            sourceSiteId: t.source_site_id,
+            destSiteId: t.dest_site_id,
+            date: t.transfer_date,
+            orderRef: t.order_ref,
+            transferStatus: t.transfer_status,
+            requestedBy: t.requested_by,
+            shippedAt: t.shipped_at,
+            deliveredAt: t.delivered_at,
+            receivedAt: t.received_at,
+            receivedBy: t.received_by
+        }));
     },
 
 
@@ -2932,7 +3476,8 @@ export const transfersService = {
             dest_site_id: transfer.destSiteId,
             status: transfer.status,
             transfer_date: transfer.date,
-            items: transfer.items
+            items: transfer.items,
+            order_ref: transfer.orderRef || generateTransferId() // Auto-generate TR-XXXX if missing
         };
 
         const { data, error } = await supabase
@@ -2946,7 +3491,9 @@ export const transfersService = {
             ...data,
             sourceSiteId: data.source_site_id,
             destSiteId: data.dest_site_id,
-            date: data.transfer_date
+            date: data.transfer_date,
+            orderRef: data.order_ref,
+            transferStatus: data.transfer_status
         };
     },
 
@@ -2970,6 +3517,7 @@ export const transfersService = {
             sourceSiteId: data.source_site_id,
             destSiteId: data.dest_site_id,
             date: data.transfer_date,
+            orderRef: data.order_ref,
             hasDiscrepancy: data.has_discrepancy,
             discrepancyDetails: data.discrepancy_details,
             notes: data.notes,
@@ -3399,9 +3947,9 @@ export const workerPointsService = {
         if (updates.estimatedBonus !== undefined) dbUpdates.estimated_bonus = updates.estimatedBonus;
         if (updates.bonusPeriodPoints !== undefined) dbUpdates.bonus_period_points = updates.bonusPeriodPoints;
 
-        const { data, error } = await supabase.from('worker_points').update(dbUpdates).eq('id', id).select().single();
+        const { data, error } = await supabase.from('worker_points').update(dbUpdates).eq('id', id).select();
         if (error) throw error;
-        return data;
+        return data?.[0] || null;
     }
 };
 
@@ -3413,7 +3961,7 @@ export const pointsTransactionsService = {
             points: transaction.points,
             type: transaction.type,
             description: transaction.description,
-            timestamp: transaction.timestamp
+            created_at: transaction.timestamp
         };
         const { data, error } = await supabase.from('points_transactions').insert(dbTxn).select().single();
         if (error) throw error;
@@ -3421,7 +3969,7 @@ export const pointsTransactionsService = {
     },
 
     async getAll(employeeId?: string, limit?: number) {
-        let query = supabase.from('points_transactions').select('*').order('timestamp', { ascending: false });
+        let query = supabase.from('points_transactions').select('*').order('created_at', { ascending: false });
         if (employeeId) query = query.eq('employee_id', employeeId);
         if (limit) query = query.limit(limit);
 
@@ -3438,7 +3986,7 @@ export const pointsTransactionsService = {
             points: t.points,
             type: t.type,
             description: t.description,
-            timestamp: t.timestamp
+            timestamp: t.created_at
         }));
     }
 };
@@ -3566,7 +4114,6 @@ export const inventoryRequestsService = {
     },
 
     async update(id: string, updates: Partial<PendingInventoryChange>) {
-        console.log('📝 inventoryRequestsService.update called:', { id, updates });
 
         const dbUpdates: any = {
             status: updates.status,
@@ -3582,7 +4129,6 @@ export const inventoryRequestsService = {
             if (dbUpdates[key] === undefined) delete dbUpdates[key];
         });
 
-        console.log('📝 DB updates to apply:', dbUpdates);
 
         const { data, error } = await supabase
             .from('inventory_requests')
@@ -3596,18 +4142,15 @@ export const inventoryRequestsService = {
             throw error;
         }
 
-        console.log('✅ inventoryRequestsService.update SUCCESS:', data);
         return data;
     },
 
     async delete(id: string) {
-        console.log('🗑️ inventoryRequestsService.delete called for ID:', id);
         const { error } = await supabase.from('inventory_requests').delete().eq('id', id);
         if (error) {
             console.error('❌ inventoryRequestsService.delete FAILED:', error);
             throw error;
         }
-        console.log('✅ inventoryRequestsService.delete SUCCESS');
     }
 };
 
@@ -4168,6 +4711,129 @@ export const schedulesService = {
             created_at: data.created_at,
             updated_at: data.updated_at
         };
+    }
+};
+
+// ============================================================================
+// DATA AUDIT & APPROVALS
+// ============================================================================
+
+export const barcodeApprovalsService = {
+    async create(approval: {
+        product_id: string;
+        barcode: string;
+        image_url?: string;
+        site_id?: string;
+        created_by: string;
+        resolution_time?: number;
+    }) {
+        const { data, error } = await supabase
+            .from('barcode_approvals')
+            .insert({
+                product_id: approval.product_id,
+                barcode: approval.barcode,
+                image_url: approval.image_url,
+                site_id: approval.site_id,
+                created_by: approval.created_by,
+                resolution_time: approval.resolution_time,
+                status: 'logged' // Reference-only audit (no approval needed)
+            })
+            .select()
+            .single();
+
+        if (error) throw error;
+        return data;
+    },
+
+    async getAuditLog(siteId?: string) {
+        let query = supabase
+            .from('barcode_approvals')
+            .select(`
+                *,
+                product:products(id, name, sku, category)
+            `)
+            // .eq('status', 'logged') // Show ALL history for audit trail
+            .order('created_at', { ascending: false })
+            .limit(100); // Limit to recent 100 entries
+
+        if (siteId) {
+            query = query.eq('site_id', siteId);
+        }
+
+        const { data, error } = await query;
+        if (error) throw error;
+        return data;
+    },
+
+    async approve(id: string, userId: string) {
+        const { data, error } = await supabase
+            .from('barcode_approvals')
+            .update({
+                status: 'approved',
+                reviewed_by: userId,
+                reviewed_at: new Date().toISOString()
+            })
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) throw error;
+        return data;
+    },
+
+    async reject(id: string, userId: string, reason: string) {
+        // 1. Get the approval record to know which barcode/product to revert
+        const { data: approval, error: fetchError } = await supabase
+            .from('barcode_approvals')
+            .select('*')
+            .eq('id', id)
+            .single();
+
+        if (fetchError || !approval) throw fetchError || new Error('Approval not found');
+
+        // 2. Mark as rejected
+        const { error: updateError } = await supabase
+            .from('barcode_approvals')
+            .update({
+                status: 'rejected',
+                reviewed_by: userId,
+                reviewed_at: new Date().toISOString(),
+                rejection_reason: reason
+            })
+            .eq('id', id);
+
+        if (updateError) throw updateError;
+
+        // 3. Revert the barcode on the product (Remove it)
+        const { data: product } = await supabase
+            .from('products')
+            .select('barcodes')
+            .eq('id', approval.product_id)
+            .single();
+
+        if (product && product.barcodes) {
+            const newBarcodes = product.barcodes.filter((b: string) => b !== approval.barcode);
+            await productsService.update(approval.product_id, { barcodes: newBarcodes });
+        }
+    },
+
+    async uploadEvidence(file: File): Promise<string> {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `audit_${Date.now()}_${Math.random().toString(36).substring(2)}.${fileExt}`;
+        const filePath = `evidence/${fileName}`;
+
+        // Reuse 'system-assets' bucket for now
+        const { error: uploadError } = await supabase.storage
+            .from('system-assets')
+            .upload(filePath, file);
+
+        if (uploadError) throw uploadError;
+
+        const { data } = supabase.storage
+            .from('system-assets')
+            .getPublicUrl(filePath);
+
+        return data.publicUrl;
     }
 };
 

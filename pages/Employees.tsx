@@ -440,8 +440,6 @@ export default function Employees() {
 
    const handleRequestPhotoChange = () => {
       // Trigger file picker
-      console.log('📷 handleRequestPhotoChange called, triggering file input');
-      console.log('📷 profilePhotoInputRef.current:', profilePhotoInputRef.current);
       profilePhotoInputRef.current?.click();
    };
 
@@ -457,18 +455,15 @@ export default function Employees() {
 
    // Handle Profile Photo Select (for edit mode)
    const handleProfilePhotoSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
-      console.log('📷 handleProfilePhotoSelect called');
       const file = event.target.files?.[0];
 
       // Clear input immediately so same file can be selected again
       if (profilePhotoInputRef.current) profilePhotoInputRef.current.value = '';
 
       if (!file) {
-         console.log('📷 No file selected');
          return;
       }
 
-      console.log('📷 File selected:', file.name, file.type, file.size);
 
       // Basic validation
       const MAX_SIZE = 15 * 1024 * 1024; // 15MB
@@ -493,13 +488,11 @@ export default function Employees() {
             file.name.toLowerCase().endsWith('.heif');
 
          if (isHeic) {
-            console.log('📷 HEIC file detected, attempting conversion...');
             setProcessingStatus('Converting iPhone photo...');
 
             try {
                const result = await processImageFile(file, setProcessingStatus);
                if (result.success && result.dataUrl) {
-                  console.log('📷 HEIC conversion successful');
                   setTempImageSrc(result.dataUrl);
                   setCropperOpen(true);
                } else {
@@ -511,16 +504,13 @@ export default function Employees() {
             }
          } else {
             // Standard image - read directly
-            console.log('📷 Standard image format, reading directly...');
             const reader = new FileReader();
 
             reader.onload = () => {
                const result = reader.result as string;
-               console.log('📷 FileReader success, data length:', result?.length);
                if (result) {
                   setTempImageSrc(result);
                   setCropperOpen(true);
-                  console.log('📷 Cropper should now be open');
                } else {
                   addNotification('alert', '❌ Failed to read image data.');
                }
@@ -543,13 +533,11 @@ export default function Employees() {
    };
 
    const handleCropComplete = async (croppedImage: string) => {
-      console.log('✅ handleCropComplete matched. Image length:', croppedImage.length);
       setIsSubmitting(true);
 
       try {
          // CASE 1: Adding New Employee (no old photo to delete yet)
          if (isAddModalOpen) {
-            console.log('✅ Handling for New Employee');
             // For new employees, we'll upload after they're created
             // For now, just store base64 temporarily
             await new Promise(resolve => setTimeout(resolve, 500));
@@ -565,13 +553,11 @@ export default function Employees() {
             return;
          }
 
-         console.log('✅ Updating Existing Employee:', selectedEmployee.name);
 
          const isPrivileged = ['super_admin', 'admin', 'hr'].includes(user?.role || '');
 
          if (isPrivileged) {
             // DIRECT UPDATE - Upload new photo and delete old one
-            console.log('✅ User is privileged, doing direct update');
 
             const oldAvatarUrl = selectedEmployee.avatar;
 
@@ -587,7 +573,6 @@ export default function Employees() {
 
                if (uploadResult.success && uploadResult.url) {
                   newAvatarUrl = uploadResult.url;
-                  console.log('📷 Successfully uploaded to storage');
                } else {
                   // Storage failed, but we can still use the base64 image
                   console.warn('📷 Storage upload failed, using base64 instead:', uploadResult.error);
@@ -606,7 +591,6 @@ export default function Employees() {
             // If the employee being edited is the current logged-in user, also update the user avatar in CentralStore
             const isCurrentUser = selectedEmployee.id === user?.id || selectedEmployee.id === (user as any)?.employeeId;
             if (isCurrentUser) {
-               console.log('✅ Updating current user avatar in CentralStore');
                updateUserAvatar(newAvatarUrl);
             }
 
@@ -622,7 +606,6 @@ export default function Employees() {
             addNotification('success', 'Profile photo updated successfully. Old photo deleted.');
          } else {
             // REQUEST APPROVAL - Store temporarily, approval process will handle upload/delete
-            console.log('✅ User is NOT privileged, requesting approval');
             systemLogsService.logHR(
                'PHOTO_CHANGE_REQUEST',
                `Photo change requested by ${selectedEmployee.name}`,
@@ -671,7 +654,6 @@ export default function Employees() {
 
             if (uploadResult.success && uploadResult.url) {
                newAvatarUrl = uploadResult.url;
-               console.log('📷 Successfully uploaded to storage');
             } else {
                console.warn('📷 Storage upload failed, using provided URL:', uploadResult.error);
             }
@@ -860,7 +842,6 @@ export default function Employees() {
    };
 
    const handleTerminateEmployee = (e?: React.MouseEvent) => {
-      console.log('🔴 TERMINATION: Opening confirmation modal');
 
       // Prevent event bubbling
       if (e) {
@@ -902,7 +883,6 @@ export default function Employees() {
          return;
       }
 
-      console.log('🔴 TERMINATION: Confirmed, updating employee...');
       const updatedEmp = { ...selectedEmployee, status: 'Terminated' as const };
 
       try {
@@ -911,7 +891,6 @@ export default function Employees() {
          addNotification('success', `Employee ${selectedEmployee.name} has been terminated.`);
          setIsTerminateModalOpen(false);
          setTerminateInput('');
-         console.log('🔴 TERMINATION: Complete!');
       } catch (error) {
          console.error('🔴 TERMINATION: Error:', error);
          addNotification('alert', 'Failed to terminate employee');
@@ -963,7 +942,6 @@ export default function Employees() {
 
       try {
          // Delete all profile photos from storage for this employee
-         console.log('Deleting profile photos for employee:', employeeToDelete.id);
          await imageStorageService.deleteAllEmployeePhotos(employeeToDelete.id);
 
          // Also delete the current avatar if it exists in storage
@@ -1142,19 +1120,13 @@ export default function Employees() {
    };
 
    const handleFinalSubmit = async () => {
-      console.log('🔵 handleFinalSubmit called!');
       setIsSubmitting(true);
-      console.log('📋 newEmpData:', newEmpData);
-      console.log('👤 user:', user);
-      console.log('🏢 sites:', sites);
 
       // Validate role-site assignment
       const selectedSite = sites.find(s => s.id === newEmpData.siteId);
-      console.log('🏢 selectedSite:', selectedSite);
 
       if (selectedSite) {
          const validationError = validateRoleSiteAssignment(newEmpData.role, selectedSite.type);
-         console.log('⚠️ validationError:', validationError);
 
          if (validationError) {
             setValidationMessage(validationError);
@@ -1170,137 +1142,47 @@ export default function Employees() {
    const submitEmployeeData = async () => {
       const isAutoApproved = ['super_admin', 'admin', 'hr'].includes(user?.role || '');
       const initialStatus = isAutoApproved ? 'Active' : 'Pending Approval';
-      console.log('✅ Validation passed, proceeding with creation. Status:', initialStatus);
 
       try {
-         console.log('Creating employee with data:', newEmpData);
 
          // Generate a valid UUID for the employee ID
-         let employeeId = crypto.randomUUID();
+         const employeeId = crypto.randomUUID();
 
          // Generate sequential employee code
          const nextCode = (employees.length + 1).toString().padStart(4, '0');
          const employeeCode = `EMP-${nextCode}`;
 
-         let createdWithAuth = false;
+         // Create employee profile (auth account is created when employee signs up)
+         const newEmp: Employee = {
+            id: employeeId,
+            code: employeeCode,
+            siteId: newEmpData.siteId || activeSite?.id || 'SITE-001',
+            name: `${newEmpData.firstName} ${newEmpData.lastName}`,
+            role: newEmpData.role,
+            email: newEmpData.email || 'pending@siifmart.com',
+            phone: newEmpData.phone || 'N/A',
+            status: initialStatus,
+            joinDate: newEmpData.joinDate,
+            department: newEmpData.department,
+            avatar: newEmpData.avatar || `https://ui-avatars.com/api/?name=${newEmpData.firstName}+${newEmpData.lastName}&background=random`,
+            performanceScore: 100,
+            specialization: newEmpData.specialization || 'Generalist',
+            salary: parseFloat(newEmpData.salary) || 0,
+            attendanceRate: 100,
+            badges: ['New Recruit'],
+            address: newEmpData.address,
+            emergencyContact: newEmpData.emergencyContact
+         };
 
-         // If email and password provided, create auth account
-         if (newEmpData.email && newEmpData.password) {
-            if (user?.role === 'super_admin') {
-               try {
-                  console.log('Attempting to create auth user via admin service...');
-                  const { createEmployeeWithAuth } = await import('../services/admin.service');
+         await addEmployee(newEmp);
 
-                  const result = await createEmployeeWithAuth({
-                     email: newEmpData.email,
-                     password: newEmpData.password,
-                     name: `${newEmpData.firstName} ${newEmpData.lastName}`,
-                     role: newEmpData.role,
-                     siteId: newEmpData.siteId || activeSite?.id || '',
-                     phone: newEmpData.phone,
-                     department: newEmpData.department,
-                     salary: parseFloat(newEmpData.salary) || 0
-                  });
+         // Success - close modal and reset
+         setFilterRole('All');
+         setIsAddModalOpen(false);
+         resetWizard();
 
-                  employeeId = result.id as any; // Cast to avoid type error
-                  createdWithAuth = true;
-                  console.log('Employee created with auth:', result);
+         addNotification('success', `✅ Employee Profile Created!\n\nNext Steps for ${newEmpData.firstName}:\n1. Go to the login page\n2. Click "Sign Up"\n3. Use email: ${newEmpData.email}\n4. Set their password\n\nTheir profile will automatically link when they log in.`);
 
-               } catch (authError: any) {
-                  console.error('Auth creation failed:', authError);
-
-                  // Check if it's a missing service key error
-                  if (authError.message?.includes('Service role key not configured')) {
-                     addNotification('alert', '⚠️ Admin Access Required\n\nTo create employees with full login access, please use the admin dashboard or contact your system administrator.\n\nFor now, creating employee profile only...');
-                  } else if (authError.message?.includes('already been registered')) {
-                     // Email already exists - try to find the existing user and link
-                     addNotification('info', `Email ${newEmpData.email} already exists. Linking to existing account...`);
-
-                     // Try to get the existing user ID from auth
-                     try {
-                        const { createEmployeeWithAuth } = await import('../services/admin.service');
-                        // This will now handle existing users
-                        const result = await createEmployeeWithAuth({
-                           email: newEmpData.email,
-                           password: newEmpData.password,
-                           name: `${newEmpData.firstName} ${newEmpData.lastName}`,
-                           role: newEmpData.role,
-                           siteId: newEmpData.siteId || activeSite?.id || '',
-                           phone: newEmpData.phone,
-                           department: newEmpData.department,
-                           salary: parseFloat(newEmpData.salary) || 0
-                        });
-                        employeeId = result.id as any;
-                        createdWithAuth = true;
-                        addNotification('success', `✅ Employee linked to existing account: ${newEmpData.email}`);
-                     } catch (linkError: any) {
-                        addNotification('alert', `Failed to link to existing account:\n\n${linkError.message}\n\nCreating employee profile only...`);
-                     }
-                  } else {
-                     addNotification('alert', `Failed to create login account:\n\n${authError.message}\n\nCreating employee profile only...`);
-                  }
-               }
-            } else {
-               console.log('Skipping auth creation: User is not super_admin', user?.role);
-               addNotification('info', 'Note: Only CEOs can create login accounts. Creating employee profile only.');
-            }
-         } else {
-            console.log('Skipping auth creation: Email or password missing');
-         }
-
-         // If auth creation failed or wasn't attempted, create employee profile only
-         if (!createdWithAuth) {
-            const newEmp: Employee = {
-               id: employeeId,
-               code: employeeCode,
-               siteId: newEmpData.siteId || activeSite?.id || 'SITE-001',
-               name: `${newEmpData.firstName} ${newEmpData.lastName}`,
-               role: newEmpData.role,
-               email: newEmpData.email || 'pending@siifmart.com',
-               phone: newEmpData.phone || 'N/A',
-               status: initialStatus,
-               joinDate: newEmpData.joinDate,
-               department: newEmpData.department,
-               avatar: newEmpData.avatar || `https://ui-avatars.com/api/?name=${newEmpData.firstName}+${newEmpData.lastName}&background=random`,
-               performanceScore: 100,
-               specialization: newEmpData.specialization || 'Generalist',
-               salary: parseFloat(newEmpData.salary) || 0,
-               attendanceRate: 100,
-               badges: ['New Recruit'],
-               address: newEmpData.address,
-               emergencyContact: newEmpData.emergencyContact
-            };
-
-            console.log('Calling addEmployee...');
-            await addEmployee(newEmp);
-            console.log('Employee added successfully!');
-
-            // Success - close modal and reset
-            setFilterRole('All');
-            setIsAddModalOpen(false);
-            resetWizard();
-
-            if (newEmpData.email && newEmpData.password) {
-               addNotification('success', `✅ Employee Profile Created!\n\nNext Steps:\n1. The employee should go to the login page\n2. Click "Sign Up"\n3. Use Email: ${newEmpData.email}\n4. Use Password: ${newEmpData.password}\n\nThis will link their profile to a login account.`);
-            } else {
-               addNotification('success', `✅ Employee Profile Created!\n\nTo enable login:\n1. Have them visit the login page\n2. Click "Sign Up"\n3. Use their email: ${newEmpData.email || 'their email'}\n4. Set a password`);
-            }
-         } else {
-            // Employee was created with auth - show success and reload
-            console.log('Employee created with auth, showing success message...');
-
-            // Close modal first
-            setFilterRole('All');
-            setIsAddModalOpen(false);
-            resetWizard();
-
-            addNotification('success', `✅ SUCCESS!\n\nEmployee created with login account!\n\n📧 Email: ${newEmpData.email}\n🔑 Password: ${newEmpData.password}\n\nThey can login immediately.`);
-
-            // Reload to show the new employee
-            setTimeout(() => {
-               window.location.reload();
-            }, 2000);
-         }
       } catch (error: any) {
          console.error('Failed to create employee:', error);
          addNotification('alert', `Failed to create employee:\n\n${error.message || 'Unknown error'}\n\nPlease check the console for details.`);
@@ -1902,7 +1784,7 @@ export default function Employees() {
                      ))}
                      <div className="absolute top-[88px] left-12 right-12 h-0.5 bg-white/10 -z-0">
                         {/* eslint-disable-next-line react/forbid-dom-props */}
-                        <div className="h-full bg-cyber-primary transition-all duration-500" style={{ width: `${((addStep - 1) / 3) * 100}%` }}></div>
+                        <div className="h-full bg-cyber-primary transition-all duration-500" ref={(el) => { if (el) el.style.width = `${((addStep - 1) / 3) * 100}%`; }}></div>
                      </div>
                   </div>
 

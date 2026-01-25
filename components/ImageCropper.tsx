@@ -39,7 +39,6 @@ const ImageCropper: React.FC<ImageCropperProps> = ({ imageSrc, onCropComplete, o
             img.onload = () => {
                 clearTimeout(timeout);
                 setImageLoading(false);
-                console.log('✅ Image pre-verified:', img.width, 'x', img.height);
             };
 
             img.onerror = () => {
@@ -71,14 +70,11 @@ const ImageCropper: React.FC<ImageCropperProps> = ({ imageSrc, onCropComplete, o
     };
 
     const createCroppedImage = async () => {
-        console.log('✂️ createCroppedImage called');
         if (!croppedAreaPixels || loading || imageLoadError) return;
 
         try {
-            console.log('✂️ Calling getCroppedImg with:', imageSrc.substring(0, 50) + '...', croppedAreaPixels);
             const croppedImage = await getCroppedImg(imageSrc, croppedAreaPixels);
             if (croppedImage) {
-                console.log('✂️ Crop success, returned length:', croppedImage.length);
                 onCropComplete(croppedImage);
             } else {
                 setImageLoadError('Failed to create cropped image. Please try again.');

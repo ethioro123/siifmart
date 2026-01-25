@@ -86,7 +86,6 @@ class SystemLogsService {
         const after = this.logs.length;
 
         if (before !== after) {
-            console.log(`Cleaned up ${before - after} old log entries`);
             this.saveLogs();
         }
     }
@@ -120,7 +119,6 @@ class SystemLogsService {
 
         // Console output for dev
         const color = this.getConsoleColor(severity);
-        console.log(`%c[${category}] ${action}: ${details}`, color);
 
         return entry;
     }

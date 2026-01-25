@@ -34,10 +34,12 @@ import { native } from './utils/native';
 import { runAutoMigration } from './utils/autoMigrate';
 
 import { useData } from './contexts/DataContext';
+import { systemConfigService } from './services/supabase.service';
+import { initializeAvatarsBucket } from './services/imageStorage.service';
 
 export default function App() {
   const { user, loading } = useStore();
-  const { cleanupAdminProducts, isDataInitialLoading, loadError } = useData();
+  const { cleanupAdminProducts, isDataInitialLoading, loadError, loadingProgress } = useData();
 
   React.useEffect(() => {
     if (native.isNative()) {
@@ -63,6 +65,8 @@ export default function App() {
         keysToRemove.forEach(k => localStorage.removeItem(k));
       }
     }
+    // Note: Storage buckets (system-assets, avatars) should be created manually in Supabase Dashboard.
+    // Client-side bucket creation is blocked by RLS policies for security.
   }, []);
 
   // Keyboard shortcut: Ctrl+Shift+H (or Cmd+Shift+H on Mac) to cleanup HQ products
@@ -79,24 +83,71 @@ export default function App() {
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [cleanupAdminProducts]);
+  // Initial Auth/Data Loading State
   if (loading || (user && isDataInitialLoading)) {
+    // Calculate progress based on entities loaded
+    const progressPercent = loadingProgress?.total > 0
+      ? Math.round((loadingProgress.loaded / loadingProgress.total) * 100)
+      : 0;
+
     return (
-      <div className="min-h-screen bg-cyber-black flex flex-col items-center justify-center p-6 text-center">
-        <div className="relative mb-8">
+      <div className="min-h-screen bg-black flex flex-col items-center justify-center p-4 relative overflow-hidden">
+        {/* Background Effects */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-gray-800 via-gray-900 to-black z-0" />
+        <div className="absolute inset-0 bg-grid-white/[0.02] bg-[length:30px_30px] z-0" />
+
+        {/* Logo/Icon */}
+        <div className="relative mb-8 transform hover:scale-105 transition-transform duration-700">
           <div className="absolute inset-0 bg-cyber-primary/20 blur-3xl rounded-full animate-pulse" />
-          <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-cyber-primary relative z-10"></div>
+          <div className="w-20 h-20 bg-black/50 backdrop-blur-xl border border-cyber-primary/30 rounded-2xl flex items-center justify-center relative z-10 shadow-[0_0_30px_rgba(0,255,157,0.1)]">
+            <div className="w-10 h-10 border-t-2 border-r-2 border-cyber-primary rounded-full animate-spin" />
+          </div>
         </div>
-        <h2 className="text-xl font-black text-white tracking-[0.2em] uppercase italic mb-2">
+
+        {/* Status Text */}
+        <h2 className="text-2xl font-black text-white tracking-[0.2em] uppercase italic mb-6 animate-pulse">
           {loading ? 'Authenticating Pulse' : 'Hydrating Neural Link'}
         </h2>
-        <p className="text-xs text-cyber-primary/60 font-mono uppercase tracking-widest animate-pulse">
-          {loadError ? 'Retrying Connection...' : 'Synchronizing local databases (100%)'}
-        </p>
 
+        {/* Progress Bar Container */}
+        <div className="w-full max-w-md bg-white/5 border border-white/10 rounded-full h-1.5 mb-2 overflow-hidden backdrop-blur-sm relative">
+          {/* Animated Progress Fill */}
+          <div
+            ref={(el) => el?.style.setProperty('--loading-progress', `${loading ? 100 : progressPercent}%`)}
+            className="absolute top-0 left-0 h-full w-[var(--loading-progress)] bg-gradient-to-r from-cyber-primary to-cyan-400 transition-all duration-300 ease-out shadow-[0_0_10px_rgba(0,255,157,0.5)]"
+          />
+        </div>
+
+        {/* Detail Status */}
+        <div className="flex justify-between w-full max-w-md px-1">
+          <p className="text-[10px] text-cyber-primary/60 font-mono uppercase tracking-widest">
+            {loadingProgress?.current || 'Initializing System...'}
+          </p>
+          <p className="text-[10px] text-white/40 font-mono">
+            {loading ? '...' : `${progressPercent}%`}
+          </p>
+        </div>
+
+        {/* Error Display with Retry */}
         {loadError && (
-          <div className="mt-8 p-4 bg-red-500/10 border border-red-500/20 rounded-xl max-w-sm">
-            <p className="text-[10px] text-red-400 font-mono uppercase tracking-tighter mb-2">Connection Disrupted</p>
-            <p className="text-[11px] text-gray-400">{loadError}</p>
+          <div className="mt-8 p-4 bg-red-500/10 border border-red-500/20 rounded-xl max-w-sm w-full backdrop-blur-md animate-in slide-in-from-bottom-4 fade-in duration-500">
+            <div className="flex items-start gap-3">
+              <div className="p-2 bg-red-500/20 rounded-lg">
+                <svg className="w-4 h-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <p className="text-[10px] text-red-400 font-mono uppercase tracking-tighter mb-1">Connection Disrupted</p>
+                <p className="text-xs text-gray-300 leading-relaxed">{loadError}</p>
+                <button
+                  onClick={() => window.location.reload()}
+                  className="mt-3 px-4 py-1.5 bg-red-500/20 hover:bg-red-500/30 text-red-400 text-[10px] font-bold uppercase tracking-wider rounded-lg transition-colors border border-red-500/20"
+                >
+                  Retry Connection
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </div>

@@ -313,7 +313,7 @@ export default function WMSDashboard() {
                               {payload.map((entry: any, i: number) => (
                                 <div key={i} className="flex items-center justify-between gap-8">
                                   <div className="flex items-center gap-2">
-                                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.fill === 'url(#inboundGradient)' ? '#00ff9d' : '#3b82f6' }} />
+                                    <div className={`w-2 h-2 rounded-full ${entry.fill === 'url(#inboundGradient)' ? 'bg-[#00ff9d]' : 'bg-[#3b82f6]'}`} />
                                     <span className="text-xs font-bold text-white uppercase tracking-tight">{entry.name}</span>
                                   </div>
                                   <span className="text-sm font-black text-white">{entry.value}</span>
@@ -361,7 +361,7 @@ export default function WMSDashboard() {
                       <div className="w-full dark:bg-black/20 bg-slate-100 rounded-full h-2 overflow-hidden border dark:border-white/5 border-black/[0.03]">
                         <div
                           className={`h-full bg-gradient-to-r ${colorClass} transition-all duration-1000 ease-out shadow-[0_0_10px_rgba(0,255,157,0.2)]`}
-                          style={{ width: `${percent}%` }}
+                          ref={(el) => { if (el) el.style.width = `${percent}%`; }}
                         />
                       </div>
                     </div>
@@ -578,7 +578,7 @@ export default function WMSDashboard() {
                       <div className="h-3 dark:bg-black/40 bg-slate-100 rounded-lg overflow-hidden border dark:border-white/5 border-black/[0.02] p-0.5">
                         <div
                           className={`h-full rounded-md bg-gradient-to-r ${config.bg} relative`}
-                          style={{ width: `${Math.min(100, (worker.weeklyPoints / 2500) * 100)}%` }}
+                          ref={(el) => { if (el) el.style.width = `${Math.min(100, (worker.weeklyPoints / 2500) * 100)}%`; }}
                         >
                           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer" />
                         </div>

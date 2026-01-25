@@ -297,6 +297,7 @@ const ShiftPlanner: React.FC<ShiftPlannerProps> = ({ employees, canEdit = false,
                     <button
                         onClick={() => changeWeek(-1)}
                         className="p-2 hover:bg-white/10 rounded-lg text-white transition-colors"
+                        aria-label="Previous Week"
                     >
                         <ChevronLeft />
                     </button>
@@ -304,6 +305,7 @@ const ShiftPlanner: React.FC<ShiftPlannerProps> = ({ employees, canEdit = false,
                     <button
                         onClick={() => changeWeek(1)}
                         className="p-2 hover:bg-white/10 rounded-lg text-white transition-colors"
+                        aria-label="Next Week"
                     >
                         <ChevronRight />
                     </button>
@@ -352,7 +354,7 @@ const ShiftPlanner: React.FC<ShiftPlannerProps> = ({ employees, canEdit = false,
                                     return (
                                         <tr key={`header-${index}`} className="bg-white/5">
                                             <td colSpan={9} className="p-2 sticky left-0 bg-[#151923] border-b border-white/5">
-                                                <div className="flex items-center gap-2" style={{ paddingLeft: `${row.level * 20}px` }}>
+                                                <div className="flex items-center gap-2" ref={(el) => { if (el) el.style.paddingLeft = `${row.level * 20}px`; }}>
                                                     <div className={`p-1 rounded ${node.color.replace('text-', 'bg-').replace('400', '500/20')} ${node.color}`}>
                                                         <Icon size={14} />
                                                     </div>
@@ -369,7 +371,7 @@ const ShiftPlanner: React.FC<ShiftPlannerProps> = ({ employees, canEdit = false,
                                     return (
                                         <tr key={emp.id} className="hover:bg-white/5 transition-colors group">
                                             <td className="p-4 sticky left-0 bg-cyber-gray group-hover:bg-[#1a1f2e] transition-colors border-r border-white/5">
-                                                <div className="flex items-center gap-3" style={{ paddingLeft: `${row.level * 20}px` }}>
+                                                <div className="flex items-center gap-3" ref={(el) => { if (el) el.style.paddingLeft = `${row.level * 20}px`; }}>
                                                     <img src={emp.avatar} alt="" className="w-8 h-8 rounded-lg object-cover" />
                                                     <div>
                                                         <p className="font-bold text-white text-sm">{emp.name}</p>

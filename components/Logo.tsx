@@ -8,7 +8,10 @@ interface LogoProps {
 
 export default function Logo({ className = "", size = 32, showText = true }: LogoProps) {
   return (
-    <div className={`flex items-center justify-center select-none text-black dark:text-white transition-colors duration-300 ${className}`} style={{ height: size }}>
+    <div
+      className={`flex items-center justify-center select-none text-black dark:text-white transition-colors duration-300 ${className}`}
+      ref={(el) => { if (el) el.style.height = `${size}px`; }}
+    >
       <svg
         height="100%"
         viewBox={showText ? "0 0 200 55" : "0 0 35 55"}
@@ -29,8 +32,7 @@ export default function Logo({ className = "", size = 32, showText = true }: Log
               stroke="#00cc7d"
               strokeWidth="4"
               strokeLinejoin="round"
-              style={{ paintOrder: 'stroke' }}
-              className="transition-colors duration-300"
+              className="transition-colors duration-300 [paint-order:stroke]"
             />
           </g>
         </defs>
@@ -52,9 +54,8 @@ export default function Logo({ className = "", size = 32, showText = true }: Log
               stroke="#00cc7d"
               strokeWidth="4"
               strokeLinejoin="round"
-              style={{ paintOrder: 'stroke' }}
               letterSpacing="0.5"
-              className="transition-colors duration-300"
+              className="transition-colors duration-300 [paint-order:stroke]"
             >
               SiifMart
             </text>

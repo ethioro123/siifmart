@@ -27,18 +27,18 @@ export interface DeleteResult {
  */
 function extractPathFromUrl(url: string): string | null {
   if (!url) return null;
-  
+
   // Check if it's a Supabase storage URL
   if (url.includes('/storage/v1/object/public/')) {
     const match = url.match(/\/storage\/v1\/object\/public\/avatars\/(.+)/);
     return match ? match[1] : null;
   }
-  
+
   // Check if it's already just a path
   if (url.startsWith('avatars/') || url.startsWith('profile-photos/')) {
     return url.replace('avatars/', '');
   }
-  
+
   return null;
 }
 
@@ -57,11 +57,11 @@ function base64ToBlob(base64: string, mimeType: string = 'image/jpeg'): Blob {
   const base64Data = base64.split(',')[1] || base64;
   const byteCharacters = atob(base64Data);
   const byteNumbers = new Array(byteCharacters.length);
-  
+
   for (let i = 0; i < byteCharacters.length; i++) {
     byteNumbers[i] = byteCharacters.charCodeAt(i);
   }
-  
+
   const byteArray = new Uint8Array(byteNumbers);
   return new Blob([byteArray], { type: mimeType });
 }
@@ -82,17 +82,14 @@ export async function deleteProfilePhoto(imageUrl: string): Promise<DeleteResult
   try {
     // Only attempt to delete if it's a Supabase storage URL
     if (!isSupabaseStorageUrl(imageUrl)) {
-      console.log('Image is not in Supabase storage, skipping delete:', imageUrl?.substring(0, 50));
       return { success: true }; // Not a storage URL, nothing to delete
     }
 
     const path = extractPathFromUrl(imageUrl);
     if (!path) {
-      console.log('Could not extract path from URL:', imageUrl?.substring(0, 50));
       return { success: true }; // Couldn't extract path, treat as success
     }
 
-    console.log('Deleting old profile photo from storage:', path);
 
     const { error } = await supabase.storage
       .from(BUCKET_NAME)
@@ -104,7 +101,6 @@ export async function deleteProfilePhoto(imageUrl: string): Promise<DeleteResult
       return { success: false, error: error.message };
     }
 
-    console.log('Successfully deleted old profile photo');
     return { success: true };
   } catch (error) {
     console.error('Exception deleting profile photo:', error);
@@ -182,7 +178,6 @@ export async function uploadProfilePhoto(
     const extension = mimeType.split('/')[1] || 'jpg';
     const fileName = generateFileName(employeeId, extension);
 
-    console.log('Uploading new profile photo:', fileName, 'Size:', (imageBlob.size / 1024).toFixed(1), 'KB');
 
     // Upload to Supabase Storage
     const { data, error } = await supabase.storage
@@ -194,7 +189,7 @@ export async function uploadProfilePhoto(
 
     if (error) {
       console.error('Error uploading profile photo:', error);
-      
+
       // Parse specific Supabase errors for better feedback
       const errorMessage = error.message.toLowerCase();
       if (errorMessage.includes('bucket') && errorMessage.includes('not found')) {
@@ -208,7 +203,7 @@ export async function uploadProfilePhoto(
       } else if (errorMessage.includes('duplicate') || errorMessage.includes('already exists')) {
         return { success: false, error: 'A file with this name already exists. Please try again.' };
       }
-      
+
       return { success: false, error: error.message };
     }
 
@@ -217,7 +212,6 @@ export async function uploadProfilePhoto(
       .from(BUCKET_NAME)
       .getPublicUrl(data.path);
 
-    console.log('Successfully uploaded profile photo:', urlData.publicUrl);
 
     return {
       success: true,
@@ -236,7 +230,7 @@ export async function uploadProfilePhoto(
 export async function deleteAllEmployeePhotos(employeeId: string): Promise<DeleteResult> {
   try {
     const folderPath = `profile-photos/${employeeId}`;
-    
+
     // List all files in the employee's folder
     const { data: files, error: listError } = await supabase.storage
       .from(BUCKET_NAME)
@@ -262,7 +256,6 @@ export async function deleteAllEmployeePhotos(employeeId: string): Promise<Delet
       return { success: false, error: deleteError.message };
     }
 
-    console.log(`Deleted ${filePaths.length} photos for employee ${employeeId}`);
     return { success: true };
   } catch (error) {
     console.error('Exception deleting employee photos:', error);
@@ -278,29 +271,34 @@ export async function initializeAvatarsBucket(): Promise<void> {
   try {
     // Check if bucket exists
     const { data: buckets, error: listError } = await supabase.storage.listBuckets();
-    
+
     if (listError) {
-      console.warn('Could not list buckets:', listError.message);
+      if (listError.message.toLowerCase().includes('row-level security') || listError.message.toLowerCase().includes('permission')) {
+      } else {
+        console.warn(`[Storage] Could not list avatars buckets: ${listError.message}`);
+      }
       return;
     }
 
     const bucketExists = buckets?.some(b => b.name === BUCKET_NAME);
-    
+
     if (!bucketExists) {
-      console.log('Creating avatars bucket...');
       const { error: createError } = await supabase.storage.createBucket(BUCKET_NAME, {
         public: true, // Make avatars publicly accessible
         fileSizeLimit: MAX_FILE_SIZE
       });
 
       if (createError) {
-        console.warn('Could not create avatars bucket:', createError.message);
+        if (createError.message.toLowerCase().includes('row-level security')) {
+          console.warn(`[Storage] RLS Restriction: Cannot create '${BUCKET_NAME}' bucket from client. Please run the SQL migration or create it manually.`);
+        } else {
+          console.warn(`[Storage] Could not create '${BUCKET_NAME}' bucket:`, createError.message);
+        }
       } else {
-        console.log('Avatars bucket created successfully');
       }
     }
   } catch (error) {
-    console.warn('Error initializing avatars bucket:', error);
+    console.warn('[Storage] Error initializing avatars bucket:', error);
   }
 }
 

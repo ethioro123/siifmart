@@ -256,6 +256,8 @@ export default function GeneralSettings() {
                                 <div className="flex items-center gap-3 p-3 bg-black/40 border border-white/10 rounded-xl">
                                     <input
                                         type="color"
+                                        aria-label="Brand Color"
+                                        title="Choose brand color"
                                         className="w-8 h-8 rounded cursor-pointer bg-transparent border-0 p-0"
                                         value={branding.brandColor}
                                         onChange={(e: any) => setBranding(prev => ({ ...prev, brandColor: e.target.value }))}

@@ -160,7 +160,7 @@ export default function WorkerPointsDisplay({
                     <div className="w-24 h-1 bg-white/10 rounded-full overflow-hidden">
                         <div
                             className={`h-full bg-gradient-to-r ${levelColor} transition-all duration-500`}
-                            style={{ width: `${levelInfo.progressPercent}%` }}
+                            ref={(el) => { if (el) el.style.width = `${levelInfo.progressPercent}%`; }}
                         />
                     </div>
                 </div>
@@ -182,7 +182,7 @@ export default function WorkerPointsDisplay({
                     </div>
                     <p className="text-sm font-bold text-white mb-1">Level Progress</p>
                     <div className="h-2 bg-black/50 rounded-full overflow-hidden mb-2">
-                        <div className={`h-full bg-gradient-to-r ${levelColor}`} style={{ width: `${levelInfo.progressPercent}%` }} />
+                        <div className={`h-full bg-gradient-to-r ${levelColor}`} ref={(el) => { if (el) el.style.width = `${levelInfo.progressPercent}%`; }} />
                     </div>
                     <p className="text-[10px] text-gray-400 text-right">
                         {levelInfo.pointsToNext > 0
@@ -261,7 +261,7 @@ export default function WorkerPointsDisplay({
                             <div className="h-3 bg-black/50 rounded-full overflow-hidden">
                                 <div
                                     className={`h-full bg-gradient-to-r ${levelColor} transition-all duration-1000 ease-out relative`}
-                                    style={{ width: `${levelInfo.progressPercent}%` }}
+                                    ref={(el) => { if (el) el.style.width = `${levelInfo.progressPercent}%`; }}
                                 >
                                     <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/30 to-white/0 animate-shimmer" />
                                 </div>
@@ -358,7 +358,7 @@ export default function WorkerPointsDisplay({
                                     <div className="h-1.5 bg-black/30 rounded-full overflow-hidden">
                                         <div
                                             className="h-full bg-gradient-to-r from-green-400 to-emerald-400 transition-all"
-                                            style={{ width: `${bonusTierProgress}%` }}
+                                            ref={(el) => { if (el) el.style.width = `${bonusTierProgress}%`; }}
                                         />
                                     </div>
                                 </div>

@@ -318,7 +318,7 @@ const ReceiptPreview = ({ settings }: { settings: Partial<SystemConfig> }) => {
     `;
 
     return (
-        <div className={`bg-white shadow-2xl rounded-lg overflow-hidden border border-black/10 flex flex-col ${is80mm ? 'w-[320px]' : 'w-[240px]'}`} style={{ height: '500px' }}>
+        <div className={`bg-white shadow-2xl rounded-lg overflow-hidden border border-black/10 flex flex-col ${is80mm ? 'w-[320px]' : 'w-[240px]'} h-[500px]`}>
             <iframe
                 srcDoc={html}
                 title="Receipt Preview"
@@ -904,7 +904,10 @@ export default function POSSettings() {
                             <div className="relative z-20 max-w-full flex-1 w-full flex justify-center overflow-visible translate-z-0">
                                 {/* Subtle paper texture background for the preview area */}
                                 {/* eslint-disable-next-line react/forbid-dom-props */}
-                                <div className="absolute inset-0 opacity-[0.03] pointer-events-none rounded-xl" style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/natural-paper.png")' }} />
+                                <div
+                                    className="absolute inset-0 opacity-[0.03] pointer-events-none rounded-xl"
+                                    ref={(el) => { if (el) el.style.backgroundImage = 'url("https://www.transparenttextures.com/patterns/natural-paper.png")'; }}
+                                />
 
                                 <div className="relative z-30 antialiased transform-none">
                                     <ReceiptPreview settings={receiptBranding} />

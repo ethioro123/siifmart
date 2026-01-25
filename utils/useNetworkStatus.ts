@@ -10,7 +10,6 @@ export function useNetworkStatus() {
 
     useEffect(() => {
         const handleOnline = () => {
-            console.log('Network: Back online');
             setIsOnline(true);
 
             // If we were offline, show a notification and reload data

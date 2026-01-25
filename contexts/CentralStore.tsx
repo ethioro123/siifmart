@@ -158,13 +158,17 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           // If message contains 'fetch' it's almost certainly a connection issue
           const msg = error.message.toLowerCase();
           if (msg.includes('fetch') || msg.includes('network') || msg.includes('failed')) {
-            console.error('CRITICAL: Server unreachable!', error);
+            if (!isServerDown) { // Only log on state change
+              console.warn('⚠️ Connection to server lost.');
+            }
             setIsServerDown(true);
           } else {
             // Other errors (auth, etc) mean the server IS reachable
+            if (isServerDown) console.log('✅ Connection to server restored.');
             setIsServerDown(false);
           }
         } else {
+          if (isServerDown) console.log('✅ Connection to server restored.');
           setIsServerDown(false);
         }
       } catch (e) {

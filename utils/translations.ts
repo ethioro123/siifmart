@@ -103,10 +103,10 @@ export const TRANSLATIONS = {
             count: { en: 'COUNT', am: 'ቁጠር', or: 'Lakkofsu / Herreguu' },
             waste: { en: 'WASTE', am: 'ብክነት', or: 'Qaraxa Badde / Hafe' },
             returns: { en: 'RETURNS', am: 'ምላሾች', or: 'Deebitoota' },
-            assign: { en: 'TASK DISPATCH', am: 'የተግባር ስርጭት', or: 'Ramaduu Hojii' },
+            assign: { en: 'MISSION CONTROL', am: 'የተግባር ማዕከል', or: 'Wiirtuu Hojii' },
             transfer: { en: 'TRANSFER', am: 'ማስተላለፍ', or: 'Gara Birootti Dabarsuu' },
             my_points: { en: 'MY POINTS', am: 'የእኔ ነጥቦች', or: 'Qabxiiwwan Koo' },
-            driver: { en: 'DRIVER', am: 'አሽከርካሪ', or: 'Konkolaachisaa' },
+            driver: { en: 'DRIVER HUB', am: 'የአሽከርካሪ ማእከል', or: 'Wiirtuu Konkolaachisaa' },
         },
 
         // Job Management
@@ -136,6 +136,7 @@ export const TRANSLATIONS = {
         zone: { en: 'Zone', am: 'ዞን', or: 'Zoonii' },
         aisle: { en: 'Aisle', am: 'መተላለፊያ', or: 'Dabarbii' },
         selectLocation: { en: 'Select Location', am: 'ቦታ ምረጥ', or: 'Bakka Fili' },
+        selectStorage: { en: 'Select Storage', am: 'ማከማቻ ይምረጡ', or: 'Kuusaa Fili' },
         selectStorageLocation: { en: 'Select Storage Location', am: 'የማከማቻ ቦታ ምረጥ', or: 'Bakka Kuusaa Fili' },
         selectPickLocation: { en: 'Select Pick Location', am: 'የመምረጫ ቦታ ምረጥ', or: 'Bakka Filannoo Fili' },
         selectedLocation: { en: 'Selected Location', am: 'የተመረጠ ቦታ', or: 'Bakka Filatame' },
@@ -324,6 +325,7 @@ export const TRANSLATIONS = {
             incoming: { en: 'Incoming (Inbound)', am: 'ገቢ (መቀበያ)', or: 'Seensaa (Fudhannaa)' },
             outgoing: { en: 'Outgoing (Outbound)', am: 'ወጪ (ማጓጓዣ)', or: 'Gadii (Ergaa)' },
             driver: { en: 'Driver Portal', am: 'አሽከርካሪ ፖርታል', or: 'Poortaalii Konkolaachisaa' },
+            currentMission: { en: 'Active Mission', am: 'ንቁ ተልዕኮ', or: 'Ergama Jireenyaa' },
             inboundTitle: { en: 'Inbound Docks (Receiving)', am: 'የገቢ መርከቦች (መቀበያ)', or: 'Buufata Seensaa (Fudhannaa)' },
             outboundTitle: { en: 'Outbound Docks (Shipping)', am: 'የወጪ መርከቦች (ማጓጓዣ)', or: 'Buufata Gadii (Ergaa)' },
             empty: { en: 'EMPTY', am: 'ባዶ', or: 'DUWWAA' },

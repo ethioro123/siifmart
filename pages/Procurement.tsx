@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import {
     Truck, Plus, Search, Filter, Download, Star, Clock, Package, CheckCircle,
-    XCircle, AlertCircle, Trash2, Printer, Lock, DollarSign, Calendar, FileText,
+    XCircle, AlertCircle, AlertTriangle, Trash2, Printer, Lock, DollarSign, Calendar, FileText,
     User, Building, Wheat, ShoppingBag, UploadCloud, Globe, Anchor, CreditCard,
-    MapPin, PieChart as PieIcon, TrendingUp, ArrowRight, ChevronRight, Send,
-    ClipboardList, ThumbsUp, Mail, Phone, ExternalLink, Check, X, Edit3, Loader2
+    MapPin, PieChart as PieIcon, TrendingUp, ArrowRight, ChevronRight, ChevronDown, Send,
+    ClipboardList, ThumbsUp, Mail, Phone, ExternalLink, Check, X, Edit3, Loader2,
+    CircleDashed, PenTool, Clipboard, RefreshCw
 } from 'lucide-react';
 import { generatePOId } from '../utils/idGenerator';
 import {
@@ -21,6 +22,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { useStore } from '../contexts/CentralStore';
 import { useData } from '../contexts/DataContext';
 import { formatCompactNumber, formatDateTime } from '../utils/formatting';
+import { formatPONumber } from '../utils/jobIdFormatter';
 import { Protected, ProtectedButton } from '../components/Protected';
 import { generateQuarterlyReport } from '../utils/reportGenerator';
 import { purchaseOrdersService, suppliersService } from '../services/supabase.service';
@@ -305,28 +307,229 @@ const getDescriptionTemplates = (category: string): DescriptionTemplate[] => {
 const PO_DESTINATION_SITE_TYPES = ['Warehouse', 'Distribution Center'] as const;
 
 
-type Tab = 'overview' | 'requests' | 'orders' | 'suppliers';
-type FilterStatus = 'All' | 'Pending' | 'Received' | 'Cancelled';
-type POStatus = 'Draft' | 'Pending' | 'Approved' | 'Rejected' | 'Ordered' | 'Received' | 'Partially Received';
+type Tab = 'overview' | 'orders' | 'suppliers';
+type FilterStatus = 'All' | 'Draft' | 'Pending' | 'Approved' | 'Partially Received' | 'Received' | 'Cancelled' | 'Rejected';
+type POStatus = 'Draft' | 'Pending' | 'Approved' | 'Rejected' | 'Ordered' | 'Received' | 'Partially Received' | 'Cancelled';
 // --- CHART CONFIG ---
 const COLORS = ['#00ff9d', '#3b82f6', '#f59e0b', '#ec4899', '#8b5cf6'];
+// ═══════════════════════════════════════════════════════════════
+// PREMIUM UI COMPONENTS (LOCAL)
+// ═══════════════════════════════════════════════════════════════
+const MultiSelectDropdown = ({
+    options,
+    selected,
+    onChange,
+    placeholder = "Select..."
+}: {
+    options: { id: string, name: string }[],
+    selected: string[],
+    onChange: (ids: string[]) => void,
+    placeholder?: string
+}) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+                setIsOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    const toggleOption = (id: string, e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (selected.includes(id)) {
+            onChange(selected.filter(i => i !== id));
+        } else {
+            onChange([...selected, id]);
+        }
+    };
+
+    return (
+        <div className="relative w-full" ref={containerRef}>
+            <button
+                type="button"
+                onClick={() => setIsOpen(!isOpen)}
+                className="w-full flex items-center justify-between bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white hover:bg-white/10 transition-all active:scale-[0.98] group"
+            >
+                <div className="flex items-center gap-2 overflow-hidden flex-1">
+                    <Building size={14} className={selected.length > 0 ? 'text-cyber-primary' : 'text-gray-500'} />
+                    <span className="truncate">
+                        {selected.length === 0 ? (
+                            <span className="text-gray-500 font-medium">{placeholder}</span>
+                        ) : (
+                            <span className="font-bold text-cyber-primary">
+                                {selected.length} Destination{selected.length > 1 ? 's' : ''}
+                            </span>
+                        )}
+                    </span>
+                </div>
+                <div className="flex items-center gap-1">
+                    {selected.length > 0 && (
+                        <span className="flex items-center justify-center w-5 h-5 bg-cyber-primary/20 text-cyber-primary rounded-full text-[10px] font-bold">
+                            {selected.length}
+                        </span>
+                    )}
+                    <ChevronDown size={14} className={`text-gray-500 transition-transform duration-300 group-hover:text-white ${isOpen ? 'rotate-180' : ''}`} />
+                </div>
+            </button>
+
+            {isOpen && (
+                <div className="absolute z-[100] left-0 right-0 mt-2 bg-cyber-dark/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200 origin-top">
+                    <div className="max-h-[220px] overflow-y-auto p-2 space-y-1 custom-scrollbar">
+                        <div className="px-2 py-1 mb-1 border-b border-white/5 flex items-center justify-between">
+                            <span className="text-[10px] text-gray-500 uppercase font-bold tracking-widest">Available Warehouses</span>
+                            <button
+                                onClick={(e) => { e.stopPropagation(); onChange(options.map(o => o.id)); }}
+                                className="text-[9px] text-cyber-primary hover:text-white transition-colors font-bold"
+                            >
+                                Select All
+                            </button>
+                        </div>
+                        {options.map(option => (
+                            <label
+                                key={option.id}
+                                onClick={(e) => toggleOption(option.id, e)}
+                                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-all ${selected.includes(option.id)
+                                    ? 'bg-cyber-primary/10 text-white'
+                                    : 'hover:bg-white/5 text-gray-400 hover:text-white'
+                                    }`}
+                            >
+                                <div className={`w-5 h-5 rounded flex items-center justify-center transition-all ${selected.includes(option.id)
+                                    ? 'bg-cyber-primary text-black'
+                                    : 'border border-white/20'
+                                    }`}>
+                                    {selected.includes(option.id) && <Check size={14} strokeWidth={3} />}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <p className="text-[12px] font-bold leading-tight">{option.name}</p>
+                                    <p className="text-[9px] opacity-40 uppercase tracking-tighter">Central Hub</p>
+                                </div>
+                            </label>
+                        ))}
+                        {options.length === 0 && (
+                            <div className="py-4 text-center text-gray-500 text-xs italic">
+                                No warehouses available
+                            </div>
+                        )}
+                    </div>
+                    {(selected.length > 0 || isOpen) && (
+                        <div className="border-t border-white/10 p-2 flex justify-between items-center bg-black/40 backdrop-blur-md">
+                            <button
+                                onClick={(e) => { e.stopPropagation(); onChange([]); }}
+                                className="px-3 py-1 text-[10px] text-gray-500 hover:text-red-400 transition-colors uppercase font-bold tracking-wider hover:bg-red-400/10 rounded-md"
+                            >
+                                Clear All
+                            </button>
+                            <button
+                                onClick={(e) => { e.stopPropagation(); setIsOpen(false); }}
+                                className="px-4 py-1 bg-cyber-primary text-black hover:bg-white transition-colors uppercase font-bold text-[10px] rounded-md shadow-[0_0_10px_rgba(0,255,157,0.3)]"
+                            >
+                                Done
+                            </button>
+                        </div>
+                    )}
+                </div>
+            )}
+        </div>
+    );
+};
+
+
+const SingleSelectDropdown = ({
+    options,
+    value,
+    onChange,
+    placeholder = "Select..."
+}: {
+    options: { id: string, name: string }[],
+    value: string,
+    onChange: (id: string) => void,
+    placeholder?: string
+}) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+                setIsOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    const selectedOption = options.find(o => o.id === value);
+
+    return (
+        <div className="relative w-full" ref={containerRef}>
+            <button
+                type="button"
+                onClick={() => setIsOpen(!isOpen)}
+                className="w-full flex items-center justify-between bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white hover:bg-white/10 transition-all active:scale-[0.98] group"
+            >
+                <div className="flex items-center gap-2 overflow-hidden flex-1">
+                    <User size={14} className={value ? 'text-cyber-primary' : 'text-gray-500'} />
+                    <span className="truncate">
+                        {!value ? (
+                            <span className="text-gray-500 font-medium">{placeholder}</span>
+                        ) : (
+                            <span className="font-bold text-cyber-primary">
+                                {selectedOption?.name || 'Unknown Vendor'}
+                            </span>
+                        )}
+                    </span>
+                </div>
+                <ChevronDown size={14} className={`text-gray-500 transition-transform duration-300 group-hover:text-white ${isOpen ? 'rotate-180' : ''}`} />
+            </button>
+
+            {isOpen && (
+                <div className="absolute z-[100] left-0 right-0 mt-2 bg-cyber-dark/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200 origin-top">
+                    <div className="max-h-[220px] overflow-y-auto p-2 space-y-1 custom-scrollbar">
+                        {options.map(option => (
+                            <button
+                                key={option.id}
+                                type="button"
+                                onClick={() => { onChange(option.id); setIsOpen(false); }}
+                                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-left ${value === option.id
+                                    ? 'bg-cyber-primary/10 text-white'
+                                    : 'hover:bg-white/5 text-gray-400 hover:text-white'
+                                    }`}
+                            >
+                                <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-bold truncate">{option.name}</p>
+                                </div>
+                                {value === option.id && <Check size={14} className="text-cyber-primary" />}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+};
+
 
 export default function Procurement() {
     const { user } = useStore();
     const {
-        suppliers, products, createPO, updatePO, addSupplier, deletePO, activeSite, sites, addNotification, addProduct, settings, getTaxForSite
+        suppliers, products, allProducts, createPO, updatePO, addSupplier, deletePO, activeSite, sites, addNotification, addProduct, settings, getTaxForSite
     } = useData();
+
+    // Sync Manager Hook REMOVED for Online-First
+
     // --- REPORT GENERATOR ---
 
     // Server-side Pagination State
     const [orders, setOrders] = useState<PurchaseOrder[]>([]);
-    const [requests, setRequests] = useState<PurchaseOrder[]>([]);
     const [loading, setLoading] = useState(false);
     const [totalCount, setTotalCount] = useState(0);
-    const [totalRequestsCount, setTotalRequestsCount] = useState(0);
     const [totalSuppliersCount, setTotalSuppliersCount] = useState(0);
     const [currentPage, setCurrentPage] = useState(1);
-    const [requestPage, setRequestPage] = useState(1);
     const [supplierPage, setSupplierPage] = useState(1);
     const ITEMS_PER_PAGE = 20;
 
@@ -370,7 +573,6 @@ export default function Procurement() {
     const [newPOSupplier, setNewPOSupplier] = useState('');
     const [newPOItems, setNewPOItems] = useState<POItem[]>([]);
     const [currentProductToAdd, setCurrentProductToAdd] = useState('');
-    const [isRequestMode, setIsRequestMode] = useState(false);
     const [editingPO, setEditingPO] = useState<PurchaseOrder | null>(null);
 
     // Flexible Item Entry State - CATEGORY-BASED
@@ -383,16 +585,73 @@ export default function Procurement() {
     const [customItemSpecs, setCustomItemSpecs] = useState('');
     const [customItemUnit, setCustomItemUnit] = useState('');
     const [customItemImage, setCustomItemImage] = useState('');
+    const [customItemIdentity, setCustomItemIdentity] = useState<'known' | 'variant' | 'new'>('known');
 
     // PO Financials & Terms (ALL OPTIONAL)
-    const [currentQty, setCurrentQty] = useState(0);
+    const [currentQty, setCurrentQty] = useState(1);
     const [currentCost, setCurrentCost] = useState(0);
     const [currentRetailPrice, setCurrentRetailPrice] = useState(0);
     const [shippingCost, setShippingCost] = useState(0);
+
+    // --- PRODUCT CATALOG FILTERS ---
+    const [catalogSearch, setCatalogSearch] = useState('');
+    const [catalogCategory, setCatalogCategory] = useState('All');
+    const [catalogSort, setCatalogSort] = useState<'name' | 'priceAsc' | 'priceDesc' | 'stockAsc'>('name');
+    const [catalogStockFilter, setCatalogStockFilter] = useState<'all' | 'low' | 'out'>('all');
+
+    // --- MAIN PO LIST FILTERS ---
+    const [poSort, setPoSort] = useState<'dateDesc' | 'dateAsc' | 'amountDesc' | 'amountAsc' | 'priority'>('dateDesc');
+    const [poSupplierFilter, setPoSupplierFilter] = useState('All');
+
+    const filteredCatalogProducts = useMemo(() => {
+        let filtered = products;
+
+        // 1. Filter by Supplier (if selected)
+        // Note: In a real app we might filter by supplier ID, but currently products aren't linked nicely
+        // So we show all products or filter by matching category/brand if possible
+
+        // 2. Search
+        if (catalogSearch.trim()) {
+            const q = catalogSearch.toLowerCase();
+            filtered = filtered.filter(p =>
+                p.name.toLowerCase().includes(q) ||
+                p.sku?.toLowerCase().includes(q)
+            );
+        }
+
+        // 3. Category
+        if (catalogCategory !== 'All') {
+            filtered = filtered.filter(p => p.category === catalogCategory);
+        }
+
+        // 4. Stock Filter
+        if (catalogStockFilter === 'low') {
+            filtered = filtered.filter(p => (p.stock || 0) <= (p.minStock || 10) && (p.stock || 0) > 0);
+        } else if (catalogStockFilter === 'out') {
+            filtered = filtered.filter(p => (p.stock || 0) === 0);
+        }
+
+        // 5. Sort
+        return filtered.sort((a, b) => {
+            switch (catalogSort) {
+                case 'priceAsc': return a.price - b.price;
+                case 'priceDesc': return b.price - a.price;
+                case 'stockAsc': return (a.stock || 0) - (b.stock || 0);
+                case 'name': default: return a.name.localeCompare(b.name);
+            }
+        });
+    }, [products, catalogSearch, catalogCategory, catalogSort, catalogStockFilter]);
+
+    const catalogCategories = useMemo(() => {
+        const cats = new Set(allProducts.map(p => p.category || 'Uncategorized'));
+        return ['All', ...Array.from(cats)].sort();
+    }, [allProducts]);
     const [taxRate, setTaxRate] = useState(0);
     const [discountRate, setDiscountRate] = useState(0);
     const [poCurrency, setPoCurrency] = useState(CURRENCY_SYMBOL);
     const [poNotes, setPoNotes] = useState('');
+    const [orderType, setOrderType] = useState<'manual' | 'reorder' | 'contract'>('manual');
+    const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [expectedDate, setExpectedDate] = useState('');
 
     // Enterprise Fields (OPTIONAL)
@@ -505,56 +764,59 @@ export default function Procurement() {
             const dates = getFilterDates();
 
             if (activeTab === 'overview') {
-                // Strategic Metrics: Strictly Quarterly (or selected range)
-                const metricFilters = {
+                // Strategic Metrics: Always Global for Centralized Procurement
+                const stats = await purchaseOrdersService.getMetrics(undefined, {
                     startDate: dates.startDate,
                     endDate: dates.endDate
-                };
-
-                // If at "Central Operations" (HQ), fetch GLOBAL metrics (pass undefined siteId)
-                // Otherwise fetch site-specific metrics
-                const querySiteId = activeSite?.name === 'Central Operations' ? undefined : activeSite?.id;
-
-                const stats = await purchaseOrdersService.getMetrics(querySiteId, metricFilters);
+                });
                 setProcurementMetrics(stats);
             } else if (activeTab === 'orders') {
-                // Operational Workspace: Load All History (ignore date filter)
                 const offset = (currentPage - 1) * ITEMS_PER_PAGE;
+
+                const sortParams = {
+                    dateDesc: { sortBy: 'created_at', sortDir: 'desc' },
+                    dateAsc: { sortBy: 'created_at', sortDir: 'asc' },
+                    amountDesc: { sortBy: 'total_amount', sortDir: 'desc' },
+                    amountAsc: { sortBy: 'total_amount', sortDir: 'asc' },
+                    priority: { sortBy: 'priority', sortDir: 'desc' }
+                }[poSort] || { sortBy: 'created_at', sortDir: 'desc' };
+
                 const poFilters = {
                     status: statusFilter,
                     search: searchTerm,
-                    startDate: undefined, // All History
-                    endDate: undefined    // All History
+                    startDate: undefined,
+                    endDate: undefined,
+                    ...sortParams,
+                    supplierId: poSupplierFilter !== 'All' ? poSupplierFilter : undefined
                 };
-                const res = await purchaseOrdersService.getAll(activeSite?.id, ITEMS_PER_PAGE, offset, { ...poFilters, isRequest: false });
+                const res = await purchaseOrdersService.getAll(undefined, ITEMS_PER_PAGE, offset, { ...poFilters, isRequest: false });
+
+                // 3. Update State
                 setOrders(res.data);
                 setTotalCount(res.count);
-            } else if (activeTab === 'requests') {
-                // Requests Workspace: Load All Requests History
-                const offset = (requestPage - 1) * ITEMS_PER_PAGE;
-                const prFilters = {
-                    status: statusFilter,
-                    search: searchTerm,
-                    startDate: undefined,
-                    endDate: undefined
-                };
-                const res = await purchaseOrdersService.getAll(activeSite?.id, ITEMS_PER_PAGE, offset, { ...prFilters, isRequest: true });
-                setRequests(res.data);
-                setTotalRequestsCount(res.count);
+
             } else if (activeTab === 'suppliers') {
                 const offset = (supplierPage - 1) * ITEMS_PER_PAGE;
                 const res = await suppliersService.getAll(ITEMS_PER_PAGE, offset);
+
+                // 3. Update State
                 setLocalSuppliers(res.data);
                 setTotalSuppliersCount(res.count);
             }
 
         } catch (err) {
             console.error('Fetch error:', err);
-            addNotification('alert', 'Failed to refresh data');
+            // If offline, we rely on what we loaded from cache in step 1.
+            // Consider adding specific "Offline Mode" notification if error is network related
+            if (!navigator.onLine) {
+                addNotification('info', 'You are offline. Showing cached data.');
+            } else {
+                addNotification('alert', 'Failed to refresh data');
+            }
         } finally {
             setLoading(false);
         }
-    }, [activeTab, activeSite?.id, currentPage, requestPage, supplierPage, statusFilter, searchTerm, dateRange]);
+    }, [activeTab, currentPage, supplierPage, statusFilter, searchTerm, dateRange, poSort, poSupplierFilter]);
 
     useEffect(() => {
         fetchData();
@@ -652,9 +914,13 @@ export default function Procurement() {
     const [isBulkApproveModalOpen, setIsBulkApproveModalOpen] = useState(false);
 
     // ACCESS CONTROL
-    const canEdit = user?.role === 'admin' || user?.role === 'super_admin' || user?.role === 'manager';
-    const canApprove = user?.role === 'super_admin' || user?.role === 'admin';
-    const canReceive = user?.role === 'admin' || user?.role === 'warehouse_manager' || user?.role === 'dispatcher' || user?.role === 'super_admin';
+    // ACCESS CONTROL - Centralized roles only: CEO, Warehouse Manager, Procurement Manager
+    const allowedRoles = ['super_admin', 'warehouse_manager', 'procurement_manager'];
+    const isAuthorized = allowedRoles.includes(user?.role || '');
+
+    const canEdit = isAuthorized;
+    const canApprove = user?.role === 'super_admin' || user?.role === 'procurement_manager';
+    const canReceive = isAuthorized;
 
     const TabButton = ({ id, label, icon: Icon }: any) => (
         <button
@@ -671,16 +937,11 @@ export default function Procurement() {
 
     // --- FILTERING LOGIC REPLACED BY SERVER-SIDE ---
     const activePurchaseOrders = orders;
-    const activeRequests = requests;
 
     // Use procurementMetrics instead of calculating on subset
     const metrics = procurementMetrics;
 
-    const cycleFilter = () => {
-        const states: FilterStatus[] = ['All', 'Pending', 'Received', 'Cancelled'];
-        const currentIndex = states.indexOf(statusFilter);
-        setStatusFilter(states[(currentIndex + 1) % states.length]);
-    };
+
 
 
 
@@ -697,7 +958,6 @@ export default function Procurement() {
 
     useEffect(() => {
         window.scrollTo(0, 0);
-        console.log("Procurement Component Mounted - VERSION CHECK v2");
     }, []);
     useEffect(() => {
         if (newPOSupplier) {
@@ -774,7 +1034,7 @@ export default function Procurement() {
             const totalAmount = itemsTotal + taxAmount + shippingCost - discountAmount;
             const totalItems = newPOItems.reduce((sum, item) => sum + item.quantity, 0);
 
-            const finalNotes = isRequestMode && poNotes.trim() ? `[PR] ${poNotes}` : poNotes;
+            const finalNotes = poNotes;
             let successfulPOs = 0;
 
             // Loop through each selected destination site and create a PO
@@ -795,6 +1055,17 @@ export default function Procurement() {
 
                 const siteTotalAmount = itemsTotal + siteTaxAmount + (shippingCost || 0) - (discountAmount || 0);
 
+                // RE-APPROVAL WORKFLOW: If editing an Approved PO, revert to Draft
+                // This ensures CEO re-approves changes.
+                const wasApproved = editingPO.status === 'Approved';
+                const newStatus = wasApproved ? 'Draft' : editingPO.status;
+
+                // Clear approval tags from notes if reverting to Draft
+                let cleanedNotes = finalNotes;
+                if (wasApproved) {
+                    cleanedNotes = finalNotes.replace(/\n?\[APPROVED_BY:.*?\]/g, '');
+                }
+
                 const updatedPO: PurchaseOrder = {
                     ...editingPO,
                     siteId,
@@ -806,14 +1077,17 @@ export default function Procurement() {
                     lineItems: newPOItems,
                     shippingCost: shippingCost || 0,
                     taxAmount: siteTaxAmount,
-                    notes: finalNotes,
+                    notes: cleanedNotes,
                     paymentTerms: paymentTerms || 'To be determined',
                     incoterms: incoterms || 'N/A',
                     destination: destination,
                     discount: discountAmount || 0,
                     priority: poPriority,
                     createdBy: editingPO.createdBy || 'Unknown',
-                    requestedBy: editingPO.requestedBy || poRequestedBy || user?.name || 'Unknown'
+                    requestedBy: editingPO.requestedBy || poRequestedBy || user?.name || 'Unknown',
+                    status: newStatus,
+                    approvedBy: wasApproved ? undefined : editingPO.approvedBy,
+                    approvedAt: wasApproved ? undefined : editingPO.approvedAt
                 };
 
                 await updatePO(updatedPO);
@@ -835,12 +1109,12 @@ export default function Procurement() {
 
                     const siteTotalAmount = itemsTotal + siteTaxAmount + (shippingCost || 0) - (discountAmount || 0);
 
+                    // OFFLINE-ONLY REMOVED: Now creating directly in Supabase
                     const newPO: PurchaseOrder = {
-                        id: crypto.randomUUID(),
-                        poNumber: generatePOId(),
+                        id: crypto.randomUUID(), // Valid UUID for both local and remote
                         siteId: siteId,
                         supplierId: vendorId,
-                        supplierName: vendorName,
+                        supplierName: vendorName || 'Unknown',
                         date: new Date().toISOString().split('T')[0],
                         status: 'Draft',
                         totalAmount: siteTotalAmount,
@@ -850,16 +1124,22 @@ export default function Procurement() {
                         shippingCost: shippingCost || 0,
                         taxAmount: siteTaxAmount,
                         notes: finalNotes,
-                        paymentTerms: paymentTerms || 'To be determined',
+                        paymentTerms: paymentTerms || 'TBD',
                         incoterms: incoterms || 'N/A',
                         destination: destination,
                         discount: discountAmount || 0,
                         priority: poPriority,
                         createdBy: user?.name || 'Unknown',
-                        requestedBy: poRequestedBy || user?.name || 'Unknown'
+                        requestedBy: poRequestedBy || user?.name || 'Unknown',
                     };
 
-                    await createPO(newPO);
+                    // 1. Create directly in Supabase
+                    await purchaseOrdersService.create(newPO, newPOItems);
+
+                    // 2. Update Local State (Optimistic UI)
+                    setOrders(prev => [newPO, ...prev]);
+                    setTotalCount(prev => prev + 1);
+
                     successfulPOs++;
                 }
             }
@@ -888,7 +1168,6 @@ export default function Procurement() {
             setManualVendorName('');
             setNewPOSupplier('');
             setPoRequestedBy(user?.name || '');
-            setIsRequestMode(false);
             setEditingPO(null);
             setExpectedDate('');
 
@@ -918,9 +1197,10 @@ export default function Procurement() {
         setTaxRate(0);
         setPaymentTerms('');
         setIncoterms('');
-        // Reset to default site (current site or first warehouse)
-        const defaultSite = activeSite?.id || sites.find(s => s.type === 'Warehouse' || s.type === 'Distribution Center')?.id || sites[0]?.id;
-        setDestinationSiteIds(defaultSite ? [defaultSite] : []);
+        // Reset to default site (first warehouse if available)
+        const warehouses = sites.filter(s => s.type === 'Warehouse' || s.type === 'Distribution Center');
+        const defaultSiteId = warehouses.length > 0 ? warehouses[0].id : '';
+        setDestinationSiteIds(defaultSiteId ? [defaultSiteId] : []);
         setIsMultiSiteMode(false); // Reset to single-site mode by default
         setExpectedDate('');
         setIsCustomItem(true);
@@ -935,8 +1215,10 @@ export default function Procurement() {
         // ═══════════════════════════════════════════════════════════════
 
         // 1. QUANTITY VALIDATION
+        // 1. QUANTITY VALIDATION
         if (!currentQty || currentQty <= 0) {
-            addNotification('alert', "Please enter a valid quantity (must be greater than 0).");
+            console.error('Add Item Failed: Invalid Quantity', { currentQty, type: typeof currentQty });
+            addNotification('alert', `Please enter a valid quantity (must be greater than 0). Value: ${currentQty}`);
             return;
         }
         if (currentQty > 999999) {
@@ -1044,16 +1326,36 @@ export default function Procurement() {
 
         } else {
             // Catalog product validation
-            if (!currentProductToAdd) {
-                addNotification('alert', "Please select a product from the catalog.");
+            let productToAdd = (allProducts || []).find(p => p.id === currentProductToAdd);
+
+            // Fallback: Smart-match if ID is not set (e.g. user typed name but didn't click dropdown)
+            if (!productToAdd && productSearchTerm) {
+                const term = productSearchTerm.trim().toLowerCase();
+                if (term) {
+                    // Filter exactly effectively as the UI dropdown does
+                    const matches = (allProducts || []).filter(p =>
+                        (p.name?.toLowerCase() || '').includes(term) ||
+                        (p.sku?.toLowerCase() || '').includes(term)
+                    );
+
+                    if (matches.length > 0) {
+                        // Aggressively select the first match (Top Hit)
+                        productToAdd = matches[0];
+                        setCurrentProductToAdd(matches[0].id); // Sync state for next time
+
+                        // Optional: Notify user if it's not an exact match, but 'info' might be too noisy
+                        if (productToAdd.name.toLowerCase() !== term) {
+                        }
+                    }
+                }
+            }
+
+            if (!productToAdd) {
+                addNotification('alert', "Please select a valid product from the catalog.");
                 return;
             }
 
-            const product = products.find(p => p.id === currentProductToAdd);
-            if (!product) {
-                addNotification('alert', "Selected product not found. Please refresh and try again.");
-                return;
-            }
+            const product = productToAdd; // Assign to const for consistent usage
 
             productId = product.id;
             productName = product.name;
@@ -1066,40 +1368,42 @@ export default function Procurement() {
             }
         }
 
-        // 4. DUPLICATE DETECTION
-        const existingItem = newPOItems.find(item =>
-            item.productId === productId ||
-            (isCustomItem && item.productName.toLowerCase() === productName.toLowerCase())
-        );
-
-        if (existingItem) {
-            const confirmDuplicate = window.confirm(
-                `"${productName}" is already in this order with ${existingItem.quantity} units.\n\n` +
-                `Would you like to add ${currentQty} more units to it instead of creating a duplicate?`
+        // 4. DUPLICATE DETECTION - SKIP if we're in full edit mode (editing existing item)
+        if (fullEditingIndex === null) {
+            const existingItem = newPOItems.find(item =>
+                item.productId === productId ||
+                (isCustomItem && item.productName.toLowerCase() === productName.toLowerCase())
             );
 
-            if (confirmDuplicate) {
-                // Update existing item quantity
-                const updatedItems = newPOItems.map(item => {
-                    if (item.productId === productId ||
-                        (isCustomItem && item.productName.toLowerCase() === productName.toLowerCase())) {
-                        const newQty = item.quantity + currentQty;
-                        return {
-                            ...item,
-                            quantity: newQty,
-                            totalCost: item.unitCost * newQty
-                        };
-                    }
-                    return item;
-                });
-                setNewPOItems(updatedItems);
-                addNotification('success', `Updated quantity for "${productName}" to ${existingItem.quantity + currentQty} units.`);
+            if (existingItem) {
+                const confirmDuplicate = window.confirm(
+                    `"${productName}" is already in this order with ${existingItem.quantity} units.\n\n` +
+                    `Would you like to add ${currentQty} more units to it instead of creating a duplicate?`
+                );
 
-                // Reset fields
-                resetItemFields();
-                return;
+                if (confirmDuplicate) {
+                    // Update existing item quantity
+                    const updatedItems = newPOItems.map(item => {
+                        if (item.productId === productId ||
+                            (isCustomItem && item.productName.toLowerCase() === productName.toLowerCase())) {
+                            const newQty = item.quantity + currentQty;
+                            return {
+                                ...item,
+                                quantity: newQty,
+                                totalCost: item.unitCost * newQty
+                            };
+                        }
+                        return item;
+                    });
+                    setNewPOItems(updatedItems);
+                    addNotification('success', `Updated quantity for "${productName}" to ${existingItem.quantity + currentQty} units.`);
+
+                    // Reset fields
+                    resetItemFields();
+                    return;
+                }
+                // If user says no, allow duplicate (different price scenarios)
             }
-            // If user says no, allow duplicate (different price scenarios)
         }
 
         // 5. CALCULATE TOTAL (with precision handling)
@@ -1118,10 +1422,21 @@ export default function Procurement() {
             size: customItemSize || undefined,
             unit: customItemUnit || undefined,
             category: selectedSubCategory || selectedMainCategory || undefined,
+            identityType: isCustomItem ? customItemIdentity : 'known', // Default to 'known' for catalog items
         };
 
-        // 7. ADD TO LIST
-        setNewPOItems(prev => [...prev, newItem]);
+        // 7. ADD TO LIST (or UPDATE if in full edit mode)
+        if (fullEditingIndex !== null) {
+            // FULL EDIT MODE: Replace the existing item
+            setNewPOItems(prev => prev.map((item, idx) =>
+                idx === fullEditingIndex ? newItem : item
+            ));
+            addNotification('success', `Updated: ${productName}`);
+            setFullEditingIndex(null); // Exit full edit mode
+        } else {
+            // NORMAL MODE: Add new item
+            setNewPOItems(prev => [...prev, newItem]);
+        }
 
         // 8. SUCCESS FEEDBACK
         addNotification('success', `Added: ${productName} × ${currentQty} = ${CURRENCY_SYMBOL}${totalCost.toLocaleString()}`);
@@ -1147,10 +1462,43 @@ export default function Procurement() {
         setSelectedDescTemplate(''); // Reset description template
         setPackQuantity(0); // Reset pack quantity
         setCustomItemImage(''); // Reset product image
+        setCustomItemIdentity('known'); // Reset product identity
     };
 
     const removePOItem = (idx: number) => {
         setNewPOItems(newPOItems.filter((_, i) => i !== idx));
+    };
+
+    // State for full item editing (populates the form with existing item data)
+    const [fullEditingIndex, setFullEditingIndex] = useState<number | null>(null);
+
+    // Full edit an item - populates the form with all item fields
+    const startFullEditItem = (idx: number) => {
+        const item = newPOItems[idx];
+        setFullEditingIndex(idx);
+
+        // Set the form to custom item mode since we're editing existing data
+        setIsCustomItem(true);
+
+        // Populate all the form fields with existing item data
+        setCustomItemName(item.productName || '');
+        setSelectedMainCategory(item.category || '');
+        setCustomItemBrand(item.brand || '');
+        setCustomItemSize(item.size || '');
+        setCustomItemUnit(item.unit || '');
+        setCurrentQty(item.quantity || 0);
+        setCurrentCost(item.unitCost || 0);
+        setCurrentRetailPrice(item.retailPrice || 0);
+        setCustomItemImage(item.image || '');
+        setCustomItemIdentity(item.identityType || 'known');
+
+        // Scroll to form
+        addNotification('info', `Editing: ${item.productName}. Make changes and click "Update Item".`);
+    };
+
+    // Modified addItemToPO to handle updating existing item when fullEditingIndex is set
+    const originalAddItemToPO = () => {
+        // This will be called by the modified version below
     };
 
     // State for inline editing of PO items
@@ -1254,8 +1602,10 @@ export default function Procurement() {
         }
 
         try {
-            await deletePO(poToDelete.id);
-            // deletePO handles notification
+            // Updated to use service directly for robustness
+            await purchaseOrdersService.delete(poToDelete.id);
+            addNotification('success', 'Purchase Order deleted successfully');
+
             setSelectedPO(null);
             setIsDeletePOModalOpen(false);
             setPoToDelete(null);
@@ -1263,6 +1613,7 @@ export default function Procurement() {
             fetchData();
         } catch (error) {
             console.error(error);
+            addNotification('alert', 'Failed to delete PO');
         }
     };
 
@@ -1604,10 +1955,10 @@ export default function Procurement() {
 
         setIsSubmitting(true);
         try {
-            // Update PO status to Approved
+            // Update PO status to Ordered (Routes to Docks)
             const updatedPO: PurchaseOrder = {
                 ...selectedPO,
-                status: 'Approved',
+                status: 'Ordered',
                 approvedBy: user?.name || 'Unknown',
                 approvedAt: new Date().toISOString()
             };
@@ -1726,7 +2077,7 @@ export default function Procurement() {
                 try {
                     const updatedPO: PurchaseOrder = {
                         ...po,
-                        status: 'Approved',
+                        status: 'Ordered',
                         approvedBy: user?.name || 'Unknown',
                         approvedAt: new Date().toISOString()
                     };
@@ -1796,8 +2147,7 @@ export default function Procurement() {
             <div className="flex gap-3">
                 <button
                     onClick={() => {
-                        setIsCreatePOOpen(false);
-                        setEditingPO(null);
+                        resetPOForm();
                     }}
                     className="px-6 py-2 rounded-lg border border-white/20 bg-white/10 hover:bg-white/20 text-white font-bold text-sm transition-colors"
                 >
@@ -1806,7 +2156,7 @@ export default function Procurement() {
                 <button
                     onClick={handleCreatePO}
                     disabled={isSubmitting}
-                    className={`px-8 py-2 rounded-lg font-bold text-sm shadow-lg transition-all flex items-center gap-2 ${isSubmitting ? 'bg-gray-500 cursor-not-allowed text-gray-300' : isRequestMode ? 'bg-blue-500 hover:bg-blue-600 text-white shadow-blue-500/20' : 'bg-cyber-primary hover:bg-cyber-accent text-black shadow-cyber-primary/30'}`}
+                    className={`px-8 py-2 rounded-lg font-bold text-sm shadow-lg transition-all flex items-center gap-2 ${isSubmitting ? 'bg-gray-500 cursor-not-allowed text-gray-300' : 'bg-cyber-primary hover:bg-cyber-accent text-black shadow-cyber-primary/30'}`}
                 >
                     {isSubmitting ? (
                         <span className="flex items-center gap-2">
@@ -1814,7 +2164,7 @@ export default function Procurement() {
                             Processing...
                         </span>
                     ) : (
-                        editingPO ? 'Update Order' : (isRequestMode ? 'Submit Request' : 'Create Order')
+                        editingPO ? 'Update Order' : 'Create Order'
                     )}
                 </button>
             </div>
@@ -1833,14 +2183,17 @@ export default function Procurement() {
                     <p className="text-gray-400 text-sm">Strategic sourcing, purchasing, and vendor management.</p>
                 </div>
                 <div className="flex items-center space-x-3">
+                    {/* SYNC STATUS WIDGET */}
+
+
                     <ProtectedButton
                         permission="CREATE_PO"
                         onClick={() => {
-                            setIsRequestMode(false);
                             setIsCreatePOOpen(true);
-                            // Default to current site, ensuring no undefined values
-                            const defaultSite = activeSite?.id || sites.find(s => s.type === 'Warehouse' || s.type === 'Distribution Center')?.id || sites[0]?.id;
-                            setDestinationSiteIds(defaultSite ? [defaultSite] : []);
+                            // Default to first warehouse
+                            const warehouses = sites.filter(s => s.type === 'Warehouse' || s.type === 'Distribution Center');
+                            const defaultSiteId = warehouses.length > 0 ? warehouses[0].id : '';
+                            setDestinationSiteIds(defaultSiteId ? [defaultSiteId] : []);
                             setIsMultiSiteMode(false); // Reset to single-site mode by default
                         }}
                         className="bg-cyber-primary hover:bg-cyber-primary/80 text-black px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
@@ -1856,7 +2209,6 @@ export default function Procurement() {
                 <TabButton id="overview" label="Overview" icon={PieIcon} />
 
                 <TabButton id="orders" label="Orders (PO)" icon={Package} />
-                <TabButton id="requests" label="Requests (PR)" icon={FileText} />
                 <TabButton id="suppliers" label="Suppliers" icon={Truck} />
             </div>
 
@@ -1923,8 +2275,14 @@ export default function Procurement() {
                                 {procurementMetrics.categoryData.map((entry, index) => (
                                     <div key={index} className="flex items-center gap-2 text-xs text-gray-400">
                                         <div
-                                            className="w-2 h-2 rounded-full"
-                                            style={{ backgroundColor: COLORS[index % COLORS.length] } as React.CSSProperties}
+                                            className={`w-2 h-2 rounded-full ${[
+                                                'bg-[#00ff9d]',
+                                                'bg-[#3b82f6]',
+                                                'bg-[#f59e0b]',
+                                                'bg-[#ec4899]',
+                                                'bg-[#8b5cf6]'
+                                            ][index % 5]
+                                                }`}
                                         ></div>
                                         {entry.name}
                                     </div>
@@ -1961,25 +2319,65 @@ export default function Procurement() {
             {/* --- ORDERS (PO) TAB --- */}
             {activeTab === 'orders' && (
                 <div className="bg-cyber-gray border border-white/5 rounded-2xl overflow-hidden">
-                    <div className="p-4 border-b border-white/5 flex gap-4">
-                        <div className="flex items-center bg-black/30 border border-white/10 rounded-xl px-4 py-2 flex-1 max-w-md focus-within:border-cyber-primary/50 transition-colors">
-                            <Search className="w-4 h-4 text-gray-400" />
-                            <input
-                                type="text"
-                                placeholder="Search PO # or Supplier..."
-                                className="bg-transparent border-none ml-3 flex-1 text-white text-sm outline-none"
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                            />
+                    {/* Modern Filter Toolbar */}
+                    <div className="p-4 border-b border-white/5 space-y-4">
+                        {/* Row 1: Search & Dropdowns */}
+                        <div className="flex flex-col md:flex-row gap-4">
+                            {/* Search */}
+                            <div className="flex items-center bg-black/30 border border-white/10 rounded-xl px-4 py-2.5 flex-1 focus-within:border-cyber-primary/50 transition-colors">
+                                <Search className="w-4 h-4 text-gray-400" />
+                                <input
+                                    type="text"
+                                    placeholder="Search PO # or Supplier..."
+                                    className="bg-transparent border-none ml-3 flex-1 text-white text-sm outline-none"
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                />
+                            </div>
+
+                            {/* Supplier Filter */}
+                            <select
+                                aria-label="Filter by Supplier"
+                                value={poSupplierFilter}
+                                onChange={(e) => setPoSupplierFilter(e.target.value)}
+                                className="bg-black/30 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-cyber-primary/50 min-w-[150px]"
+                            >
+                                <option value="All">All Suppliers</option>
+                                {suppliers.map(s => (
+                                    <option key={s.id} value={s.id}>{s.name}</option>
+                                ))}
+                            </select>
+
+                            {/* Sort */}
+                            <select
+                                aria-label="Sort POs"
+                                value={poSort}
+                                onChange={(e) => setPoSort(e.target.value as any)}
+                                className="bg-black/30 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-cyber-primary/50 min-w-[150px]"
+                            >
+                                <option value="dateDesc">Date: Newest</option>
+                                <option value="dateAsc">Date: Oldest</option>
+                                <option value="amountDesc">Amount: High-Low</option>
+                                <option value="amountAsc">Amount: Low-High</option>
+                                <option value="priority">Priority</option>
+                            </select>
                         </div>
-                        <button
-                            onClick={cycleFilter}
-                            className={`p-2 rounded-lg border flex items-center gap-2 px-3 transition-colors ${statusFilter !== 'All' ? 'bg-cyber-primary/10 border-cyber-primary text-cyber-primary' : 'border-white/10 text-gray-400 hover:bg-white/5'
-                                }`}
-                        >
-                            <Filter className="w-4 h-4" />
-                            <span className="text-xs">{statusFilter}</span>
-                        </button>
+
+                        {/* Row 2: Status Chips */}
+                        <div className="flex flex-wrap gap-2">
+                            {['All', 'Draft', 'Pending', 'Approved', 'Partially Received', 'Received', 'Cancelled', 'Rejected'].map(status => (
+                                <button
+                                    key={status}
+                                    onClick={() => setStatusFilter(status as any)}
+                                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${statusFilter === status
+                                        ? 'bg-cyber-primary text-black border-cyber-primary shadow-[0_0_10px_rgba(0,255,157,0.2)]'
+                                        : 'bg-white/5 text-gray-400 border-white/5 hover:text-white hover:border-white/20'
+                                        }`}
+                                >
+                                    {status}
+                                </button>
+                            ))}
+                        </div>
                     </div>
 
                     {/* Bulk Actions Bar (CEO Only) */}
@@ -2042,15 +2440,15 @@ export default function Procurement() {
                                         </th>
                                     )}
                                     <th className="p-4 text-xs text-gray-400 uppercase">PO Number</th>
-                                    <th className="p-4 text-xs text-gray-400 uppercase text-center">Priority</th>
-                                    <th className="p-4 text-xs text-gray-400 uppercase">Supplier</th>
-                                    <th className="p-4 text-xs text-gray-400 uppercase">Destination</th>
-                                    <th className="p-4 text-xs text-gray-400 uppercase">Date</th>
-                                    <th className="p-4 text-xs text-gray-400 uppercase">Expected</th>
-                                    <th className="p-4 text-xs text-gray-400 uppercase text-right">Items</th>
-                                    <th className="p-4 text-xs text-gray-400 uppercase text-right">Amount</th>
-                                    <th className="p-4 text-xs text-gray-400 uppercase text-center">Status</th>
-                                    <th className="p-4 text-xs text-gray-400 uppercase">Requested By</th>
+                                    <th className="p-4 text-xs text-gray-400 uppercase font-bold text-center">Priority</th>
+                                    <th className="p-4 text-xs text-gray-400 uppercase font-bold">Supplier</th>
+                                    <th className="p-4 text-xs text-gray-400 uppercase font-bold">Destination</th>
+                                    <th className="p-4 text-xs text-gray-400 uppercase font-bold">Date</th>
+                                    <th className="p-4 text-xs text-gray-400 uppercase font-bold">Expected</th>
+                                    <th className="p-4 text-xs text-gray-400 uppercase font-bold text-right">Items</th>
+                                    <th className="p-4 text-xs text-gray-400 uppercase font-bold text-right">Amount</th>
+                                    <th className="p-4 text-xs text-gray-400 uppercase text-center font-bold">Status</th>
+                                    <th className="p-4 text-xs text-gray-400 uppercase font-bold">Requested By</th>
                                     <th className="p-4 text-xs text-gray-400 uppercase"></th>
                                 </tr>
                             </thead>
@@ -2075,15 +2473,15 @@ export default function Procurement() {
                                                                 }
                                                             }}
                                                             className="w-4 h-4 rounded border-gray-600 text-cyber-primary focus:ring-cyber-primary bg-black/50"
-                                                            title={`Select PO ${po.poNumber || po.po_number || po.id}`}
-                                                            aria-label={`Select PO ${po.poNumber || po.po_number || po.id}`}
+                                                            title={`Select PO ${formatPONumber(po)}`}
+                                                            aria-label={`Select PO ${formatPONumber(po)}`}
                                                         />
                                                     ) : (
                                                         <span className="w-4 h-4 block"></span>
                                                     )}
                                                 </td>
                                             )}
-                                            <td className="p-4 text-sm font-mono text-white font-bold">{po.poNumber || po.po_number || `PO-${po.id.substring(0, 8).toUpperCase()}`}</td>
+                                            <td className="p-4 text-sm font-mono text-white font-bold">{formatPONumber(po)}</td>
                                             <td className="p-4">
                                                 <div className={`mx-auto px-2 py-0.5 rounded text-[9px] font-bold border uppercase text-center w-fit ${po.priority === 'High' || po.priority === 'Urgent' ? 'text-red-400 border-red-500/20 bg-red-500/10' :
                                                     po.priority === 'Low' ? 'text-blue-400 border-blue-500/20 bg-blue-500/10' :
@@ -2096,7 +2494,7 @@ export default function Procurement() {
                                             <td className="p-4 text-sm text-gray-300">
                                                 <div className="flex items-center gap-1.5 max-w-[250px]">
                                                     <MapPin size={12} className="text-gray-500 flex-shrink-0" />
-                                                    <span>{po.destination || sites.find(s => s.id === po.siteId)?.name || 'Unknown'}</span>
+                                                    <span className="truncate">{po.destination || sites.find(s => s.id === po.siteId)?.name || 'Central Operations'}</span>
                                                 </div>
                                             </td>
                                             <td className="p-4 text-xs text-gray-500 whitespace-nowrap">{po.date}</td>
@@ -2105,16 +2503,20 @@ export default function Procurement() {
                                             <td className="p-4 text-sm text-cyber-primary font-mono text-right font-bold">{CURRENCY_SYMBOL} {po.totalAmount.toLocaleString()}</td>
                                             <td className="p-4 text-center">
                                                 <span className={`inline-flex items-center px-2 py-1 rounded text-[10px] font-bold uppercase border ${po.status === 'Received' ? 'text-green-400 border-green-500/20 bg-green-500/10' :
-                                                    po.status === 'Approved' ? 'text-cyan-400 border-cyan-500/20 bg-cyan-500/10' :
-                                                        po.status === 'Draft' ? 'text-yellow-400 border-yellow-500/20 bg-yellow-500/10' :
-                                                            po.status === 'Pending' ? 'text-blue-400 border-blue-500/20 bg-blue-500/10' :
-                                                                'text-red-400 border-red-500/20 bg-red-500/10'
+                                                    po.status === 'Partially Received' ? 'text-indigo-400 border-indigo-500/20 bg-indigo-500/10' :
+                                                        po.status === 'Approved' ? 'text-cyan-400 border-cyan-500/20 bg-cyan-500/10' :
+                                                            po.status === 'Ordered' ? 'text-purple-400 border-purple-500/20 bg-purple-500/10' :
+                                                                po.status === 'Draft' ? 'text-yellow-400 border-yellow-500/20 bg-yellow-500/10' :
+                                                                    po.status === 'Pending' ? 'text-blue-400 border-blue-500/20 bg-blue-500/10' :
+                                                                        'text-red-400 border-red-500/20 bg-red-500/10'
                                                     }`}>
                                                     {po.status === 'Received' && <CheckCircle size={12} className="mr-1" />}
+                                                    {po.status === 'Partially Received' && <Clock size={12} className="mr-1" />}
                                                     {po.status === 'Approved' && <CheckCircle size={12} className="mr-1" />}
+                                                    {po.status === 'Ordered' && <Truck size={12} className="mr-1" />}
                                                     {po.status === 'Draft' && <Clock size={12} className="mr-1" />}
                                                     {po.status === 'Pending' && <Clock size={12} className="mr-1" />}
-                                                    {po.status === 'Cancelled' && <XCircle size={12} className="mr-1" />}
+                                                    {(po.status === 'Cancelled' || po.status === 'Rejected') && <XCircle size={12} className="mr-1" />}
                                                     {po.status}
                                                 </span>
                                             </td>
@@ -2129,12 +2531,12 @@ export default function Procurement() {
                                                                 try {
                                                                     const updatedPO: PurchaseOrder = {
                                                                         ...po,
-                                                                        status: 'Approved',
+                                                                        status: 'Ordered',
                                                                         approvedBy: user?.name || 'Unknown',
                                                                         approvedAt: new Date().toISOString()
                                                                     };
                                                                     await updatePO(updatedPO);
-                                                                    addNotification('success', `PO ${po.poNumber || po.po_number || `PO-${po.id.substring(0, 8).toUpperCase()}`} approved successfully`);
+                                                                    addNotification('success', `PO ${formatPONumber(po)} approved successfully`);
                                                                     fetchData();
                                                                 } catch (error) {
                                                                     console.error('Error approving PO:', error);
@@ -2197,123 +2599,7 @@ export default function Procurement() {
                 </div>
             )}
 
-            {/* --- REQUESTS TAB --- */}
-            {activeTab === 'requests' && (
-                <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                    <div className="bg-cyber-gray/30 border border-white/10 rounded-2xl overflow-hidden backdrop-blur-sm">
-                        <table className="w-full text-left border-collapse">
-                            <thead>
-                                <tr className="bg-white/5 border-b border-white/10">
-                                    <th className="p-4 text-xs text-gray-400 uppercase pl-6 font-bold">Request #</th>
-                                    <th className="p-4 text-xs text-gray-400 uppercase font-bold text-center">Priority</th>
-                                    <th className="p-4 text-xs text-gray-400 uppercase font-bold">Supplier</th>
-                                    <th className="p-4 text-xs text-gray-400 uppercase font-bold text-right">Items</th>
-                                    <th className="p-4 text-xs text-gray-400 uppercase font-bold text-right">Est. Cost</th>
-                                    <th className="p-4 text-xs text-gray-400 uppercase text-center font-bold">Status</th>
-                                    <th className="p-4 text-xs text-gray-400 uppercase font-bold">Requested By</th>
-                                    <th className="p-4 text-xs text-gray-400 uppercase pr-6 text-right font-bold">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-white/5">
-                                {activeRequests.map((req) => (
-                                    <tr key={req.id} className="hover:bg-white/5 group transition-colors cursor-pointer" onClick={() => setSelectedPO(req)}>
-                                        <td className="p-4 text-sm font-mono text-white font-bold pl-6">{req.poNumber || req.po_number || `PR-${req.id.substring(0, 8).toUpperCase()}`}</td>
-                                        <td className="p-4">
-                                            <div className={`mx-auto px-2 py-0.5 rounded text-[9px] font-bold border uppercase text-center w-fit ${req.priority === 'High' || req.priority === 'Urgent' ? 'text-red-400 border-red-500/20 bg-red-500/10' :
-                                                req.priority === 'Low' ? 'text-blue-400 border-blue-500/20 bg-blue-500/10' :
-                                                    'text-gray-400 border-gray-500/20 bg-gray-500/10'
-                                                }`}>
-                                                {req.priority || 'Normal'}
-                                            </div>
-                                        </td>
-                                        <td className="p-4 text-sm text-gray-300">{req.supplierName}</td>
-                                        <td className="p-4 text-sm text-gray-300 font-mono text-right">{req.itemsCount}</td>
-                                        <td className="p-4 text-sm text-cyber-primary font-mono text-right font-bold">{CURRENCY_SYMBOL} {req.totalAmount.toLocaleString()}</td>
-                                        <td className="p-4 text-center">
-                                            <span className="inline-flex items-center px-2 py-1 rounded text-[10px] font-bold uppercase border text-blue-400 border-blue-500/20 bg-blue-500/10">
-                                                Request
-                                            </span>
-                                        </td>
-                                        <td className="p-4 text-xs text-gray-500 italic truncate max-w-[120px]">{req.requestedBy || req.createdBy || 'Unknown'}</td>
-                                        <td className="p-4 pr-6 text-right">
-                                            <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <button
-                                                    onClick={(e) => { e.stopPropagation(); setSelectedPO(req); }}
-                                                    className="p-1 px-2 hover:bg-white/10 rounded border border-white/10 text-gray-300 text-[10px] font-bold"
-                                                >
-                                                    Review
-                                                </button>
-                                                {canApprove && (
-                                                    <button
-                                                        onClick={async (e) => {
-                                                            e.stopPropagation();
-                                                            setSelectedPO(req);
-                                                            // We use setImmediate or setTimeout to ensure state is updated before calling handler
-                                                            // or better, just inline the approval logic since handleApprovePO depends on state
-                                                            if (!window.confirm('Convert this request to a Purchase Order?')) return;
-                                                            try {
-                                                                const updatedPO: PurchaseOrder = {
-                                                                    ...req,
-                                                                    status: 'Approved',
-                                                                    approvedBy: user?.name || 'Unknown',
-                                                                    approvedAt: new Date().toISOString()
-                                                                };
-                                                                await updatePO(updatedPO);
-                                                                addNotification('success', `Request ${req.poNumber || req.po_number} converted to PO successfully`);
-                                                                fetchData();
-                                                            } catch (error) {
-                                                                console.error('Error converting request:', error);
-                                                                addNotification('alert', 'Failed to convert request');
-                                                            }
-                                                        }}
-                                                        className="p-1 px-2 bg-cyber-primary hover:bg-cyber-accent text-black rounded text-[10px] font-bold transition-colors"
-                                                    >
-                                                        Convert to PO
-                                                    </button>
-                                                )}
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
-                                {activeRequests.length === 0 && (
-                                    <tr>
-                                        <td colSpan={8} className="p-8 text-center text-gray-500 italic">No purchase requests found.</td>
-                                    </tr>
-                                )}
-                            </tbody>
-                        </table>
 
-                        {/* Pagination Controls */}
-                        <div className="flex items-center justify-between p-4 border-t border-white/5 bg-black/20">
-                            <p className="text-xs text-gray-500 font-mono">
-                                Showing <span className="text-gray-300">{activeRequests.length}</span> of <span className="text-gray-300">{totalRequestsCount}</span> Requests
-                            </p>
-                            <div className="flex gap-2">
-                                <button
-                                    onClick={() => setRequestPage(prev => Math.max(1, prev - 1))}
-                                    disabled={requestPage === 1 || loading}
-                                    className="px-3 py-1.5 border border-white/10 rounded-lg text-xs font-bold text-gray-400 hover:bg-white/5 disabled:opacity-30"
-                                >
-                                    Previous
-                                </button>
-                                <div className="flex items-center px-4 bg-white/5 rounded-lg border border-white/10">
-                                    <span className="text-[10px] text-gray-500 uppercase font-bold tracking-wider mr-2">Page</span>
-                                    <span className="text-sm font-mono font-bold text-blue-400">{requestPage}</span>
-                                    <span className="text-[10px] text-gray-500 mx-2">of</span>
-                                    <span className="text-sm font-mono text-white">{Math.ceil(totalRequestsCount / ITEMS_PER_PAGE)}</span>
-                                </div>
-                                <button
-                                    onClick={() => setRequestPage(prev => prev + 1)}
-                                    disabled={requestPage * ITEMS_PER_PAGE >= totalRequestsCount || loading}
-                                    className="px-3 py-1.5 border border-white/10 rounded-lg text-xs font-bold text-gray-400 hover:bg-white/5 disabled:opacity-30"
-                                >
-                                    Next
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
 
             {/* --- SUPPLIERS TAB --- */}
             {activeTab === 'suppliers' && (
@@ -2396,7 +2682,7 @@ export default function Procurement() {
                                                         <span className="text-xs text-gray-600">/ 5.0</span>
                                                     </div>
                                                     <div className="w-24 h-1 bg-white/10 rounded-full overflow-hidden">
-                                                        <div className="h-full bg-green-500" style={{ width: '98%' }}></div>
+                                                        <div className="h-full bg-green-500 w-[98%]"></div>
                                                     </div>
                                                     <span className="text-[10px] text-green-400">98% OTIF Score</span>
                                                 </div>
@@ -2483,10 +2769,52 @@ export default function Procurement() {
                     {/* Header */}
                     <div className="flex items-start justify-between">
                         <div>
-                            <h2 className="text-2xl font-bold text-white">{isRequestMode ? "New Purchase Request" : "New Purchase Order"}</h2>
+                            <h2 className="text-2xl font-bold text-white">{(editingPO ? `Editing ${editingPO.poNumber || 'PO'}` : "New Purchase Order")}</h2>
                             <p className="text-sm text-gray-400 mt-1">{formatDateTime(new Date())}</p>
+                            <p className="text-[10px] text-gray-500 mt-2 italic max-w-md">This order defines what we expect to receive. Final product identity is confirmed at receiving.</p>
                         </div>
-                        <span className="px-4 py-2 bg-yellow-500/20 text-yellow-400 rounded-full text-sm font-bold">Draft</span>
+                        <span className={`px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 ${editingPO?.status === 'Approved' ? 'bg-blue-500/20 text-blue-400' : editingPO?.status === 'Received' ? 'bg-green-500/20 text-green-400' : 'bg-yellow-500/20 text-yellow-400'}`}>
+                            {editingPO?.status === 'Draft' ? <><CircleDashed size={12} /> Draft</> :
+                                editingPO?.status === 'Approved' ? <><Lock size={12} /> Approved</> :
+                                    editingPO?.status === 'Received' ? <><Package size={12} /> Received</> :
+                                        <><CircleDashed size={12} /> {editingPO?.status || 'Draft'}</>}
+                        </span>
+                    </div>
+
+                    {/* Re-Approval Warning */}
+                    {editingPO?.status === 'Approved' && (
+                        <div className="flex items-center gap-3 p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-xl text-yellow-400">
+                            <AlertTriangle size={20} />
+                            <div>
+                                <p className="font-bold text-sm">Re-Approval Required</p>
+                                <p className="text-xs opacity-80">Saving changes will revert this PO to Draft status and require CEO re-approval.</p>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Order Type Selector */}
+                    <div className="flex items-center gap-3 p-3 bg-white/5 rounded-xl">
+                        <span className="text-xs text-gray-500 uppercase tracking-wider">Order Type:</span>
+                        <div className="flex gap-2">
+                            {[
+                                { key: 'manual', label: 'Manual Order', icon: Edit3, desc: 'One-time order' },
+                                { key: 'reorder', label: 'Reorder', icon: RefreshCw, desc: 'Replenishment' },
+                                { key: 'contract', label: 'Contract', icon: FileText, desc: 'Standing order' }
+                            ].map(opt => (
+                                <button
+                                    key={opt.key}
+                                    onClick={() => setOrderType(opt.key as 'manual' | 'reorder' | 'contract')}
+                                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-2 ${orderType === opt.key
+                                        ? 'bg-cyber-primary text-black'
+                                        : 'bg-white/10 text-gray-400 hover:bg-white/20'
+                                        }`}
+                                    title={opt.desc}
+                                >
+                                    <opt.icon size={12} />
+                                    {opt.label}
+                                </button>
+                            ))}
+                        </div>
                     </div>
 
                     {/* Info Cards - 4 column grid */}
@@ -2495,47 +2823,43 @@ export default function Procurement() {
                         <div className="bg-white/5 rounded-xl p-4">
                             <div className="flex items-center justify-between mb-2">
                                 <p className="text-xs text-gray-500 uppercase tracking-wider">Vendor</p>
-                                <button onClick={() => { setIsManualVendor(!isManualVendor); setNewPOSupplier(''); setManualVendorName(''); }} className="text-[10px] text-gray-400 hover:text-white">
-                                    {isManualVendor ? '📋 Use List' : '✏️ Manual'}
+                                <button onClick={() => { setIsManualVendor(!isManualVendor); setNewPOSupplier(''); setManualVendorName(''); }} className="text-[10px] text-gray-400 hover:text-white flex items-center gap-1">
+                                    {isManualVendor ? <><Clipboard size={10} /> Select from List</> : <><PenTool size={10} /> Enter Manually</>}
                                 </button>
                             </div>
                             {isManualVendor ? (
                                 <input className="w-full bg-transparent border-b border-white/20 py-1 text-white text-sm focus:border-cyber-primary outline-none" placeholder="Enter vendor name..." value={manualVendorName} onChange={(e) => setManualVendorName(e.target.value)} title="Manual Vendor Name" aria-label="Manual Vendor Name" />
                             ) : (
-                                <select className="w-full bg-transparent text-white text-sm focus:outline-none cursor-pointer" value={newPOSupplier} onChange={(e) => setNewPOSupplier(e.target.value)} title="Select Vendor">
-                                    <option value="" className="bg-cyber-dark">Select...</option>
-                                    {suppliers.map(s => <option key={s.id} value={s.id} className="bg-cyber-dark">{s.name}</option>)}
-                                </select>
+                                <SingleSelectDropdown
+                                    options={suppliers.map(s => ({ id: s.id, name: s.name }))}
+                                    value={newPOSupplier}
+                                    onChange={setNewPOSupplier}
+                                    placeholder="Choose Vendor..."
+                                />
                             )}
                         </div>
 
-                        {/* Destination - Multi-Site */}
+                        {/* Destination - Multi-Site Premium Dropdown */}
                         <div className="bg-white/5 rounded-xl p-4">
-                            <div className="flex items-center justify-between mb-2">
-                                <p className="text-xs text-gray-500 uppercase tracking-wider">Destination(s)</p>
-                                <span className="text-[10px] text-cyber-primary">{destinationSiteIds.length} selected</span>
-                            </div>
-                            <div className="max-h-[80px] overflow-y-auto space-y-1">
-                                {getValidPODestinationSites().map(site => (
-                                    <label key={site.id} className="flex items-center gap-2 cursor-pointer hover:bg-white/5 rounded px-1 py-0.5">
-                                        <input
-                                            type="checkbox"
-                                            className="accent-cyber-primary"
-                                            checked={destinationSiteIds.includes(site.id)}
-                                            onChange={(e) => {
-                                                if (e.target.checked) {
-                                                    setDestinationSiteIds(prev => [...prev, site.id]);
-                                                } else {
-                                                    setDestinationSiteIds(prev => prev.filter(id => id !== site.id));
-                                                }
-                                            }}
-                                            title={`Select ${site.name}`}
-                                            aria-label={`Select ${site.name}`}
-                                        />
-                                        <span className="text-sm text-white">{site.name}</span>
-                                    </label>
-                                ))}
-                            </div>
+                            <p className="text-xs text-gray-500 uppercase tracking-wider mb-2">Destination(s)</p>
+                            <MultiSelectDropdown
+                                options={(() => {
+                                    // Base options: Warehouses and Distribution Centers
+                                    const baseOptions = sites.filter(s => s.type === 'Warehouse' || s.type === 'Distribution Center');
+
+                                    // When editing, ensure current site is always included
+                                    if (editingPO?.siteId) {
+                                        const currentSite = sites.find(s => s.id === editingPO.siteId);
+                                        if (currentSite && !baseOptions.find(o => o.id === currentSite.id)) {
+                                            return [currentSite, ...baseOptions];
+                                        }
+                                    }
+                                    return baseOptions;
+                                })()}
+                                selected={destinationSiteIds}
+                                onChange={setDestinationSiteIds}
+                                placeholder="Choose Hubs..."
+                            />
                         </div>
 
                         {/* Expected */}
@@ -2599,7 +2923,7 @@ export default function Procurement() {
                                 />
                                 <Button
                                     variant={isCustomItem ? 'primary' : 'secondary'}
-                                    onClick={() => { setIsCustomItem(!isCustomItem); setCurrentProductToAdd(''); setCustomItemName(''); setSelectedMainCategory(''); setItemAttributes({}); setSelectedDescTemplate(''); }}
+                                    onClick={() => { setIsCustomItem(!isCustomItem); setCurrentProductToAdd(''); setCustomItemName(''); setSelectedMainCategory(''); setItemAttributes({}); setSelectedDescTemplate(''); setCurrentQty(1); }}
                                     size="sm"
                                     className="px-3 py-1.5"
                                 >
@@ -2625,6 +2949,30 @@ export default function Procurement() {
                                             Upload a photo for this item. You can browse files, take a photo with camera, or paste a URL.
                                         </p>
                                         <p className="text-gray-600 text-[9px] mt-1">Max 10MB • Supports JPG, PNG, HEIC (iPhone), WebP & more</p>
+                                    </div>
+                                </div>
+
+                                {/* Product Identity (Critical for Receiving) */}
+                                <div className="bg-yellow-500/5 border border-yellow-500/20 rounded-xl p-3">
+                                    <div className="flex items-center justify-between gap-4">
+                                        <div className="flex-1">
+                                            <label className="text-[10px] text-yellow-400 uppercase mb-1 block font-bold">Product Identity *</label>
+                                            <select
+                                                className="w-full bg-black/30 border border-yellow-500/30 rounded-lg px-3 py-2 text-sm text-white cursor-pointer"
+                                                value={customItemIdentity}
+                                                onChange={e => setCustomItemIdentity(e.target.value as 'known' | 'variant' | 'new')}
+                                                title="Product Identity"
+                                            >
+                                                <option value="known">Existing Product – Barcode May Differ</option>
+                                                <option value="variant">Existing Product – Details May Vary</option>
+                                                <option value="new">New Product (Create at Receiving)</option>
+                                            </select>
+                                        </div>
+                                        <div className="text-[9px] text-yellow-400/70 max-w-[180px]">
+                                            {customItemIdentity === 'known' && 'Same product, different supplier barcode'}
+                                            {customItemIdentity === 'variant' && 'Similar product, specs may vary'}
+                                            {customItemIdentity === 'new' && 'Genuinely new, create at receiving'}
+                                        </div>
                                     </div>
                                 </div>
 
@@ -2753,7 +3101,18 @@ export default function Procurement() {
                                 <div className="grid grid-cols-5 gap-3 pt-2 border-t border-white/10">
                                     <div>
                                         <label className="text-[10px] text-cyber-primary uppercase mb-1 block">Order Qty *</label>
-                                        <input type="number" min="1" className="w-full bg-black/30 border border-white/20 rounded-lg px-3 py-2 text-sm text-white text-center" placeholder="0" value={currentQty || ''} onChange={e => setCurrentQty(parseInt(e.target.value) || 0)} />
+                                        <input
+                                            type="number"
+                                            min="1"
+                                            className="w-full bg-black/30 border border-white/20 rounded-lg px-3 py-2 text-sm text-white text-center"
+                                            placeholder="0"
+                                            value={currentQty || ''}
+                                            onChange={e => {
+                                                const val = parseInt(e.target.value);
+                                                setCurrentQty(isNaN(val) ? 0 : val);
+                                            }}
+                                            onKeyDown={e => e.key === 'Enter' && addItemToPO()}
+                                        />
                                     </div>
                                     <div>
                                         <label className="text-[10px] text-cyber-primary uppercase mb-1 block">Cost Price (ETB) *</label>
@@ -2776,12 +3135,13 @@ export default function Procurement() {
                                     </div>
                                     <div className="flex items-end">
                                         <Button
+                                            type="button"
                                             onClick={addItemToPO}
-                                            icon={<Plus size={16} />}
-                                            className="w-full bg-cyber-primary hover:bg-cyber-accent text-black py-2 rounded-lg font-bold text-sm transition-colors flex items-center justify-center gap-1"
-                                            title="Add Item"
+                                            icon={fullEditingIndex !== null ? <Check size={16} /> : <Plus size={16} />}
+                                            className={`w-full py-2 rounded-lg font-bold text-sm transition-colors flex items-center justify-center gap-1 ${fullEditingIndex !== null ? 'bg-blue-500 hover:bg-blue-600 text-white' : 'bg-cyber-primary hover:bg-cyber-accent text-black'}`}
+                                            title={fullEditingIndex !== null ? "Update Item" : "Add Item"}
                                         >
-                                            Add Item
+                                            {fullEditingIndex !== null ? 'Update Item' : 'Add Item'}
                                         </Button>
                                     </div>
                                 </div>
@@ -2790,7 +3150,8 @@ export default function Procurement() {
                             /* Catalog Product Selection */
                             <div className="grid grid-cols-12 gap-3">
                                 <div className="col-span-12 md:col-span-5">
-                                    <div className="relative group">
+                                    <label className="text-[10px] text-gray-500 uppercase mb-1 block">Search Product</label>
+                                    <div className="relative group z-[200]">
                                         <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-cyber-primary transition-colors">
                                             <Search size={14} />
                                         </div>
@@ -2798,15 +3159,41 @@ export default function Procurement() {
                                             className="w-full bg-black/30 border border-white/20 focus:border-cyber-primary/50 outline-none rounded-lg pl-9 pr-3 py-2 text-sm text-white transition-all"
                                             placeholder="Search product from catalog..."
                                             value={productSearchTerm}
-                                            onChange={e => setProductSearchTerm(e.target.value)}
+                                            onChange={e => {
+                                                setProductSearchTerm(e.target.value);
+                                                setIsSearchOpen(true);
+                                                if (!e.target.value) setCurrentProductToAdd('');
+                                            }}
+                                            onFocus={() => setIsSearchOpen(true)}
+                                            // Delayed blur to allow clicking items
+                                            onBlur={() => setTimeout(() => setIsSearchOpen(false), 200)}
+                                            onKeyDown={e => {
+                                                if (e.key === 'Enter') {
+                                                    const term = productSearchTerm.toLowerCase();
+                                                    if (!term) return;
+                                                    const matches = products.filter(p =>
+                                                        p.name.toLowerCase().includes(term) ||
+                                                        p.sku?.toLowerCase().includes(term) ||
+                                                        p.category?.toLowerCase().includes(term)
+                                                    );
+                                                    if (matches.length > 0) {
+                                                        const p = matches[0];
+                                                        setCurrentProductToAdd(p.id);
+                                                        setProductSearchTerm(p.name);
+                                                        setCurrentCost(p.costPrice || (p.price * 0.7));
+                                                        setCurrentRetailPrice(p.price);
+                                                        setIsSearchOpen(false);
+                                                    }
+                                                }
+                                            }}
                                         />
-                                        {productSearchTerm && (
-                                            <div className="absolute top-full left-0 right-0 mt-1 bg-cyber-dark border border-white/10 rounded-xl overflow-hidden shadow-2xl z-[100] max-h-[300px] overflow-y-auto custom-scrollbar">
-                                                {products
+                                        {isSearchOpen && (productSearchTerm || isSearchOpen) && (
+                                            <div className="absolute top-full left-0 right-0 mt-1 bg-gray-900 border border-white/10 rounded-xl overflow-hidden shadow-2xl z-[200] max-h-[300px] overflow-y-auto custom-scrollbar">
+                                                {(allProducts || [])
                                                     .filter(p =>
-                                                        p.name.toLowerCase().includes(productSearchTerm.toLowerCase()) ||
-                                                        p.sku?.toLowerCase().includes(productSearchTerm.toLowerCase()) ||
-                                                        p.category?.toLowerCase().includes(productSearchTerm.toLowerCase())
+                                                        (p.name?.toLowerCase() || '').includes(productSearchTerm.toLowerCase()) ||
+                                                        (p.sku?.toLowerCase() || '').includes(productSearchTerm.toLowerCase()) ||
+                                                        (p.category?.toLowerCase() || '').includes(productSearchTerm.toLowerCase())
                                                     )
                                                     .slice(0, 50)
                                                     .map(p => (
@@ -2818,8 +3205,10 @@ export default function Procurement() {
                                                                 // Set prices from catalog
                                                                 setCurrentCost(p.costPrice || (p.price * 0.7));
                                                                 setCurrentRetailPrice(p.price);
+                                                                setCurrentQty(1);
+                                                                setIsSearchOpen(false);
                                                             }}
-                                                            className={`flex items-center justify-between px-4 py-3 cursor-pointer hover:bg-white/5 transition-colors border-b border-white/5 last:border-0 ${currentProductToAdd === p.id ? 'bg-cyber-primary/10' : ''}`}
+                                                            className={`flex items-center justify-between px-4 py-3 cursor-pointer hover:bg-white/5 transition-colors border-b border-white/5 last:border-0 ${currentProductToAdd === p.id ? 'bg-cyber-primary/20 border-l-2 border-l-cyber-primary' : ''}`}
                                                         >
                                                             <div className="min-w-0">
                                                                 <p className="text-sm font-bold text-white truncate">{p.name}</p>
@@ -2831,7 +3220,7 @@ export default function Procurement() {
                                                             </div>
                                                         </div>
                                                     ))}
-                                                {products.filter(p => p.name.toLowerCase().includes(productSearchTerm.toLowerCase())).length === 0 && (
+                                                {(allProducts || []).filter(p => (p.name?.toLowerCase() || '').includes(productSearchTerm.toLowerCase())).length === 0 && (
                                                     <div className="px-4 py-3 text-xs text-gray-500 italic">No products found...</div>
                                                 )}
                                             </div>
@@ -2839,22 +3228,44 @@ export default function Procurement() {
                                     </div>
                                 </div>
                                 <div className="col-span-3 md:col-span-1">
-                                    <input type="number" min="1" className="w-full bg-black/30 border border-white/20 rounded-lg px-2 py-2 text-sm text-white text-center" placeholder="Qty" value={currentQty || ''} onChange={e => setCurrentQty(parseInt(e.target.value) || 0)} />
+                                    <label className="text-[10px] text-gray-500 uppercase mb-1 block">Qty</label>
+                                    <input
+                                        type="number"
+                                        min="1"
+                                        className="w-full bg-black/30 border border-white/20 rounded-lg px-2 py-2 text-sm text-white text-center"
+                                        placeholder="Qty"
+                                        value={currentQty || ''}
+                                        onChange={e => {
+                                            const val = parseInt(e.target.value);
+                                            setCurrentQty(isNaN(val) ? 0 : val);
+                                        }}
+                                        onKeyDown={e => e.key === 'Enter' && addItemToPO()}
+                                    />
                                 </div>
                                 <div className="col-span-3 md:col-span-2">
+                                    <label className="text-[10px] text-gray-500 uppercase mb-1 block">Buying Price</label>
                                     <input type="number" min="0" step="0.01" className="w-full bg-black/30 border border-white/20 rounded-lg px-2 py-2 text-sm text-white text-right" placeholder="Cost" value={currentCost || ''} onChange={e => setCurrentCost(parseFloat(e.target.value) || 0)} />
                                 </div>
                                 <div className="col-span-3 md:col-span-2">
+                                    <div className="flex items-center justify-between mb-1">
+                                        <label className="text-[10px] text-gray-500 uppercase block">Retail Price</label>
+                                        {currentRetailPrice > 0 && currentCost > 0 && (
+                                            <span className={`text-[10px] font-bold ${((currentRetailPrice - currentCost) / currentRetailPrice * 100) < 15 ? 'text-red-400' : 'text-green-400'}`}>
+                                                {(((currentRetailPrice - currentCost) / currentRetailPrice) * 100).toFixed(1)}%
+                                            </span>
+                                        )}
+                                    </div>
                                     <input type="number" min="0" step="0.01" className="w-full bg-black/30 border border-white/20 rounded-lg px-2 py-2 text-sm text-white text-right" placeholder="Retail" value={currentRetailPrice || ''} onChange={e => setCurrentRetailPrice(parseFloat(e.target.value) || 0)} />
                                 </div>
-                                <div className="col-span-3 md:col-span-2">
+                                <div className="col-span-3 md:col-span-2 flex items-end">
                                     <Button
+                                        type="button"
                                         onClick={addItemToPO}
-                                        icon={<Plus size={16} />}
-                                        className="w-full bg-cyber-primary hover:bg-cyber-accent text-black py-2 rounded-lg font-bold text-sm transition-colors flex items-center justify-center gap-1"
-                                        title="Add Item"
+                                        icon={fullEditingIndex !== null ? <Check size={16} /> : <Plus size={16} />}
+                                        className={`w-full py-2 rounded-lg font-bold text-sm transition-colors flex items-center justify-center gap-1 ${fullEditingIndex !== null ? 'bg-blue-500 hover:bg-blue-600 text-white' : 'bg-cyber-primary hover:bg-cyber-accent text-black'}`}
+                                        title={fullEditingIndex !== null ? "Update Item" : "Add Item"}
                                     >
-                                        Add Item
+                                        {fullEditingIndex !== null ? 'Update Item' : 'Add Item'}
                                     </Button>
                                 </div>
                             </div>
@@ -2903,8 +3314,12 @@ export default function Procurement() {
                                                     )}
                                                     <div className="min-w-0">
                                                         <span className="text-white block truncate">{item.productName}</span>
-                                                        <div className="flex items-center gap-1 mt-0.5">
-                                                            {item.productId?.startsWith('CUSTOM') && <span className="text-[10px] bg-green-500/20 text-green-400 px-1.5 py-0.5 rounded">Custom</span>}
+                                                        <div className="flex items-center gap-1 mt-0.5 flex-wrap">
+                                                            {/* Identity Badge */}
+                                                            {item.identityType === 'known' && <span className="text-[10px] bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded">🔒 Known</span>}
+                                                            {item.identityType === 'variant' && <span className="text-[10px] bg-yellow-500/20 text-yellow-400 px-1.5 py-0.5 rounded">🟡 Variant</span>}
+                                                            {item.identityType === 'new' && <span className="text-[10px] bg-green-500/20 text-green-400 px-1.5 py-0.5 rounded">🆕 New</span>}
+                                                            {item.productId?.startsWith('CUSTOM') && !item.identityType && <span className="text-[10px] bg-green-500/20 text-green-400 px-1.5 py-0.5 rounded">Custom</span>}
                                                             {item.category && <span className="text-[10px] bg-white/10 text-gray-400 px-1.5 py-0.5 rounded">{item.category}</span>}
                                                         </div>
                                                     </div>
@@ -2982,7 +3397,10 @@ export default function Procurement() {
                                                     </div>
                                                 ) : (
                                                     <div className="flex items-center justify-center gap-1">
-                                                        <button onClick={() => startEditItem(i)} className="p-1 text-gray-500 hover:text-cyber-primary transition-colors" title="Edit">
+                                                        <button onClick={() => startFullEditItem(i)} className="p-1 text-gray-500 hover:text-blue-400 transition-colors" title="Full Edit (all fields)">
+                                                            <FileText size={14} />
+                                                        </button>
+                                                        <button onClick={() => startEditItem(i)} className="p-1 text-gray-500 hover:text-cyber-primary transition-colors" title="Quick Edit (qty/price)">
                                                             <Edit3 size={14} />
                                                         </button>
                                                         <button onClick={() => removePOItem(i)} className="p-1 text-gray-500 hover:text-red-400 transition-colors" title="Remove">
@@ -3001,12 +3419,18 @@ export default function Procurement() {
                         </div>
                     </div>
 
-                    {/* Notes & Summary */}
+                    {/* Receiving Instructions & Summary */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {/* Notes */}
+                        {/* Receiving Instructions */}
                         <div className="bg-white/5 rounded-xl p-4">
-                            <p className="text-xs text-gray-500 uppercase tracking-wider mb-2">Notes (Optional)</p>
-                            <textarea className="w-full bg-transparent border border-white/10 rounded-lg p-3 text-sm text-white placeholder-gray-500 resize-none h-20 focus:border-cyber-primary outline-none" placeholder="Add any notes or instructions..." value={poNotes} onChange={e => setPoNotes(e.target.value)} />
+                            <p className="text-xs text-gray-500 uppercase tracking-wider mb-2">Receiving Instructions (Optional)</p>
+                            <textarea
+                                className="w-full bg-transparent border border-white/10 rounded-lg p-3 text-sm text-white placeholder-gray-500 resize-none h-20 focus:border-cyber-primary outline-none"
+                                placeholder="e.g., Mixed cartons expected • Supplier may substitute size • Do not accept damaged packaging"
+                                value={poNotes}
+                                onChange={e => setPoNotes(e.target.value)}
+                            />
+                            <p className="text-[9px] text-gray-600 mt-1">These instructions will be shown to receiving staff</p>
                         </div>
 
                         {/* Summary */}
@@ -3039,7 +3463,7 @@ export default function Procurement() {
                         <div className="flex items-start justify-between">
                             <div>
                                 <h2 className="text-2xl font-bold text-white tracking-tight">
-                                    {selectedPO.poNumber || selectedPO.po_number || `PO-${selectedPO.id?.slice(0, 8)}`}
+                                    {formatPONumber(selectedPO)}
                                 </h2>
                                 <p className="text-sm text-gray-400 mt-1">
                                     {selectedPO.supplierName}
@@ -3129,24 +3553,26 @@ export default function Procurement() {
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-white/5">
-                                        {selectedPO.lineItems?.map((item, i) => (
-                                            <tr key={i} className="hover:bg-white/5 transition-colors">
-                                                <td className="p-4 text-gray-500 text-sm">{i + 1}</td>
-                                                <td className="p-4">
-                                                    <div className="text-white font-medium">{item.productName}</div>
-                                                    {item.productId && !item.productId.startsWith('CUSTOM') && (
-                                                        <div className="text-xs text-gray-500 mt-0.5">ID: {item.productId.slice(0, 8)}...</div>
-                                                    )}
-                                                    {item.productId?.startsWith('CUSTOM') && (
-                                                        <span className="inline-block mt-1 text-[10px] bg-green-500/20 text-green-400 px-1.5 py-0.5 rounded">Custom Item</span>
-                                                    )}
-                                                </td>
-                                                <td className="p-4 text-gray-300 text-right font-medium">{item.quantity}</td>
-                                                <td className="p-4 text-gray-400 text-right font-mono">{formatCompactNumber(item.unitCost, { currency: CURRENCY_SYMBOL })}</td>
-                                                <td className="p-4 text-yellow-500/80 text-right font-mono">{item.retailPrice ? formatCompactNumber(item.retailPrice, { currency: CURRENCY_SYMBOL }) : '—'}</td>
-                                                <td className="p-4 text-cyber-primary text-right font-mono font-bold">{formatCompactNumber(item.totalCost, { currency: CURRENCY_SYMBOL })}</td>
-                                            </tr>
-                                        ))}
+                                        {selectedPO.lineItems?.map((item, i) => {
+                                            return (
+                                                <tr key={i} className="hover:bg-white/5 transition-colors">
+                                                    <td className="p-4 text-gray-500 text-sm">{i + 1}</td>
+                                                    <td className="p-4">
+                                                        <div className="text-white font-medium">{item.productName}</div>
+                                                        {item.productId && !item.productId.startsWith('CUSTOM') && (
+                                                            <div className="text-xs text-gray-500 mt-0.5">ID: {item.sku || item.productId.slice(0, 8) + '...'}</div>
+                                                        )}
+                                                        {item.productId?.startsWith('CUSTOM') && (
+                                                            <span className="inline-block mt-1 text-[10px] bg-green-500/20 text-green-400 px-1.5 py-0.5 rounded">Custom Item</span>
+                                                        )}
+                                                    </td>
+                                                    <td className="p-4 text-gray-300 text-right font-medium">{item.quantity}</td>
+                                                    <td className="p-4 text-gray-400 text-right font-mono">{formatCompactNumber(item.unitCost, { currency: CURRENCY_SYMBOL })}</td>
+                                                    <td className="p-4 text-yellow-500/80 text-right font-mono">{item.retailPrice ? formatCompactNumber(item.retailPrice, { currency: CURRENCY_SYMBOL }) : '—'}</td>
+                                                    <td className="p-4 text-cyber-primary text-right font-mono font-bold">{formatCompactNumber(item.totalCost, { currency: CURRENCY_SYMBOL })}</td>
+                                                </tr>
+                                            );
+                                        })}
                                         {(!selectedPO.lineItems || selectedPO.lineItems.length === 0) && (
                                             <tr>
                                                 <td colSpan={5} className="p-8 text-center text-gray-500 italic">No items in this order</td>
@@ -3252,14 +3678,13 @@ export default function Procurement() {
                                     </button>
                                 )}
 
-                                {(selectedPO.status === 'Approved' || selectedPO.status === 'Pending' || selectedPO.status === 'Draft') && (
-                                    <ProtectedButton
-                                        permission="DELETE_PO"
+                                {(selectedPO.status === 'Approved' || selectedPO.status === 'Pending' || selectedPO.status === 'Draft' || selectedPO.status === 'Rejected' || selectedPO.status === 'Cancelled') && (
+                                    <button
                                         onClick={handleDeletePO}
                                         className="py-3 bg-white/5 hover:bg-red-500/10 text-gray-300 hover:text-red-400 rounded-xl transition-colors flex items-center justify-center gap-2 font-medium border border-transparent hover:border-red-500/20"
                                     >
                                         <Trash2 size={16} /> Delete
-                                    </ProtectedButton>
+                                    </button>
                                 )}
 
                                 <button
@@ -3375,26 +3800,99 @@ export default function Procurement() {
             < Modal isOpen={isProductCatalogOpen} onClose={() => setIsProductCatalogOpen(false)} title={`Products from ${selectedSupplier?.name || 'Supplier'}`} size="xl" >
                 {selectedSupplier && (
                     <div className="space-y-4">
+                        {/* Header Banner */}
                         <div className="bg-blue-500/10 border border-blue-500/30 rounded-xl p-4">
                             <div className="flex items-center gap-3 mb-2">
                                 <Package className="text-blue-400" size={20} />
                                 <h3 className="text-white font-bold">Supplier Product Catalog</h3>
                             </div>
                             <p className="text-xs text-gray-400">
-                                Products available from {selectedSupplier.name}. Filter by category or search by name.
+                                Products available from {selectedSupplier.name}.
                             </p>
                         </div>
 
+                        {/* 🔍 Search & Filter Bar */}
+                        <div className="space-y-3">
+                            {/* Search */}
+                            <div className="relative">
+                                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
+                                <input
+                                    type="text"
+                                    placeholder="Search products by name or SKU..."
+                                    value={catalogSearch}
+                                    onChange={(e) => setCatalogSearch(e.target.value)}
+                                    className="w-full bg-black/40 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-sm text-white focus:outline-none focus:border-cyber-primary/50 transition-colors"
+                                />
+                            </div>
+
+                            {/* Filters Row */}
+                            <div className="flex flex-col md:flex-row gap-3">
+                                {/* Category Chips (Horizontal Scroll) */}
+                                <div className="flex-1 overflow-x-auto pb-2 -mb-2 no-scrollbar">
+                                    <div className="flex gap-2">
+                                        {catalogCategories.map(cat => (
+                                            <button
+                                                key={cat}
+                                                onClick={() => setCatalogCategory(cat)}
+                                                className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-colors ${catalogCategory === cat
+                                                    ? 'bg-cyber-primary text-black'
+                                                    : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white'
+                                                    }`}
+                                            >
+                                                {cat}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Controls Right */}
+                                <div className="flex gap-2 shrink-0">
+                                    {/* Sort */}
+                                    <select
+                                        aria-label="Sort by"
+                                        value={catalogSort}
+                                        onChange={(e) => setCatalogSort(e.target.value as any)}
+                                        className="bg-black/40 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-cyber-primary/50"
+                                    >
+                                        <option value="name">Name (A-Z)</option>
+                                        <option value="priceAsc">Price (Low-High)</option>
+                                        <option value="priceDesc">Price (High-Low)</option>
+                                        <option value="stockAsc">Stock (Low-High)</option>
+                                    </select>
+
+                                    {/* Stock Filter */}
+                                    <div className="flex bg-black/40 rounded-lg p-1 border border-white/10">
+                                        {[
+                                            { id: 'all', label: 'All' },
+                                            { id: 'low', label: 'Low' },
+                                            { id: 'out', label: 'Out' }
+                                        ].map(opt => (
+                                            <button
+                                                key={opt.id}
+                                                onClick={() => setCatalogStockFilter(opt.id as any)}
+                                                className={`px-3 py-1 rounded-md text-xs font-bold transition-all ${catalogStockFilter === opt.id
+                                                    ? 'bg-cyber-primary/20 text-cyber-primary shadow-sm'
+                                                    : 'text-gray-500 hover:text-gray-300'
+                                                    }`}
+                                            >
+                                                {opt.label}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         {/* Products List */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[500px] overflow-y-auto">
-                            {products.slice(0, 20).map(product => (
-                                <div key={product.id} className="bg-white/5 border border-white/10 rounded-xl p-4 hover:border-cyber-primary/50 transition-colors">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[500px] overflow-y-auto pr-1 custom-scrollbar">
+                            {filteredCatalogProducts.map(product => (
+                                <div key={product.id} className="bg-white/5 border border-white/10 rounded-xl p-4 hover:border-cyber-primary/50 transition-colors group">
                                     <div className="flex items-start gap-3">
                                         {product.image && !product.image.includes('placeholder.com') ? (
                                             <img
                                                 src={product.image}
                                                 alt={product.name}
-                                                className="w-16 h-16 rounded-lg object-cover"
+                                                className="w-16 h-16 rounded-lg object-cover bg-black/20"
                                                 onError={(e) => {
                                                     e.currentTarget.style.display = 'none';
                                                     (e.currentTarget.parentElement as HTMLElement).innerHTML = '<div class="w-16 h-16 rounded-lg bg-black/30 flex items-center justify-center flex-shrink-0"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-package text-gray-600"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg></div>';
@@ -3406,13 +3904,31 @@ export default function Procurement() {
                                             </div>
                                         )}
                                         <div className="flex-1 min-w-0">
-                                            <h4 className="text-white font-bold text-sm truncate">{product.name}</h4>
-                                            <p className="text-xs text-gray-400 mt-1">SKU: {product.sku || product.id}</p>
-                                            <div className="flex items-center gap-2 mt-2">
-                                                <span className="text-cyber-primary font-bold text-sm">{CURRENCY_SYMBOL} {product.price.toLocaleString()}</span>
-                                                {product.stock !== undefined && (
-                                                    <span className="text-xs text-gray-500">Stock: {product.stock}</span>
+                                            <div className="flex justify-between items-start">
+                                                <h4 className="text-white font-bold text-sm truncate pr-2 group-hover:text-cyber-primary transition-colors">{product.name}</h4>
+                                                {/* Stock Badge */}
+                                                {(product.stock || 0) <= (product.minStock || 10) && (
+                                                    <span className={`text-[10px] px-1.5 py-0.5 rounded font-bold uppercase ${(product.stock || 0) === 0 ? 'bg-red-500/20 text-red-400' : 'bg-yellow-500/20 text-yellow-400'
+                                                        }`}>
+                                                        {(product.stock || 0) === 0 ? 'Out' : 'Low'}
+                                                    </span>
                                                 )}
+                                            </div>
+                                            <p className="text-xs text-gray-400 mt-1">SKU: {product.sku || product.id}</p>
+                                            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2">
+                                                <div className="flex items-center gap-1.5">
+                                                    <span className="text-[10px] text-gray-500 uppercase font-bold">Retail</span>
+                                                    <span className="text-white font-bold text-sm">{CURRENCY_SYMBOL} {product.price.toLocaleString()}</span>
+                                                </div>
+                                                <div className="flex items-center gap-1.5">
+                                                    <span className="text-[10px] text-gray-500 uppercase font-bold border-l border-white/10 pl-4">Base Cost</span>
+                                                    <span className="text-cyber-primary font-bold text-sm">
+                                                        {CURRENCY_SYMBOL} {(product.costPrice || (product.price * 0.7)).toLocaleString()}
+                                                    </span>
+                                                </div>
+                                                <div className="text-[10px] text-gray-500 border-l border-white/10 pl-4">
+                                                    Stock: {product.stock || 0}
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -3420,21 +3936,33 @@ export default function Procurement() {
                                         onClick={() => {
                                             setIsCreatePOOpen(true);
                                             setIsProductCatalogOpen(false);
+                                            // Pre-fill logic could go here if we passed product info back
                                             addNotification('info', `Add "${product.name}" to your purchase order`);
                                         }}
-                                        className="w-full mt-3 py-2 bg-cyber-primary/10 hover:bg-cyber-primary text-cyber-primary hover:text-black text-xs font-bold rounded-lg transition-colors"
+                                        className="w-full mt-3 py-2 bg-cyber-primary/10 hover:bg-cyber-primary text-cyber-primary hover:text-black text-xs font-bold rounded-lg transition-colors flex items-center justify-center gap-2"
                                     >
+                                        <Plus size={14} />
                                         Add to PO
                                     </button>
                                 </div>
                             ))}
                         </div>
 
-                        {products.length === 0 && (
-                            <div className="text-center py-12 text-gray-500">
-                                <Package size={48} className="mx-auto mb-4 opacity-50" />
-                                <p className="text-sm">No products found</p>
-                                <p className="text-xs mt-1">Products will appear here once they are added to the system</p>
+                        {filteredCatalogProducts.length === 0 && (
+                            <div className="text-center py-12 text-gray-500 bg-white/5 rounded-xl border border-dashed border-white/10">
+                                <Package size={48} className="mx-auto mb-4 opacity-50 text-gray-600" />
+                                <p className="text-sm font-bold text-gray-400">No products found</p>
+                                <p className="text-xs mt-1">Try adjusting your filters or search terms</p>
+                                <button
+                                    onClick={() => {
+                                        setCatalogSearch('');
+                                        setCatalogCategory('All');
+                                        setCatalogStockFilter('all');
+                                    }}
+                                    className="mt-4 px-4 py-2 bg-white/5 hover:bg-white/10 rounded-lg text-xs text-white border border-white/10 transition-colors"
+                                >
+                                    Clear Filters
+                                </button>
                             </div>
                         )}
                     </div>

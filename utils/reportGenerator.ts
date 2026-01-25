@@ -17,7 +17,6 @@ export const generateQuarterlyReport = (
     reportType: 'Operations' | 'Financials' | 'Procurement' = 'Operations'
 ) => {
     try {
-        console.log(`📄 Generating ${reportType} report for ${periodLabel}...`);
         const doc = new jsPDF();
         const pageWidth = doc.internal.pageSize.width;
 
@@ -75,7 +74,6 @@ export const generateQuarterlyReport = (
         // Save
         const fileName = `SiifMart_${reportType}_${periodLabel.replace(/[\s/\\:*?"<>|]+/g, '_')}.pdf`;
         doc.save(fileName);
-        console.log(`✅ PDF ${fileName} generated successfully.`);
     } catch (error) {
         console.error('❌ PDF Generation Error:', error);
         alert('Failed to generate PDF. Check console for details.');

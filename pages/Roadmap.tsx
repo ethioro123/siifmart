@@ -420,6 +420,7 @@ export default function Roadmap() {
                   value={selectedEntry.title}
                   onChange={(e) => setSelectedEntry({ ...selectedEntry, title: e.target.value })}
                   className="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-2xl font-bold text-white focus:border-cyber-primary/50 focus:outline-none"
+                  aria-label="Title"
                 />
                 <textarea
                   value={selectedEntry.description}
@@ -427,6 +428,7 @@ export default function Roadmap() {
                   rows={2}
                   placeholder="Short description..."
                   className="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-gray-400 focus:border-cyber-primary/50 focus:outline-none resize-none"
+                  aria-label="Description"
                 />
               </div>
             ) : (
@@ -465,6 +467,7 @@ export default function Roadmap() {
                   rows={12}
                   placeholder="Write your content here..."
                   className="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-4 text-white focus:border-cyber-primary/50 focus:outline-none resize-none font-mono text-sm leading-relaxed"
+                  aria-label="Content"
                 />
               ) : (
                 <div className="bg-black/30 rounded-xl p-6 min-h-[200px]">
@@ -530,11 +533,13 @@ export default function Roadmap() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full bg-cyber-gray border border-white/10 rounded-xl pl-11 pr-4 py-3 text-white placeholder-gray-500 focus:border-cyber-primary/50 focus:outline-none"
+            aria-label="Search entries"
           />
         </div>
         <select
           value={filterDepartment}
           onChange={(e) => setFilterDepartment(e.target.value)}
+          aria-label="Filter by department"
           className="bg-cyber-gray border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyber-primary/50 min-w-[150px]"
         >
           <option value="all">All Areas</option>
@@ -545,6 +550,7 @@ export default function Roadmap() {
         <select
           value={filterType}
           onChange={(e) => setFilterType(e.target.value)}
+          aria-label="Filter by type"
           className="bg-cyber-gray border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyber-primary/50 min-w-[150px]"
         >
           <option value="all">All Types</option>
@@ -634,6 +640,7 @@ export default function Roadmap() {
                   onChange={(e) => setNewEntry({ ...newEntry, title: e.target.value })}
                   className="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:border-cyber-primary/50 focus:outline-none"
                   autoFocus
+                  aria-label="Title"
                 />
               </div>
               <div>
@@ -644,6 +651,7 @@ export default function Roadmap() {
                   value={newEntry.description}
                   onChange={(e) => setNewEntry({ ...newEntry, description: e.target.value })}
                   className="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:border-cyber-primary/50 focus:outline-none"
+                  aria-label="Description"
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -653,6 +661,7 @@ export default function Roadmap() {
                     value={newEntry.type}
                     onChange={(e) => setNewEntry({ ...newEntry, type: e.target.value as KnowledgeEntry['type'] })}
                     className="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyber-primary/50"
+                    aria-label="Type"
                   >
                     {Object.entries(ENTRY_TYPES).map(([key, t]) => (
                       <option key={key} value={key}>{t.label}</option>
@@ -665,6 +674,7 @@ export default function Roadmap() {
                     value={newEntry.department}
                     onChange={(e) => setNewEntry({ ...newEntry, department: e.target.value as KnowledgeEntry['department'] })}
                     className="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyber-primary/50"
+                    aria-label="Department"
                   >
                     {Object.entries(DEPARTMENTS).map(([key, d]) => (
                       <option key={key} value={key}>{d.label}</option>
@@ -680,6 +690,7 @@ export default function Roadmap() {
                   onChange={(e) => setNewEntry({ ...newEntry, content: e.target.value })}
                   rows={6}
                   className="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:border-cyber-primary/50 focus:outline-none resize-none"
+                  aria-label="Content"
                 />
               </div>
             </div>

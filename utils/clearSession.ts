@@ -15,7 +15,6 @@ export async function clearSession() {
         // Clear sessionStorage
         sessionStorage.clear();
 
-        console.log('✅ Session cleared successfully');
 
         // Reload the page
         window.location.reload();

@@ -1,5 +1,5 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback, useMemo } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import {
   Product, PurchaseOrder, Supplier, SaleRecord, ExpenseRecord,
   StockMovement, CartItem, PaymentMethod, WMSJob, JobItem, Employee, EmployeeTask, Customer,
@@ -7,7 +7,7 @@ import {
   Notification, SystemLog, JobAssignment, Promotion, DiscountCode, WorkerPoints, PointsTransaction, POINTS_CONFIG,
   StorePoints, WorkerBonusShare, BonusTier, DEFAULT_BONUS_TIERS, DEFAULT_POS_BONUS_TIERS, DEFAULT_POS_ROLE_DISTRIBUTION,
   StorePointRule, DEFAULT_STORE_POINT_RULES, WarehousePointRule, DEFAULT_WAREHOUSE_POINT_RULES, WarehouseZone, FulfillmentPlan,
-  StaffSchedule
+  StaffSchedule, PendingInventoryChange, BarcodeApproval
 } from '../types';
 import { useNavigate } from 'react-router-dom';
 import { CURRENCY_SYMBOL } from '../constants';
@@ -33,11 +33,15 @@ import {
   warehouseZonesService,
   inventoryRequestsService,
   discrepancyService,
-  schedulesService
+  schedulesService,
+  barcodeApprovalsService
 } from '../services/supabase.service';
 import { supabase } from '../lib/supabase';
 import { realtimeService } from '../services/realtime.service';
 import { useStore } from './CentralStore';
+import { posDB } from '../services/db/pos.db';
+import { usePosSync } from '../hooks/usePosSync';
+import { useDataQueries } from '../hooks/useDataQueries';
 import { generateSKU, registerExistingSKU } from '../utils/skuGenerator';
 import { setGlobalTimezone } from '../utils/formatting';
 
@@ -109,6 +113,7 @@ interface DataContextType {
   zones: WarehouseZone[];
   allZones: WarehouseZone[];
   schedules: StaffSchedule[];
+  barcodeApprovals: BarcodeApproval[];
 
   // Global Raw Data
   allProducts: Product[];
@@ -125,6 +130,7 @@ interface DataContextType {
 
   addProduct: (product: Product) => Promise<Product | undefined>;
   updateProduct: (product: Partial<Product> & { id: string }, updatedBy?: string) => Promise<Product | undefined>;
+  updatePricesBySKU: (sku: string, updates: { price: number; costPrice?: number; salePrice?: number; isOnSale?: boolean }) => Promise<void>;
   deleteProduct: (id: string) => Promise<void>;
   relocateProduct: (productId: string, newLocation: string, user: string) => Promise<void>;
   cleanupAdminProducts: () => Promise<void>;
@@ -132,12 +138,14 @@ interface DataContextType {
   createPO: (po: PurchaseOrder) => Promise<PurchaseOrder | undefined>;
   updatePO: (po: PurchaseOrder) => Promise<void>;
   receivePO: (poId: string, receivedItems?: ReceivingItem[], skuDecisions?: Record<string, 'keep' | 'generate'>, scannedSkus?: Record<string, string>) => Promise<any>;
+  receivePOSplit: (poId: string, itemId: string, variants: Array<{ sku: string; skuType: 'existing' | 'new'; productId?: string; productName?: string; quantity: number; barcode?: string; }>) => Promise<void>;
   deletePO: (poId: string) => void;
 
-  processSale: (cart: CartItem[], method: PaymentMethod, user: string, tendered: number, change: number, customerId?: string, pointsRedeemed?: number, type?: 'In-Store' | 'Delivery' | 'Pickup', taxBreakdown?: any[]) => Promise<{ saleId: string; pointsResult?: any }>;
+  processSale: (cart: CartItem[], method: PaymentMethod, user: string, tendered: number, change: number, customerId?: string, pointsRedeemed?: number, type?: 'In-Store' | 'Delivery' | 'Pickup', taxBreakdown?: any[], receiptNumber?: string) => Promise<{ saleId: string; pointsResult?: any }>;
   processReturn: (saleId: string, items: ReturnItem[], totalRefund: number, user: string) => void;
   closeShift: (shift: ShiftRecord) => void;
   startShift: (cashierId: string, openingFloat: number) => void;
+  triggerSync: () => void;
 
   addSupplier: (supplier: Supplier) => void;
   adjustStock: (productId: string, qty: number, type: 'IN' | 'OUT', reason: string, user: string) => void;
@@ -152,10 +160,11 @@ interface DataContextType {
   updateJobItem: (jobId: string, itemId: number, status: JobItem['status'], qty: number) => Promise<void>;
   updateJobStatus: (jobId: string, status: WMSJob['status']) => Promise<void>;
   updateJob: (id: string, updates: Partial<WMSJob>) => Promise<void>;
-  completeJob: (jobId: string, user: string, skipValidation?: boolean) => Promise<any>;
+  completeJob: (jobId: string, user: string, skipValidation?: boolean, optimisticLineItems?: any[]) => Promise<any>;
   resetJob: (jobId: string) => Promise<void>;
   fixBrokenJobs: () => Promise<void>;
   createPutawayJob: (product: Product, quantity: number, user: string, source?: string) => Promise<WMSJob | undefined>;
+  deleteJob: (id: string) => Promise<void>;
 
   // HR Actions
   addEmployee: (employee: Employee, user?: string) => void;
@@ -204,6 +213,10 @@ interface DataContextType {
   resetData: () => void;
   refreshData: () => Promise<void>;
 
+  // Data Audit Actions
+  approveBarcode: (id: string, userId: string) => Promise<void>;
+  rejectBarcode: (id: string, userId: string, reason: string) => Promise<void>;
+
   // Merchandising
   addPromotion: (promo: Promotion) => void;
   deletePromotion: (id: string) => void;
@@ -218,6 +231,14 @@ interface DataContextType {
   releaseOrder: (saleId: string) => Promise<void>;
   isDataInitialLoading: boolean;
   loadError: string | null;
+  loadingProgress: {
+    total: number;
+    loaded: number;
+    current: string;
+    entities: Record<string, 'pending' | 'loading' | 'success' | 'error'>;
+  };
+  posSyncStatus?: 'synced' | 'syncing' | 'offline' | 'error' | 'pending';
+  posPendingSyncCount?: number;
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
@@ -225,6 +246,7 @@ const DataContext = createContext<DataContextType | undefined>(undefined);
 export const DataProvider = ({ children }: { children?: ReactNode }) => {
   // Get user from CentralStore (safely)
   const storeContext = useStore();
+  const queryClient = useQueryClient();
   const user = storeContext?.user;
 
   // --- STATE ---
@@ -320,8 +342,22 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
   const [zones, setZones] = useState<WarehouseZone[]>([]);
   const [allZones, setAllZones] = useState<WarehouseZone[]>([]);
   const [schedules, setSchedules] = useState<StaffSchedule[]>([]);
+  const [barcodeApprovals, setBarcodeApprovals] = useState<BarcodeApproval[]>([]);
   const [isDataInitialLoading, setIsDataInitialLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
+
+  // Loading Progress State - tracks per-entity loading for UI feedback
+  const [loadingProgress, setLoadingProgress] = useState<{
+    total: number;
+    loaded: number;
+    current: string;
+    entities: Record<string, 'pending' | 'loading' | 'success' | 'error'>;
+  }>({
+    total: 0,
+    loaded: 0,
+    current: '',
+    entities: {}
+  });
 
   // Derived state
   const activeSite = React.useMemo(() =>
@@ -331,7 +367,87 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
 
   // --- NOTIFICATION PERSISTENCE ---
 
-  // Load notifs from local storage on mount
+  // React Query Hook for Data Fetching
+  const queries = useDataQueries({
+    siteId: activeSiteId,
+    enabled: navigator.onLine,
+    onProgress: (entity, status) => {
+      // Sync React Query progress with our local progress state
+      if (status === 'loading') {
+        setLoadingProgress(prev => ({
+          ...prev,
+          current: entity,
+          entities: { ...prev.entities, [entity]: 'loading' }
+        }));
+      } else if (status === 'success') {
+        setLoadingProgress(prev => ({
+          ...prev,
+          loaded: prev.loaded + 1,
+          entities: { ...prev.entities, [entity]: 'success' }
+        }));
+      } else if (status === 'error') {
+        setLoadingProgress(prev => ({
+          ...prev,
+          loaded: prev.loaded + 1,
+          entities: { ...prev.entities, [entity]: 'error' }
+        }));
+      }
+    }
+  });
+
+  // Sync React Query data to local state
+  useEffect(() => {
+    if (queries.products.data) {
+      // Apply sanitization
+      const finalProducts = queries.products.data.map(p =>
+        p.category?.toLowerCase() === 'alcohol' ? { ...p, category: 'Beverages' } : p
+      );
+      setProducts(finalProducts);
+    }
+    if (queries.employees.data) setEmployees(queries.employees.data);
+    if (queries.orders.data) setOrders(queries.orders.data);
+    if (queries.sales.data) {
+      const sanitizedSales = queries.sales.data.map(s => ({
+        ...s,
+        items: s.items?.map((i: any) => i.category?.toLowerCase() === 'alcohol' ? { ...i, category: 'Beverages' } : i) || []
+      }));
+      setSales(sanitizedSales);
+    }
+    if (queries.customers.data) setCustomers(queries.customers.data);
+    if (queries.suppliers.data) setSuppliers(queries.suppliers.data);
+    if (queries.jobs.data) setJobs(queries.jobs.data);
+    if (queries.movements.data) setMovements(queries.movements.data);
+    if (queries.transfers.data) {
+      const enrichedTransfers = queries.transfers.data.map((t: any) => ({
+        ...t,
+        sourceSiteName: sites.find(s => s.id === t.sourceSiteId)?.name || 'Unknown',
+        destSiteName: sites.find(s => s.id === t.destSiteId)?.name || 'Unknown'
+      }));
+      setTransfers(enrichedTransfers);
+    }
+    if (queries.assignments.data) setJobAssignments(queries.assignments.data);
+    if (queries.workerPoints.data) setWorkerPoints(queries.workerPoints.data);
+    if (queries.storePoints.data) setStorePoints(queries.storePoints.data);
+    if (queries.tasks.data) setTasks(queries.tasks.data);
+    if (queries.schedules.data) setSchedules(queries.schedules.data);
+    if (queries.barcodeApprovals.data) setBarcodeApprovals(queries.barcodeApprovals.data);
+    if (queries.zones.data) setZones(queries.zones.data);
+    if (queries.expenses.data) setExpenses(queries.expenses.data);
+    if (queries.systemLogs.data) setSystemLogs(queries.systemLogs.data);
+
+    // If query hook is managing loading, sync it
+    if (!queries.isLoadingCritical && isDataInitialLoading) {
+      setIsDataInitialLoading(false);
+    }
+  }, [
+    queries.products.data, queries.employees.data, queries.orders.data, queries.sales.data,
+    queries.customers.data, queries.suppliers.data, queries.jobs.data, queries.movements.data,
+    queries.transfers.data, queries.assignments.data, queries.workerPoints.data,
+    queries.storePoints.data, queries.tasks.data, queries.schedules.data,
+    queries.barcodeApprovals.data, queries.zones.data, queries.expenses.data,
+    queries.systemLogs.data, queries.isLoadingCritical, activeSiteId, sites
+  ]);
+
   useEffect(() => {
     try {
       const savedNotifs = localStorage.getItem('siifmart_notifications');
@@ -395,6 +511,104 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
   // Guard to prevent concurrent loadData calls
   const loadingRef = React.useRef(false);
   const loadedSiteRef = React.useRef<string>('');
+
+  // --- UNIVERSAL JOB ENRICHMENT ---
+  // 1. Hydrate PO numbers for Inbound Jobs
+  // 2. Hydrate Customer/Site details for Outbound Jobs (Pack/Dispatch)
+  const enrichedJobs = useMemo(() => {
+    return jobs.map(j => {
+      // Clone job to allow extension
+      const enhancedJob = { ...j } as any;
+
+      // --- OUTBOUND ENRICHMENT (Pack/Dispatch) ---
+      if (j.type === 'PACK' || j.type === 'DISPATCH' || j.type === 'PICK') {
+        const orderRef = (j.orderRef || '').trim();
+
+        // 1. Try finding linked Sale (for Customer details)
+        const sale = sales.find(s => s.id === orderRef) || allSales.find(s => s.id === orderRef);
+        if (sale) {
+          const cust = customers.find(c => c.id === sale.customerId);
+          if (cust) {
+            enhancedJob.customerName = cust.name;
+            enhancedJob.shippingAddress = (cust as any).address || (cust as any).shipping_address;
+            enhancedJob.city = (cust as any).city || ((cust as any).address ? (cust as any).address.split(',').pop()?.trim() : 'Addis Ababa');
+          } else if (sale.customerId === 'WALK_IN') {
+            enhancedJob.customerName = 'Walk-In Customer';
+            enhancedJob.city = 'In-Store';
+          }
+        } else {
+          // 2. Try finding linked Transfer (for Site details)
+          const transfer = transfers.find(t => t.id === orderRef);
+          if (transfer) {
+            const destSite = sites.find(s => s.id === transfer.destSiteId);
+            if (destSite) {
+              enhancedJob.destSiteName = destSite.name;
+              enhancedJob.shippingAddress = destSite.address;
+              enhancedJob.city = destSite.address?.split(',').pop()?.trim();
+            }
+          }
+        }
+      }
+
+      // --- INBOUND / PO ENRICHMENT (Existing Logic) ---
+      if (j.poNumber) return enhancedJob; // Already has it
+
+      const jRef = (j.orderRef || '').trim().toUpperCase();
+      if (!jRef || jRef.length < 3) return enhancedJob;
+
+      // Fuzzy Matcher logic...
+      const findPO = (list: PurchaseOrder[]) => list.find(o => {
+        const pRef = (o.poNumber || o.po_number || '').trim().toUpperCase();
+        if (!pRef) return false;
+        if (pRef === jRef) return true;
+        if (pRef.endsWith(jRef) || jRef.endsWith(pRef)) return true;
+        const pId = (o.id || '').toLowerCase().trim();
+        const jId = (j.orderRef || '').toLowerCase().trim();
+        if (pId && jId && pId === jId) return true;
+        return false;
+      });
+
+      const po = findPO(orders) || findPO(allOrders);
+
+      if (po && (po.poNumber || po.po_number)) {
+        return {
+          ...enhancedJob,
+          poNumber: po.poNumber || po.po_number,
+          orderRef: (po.poNumber || po.po_number || j.orderRef) as string
+        };
+      }
+
+      // Traceability Lite logic...
+      if (j.lineItems && j.lineItems.length > 0) {
+        const firstItem = j.lineItems[0] as any;
+        const pid = firstItem.productId || firstItem.product_id;
+        if (pid) {
+          const sourcePO = orders.find(o => o.lineItems?.some((i: any) => i.product_id === pid || i.productId === pid)) ||
+            allOrders.find(o => o.lineItems?.some((i: any) => i.product_id === pid || i.productId === pid));
+
+          if (sourcePO && (sourcePO.poNumber || sourcePO.po_number)) {
+            return { ...enhancedJob, poNumber: sourcePO.poNumber || sourcePO.po_number };
+          }
+        }
+      }
+
+      // Fallback logic...
+      const possibleSku = (j.orderRef || '').replace('REPLENISH-', '').trim();
+      if (possibleSku && possibleSku.length > 3 && !possibleSku.includes('-')) {
+        const prod = allProducts.find(p => p.sku === possibleSku);
+        if (prod) {
+          const sourcePO = orders.find(o => o.lineItems?.some((i: any) => i.product_id === prod.id || i.productId === prod.id)) ||
+            allOrders.find(o => o.lineItems?.some((i: any) => i.product_id === prod.id || i.productId === prod.id));
+          if (sourcePO && (sourcePO.poNumber || sourcePO.po_number)) {
+            return { ...enhancedJob, poNumber: sourcePO.poNumber || sourcePO.po_number };
+          }
+        }
+      }
+
+      return enhancedJob;
+    });
+  }, [jobs, orders, allOrders, sales, allSales, customers, transfers, sites, allProducts]);
+
 
   const logSystemEvent = useCallback(async (action: string, details: string, user: string, module: SystemLog['module']) => {
     try {
@@ -469,25 +683,27 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
   }, []);
 
   // --- LOAD SITE DATA WHEN ACTIVE SITE CHANGES ---
-  // --- LOAD SITE DATA WHEN ACTIVE SITE CHANGES ---
-  useEffect(() => {
-    if (activeSiteId) {
-      loadSiteData(activeSiteId);
-    }
-  }, [activeSiteId]);
+  // React Query Hook (useDataQueries) now handles site data loading 
+  // automatically when activeSiteId changes.
 
   // Load Global Data once on mount (background)
   useEffect(() => {
     loadGlobalData();
 
-    // FAIL-SAFE: If hydration takes more than 10s, release the screen
-    // This prevents "loads forever" issues if a specific service hangs
+    // FAIL-SAFE: If hydration takes more than 15s (slow network), we warn but DO NOT unblock
+    // Strict Sync means we wait for data (cache or network)
     const timeout = setTimeout(() => {
       if (isDataInitialLoading) {
-        console.warn('⚠️ Hydration taking too long - releasing fail-safe');
-        setIsDataInitialLoading(false);
+        console.warn('⚠️ Hydration taking long - Checking for partial data...');
+        // Only unblock if we actually have something useful (e.g. products)
+        // Otherwise, stay blocked to prevent empty dashboard
+        if (products.length > 0 || sites.length > 0) {
+          setIsDataInitialLoading(false);
+        } else {
+          setLoadError('Synchronization is taking longer than expected. Please check your connection.');
+        }
       }
-    }, 10000);
+    }, 15000);
 
     return () => clearTimeout(timeout);
   }, []);
@@ -506,29 +722,58 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
       const loadedSites = await sitesService.getAll();
       setSites(loadedSites);
 
+      // Cache for offline use
+      try {
+        localStorage.setItem('siifmart_sites_cache', JSON.stringify(loadedSites));
+      } catch (e) {
+        console.warn('Failed to cache sites', e);
+      }
+
       try {
         const loadedAllZones = await warehouseZonesService.getAll();
         setAllZones(loadedAllZones);
+        // Cache zones
+        localStorage.setItem('siifmart_zones_cache', JSON.stringify(loadedAllZones));
       } catch (zoneError) {
         console.warn('⚠️ Failed to load warehouse zones:', zoneError);
-        setAllZones([]); // Fallback to empty zones if table/columns missing
+        // Try fallback cache
+        const cachedZones = localStorage.getItem('siifmart_zones_cache');
+        if (cachedZones) {
+          setAllZones(JSON.parse(cachedZones));
+        } else {
+          setAllZones([]);
+        }
       }
 
       if (loadedSites.length === 0) {
         addNotification('info', 'No operational sites were found in the database.');
       }
 
-      // NOTE: We do NOT set activeSiteId here anymore. 
-      // We rely on the `useEffect` observing `user` and `sites` to set the initial site.
-      // This prevents race conditions where we might default to site[0] before the user profile is loaded.
-
     } catch (error: any) {
       console.error('❌ Failed to load sites:', error);
+
+      // FALLBACK TO CACHE
+      const cached = localStorage.getItem('siifmart_sites_cache');
+      if (cached) {
+        console.log('⚠️ Network failed, loading sites from cache.');
+        setSites(JSON.parse(cached));
+        // Also try zones cache
+        const cachedZones = localStorage.getItem('siifmart_zones_cache');
+        if (cachedZones) setAllZones(JSON.parse(cachedZones));
+
+        addNotification('info', 'Network unreachable. Loaded sites from local cache.');
+        return; // Successfully recovered via cache, no retry needed
+      }
+
       const errorMsg = `Unable to connect to the logistics server (${error?.message || 'Network Error'}).`;
+      // Only alert if we really have no data
       addNotification('alert', `System Error: ${errorMsg} Retrying...`);
       setLoadError(errorMsg);
-      // Retry in 3 seconds
-      setTimeout(loadSites, 3000);
+
+      // Retry in 5 seconds only if online (otherwise wait for online event)
+      if (navigator.onLine) {
+        setTimeout(loadSites, 5000);
+      }
     }
   };
 
@@ -553,127 +798,27 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
   };
 
   const loadSiteData = async (siteId: string, force = false) => {
-    // Prevent concurrent calls UNLESS forced
-    if (loadingRef.current && !force) {
-      console.log('⏭️ Skipping loadData - already loading');
-      return;
-    }
-
-    // Prevent redundant loads for the same site
-    if (!force && loadedSiteRef.current === siteId) {
-      console.log(`⏭️ Skipping loadData - already loaded for site ${siteId}`);
-      return;
-    }
-
-    loadingRef.current = true;
-    try {
-      if (!isUUID(siteId)) {
-        console.warn(`⚠️ skipping loadSiteData: "${siteId}" is not a valid UUID (likely Demo Mode)`);
-        return;
-      }
-
-      console.log(`🔄 Loading data for site: ${siteId}...`);
-
-      // Load all data in parallel, filtered by siteId where applicable
-      // Load data, skipping global collections if they already have data
-      const [
-        loadedProducts,
-        loadedOrders,
-        loadedSuppliers,
-        loadedSales,
-        loadedExpenses,
-        loadedMovements,
-        loadedJobs,
-        loadedEmployees,
-        loadedCustomers,
-        loadedLogs,
-        loadedTransfers,
-        loadedJobAssignments,
-        loadedWorkerPoints,
-        loadedStorePoints,
-        loadedTasks,
-        loadedSchedules,
-        loadedZones
-      ] = await Promise.all([
-        productsService.getAll(siteId, 2000).then(res => res.data), // Scalability: Limit products to 2000 to prevent crash
-        purchaseOrdersService.getAll(siteId, 1000).then(res => res.data), // Limit to 1000 recent POs (increased from 500)
-        suppliers.length > 0 ? Promise.resolve(suppliers) : suppliersService.getAll().then(res => res.data),
-        salesService.getAll(siteId, 2000).then(res => res.data), // Scalability: Limit to 2000 recent sales (increased from 1000)
-        expensesService.getAll(siteId, 500).then(res => res.data), // Limit to 500 recent expenses (increased from 200)
-        stockMovementsService.getAll(siteId, undefined, 2000).then(res => res.data), // Limit to 2000 recent movements (increased from 1000)
-        wmsJobsService.getAll(siteId, 2000), // Scalability: Limit to 2000 recent jobs (increased from 500)
-        employees.length > 0 ? Promise.resolve(employees) : employeesService.getAll(),
-        customers.length > 0 ? Promise.resolve(customers) : customersService.getAll(2000), // Limit to 2000 customers (Retail Scale)
-        systemLogs.length > 0 ? Promise.resolve(systemLogs) : systemLogsService.getAll(),
-        transfersService.getAll(siteId, 500), // Limit to 500 recent transfers (increased from 100)
-        jobAssignmentsService.getAll(siteId, undefined, 500), // Limit to 500 recent assignments (increased from 100)
-        workerPointsService.getAll(siteId),
-        storePointsService.getAll(),
-        tasksService.getAll(siteId, 500), // Limit to 500 recent tasks (increased from 100)
-        schedulesService.getAll(siteId),
-        warehouseZonesService.getAll(siteId).catch(err => {
-          console.warn('⚠️ Missing warehouse_zones table/columns:', err);
-          return [];
-        })
-      ]);
-
-      setProducts(loadedProducts);
-      setOrders(loadedOrders);
-      setSuppliers(loadedSuppliers);
-      setSales(loadedSales);
-      setExpenses(loadedExpenses);
-      setMovements(loadedMovements);
-      setJobs(loadedJobs);
-      setEmployees(loadedEmployees);
-      setCustomers(loadedCustomers);
-      setSystemLogs(loadedLogs);
-      setJobAssignments(loadedJobAssignments);
-      setWorkerPoints(loadedWorkerPoints);
-      setStorePoints(loadedStorePoints);
-      setTasks(loadedTasks);
-      setSchedules(loadedSchedules);
-      setZones(loadedZones);
-
-      // Map site names to transfers
-      const enrichedTransfers = loadedTransfers.map((t: any) => ({
-        ...t,
-        sourceSiteName: sites.find(s => s.id === t.sourceSiteId)?.name || 'Unknown',
-        destSiteName: sites.find(s => s.id === t.destSiteId)?.name || 'Unknown'
-      }));
-      setTransfers(enrichedTransfers);
-
-      // Mark this site as loaded
-      loadedSiteRef.current = siteId;
-
-      console.log('✅ Data loaded successfully!');
-      setLoadError(null);
-      setIsDataInitialLoading(false);
-    } catch (error: any) {
-      console.error('❌ Failed to load data:', error);
-      setLoadError(`Failed to load site data: ${error?.message || 'Unknown Error'}`);
-      addNotification('alert', 'Failed to load site data. Retrying...');
-      // Retry in 5 seconds
-      setTimeout(() => loadSiteData(siteId, true), 5000);
-    } finally {
-      loadingRef.current = false;
-    }
+    // Deprecated: Data fetching is now handled by useDataQueries hook
+    console.log('⚠️ loadSiteData is deprecated. React Query is handling data fetching.');
+    return;
   };
 
-  const refreshData = useCallback(async () => {
-    if (activeSiteId) {
-      console.log('🔄 Manual Refresh Triggered');
-      await loadSiteData(activeSiteId, true);
-    }
-  }, [activeSiteId, loadSiteData]);
 
   const loadGlobalData = async () => {
+    // ------------------------------------------------------------
+    // OFFLINE-FIRST: Global Cache
+    // ------------------------------------------------------------
+    // ------------------------------------------------------------
+    // GLOBAL CACHE REMOVED (Online-Only Mode)
+    // ------------------------------------------------------------
+
     try {
       console.log('🌍 Loading Global HQ Data...');
       // For now, we fetch all and aggregate on client (careful with volume)
       const [allProds, allSls, allOrds, allEmps, allSupps] = await Promise.all([
-        productsService.getAll(undefined, 2000).then(res => res.data), // Scalability: Limit global view to 2000
-        salesService.getAll(undefined, 2000).then(res => res.data), // Scalability: increased for global
-        purchaseOrdersService.getAll(undefined, 1000).then(res => res.data), // increased for global
+        productsService.getAll(undefined, 5000).then(res => res.data), // Scalability: Limit global view to 5000
+        salesService.getAll(undefined, 5000).then(res => res.data), // Scalability: increased for global
+        purchaseOrdersService.getAll(undefined, 5000).then(res => res.data), // increased for global
         employeesService.getAll(),
         suppliersService.getAll(1000).then(res => res.data) // Load all active partners for HQ
       ]);
@@ -688,6 +833,10 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
       setSchedules(allSchedules);
 
       console.log('✅ Global HQ Data Loaded');
+
+      // Update Global Cache
+      // Cache update removed (Online-Only Mode)
+
       // If no site is active yet (e.g. CEO), global load finishes the hydration
       if (!activeSiteId) {
         setIsDataInitialLoading(false);
@@ -696,10 +845,22 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
       console.error('❌ Failed to load global data:', error);
       // Even if global fails, don't lock the user out forever
       if (!activeSiteId) {
-        setIsDataInitialLoading(false);
+        // Only unblock if we have cached data
+        setLoadError('Failed to load global data. Check connection.');
+        setIsDataInitialLoading(false); // CRITICAL: Unblock UI even on error
       }
     }
   };
+
+  const refreshData = useCallback(async () => {
+    if (activeSiteId) {
+      console.log('🔄 Manual Refresh Triggered (Site) - via React Query');
+      queries.refetchAll();
+    } else {
+      console.log('🔄 Manual Refresh Triggered (Global)');
+      await loadGlobalData();
+    }
+  }, [activeSiteId, queries]);
 
 
   // --- REAL-TIME UPDATES ---
@@ -710,8 +871,39 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
 
     const subscriptions = realtimeService.subscribeToSite(activeSiteId, {
       onProductChange: (event, payload) => {
-        if (event === 'INSERT') setProducts(prev => [payload, ...prev]);
-        else if (event === 'UPDATE') setProducts(prev => prev.map(p => p.id === payload.id ? payload : p));
+        // [FIX] Map raw DB payload (snake_case) to Product interface (camelCase)
+        const mapRealtimeProduct = (data: any): Product => ({
+          ...data,
+          siteId: data.site_id,
+          barcodes: data.barcodes || [],
+          costPrice: data.cost_price,
+          salePrice: data.sale_price,
+          isOnSale: data.is_on_sale,
+          expiryDate: data.expiry_date,
+          batchNumber: data.batch_number,
+          shelfPosition: data.shelf_position,
+          competitorPrice: data.competitor_price,
+          salesVelocity: data.sales_velocity,
+          posReceivedAt: data.pos_received_at,
+          posReceivedBy: data.pos_received_by,
+          approvalStatus: data.approval_status,
+          createdBy: data.created_by,
+          approvedBy: data.approved_by,
+          approvedAt: data.approved_at,
+          rejectedBy: data.rejected_by,
+          rejectedAt: data.rejected_at,
+          rejectionReason: data.rejection_reason,
+          priceUpdatedAt: data.price_updated_at // [NEW] Map timestamp
+        });
+
+        if (event === 'INSERT') {
+          const mapped = mapRealtimeProduct(payload);
+          setProducts(prev => [mapped, ...prev]);
+        }
+        else if (event === 'UPDATE') {
+          const mapped = mapRealtimeProduct(payload);
+          setProducts(prev => prev.map(p => p.id === payload.id ? { ...p, ...mapped } : p));
+        }
         else if (event === 'DELETE') setProducts(prev => prev.filter(p => p.id !== payload.id));
       },
       onSaleChange: (event, payload) => {
@@ -729,8 +921,10 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
         else if (event === 'UPDATE') setCustomers(prev => prev.map(c => c.id === payload.id ? payload : c));
       },
       onWMSJobChange: (event, payload) => {
-        if (event === 'INSERT') setJobs(prev => [payload, ...prev]);
+        // Prevent duplicates: Only add if job doesn't already exist (may have been added by manual setJobs call)
+        if (event === 'INSERT') setJobs(prev => prev.find(j => j.id === payload.id) ? prev : [payload, ...prev]);
         else if (event === 'UPDATE') setJobs(prev => prev.map(j => j.id === payload.id ? payload : j));
+        else if (event === 'DELETE') setJobs(prev => prev.filter(j => j.id !== payload.id));
       },
       onJobAssignmentChange: (event, payload) => {
         if (event === 'INSERT') setJobAssignments(prev => [payload, ...prev]);
@@ -741,6 +935,11 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
         if (event === 'INSERT') setTransfers(prev => [payload, ...prev]);
         else if (event === 'UPDATE') setTransfers(prev => prev.map(t => t.id === payload.id ? payload : t));
         else if (event === 'DELETE') setTransfers(prev => prev.filter(t => t.id !== payload.id));
+      },
+      onPurchaseOrderChange: (event, payload) => {
+        if (event === 'INSERT') setOrders(prev => [payload, ...prev]);
+        else if (event === 'UPDATE') setOrders(prev => prev.map(o => o.id === payload.id ? payload : o));
+        else if (event === 'DELETE') setOrders(prev => prev.filter(o => o.id !== payload.id));
       }
     });
 
@@ -826,6 +1025,7 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
 
   const addProduct = useCallback(async (product: Product): Promise<Product | undefined> => {
     console.log('🧪 DataContext: addProduct called with:', product);
+    const targetSiteId = product.siteId || product.site_id || activeSite?.id;
     try {
       if (!activeSite?.id) {
         addNotification('alert', 'No active site selected. Cannot add product.');
@@ -841,8 +1041,7 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
         console.warn(`Creating product "${product.name}" with invalid price: ${product.price}. Proceeding anyway.`);
       }
 
-      // 2. Get the target site to check its type
-      const targetSiteId = product.siteId || product.site_id || activeSite.id;
+      // 2. Get the targetSite to check its type
       const targetSite = sites.find(s => s.id === targetSiteId);
 
       // 3. Prevent products from being assigned to HQ/Administrative sites
@@ -880,6 +1079,11 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
       });
       setAllProducts(prev => [...prev, newProduct]);
 
+      // [FIX] Also update React Query cache
+      queryClient.setQueryData(['products', targetSiteId], (old: Product[] | undefined) =>
+        old ? [...old, newProduct] : [newProduct]
+      );
+
       addNotification('success', `Product ${product.name} added`);
       logSystemEvent('Product Added', `Product "${product.name}" (SKU: ${product.sku}) created in site ${targetSiteId}`, user?.name || 'System', 'Inventory');
       return newProduct; // Return the created product
@@ -892,7 +1096,7 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
         console.warn(`Product with SKU "${product.sku}" already exists. Fetching existing record...`);
         try {
           // Attempt to find the existing product in the target site
-          const existing = await productsService.getBySKU(product.sku);
+          const existing = await productsService.getBySKU(product.sku, targetSiteId);
           if (existing) {
             // If we found it, verify site match if needed, but for now just return it to unblock flow
             addNotification('info', `Product ${product.sku} already exists. Using existing record.`);
@@ -931,10 +1135,9 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
 
       // 2. Check if trying to move product to HQ site
       const targetSiteId = product.siteId || (product as any).site_id;
-      if (user?.siteId) {
-        const s = sites.find(site => site.id === user.siteId);
-        if (s) setActiveSiteId(s.id);
-      }
+
+      // [FIX] Removed auto-reset of activeSiteId to user.siteId.
+      // This was causing the view to snap back to home site during global updates.
       if (targetSiteId) {
         const targetSite = sites.find(s => s.id === targetSiteId);
         if (targetSite) {
@@ -952,11 +1155,24 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
 
       // ============================================================
 
-      const updated = await productsService.update(product.id, product);
+      // ============================================================
+      // SANITIZATION: Remove fields that shouldn't be sent to DB
+      // ============================================================
+      const { createdBy, updatedBy, ...sanitizedProduct } = product as any;
+
+      const updated = await productsService.update(product.id, sanitizedProduct);
 
       // Update local state immediately (Merge updates)
       setProducts(prev => prev.map(p => p.id === product.id ? { ...p, ...updated } : p));
       setAllProducts(prev => prev.map(p => p.id === product.id ? { ...p, ...updated } : p));
+
+      // [FIX] Also update React Query cache to prevent stale data overwrite
+      const updatedSiteId = updated.siteId || updated.site_id;
+      if (updatedSiteId) {
+        queryClient.setQueryData(['products', updatedSiteId], (old: Product[] | undefined) =>
+          old ? old.map(p => p.id === product.id ? { ...p, ...updated } : p) : old
+        );
+      }
 
       addNotification('success', `Product ${product.name || updated.name} updated`);
       logSystemEvent('Product Updated', `Product "${product.name || updated.name}" updated`, updatedBy || user?.name || 'System', 'Inventory');
@@ -968,38 +1184,74 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
     }
   }, [addNotification, logSystemEvent, user, sites]);
 
+  const updatePricesBySKU = useCallback(async (sku: string, updates: { price: number; costPrice?: number; salePrice?: number; isOnSale?: boolean }) => {
+    try {
+      const updatedProducts = await productsService.updatePricesBySKU(sku, updates);
+
+      // Update local state for all matching products
+      const updatedIds = new Set(updatedProducts.map(p => p.id));
+
+      setProducts(prev => prev.map(p => updatedIds.has(p.id) ? { ...p, ...updates } : p));
+      setAllProducts(prev => prev.map(p => updatedIds.has(p.id) ? { ...p, ...updates } : p));
+
+      // [FIX] Also update React Query cache for all affected sites
+      const affectedSiteIds = new Set(updatedProducts.map(p => p.siteId || p.site_id).filter(Boolean));
+      affectedSiteIds.forEach(siteId => {
+        queryClient.setQueryData(['products', siteId], (old: Product[] | undefined) =>
+          old ? old.map(p => updatedIds.has(p.id) ? { ...p, ...updates } : p) : old
+        );
+      });
+
+      addNotification('success', `Synchronized prices for SKU ${sku} across ${updatedProducts.length} locations`);
+      logSystemEvent('Global Price Sync', `SKU ${sku} prices updated network-wide`, user?.name || 'System', 'Inventory');
+    } catch (error) {
+      console.error('Global Price Sync Error:', error);
+      addNotification('alert', 'Failed to synchronize prices globally');
+      throw error;
+    }
+  }, [addNotification, logSystemEvent, user]);
+
   const deleteProduct = useCallback(async (id: string) => {
     try {
-      // Use cascade delete to remove related records (stock_movements, etc.) first
       await productsService.cascadeDelete(id);
 
-      // Update local state
-      setProducts(prev => prev.filter(p => p.id !== id));
-      setAllProducts(prev => prev.filter(p => p.id !== id));
+      // Invalidate products query instead of manual state updates
+      queryClient.invalidateQueries({ queryKey: ['products'] });
 
       addNotification('success', 'Product and related records deleted permanently');
       logSystemEvent('Product Deleted', `Product with ID ${id} and all related records deleted permanently`, user?.name || 'System', 'Inventory');
     } catch (error) {
       console.error(error);
       addNotification('alert', 'Failed to delete product');
-      throw error; // Re-throw to allow caller to handle error
+      throw error;
     }
-  }, [addNotification, logSystemEvent, user]);
+  }, [addNotification, logSystemEvent, user, queryClient]);
 
   const relocateProduct = useCallback(async (productId: string, newLocation: string, user: string) => {
     try {
-      await productsService.update(productId, { location: newLocation });
+      const product = allProducts.find(p => p.id === productId);
+      const currentLocations = product?.location ? product.location.split(',').map(l => l.trim()) : [];
 
-      // Update local state immediately
-      setProducts(prev => prev.map(p => p.id === productId ? { ...p, location: newLocation } : p));
-      setAllProducts(prev => prev.map(p => p.id === productId ? { ...p, location: newLocation } : p));
+      if (currentLocations.includes(newLocation.trim())) {
+        console.log(`📍 Product ${productId} already assigned to location ${newLocation}. Skipping append.`);
+        return;
+      }
 
-      logSystemEvent('Product Relocated', `Product ${productId} moved to ${newLocation}`, user, 'Inventory');
+      const updatedLocation = product?.location
+        ? `${product.location}, ${newLocation.trim()}`
+        : newLocation.trim();
+
+      await productsService.update(productId, { location: updatedLocation });
+
+      // Invalidate React Query cache
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+
+      logSystemEvent('Product Relocated', `Product ${productId} added to location ${newLocation}`, user, 'Inventory');
     } catch (error) {
       console.error(error);
       addNotification('alert', 'Failed to relocate product');
     }
-  }, [addNotification, logSystemEvent]);
+  }, [allProducts, queryClient, logSystemEvent, addNotification]);
 
   const cleanupAdminProducts = useCallback(async () => {
     try {
@@ -1069,7 +1321,7 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
       // Fallback: Save to local state even if database fails
       const localPO: PurchaseOrder = {
         ...po,
-        id: po.id || `PO-${Date.now()}`,
+        id: po.id || `REF-${Date.now()}`,
         siteId: po.siteId || activeSite?.id || 'SITE-001'
       };
 
@@ -1155,6 +1407,19 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
         console.log('🏗️ Processing Items Count:', itemsToProcess.length, itemsToProcess.map(i => ({ id: i.id, productId: i.productId })));
         console.log('🏗️ Creating PUTAWAY jobs for site:', targetSiteId);
 
+        // 🔢 FIND PERSISTENT JOB NUMBER
+        // Use initial RECEIVE job number if it exists, otherwise use PO number
+        const { data: receiveJob } = await supabase
+          .from('wms_jobs')
+          .select('job_number')
+          .eq('order_ref', poId)
+          .eq('type', 'RECEIVE')
+          .maybeSingle();
+
+        // STRICT: User requires PO Number to be the primary identifier
+        // If receiveJob exists, checks if it has a properly formatted number, else defaults to PO
+        const persistentJobNumber = po.poNumber || po.po_number || poId;
+
         const jobPromises = itemsToProcess.map(async (item, index) => {
           let targetProductId = item.productId;
 
@@ -1163,9 +1428,30 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
             (r.productId && r.productId === item.productId) ||
             (r.id && r.id === item.id)
           );
-          const qtyToReceive = receivedData ? receivedData.quantity : item.quantity; // Default to full PO qty if not specified
+          const qtyToReceive = receivedData ? receivedData.quantity : item.quantity;
 
-          // Try to find the source product to get SKU
+          // 🛡️ [DUPLICATE CHECK] Skip if identical putaway job was created recently
+          // This allows partial receipts (different quantities) but blocks rapid double-clicks.
+          const existingJob = jobs.find(j => {
+            const isSamePO = (j.orderRef === poId || j.orderRef === persistentJobNumber);
+            const isPutaway = j.type === 'PUTAWAY';
+            const hasProduct = j.lineItems?.some((li: any) => li.productId === item.productId);
+            if (!isSamePO || !isPutaway || !hasProduct) return false;
+
+            const sameQty = j.lineItems?.some((li: any) => li.productId === item.productId && li.expectedQty === qtyToReceive);
+            const createdTime = new Date(j.createdAt || Date.now()).getTime();
+            const isRecent = (Date.now() - createdTime) < 10000; // 10s window
+
+            return sameQty && isRecent;
+          });
+
+          if (existingJob) {
+            console.log(`⚠️ Skipping duplicate: Recent identical PUTAWAY job exists for ${item.productName} (Job: ${existingJob.id})`);
+            addNotification('info', `${item.productName} already had a job created recently`);
+            return { job: existingJob, productId: item.productId, sku: existingJob.lineItems?.[0]?.sku || 'UNKNOWN' };
+          }
+
+          // Try to find the source product to get info
           const sourceProduct = allProducts.find(p => p.id === item.productId);
 
           if (sourceProduct) {
@@ -1177,21 +1463,18 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
 
             if (existingSiteProduct) {
               targetProductId = existingSiteProduct.id;
-              console.log(`✅ Product ${sku} exists at site, using ID:`, targetProductId);
             } else {
-              // Product exists in catalog but NOT at this site. Auto-create it.
+              // Auto-create product for site
               try {
-                console.log(`🆕 Auto-creating product ${sku} for site ${targetSiteId}`);
                 const newProductData = {
                   ...sourceProduct,
-                  id: undefined, // Generate new ID
+                  id: undefined,
                   siteId: targetSiteId,
                   site_id: targetSiteId,
-                  stock: 0, // Will be updated by Putaway
-                  posReceivedAt: null, // Reset receiving status
+                  stock: 0,
+                  posReceivedAt: null,
                   pos_received_at: null
                 };
-                // Remove ID to let DB generate it
                 delete (newProductData as any).id;
                 delete (newProductData as any).created_at;
                 delete (newProductData as any).updated_at;
@@ -1199,100 +1482,59 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
                 const newProduct = await productsService.create(newProductData as any);
                 targetProductId = newProduct.id;
                 setAllProducts(prev => [...prev, newProduct]);
-                // Update local products if relevant to current view
-                if (targetSiteId === activeSiteId) {
-                  setProducts(prev => [...prev, newProduct]);
-                }
-                console.log(`✅ Created product at site:`, newProduct.id);
+                if (targetSiteId === activeSiteId) setProducts(prev => [...prev, newProduct]);
               } catch (err) {
                 console.error("❌ Failed to auto-create site product:", err);
-                // Fallback to original ID (will likely fail stock update but keeps job valid)
               }
             }
           }
 
           const product = allProducts.find(p => p.id === targetProductId) || sourceProduct;
-
-          // Fallback to PO item data if product not found (handles custom products)
           const productName = product?.name || item.productName;
           const productCategory = product?.category || 'General';
 
-          // SKU GENERATION & REGISTRATION LOGIC WITH DECISIONS & SCANS
+          // SKU & Barcode Logic
           let productSku: string;
           let needsSkuUpdate = false;
           const userDecision = item.productId ? skuDecisions?.[item.productId] : undefined;
-          const scannedSku = item.productId ? scannedSkus?.[item.productId] : undefined; // Get scanned SKU for this product
+          const scannedSku = item.productId ? scannedSkus?.[item.productId] : undefined;
 
           if (scannedSku && scannedSku.trim() !== '') {
-            // 1. Manual/Scanned SKU (Highest Priority)
             productSku = scannedSku.trim().toUpperCase();
-            needsSkuUpdate = true; // Always save scanned SKU
-            console.log(`✅ Using SCANNED SKU: ${productSku} for product: ${productName}`);
+            needsSkuUpdate = true;
           } else if (product?.sku && product.sku.trim() !== '' && product.sku !== 'MISC') {
-            // 2. Existing Product SKU
             if (userDecision === 'generate') {
-              // User chose to DISCARD and generate new
-              // Pass allProducts for live check
               productSku = generateSKU(productCategory, allProducts);
               needsSkuUpdate = true;
-              console.log(`🔄 User chose to generate NEW SKU: ${productSku} (replacing ${product.sku}) for product: ${productName}`);
             } else {
-              // User chose to KEEP existing (default)
               productSku = product.sku;
-              console.log(`✅ User chose to KEEP existing SKU: ${productSku} for product: ${productName}`);
             }
           } else if (item.sku && item.sku.trim() !== '' && item.sku !== 'MISC') {
-            // 3. PO PO Item SKU (Supplier provided)
             productSku = item.sku;
-            needsSkuUpdate = true; // Mark to save to product
-            console.log(`✅ Using PO item SKU: ${productSku} for product: ${productName}`);
+            needsSkuUpdate = true;
           } else {
-            // 4. Fallback: Auto-Generate
-            // Pass allProducts for live check
             productSku = generateSKU(productCategory, allProducts);
-            needsSkuUpdate = true; // Mark to save to product
-            console.log(`🆕 Generated new SKU: ${productSku} for product: ${productName} (Category: ${productCategory})`);
+            needsSkuUpdate = true;
           }
 
-
-          // ✅ HANDLE MANUAL ITEMS: If no product exists, create it now
+          // Handle Manual Items
           if (!product && !targetProductId) {
-            // First, check if a product with this name already exists at this site
             const existingByName = allProducts.find(p =>
               p.name.toLowerCase() === productName.toLowerCase() &&
               (p.siteId === targetSiteId || p.site_id === targetSiteId)
             );
 
             if (existingByName) {
-              // Reuse existing product
               targetProductId = existingByName.id;
-              console.log(`♻️ Reusing existing product: ${existingByName.name} (${existingByName.id})`);
-
-              // Link PO Item to this product
               if (item.id) {
-                const { error: linkErr } = await supabase
-                  .from('po_items')
-                  .update({ product_id: existingByName.id })
-                  .eq('id', item.id);
-                if (linkErr) console.error('Failed to link PO item to existing product', linkErr);
-
-                // Update local orders state
-                setOrders(prev => prev.map(o => {
-                  if (o.id === poId) {
-                    return {
-                      ...o,
-                      lineItems: o.lineItems?.map(li =>
-                        li.id === item.id ? { ...li, productId: existingByName.id } : li
-                      )
-                    };
-                  }
-                  return o;
-                }));
+                await supabase.from('po_items').update({ product_id: existingByName.id }).eq('id', item.id);
+                setOrders(prev => prev.map(o => o.id === poId ? {
+                  ...o,
+                  lineItems: o.lineItems?.map(li => li.id === item.id ? { ...li, productId: existingByName.id } : li)
+                } : o));
               }
             } else {
-              // Create new product
               try {
-                console.log(`🆕 Creating NEW Manual Product: ${productName} (SKU: ${productSku})`);
                 const newP = await productsService.create({
                   name: productName,
                   sku: productSku,
@@ -1305,111 +1547,127 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
                   status: 'active'
                 } as any);
                 targetProductId = newP.id;
-
                 setAllProducts(prev => [...prev, newP]);
                 if (targetSiteId === activeSiteId) setProducts(prev => [...prev, newP]);
-
-                needsSkuUpdate = false; // Already created with correct SKU
-                console.log(`✅ Manual Product Created: ${newP.id}`);
-
-                // 🔗 Link PO Item to new Product so it tracks correctly
                 if (item.id) {
-                  console.log(`🔗 Linking PO Item ${item.id} to new Product ${newP.id}`);
-                  const { error: linkErr } = await supabase
-                    .from('po_items')
-                    .update({ product_id: newP.id })
-                    .eq('id', item.id);
-                  if (linkErr) console.error('Failed to link PO item', linkErr);
-
-                  // Update local orders state so UI reflects the link immediately
-                  setOrders(prev => prev.map(o => {
-                    if (o.id === poId) {
-                      return {
-                        ...o,
-                        lineItems: o.lineItems?.map(li =>
-                          li.id === item.id ? { ...li, productId: newP.id } : li
-                        )
-                      };
-                    }
-                    return o;
-                  }));
+                  await supabase.from('po_items').update({ product_id: newP.id }).eq('id', item.id);
+                  setOrders(prev => prev.map(o => o.id === poId ? {
+                    ...o,
+                    lineItems: o.lineItems?.map(li => li.id === item.id ? { ...li, productId: newP.id } : li)
+                  } : o));
                 }
               } catch (err) {
                 console.error('Failed to create manual product', err);
-                addNotification('alert', `Failed to create product for ${productName}`);
-              }
-            }
-          } // Close outer if (!product && !targetProductId)
-
-          // ✅ SAVE THE SKU AND BARCODE TO THE PRODUCT IN THE DATABASE
-          if (needsSkuUpdate && (product || targetProductId)) {
-            const pidToUpdate = product?.id || targetProductId;
-            if (pidToUpdate) {
-              try {
-                // If the scanned SKU looks like a barcode (EAN-13, UPC, etc.), save it as barcode too
-                const updateData: any = { sku: productSku };
-
-                // Detect if scanned value is likely a barcode
-                if (scannedSku && scannedSku.trim() !== '') {
-                  const cleanScan = scannedSku.trim();
-                  // Check if it's numeric (EAN-13/UPC) or follows barcode patterns
-                  const isEAN = /^\d{12,13}$/.test(cleanScan); // EAN-13 or UPC-A
-                  const isUPC = /^\d{8,12}$/.test(cleanScan); // UPC variations
-                  const isCODE = /^[A-Z0-9]{6,20}$/i.test(cleanScan); // CODE128/CODE39
-
-                  if (isEAN || isUPC || isCODE) {
-                    updateData.barcode = cleanScan;
-                    updateData.barcodeType = isEAN ? 'EAN-13' : isUPC ? 'UPC-A' : 'CODE128';
-                    console.log(`📊 Saving barcode: ${cleanScan} (type: ${updateData.barcodeType})`);
-                  }
-                }
-
-                console.log(`💾 Saving SKU ${productSku} to product ${pidToUpdate}...`, updateData);
-                await productsService.update(pidToUpdate, updateData);
-                // Update local state
-                setAllProducts(prev => prev.map(p => p.id === pidToUpdate ? { ...p, ...updateData } : p));
-                setProducts(prev => prev.map(p => p.id === pidToUpdate ? { ...p, ...updateData } : p));
-                console.log(`✅ SKU ${productSku} saved to product ${productName}`);
-              } catch (updateError) {
-                console.error(`❌ Failed to save SKU to product:`, updateError);
-                // Continue anyway - use the SKU for the job even if DB update failed
               }
             }
           }
 
-          const productImage = product?.image || '';
+          // Sync Product Pricing & Identity (Critical for Real-Time Valuation)
+          if (product || targetProductId) {
+            const pidToUpdate = product?.id || targetProductId;
+            if (pidToUpdate) {
+              const updateData: any = {};
+
+              // 1. Sync Valuation - ALWAYS update from latest PO receipt
+              if (item.unitCost && item.unitCost > 0) {
+                const currentCost = (product as any)?.costPrice || 0;
+                if (item.unitCost !== currentCost) {
+                  console.log(`💰 Updating costPrice: ${currentCost} → ${item.unitCost}`);
+                  updateData.costPrice = item.unitCost;
+                }
+              }
+              if (item.retailPrice && item.retailPrice > 0) {
+                const currentPrice = product?.price || 0;
+                if (item.retailPrice !== currentPrice) {
+                  console.log(`💰 Updating retailPrice: ${currentPrice} → ${item.retailPrice}`);
+                  updateData.price = item.retailPrice;
+                }
+              }
+
+              // 2. Sync SKU if needed
+              if (needsSkuUpdate) updateData.sku = productSku;
+
+              // 3. Sync Barcodes (Robust Multi-Barcode Logic)
+              if (scannedSku && scannedSku.trim() !== '') {
+                const cleanScan = scannedSku.trim();
+                const isEAN = /^\d{12,13}$/.test(cleanScan);
+                const isUPC = /^\d{8,12}$/.test(cleanScan);
+                if (isEAN || isUPC || /^[A-Z0-9]{6,20}$/i.test(cleanScan)) {
+                  const currentBarcodes = product?.barcodes || [];
+                  const currentPrimary = product?.barcode;
+
+                  // Maintain Legacy Primary if missing
+                  if (!currentPrimary) {
+                    updateData.barcode = cleanScan;
+                    updateData.barcodeType = isEAN ? 'EAN-13' : isUPC ? 'UPC-A' : 'CODE128';
+                  }
+
+                  // Append to Aliases if new
+                  if (!currentBarcodes.includes(cleanScan) && cleanScan !== currentPrimary) {
+                    updateData.barcodes = [...currentBarcodes, cleanScan];
+                  }
+                }
+              }
+
+              if (Object.keys(updateData).length > 0) {
+                console.log(`🔄 Syncing product ${productSku} details from PO:`, updateData);
+                try {
+                  const updatedP = await productsService.update(pidToUpdate, updateData);
+                  setAllProducts(prev => prev.map(p => p.id === pidToUpdate ? updatedP : p));
+                  if (targetSiteId === activeSiteId) setProducts(prev => prev.map(p => p.id === pidToUpdate ? updatedP : p));
+                } catch (err) {
+                  console.error('❌ Failed to sync product details from PO:', err);
+                }
+              }
+            }
+          }
+
+          // [NEW] robust: Persist received_qty to po_items for History accuracy
+          if (item.id) {
+            await supabase.from('po_items').update({
+              received_qty: qtyToReceive
+              // updated_at: new Date().toISOString() // Removed: Column does not exist in po_items
+            }).eq('id', item.id);
+          }
+
+          // 🏗️ CREATE PUTAWAY JOB
+          const jobNotes = [
+            (po as any).notes,
+            receivedData?.temperature ? `Temp: ${receivedData.temperature}°C` : null
+          ].filter(Boolean).join(' | ');
 
           const newJob: Omit<WMSJob, 'id' | 'created_at' | 'updated_at'> = {
             siteId: targetSiteId,
-            site_id: targetSiteId, // Ensure snake_case for Supabase
+            site_id: targetSiteId,
             type: 'PUTAWAY',
             status: 'Pending',
-            priority: 'Normal',
+            priority: (po as any).priority || 'Normal',
             assignedTo: '',
             location: 'Receiving Dock',
-            items: 1, // Number of distinct products (line items), not total quantity
+            items: 1,
+            // 🛡️ CHANGED: Use UUID for data integrity (User Request)
             orderRef: poId,
-            jobNumber: `PW-${(po.poNumber || poId.slice(0, 8)).replace(/[^A-Z0-9-]/gi, '')}-${Date.now().toString(36).toUpperCase()}`,
+            // jobNumber: Auto-generated by service (Standard 4-char)
+            notes: jobNotes,
             lineItems: [{
-              productId: targetProductId!, // Use the SITE-SPECIFIC ID
+              productId: targetProductId!,
               name: productName,
-              sku: productSku, // ✅ Use finalized SKU
-              image: productImage,
-              expectedQty: qtyToReceive || 0, // Use ACTUAL received qty, not PO expected
+              sku: product?.sku || productSku, // Use product's SKU if available, otherwise the determined one
+              image: product?.image || '',
+              expectedQty: qtyToReceive || 0,
               pickedQty: 0,
-              status: 'Pending'
+              status: 'Pending',
+              expiryDate: receivedData?.expiryDate,
+              batchNumber: receivedData?.batchNumber,
+              condition: (receivedData?.condition as any) || 'Good'
             }]
           };
 
-          // Persist to DB (DB will generate UUID)
           try {
-            console.log('💾 Creating WMS job in database...', newJob);
             const createdJob = await wmsJobsService.create(newJob as any);
-            console.log('✅ Job created:', createdJob.id);
             return { job: createdJob, productId: targetProductId, sku: productSku };
           } catch (e) {
             console.error('❌ Failed to create WMS job:', e);
-            // Fallback: create with temp ID for local state
             return { job: { ...newJob, id: crypto.randomUUID() } as WMSJob, productId: targetProductId, sku: productSku };
           }
         });
@@ -1417,70 +1675,91 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
         const results = await Promise.all(jobPromises);
         const createdJobs = results.map(r => r.job);
 
-        // Create map of finalized SKUs to return
         const finalizedSkus: Record<string, string> = {};
-        results.forEach(r => {
-          if (r.productId && r.sku) {
-            finalizedSkus[r.productId] = r.sku;
+        results.forEach(r => { if (r.productId && r.sku) finalizedSkus[r.productId] = r.sku; });
+
+        logSystemEvent('Stock Received', `Received ${itemsToProcess.length} items for PO ${po.poNumber || poId}`, user?.name || 'Manager', 'Inventory');
+
+        // 🔥 CRITICAL: Complete the RECEIVE job now that PUTAWAY jobs have been created
+        try {
+          console.log('🔍 [receivePO] Searching for RECEIVE job to complete:', { poId, persistentJobNumber });
+
+          // Try finding by PO ID first, then by PO Number
+          let { data: receiveJobToComplete } = await supabase
+            .from('wms_jobs')
+            .select('id, order_ref, status')
+            .eq('order_ref', poId)
+            .eq('type', 'RECEIVE')
+            .neq('status', 'Completed')
+            .maybeSingle();
+
+          // Fallback: Try with PO Number if not found by UUID
+          if (!receiveJobToComplete && persistentJobNumber && persistentJobNumber !== poId) {
+            console.log('🔍 [receivePO] Fallback: searching by PO Number:', persistentJobNumber);
+            const fallback = await supabase
+              .from('wms_jobs')
+              .select('id, order_ref, status')
+              .eq('order_ref', persistentJobNumber)
+              .eq('type', 'RECEIVE')
+              .neq('status', 'Completed')
+              .maybeSingle();
+            receiveJobToComplete = fallback.data;
           }
-        });
 
-        console.log(`✅ Created ${createdJobs.length} PUTAWAY jobs`);
+          if (receiveJobToComplete) {
+            console.log('✅ [receivePO] Found RECEIVE job to complete:', receiveJobToComplete);
+            const { error: updateError } = await supabase
+              .from('wms_jobs')
+              .update({
+                status: 'Completed',
+                updated_at: new Date().toISOString()
+              })
+              .eq('id', receiveJobToComplete.id);
 
-        // Log Successful Reception
-        const receivedCount = itemsToProcess.length;
-        if (receivedCount > 0) {
-          logSystemEvent(
-            'Stock Received',
-            `Received ${receivedCount} items for PO ${po.poNumber || poId}`,
-            user?.name || 'Inventory Manager',
-            'Inventory'
-          );
+            if (updateError) {
+              console.error('❌ [receivePO] Failed to update job status:', updateError);
+            } else {
+              console.log('✅ [receivePO] Successfully marked RECEIVE job as Completed:', receiveJobToComplete.id);
+            }
+          } else {
+            console.log('⚠️ [receivePO] No pending RECEIVE job found for this PO');
+          }
+        } catch (jobErr) {
+          console.error('⚠️ Could not complete RECEIVE job:', jobErr);
         }
 
-        // Force refresh jobs from DB SYNCHRONOUSLY to ensure visibility
         if (targetSiteId) {
           const js = await wmsJobsService.getAll(targetSiteId);
-          console.log('🔄 Refreshed jobs from DB. Count:', js.length);
           setJobs(js);
         } else {
           setJobs(prev => [...prev, ...createdJobs]);
         }
 
-        // Return the finalized SKUs so UI can use them immediately
         try {
-          // Check if ALL items have been fully received
-          // Fetch all jobs for this PO again to include the new ones
-          const allJobsForPO = [...jobs, ...createdJobs].filter(j => j.orderRef === poId && j.status !== 'Completed');
-
+          const allJobsForPO = [...jobs, ...createdJobs].filter(j => j.orderRef === poId); // Count ALL jobs (Pending, In Progress, Completed)
           let allReceived = true;
           po.lineItems?.forEach(item => {
             const totalJobQty = allJobsForPO.reduce((sum, job) => {
               const jobItem = job.lineItems.find((ji: any) => ji.productId === item.productId);
               return sum + (jobItem ? jobItem.expectedQty : 0);
             }, 0);
-
-            if (totalJobQty < item.quantity) {
-              allReceived = false;
-            }
+            if (totalJobQty < item.quantity) allReceived = false;
           });
 
           if (allReceived) {
-            console.log('✅ PO fully received. Updating status to RECEIVED.');
-            await purchaseOrdersService.receive(poId);
-            setOrders(prev => prev.map(o => o.id === poId ? { ...o, status: 'Received' } : o));
-            setAllOrders(prev => prev.map(o => o.id === poId ? { ...o, status: 'Received' } : o));
-            addNotification('success', `PO ${poId} fully received! All items processed.`);
+            const updatedPo = await purchaseOrdersService.receive(poId, false);
+            if (updatedPo) {
+              setOrders(prev => prev.map(o => o.id === poId ? updatedPo : o));
+              setAllOrders(prev => prev.map(o => o.id === poId ? updatedPo : o));
+            }
+            addNotification('success', `PO ${poId} fully received!`);
           } else {
-            console.log('⚠️ PO partially received. Status remains APPROVED.');
-            addNotification('success', `Items received. PO remains open for remaining items.`);
+            addNotification('success', `Items received. PO remains open for remaining inventory.`);
           }
-
-          return finalizedSkus; // ✅ RETURN SKUS!
+          return finalizedSkus;
         } catch (error) {
           console.error(error);
-          addNotification('alert', 'Failed to update PO status');
-          return finalizedSkus; // Return SKUs even if status update fails
+          return finalizedSkus;
         }
       }
 
@@ -1502,6 +1781,421 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
       addNotification('alert', 'Failed to delete PO');
     }
   }, [addNotification]);
+
+  // Split Receiving: Receive one PO line item as multiple SKU variants
+  const receivePOSplit = useCallback(async (
+    poId: string,
+    itemId: string,
+    variants: Array<{
+      sku: string;
+      skuType: 'existing' | 'new';
+      productId?: string;
+      productName?: string;
+      quantity: number;
+      barcode?: string;
+    }>
+  ) => {
+    try {
+      const po = orders.find(o => o.id === poId);
+      if (!po) {
+        addNotification('alert', 'Purchase Order not found');
+        return;
+      }
+
+      const item = po.lineItems?.find(i => i.id === itemId);
+      if (!item) {
+        addNotification('alert', 'Item not found in PO');
+        return;
+      }
+
+      // Validate total quantities - compare against REMAINING qty (not original qty)
+      const remainingQty = item.quantity - (item.receivedQty || 0);
+      const totalQty = variants.reduce((sum, v) => sum + v.quantity, 0);
+
+      console.log('📊 Quantity validation:', {
+        originalQty: item.quantity,
+        receivedQty: item.receivedQty,
+        remainingQty,
+        variantTotalQty: totalQty,
+        variants: variants.map(v => ({ sku: v.sku, qty: v.quantity }))
+      });
+
+      // Allow receiving up to the remaining quantity (not exact match required)
+      // Check if item is already fully (or over) received
+      if (remainingQty <= 0) {
+        addNotification('alert', `This item has already been fully received (${item.receivedQty || 0}/${item.quantity}). No more units needed.`);
+        return;
+      }
+      if (totalQty <= 0) {
+        addNotification('alert', `Please enter a valid quantity to receive`);
+        return;
+      }
+      if (totalQty > remainingQty) {
+        addNotification('alert', `Cannot receive ${totalQty} units. Only ${remainingQty} remaining to receive.`);
+        return;
+      }
+
+      const targetSiteId = po.siteId || po.site_id || activeSiteId;
+      if (!targetSiteId) {
+        addNotification('alert', 'No site ID available');
+        return;
+      }
+
+      const persistentJobNumber = po.poNumber || po.po_number || poId;
+
+      console.log('🔍 receivePOSplit: Starting variant processing', {
+        persistentJobNumber,
+        targetSiteId,
+        variantsCount: variants.length,
+        variants: variants.map(v => ({ sku: v.sku, qty: v.quantity, productId: v.productId }))
+      });
+
+      // Process each variant
+      const jobPromises = variants.map(async (variant, index) => {
+        let targetProductId = variant.productId;
+
+        // ROBUST SKU RESOLUTION
+        // 1. Prefer variant SKU if explicitly provided
+        // 2. Fallback to existing Product SKU if we have a productId
+        // 3. Fallback to PO Item SKU if valid
+        let productSku: string = variant.sku || '';
+
+        if (!productSku && targetProductId) {
+          const existingProduct = allProducts.find(p => p.id === targetProductId);
+          if (existingProduct && existingProduct.sku) productSku = existingProduct.sku;
+        }
+
+        if (!productSku && (variant.skuType === 'existing' || !variant.skuType)) {
+          productSku = item.sku || '';
+        }
+
+        // Final Fallback to prevent "N/A"
+        if (!productSku) productSku = 'UNKNOWN-SKU';
+
+        console.log(`🔄 Processing variant ${index + 1}:`, {
+          sku: productSku,
+          skuType: variant.skuType,
+          productId: targetProductId,
+          quantity: variant.quantity
+        });
+
+        // 🛡️ DUPLICATE CHECK: Skip if RECENT identical putaway job exists (prevent double-submit)
+        // We only block if it's the SAME product, SAME quantity, and created < 2 mins ago involved in the same PO.
+        // This allows split receiving (receiving more later) but stops accidental double-clicks.
+        if (targetProductId) {
+          const existingJob = jobs.find(j => {
+            const isSamePO = (j.orderRef === persistentJobNumber || j.orderRef === poId);
+            const isPutaway = j.type === 'PUTAWAY';
+            const hasProduct = j.lineItems?.some((li: any) => li.productId === targetProductId);
+
+            if (!isSamePO || !isPutaway || !hasProduct) return false;
+
+            // Check for identical quantity in the line item
+            const sameQty = j.lineItems?.some((li: any) => li.productId === targetProductId && li.expectedQty === variant.quantity);
+
+            // Check if created recently (< 5 seconds)
+            const createdTime = new Date(j.createdAt || Date.now()).getTime();
+            const isRecent = (Date.now() - createdTime) < 5000;
+
+            return sameQty && isRecent;
+          });
+
+          if (existingJob) {
+            console.log(`⚠️ Skipping match: Recent identical PUTAWAY job exists (Job: ${existingJob.id})`);
+            addNotification('info', `A Putaway job for this item was just created.`);
+            return existingJob; // Return existing job so UI updates
+          }
+        }
+
+        // Handle NEW products during Procurement Receiving
+        // The PO itself is authorization - no CEO approval needed. Auto-create the product.
+        if (variant.skuType === 'new' && !targetProductId) {
+          const templateProduct = allProducts.find(p => p.id === item.productId);
+
+          console.log('🆕 Creating new product for Procurement receiving:', {
+            sku: productSku,
+            name: variant.productName || item.productName,
+            siteId: targetSiteId
+          });
+
+          try {
+            const newProduct = await productsService.create({
+              name: variant.productName || item.productName,
+              sku: productSku,
+              category: templateProduct?.category || 'General',
+              price: templateProduct?.price || 0,
+              costPrice: templateProduct?.costPrice || templateProduct?.price || 0,
+              stock: 0, // Will be updated by Putaway job
+              minStock: 0,
+              siteId: targetSiteId,
+              site_id: targetSiteId,
+              location: '',
+              image: templateProduct?.image || '/placeholder.png',
+              barcode: variant.barcode || '',
+              unit: 'pcs',
+              status: 'active'
+            } as any);
+
+            // CRITICAL: Validate that we got a valid UUID
+            if (newProduct?.id && typeof newProduct.id === 'string' && newProduct.id.length > 10) {
+              console.log('✅ New product created with valid ID:', newProduct.id, productSku);
+              targetProductId = newProduct.id;
+
+              // Update local products state so it's available for subsequent operations
+              setAllProducts(prev => [...prev, newProduct as any]);
+              addNotification('success', `Created new product: ${productSku}`);
+            } else {
+              console.error('❌ Product creation returned invalid ID:', newProduct);
+              addNotification('alert', `Product creation failed for ${productSku} - invalid ID returned`);
+              return null;
+            }
+          } catch (createErr) {
+            console.error('❌ Failed to create new product:', createErr);
+            addNotification('alert', `Failed to create product ${productSku}`);
+            return null;
+          }
+        }
+
+        // CRITICAL FIX: If productId is still missing, try to find product by SKU
+        // This handles cases where product exists but wasn't linked properly
+        if (!targetProductId && productSku) {
+          console.log(`🔍 ProductId missing for SKU: ${productSku}. Searching in allProducts...`);
+          const existingProduct = allProducts.find(p =>
+            p.sku === productSku ||
+            p.sku?.toLowerCase() === productSku.toLowerCase()
+          );
+
+          if (existingProduct) {
+            console.log(`✅ Found existing product by SKU: ${existingProduct.id}`);
+            targetProductId = existingProduct.id;
+          }
+        }
+
+        // For existing products (or newly created above), create PUTAWAY job
+        if (!targetProductId) {
+          console.error(`❌ FATAL: Product ID not found for SKU: ${productSku}. Cannot create PUTAWAY job.`);
+          addNotification('alert', `Cannot create Putaway job - Product not linked for SKU: ${productSku}`);
+          return null;
+        }
+
+        // Sync Product Pricing (Valuation Accuracy)
+        const variantProduct = allProducts.find(p => p.id === targetProductId);
+        if (variantProduct && variant.skuType !== 'new') { // Optimization: don't re-sync if just created
+          const syncData: any = {};
+          // Sync Valuation - ALWAYS update from latest PO receipt
+          if (item.unitCost && item.unitCost > 0) {
+            const currentCost = (variantProduct as any)?.costPrice || 0;
+            if (item.unitCost !== currentCost) {
+              console.log(`💰 Split: Updating costPrice: ${currentCost} → ${item.unitCost}`);
+              syncData.costPrice = item.unitCost;
+            }
+          }
+          if (item.retailPrice && item.retailPrice > 0) {
+            const currentPrice = variantProduct?.price || 0;
+            if (item.retailPrice !== currentPrice) {
+              console.log(`💰 Split: Updating retailPrice: ${currentPrice} → ${item.retailPrice}`);
+              syncData.price = item.retailPrice;
+            }
+          }
+
+          if (Object.keys(syncData).length > 0) {
+            console.log(`🔄 receivePOSplit: Syncing product valuation for ${productSku}:`, syncData);
+            try {
+              const updatedP = await productsService.update(targetProductId, syncData);
+              setAllProducts(prev => prev.map(p => p.id === targetProductId ? updatedP : p));
+              if (targetSiteId === activeSiteId) setProducts(prev => prev.map(p => p.id === targetProductId ? updatedP : p));
+            } catch (err) {
+              console.error('❌ Failed to sync product details in split receive:', err);
+            }
+          }
+        }
+
+        const newJob: Omit<WMSJob, 'id'> = {
+          type: 'PUTAWAY',
+          status: 'Pending',
+          siteId: targetSiteId,
+          site_id: targetSiteId,
+          sourceSiteId: targetSiteId,
+          destSiteId: targetSiteId,
+          assignedTo: null as any,
+          createdAt: new Date().toISOString(),
+          // 🛡️ CHANGED: Use UUID for data integrity (User Request)
+          orderRef: po.id,
+          // jobNumber: Auto-generated by service now
+          notes: `Split receiving - Variant ${index + 1}/${variants.length}`,
+          location: 'Receiving Dock',
+          priority: 'Normal',
+          items: variant.quantity,
+          lineItems: [{
+            productId: targetProductId,
+            name: variantProduct?.name || variant.productName || item.productName,
+            sku: productSku,
+            image: variantProduct?.image || '',
+            expectedQty: variant.quantity,
+            pickedQty: 0,
+            status: 'Pending',
+            barcode: variant.barcode,
+            condition: 'Good'
+          } as any]
+        };
+
+        try {
+          const createdJob = await wmsJobsService.create(newJob as any);
+          return createdJob;
+        } catch (e) {
+          console.error('❌ Failed to create WMS job for variant:', e);
+          return null;
+        }
+      });
+
+      const results = await Promise.all(jobPromises);
+      const createdJobs = results.filter(j => j !== null) as WMSJob[];
+
+      console.log('📤 receivePOSplit: Job creation results:', {
+        totalVariants: variants.length,
+        createdJobsCount: createdJobs.length,
+        jobIds: createdJobs.map(j => j.id),
+        nulls: results.filter(j => j === null).length
+      });
+
+      if (createdJobs.length > 0) {
+        // 🔥 UPDATE LOCAL STATE: Add created jobs to state so they're immediately visible
+        // Filter out any duplicates (realtime subscription may also add these)
+        setJobs(prev => {
+          const newJobIds = new Set(createdJobs.map(j => j.id));
+          const filteredPrev = prev.filter(j => !newJobIds.has(j.id));
+          return [...createdJobs, ...filteredPrev];
+        });
+
+        // 🔥 CRITICAL FIX: Update received_qty in po_items table
+        // Calculate total received quantity ONLY for successfully created jobs (Fixes integrity bug)
+        const totalReceivedQty = createdJobs.reduce((sum, job) => sum + (job.items || 0), 0);
+
+        try {
+          await supabase
+            .from('po_items')
+            .update({ received_qty: (item.receivedQty || 0) + totalReceivedQty })
+            .eq('id', itemId);
+
+          console.log(`✅ Updated po_items.received_qty for item ${itemId}: ${(item.receivedQty || 0)} + ${totalReceivedQty} = ${(item.receivedQty || 0) + totalReceivedQty}`);
+
+          // Update local state to reflect the change immediately
+          setOrders(prev => prev.map(o => {
+            if (o.id !== poId) return o;
+            return {
+              ...o,
+              lineItems: o.lineItems?.map(li =>
+                li.id === itemId
+                  ? { ...li, receivedQty: (li.receivedQty || 0) + totalReceivedQty }
+                  : li
+              )
+            };
+          }));
+
+          setAllOrders(prev => prev.map(o => {
+            if (o.id !== poId) return o;
+            return {
+              ...o,
+              lineItems: o.lineItems?.map(li =>
+                li.id === itemId
+                  ? { ...li, receivedQty: (li.receivedQty || 0) + totalReceivedQty }
+                  : li
+              )
+            };
+          }));
+        } catch (err) {
+          console.error('❌ Failed to update po_items.received_qty:', err);
+        }
+
+        logSystemEvent(
+          'Split Receiving',
+          `Split received ${item.productName} into ${variants.length} variants for PO ${persistentJobNumber}`,
+          user?.name || 'Manager',
+          'Inventory'
+        );
+
+        // 🔥 NEW: Explicitly complete the RECEIVE job for this PO
+        try {
+          console.log('🔍 Searching for RECEIVE job to complete:', { poId, persistentJobNumber });
+
+          // Try finding by PO ID first, then by PO Number
+          let { data: receiveJob } = await supabase
+            .from('wms_jobs')
+            .select('id, order_ref, status')
+            .eq('order_ref', poId)
+            .eq('type', 'RECEIVE')
+            .neq('status', 'Completed')
+            .maybeSingle();
+
+          // Fallback: Try with PO Number if not found by UUID
+          if (!receiveJob && persistentJobNumber && persistentJobNumber !== poId) {
+            console.log('🔍 Fallback: searching by PO Number:', persistentJobNumber);
+            const fallback = await supabase
+              .from('wms_jobs')
+              .select('id, order_ref, status')
+              .eq('order_ref', persistentJobNumber)
+              .eq('type', 'RECEIVE')
+              .neq('status', 'Completed')
+              .maybeSingle();
+            receiveJob = fallback.data;
+          }
+
+          if (receiveJob) {
+            console.log('✅ Found RECEIVE job to complete:', receiveJob);
+            const { error: updateError } = await supabase
+              .from('wms_jobs')
+              .update({
+                status: 'Completed',
+                updated_at: new Date().toISOString()
+              })
+              .eq('id', receiveJob.id);
+
+            if (updateError) {
+              console.error('❌ Failed to update job status:', updateError);
+            } else {
+              console.log('✅ Successfully marked RECEIVE job as Completed:', receiveJob.id);
+            }
+          } else {
+            console.log('⚠️ No pending RECEIVE job found for this PO');
+          }
+        } catch (jobErr) {
+          console.error('⚠️ Could not complete associated RECEIVE job:', jobErr);
+        }
+
+        // Check if PO is fully received (using updated received quantities)
+        const updatedPO = orders.find(o => o.id === poId);
+        if (!updatedPO) return;
+
+        let allReceived = true;
+        updatedPO.lineItems?.forEach(poItem => {
+          const currentReceivedQty = (poItem.id === itemId)
+            ? (poItem.receivedQty || 0) + totalReceivedQty
+            : (poItem.receivedQty || 0);
+
+          if (currentReceivedQty < poItem.quantity) {
+            allReceived = false;
+          }
+        });
+
+        if (allReceived) {
+          const updatedPo = await purchaseOrdersService.receive(poId, false);
+          if (updatedPo) {
+            setOrders(prev => prev.map(o => o.id === poId ? updatedPo : o));
+            setAllOrders(prev => prev.map(o => o.id === poId ? updatedPo : o));
+          }
+          addNotification('success', `PO ${persistentJobNumber} fully received!`);
+        } else {
+          addNotification('success', `Received ${totalReceivedQty} units. ${createdJobs.length} PUTAWAY job(s) created.`);
+          // Refresh data to show updated PO status/quantities
+          await refreshData();
+        }
+      }
+
+    } catch (error) {
+      console.error('Error in receivePOSplit:', error);
+      addNotification('alert', 'Error processing split reception');
+    }
+  }, [orders, addNotification, activeSiteId, allProducts, user, logSystemEvent, jobs, refreshData]);
 
   const fixBrokenJobs = useCallback(async () => {
     console.log('Running Fix Broken Jobs...');
@@ -1531,7 +2225,8 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
             const newJob: WMSJob = {
               id: crypto.randomUUID(),
               type: 'PUTAWAY',
-              jobNumber: `PUT-${po.poNumber || po.id.slice(-4)}-${index}`,
+              // STRICT: No ID slicing fallback
+              jobNumber: po.poNumber || po.po_number || 'UNKNOWN',
               siteId: po.siteId || activeSite?.id || 'SITE-001',
               site_id: po.siteId || activeSite?.id,
               status: 'Pending',
@@ -1620,7 +2315,8 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
           lineItems: [lineItem],
           location: product.location || 'Receiving Dock',
           orderRef: `INV-${product.id}`,
-          jobNumber: `PUT-INV-${Date.now().toString().slice(-4)}${Math.random().toString(36).substr(2, 3).toUpperCase()}`,
+          // STRICT: SKU only, no ID slicing
+          // jobNumber: (product.sku || 'UNKNOWN').toUpperCase(), // Fixed: Let system generate unique ID (PUT-SKU)
           createdAt: new Date().toISOString(),
           requestedBy: userName
         });
@@ -1644,7 +2340,8 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
           lineItems: [lineItem],
           location: product.location || 'Receiving Dock',
           orderRef: `INV-${product.id}`,
-          jobNumber: `PUT-INV-${Date.now().toString().slice(-4)}${Math.random().toString(36).substr(2, 3).toUpperCase()}`,
+          // STRICT: SKU only, no ID slicing
+          jobNumber: (product.sku || 'UNKNOWN').toUpperCase(),
           createdAt: new Date().toISOString(),
           requestedBy: userName
         };
@@ -1737,32 +2434,15 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
   };
 
   const adjustStock = async (productId: string, quantity: number, type: 'IN' | 'OUT', reason: string, user: string) => {
-    console.log(`🧪 DataContext: adjustStock called for ${productId}, Qty: ${quantity}, Type: ${type}`);
-
     try {
       if (isNaN(Number(quantity))) {
-        console.error('❌ DataContext: Invalid quantity passed to adjustStock:', quantity);
         addNotification('alert', 'Invalid stock quantity');
         return;
       }
       await productsService.adjustStock(productId, Number(quantity), type === 'IN' ? 'IN' : 'OUT', reason, user);
 
-      // Force fetch latest data from DB to ensure UI is 100% accurate
-      // This prevents issues where local state might drift or have type errors (e.g. string/number)
-      try {
-        const latestProduct = await productsService.getById(productId);
-        if (latestProduct) {
-          setProducts(prev => prev.map(p => p.id === productId ? latestProduct : p));
-          setAllProducts(prev => prev.map(p => p.id === productId ? latestProduct : p));
-        }
-      } catch (fetchErr) {
-        console.warn('Failed to refresh product after stock adjustment, falling back to local update', fetchErr);
-        // Fallback optimistic update
-        const stockChange = type === 'IN' ? quantity : -quantity;
-        setProducts(prev => prev.map(p =>
-          p.id === productId ? { ...p, stock: Math.max(0, Number(p.stock || 0) + stockChange) } : p
-        ));
-      }
+      // Invalidate products query
+      queryClient.invalidateQueries({ queryKey: ['products'] });
 
       console.log(`📦 Stock adjusted: ${productId} ${type} ${quantity} (${reason})`);
     } catch (error) {
@@ -1891,6 +2571,9 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
 
       setJobs(prev => prev.map(j => j.id === jobId ? updatedJob : j));
 
+      // Invalidate jobs query
+      queryClient.invalidateQueries({ queryKey: ['jobs'] });
+
       addNotification('success', `Job assigned to ${employee.name}`);
     } catch (error) {
       console.error('Failed to assign job:', error);
@@ -1899,27 +2582,43 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
   };
 
   const updateJobItem = async (jobId: string, itemId: number, status: JobItem['status'], qty: number) => {
+    console.log(`📝 updateJobItem called: Job=${jobId}, ItemIdx=${itemId}, Status=${status}, Qty=${qty}`);
     try {
       const job = jobs.find(j => j.id === jobId);
-      if (!job) return;
+      if (!job) {
+        console.error(`❌ updateJobItem: Job ${jobId} not found in local state!`);
+        addNotification('alert', 'Job not found - please refresh and try again.');
+        return;
+      }
 
       const updatedLineItems = [...job.lineItems];
       if (updatedLineItems[itemId]) {
+        const oldStatus = updatedLineItems[itemId].status;
         updatedLineItems[itemId] = {
           ...updatedLineItems[itemId],
           status,
           pickedQty: qty
         };
+        console.log(`📝 Item ${itemId} (${updatedLineItems[itemId].name}): ${oldStatus} → ${status}, pickedQty=${qty}`);
+      } else {
+        console.error(`❌ updateJobItem: Item at index ${itemId} not found in job lineItems!`);
+        addNotification('alert', 'Item not found in job - please refresh and try again.');
+        return;
       }
 
       // Optimistic update
       setJobs(prev => prev.map(j => j.id === jobId ? { ...j, lineItems: updatedLineItems } : j));
 
-      await wmsJobsService.update(jobId, { lineItems: updatedLineItems });
+      const result = await wmsJobsService.update(jobId, { lineItems: updatedLineItems });
+
+      // Invalidate jobs query
+      queryClient.invalidateQueries({ queryKey: ['jobs'] });
+
+      console.log(`✅ updateJobItem: DB updated successfully for Job ${jobId}. DB response:`, result?.lineItems?.length || 'N/A', 'items');
       addNotification('success', 'Item updated');
     } catch (error) {
-      console.error(error);
-      addNotification('alert', 'Failed to update job item');
+      console.error(`❌ updateJobItem FAILED for Job ${jobId}:`, error);
+      addNotification('alert', 'Failed to update job item - please try again.');
       // Revert optimistic update if needed (omitted for brevity, but recommended in prod)
     }
   };
@@ -1930,6 +2629,8 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
 
     try {
       await wmsJobsService.update(jobId, { status });
+      // Invalidate jobs query
+      queryClient.invalidateQueries({ queryKey: ['jobs'] });
     } catch (e) {
       console.error('Failed to update job status in DB (keeping local)', e);
     }
@@ -1985,6 +2686,10 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
       };
 
       setJobs(prev => prev.map(j => j.id === jobId ? updatedJobLocal as WMSJob : j));
+
+      // Invalidate jobs query
+      queryClient.invalidateQueries({ queryKey: ['jobs'] });
+
       addNotification('success', 'Job reset successfully');
     } catch (error) {
       console.error('Failed to reset job:', error);
@@ -1992,7 +2697,7 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
     }
   };
 
-  const completeJob = async (jobId: string, employeeName: string, skipValidation = false) => {
+  const completeJob = async (jobId: string, employeeName: string, skipValidation = false, optimisticLineItems?: JobItem[]) => {
     let pointsResult = null;
     const stage = (name: string) => console.log(`[ST-PACK] 🕒 Stage: ${name} (Job: ${jobId})`);
     console.time(`completeJob-${jobId}`);
@@ -2000,35 +2705,72 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
     try {
       stage('Start');
       console.log(`🏁 completeJob called for: ${jobId} (skipValidation: ${skipValidation})`);
-      const job = jobs.find(j => j.id === jobId);
+      let job = jobs.find(j => j.id === jobId);
+
+      // Fix: For PUTAWAY, if location is missing in local state (race condition), fetch fresh from DB
+      if (job && job.type === 'PUTAWAY' && !job.location) {
+        try {
+          const freshJob = await wmsJobsService.getById(jobId);
+          if (freshJob) {
+            job = freshJob;
+            console.log(`🔄 Refreshed job ${jobId} from DB to get location: ${freshJob.location}`);
+          }
+        } catch (e) {
+          console.error('Failed to refresh job from DB', e);
+        }
+      }
 
       if (!job) {
         console.error(`❌ Job ${jobId} not found in local state`);
         return;
       }
 
+      // Use Optimistic Items if provided (Fixes Race Condition where state isn't updated yet)
+      let itemsToValidate = optimisticLineItems || job.lineItems;
+
       // Validate that all items are actually completed (Picked or Short)
-      if (!skipValidation && job.lineItems && job.lineItems.length > 0) {
-        const allItemsProcessed = job.lineItems.every(item =>
-          item.status === 'Picked' || item.status === 'Short'
+      if (!skipValidation && itemsToValidate && itemsToValidate.length > 0) {
+        const allItemsProcessed = itemsToValidate.every(item =>
+          item.status === 'Picked' || item.status === 'Short' || item.status === 'Discontinued'
         );
 
         if (!allItemsProcessed) {
-          console.warn(`⚠️ Job ${jobId} has unprocessed items, not completing yet`);
+          console.warn(`⚠️ Job ${jobId} has unprocessed items, not completing yet (Checked ${itemsToValidate.length} items)`);
+          // Additional logging to help verify exactly which item is blocking
+          itemsToValidate.forEach(i => {
+            if (i.status !== 'Picked' && i.status !== 'Short' && i.status !== 'Discontinued') {
+              console.warn(`   ❌ Blocking Item: ${i.name} [${i.status}]`);
+            }
+          });
           return;
         }
       }
 
       stage('DB Update WMS Job');
-      // Update in database
-      await wmsJobsService.complete(jobId);
+
+      // CRITICAL FIX: When skipValidation=true (Force Complete), update lineItems to 'Picked' in DB
+      // This ensures the job doesn't reappear on refresh. Use itemsToValidate (optimistic).
+      if (skipValidation && itemsToValidate && itemsToValidate.length > 0) {
+        const forcedLineItems = itemsToValidate.map(item => ({
+          ...item,
+          status: (item.status === 'Short' ? 'Short' : 'Picked') as JobItem['status'],
+          pickedQty: item.pickedQty || item.expectedQty || 0
+        }));
+        console.log(`🔧 Force Complete: Updating ${forcedLineItems.length} lineItems to 'Picked' status in DB`);
+        await wmsJobsService.update(jobId, { status: 'Completed', lineItems: forcedLineItems });
+
+        // CRITICAL: Update itemsToValidate so Job Chaining uses the forced quantities
+        itemsToValidate = forcedLineItems;
+      } else {
+        await wmsJobsService.update(jobId, { status: 'Completed' });
+      }
       console.log(`💾 Database updated for job ${jobId}`);
 
       stage('Local State Update');
       // Update local state immediately - this ensures the UI updates
       setJobs(prev => prev.map(j => {
         if (j.id === jobId) {
-          const updatedLineItems = j.lineItems?.map(item => ({
+          const updatedLineItems = itemsToValidate.map(item => ({
             ...item,
             status: (item.status === 'Short' ? 'Short' : 'Completed') as any
           }));
@@ -2042,20 +2784,100 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
       // ═══════════════════════════════════════════════════════════════
       // PUTAWAY LOGIC
       // ═══════════════════════════════════════════════════════════════
-      if (job.type === 'PUTAWAY' && job.location) {
-        stage('Putaway Location Update');
-        await Promise.all(job.lineItems.map(async (item) => {
-          if (item.status === 'Picked' && item.productId) {
-            try {
-              const product = products.find(p => p.id === item.productId);
-              if (product) {
-                await updateProduct({ ...product, location: job.location! });
+      if (job.type === 'PUTAWAY') { // Moved check inside for better logging
+        console.log(`📦 DEBUG: Putaway Logic Triggered for Job ${job.id}`);
+        console.log(`   - Location: ${job.location || 'MISSING'}`);
+        console.log(`   - Items: ${job.lineItems?.length || 0}`);
+
+        if (job.location) {
+          console.log('ℹ️ Bulk Putaway Update skipped in favor of granular item scanning/relocation.');
+          // stage('Putaway Location Update');
+          // await Promise.all(job.lineItems.map(async (item) => {
+          //   console.log(`   - Processing Item: ${item.name} (${item.status})`);
+          //   // Fix: Allow Pending items too, in case user completes job without scanning each item individually
+          //   const isEligibleStatus = item.status === 'Picked' || item.status === 'Pending';
+
+          //   if (isEligibleStatus && item.productId) {
+          //     try {
+          //       console.log(`     -> Updating Product ${item.productId} to location ${job.location}`);
+          //       const product = products.find(p => p.id === item.productId);
+          //       if (product) {
+          //         // Using sanitized update via updateProduct (already fixed)
+          //         // BUT disabling entirely to prevent overwriting individual scans handled in Fulfillment.tsx
+          //         // await updateProduct({ ...product, location: job.location! }); 
+          //         console.log(`     -> Success`);
+          //       } else {
+          //         console.error(`     -> Product not found in local state`);
+          //       }
+          //     } catch (err) {
+          //       console.error(`❌ Failed to update location for product ${item.productId}`, err);
+          //     }
+          //   } else {
+          //     console.log(`     -> Skipped (Status: ${item.status}, PID: ${item.productId})`);
+          //   }
+          // }));
+        } else {
+          console.log('ℹ️ Job has no target location. Relying on individual item scans.');
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // CHECK IF ALL PUTAWAY JOBS FOR THIS PO ARE COMPLETE
+        // ═══════════════════════════════════════════════════════════════
+        stage('Check PO Completion');
+        if (job.orderRef) {
+          // Get all PUTAWAY jobs for this PO (including the one we just completed)
+          const allPutawayJobsForPO = jobs
+            .filter(j => j.orderRef === job.orderRef && j.type === 'PUTAWAY')
+            .map(j => j.id === jobId ? { ...j, status: 'Completed' as const } : j); // Include the just-completed job
+
+          // Check if all PUTAWAY jobs are now complete
+          const allPutawayJobsComplete = allPutawayJobsForPO.length > 0 &&
+            allPutawayJobsForPO.every(j => j.status === 'Completed');
+
+          if (allPutawayJobsComplete) {
+            console.log(`✅ All PUTAWAY jobs for PO ${job.orderRef} are complete. Updating PO status to 'Received'...`);
+
+            // Validate if orderRef is a valid UUID before calling Supabase
+            const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(job.orderRef || '');
+
+            if (isUUID) {
+              try {
+                const updatedPo = await purchaseOrdersService.receive(job.orderRef, false);
+                if (updatedPo) {
+                  setOrders(prev => prev.map(o => o.id === job.orderRef ? updatedPo : o));
+                  setAllOrders(prev => prev.map(o => o.id === job.orderRef ? updatedPo : o));
+                  addNotification('success', `PO ${updatedPo.poNumber || job.orderRef} fully received and moved to history!`);
+                }
+              } catch (err) {
+                console.error(`❌ Failed to update PO status for ${job.orderRef}:`, err);
               }
-            } catch (err) {
-              console.error(`❌ Failed to update location for product ${item.productId}`, err);
+            } else {
+              // RETRY: If not a UUID, it might be the PO Number (e.g. AAAA0027). Try to find the UUID.
+              console.log(`ℹ️ PO Ref ${job.orderRef} is not a UUID. Attempting lookup by PO Number...`);
+              const poByNumber = allOrders.find(o => o.poNumber === job.orderRef || o.po_number === job.orderRef);
+
+              if (poByNumber && poByNumber.id) {
+                try {
+                  console.log(`✅ Found PO UUID ${poByNumber.id} for ref ${job.orderRef}. Updating status...`);
+                  const updatedPo = await purchaseOrdersService.receive(poByNumber.id, false);
+                  if (updatedPo) {
+                    setOrders(prev => prev.map(o => o.id === poByNumber.id ? updatedPo : o));
+                    setAllOrders(prev => prev.map(o => o.id === poByNumber.id ? updatedPo : o));
+                    addNotification('success', `PO ${updatedPo.poNumber} fully received!`);
+                  }
+                } catch (err) {
+                  console.error(`❌ Failed to update PO status by number ${job.orderRef}:`, err);
+                }
+              } else {
+                console.warn(`⚠️ PO ID ${job.orderRef} is not a valid UUID and not found in local orders. Skipping backend update.`);
+                // Update local state only for mock/legacy IDs
+                setOrders(prev => prev.map(o => o.id === job.orderRef ? { ...o, status: 'Received' } : o));
+                setAllOrders(prev => prev.map(o => o.id === job.orderRef ? { ...o, status: 'Received' } : o));
+                addNotification('success', `PO ${job.orderRef} received (Local Update Only)`);
+              }
             }
           }
-        }));
+        }
       }
 
       // ═══════════════════════════════════════════════════════════════
@@ -2113,22 +2935,44 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
       stage('Job Chaining');
       if (job && job.type === 'PICK' && job.orderRef) {
         stage('Chaining: PICK -> PACK');
-        const packJob = await wmsJobsService.create({
-          siteId: job.siteId,
-          site_id: job.site_id,
-          type: 'PACK',
-          priority: job.priority,
-          status: 'Pending',
-          items: job.items,
-          lineItems: job.lineItems.map(item => ({ ...item, status: 'Pending' as JobItem['status'], pickedQty: 0 })),
-          location: 'Packing Station 1',
-          orderRef: job.orderRef,
-          jobNumber: `PCK-${job.orderRef?.slice(-4) || Date.now().toString().slice(-4)}${Math.random().toString(36).substr(2, 3).toUpperCase()}`,
-          sourceSiteId: job.sourceSiteId,
-          destSiteId: job.destSiteId
-        });
-        // Add to state only if it doesn't already exist (prevent double entries from real-time)
-        setJobs(prev => prev.find(j => j.id === packJob.id) ? prev : [packJob, ...prev]);
+        // Fix: Use itemsToValidate (optimistic) to ensure the PACK job has correct items
+        // CRITICAL FIX: Only include items that were actually picked (qty > 0)
+        // AND set expectedQty for PACK job to be equal to the pickedQty from the PICK job
+        const packItems = itemsToValidate
+          .filter(item => (item.pickedQty || 0) > 0)
+          .map(item => ({
+            ...item,
+            expectedQty: item.pickedQty, // Packer expects what was picked
+            pickedQty: 0, // Reset for packing
+            status: 'Pending' as JobItem['status']
+          }));
+
+        if (packItems.length > 0) {
+          // Idempotency: Check if a PACK job already exists for this orderRef that is not cancelled
+          const existingPackJob = jobs.find(j => j.orderRef === job.orderRef && j.type === 'PACK' && j.status !== 'Cancelled');
+          if (existingPackJob) {
+            console.warn(`⚠️ PACK job already exists for ${job.orderRef}. Skipping creation.`);
+          } else {
+            const packJob = await wmsJobsService.create({
+              siteId: job.siteId,
+              site_id: job.site_id,
+              type: 'PACK',
+              priority: job.priority,
+              status: 'Pending',
+              items: packItems.length,
+              lineItems: packItems,
+              location: 'Packing Station 1',
+              orderRef: job.orderRef,
+              // jobNumber: job.jobNumber || job.orderRef, // Fixed: Let system generate unique ID (PAK-...)
+              sourceSiteId: job.sourceSiteId,
+              destSiteId: job.destSiteId
+            });
+            // Add to state only if it doesn't already exist (prevent double entries from real-time)
+            setJobs(prev => prev.find(j => j.id === packJob.id) ? prev : [packJob, ...prev]);
+          }
+        } else {
+          console.warn(`⚠️ Skipped creation of PACK job for ${job.orderRef} because no items were picked.`);
+        }
 
         const sale = sales.find(s => s.id === job.orderRef);
         const transfer = jobs.find(j => (j.id === job.orderRef || j.jobNumber === job.orderRef) && j.type === 'TRANSFER');
@@ -2164,23 +3008,45 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
 
         if (isCrossWarehouse) {
           stage('Cross-Warehouse Dispatch');
-          const dispatchJob = await wmsJobsService.create({
-            siteId: job.siteId,
-            site_id: job.site_id,
-            type: 'DISPATCH',
-            priority: job.priority,
-            status: 'Pending',
-            items: job.items,
-            lineItems: job.lineItems.map(item => ({ ...item, status: 'Pending' as JobItem['status'] })),
-            location: 'Dispatch Bay',
-            orderRef: job.orderRef,
-            jobNumber: `DSP-${job.orderRef?.slice(-4) || Date.now().toString().slice(-4)}${Math.random().toString(36).substr(2, 3).toUpperCase()}`,
-            sourceSiteId: job.sourceSiteId,
-            destSiteId: job.destSiteId,
-            transferStatus: 'Packed'
-          });
+          // Fix: Use itemsToValidate (optimistic)
+          // CRITICAL FIX: Only include items that were actually packed (qty > 0 -- using pickedQty field for pack count)
+          // AND set expectedQty for DISPATCH job to be equal to the packedQty
+          const dispatchItems = itemsToValidate
+            .filter(item => (item.pickedQty || 0) > 0) // pickedQty stores "packed amount" in PACK jobs
+            .map(item => ({
+              ...item,
+              expectedQty: item.pickedQty, // Driver expects what was packed
+              pickedQty: 0,
+              status: 'Pending' as JobItem['status']
+            }));
 
-          setJobs(prev => prev.find(j => j.id === dispatchJob.id) ? prev : [dispatchJob, ...prev]);
+          if (dispatchItems.length > 0) {
+            // Idempotency: Check if a DISPATCH job already exists for this orderRef
+            const existingDispatchJob = jobs.find(j => j.orderRef === job.orderRef && j.type === 'DISPATCH' && j.status !== 'Cancelled');
+            if (existingDispatchJob) {
+              console.warn(`⚠️ DISPATCH job already exists for ${job.orderRef}. Skipping creation.`);
+            } else {
+              const dispatchJob = await wmsJobsService.create({
+                siteId: job.siteId,
+                site_id: job.site_id,
+                type: 'DISPATCH',
+                priority: job.priority,
+                status: 'Pending',
+                items: dispatchItems.length,
+                lineItems: dispatchItems,
+                location: 'Dispatch Bay',
+                orderRef: job.orderRef,
+                // jobNumber: job.jobNumber || job.orderRef, // Fixed: Let system generate unique ID (DSP-...)
+                sourceSiteId: job.sourceSiteId,
+                destSiteId: job.destSiteId,
+                transferStatus: 'Packed'
+              });
+
+              setJobs(prev => prev.find(j => j.id === dispatchJob.id) ? prev : [dispatchJob, ...prev]);
+            }
+          } else {
+            console.warn(`⚠️ Skipped creation of DISPATCH job for ${job.orderRef} because no items were packed.`);
+          }
 
           if (sale) {
             await salesService.update(sale.id, { fulfillmentStatus: 'Shipped' });
@@ -2216,30 +3082,13 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
           setJobs(prev => prev.map(j => j.id === tId ? { ...j, transferStatus: 'Delivered' } : j));
           setTransfers(prev => prev.map(t => t.id === tId ? { ...t, transferStatus: 'Delivered' } : t));
         }
-
-        if (job.destSiteId && job.lineItems) {
-          stage('Inventory Destination Update');
-          for (const item of job.lineItems) {
-            if (item.productId && item.expectedQty > 0) {
-              const sourceProduct = products.find(p => p.id === item.productId);
-              if (sourceProduct) {
-                const destProduct = products.find(p => p.siteId === job.destSiteId && p.sku === sourceProduct.sku);
-                if (destProduct) {
-                  const newStock = destProduct.stock + item.expectedQty;
-                  await productsService.update(destProduct.id, { stock: newStock });
-                  setProducts(prev => prev.map(p => p.id === destProduct.id ? { ...p, stock: newStock } : p));
-                } else {
-                  const newProduct = { ...sourceProduct, id: `${sourceProduct.sku}-${job.destSiteId}-${Date.now()}`, siteId: job.destSiteId, site_id: job.destSiteId, stock: item.expectedQty, location: '', posReceivedAt: new Date().toISOString(), posReceivedBy: employeeName };
-                  const createdProduct = await productsService.create(newProduct);
-                  setProducts(prev => [createdProduct, ...prev]);
-                }
-              }
-            }
-          }
-        }
       }
 
       stage('Final Logs');
+
+      // Invalidate jobs query (Ensures PICK status update and PACK job creation are fresh)
+      queryClient.invalidateQueries({ queryKey: ['jobs'] });
+
       logSystemEvent('Job Completed', `Job ${job.jobNumber || jobId} completed`, employeeName, 'Inventory');
       console.timeEnd(`completeJob-${jobId}`);
       return pointsResult;
@@ -2683,6 +3532,9 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
     }
   }, [addNotification]);
 
+  // Initialize Sync Manager
+  const { triggerSync, syncStatus, pendingCount } = usePosSync();
+
   const processSale = useCallback(async (
     cart: CartItem[],
     method: PaymentMethod,
@@ -2692,45 +3544,39 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
     customerId?: string,
     pointsRedeemed?: number,
     type: 'In-Store' | 'Delivery' | 'Pickup' = 'In-Store',
-    taxBreakdown: { name: string; rate: number; amount: number; compound: boolean }[] = []
+    taxBreakdown: { name: string; rate: number; amount: number; compound: boolean }[] = [],
+    receiptNumber?: string // Optional receipt number
   ): Promise<{ saleId: string; pointsResult?: any }> => {
     try {
       const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-      const tax = subtotal * (settings.taxRate / 100);
+      const taxRate = settings.taxRate || 0;
+      const tax = subtotal * (taxRate / 100);
       const total = subtotal + tax;
+      const saleId = crypto.randomUUID();
 
-      // --- DATA OPTIMIZATION: Sanitize Items for Storage (Keep DB small) ---
-      // We strip heavy fields like images, logs, and descriptions
+      // --- DATA OPTIMIZATION: Sanitize Items ---
       const sanitizedItems = cart.map(item => ({
         id: item.id,
-        siteId: item.siteId, // Mandatory
+        siteId: item.siteId,
         name: item.name,
         sku: item.sku,
         price: item.price,
         quantity: item.quantity,
-        status: item.status, // Mandatory
-        stock: item.stock,   // Mandatory
-        // Keep essential metadata
+        status: item.status,
+        stock: item.stock,
         category: item.category,
         unit: item.unit,
         size: item.size,
         brand: item.brand,
-        // Critical: Set image to empty string to save space (it's mandatory in TS)
-        image: '',
-        // Optional fields we explicitly drop by not including them:
-        // - receivingNotes
-        // - posReceivedBy
-        // - approvedBy
-        // - history logs
-        // - description
+        image: ''
       })) as CartItem[];
 
-      const sale = await salesService.create({
+      const saleRecord: SaleRecord = {
+        id: saleId,
         siteId: activeSite?.id || '',
-        site_id: activeSite?.id,
-        customer_id: customerId,
+        customerId: customerId,
         date: new Date().toISOString(),
-        items: sanitizedItems, // Use optimized items
+        items: sanitizedItems,
         subtotal,
         tax,
         taxBreakdown,
@@ -2740,35 +3586,29 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
         amountTendered: tendered,
         change,
         cashierName: user,
-        type, // Save the type
-        fulfillmentStatus: type === 'In-Store' ? 'Delivered' : 'Picking'
-      }, sanitizedItems); // Use optimized items
-
-      // --- CRITICAL FIX: Update Local State Immediately ---
-      // This ensures the UI reflects the new sale without needing a refresh or realtime subscription
-      const newSaleRecord: SaleRecord = {
-        ...sale,
-        items: cart, // Ensure items are attached for immediate display
-        siteId: activeSite?.id || '', // Ensure siteId is present
-        receiptNumber: sale.receiptNumber || `TX-${Date.now()}` // Fallback if DB doesn't return it yet (though it should)
+        type,
+        fulfillmentStatus: type === 'In-Store' ? 'Delivered' : 'Picking',
+        receiptNumber: receiptNumber || `TX-${Date.now()}` // Use custom or fallback
       };
 
-      setSales(prev => [newSaleRecord, ...prev]);
-      setAllSales(prev => [newSaleRecord, ...prev]); // Update global list as well since SalesHistory uses it
+      // 1. Offline Save
+      await posDB.saveSale(saleRecord);
+      await posDB.enqueueOperation('CREATE_SALE', saleRecord);
 
-      // --- GAMIFICATION: Award Points for Sale ---
+      // 2. Optimistic Update
+      const uiSaleRecord: SaleRecord = { ...saleRecord, items: cart };
+      setSales(prev => [uiSaleRecord, ...prev]);
+      setAllSales(prev => [uiSaleRecord, ...prev]);
+
+      // 3. Trigger Sync (if online)
+      if (navigator.onLine) {
+        triggerSync();
+      }
+
+      // 4. Gamification Logic (Calculated locally for immediate feedback)
       let pointsResult = null;
-      console.log('🎮 GAMIFICATION CHECK:', {
-        posBonusEnabled: settings.posBonusEnabled,
-        hasRules: !!settings.posPointRules,
-        rulesCount: settings.posPointRules?.length || 0,
-        cartItems: cart.length
-      });
-      if (settings.posBonusEnabled !== false) {
-        // 1. Calculate Store Points (Team-based)
-        const storeRules = settings.posPointRules || []; // No defaults - only user-configured rules
-        console.log('🎮 POS Gamification - Using rules:', storeRules.length, 'rules',
-          settings.posPointRules ? '(from settings)' : '(defaults)');
+      if (settings.posBonusEnabled !== false && activeSite?.id) {
+        const storeRules = settings.posPointRules || [];
         let totalStorePoints = 0;
         const pointsBreakdown: { item: string; rule: string; points: number }[] = [];
 
@@ -2776,259 +3616,117 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
           let itemPoints = 0;
           let appliedRuleName = 'none';
 
-          // Find matching category-specific rule (exact match)
-          const categoryRule = storeRules.find(r =>
-            r.enabled && r.type === 'category' && r.categoryId === item.category
-          );
-
-          // Find base/quantity rule (matches 'all' categories)
-          const baseRule = storeRules.find(r =>
-            r.enabled && (r.type === 'quantity' || r.type === 'category') && r.categoryId === 'all'
-          );
-
-          // Use category-specific rule if exists, otherwise use base rule
-          const activeRule = categoryRule || baseRule;
+          // Find rules
+          const categoryRule = storeRules.find(r => r.enabled && r.type === 'category' && r.categoryId === item.category);
+          const productRule = storeRules.find(r => r.enabled && r.type === 'product' && r.productSku === item.sku);
+          // Product rule takes precedence
+          const activeRule = productRule || categoryRule;
 
           if (activeRule) {
             itemPoints = item.quantity * (activeRule.pointsPerUnit || 1);
             if (activeRule.multiplier) itemPoints *= activeRule.multiplier;
-            if (activeRule.minQuantity && item.quantity < activeRule.minQuantity) {
-              itemPoints = 0; // Don't apply if below min quantity
-            }
-            if (activeRule.maxPointsPerTransaction && itemPoints > activeRule.maxPointsPerTransaction) {
-              itemPoints = activeRule.maxPointsPerTransaction;
-            }
+            if (activeRule.minQuantity && item.quantity < activeRule.minQuantity) itemPoints = 0;
+            if (activeRule.maxPointsPerTransaction && itemPoints > activeRule.maxPointsPerTransaction) itemPoints = activeRule.maxPointsPerTransaction;
             appliedRuleName = activeRule.name;
           }
 
-          pointsBreakdown.push({
-            item: item.name,
-            rule: appliedRuleName,
-            points: Math.floor(itemPoints)
-          });
-          totalStorePoints += Math.floor(itemPoints);
+          if (itemPoints > 0) {
+            pointsBreakdown.push({ item: item.name, rule: appliedRuleName, points: Math.floor(itemPoints) });
+            totalStorePoints += Math.floor(itemPoints);
+          }
         });
 
-        // Revenue based points
+        // Revenue Rule
         const revenueRule = storeRules.find(r => r.type === 'revenue' && r.enabled);
         if (revenueRule && revenueRule.revenueThreshold) {
           const revenuePoints = Math.floor((subtotal / revenueRule.revenueThreshold) * (revenueRule.pointsPerRevenue || 1));
           totalStorePoints += revenuePoints;
-          pointsBreakdown.push({
-            item: 'Revenue Bonus',
-            rule: revenueRule.name,
-            points: revenuePoints
-          });
+          pointsBreakdown.push({ item: 'Revenue Bonus', rule: revenueRule.name, points: revenuePoints });
         }
 
-        console.log('🎮 Points breakdown:', pointsBreakdown);
-        console.log('🎮 Total store points:', totalStorePoints);
+        if (totalStorePoints > 0) {
+          awardStorePoints(activeSite.id, totalStorePoints, total, 1);
+          pointsResult = { points: totalStorePoints, storePoints: totalStorePoints, breakdown: pointsBreakdown };
 
-        // Award to Store
-        awardStorePoints(activeSite?.id || '', totalStorePoints, subtotal);
-
-        // 2. Calculate Individual Cashier Points
-        // Cashiers earn their share of store points (based on the same rules) for personal level progression
-        const individualPoints = totalStorePoints; // Award full store points to the cashier too
-
-        const cashierEmployee = employees.find(e => e.name === user || e.id === user || e.email === user);
-        if (cashierEmployee) {
-          awardPoints(
-            cashierEmployee.id,
-            individualPoints,
-            'JOB_COMPLETE',
-            `Processed sale ${sale.receiptNumber || sale.id}`,
-            sale.id
-          );
-
-          pointsResult = {
-            points: individualPoints,
-            storePoints: totalStorePoints,
-            breakdown: pointsBreakdown.map(b => ({ label: b.item, points: b.points }))
-          };
+          // Award to Cashier (Individual)
+          const cashierEmployee = employees.find(e => e.name === user || e.id === user);
+          if (cashierEmployee) {
+            awardPoints(cashierEmployee.id, totalStorePoints, 'JOB_COMPLETE', `Sale ${saleRecord.receiptNumber}`, saleId);
+          }
         }
       }
 
-      // --- OPTIMISTIC UPDATE: Update local state immediately ---
-      setSales(prev => [sale, ...prev]);
+      // 5. Loyalty (Online Only for now)
+      if (customerId && settings.enableLoyalty !== false && navigator.onLine) {
+        try {
+          const customer = customers.find(c => c.id === customerId);
+          if (customer) {
+            const loyaltyRate = settings.loyaltyPointsRate || 0;
+            const pointsEarned = loyaltyRate > 0 ? Math.floor(subtotal / loyaltyRate) : 0;
+            const currentPoints = customer.loyaltyPoints || 0;
+            const redeemed = pointsRedeemed || 0;
+            const newLoyaltyPoints = Math.max(0, currentPoints + pointsEarned - redeemed);
 
-      // --- CUSTOMER LOYALTY UPDATES ---
-      if (customerId && settings.enableLoyalty !== false) {
-        const customer = customers.find(c => c.id === customerId);
-        if (customer) {
-          // Calculate loyalty points earned - uses settings.loyaltyPointsRate or 0 if not set
-          const loyaltyRate = settings.loyaltyPointsRate || 0; // ETB per 1 loyalty point, 0 = disabled
-          const pointsEarned = loyaltyRate > 0 ? Math.floor(subtotal / loyaltyRate) : 0;
-
-          // Current points + earned - redeemed
-          const currentPoints = customer.loyaltyPoints || 0;
-          const redeemed = pointsRedeemed || 0;
-          const newLoyaltyPoints = Math.max(0, currentPoints + pointsEarned - redeemed);
-
-          // Update customer in DB
-          try {
             await customersService.update(customerId, {
               loyaltyPoints: newLoyaltyPoints,
               totalSpent: (customer.totalSpent || 0) + total,
               lastVisit: new Date().toISOString()
             });
 
-            // Update local state
-            setCustomers(prev => prev.map(c =>
-              c.id === customerId
-                ? { ...c, loyaltyPoints: newLoyaltyPoints, totalSpent: (c.totalSpent || 0) + total, lastVisit: new Date().toISOString() }
-                : c
-            ));
-
-            console.log(`💎 Loyalty Update: Customer ${customer.name} earned ${pointsEarned} pts, redeemed ${redeemed} pts. New Balance: ${newLoyaltyPoints}`);
-          } catch (err) {
-            console.error('Failed to update customer loyalty:', err);
+            setCustomers(prev => prev.map(c => c.id === customerId ? { ...c, loyaltyPoints: newLoyaltyPoints, totalSpent: (c.totalSpent || 0) + total, lastVisit: new Date().toISOString() } : c));
           }
+        } catch (e) {
+          console.error("Loyalty update failed", e);
         }
       }
 
-      // --- STOCK LEVEL CHECK (RETAIL -> WAREHOUSE CONNECTION) ---
-      // Check if any item dropped below threshold to trigger replenishment
-      cart.forEach(item => {
+      // 6. Stock Decrement & Alerts
+      for (const item of cart) {
         const product = products.find(p => p.id === item.id);
         if (product) {
-          const newStock = product.stock - item.quantity;
-          if (newStock <= settings.lowStockThreshold) {
-            // Trigger Warehouse Alert
-            addNotification('alert', `⚠️ Low Stock Alert: ${product.name} is down to ${newStock}. Replenishment needed!`);
-            // In a real system, this would create a 'Replenish' task automatically
+          const newStock = Math.max(0, product.stock - item.quantity);
+          const newStatus = newStock === 0 ? 'out_of_stock' : newStock < settings.lowStockThreshold ? 'low_stock' : 'active';
+
+          console.log('📦 Stock update:', { productId: item.id, name: product.name, oldStock: product.stock, newStock, newStatus });
+
+          // Optimistic local update
+          setProducts(prev => prev.map(p =>
+            p.id === item.id ? { ...p, stock: newStock, status: newStatus as any } : p
+          ));
+
+          // Queue database update (online or offline)
+          if (navigator.onLine) {
+            try {
+              await productsService.update(item.id, { stock: newStock, status: newStatus });
+            } catch (e) {
+              console.error('Stock update failed (will retry)', e);
+            }
+          } else {
+            console.warn('⚠️ Offline: Transfer stock update skipped (Strict Online Mode)');
+            // Offline logic removed per user request
           }
-        }
-      });
 
-      // --- AUTO-GENERATE WMS JOBS ---
-      if (settings.enableWMS && cart.length > 0) {
-        try {
-          const requestingStoreId = sale.siteId || activeSite?.id || '';
-          const requestingStore = sites.find(s => s.id === requestingStoreId);
-          const strategy = requestingStore?.fulfillmentStrategy || 'NEAREST';
-
-          if (strategy === 'MANUAL') {
-            console.log('⏳ Order held for MANUAL release optimization.');
-            await salesService.update(sale.id, { release_status: 'PENDING' });
-            return { saleId: sale.id, pointsResult };
+          // Low stock alert
+          if (newStock <= settings.lowStockThreshold && newStock > 0) {
+            addNotification('alert', `Low Stock: ${product.name} (${newStock} remaining)`);
+          } else if (newStock === 0) {
+            addNotification('alert', `Out of Stock: ${product.name}`);
           }
-
-          // Trigger backend release (handles planning and job creation)
-          await salesService.releaseOrder(sale.id);
-
-          // Refresh local state to reflect new jobs
-          await refreshData();
-        } catch (jobError) {
-          console.error('Failed to create WMS jobs:', jobError);
-          addNotification('info', 'Sale completed but fulfillment jobs could not be created');
         }
       }
 
       addNotification('success', 'Sale processed successfully');
+      return { saleId, pointsResult };
 
-      // Award store points for POS team bonus using configured rules
-      // Check if the store is eligible for bonuses
-      const saleStore = sites.find(s => s.id === sale.siteId);
-      const storeIsEligible = saleStore?.bonusEnabled !== false;
-
-      if (settings.posBonusEnabled !== false && sale.siteId && storeIsEligible) {
-        const pointRules = settings.posPointRules || []; // No defaults - only user-configured rules
-        const enabledRules = pointRules.filter(r => r.enabled).sort((a, b) => (b.priority || 0) - (a.priority || 0));
-
-        let totalPoints = 0;
-        const totalQuantity = cart.reduce((sum, item) => sum + item.quantity, 0);
-
-        // Process each cart item
-        cart.forEach(cartItem => {
-          const product = products.find(p => p.id === cartItem.id);
-          const itemCategory = product?.category || 'Unknown';
-          const itemSku = product?.sku;
-
-          // Find applicable rules for this item
-          let itemPoints = 0;
-
-          enabledRules.forEach(rule => {
-            let ruleApplies = false;
-            let rulePoints = 0;
-
-            switch (rule.type) {
-              case 'category':
-                // Category-specific or all categories
-                if (rule.categoryId === 'all' || rule.categoryId === itemCategory) {
-                  ruleApplies = true;
-                  rulePoints = (rule.pointsPerUnit || 0) * cartItem.quantity;
-                }
-                break;
-
-              case 'product':
-                // Specific product by SKU
-                if (rule.productSku && itemSku === rule.productSku) {
-                  ruleApplies = true;
-                  rulePoints = (rule.pointsPerUnit || 0) * cartItem.quantity;
-                }
-                break;
-
-              case 'quantity':
-                // Quantity-based bonuses (applies to all items if criteria met)
-                if (rule.categoryId === 'all' || rule.categoryId === itemCategory) {
-                  if (!rule.minQuantity || totalQuantity >= rule.minQuantity) {
-                    ruleApplies = true;
-                    rulePoints = (rule.pointsPerUnit || 0) * cartItem.quantity;
-                  }
-                }
-                break;
-            }
-
-            if (ruleApplies) {
-              // Apply max cap if configured
-              if (rule.maxPointsPerTransaction && rulePoints > rule.maxPointsPerTransaction) {
-                rulePoints = rule.maxPointsPerTransaction;
-              }
-              itemPoints += rulePoints;
-            }
-          });
-
-          totalPoints += itemPoints;
-        });
-
-        // Apply revenue-based rules (calculated on total)
-        enabledRules.filter(r => r.type === 'revenue').forEach(rule => {
-          if (rule.revenueThreshold && rule.pointsPerRevenue) {
-            const revenuePoints = Math.floor(total / rule.revenueThreshold) * rule.pointsPerRevenue;
-            totalPoints += rule.maxPointsPerTransaction
-              ? Math.min(revenuePoints, rule.maxPointsPerTransaction)
-              : revenuePoints;
-          }
-        });
-
-        // Apply quantity multipliers (for bulk sales)
-        const multiplierRule = enabledRules.find(r =>
-          r.type === 'quantity' &&
-          r.multiplier &&
-          r.multiplier > 1 &&
-          r.minQuantity &&
-          totalQuantity >= r.minQuantity
-        );
-        if (multiplierRule && multiplierRule.multiplier) {
-          totalPoints = Math.floor(totalPoints * multiplierRule.multiplier);
-        }
-
-        // Ensure at least 1 point per transaction if any items sold
-        if (totalPoints < 1 && cart.length > 0) {
-          totalPoints = 1;
-        }
-
-        awardStorePoints(sale.siteId, totalPoints, total, 1);
-      }
-
-      return { saleId: sale.id, pointsResult };
     } catch (error) {
-      console.error(error);
+      console.error("Process Sale Failed:", error);
       addNotification('alert', 'Failed to process sale');
       throw error;
     }
-  }, [settings, activeSite, sites, products, employees, customers, addNotification, awardPoints, awardStorePoints]);
+  }, [
+    activeSite, settings, addNotification, triggerSync, products, sites,
+    employees, customers, awardPoints, awardStorePoints
+  ]);
 
   const holdOrder = useCallback((order: HeldOrder) => {
     setHeldOrders(prev => [order, ...prev]);
@@ -3135,6 +3833,11 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
     try {
       const updated = await wmsJobsService.update(id, updates);
       setJobs(prev => prev.map(j => j.id === id ? updated : j));
+
+      // Invalidate jobs query
+      queryClient.invalidateQueries({ queryKey: ['jobs'] });
+
+      return;
     } catch (error) {
       console.error(error);
       addNotification('alert', 'Failed to update job');
@@ -3294,7 +3997,11 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
     try {
       await wmsJobsService.delete(id);
       setJobs(prev => prev.filter(j => j.id !== id));
-      addNotification('info', 'Job deleted');
+
+      // Invalidate jobs query
+      queryClient.invalidateQueries({ queryKey: ['jobs'] });
+
+      addNotification('success', 'Job deleted');
     } catch (e) {
       console.error(e);
       addNotification('alert', 'Failed to delete job');
@@ -3339,12 +4046,12 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
     // In Supabase context, this might be dangerous or restricted
     // For now, we'll just reload data
     if (activeSiteId) {
-      loadSiteData(activeSiteId);
+      queries.refetchAll();
       addNotification('info', 'Data reloaded from server');
     } else {
       loadSites();
     }
-  }, [activeSiteId, loadSiteData, loadSites, addNotification]);
+  }, [activeSiteId, queries, loadSites, addNotification]);
 
   const addPromotion = useCallback((promo: Promotion) => {
     setPromotions(prev => [...prev, promo]);
@@ -3425,6 +4132,15 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
     ));
   }, []);
 
+  // Note: approveBarcode and rejectBarcode are deprecated - barcode mappings no longer require approval
+  const approveBarcode = useCallback(async (_id: string, _userId: string) => {
+    console.warn('approveBarcode is deprecated - barcode mappings are now instant');
+  }, []);
+
+  const rejectBarcode = useCallback(async (_id: string, _userId: string, _reason: string) => {
+    console.warn('rejectBarcode is deprecated - barcode mappings are now instant');
+  }, []);
+
   // Filter data by active site
   // Data is now pre-filtered by loadSiteData, so we just pass the state directly
   // keeping these variables to match the value object structure if needed, or we can update the value object
@@ -3434,7 +4150,8 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
   const filteredEmployees = employees;
   const filteredExpenses = expenses;
   const filteredMovements = movements;
-  const filteredJobs = jobs;
+  // 🛡️ CRITICAL FIX: Export enrichedJobs (with PO hydration) instead of raw jobs
+  const filteredJobs = enrichedJobs;
 
   const value = useMemo<DataContextType>(() => ({
     settings,
@@ -3466,6 +4183,10 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
     discountCodes,
     zones,
     allZones,
+    barcodeApprovals,
+    loadingProgress,
+    isDataInitialLoading,
+    loadError,
 
     // Actions
     updateSettings,
@@ -3477,6 +4198,7 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
 
     addProduct,
     updateProduct,
+    updatePricesBySKU,
     deleteProduct,
     relocateProduct,
     cleanupAdminProducts,
@@ -3484,12 +4206,15 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
     createPO,
     updatePO,
     receivePO,
+    receivePOSplit,
     deletePO,
 
     processSale,
     processReturn,
     closeShift,
     startShift,
+    triggerSync, // Expose sync trigger
+
 
     addSupplier,
     adjustStock,
@@ -3551,6 +4276,8 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
     exportSystemData,
     resetData,
     refreshData,
+    approveBarcode,
+    rejectBarcode,
 
     addPromotion,
     updatePromotion,
@@ -3562,14 +4289,14 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
     validateDiscountCode,
     useDiscountCode,
     releaseOrder,
-    isDataInitialLoading,
-    loadError
+    posSyncStatus: syncStatus,
+    posPendingSyncCount: pendingCount
   }), [
-    settings, products, orders, suppliers, sales, expenses, movements, jobs,
+    settings, products, orders, suppliers, sales, expenses, movements, enrichedJobs,
     employees, customers, shifts, heldOrders, sites, activeSite, transfers,
     notifications, systemLogs, jobAssignments, promotions, workerPoints,
     pointsTransactions, tasks, schedules, storePoints, zones, allZones, allProducts,
-    allSales, allOrders, discountCodes, isDataInitialLoading, loadError,
+    allSales, allOrders, discountCodes, isDataInitialLoading, loadError, syncStatus, pendingCount,
     updateSettings, setActiveSite, addSite, updateSite, deleteSite, getTaxForSite,
     addProduct, updateProduct, deleteProduct, relocateProduct, cleanupAdminProducts,
     createPO, updatePO, receivePO, deletePO, processSale, processReturn, closeShift,
@@ -3583,7 +4310,8 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
     addNotification, clearNotification, clearAllNotifications, logSystemEvent, exportSystemData,
     resetData, refreshData, addPromotion, updatePromotion, deletePromotion, addDiscountCode,
     updateDiscountCode, deleteDiscountCode, validateDiscountCode, useDiscountCode,
-    releaseOrder, addSchedule, updateSchedule, deleteSchedule
+    releaseOrder, addSchedule, updateSchedule, deleteSchedule,
+    barcodeApprovals, approveBarcode, rejectBarcode
   ]);
 
   return (
@@ -3682,7 +4410,12 @@ export const useData = () => {
       logSystemEvent: () => { },
       exportSystemData: () => '',
       resetData: () => { },
-      releaseOrder: async () => { }
+      releaseOrder: async () => { },
+      posSyncStatus: 'synced',
+      posPendingSyncCount: 0,
+      barcodeApprovals: [],
+      approveBarcode: async () => { },
+      rejectBarcode: async () => { }
     } as unknown as DataContextType;
   }
   return context;

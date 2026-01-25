@@ -25,40 +25,50 @@ export default function Pagination({
 }: PaginationProps) {
 
     // Calculate range for display
-    const startItem = (currentPage - 1) * itemsPerPage + 1;
+    const startItem = totalItems === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
     const endItem = Math.min(currentPage * itemsPerPage, totalItems);
 
     return (
-        <div className={`flex justify-between items-center p-4 border-t border-white/5 bg-black/20 ${className}`}>
-            <div className="text-xs text-gray-400">
+        <div className={`flex flex-col sm:flex-row justify-between items-center gap-4 p-4 border border-white/5 bg-black/40 backdrop-blur-md rounded-2xl shadow-xl ${className}`}>
+
+            {/* Left: Stats Display */}
+            <div className="flex items-center gap-2 text-[10px] font-black tracking-widest uppercase text-gray-500">
+                <div className="w-1.5 h-1.5 rounded-full bg-cyan-500/50" />
                 {totalItems > 0 ? (
-                    <>Showing <span className="text-white font-mono">{startItem}-{endItem}</span> of <span className="text-white font-mono">{formatCompactNumber(totalItems)}</span> {itemName}</>
+                    <div className="flex items-center gap-2">
+                        <span>Showing</span>
+                        <span className="text-white bg-white/5 px-2 py-0.5 rounded border border-white/5 font-mono">{startItem}-{endItem}</span>
+                        <span>of</span>
+                        <span className="text-cyan-400 font-mono text-xs">{formatCompactNumber(totalItems)}</span>
+                        <span>{itemName}</span>
+                    </div>
                 ) : (
-                    <>No {itemName} found</>
+                    <span>No {itemName} available</span>
                 )}
             </div>
 
-            <div className="flex gap-2">
+            {/* Right: Controls */}
+            <div className="flex items-center gap-2 bg-black/20 p-1 rounded-xl border border-white/5">
                 <button
                     onClick={() => onPageChange(Math.max(1, currentPage - 1))}
                     disabled={currentPage === 1 || isLoading || totalItems === 0}
-                    className="px-3 py-1.5 bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed rounded-lg text-xs text-white transition-colors border border-white/10 flex items-center gap-1"
+                    className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/5 hover:bg-cyan-500 hover:text-black text-gray-400 disabled:opacity-30 disabled:hover:bg-white/5 disabled:hover:text-gray-400 transition-all active:scale-95"
+                    title="Previous Page"
                 >
-                    <ChevronLeft size={14} />
-                    Previous
+                    <ChevronLeft size={16} strokeWidth={3} />
                 </button>
 
-                <span className="flex items-center px-3 text-xs text-gray-400 font-mono bg-black/40 rounded-lg border border-white/5">
-                    {currentPage} <span className="mx-1 text-gray-600">/</span> {Math.max(1, totalPages)}
-                </span>
+                <div className="px-4 text-[10px] font-black text-gray-400 uppercase tracking-widest font-mono">
+                    Page <span className="text-white text-sm mx-1">{currentPage}</span> / {Math.max(1, totalPages)}
+                </div>
 
                 <button
                     onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
                     disabled={currentPage >= totalPages || isLoading || totalItems === 0}
-                    className="px-3 py-1.5 bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed rounded-lg text-xs text-white transition-colors border border-white/10 flex items-center gap-1"
+                    className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/5 hover:bg-cyan-500 hover:text-black text-gray-400 disabled:opacity-30 disabled:hover:bg-white/5 disabled:hover:text-gray-400 transition-all active:scale-95"
+                    title="Next Page"
                 >
-                    Next
-                    <ChevronRight size={14} />
+                    <ChevronRight size={16} strokeWidth={3} />
                 </button>
             </div>
         </div>

@@ -1,14 +1,15 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Search, Filter, ArrowUpDown, MoreHorizontal, AlertTriangle, FileText, Download, Printer, Box, Trash2, Edit, RefreshCw, Map, TrendingUp, Layout, ClipboardList, Thermometer, Shield, XCircle, DollarSign, ChevronDown, Minus, Barcode, Package, Loader2, Clock, CheckCircle, User, ArrowRight } from 'lucide-react';
+import { Plus, Search, Filter, ArrowUpDown, MoreHorizontal, AlertTriangle, FileText, Download, Printer, Box, Trash2, Edit, RefreshCw, Map, TrendingUp, Layout, ClipboardList, Thermometer, Shield, XCircle, DollarSign, ChevronDown, ChevronLeft, ChevronRight, Minus, Barcode, Package, Loader2, Clock, CheckCircle, User, ArrowRight, Link, Info, Scan, X, Camera, SlidersHorizontal } from 'lucide-react';
 import { formatCompactNumber, formatDateTime } from '../utils/formatting';
+import { formatJobId } from '../utils/jobIdFormatter';
 import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
     PieChart, Pie, Cell
 } from 'recharts';
 import { MOCK_ZONES, CURRENCY_SYMBOL, GROCERY_CATEGORIES, COMMON_UNITS } from '../constants';
 import ImageUpload from '../components/ImageUpload';
-import { Product, StockMovement, PendingInventoryChange } from '../types';
+import { Product, StockMovement, PendingInventoryChange, BarcodeApproval } from '../types';
 import { inventoryRequestsService, stockMovementsService, productsService } from '../services/supabase.service';
 import Modal from '../components/Modal';
 import LabelPrintModal from '../components/LabelPrintModal';
@@ -21,8 +22,14 @@ import { filterBySite } from '../utils/locationAccess';
 import { native } from '../utils/native';
 import { generateUniqueSKU, isSKUUnique } from '../utils/skuUtils';
 import { generateInternalBarcode } from '../utils/barcodeNumberGenerator';
+import { ProductForm } from '../components/ProductForm';
+import { useSaveProductMutation } from '../hooks/useSaveProductMutation';
+import { useDeleteProductMutation } from '../hooks/useDeleteProductMutation';
+import { useAdjustStockMutation } from '../hooks/useAdjustStockMutation';
+import { useApproveBarcodeMutation, useRejectBarcodeMutation } from '../hooks/useBarcodeApprovalMutations';
+import { useApproveInventoryRequestMutation, useRejectInventoryRequestMutation, useBulkCleanupRequestsMutation } from '../hooks/useInventoryRequestMutations';
 
-type Tab = 'overview' | 'stock' | 'zones' | 'movements' | 'pending';
+type Tab = 'overview' | 'stock' | 'zones' | 'movements' | 'pending' | 'barcode_audit';
 
 // --- COLORS & HELPERS ---
 const COLORS = ['#00ff9d', '#3b82f6', '#f59e0b', '#ef4444'];
@@ -38,8 +45,30 @@ const getABCClass = (product: Product, totalValue: number) => {
 
 export default function Inventory() {
     const { user } = useStore();
-    const { products, allProducts, sites, addProduct, updateProduct, deleteProduct, adjustStock, activeSite, setActiveSite, addNotification, refreshData, logSystemEvent, createPutawayJob } = useData();
+    const { products, allProducts, sites, employees, addProduct, updateProduct, deleteProduct, adjustStock, activeSite, setActiveSite, addNotification, refreshData, logSystemEvent, createPutawayJob, barcodeApprovals, approveBarcode, rejectBarcode } = useData();
     const navigate = useNavigate();
+    const saveMutation = useSaveProductMutation();
+    const deleteMutation = useDeleteProductMutation();
+    const adjustStockMutation = useAdjustStockMutation();
+    const approveBarcodeMutation = useApproveBarcodeMutation();
+    const rejectBarcodeMutation = useRejectBarcodeMutation();
+    const approveRequestMutation = useApproveInventoryRequestMutation(createPutawayJob);
+    const rejectRequestMutation = useRejectInventoryRequestMutation();
+    const bulkCleanupMutation = useBulkCleanupRequestsMutation();
+
+    // Helper to lookup employee name by ID
+    const getEmployeeName = (employeeId: string | undefined | null) => {
+        if (!employeeId) return 'Unknown';
+        const emp = employees.find(e => e.id === employeeId);
+        return emp?.name || 'Unknown';
+    };
+
+    // --- BARCODE AUDIT STATE ---
+    const [barcodeSearch, setBarcodeSearch] = useState('');
+    const [barcodeSiteFilter, setBarcodeSiteFilter] = useState('All');
+    const [barcodeSort, setBarcodeSort] = useState<{ key: string, direction: 'asc' | 'desc' }>({ key: 'date', direction: 'desc' });
+    // Track viewed items to "clear" notification
+    const [lastViewedBarcodeCount, setLastViewedBarcodeCount] = useState(0);
 
     // --- READ-ONLY & PERMISSIONS ---
     // Rule: Warehouses & DCs have write access. Stores & Admin (HQ) are Read-Only.
@@ -59,6 +88,51 @@ export default function Inventory() {
         return (Array.isArray(base) ? base : []).filter(p => (p.status || (p as any).status) !== 'archived');
     }, [products, allProducts, isReadOnly, user?.role, activeSite]);
 
+    // --- FILTERED BARCODES ---
+    const filteredBarcodes = useMemo(() => {
+        let result = [...barcodeApprovals];
+
+        // 🔍 Search
+        if (barcodeSearch) {
+            const lowSearch = barcodeSearch.toLowerCase();
+            result = result.filter(b =>
+                b.barcode.toLowerCase().includes(lowSearch) ||
+                (b.product?.name || '').toLowerCase().includes(lowSearch) ||
+                (b.product?.sku || '').toLowerCase().includes(lowSearch)
+            );
+        }
+
+        // Hide deleted/rejected mappings
+        result = result.filter(b => b.status !== 'rejected');
+
+        // 📍 Site Filter
+        if (barcodeSiteFilter !== 'All') {
+            result = result.filter(b => (b.site_id || b.siteId) === barcodeSiteFilter);
+        }
+
+        // 📊 Sort
+        result.sort((a, b) => {
+            let valA: any, valB: any;
+
+            if (barcodeSort.key === 'date') {
+                valA = new Date(a.created_at || 0).getTime();
+                valB = new Date(b.created_at || 0).getTime();
+            } else if (barcodeSort.key === 'product') {
+                valA = (a.product?.name || '').toLowerCase();
+                valB = (b.product?.name || '').toLowerCase();
+            } else if (barcodeSort.key === 'duration') {
+                valA = a.resolution_time || 0;
+                valB = b.resolution_time || 0;
+            }
+
+            if (valA < valB) return barcodeSort.direction === 'asc' ? -1 : 1;
+            if (valA > valB) return barcodeSort.direction === 'asc' ? 1 : -1;
+            return 0;
+        });
+
+        return result;
+    }, [barcodeApprovals, barcodeSearch, barcodeSiteFilter, barcodeSort]);
+
     // PDA Mode Detection
     const isNativeApp = native.isNative();
 
@@ -72,13 +146,26 @@ export default function Inventory() {
     const [currentMovementsPage, setCurrentMovementsPage] = useState(1);
     const MOVEMENTS_PER_PAGE = 20;
 
+    // --- MOVEMENTS FILTER STATE ---
+    const [movementsSearch, setMovementsSearch] = useState('');
+    const [movementsTypeFilter, setMovementsTypeFilter] = useState('All');
+    const [movementsSiteFilter, setMovementsSiteFilter] = useState('All');
+    const [movementsSort, setMovementsSort] = useState<{ key: string, direction: 'asc' | 'desc' }>({ key: 'date', direction: 'desc' });
+
     useEffect(() => {
         if (activeTab === 'movements') {
             const fetchMovements = async () => {
                 setMovementsLoading(true);
                 try {
                     const offset = (currentMovementsPage - 1) * MOVEMENTS_PER_PAGE;
-                    const { data, count } = await stockMovementsService.getAll(activeSite?.id, undefined, MOVEMENTS_PER_PAGE, offset);
+                    const { data, count } = await stockMovementsService.getAll(
+                        isReadOnly ? movementsSiteFilter : activeSite?.id,
+                        undefined,
+                        MOVEMENTS_PER_PAGE,
+                        offset,
+                        { search: movementsSearch, type: movementsTypeFilter },
+                        movementsSort
+                    );
                     setLocalMovements(data);
                     setTotalMovementsCount(count);
                 } catch (error) {
@@ -90,7 +177,21 @@ export default function Inventory() {
             };
             fetchMovements();
         }
-    }, [activeTab, currentMovementsPage, activeSite?.id]);
+    }, [activeTab, currentMovementsPage, activeSite?.id, movementsSearch, movementsTypeFilter, movementsSiteFilter, movementsSort, isReadOnly]);
+
+    useEffect(() => {
+        setCurrentMovementsPage(1);
+    }, [movementsSearch, movementsTypeFilter, movementsSiteFilter, movementsSort]);
+    useEffect(() => {
+        setCurrentBarcodePage(1);
+    }, [barcodeApprovals.length, activeSite?.id]);
+
+    // Clear notification badge when tab is opened
+    useEffect(() => {
+        if (activeTab === 'barcode_audit') {
+            setLastViewedBarcodeCount(barcodeApprovals.length);
+        }
+    }, [activeTab, barcodeApprovals.length]);
 
 
 
@@ -106,12 +207,27 @@ export default function Inventory() {
         siteId: 'All' // New Location Filter
     });
 
+    // --- SORT STATE ---
+    const [sortConfig, setSortConfig] = useState<{ key: string, direction: 'asc' | 'desc' } | null>({ key: 'createdAt', direction: 'desc' }); // Default to recent
+
+    const handleSort = (key: string) => {
+        setSortConfig(current => {
+            if (current && current.key === key) {
+                return { key, direction: current.direction === 'asc' ? 'desc' : 'asc' };
+            }
+            return { key, direction: 'asc' };
+        });
+    };
+
     // Server-side Pagination for Products
     const [localProducts, setLocalProducts] = useState<Product[]>([]);
     const [productsLoading, setProductsLoading] = useState(false);
     const [totalProductCount, setTotalProductCount] = useState(0);
     const [currentProductPage, setCurrentProductPage] = useState(1);
+    const [currentBarcodePage, setCurrentBarcodePage] = useState(1);
+    const BARCODE_PER_PAGE = 15;
     const PRODUCTS_PER_PAGE = 20;
+
 
     const fetchProducts = useCallback(async () => {
         setProductsLoading(true);
@@ -131,7 +247,7 @@ export default function Inventory() {
                 querySiteId = filters.siteId;
             }
 
-            const { data, count } = await productsService.getAll(querySiteId, PRODUCTS_PER_PAGE, offset, serviceFilters);
+            const { data, count } = await productsService.getAll(querySiteId, PRODUCTS_PER_PAGE, offset, serviceFilters, sortConfig || undefined);
             setLocalProducts(data || []);
             setTotalProductCount(count || 0);
         } catch (error) {
@@ -140,7 +256,7 @@ export default function Inventory() {
         } finally {
             setProductsLoading(false);
         }
-    }, [activeSite?.id, currentProductPage, filters, searchTerm, PRODUCTS_PER_PAGE, addNotification]);
+    }, [activeSite?.id, currentProductPage, filters, searchTerm, PRODUCTS_PER_PAGE, addNotification, sortConfig]);
 
     // --- SERVER-SIDE METRICS ---
     const [serverMetrics, setServerMetrics] = useState<any>(null);
@@ -171,17 +287,6 @@ export default function Inventory() {
     }, [activeSite?.id, filters, searchTerm]);
 
 
-    // --- SORT STATE ---
-    const [sortConfig, setSortConfig] = useState<{ key: string, direction: 'asc' | 'desc' } | null>({ key: 'createdAt', direction: 'desc' }); // Default to recent
-
-    const handleSort = (key: string) => {
-        setSortConfig(current => {
-            if (current && current.key === key) {
-                return { key, direction: current.direction === 'asc' ? 'desc' : 'asc' };
-            }
-            return { key, direction: 'asc' };
-        });
-    };
 
     // --- SELECTION STATE ---
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -200,6 +305,9 @@ export default function Inventory() {
     // Form State
     const [skuInput, setSkuInput] = useState('');
     const [barcodeInput, setBarcodeInput] = useState('');
+    const [barcodeAliases, setBarcodeAliases] = useState<string[]>([]);
+    const [newBarcodeAlias, setNewBarcodeAlias] = useState('');
+    const [testBarcodeInput, setTestBarcodeInput] = useState('');
     const [adjustQty, setAdjustQty] = useState<string>('');
     const [adjustReason, setAdjustReason] = useState<string>('Stock Correction');
     const [adjustType, setAdjustType] = useState<'IN' | 'OUT'>('IN');
@@ -245,6 +353,11 @@ export default function Inventory() {
     const [pendingChanges, setPendingChanges] = useState<PendingInventoryChange[]>([]);
     const [isInitialLoad, setIsInitialLoad] = useState(true);
 
+    const [selectedBarcodeApproval, setSelectedBarcodeApproval] = useState<BarcodeApproval | null>(null);
+    const [isBarcodeRejectionModalOpen, setIsBarcodeRejectionModalOpen] = useState(false);
+    const [isApprovalDetailsOpen, setIsApprovalDetailsOpen] = useState(false);
+    const [selectedAuditRecord, setSelectedAuditRecord] = useState<BarcodeApproval | null>(null);
+
     const loadPendingRequests = async () => {
         try {
             const requests = await inventoryRequestsService.getAll(activeSite?.id);
@@ -262,8 +375,9 @@ export default function Inventory() {
         loadPendingRequests();
     }, [activeSite]);
 
-    const canApprove = user?.role === 'super_admin';
-    const canViewPending = ['super_admin', 'admin', 'warehouse_manager', 'manager'].includes(user?.role || '');
+    const canApprove = ['super_admin', 'CEO'].includes(user?.role || '');
+    const canViewPending = canApprove;
+    const canViewAuditLog = ['super_admin', 'CEO', 'warehouse_manager', 'store_manager', 'regional_manager', 'operations_manager'].includes(user?.role || '');
     const [isApprovalModalOpen, setIsApprovalModalOpen] = useState(false);
     const [selectedPendingProduct, setSelectedPendingProduct] = useState<Product | null>(null);
     const [selectedPendingChange, setSelectedPendingChange] = useState<PendingInventoryChange | null>(null);
@@ -287,7 +401,12 @@ export default function Inventory() {
                             return (
                                 <div key={key} className="p-3 bg-white/5 rounded-lg border border-white/10 hover:border-white/20 transition-all">
                                     <label className="text-[10px] text-gray-500 uppercase font-bold block mb-1">{key.replace(/([A-Z])/g, ' $1')}</label>
-                                    <span className="text-white text-sm font-medium">{String(value || 'N/A')}</span>
+                                    <span className="text-white text-sm font-medium">
+                                        {['price', 'costPrice', 'salePrice'].includes(key)
+                                            ? formatCompactNumber(Number(value || 0), { currency: CURRENCY_SYMBOL })
+                                            : String(value || 'N/A')
+                                        }
+                                    </span>
                                 </div>
                             );
                         })}
@@ -316,15 +435,23 @@ export default function Inventory() {
 
                             if (newVal === undefined) return null;
 
+                            const isPriceField = ['price', 'costPrice', 'salePrice'].includes(prop as string);
+                            const formattedOld = isPriceField && oldVal !== 'N/A'
+                                ? formatCompactNumber(Number(oldVal), { currency: CURRENCY_SYMBOL })
+                                : String(oldVal ?? 'None');
+                            const formattedNew = isPriceField && newVal !== undefined
+                                ? formatCompactNumber(Number(newVal), { currency: CURRENCY_SYMBOL })
+                                : String(newVal ?? 'None');
+
                             return (
                                 <div key={prop as string} className={`grid grid-cols-12 gap-2 items-center p-3 rounded-lg transition-all border ${isChanged ? 'bg-blue-500/10 border-blue-500/20 shadow-lg shadow-blue-500/5' : 'bg-white/5 border-transparent'}`}>
                                     <div className="col-span-3 text-xs font-bold text-gray-400 uppercase">{prop as string}</div>
-                                    <div className="col-span-4 text-sm text-gray-500 line-through truncate">{String(oldVal ?? 'None')}</div>
+                                    <div className="col-span-4 text-sm text-gray-500 line-through truncate">{formattedOld}</div>
                                     <div className="col-span-1 flex justify-center text-blue-400">
                                         <ArrowRight size={14} />
                                     </div>
                                     <div className={`col-span-4 text-sm font-bold truncate ${isChanged ? 'text-green-400' : 'text-gray-300'}`}>
-                                        {String(newVal ?? 'None')}
+                                        {formattedNew}
                                     </div>
                                 </div>
                             );
@@ -400,11 +527,6 @@ export default function Inventory() {
     // Filter products by approval status
     const pendingProducts = useMemo(() => {
         const pending = filteredProducts.filter(p => p.approvalStatus === 'pending' || p.approval_status === 'pending');
-        console.log('🔍 Inventory Pending Products Check:', {
-            totalFiltered: filteredProducts.length,
-            pendingCount: pending.length,
-            samplePending: pending[0]
-        });
         return pending;
     }, [filteredProducts]);
 
@@ -478,7 +600,6 @@ export default function Inventory() {
     // --- HANDLERS ---
 
     const handleOpenAddProduct = () => {
-        console.log('🟦 Inventory: Opening Add Product Modal');
         setEditingProduct(null);
         setSkuInput('');
         setBarcodeInput('');
@@ -493,6 +614,9 @@ export default function Inventory() {
         setRetailPriceInput('');
         setStockInput('');
         setLocationInput('');
+        setBarcodeAliases([]);
+        setNewBarcodeAlias('');
+        setTestBarcodeInput('');
         setIsProductModalOpen(true);
     };
 
@@ -500,6 +624,9 @@ export default function Inventory() {
         setEditingProduct(product);
         setSkuInput(product.sku);
         setBarcodeInput(product.barcode || '');
+        setBarcodeAliases(product.barcodes || []);
+        setNewBarcodeAlias('');
+        setTestBarcodeInput('');
         // Parse category - check if it's a main category
         const mainCat = Object.keys(GROCERY_CATEGORIES).find(cat =>
             cat === product.category || GROCERY_CATEGORIES[cat].includes(product.category)
@@ -536,6 +663,22 @@ export default function Inventory() {
         const generated = generateInternalBarcode(products);
         setBarcodeInput(generated);
         addNotification('success', `Generated internal barcode: ${generated} `);
+    };
+
+    const handleDeleteAuditRecord = async (approval: BarcodeApproval) => {
+        if (!window.confirm('Are you sure you want to delete this barcode mapping? This will remove the alias from the product.')) {
+            return;
+        }
+
+        try {
+            await rejectBarcodeMutation.mutateAsync({
+                id: approval.id,
+                userId: user?.id || 'system',
+                reason: 'Manual deletion from Audit Log'
+            });
+        } catch (error) {
+            // Already handled in hook
+        }
     };
 
     const handleSaveProduct = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -593,6 +736,7 @@ export default function Inventory() {
                 name: fullProductName,
                 sku: skuInput,
                 barcode: barcodeInput || undefined,
+                barcodes: barcodeAliases.length > 0 ? barcodeAliases : undefined,
                 barcodeType: barcodeInput ? (formData.get('barcodeType') as 'EAN-13' | 'UPC-A' | 'CODE128' | 'CODE39' | 'QR' | 'OTHER') : undefined,
                 category: finalCategory,
                 price: price,
@@ -666,9 +810,7 @@ export default function Inventory() {
                     return;
                 }
 
-                console.log('📦 Add Product Submission:', newProduct);
                 const createdProduct = await addProduct(newProduct as Product);
-                console.log('✅ Created Product Result:', createdProduct);
 
                 if (canApprove) {
                     addNotification('success', `Product "${fullProductName}" created. Putaway job queued.`);
@@ -715,101 +857,51 @@ export default function Inventory() {
 
     const handleConfirmDelete = async () => {
         if (!productToDelete) return;
-
         if (deleteInput !== "DELETE") {
             addNotification('alert', 'Please type "DELETE" to confirm.');
             return;
         }
-
         const productDetails = filteredProducts.find(p => p.id === productToDelete);
 
         setIsSubmitting(true);
         try {
-            // CEO can delete directly, others need approval
-            if (canApprove) {
-                await deleteProduct(productToDelete);
-                addNotification('success', 'Product deleted permanently.');
-            } else {
-                // Create persistent delete request
-                const request: Omit<PendingInventoryChange, 'id'> = {
-                    productId: productToDelete,
-                    productName: productDetails?.name || 'Unknown',
-                    productSku: productDetails?.sku || 'Unknown',
-                    siteId: activeSite?.id || user?.siteId || '',
-                    changeType: 'delete',
-                    requestedBy: user?.name || 'Unknown',
-                    requestedAt: new Date().toISOString(),
-                    status: 'pending',
-                };
-                await inventoryRequestsService.create(request);
-                addNotification('info', `Delete request submitted for approval. Product: ${productDetails?.name}`);
-                loadPendingRequests();
-            }
+            await deleteMutation.mutateAsync({
+                productId: productToDelete,
+                productName: productDetails?.name || 'Unknown',
+                productSku: productDetails?.sku || 'Unknown',
+                siteId: activeSite?.id || user?.siteId || '',
+                canApprove
+            });
             setIsDeleteModalOpen(false);
             setProductToDelete(null);
             setDeleteInput('');
-        } catch (error: any) {
-            console.error(error);
-
-            // Check for foreign key constraint violation
-            if (error?.code === '23503' || error?.message?.includes('foreign key constraint') || error?.message?.includes('still referenced')) {
-                addNotification('alert', `Cannot delete "${productDetails?.name}" - this product has transaction history (stock movements, sales, etc.). To remove it from active inventory, set its status to "Inactive" instead.`);
-            } else {
-                addNotification('alert', `Failed to delete product: ${error?.message || 'Unknown error'}`);
-            }
+        } catch (error) {
+            // Error handled by mutation onError
         } finally {
             setIsSubmitting(false);
-            refreshData();
         }
     };
 
-    // --- APPROVAL HANDLERS ---
-    const handleApproveProduct = async (product: Product) => {
+    const handleApproveProduct = (product: Product) => {
         if (!canApprove) {
             addNotification('alert', 'Only CEO can approve products.');
             return;
         }
-        setIsSubmitting(true);
-        try {
-            const approvedProduct: Product = {
-                ...product,
-                approvalStatus: 'approved',
-                approvedBy: user?.name || 'Unknown',
-                approvedAt: new Date().toISOString(),
-            };
-            await updateProduct(approvedProduct);
-
-            // Create a PUTAWAY job if product has stock (similar to PO workflow)
-            if (product.stock > 0) {
-                const putawayJob = await createPutawayJob(
-                    approvedProduct,
-                    product.stock,
-                    user?.name || 'Unknown',
-                    'Inventory Approval'
-                );
-
-                if (putawayJob) {
-                    addNotification('success', `Product "${product.name}" approved. Putaway job created for ${product.stock} units.`);
-                } else {
-                    addNotification('success', `Product "${product.name}" approved successfully.`);
-                }
-            } else {
-                addNotification('success', `Product "${product.name}" approved successfully.`);
-            }
-
-            logSystemEvent('Product Approved', `New product "${product.name}" (SKU: ${product.sku}) approved`, user?.name || 'System', 'Inventory');
-
-            setIsApprovalModalOpen(false);
-            setSelectedPendingProduct(null);
-        } catch (error) {
-            console.error(error);
-            addNotification('alert', 'Failed to approve product.');
-        } finally {
-            setIsSubmitting(false);
-        }
+        approveRequestMutation.mutate({
+            id: 'view-only',
+            productId: product.id,
+            productName: product.name,
+            productSku: product.sku,
+            changeType: 'create',
+            proposedChanges: product as any,
+            requestedBy: (product as any).createdBy || (product as any).created_by || 'Unknown',
+            requestedAt: (product as any).createdAt || (product as any).created_at || '',
+            status: 'pending',
+            siteId: product.siteId || (product as any).site_id || ''
+        } as PendingInventoryChange);
     };
 
-    const handleRejectProduct = async (product: Product) => {
+    const handleRejectProduct = (product: Product) => {
         if (!canApprove) {
             addNotification('alert', 'Only CEO can reject products.');
             return;
@@ -818,193 +910,46 @@ export default function Inventory() {
             addNotification('alert', 'Please provide a reason for rejection.');
             return;
         }
-        setIsSubmitting(true);
-        try {
-            const rejectedProduct: Product = {
-                ...product,
-                approvalStatus: 'rejected',
-                rejectedBy: user?.name || 'Unknown',
-                rejectedAt: new Date().toISOString(),
-                rejectionReason: rejectionReason,
-            };
-            await updateProduct(rejectedProduct);
-            addNotification('success', `Product "${product.name}" rejected.`);
-            logSystemEvent('Product Rejected', `New product "${product.name}" (SKU: ${product.sku}) rejected. Reason: ${rejectionReason}`, user?.name || 'System', 'Inventory');
-            setIsApprovalModalOpen(false);
-            setSelectedPendingProduct(null);
-            setRejectionReason('');
-        } catch (error) {
-            console.error(error);
-            addNotification('alert', 'Failed to reject product.');
-        } finally {
-            setIsSubmitting(false);
-        }
+        rejectRequestMutation.mutate({
+            change: {
+                id: 'view-only',
+                productId: product.id,
+                productName: product.name,
+                productSku: product.sku,
+                changeType: 'create',
+                proposedChanges: product as any,
+                requestedBy: (product as any).createdBy || (product as any).created_by || 'Unknown',
+                requestedAt: (product as any).createdAt || (product as any).created_at || '',
+                status: 'pending',
+                siteId: product.siteId || (product as any).site_id || ''
+            } as PendingInventoryChange,
+            reason: rejectionReason
+        });
+        setIsApprovalModalOpen(false);
+        setSelectedPendingProduct(null);
+        setRejectionReason('');
     };
 
-    const handleApproveChange = async (change: PendingInventoryChange) => {
+    const handleApproveChange = (change: PendingInventoryChange) => {
         if (!canApprove) return;
-        console.log('📝 handleApproveChange START:', change);
-        console.log('📝 Change ID:', change.id);
-        console.log('📝 Change Type:', change.changeType);
-        setIsSubmitting(true);
-
-        let success = false;
-
-        try {
-            // 1. Apply the change to production
-            if (change.changeType === 'create' && change.proposedChanges) {
-                console.log('🔹 Creating new product from request...');
-                const productToCreate = {
-                    ...change.proposedChanges,
-                    approvalStatus: 'approved' as const,
-                    approvedBy: user?.name,
-                    approvedAt: new Date().toISOString()
-                };
-                const created = await addProduct(productToCreate as Product);
-
-                if (created && created.id) {
-                    success = true;
-                    // Trigger putaway for new stock if needed
-                    if ((change.adjustmentQty || 0) > 0) {
-                        console.log('🔹 Creating putaway job for new product...');
-                        await createPutawayJob(created, change.adjustmentQty || 0, user?.name || 'System', 'Approved Creation');
-                    }
-                }
-            }
-            else if (change.changeType === 'edit' && change.proposedChanges) {
-                console.log('🔹 Updating product from edit request...');
-                console.log('🔹 Proposed changes:', change.proposedChanges);
-                const updateResult = await updateProduct({
-                    ...change.proposedChanges,
-                    id: change.productId,
-                    approvalStatus: 'approved' as const,
-                    approvedBy: user?.name,
-                    approvedAt: new Date().toISOString()
-                } as Product);
-                console.log('🔹 Product update result:', updateResult);
-                success = !!updateResult;
-            }
-            else if (change.changeType === 'delete') {
-                console.log('🔹 Deleting product from request...');
-                await deleteProduct(change.productId);
-                success = true;
-            }
-            else if (change.changeType === 'stock_adjustment') {
-                console.log('🔹 Adjusting stock from request...');
-                await adjustStock(
-                    change.productId,
-                    change.adjustmentQty || 0,
-                    change.adjustmentType || 'IN',
-                    change.adjustmentReason || 'Approved Adjustment',
-                    user?.name || 'System'
-                );
-                success = true;
-            }
-
-            // 2. If the production change succeeded, DELETE the pending request
-            //    (This is more reliable than updating status, which may fail due to RLS)
-            if (success) {
-                console.log('🔹 Deleting completed request from pending queue...');
-                try {
-                    await inventoryRequestsService.delete(change.id);
-                    console.log('✅ Request deleted from pending queue');
-                } catch (deleteErr) {
-                    console.warn('⚠️ Failed to delete request, trying update instead:', deleteErr);
-                    // Fallback: try updating status
-                    await inventoryRequestsService.update(change.id, {
-                        status: 'approved',
-                        approvedBy: user?.name,
-                        approvedAt: new Date().toISOString()
-                    });
-                }
-
-                console.log('✅ Request approved successfully!');
-                addNotification('success', `Request approved: ${change.productName}`);
-                logSystemEvent('Inventory Request Approved', `Request for ${change.changeType} "${change.productName}" approved`, user?.name || 'System', 'Inventory');
-            } else {
-                throw new Error('Failed to apply change to production');
-            }
-
-            // Reload pending requests to update the UI
-            await loadPendingRequests();
-            await refreshData();
-        } catch (error) {
-            console.error('❌ Approval failed:', error);
-            addNotification('alert', `Failed to approve request: ${(error as any)?.message || 'Unknown error'}`);
-        } finally {
-            setIsSubmitting(false);
-        }
+        approveRequestMutation.mutate(change);
     };
 
-    const handleRejectChange = async (change: PendingInventoryChange) => {
+    const handleRejectChange = (change: PendingInventoryChange) => {
         if (!canApprove) return;
-
         const reason = rejectionReason.trim() || "Rejected by administrator";
-        console.log('📝 Rejecting change:', change, 'Reason:', reason);
-
-        setIsSubmitting(true);
-        try {
-            // DELETE the request instead of updating status (more reliable)
-            console.log('🔹 Deleting rejected request from pending queue...');
-            try {
-                await inventoryRequestsService.delete(change.id);
-                console.log('✅ Request deleted from pending queue');
-            } catch (deleteErr) {
-                console.warn('⚠️ Failed to delete request, trying update instead:', deleteErr);
-                // Fallback: try updating status
-                await inventoryRequestsService.update(change.id, {
-                    status: 'rejected',
-                    rejectedBy: user?.name,
-                    rejectedAt: new Date().toISOString(),
-                    rejectionReason: reason
-                });
-            }
-
-            console.log('✅ Request rejected successfully!');
-            addNotification('info', `Request rejected: ${change.productName}`);
-            logSystemEvent('Inventory Request Rejected', `Request for ${change.changeType} "${change.productName}" rejected. Reason: ${reason}`, user?.name || 'System', 'Inventory');
-
-            // CRITICAL: Reset modal state and refresh data
-            setIsApprovalModalOpen(false);
-            setSelectedPendingChange(null);
-            setRejectionReason('');
-
-            await loadPendingRequests();
-        } catch (error) {
-            console.error('❌ Rejection failed:', error);
-            addNotification('alert', 'Failed to reject request');
-        } finally {
-            setIsSubmitting(false);
-        }
+        rejectRequestMutation.mutate({ change, reason });
+        setIsApprovalModalOpen(false);
+        setSelectedPendingChange(null);
+        setRejectionReason('');
     };
 
-    const handleBulkCleanupRequests = async () => {
+    const handleBulkCleanupRequests = () => {
         if (!canApprove || pendingChanges.length === 0) return;
-
         if (!window.confirm(`Are you sure you want to reject all ${pendingChanges.length} pending requests? This will clear all "ghost" requests.`)) {
             return;
         }
-
-        setIsSubmitting(true);
-        try {
-            const cleanupPromises = pendingChanges.map(change =>
-                inventoryRequestsService.update(change.id, {
-                    status: 'rejected',
-                    rejectedBy: user?.name,
-                    rejectedAt: new Date().toISOString(),
-                    rejectionReason: 'System Cleanup: Correcting role casing mismatch ghosts'
-                })
-            );
-
-            await Promise.all(cleanupPromises);
-            addNotification('success', `Successfully cleared ${pendingChanges.length} requests.`);
-            loadPendingRequests();
-        } catch (error) {
-            console.error('Cleanup failed:', error);
-            addNotification('alert', 'Failed to clear all requests');
-        } finally {
-            setIsSubmitting(false);
-        }
+        bulkCleanupMutation.mutate(pendingChanges);
     };
 
     const handleOpenAdjust = (product: Product) => {
@@ -1020,38 +965,22 @@ export default function Inventory() {
 
         setIsSubmitting(true);
         try {
-            // CEO can adjust directly, others need approval
-            if (canApprove) {
-                await adjustStock(editingProduct.id, qty, adjustType, adjustReason, user?.name || 'System');
-                addNotification('success', `Stock adjusted for "${editingProduct.name}".`);
-                logSystemEvent('Stock Adjusted', `Manually adjusted stock for "${editingProduct.name}" by ${qty} units (${adjustType})`, user?.name || 'System', 'Inventory');
-            } else {
-                // Create persistent stock adjustment request
-                const request: Omit<PendingInventoryChange, 'id'> = {
-                    productId: editingProduct.id,
-                    productName: editingProduct.name,
-                    productSku: editingProduct.sku,
-                    siteId: activeSite?.id || user?.siteId || '',
-                    changeType: 'stock_adjustment',
-                    requestedBy: user?.name || 'Unknown',
-                    requestedAt: new Date().toISOString(),
-                    status: 'pending',
-                    adjustmentType: adjustType,
-                    adjustmentQty: qty,
-                    adjustmentReason: adjustReason
-                };
-                await inventoryRequestsService.create(request);
-                addNotification('info', 'Stock adjustment request submitted for approval');
-                loadPendingRequests();
-            }
+            await adjustStockMutation.mutateAsync({
+                productId: editingProduct.id,
+                productName: editingProduct.name,
+                productSku: editingProduct.sku,
+                siteId: activeSite?.id || user?.siteId || '',
+                quantity: qty,
+                type: adjustType,
+                reason: adjustReason,
+                canApprove
+            });
             setIsAdjustModalOpen(false);
             setEditingProduct(null);
         } catch (error) {
-            console.error(error);
-            addNotification('alert', 'Failed to process adjustment');
+            // Error handled by mutation onError
         } finally {
             setIsSubmitting(false);
-            refreshData();
         }
     };
 
@@ -1090,15 +1019,14 @@ export default function Inventory() {
                 <div>
                     <h2 className="text-2xl font-bold text-white flex items-center gap-2">
                         <Box className="text-cyber-primary" />
-                        {isReadOnly ? "Global Inventory (Read-Only)" : `Inventory Command Center: ${activeSite?.name || 'Loading...'}`}
+                        {activeSite ? activeSite.name : "Global Inventory"}
                     </h2>
-                    <p className="text-gray-400 text-sm">Real-time stock levels, batch tracking, and warehouse positions.</p>
+                    <p className="text-gray-400 text-sm">Real-time stock levels, warehouse positions, and audit tracking.</p>
                 </div>
 
                 <div className="flex items-center space-x-3">
                     <button
                         onClick={() => {
-                            console.log('🟦 Inventory: Opening Print Hub');
                             setIsPrintHubOpen(true);
                         }}
                         className="bg-white/5 text-white border border-white/10 px-4 py-2 rounded-lg text-sm hover:bg-white/10 flex items-center transition-colors font-bold"
@@ -1120,11 +1048,21 @@ export default function Inventory() {
 
             {/* Navigation Tabs */}
             <div className="flex space-x-1 bg-cyber-gray p-1 rounded-xl border border-white/5 w-fit overflow-x-auto">
-                <TabButton id="overview" label="Dashboard" icon={TrendingUp} />
-                <TabButton id="stock" label="Master List" icon={Layout} />
-                <TabButton id="zones" label="Zone Map" icon={Map} />
-                <TabButton id="movements" label="Audit Log" icon={ClipboardList} />
-                {/* Pending Approvals Tab - Visible to CEO & Managers */}
+                <TabButton id="overview" label="Overview" icon={TrendingUp} />
+                <TabButton id="stock" label="Products" icon={Layout} />
+                <TabButton id="zones" label="Zones" icon={Map} />
+                <TabButton id="movements" label="Movements" icon={ClipboardList} />
+                {/* Barcode Audit Tab - Visible to Managers */}
+                {canViewAuditLog && (
+                    <Button onClick={() => setActiveTab('barcode_audit')} variant={activeTab === 'barcode_audit' ? 'primary' : 'ghost'} className={`flex items-center space-x-2 px-4 py-3 rounded-lg text-sm font-medium transition-all ${activeTab === 'barcode_audit' ? 'bg-blue-500 text-white shadow-[0_0_15px_rgba(59,130,246,0.3)]' : 'text-blue-400 hover:text-white hover:bg-white/5'} `}>
+                        <Barcode size={16} />
+                        <span>Barcode Mappings</span>
+                        {barcodeApprovals.length > lastViewedBarcodeCount && (
+                            <span className="bg-blue-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">{barcodeApprovals.length - lastViewedBarcodeCount}</span>
+                        )}
+                    </Button>
+                )}
+                {/* Pending Approvals Tab - Visible to CEO Only */}
                 {canViewPending && (
                     <Button onClick={() => setActiveTab('pending')} variant={activeTab === 'pending' ? 'primary' : 'ghost'} className={`flex items-center space-x-2 px-4 py-3 rounded-lg text-sm font-medium transition-all ${activeTab === 'pending' ? 'bg-amber-500 text-black shadow-[0_0_15px_rgba(245,158,11,0.3)]' : 'text-amber-400 hover:text-white hover:bg-white/5'} `}>
                         <Clock size={16} />
@@ -1141,11 +1079,11 @@ export default function Inventory() {
                 <div className="space-y-6 animate-in fade-in">
                     {/* KPI Cards */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-                        <MetricCard title="Total Asset Value" value={formatCompactNumber(totalInventoryValueCost, { currency: CURRENCY_SYMBOL })} sub="Valued at Base Cost" icon={DollarSign} trend={12} />
+                        <MetricCard title="Total Asset Value" value={formatCompactNumber(totalInventoryValueCost, { currency: CURRENCY_SYMBOL })} sub="Valued at Base Cost" icon={DollarSign} />
                         <MetricCard title="Potential Revenue" value={formatCompactNumber(totalInventoryValueRetail, { currency: CURRENCY_SYMBOL })} sub="Retail Valuation" icon={TrendingUp} />
-                        <MetricCard title="Stock Turn Rate" value="4.2x" sub="Annualized" icon={RefreshCw} trend={5} />
-                        <MetricCard title="Low Stock SKUs" value={filteredProducts.filter(p => p.status === 'low_stock').length} sub="Requires Action" icon={AlertTriangle} trend={-2} />
-                        <MetricCard title="Dead Stock Value" value={`${CURRENCY_SYMBOL} 45K`} sub="> 90 Days No Move" icon={XCircle} />
+                        <MetricCard title="Stock Turn Rate" value={`${serverMetrics?.stock_turnover_rate || 0}x`} sub="Annualized Ratio" icon={RefreshCw} />
+                        <MetricCard title="Low Stock SKUs" value={serverMetrics?.low_stock_count ?? filteredProducts.filter(p => p.status === 'low_stock').length} sub="Requires Action" icon={AlertTriangle} />
+                        <MetricCard title="Dead Stock Value" value={formatCompactNumber(serverMetrics?.dead_stock_value || 0, { currency: CURRENCY_SYMBOL })} sub="> 90 Days No Move" icon={XCircle} />
                     </div>
 
                     {/* Charts Row */}
@@ -1154,7 +1092,7 @@ export default function Inventory() {
                         <div className="lg:col-span-2 bg-cyber-gray border border-white/5 rounded-2xl p-6">
                             <h3 className="font-bold text-white mb-6">Valuation by Category</h3>
                             <div className="h-[300px] w-full">
-                                <ResponsiveContainer width="100%" height="100%" minHeight={0}>
+                                <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0} debounce={50}>
                                     <BarChart data={categoryData}>
                                         <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
                                         <XAxis dataKey="name" stroke="#666" fontSize={12} tickLine={false} axisLine={false} />
@@ -1170,11 +1108,11 @@ export default function Inventory() {
                         <div className="bg-cyber-gray border border-white/5 rounded-2xl p-6">
                             <h3 className="font-bold text-white mb-6">ABC Classification</h3>
                             <div className="h-[200px] w-full">
-                                <ResponsiveContainer width="100%" height="100%" minHeight={0}>
+                                <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0} debounce={50}>
                                     <PieChart>
                                         <Pie data={abcData} cx="50%" cy="50%" innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value">
                                             {abcData.map((entry: any, index: number) => (
-                                                <Cell key={`cell - ${index} `} fill={COLORS[index % COLORS.length]} stroke="none" />
+                                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke="none" />
                                             ))}
                                         </Pie>
                                         <Tooltip contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #333' }} />
@@ -1205,87 +1143,99 @@ export default function Inventory() {
                 <div className="flex flex-col h-[calc(100vh-280px)]">
                     {/* Main List */}
                     <div className="flex-1 bg-cyber-gray border border-white/5 rounded-2xl overflow-hidden flex flex-col">
-                        {/* Toolbar with Filters */}
-                        <div className="p-4 border-b border-white/5 space-y-3">
-                            {/* Search Bar */}
+                        {/* Toolbar with Filters - Redesigned for Premium Elegance */}
+                        <div className="p-6 border-b border-white/5 space-y-4 bg-white/2">
+                            {/* Refined Search Bar */}
                             <div className="flex items-center gap-3">
-                                <div className="flex items-center bg-black/30 border border-white/10 rounded-xl px-4 py-2 flex-1">
-                                    <Search className="w-4 h-4 text-gray-400" />
+                                <div className="flex items-center bg-black/40 border border-white/10 rounded-2xl px-5 py-2.5 flex-1 focus-within:border-cyber-primary/50 transition-all shadow-inner group">
+                                    <Search className="w-5 h-5 text-gray-500 group-focus-within:text-cyber-primary transition-colors" />
                                     <input
                                         type="text"
                                         aria-label="Search"
-                                        placeholder="Search SKU, Name, Location..."
-                                        className="bg-transparent border-none ml-3 flex-1 text-white outline-none placeholder-gray-500 text-sm"
+                                        placeholder="Search SKU, Name, or Warehouse Location..."
+                                        className="bg-transparent border-none ml-3 flex-1 text-white outline-none placeholder:text-gray-600 font-medium text-sm"
                                         value={searchTerm}
                                         onChange={(e) => setSearchTerm(e.target.value)}
                                     />
                                 </div>
-                                <div className="text-xs text-gray-400 font-mono whitespace-nowrap">
-                                    {filteredItems.length} items
+                                <div className="text-[11px] text-gray-500 font-black uppercase tracking-widest bg-white/5 px-3 py-1.5 rounded-lg border border-white/5">
+                                    {filteredItems.length} Records
                                 </div>
                             </div>
 
-                            {/* Filter Dropdowns */}
-                            <div className="flex items-center gap-3 flex-wrap">
-                                <span className="text-xs text-gray-500 font-bold uppercase">Filters:</span>
+                            {/* Elegant Filter System */}
+                            <div className="flex items-center gap-4 flex-wrap">
+                                <div className="flex items-center gap-2 pr-4 border-r border-white/5">
+                                    <SlidersHorizontal size={14} className="text-cyber-primary" />
+                                    <span className="text-[11px] text-white font-black uppercase tracking-[0.15em]">Filters</span>
+                                </div>
 
                                 {/* NEW: Site Location Filter (Global View Only) */}
                                 {(!activeSite || isReadOnly) && (
-                                    <div className="relative">
+                                    <div className="relative group">
+                                        <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                                            <Map size={12} className="text-blue-400 opacity-60 group-hover:opacity-100 transition-opacity" />
+                                        </div>
                                         <select
                                             value={filters.siteId}
                                             aria-label="Filter by Site"
                                             onChange={(e) => setFilters({ ...filters, siteId: e.target.value })}
-                                            className="appearance-none bg-blue-900/20 border border-blue-500/30 rounded-lg pl-3 pr-8 py-2 text-xs font-bold text-blue-400 outline-none cursor-pointer hover:bg-blue-900/30 transition-colors"
+                                            className="appearance-none bg-white/5 border border-white/10 rounded-xl pl-8 pr-10 py-2 text-xs font-bold text-gray-300 outline-none cursor-pointer hover:bg-white/10 hover:border-blue-500/30 hover:text-white transition-all min-w-[160px]"
                                         >
                                             <option value="All">All Locations</option>
                                             {sites.filter(s => s.type !== 'Store' && s.type !== 'Administration').map(s => (
                                                 <option key={s.id} value={s.id}>{s.name} ({s.type})</option>
                                             ))}
                                         </select>
-                                        <ChevronDown size={12} className="absolute right-2 top-2.5 text-blue-400 pointer-events-none" />
+                                        <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 group-hover:text-blue-400 transition-colors pointer-events-none" />
                                     </div>
                                 )}
 
                                 {/* Category Filter */}
-                                <div className="relative">
+                                <div className="relative group">
+                                    <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                                        <Package size={12} className="text-cyber-primary opacity-60 group-hover:opacity-100 transition-opacity" />
+                                    </div>
                                     <select
                                         value={filters.category}
                                         aria-label="Filter by Category"
                                         onChange={(e) => setFilters({ ...filters, category: e.target.value })}
-                                        className="appearance-none bg-white/5 border border-white/10 rounded-lg pl-3 pr-8 py-2 text-xs font-bold text-white outline-none cursor-pointer hover:bg-white/10 transition-colors"
+                                        className="appearance-none bg-white/5 border border-white/10 rounded-xl pl-8 pr-10 py-2 text-xs font-bold text-gray-300 outline-none cursor-pointer hover:bg-white/10 hover:border-cyber-primary/30 hover:text-white transition-all min-w-[160px]"
                                     >
                                         <option value="All">All Categories</option>
                                         {Array.from(new Set(filteredProducts.map(p => p.category))).map(c => (
                                             <option key={c} value={c}>{c}</option>
                                         ))}
                                     </select>
-                                    <ChevronDown size={12} className="absolute right-2 top-2.5 text-gray-400 pointer-events-none" />
+                                    <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 group-hover:text-cyber-primary transition-colors pointer-events-none" />
                                 </div>
 
                                 {/* Status Filter */}
-                                <div className="relative">
+                                <div className="relative group">
+                                    <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                                        <div className="w-2 h-2 rounded-full border border-green-500/50 group-hover:bg-green-500 transition-all" />
+                                    </div>
                                     <select
                                         value={filters.status}
                                         aria-label="Filter by Status"
                                         onChange={(e) => setFilters({ ...filters, status: e.target.value })}
-                                        className="appearance-none bg-white/5 border border-white/10 rounded-lg pl-3 pr-8 py-2 text-xs font-bold text-white outline-none cursor-pointer hover:bg-white/10 transition-colors"
+                                        className="appearance-none bg-white/5 border border-white/10 rounded-xl pl-8 pr-10 py-2 text-xs font-bold text-gray-300 outline-none cursor-pointer hover:bg-white/10 hover:border-green-500/30 hover:text-white transition-all min-w-[140px]"
                                     >
-                                        <option value="All">All Status</option>
+                                        <option value="All">All Inventory</option>
                                         <option value="Active">In Stock</option>
                                         <option value="Low Stock">Low Stock</option>
                                         <option value="Out of Stock">Out of Stock</option>
                                     </select>
-                                    <ChevronDown size={12} className="absolute right-2 top-2.5 text-gray-400 pointer-events-none" />
+                                    <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 group-hover:text-green-400 transition-colors pointer-events-none" />
                                 </div>
 
                                 {/* Clear Filters */}
                                 {(filters.category !== 'All' || filters.status !== 'All' || filters.abc !== 'All' || filters.siteId !== 'All') && (
                                     <button
                                         onClick={() => setFilters({ category: 'All', status: 'All', abc: 'All', priceRange: 'All', siteId: 'All' })}
-                                        className="text-xs text-gray-400 hover:text-white underline"
+                                        className="px-4 py-2 rounded-xl text-[10px] font-black uppercase text-red-400 hover:text-white hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-all ml-auto"
                                     >
-                                        Clear All
+                                        Reset Filters
                                     </button>
                                 )}
                             </div>
@@ -1302,177 +1252,243 @@ export default function Inventory() {
                             </div>
                         )}
 
-                        {/* Table */}
+                        {/* Master Inventory Table - Refined for High-End Look */}
                         <div className="flex-1 overflow-auto custom-scrollbar">
                             <table className="w-full text-left border-collapse">
-                                <thead className="sticky top-0 bg-black/90 backdrop-blur-sm z-10 border-b border-white/10">
-                                    <tr>
-                                        <th className="p-4 w-10"><input type="checkbox" aria-label="Select All" className="accent-cyber-primary" onChange={() => {
-                                            if (selectedIds.size === filteredItems.length) setSelectedIds(new Set());
-                                            else setSelectedIds(new Set(filteredItems.map(i => i.id)));
-                                        }} checked={selectedIds.size === filteredItems.length && filteredItems.length > 0} /></th>
+                                <thead className="sticky top-0 bg-black/80 backdrop-blur-md z-10 border-b border-white/10 shadow-lg">
+                                    <tr className="bg-white/[0.02]">
+                                        <th className="p-5 w-10">
+                                            <div className="relative flex items-center justify-center">
+                                                <input
+                                                    type="checkbox"
+                                                    aria-label="Select All"
+                                                    className="peer appearance-none w-4 h-4 border border-white/20 rounded bg-white/5 checked:bg-cyber-primary checked:border-cyber-primary transition-all cursor-pointer"
+                                                    onChange={() => {
+                                                        if (selectedIds.size === filteredItems.length) setSelectedIds(new Set());
+                                                        else setSelectedIds(new Set(filteredItems.map(i => i.id)));
+                                                    }}
+                                                    checked={selectedIds.size === filteredItems.length && filteredItems.length > 0}
+                                                />
+                                                <CheckCircle size={10} className="absolute text-black opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none" />
+                                            </div>
+                                        </th>
 
-                                        <th className="p-4 text-xs font-medium text-gray-400 uppercase cursor-pointer hover:text-white transition-colors group select-none" onClick={() => handleSort('name')}>
-                                            <div className="flex items-center gap-1">
+                                        <th className="p-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] cursor-pointer hover:text-white transition-colors group select-none" onClick={() => handleSort('name')}>
+                                            <div className="flex items-center gap-2">
                                                 Product
-                                                {sortConfig?.key === 'name' && (
-                                                    <ArrowUpDown size={12} className={sortConfig.direction === 'asc' ? 'rotate-180' : ''} />
-                                                )}
+                                                <div className={`p-1 rounded transition-colors ${sortConfig?.key === 'name' ? 'bg-cyber-primary/20 text-cyber-primary' : 'text-gray-600 group-hover:text-gray-400'}`}>
+                                                    <ArrowUpDown size={10} className={sortConfig?.key === 'name' && sortConfig.direction === 'asc' ? 'rotate-180' : ''} />
+                                                </div>
                                             </div>
                                         </th>
-                                        <th className="p-4 text-xs font-medium text-gray-400 uppercase cursor-pointer hover:text-white transition-colors group select-none" onClick={() => handleSort('location')}>
-                                            <div className="flex items-center gap-1">
-                                                Warehouse Location
-                                                {sortConfig?.key === 'location' && (
-                                                    <ArrowUpDown size={12} className={sortConfig.direction === 'asc' ? 'rotate-180' : ''} />
-                                                )}
+                                        <th className="p-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] cursor-pointer hover:text-white transition-colors group select-none" onClick={() => handleSort('location')}>
+                                            <div className="flex items-center gap-2">
+                                                Location
+                                                <div className={`p-1 rounded transition-colors ${sortConfig?.key === 'location' ? 'bg-cyber-primary/20 text-cyber-primary' : 'text-gray-600 group-hover:text-gray-400'}`}>
+                                                    <ArrowUpDown size={10} className={sortConfig?.key === 'location' && sortConfig.direction === 'asc' ? 'rotate-180' : ''} />
+                                                </div>
                                             </div>
                                         </th>
-                                        <th className="p-4 text-xs font-medium text-gray-400 uppercase text-center cursor-pointer hover:text-white transition-colors group select-none" onClick={() => handleSort('stock')}>
-                                            <div className="flex items-center justify-center gap-1">
-                                                Stock
-                                                {sortConfig?.key === 'stock' && (
-                                                    <ArrowUpDown size={12} className={sortConfig.direction === 'asc' ? 'rotate-180' : ''} />
-                                                )}
+                                        <th className="p-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-center cursor-pointer hover:text-white transition-colors group select-none" onClick={() => handleSort('stock')}>
+                                            <div className="flex items-center justify-center gap-2">
+                                                Stock Level
+                                                <div className={`p-1 rounded transition-colors ${sortConfig?.key === 'stock' ? 'bg-cyber-primary/20 text-cyber-primary' : 'text-gray-600 group-hover:text-gray-400'}`}>
+                                                    <ArrowUpDown size={10} className={sortConfig?.key === 'stock' && sortConfig.direction === 'asc' ? 'rotate-180' : ''} />
+                                                </div>
                                             </div>
                                         </th>
-                                        <th className="p-4 text-xs font-medium text-gray-400 uppercase text-right cursor-pointer hover:text-white transition-colors group select-none" onClick={() => handleSort('costPrice')}>
-                                            <div className="flex items-center justify-end gap-1">
-                                                Base Cost
-                                                {sortConfig?.key === 'costPrice' && (
-                                                    <ArrowUpDown size={12} className={sortConfig.direction === 'asc' ? 'rotate-180' : ''} />
-                                                )}
+                                        <th className="p-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-right cursor-pointer hover:text-white transition-colors group select-none" onClick={() => handleSort('costPrice')}>
+                                            <div className="flex items-center justify-end gap-2">
+                                                Cost
+                                                <div className={`p-1 rounded transition-colors ${sortConfig?.key === 'costPrice' ? 'bg-cyber-primary/20 text-cyber-primary' : 'text-gray-600 group-hover:text-gray-400'}`}>
+                                                    <ArrowUpDown size={10} className={sortConfig?.key === 'costPrice' && sortConfig.direction === 'asc' ? 'rotate-180' : ''} />
+                                                </div>
                                             </div>
                                         </th>
-                                        <th className="p-4 text-xs font-medium text-gray-400 uppercase text-right cursor-pointer hover:text-white transition-colors group select-none" onClick={() => handleSort('price')}>
-                                            <div className="flex items-center justify-end gap-1">
-                                                Retail Price
-                                                {sortConfig?.key === 'price' && (
-                                                    <ArrowUpDown size={12} className={sortConfig.direction === 'asc' ? 'rotate-180' : ''} />
-                                                )}
+                                        <th className="p-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-right cursor-pointer hover:text-white transition-colors group select-none" onClick={() => handleSort('price')}>
+                                            <div className="flex items-center justify-end gap-2">
+                                                Price
+                                                <div className={`p-1 rounded transition-colors ${sortConfig?.key === 'price' ? 'bg-cyber-primary/20 text-cyber-primary' : 'text-gray-600 group-hover:text-gray-400'}`}>
+                                                    <ArrowUpDown size={10} className={sortConfig?.key === 'price' && sortConfig.direction === 'asc' ? 'rotate-180' : ''} />
+                                                </div>
                                             </div>
                                         </th>
-                                        <th className="p-4 text-xs font-medium text-gray-400 uppercase text-right cursor-pointer hover:text-white transition-colors group select-none" onClick={() => handleSort('assetValue')}>
-                                            <div className="flex items-center justify-end gap-1">
-                                                Asset Value
-                                                {sortConfig?.key === 'assetValue' && (
-                                                    <ArrowUpDown size={12} className={sortConfig.direction === 'asc' ? 'rotate-180' : ''} />
-                                                )}
+                                        <th className="p-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-right cursor-pointer hover:text-white transition-colors group select-none" onClick={() => handleSort('assetValue')}>
+                                            <div className="flex items-center justify-end gap-2">
+                                                Value
+                                                <div className={`p-1 rounded transition-colors ${sortConfig?.key === 'assetValue' ? 'bg-cyber-primary/20 text-cyber-primary' : 'text-gray-600 group-hover:text-gray-400'}`}>
+                                                    <ArrowUpDown size={10} className={sortConfig?.key === 'assetValue' && sortConfig.direction === 'asc' ? 'rotate-180' : ''} />
+                                                </div>
                                             </div>
                                         </th>
-                                        <th className="p-4 text-xs font-medium text-gray-400 uppercase text-center cursor-pointer hover:text-white transition-colors group select-none" onClick={() => handleSort('abc')}>
-                                            <div className="flex items-center justify-center gap-1">
+                                        <th className="p-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-center cursor-pointer hover:text-white transition-colors group select-none" onClick={() => handleSort('abc')}>
+                                            <div className="flex items-center justify-center gap-2">
                                                 Class
-                                                {sortConfig?.key === 'abc' && (
-                                                    <ArrowUpDown size={12} className={sortConfig.direction === 'asc' ? 'rotate-180' : ''} />
-                                                )}
+                                                <div className={`p-1 rounded transition-colors ${sortConfig?.key === 'abc' ? 'bg-cyber-primary/20 text-cyber-primary' : 'text-gray-600 group-hover:text-gray-400'}`}>
+                                                    <ArrowUpDown size={10} className={sortConfig?.key === 'abc' && sortConfig.direction === 'asc' ? 'rotate-180' : ''} />
+                                                </div>
                                             </div>
                                         </th>
-                                        <th className="p-4 text-xs font-medium text-gray-400 uppercase text-right cursor-pointer hover:text-white transition-colors group select-none" onClick={() => handleSort('createdAt')}>
-                                            <div className="flex items-center justify-end gap-1">
+                                        <th className="p-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-right cursor-pointer hover:text-white transition-colors group select-none" onClick={() => handleSort('createdAt')}>
+                                            <div className="flex items-center justify-end gap-2">
                                                 Date
-                                                {sortConfig?.key === 'createdAt' && (
-                                                    <ArrowUpDown size={12} className={sortConfig.direction === 'asc' ? 'rotate-180' : ''} />
-                                                )}
+                                                <div className={`p-1 rounded transition-colors ${sortConfig?.key === 'createdAt' ? 'bg-cyber-primary/20 text-cyber-primary' : 'text-gray-600 group-hover:text-gray-400'}`}>
+                                                    <ArrowUpDown size={10} className={sortConfig?.key === 'createdAt' && sortConfig.direction === 'asc' ? 'rotate-180' : ''} />
+                                                </div>
                                             </div>
                                         </th>
-                                        <th className="p-4 text-xs font-medium text-gray-400 uppercase text-right">Actions</th>
+                                        <th className="p-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-right">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-white/5">
                                     {filteredItems.map((product) => {
                                         const abc = getABCClass(product, totalInventoryValue);
                                         const isSelected = selectedIds.has(product.id);
+                                        const displayCostPrice = product.costPrice && product.costPrice > 0
+                                            ? product.costPrice
+                                            : (product.price && product.price > 0 ? product.price * 0.7 : 0);
+
                                         return (
-                                            <tr key={product.id} className={`hover:bg-white/5 transition-colors group ${isSelected ? 'bg-cyber-primary/5' : ''}`}>
-                                                <td className="p-4"><input type="checkbox" aria-label="Select row" className="accent-cyber-primary" checked={isSelected} onChange={() => toggleSelection(product.id)} /></td>
-                                                <td className="p-4">
-                                                    <div className="flex items-center space-x-3">
-                                                        <div className="w-12 h-12 rounded-lg bg-black/30 border border-white/10 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                                            <tr key={product.id} className={`group hover:bg-white/[0.03] transition-all duration-300 ${isSelected ? 'bg-cyber-primary/[0.08]' : ''}`}>
+                                                <td className="p-5">
+                                                    <div className="relative flex items-center justify-center">
+                                                        <input
+                                                            type="checkbox"
+                                                            aria-label="Select row"
+                                                            className="peer appearance-none w-4 h-4 border border-white/10 rounded bg-white/5 checked:bg-cyber-primary checked:border-cyber-primary transition-all cursor-pointer"
+                                                            checked={isSelected}
+                                                            onChange={() => toggleSelection(product.id)}
+                                                        />
+                                                        <CheckCircle size={10} className="absolute text-black opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none" />
+                                                    </div>
+                                                </td>
+                                                <td className="p-5">
+                                                    <div className="flex items-center space-x-4">
+                                                        <div className="w-14 h-14 rounded-2xl bg-black/40 border border-white/10 flex items-center justify-center flex-shrink-0 overflow-hidden shadow-inner group-hover:border-cyber-primary/30 transition-colors">
                                                             {product.image && !product.image.includes('placeholder.com') ? (
                                                                 <img
                                                                     src={product.image}
                                                                     alt=""
-                                                                    className="w-full h-full object-cover"
+                                                                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                                                                     onError={(e) => {
                                                                         e.currentTarget.style.display = 'none';
-                                                                        (e.currentTarget.parentElement as HTMLElement).innerHTML = '<div class="text-gray-600"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-package"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg></div>';
+                                                                        (e.currentTarget.parentElement as HTMLElement).innerHTML = '<div class="text-gray-700"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg></div>';
                                                                     }}
                                                                 />
                                                             ) : (
-                                                                <Package size={20} className="text-gray-600" />
+                                                                <Package size={24} className="text-gray-700 group-hover:text-cyber-primary/40 transition-colors" />
                                                             )}
                                                         </div>
                                                         <div>
-                                                            <p className="text-sm font-medium text-white">{product.name}</p>
-                                                            <div className="flex items-center space-x-2 mt-1">
-                                                                <span className="text-[10px] font-mono text-gray-500 bg-black/30 px-1.5 py-0.5 rounded">{product.sku}</span>
-                                                                <span className="text-[10px] bg-white/10 px-1.5 py-0.5 rounded text-gray-400">{product.category}</span>
-                                                                {/* Approval Status Badge */}
+                                                            <p className="text-[13px] font-black text-white tracking-tight group-hover:text-cyber-primary transition-colors">{product.name}</p>
+                                                            <div className="flex items-center gap-2 mt-1.5">
+                                                                <span className="text-[9px] font-black font-mono text-gray-500 bg-black/40 px-2 py-0.5 rounded-md border border-white/5 uppercase tracking-tighter">{product.sku}</span>
+                                                                <span className="text-[9px] font-black bg-white/5 px-2 py-0.5 rounded-md text-gray-400 uppercase tracking-tighter">{product.category}</span>
                                                                 {product.approvalStatus === 'pending' && (
-                                                                    <span className="text-[10px] bg-amber-500/20 text-amber-400 px-1.5 py-0.5 rounded border border-amber-500/30">⏳ Pending</span>
-                                                                )}
-                                                                {product.approvalStatus === 'rejected' && (
-                                                                    <span className="text-[10px] bg-red-500/20 text-red-400 px-1.5 py-0.5 rounded border border-red-500/30">❌ Rejected</span>
+                                                                    <span className="text-[9px] font-black bg-amber-500/10 text-amber-500 px-2 py-0.5 rounded-md border border-amber-500/20 uppercase tracking-tighter">⏳ Review</span>
                                                                 )}
                                                             </div>
-                                                            {/* Created By Info */}
-                                                            {(product.createdBy || product.created_by) && (
-                                                                <p className="text-[10px] text-cyan-400/70 mt-1 flex items-center gap-1">
-                                                                    <User size={10} /> Created by: {product.createdBy || product.created_by}
-                                                                </p>
-                                                            )}
                                                         </div>
                                                     </div>
                                                 </td>
-                                                <td className="p-4">
+                                                <td className="p-5">
                                                     {(!activeSite || isReadOnly) ? (
-                                                        // Global/Read-Only View: Show Site Name
                                                         (() => {
                                                             const site = sites.find(s => s.id === product.siteId || s.id === (product as any).site_id);
                                                             return site ? (
-                                                                <span className="font-mono text-xs font-bold px-3 py-1.5 rounded-lg border bg-blue-500/10 border-blue-500/20 text-blue-400">
-                                                                    🏢 {site.name}
-                                                                </span>
+                                                                <div className="flex flex-col">
+                                                                    <span className="text-[11px] font-black text-blue-400 uppercase tracking-[0.1em] flex items-center gap-1.5">
+                                                                        <div className="w-1.5 h-1.5 rounded-full bg-blue-400" />
+                                                                        {site.name}
+                                                                    </span>
+                                                                    <span className="text-[9px] text-gray-600 font-bold uppercase mt-0.5 ml-3">{site.type}</span>
+                                                                </div>
                                                             ) : (
-                                                                <span className="font-mono text-xs text-gray-500">Unknown Site</span>
+                                                                <span className="text-[10px] text-gray-600 font-black uppercase italic tracking-widest">Unmapped Site</span>
                                                             );
                                                         })()
                                                     ) : (
-                                                        // Active Warehouse View: Show Shelf/Bin Location
                                                         product.location ? (
-                                                            <span className="font-mono text-xs font-bold px-3 py-1.5 rounded-lg border bg-white/5 border-white/10 text-white">📍 {product.location}</span>
+                                                            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 group-hover:border-cyber-primary/30 transition-all">
+                                                                <Map size={10} className="text-cyber-primary" />
+                                                                <span className="text-[11px] font-black text-white font-mono">{product.location}</span>
+                                                            </div>
                                                         ) : (
-                                                            <span className="font-mono text-xs text-red-400 bg-red-500/10 px-3 py-1.5 rounded-lg border border-red-500/30">⚠️ UNASSIGNED</span>
+                                                            <span className="text-[9px] font-black text-red-500/60 uppercase tracking-widest bg-red-500/5 px-3 py-1.5 rounded-xl border border-red-500/10">No Cell Assigned</span>
                                                         )
                                                     )}
                                                 </td>
-                                                <td className="p-4 text-center">
-                                                    <span className={`text-sm font-bold font-mono px-3 py-1 rounded-lg ${product.stock === 0 ? 'bg-red-500/20 text-red-400 border border-red-500/50' : product.stock < 10 ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/50' : 'bg-green-500/20 text-green-400 border border-green-500/50'}`}>{product.stock}</span>
+                                                <td className="p-5 text-center">
+                                                    <div className={`inline-flex items-center justify-center min-w-[50px] px-3 py-1.5 rounded-2xl text-[12px] font-black font-mono shadow-sm transition-all ${product.stock === 0 ? 'bg-red-500/10 text-red-500 border border-red-500/30' : product.stock < 10 ? 'bg-yellow-500/10 text-yellow-500 border border-yellow-500/30 shadow-yellow-500/5' : 'bg-green-500/10 text-green-500 border border-green-500/30'}`}>
+                                                        {product.stock}
+                                                    </div>
                                                 </td>
-                                                <td className="p-4 text-right">
-                                                    <div className="text-sm font-mono text-gray-400">{formatCompactNumber(product.costPrice || product.price * 0.7, { currency: CURRENCY_SYMBOL })}</div>
+                                                <td className="p-5 text-right">
+                                                    <div className="flex flex-col items-end">
+                                                        <span className="text-[12px] font-black text-gray-400 font-mono tracking-tighter">
+                                                            {displayCostPrice > 0 ? formatCompactNumber(displayCostPrice, { currency: CURRENCY_SYMBOL }) : '—'}
+                                                        </span>
+                                                        <span className="text-[9px] text-gray-600 font-bold uppercase tracking-widest mt-0.5">Unit Cost</span>
+                                                    </div>
                                                 </td>
-                                                <td className="p-4 text-right">
-                                                    <div className="text-sm font-mono text-blue-400">{formatCompactNumber(product.price, { currency: CURRENCY_SYMBOL })}</div>
+                                                <td className="p-5 text-right">
+                                                    <div className="flex flex-col items-end">
+                                                        <span className="text-[13px] font-black text-white font-mono tracking-tighter group-hover:text-cyber-primary transition-colors">
+                                                            {product.price && product.price > 0 ? formatCompactNumber(product.price, { currency: CURRENCY_SYMBOL }) : '—'}
+                                                        </span>
+                                                        <span className="text-[9px] text-gray-500 font-bold uppercase tracking-widest mt-0.5">Retail Price</span>
+                                                    </div>
                                                 </td>
-                                                <td className="p-4 text-right">
-                                                    <div className="text-sm font-mono text-white font-bold">{formatCompactNumber(product.stock * (product.costPrice || product.price * 0.7), { currency: CURRENCY_SYMBOL })}</div>
-                                                    <div className="text-[10px] text-gray-500 mt-0.5">Retail: {formatCompactNumber(product.price * product.stock, { currency: CURRENCY_SYMBOL })}</div>
+                                                <td className="p-5 text-right">
+                                                    <div className="inline-flex flex-col items-end bg-black/20 p-2 rounded-xl border border-white/[0.03]">
+                                                        <span className="text-[12px] font-black text-cyber-primary font-mono tracking-tighter">
+                                                            {displayCostPrice > 0 ? formatCompactNumber(product.stock * displayCostPrice, { currency: CURRENCY_SYMBOL }) : '—'}
+                                                        </span>
+                                                        <span className="text-[9px] text-gray-600 font-bold uppercase tracking-widest">Inventory Value</span>
+                                                    </div>
                                                 </td>
-                                                <td className="p-4 text-center">
-                                                    <span className={`text-xs font-bold w-8 h-8 flex items-center justify-center rounded-full mx-auto border-2 ${abc === 'A' ? 'border-green-500 text-green-500 bg-green-500/10' : abc === 'B' ? 'border-blue-500 text-blue-500 bg-blue-500/10' : 'border-gray-500 text-gray-500 bg-gray-500/10'}`}>{abc}</span>
+                                                <td className="p-5 text-center">
+                                                    <div className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-[11px] font-black border transition-all ${abc === 'A' ? 'bg-green-500/10 text-green-500 border-green-500/30 shadow-lg shadow-green-500/5' : abc === 'B' ? 'bg-blue-500/10 text-blue-500 border-blue-500/30' : 'bg-gray-500/10 text-gray-500 border-gray-500/30'}`}>
+                                                        {abc}
+                                                    </div>
                                                 </td>
-                                                <td className="p-4 text-right">
+                                                <td className="p-5 text-right">
+                                                    <div className="flex flex-col items-end">
+                                                        <span className="text-[10px] font-black text-gray-500 font-mono">
+                                                            {product.createdAt ? formatDateTime(product.createdAt) :
+                                                                (product as any).created_at ? formatDateTime((product as any).created_at) : '--'}
+                                                        </span>
+                                                        <span className="text-[9px] text-gray-700 font-bold uppercase tracking-widest mt-0.5">Date Added</span>
+                                                    </div>
+                                                </td>
+                                                <td className="p-5 text-right">
                                                     {!isReadOnly && (
-                                                        <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                        <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-all translate-x-2 group-hover:translate-x-0">
                                                             <Protected permission="EDIT_PRODUCT">
-                                                                <div className="flex items-center gap-2">
+                                                                <div className="flex items-center gap-1">
                                                                     <Protected permission="ADJUST_STOCK">
-                                                                        <Button onClick={() => handleOpenAdjust(product)} variant="ghost" size="sm" className="p-1.5 text-gray-400 hover:text-white" title="Adjust Stock" aria-label="Adjust Stock"><RefreshCw size={14} /></Button>
+                                                                        <button
+                                                                            onClick={() => handleOpenAdjust(product)}
+                                                                            className="p-2 hover:bg-cyber-primary/10 hover:text-cyber-primary text-gray-500 rounded-xl transition-all"
+                                                                            title="Adjust Stock"
+                                                                        >
+                                                                            <RefreshCw size={14} />
+                                                                        </button>
                                                                     </Protected>
-                                                                    <Button onClick={() => handleDeleteProduct(product.id)} variant="ghost" size="sm" className="p-1.5 text-gray-400 hover:text-red-400" title="Delete Product" aria-label="Delete Product"><Trash2 size={14} /></Button>
-                                                                    <Button onClick={() => handleOpenEditProduct(product)} variant="ghost" size="sm" className="p-1.5 text-gray-400 hover:text-yellow-400" title="Edit Product" aria-label="Edit Product"><Edit size={14} /></Button>
+                                                                    <button
+                                                                        onClick={() => handleOpenEditProduct(product)}
+                                                                        className="p-2 hover:bg-blue-500/10 hover:text-blue-400 text-gray-500 rounded-xl transition-all"
+                                                                        title="Edit Product"
+                                                                    >
+                                                                        <Edit size={14} />
+                                                                    </button>
+                                                                    <button
+                                                                        onClick={() => handleDeleteProduct(product.id)}
+                                                                        className="p-2 hover:bg-red-500/10 hover:text-red-500 text-gray-500 rounded-xl transition-all"
+                                                                        title="Delete Product"
+                                                                    >
+                                                                        <Trash2 size={14} />
+                                                                    </button>
                                                                 </div>
                                                             </Protected>
                                                         </div>
@@ -1493,27 +1509,35 @@ export default function Inventory() {
                         </div>
 
                         {/* Product Pagination Controls */}
-                        <div className="flex justify-between items-center p-4 border-t border-white/5 bg-black/20">
-                            <div className="text-xs text-gray-400">
-                                Showing {localProducts.length} of {formatCompactNumber(totalProductCount)} records
+                        <div className="flex justify-between items-center p-6 border-t border-white/5 bg-black/40 backdrop-blur-md rounded-b-3xl">
+                            <div className="text-[11px] font-black text-gray-500 uppercase tracking-widest flex items-center gap-3">
+                                <span className="w-1.5 h-1.5 rounded-full bg-cyber-primary animate-pulse" />
+                                Displays: <span className="text-white">{localProducts.length}</span> <span className="text-gray-700">/</span> <span className="text-gray-400">{formatCompactNumber(totalProductCount)}</span> Records
                             </div>
-                            <div className="flex gap-2">
+                            <div className="flex items-center gap-4">
                                 <button
                                     onClick={() => setCurrentProductPage(prev => Math.max(1, prev - 1))}
                                     disabled={currentProductPage === 1 || productsLoading}
-                                    className="px-3 py-1 bg-white/5 hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed rounded text-xs text-white transition-colors border border-white/10"
+                                    className="px-4 py-2 bg-white/5 hover:bg-cyber-primary/10 disabled:opacity-30 disabled:hover:bg-white/5 rounded-xl text-[11px] font-black text-white transition-all border border-white/10 hover:border-cyber-primary/40 flex items-center gap-2 group"
                                 >
-                                    Previous
+                                    <ChevronLeft size={14} className="group-hover:-translate-x-0.5 transition-transform" />
+                                    Prev
                                 </button>
-                                <span className="flex items-center px-2 text-xs text-gray-400 font-mono">
-                                    Page {currentProductPage}
-                                </span>
+
+                                <div className="flex items-center gap-2 bg-black/40 px-3 py-1.5 rounded-xl border border-white/5">
+                                    <span className="text-[10px] font-black text-gray-600 uppercase tracking-tighter">Page</span>
+                                    <span className="text-[12px] font-black text-cyber-primary font-mono">{currentProductPage}</span>
+                                    <span className="text-gray-700 mx-1 text-[10px]">/</span>
+                                    <span className="text-[12px] font-black text-gray-500 font-mono">{Math.max(1, Math.ceil(totalProductCount / PRODUCTS_PER_PAGE))}</span>
+                                </div>
+
                                 <button
                                     onClick={() => setCurrentProductPage(prev => Math.min(prev + 1, Math.max(1, Math.ceil(totalProductCount / PRODUCTS_PER_PAGE))))}
                                     disabled={currentProductPage >= Math.ceil(totalProductCount / PRODUCTS_PER_PAGE) || productsLoading}
-                                    className="px-3 py-1 bg-white/5 hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed rounded text-xs text-white transition-colors border border-white/10"
+                                    className="px-4 py-2 bg-white/5 hover:bg-cyber-primary/10 disabled:opacity-30 disabled:hover:bg-white/5 rounded-xl text-[11px] font-black text-white transition-all border border-white/10 hover:border-cyber-primary/40 flex items-center gap-2 group"
                                 >
                                     Next
+                                    <ChevronRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
                                 </button>
                             </div>
                         </div>
@@ -1533,12 +1557,12 @@ export default function Inventory() {
                             <div key={zone.id} className="bg-cyber-gray border border-white/5 rounded-2xl p-6 relative overflow-hidden group cursor-pointer hover:border-white/20 transition-all">
                                 <div className="flex justify-between items-start mb-6 relative z-10">
                                     <div className="flex items-center gap-3">
-                                        <div className={`p - 3 rounded - xl ${zone.type === 'Cold' ? 'bg-blue-500/10 text-blue-400' : zone.type === 'Secure' ? 'bg-purple-500/10 text-purple-400' : 'bg-cyber-primary/10 text-cyber-primary'} `}>
+                                        <div className={`p-3 rounded-xl ${zone.type === 'Cold' ? 'bg-blue-500/10 text-blue-400' : zone.type === 'Secure' ? 'bg-purple-500/10 text-purple-400' : 'bg-cyber-primary/10 text-cyber-primary'}`}>
                                             {zone.type === 'Cold' ? <Thermometer size={24} /> : zone.type === 'Secure' ? <Shield size={24} /> : <Box size={24} />}
                                         </div>
                                         <div><h3 className="font-bold text-white text-lg">{zone.name}</h3><p className="text-xs text-gray-500 uppercase tracking-wider">{zone.type} Storage</p></div>
                                     </div>
-                                    <div className="text-right"><span className={`text - 2xl font - mono font - bold ${usagePercent > 90 ? 'text-red-400' : 'text-white'} `}>{usagePercent.toFixed(1)}%</span></div>
+                                    <div className="text-right"><span className={`text-2xl font-mono font-bold ${usagePercent > 90 ? 'text-red-400' : 'text-white'}`}>{usagePercent.toFixed(1)}%</span></div>
                                 </div>
                                 <div className="relative z-10">
                                     <div className="w-full bg-black/50 rounded-full h-4 border border-white/10 overflow-hidden relative">
@@ -1557,55 +1581,358 @@ export default function Inventory() {
 
             {/* --- AUDIT LOG --- */}
             {activeTab === 'movements' && (
-                <div className="bg-cyber-gray border border-white/5 rounded-2xl overflow-hidden">
-                    <div className="p-6 border-b border-white/5"><h3 className="font-bold text-white">Transactional Ledger</h3><p className="text-xs text-gray-400 mt-1">Immutable history of stock movements.</p></div>
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left">
-                            <thead><tr className="bg-black/20 border-b border-white/5"><th className="p-4 text-xs text-gray-500 uppercase">Ref ID</th><th className="p-4 text-xs text-gray-500 uppercase">Time</th><th className="p-4 text-xs text-gray-500 uppercase">Type</th><th className="p-4 text-xs text-gray-500 uppercase">Product</th><th className="p-4 text-xs text-gray-500 uppercase text-right">Qty</th><th className="p-4 text-xs text-gray-500 uppercase">User</th><th className="p-4 text-xs text-gray-500 uppercase">Reason</th></tr></thead>
-                            <tbody className="divide-y divide-white/5">
-                                {localMovements.map((move) => (
-                                    <tr key={move.id} className="hover:bg-white/5">
-                                        <td className="p-4 text-xs font-mono text-gray-400">{move.id}</td>
-                                        <td className="p-4 text-xs text-white">{move.date}</td>
-                                        <td className="p-4"><span className={`text-[10px] font-bold px-2 py-1 rounded uppercase border ${move.type === 'IN' ? 'text-green-400 border-green-400/20 bg-green-400/5' : move.type === 'OUT' ? 'text-blue-400 border-blue-400/20 bg-blue-400/5' : 'text-yellow-400 border-yellow-400/20 bg-yellow-400/5'} `}>{move.type}</span></td>
-                                        <td className="p-4 text-sm text-white">{move.productName}</td>
-                                        <td className={`p-4 text-sm font-mono text-right font-bold ${move.type === 'IN' ? 'text-green-400' : 'text-white'} `}>{move.type === 'IN' ? '+' : ''}{move.quantity}</td>
-                                        <td className="p-4 text-xs text-gray-300">{move.performedBy}</td>
-                                        <td className="p-4 text-xs text-gray-500 italic">{move.reason}</td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                    {/* Pagination Controls */}
-                    <div className="flex justify-between items-center p-4 border-t border-white/5 bg-black/20">
-                        <div className="text-xs text-gray-400">
-                            Showing {localMovements.length} of {formatCompactNumber(totalMovementsCount)} records
+                <div className="space-y-4">
+                    {/* --- ADVANCED CONTROLS --- */}
+                    <div className="p-4 bg-cyber-gray border border-white/5 rounded-2xl flex flex-wrap items-center gap-4">
+                        <div className="flex-1 min-w-[300px] relative group">
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-cyber-primary transition-colors" size={16} />
+                            <input
+                                type="text"
+                                value={movementsSearch}
+                                onChange={(e) => setMovementsSearch(e.target.value)}
+                                placeholder="Search by Product name or Reference ID..."
+                                className="w-full bg-black/40 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-sm text-white focus:outline-none focus:border-cyber-primary/50 focus:ring-1 focus:ring-cyber-primary/20 transition-all"
+                            />
                         </div>
-                        <div className="flex gap-2">
-                            <button
-                                onClick={() => setCurrentMovementsPage(prev => Math.max(1, prev - 1))}
-                                disabled={currentMovementsPage === 1 || movementsLoading}
-                                className="px-3 py-1 bg-white/5 hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed rounded text-xs text-white transition-colors border border-white/10"
+
+                        <div className="flex items-center gap-3 flex-wrap">
+                            {/* Site Filter (Global Only) */}
+                            {isReadOnly && (
+                                <select
+                                    aria-label="Filter Movement Site"
+                                    value={movementsSiteFilter}
+                                    onChange={(e) => setMovementsSiteFilter(e.target.value)}
+                                    className="bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-cyber-primary/50"
+                                >
+                                    <option value="All">All Sites</option>
+                                    {sites.map(s => <option key={s.id} value={s.id}>{s.name} ({s.code})</option>)}
+                                </select>
+                            )}
+
+                            {/* Type Filter */}
+                            <select
+                                aria-label="Filter Movement Type"
+                                value={movementsTypeFilter}
+                                onChange={(e) => setMovementsTypeFilter(e.target.value)}
+                                className="bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-cyber-primary/50"
                             >
-                                Previous
-                            </button>
-                            <span className="flex items-center px-2 text-xs text-gray-400 font-mono">
-                                Page {currentMovementsPage}
-                            </span>
-                            <button
-                                onClick={() => setCurrentMovementsPage(prev => (localMovements.length === MOVEMENTS_PER_PAGE ? prev + 1 : prev))}
-                                disabled={localMovements.length < MOVEMENTS_PER_PAGE || movementsLoading}
-                                className="px-3 py-1 bg-white/5 hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed rounded text-xs text-white transition-colors border border-white/10"
+                                <option value="All">All Types</option>
+                                <option value="IN">Inbound (Stock In)</option>
+                                <option value="OUT">Outbound (Stock Out)</option>
+                                <option value="ADJUSTMENT">Adjustments</option>
+                                <option value="TRANSFER">Transfers</option>
+                            </select>
+
+                            {/* Sort */}
+                            <select
+                                aria-label="Sort Movements"
+                                value={`${movementsSort.key}-${movementsSort.direction}`}
+                                onChange={(e) => {
+                                    const [key, direction] = e.target.value.split('-');
+                                    setMovementsSort({ key, direction: direction as 'asc' | 'desc' });
+                                }}
+                                className="bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-cyber-primary/50"
                             >
-                                Next
-                            </button>
+                                <option value="date-desc">Newest First</option>
+                                <option value="date-asc">Oldest First</option>
+                                <option value="quantity-desc">Highest Qty</option>
+                                <option value="quantity-asc">Lowest Qty</option>
+                            </select>
+
+                            {(movementsSearch || movementsTypeFilter !== 'All' || (isReadOnly && movementsSiteFilter !== 'All')) && (
+                                <button
+                                    onClick={() => {
+                                        setMovementsSearch('');
+                                        setMovementsTypeFilter('All');
+                                        setMovementsSiteFilter('All');
+                                    }}
+                                    className="p-3 text-red-400 hover:bg-red-400/10 rounded-xl transition-colors shrink-0"
+                                    title="Clear All Filters"
+                                >
+                                    <X size={20} />
+                                </button>
+                            )}
+                        </div>
+                    </div>
+
+                    <div className="bg-cyber-gray border border-white/5 rounded-2xl overflow-hidden">
+                        <div className="p-6 border-b border-white/5"><h3 className="font-bold text-white">Stock Movements</h3><p className="text-xs text-gray-400 mt-1">Immutable history of inventory changes.</p></div>
+                        <div className="overflow-x-auto relative min-h-[400px]">
+                            {movementsLoading && (
+                                <div className="absolute inset-0 bg-black/20 backdrop-blur-[1px] flex items-center justify-center z-10 transition-all">
+                                    <div className="w-10 h-10 border-4 border-cyber-primary/20 border-t-cyber-primary rounded-full animate-spin" />
+                                </div>
+                            )}
+                            <table className="w-full text-left">
+                                <thead><tr className="bg-black/20 border-b border-white/5"><th className="p-4 text-xs text-gray-500 uppercase">Ref ID</th><th className="p-4 text-xs text-gray-500 uppercase">Time</th><th className="p-4 text-xs text-gray-500 uppercase">Type</th><th className="p-4 text-xs text-gray-500 uppercase">Product</th><th className="p-4 text-xs text-gray-500 uppercase text-right">Qty</th><th className="p-4 text-xs text-gray-500 uppercase">User</th><th className="p-4 text-xs text-gray-500 uppercase">Reason</th></tr></thead>
+                                <tbody className="divide-y divide-white/5">
+                                    {localMovements.map((move) => (
+                                        <tr key={move.id} className="hover:bg-white/5">
+                                            <td className="p-4 text-xs font-mono text-gray-400">{move.id?.slice(0, 8).toUpperCase()}</td>
+                                            <td className="p-4 text-xs text-white">{formatDateTime(move.date, { showTime: true })}</td>
+                                            <td className="p-4"><span className={`text-[10px] font-bold px-2 py-1 rounded uppercase border ${move.type === 'IN' ? 'text-green-400 border-green-400/20 bg-green-400/5' : move.type === 'OUT' ? 'text-blue-400 border-blue-400/20 bg-blue-400/5' : 'text-yellow-400 border-yellow-400/20 bg-yellow-400/5'} `}>{move.type}</span></td>
+                                            <td className="p-4 text-sm text-white">{move.productName}</td>
+                                            <td className={`p-4 text-sm font-mono text-right font-bold ${move.type === 'IN' ? 'text-green-400' : 'text-white'} `}>{move.type === 'IN' ? '+' : ''}{move.quantity}</td>
+                                            <td className="p-4 text-xs text-gray-300">{move.performedBy}</td>
+                                            <td className="p-4 text-xs text-gray-500 italic">{move.reason}</td>
+                                        </tr>
+                                    ))}
+                                    {!movementsLoading && localMovements.length === 0 && (
+                                        <tr>
+                                            <td colSpan={7} className="p-10 text-center text-gray-500 italic text-sm">
+                                                No stock movements found matching your criteria.
+                                            </td>
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+                        {/* Pagination Controls */}
+                        <div className="flex justify-between items-center p-4 border-t border-white/5 bg-black/20">
+                            <div className="text-xs text-gray-400">
+                                Showing {localMovements.length} of {formatCompactNumber(totalMovementsCount)} records
+                            </div>
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={() => setCurrentMovementsPage(prev => Math.max(1, prev - 1))}
+                                    disabled={currentMovementsPage === 1 || movementsLoading}
+                                    className="px-3 py-1 bg-white/5 hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed rounded text-xs text-white transition-colors border border-white/10"
+                                >
+                                    Previous
+                                </button>
+                                <span className="flex items-center px-2 text-xs text-gray-400 font-mono">
+                                    Page {currentMovementsPage}
+                                </span>
+                                <button
+                                    onClick={() => setCurrentMovementsPage(prev => (localMovements.length === MOVEMENTS_PER_PAGE ? prev + 1 : prev))}
+                                    disabled={localMovements.length < MOVEMENTS_PER_PAGE || movementsLoading}
+                                    className="px-3 py-1 bg-white/5 hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed rounded text-xs text-white transition-colors border border-white/10"
+                                >
+                                    Next
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
             )}
 
-            {/* --- PENDING APPROVALS TAB (Visible to CEO & Managers) --- */}
+            {/* --- BARCODE AUDIT TAB (Visible to Managers) --- */}
+            {activeTab === 'barcode_audit' && canViewAuditLog && (
+                <div className="space-y-6 animate-in fade-in">
+                    <div className="bg-cyber-gray border border-white/5 rounded-2xl overflow-hidden">
+                        <div className="p-6 border-b border-white/5">
+                            <h3 className="font-bold text-blue-400 flex items-center gap-2">
+                                <Barcode size={18} /> Barcode Mapping Audit Log
+                            </h3>
+                            <p className="text-xs text-gray-400 mt-1">{filteredBarcodes.length} barcode mappings matched</p>
+                        </div>
+
+                        {/* Advanced Filters */}
+                        <div className="p-6 border-b border-white/5 bg-white/[0.01] flex flex-col md:flex-row gap-4 items-center">
+                            <div className="relative flex-1 group">
+                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-blue-400 transition-colors" size={16} />
+                                <input
+                                    type="text"
+                                    placeholder="Search by product, barcode, or SKU..."
+                                    value={barcodeSearch}
+                                    onChange={(e) => {
+                                        setBarcodeSearch(e.target.value);
+                                        setCurrentBarcodePage(1);
+                                    }}
+                                    className="w-full bg-black/40 border border-white/10 rounded-2xl py-3 pl-12 pr-4 text-sm text-white placeholder:text-gray-600 focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all"
+                                />
+                            </div>
+
+                            <div className="flex items-center gap-3 w-full md:w-auto">
+                                {isReadOnly && (
+                                    <div className="relative group min-w-[180px]">
+                                        <Filter className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" size={14} />
+                                        <select
+                                            aria-label="Filter by Location"
+                                            value={barcodeSiteFilter}
+                                            onChange={(e) => {
+                                                setBarcodeSiteFilter(e.target.value);
+                                                setCurrentBarcodePage(1);
+                                            }}
+                                            className="w-full bg-black/40 border border-white/10 rounded-2xl py-3 pl-10 pr-10 text-[11px] font-black uppercase tracking-widest text-gray-300 appearance-none focus:border-blue-500/50 transition-all cursor-pointer"
+                                        >
+                                            <option value="All">All Locations</option>
+                                            {sites.map(s => (
+                                                <option key={s.id} value={s.id}>{s.name}</option>
+                                            ))}
+                                        </select>
+                                        <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" size={14} />
+                                    </div>
+                                )}
+
+                                <div className="relative group min-w-[180px]">
+                                    <ArrowUpDown className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" size={14} />
+                                    <select
+                                        aria-label="Sort Audit Log"
+                                        value={`${barcodeSort.key}-${barcodeSort.direction}`}
+                                        onChange={(e) => {
+                                            const [key, direction] = e.target.value.split('-');
+                                            setBarcodeSort({ key, direction: direction as 'asc' | 'desc' });
+                                        }}
+                                        className="w-full bg-black/40 border border-white/10 rounded-2xl py-3 pl-10 pr-10 text-[11px] font-black uppercase tracking-widest text-gray-300 appearance-none focus:border-blue-500/50 transition-all cursor-pointer"
+                                    >
+                                        <option value="date-desc">Newest First</option>
+                                        <option value="date-asc">Oldest First</option>
+                                        <option value="product-asc">Product (A-Z)</option>
+                                        <option value="product-desc">Product (Z-A)</option>
+                                        <option value="duration-desc">Longest Duration</option>
+                                        <option value="duration-asc">Fastest Duration</option>
+                                    </select>
+                                    <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" size={14} />
+                                </div>
+
+                                {(barcodeSearch || barcodeSiteFilter !== 'All') && (
+                                    <button
+                                        onClick={() => {
+                                            setBarcodeSearch('');
+                                            setBarcodeSiteFilter('All');
+                                            setCurrentBarcodePage(1);
+                                        }}
+                                        className="p-3 rounded-2xl bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 transition-all"
+                                        title="Clear all filters"
+                                    >
+                                        <X size={18} />
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="p-6">
+                            {filteredBarcodes.length === 0 ? (
+                                <div className="p-12 text-center text-gray-500">
+                                    <Barcode size={48} className="mx-auto opacity-30 mb-4" />
+                                    <p>{barcodeSearch || barcodeSiteFilter !== 'All' ? 'No mappings match your search.' : 'No barcode mappings recorded yet.'}</p>
+                                    <p className="text-xs mt-2">When cashiers map unknown barcodes to products, they will appear here.</p>
+                                </div>
+                            ) : (
+                                <div className="space-y-4">
+                                    {filteredBarcodes.slice((currentBarcodePage - 1) * BARCODE_PER_PAGE, currentBarcodePage * BARCODE_PER_PAGE).map((approval) => (
+                                        <div
+                                            key={approval.id}
+                                            className="group bg-white/[0.02] border border-white/[0.05] hover:border-blue-500/30 rounded-2xl transition-all duration-300 overflow-hidden"
+                                        >
+                                            <div className="p-4 flex flex-col md:flex-row md:items-center gap-6">
+                                                {/* Left: Product Info & Thumb */}
+                                                <div className="flex items-center gap-4 flex-1 min-w-0">
+                                                    <div className="w-14 h-14 rounded-xl bg-black/40 border border-white/10 flex items-center justify-center flex-shrink-0 overflow-hidden group-hover:border-blue-500/30 transition-colors">
+                                                        {approval.image_url ? (
+                                                            <img src={approval.image_url} alt="Evidence" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                                                        ) : (
+                                                            <div className="w-full h-full flex items-center justify-center text-gray-700 bg-black/20">
+                                                                <Barcode size={24} className="opacity-20" />
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    <div className="min-w-0">
+                                                        <h4 className="text-[14px] font-black text-white tracking-tight group-hover:text-blue-400 transition-colors truncate">
+                                                            {approval.product?.name || 'Unknown Product'}
+                                                        </h4>
+                                                        <div className="flex items-center gap-2 mt-1">
+                                                            <span className="text-[10px] font-black font-mono text-gray-500 bg-black/40 px-2 py-0.5 rounded-md border border-white/5 uppercase tracking-tighter">
+                                                                {approval.product?.sku || 'NO SKU'}
+                                                            </span>
+                                                            <span className="text-[10px] font-black text-blue-400/80 uppercase tracking-widest bg-blue-500/5 px-2 py-0.5 rounded-md">
+                                                                Mapped to {approval.barcode}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                {/* Middle: Attribution */}
+                                                <div className="flex flex-wrap items-center gap-8 text-[11px] font-medium text-gray-400">
+                                                    <div className="flex flex-col gap-1">
+                                                        <span className="text-[9px] uppercase tracking-[0.2em] text-gray-600 font-bold">Recorded By</span>
+                                                        <div className="flex items-center gap-2">
+                                                            <div className="w-5 h-5 rounded-full bg-cyan-500/10 flex items-center justify-center border border-cyan-500/20">
+                                                                <User size={10} className="text-cyan-400" />
+                                                            </div>
+                                                            <span className="text-gray-300 font-bold">{getEmployeeName(approval.created_by)}</span>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="flex flex-col gap-1">
+                                                        <span className="text-[9px] uppercase tracking-[0.2em] text-gray-600 font-bold">Timestamp</span>
+                                                        <div className="flex items-center gap-2">
+                                                            <Clock size={12} className="text-gray-500" />
+                                                            <span className="text-gray-300 font-mono tracking-tighter">{formatDateTime(approval.created_at || '', { showTime: true })}</span>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="flex flex-col gap-1">
+                                                        <span className="text-[9px] uppercase tracking-[0.2em] text-gray-600 font-bold">Status</span>
+                                                        <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-green-500/10 border border-green-500/20">
+                                                            <div className="w-1.5 h-1.5 rounded-full bg-green-400 shadow-[0_0_8px_rgba(74,222,128,0.5)] animate-pulse" />
+                                                            <span className="text-green-400 font-black text-[9px] uppercase tracking-wider">Synced</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                {/* Right: Actions */}
+                                                <div className="flex items-center gap-2 ml-auto">
+                                                    <button
+                                                        onClick={() => {
+                                                            setSelectedAuditRecord(approval);
+                                                            setIsApprovalDetailsOpen(true);
+                                                        }}
+                                                        className="px-4 py-2 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/20 hover:border-blue-500/40 transition-all flex items-center gap-2 text-xs font-black uppercase tracking-widest group/btn"
+                                                    >
+                                                        Details
+                                                        <ChevronRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
+                                                    </button>
+                                                    {user?.role === 'super_admin' && (
+                                                        <button
+                                                            onClick={() => handleDeleteAuditRecord(approval)}
+                                                            className="w-8 h-8 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 hover:border-red-500/40 transition-all flex items-center justify-center group/del"
+                                                            title="Delete Mapping"
+                                                        >
+                                                            <Trash2 size={14} className="group-hover:scale-110 transition-transform" />
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            {/* Pagination Controls */}
+                            {filteredBarcodes.length > 0 && (
+                                <div className="flex justify-between items-center mt-8 p-4 border-t border-white/5 bg-black/20 rounded-b-2xl">
+                                    <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest flex items-center gap-3 ml-2">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                                        Showing {(currentBarcodePage - 1) * BARCODE_PER_PAGE + 1} - {Math.min(currentBarcodePage * BARCODE_PER_PAGE, filteredBarcodes.length)} of {filteredBarcodes.length} Records
+                                    </div>
+                                    {filteredBarcodes.length > BARCODE_PER_PAGE && (
+                                        <div className="flex gap-2">
+                                            <button
+                                                onClick={() => setCurrentBarcodePage(prev => Math.max(1, prev - 1))}
+                                                disabled={currentBarcodePage === 1}
+                                                className="px-6 py-2.5 bg-white/5 hover:bg-white/10 disabled:opacity-20 disabled:cursor-not-allowed rounded-xl text-[10px] font-black uppercase tracking-widest text-white transition-all border border-white/10"
+                                            >
+                                                Previous
+                                            </button>
+                                            <button
+                                                onClick={() => setCurrentBarcodePage(prev => (currentBarcodePage * BARCODE_PER_PAGE < filteredBarcodes.length ? prev + 1 : prev))}
+                                                disabled={currentBarcodePage * BARCODE_PER_PAGE >= filteredBarcodes.length}
+                                                className="px-6 py-2.5 bg-white/5 hover:bg-white/10 disabled:opacity-20 disabled:cursor-not-allowed rounded-xl text-[10px] font-black uppercase tracking-widest text-white transition-all border border-white/10"
+                                            >
+                                                Next
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* --- PENDING APPROVALS TAB (Visible to CEO Only) --- */}
             {activeTab === 'pending' && canViewPending && (
                 <div className="space-y-6 animate-in fade-in">
                     {/* Pending Products Section */}
@@ -1618,6 +1945,8 @@ export default function Inventory() {
                                 <p className="text-xs text-gray-400 mt-1">{pendingProducts.length} products pending review</p>
                             </div>
                         </div>
+
+
                         {pendingProducts.length === 0 ? (
                             <div className="p-12 text-center text-gray-500">
                                 <CheckCircle size={48} className="mx-auto opacity-30 mb-4" />
@@ -1734,6 +2063,8 @@ export default function Inventory() {
                                 </table>
                             </div>
                         )}
+
+
                     </div>
 
                     {/* Pending Changes Section (Edits, Deletes, Stock Adjustments) */}
@@ -1817,7 +2148,7 @@ export default function Inventory() {
                                                     <User size={12} /> {change.requestedBy}
                                                 </td>
                                                 <td className="p-4 text-xs text-gray-400">
-                                                    {formatDateTime(change.requestedAt || (change as any).requested_at || '')}
+                                                    {formatDateTime(change.requestedAt || (change as any).requested_at || '', { showTime: true })}
                                                 </td>
                                                 <td className="p-4 text-center">
                                                     {canApprove ? (
@@ -1992,349 +2323,31 @@ export default function Inventory() {
 
             {/* Modals - Add/Edit Product */}
             <Modal isOpen={isProductModalOpen} onClose={() => setIsProductModalOpen(false)} title={editingProduct ? 'Edit Product' : 'Inbound Stock Entry'} size="lg">
-                <form onSubmit={handleSaveProduct} className="space-y-4 max-h-[70vh] overflow-y-auto pr-2" noValidate>
-                    {/* Product Image Upload */}
-                    <div className="flex items-start gap-4 p-4 bg-black/20 rounded-xl border border-white/5">
-                        <ImageUpload
-                            value={productImage}
-                            onChange={setProductImage}
-                            onError={(error) => addNotification('alert', error)}
-                            placeholder="Add product photo"
-                            size="lg"
-                        />
-                        <div className="flex-1">
-                            <h4 className="text-white font-bold text-sm mb-2">Product Image</h4>
-                            <p className="text-gray-400 text-xs leading-relaxed mb-2">
-                                Upload a clear photo of the product. You can:
-                            </p>
-                            <ul className="text-gray-500 text-[10px] space-y-1">
-                                <li>• <strong className="text-gray-400">Browse</strong> - Select from your device</li>
-                                <li>• <strong className="text-gray-400">Camera</strong> - Take a photo (mobile)</li>
-                                <li>• <strong className="text-gray-400">URL</strong> - Paste an image link</li>
-                                <li>• <strong className="text-gray-400">Drag & Drop</strong> - Drop an image file</li>
-                            </ul>
-                            <p className="text-gray-500 text-[10px] mt-2">Max 10MB • Supports JPG, PNG, HEIC (iPhone), WebP & more</p>
-                        </div>
-                    </div>
-
-                    {/* Row 1: Category + Item Name + Brand */}
-                    <div className="grid grid-cols-12 gap-2">
-                        {/* Category */}
-                        <div className="col-span-3">
-                            <label className="text-[10px] text-cyber-primary uppercase mb-1 block">Category *</label>
-                            <select
-                                aria-label="Category"
-                                className="w-full bg-black/30 border border-white/20 rounded-lg px-2 py-2 text-sm text-white"
-                                value={selectedMainCategory}
-                                onChange={(e) => {
-                                    setSelectedMainCategory(e.target.value);
-                                    setSelectedSubCategory('');
-                                }}
-                                required
-                            >
-                                <option value="">Select...</option>
-                                {Object.keys(GROCERY_CATEGORIES).map(cat => (
-                                    <option key={cat} value={cat}>{cat}</option>
-                                ))}
-                            </select>
-                        </div>
-
-                        {/* Item Name */}
-                        <div className="col-span-5">
-                            <label className="text-[10px] text-cyber-primary uppercase mb-1 block">Item Name *</label>
-                            <input
-                                className="w-full bg-black/30 border border-white/20 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500"
-                                placeholder="e.g., Milk, Water..."
-                                value={productNameInput}
-                                onChange={(e) => setProductNameInput(e.target.value)}
-                                required
-                            />
-                        </div>
-
-                        {/* Brand */}
-                        <div className="col-span-4">
-                            <label className="text-[10px] text-gray-500 uppercase mb-1 block">Brand</label>
-                            <input
-                                className="w-full bg-black/30 border border-white/20 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500"
-                                placeholder="e.g., Coca-Cola..."
-                                value={productBrand}
-                                onChange={(e) => setProductBrand(e.target.value)}
-                            />
-                        </div>
-                    </div>
-
-                    {/* Row 2: Unit + Size + Pack Qty + Preview Box */}
-                    <div className="grid grid-cols-12 gap-2">
-                        {/* Unit */}
-                        <div className="col-span-3">
-                            <label className="text-[10px] text-cyber-primary uppercase mb-1 block">Unit *</label>
-                            <select
-                                aria-label="Unit"
-                                className="w-full bg-black/30 border border-cyber-primary/50 rounded-lg px-2 py-2 text-sm text-white"
-                                value={productUnit}
-                                onChange={(e) => setProductUnit(e.target.value)}
-                            >
-                                {COMMON_UNITS.map(u => (
-                                    <option key={u} value={u}>{u}</option>
-                                ))}
-                            </select>
-                        </div>
-
-                        {/* Size */}
-                        <div className="col-span-2">
-                            <label className="text-[10px] text-cyber-primary uppercase mb-1 block">Size</label>
-                            <input
-                                type="text"
-                                className="w-full bg-black/30 border border-white/20 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 text-center"
-                                placeholder="500"
-                                value={productSize}
-                                onChange={(e) => setProductSize(e.target.value)}
-                            />
-                        </div>
-
-                        {/* Pack Qty */}
-                        <div className="col-span-3">
-                            <label className="text-[10px] text-yellow-400 uppercase mb-1 block">Pack Qty</label>
-                            <div className="relative">
-                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-xs">Pack of</span>
-                                <input
-                                    type="number"
-                                    min="0"
-                                    className="w-full bg-black/30 border border-yellow-500/30 rounded-lg pl-16 pr-3 py-2 text-sm text-white text-center"
-                                    placeholder="0"
-                                    value={packQuantity || ''}
-                                    onChange={(e) => setPackQuantity(parseInt(e.target.value) || 0)}
-                                />
-                            </div>
-                        </div>
-
-                        {/* Live Preview Text Box */}
-                        <div className="col-span-4">
-                            <label className="text-[10px] text-gray-500 uppercase mb-1 block">Preview</label>
-                            <div className="w-full bg-cyber-primary/10 border border-cyber-primary/30 rounded-lg px-3 py-2 text-sm text-cyber-primary font-medium truncate">
-                                {previewProductName || 'Enter details...'}
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Row 3: SKU & Barcode */}
-                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <label className="text-xs text-gray-400 uppercase font-bold">Internal SKU *</label>
-                            <div className="flex gap-2">
-                                <input
-                                    aria-label="SKU"
-                                    name="sku"
-                                    value={skuInput}
-                                    onChange={(e) => setSkuInput(e.target.value)}
-                                    placeholder="Auto-generate or enter..."
-                                    required
-                                    className="flex-1 bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:border-cyber-primary font-mono"
-                                />
-                                <Button type="button" onClick={handleGenerateSKU} variant="ghost" className="px-3 bg-cyber-primary/20 text-cyber-primary rounded-lg hover:bg-cyber-primary/30" aria-label="Generate SKU" title="Generate SKU">
-                                    <RefreshCw size={14} />
-                                </Button>
-                            </div>
-                        </div>
-                        <div>
-                            <label className="text-xs text-gray-400 uppercase font-bold">Barcode (Supplier)</label>
-                            <div className="flex gap-2">
-                                <input
-                                    aria-label="External Barcode"
-                                    name="barcode"
-                                    value={barcodeInput}
-                                    onChange={(e) => setBarcodeInput(e.target.value)}
-                                    placeholder="Scan or enter..."
-                                    className="flex-1 bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:border-cyber-primary font-mono"
-                                />
-                                <Button type="button" onClick={handleGenerateBarcode} variant="ghost" className="px-3 bg-blue-500/20 text-blue-400 rounded-lg hover:bg-blue-500/30" aria-label="Generate Barcode" title="Generate Internal Barcode">
-                                    <Barcode size={14} />
-                                </Button>
-                            </div>
-                            <p className="text-[10px] text-gray-500 mt-1">
-                                {barcodeInput?.startsWith('200') ? '🏷️ Internal barcode' : 'Scan supplier barcode or generate'}
-                            </p>
-                        </div>
-                    </div>
-
-                    {/* Barcode Type (only if barcode entered) */}
-                    {barcodeInput && (
-                        <div>
-                            <label className="text-xs text-gray-400 uppercase font-bold">Barcode Type</label>
-                            <select
-                                aria-label="Barcode Type"
-                                name="barcodeType"
-                                defaultValue={editingProduct?.barcodeType || 'EAN-13'}
-                                className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white text-sm"
-                            >
-                                <option value="EAN-13">EAN-13</option>
-                                <option value="UPC-A">UPC-A</option>
-                                <option value="CODE128">CODE128</option>
-                                <option value="CODE39">CODE39</option>
-                                <option value="QR">QR Code</option>
-                                <option value="OTHER">Other</option>
-                            </select>
-                        </div>
-                    )}
-
-                    {/* Row 4: Pricing + Stock */}
-                    <div className="grid grid-cols-3 gap-4 border-t border-white/10 pt-2 mt-2">
-                        <div>
-                            <label className="text-xs text-gray-400 uppercase font-bold">Cost Price ({CURRENCY_SYMBOL})</label>
-                            <input
-                                aria-label="Cost Price"
-                                name="costPrice"
-                                type="number"
-                                step="0.01"
-                                value={costPriceInput}
-                                onChange={(e) => setCostPriceInput(e.target.value)}
-                                placeholder="0.00"
-                                className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:border-cyber-primary font-mono"
-                            />
-                        </div>
-                        <div>
-                            <label className="text-xs text-gray-400 uppercase font-bold">Retail Price ({CURRENCY_SYMBOL}) *</label>
-                            <input
-                                aria-label="Retail Price"
-                                name="price"
-                                type="number"
-                                step="0.01"
-                                value={retailPriceInput}
-                                onChange={(e) => setRetailPriceInput(e.target.value)}
-                                required
-                                placeholder="0.00"
-                                className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:border-cyber-primary font-mono"
-                            />
-                        </div>
-                        <div>
-                            <label className="text-xs text-gray-400 uppercase font-bold">Stock Qty *</label>
-                            <input
-                                aria-label="Stock Quantity"
-                                name="stock"
-                                type="number"
-                                value={stockInput}
-                                onChange={(e) => setStockInput(e.target.value)}
-                                required
-                                className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:border-cyber-primary font-mono"
-                            />
-                        </div>
-                    </div>
-
-
-
-                    {/* ═══════════════════════════════════════════════════════════════ */}
-                    {/* PRODUCT PREVIEW - Shows how the product will appear */}
-                    {/* ═══════════════════════════════════════════════════════════════ */}
-                    <div className="border-t border-white/10 pt-4 mt-4">
-                        <div className="flex items-center gap-2 mb-3">
-                            <Box size={16} className="text-cyber-primary" />
-                            <h4 className="text-cyber-primary font-bold text-sm uppercase tracking-wider">Product Preview</h4>
-                        </div>
-                        <div className="bg-gradient-to-br from-black/40 to-black/20 rounded-xl border border-white/10 p-4">
-                            <div className="flex items-start gap-4">
-                                {/* Product Image Preview */}
-                                <div className="w-24 h-24 rounded-xl border border-white/20 overflow-hidden flex-shrink-0 bg-black/30">
-                                    {productImage ? (
-                                        <img src={productImage} alt="Preview" className="w-full h-full object-cover" />
-                                    ) : (
-                                        <div className="w-full h-full flex items-center justify-center">
-                                            <Box size={32} className="text-gray-600" />
-                                        </div>
-                                    )}
-                                </div>
-                                {/* Product Details Preview */}
-                                <div className="flex-1 min-w-0">
-                                    <h3 className="text-white font-bold text-lg truncate">
-                                        {previewProductName}
-                                    </h3>
-                                    <div className="flex flex-wrap items-center gap-2 mt-1">
-                                        {(selectedSubCategory || selectedMainCategory) && (
-                                            <span className="text-[10px] bg-white/10 px-2 py-0.5 rounded text-gray-300">
-                                                {selectedSubCategory || selectedMainCategory}
-                                            </span>
-                                        )}
-                                        {skuInput && (
-                                            <span className="text-[10px] font-mono bg-black/30 px-2 py-0.5 rounded text-gray-400">
-                                                SKU: {skuInput}
-                                            </span>
-                                        )}
-                                        {barcodeInput && (
-                                            <span className="text-[10px] font-mono bg-blue-500/10 px-2 py-0.5 rounded text-blue-400">
-                                                📊 {barcodeInput}
-                                            </span>
-                                        )}
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-3 mt-3">
-                                        <div className="bg-black/20 rounded-lg p-2">
-                                            <p className="text-[10px] text-gray-500 uppercase">Retail Price</p>
-                                            <p className="text-lg font-bold text-cyber-primary">
-                                                {retailPriceInput ? `${CURRENCY_SYMBOL}${parseFloat(retailPriceInput).toLocaleString()}` : '—'}
-                                            </p>
-                                        </div>
-                                        <div className="bg-black/20 rounded-lg p-2">
-                                            <p className="text-[10px] text-gray-500 uppercase">Cost Price</p>
-                                            <p className="text-lg font-bold text-gray-300">
-                                                {costPriceInput ? `${CURRENCY_SYMBOL}${parseFloat(costPriceInput).toLocaleString()}` : '—'}
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center gap-4 mt-3 text-xs">
-                                        <div className="flex items-center gap-1">
-                                            <Package size={12} className="text-gray-500" />
-                                            <span className="text-gray-400">Stock:</span>
-                                            <span className={`font-bold ${parseInt(stockInput) > 10 ? 'text-green-400' : parseInt(stockInput) > 0 ? 'text-yellow-400' : 'text-gray-500'}`}>
-                                                {stockInput || '0'} units
-                                            </span>
-                                        </div>
-                                        {locationInput && (
-                                            <div className="flex items-center gap-1">
-                                                <Map size={12} className="text-gray-500" />
-                                                <span className="text-gray-400">Location:</span>
-                                                <span className="font-mono text-white">{locationInput}</span>
-                                            </div>
-                                        )}
-                                    </div>
-                                    {/* Profit Margin Preview */}
-                                    {retailPriceInput && costPriceInput && parseFloat(costPriceInput) > 0 && (
-                                        <div className="mt-3 p-2 bg-gradient-to-r from-green-500/10 to-transparent rounded-lg border border-green-500/20">
-                                            <div className="flex items-center justify-between">
-                                                <span className="text-[10px] text-green-400 uppercase font-bold">Profit Margin</span>
-                                                <span className="text-green-400 font-bold">
-                                                    {(((parseFloat(retailPriceInput) - parseFloat(costPriceInput)) / parseFloat(retailPriceInput)) * 100).toFixed(1)}%
-                                                </span>
-                                            </div>
-                                            <p className="text-[10px] text-gray-500 mt-0.5">
-                                                Profit per unit: {CURRENCY_SYMBOL}{(parseFloat(retailPriceInput) - parseFloat(costPriceInput)).toFixed(2)}
-                                            </p>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Actions */}
-                    <div className="flex gap-4 pt-6 mt-6 border-t border-white/10">
-                        <Button
-                            type="button"
-                            onClick={() => setIsProductModalOpen(false)}
-                            disabled={isSubmitting}
-                            variant="secondary"
-                            className="flex-1 py-3 text-white font-bold"
-                        >
-                            Cancel
-                        </Button>
-                        <Button
-                            type="submit"
-                            disabled={isSubmitting}
-                            loading={isSubmitting}
-                            icon={<CheckCircle size={18} />}
-                            className="flex-1 py-3 bg-cyber-primary hover:bg-cyber-accent text-black font-bold rounded-xl flex items-center justify-center gap-2"
-                        >
-                            {editingProduct ? 'Save Changes' : 'Create Product'}
-                        </Button>
-                    </div>
-                </form>
+                <ProductForm
+                    initialData={editingProduct || undefined}
+                    isSubmitting={isSubmitting}
+                    onCancel={() => setIsProductModalOpen(false)}
+                    onSubmit={async (data) => {
+                        setIsSubmitting(true);
+                        try {
+                            await saveMutation.mutateAsync({
+                                product: data,
+                                isNew: !editingProduct,
+                                activeSite: activeSite as any,
+                                user,
+                                canApprove,
+                                stockToAdjust: data.stock
+                            });
+                            addNotification('success', `Product "${data.name}" processed.`);
+                            setIsProductModalOpen(false);
+                            refreshData();
+                        } catch (err: any) {
+                            addNotification('alert', err.message || 'Failed to save product');
+                        } finally {
+                            setIsSubmitting(false);
+                        }
+                    }}
+                />
             </Modal>
 
             {/* Adjustment Modal */}
@@ -2370,6 +2383,210 @@ export default function Inventory() {
                     </Button>
                 </div>
             </Modal>
+            {/* --- Barcode Rejection Modal --- */}
+            {isBarcodeRejectionModalOpen && selectedBarcodeApproval && (
+                <Modal
+                    isOpen={isBarcodeRejectionModalOpen}
+                    onClose={() => setIsBarcodeRejectionModalOpen(false)}
+                    title="Reject Barcode Mapping"
+                >
+                    <div className="p-6">
+                        <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex gap-3">
+                            <AlertTriangle className="text-red-500 shrink-0" size={20} />
+                            <div>
+                                <h4 className="text-sm font-bold text-white mb-1">Confirm Rejection</h4>
+                                <p className="text-xs text-gray-400">
+                                    Rejecting this mapping for <span className="text-white font-mono font-bold">{selectedBarcodeApproval.barcode}</span> will
+                                    immediately remove it from {selectedBarcodeApproval.product?.name}'s catalog.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Rejection Reason</label>
+                                <textarea
+                                    value={rejectionReason}
+                                    onChange={(e) => setRejectionReason(e.target.value)}
+                                    placeholder="Explain why this mapping is incorrect (e.g., Wrong product, blurry image, invalid barcode)..."
+                                    className="w-full bg-black/40 border border-white/10 rounded-xl p-4 text-sm text-white focus:outline-none focus:border-red-500/50 min-h-[120px]"
+                                />
+                            </div>
+
+                            <div className="flex gap-3 pt-4">
+                                <Button
+                                    onClick={() => setIsBarcodeRejectionModalOpen(false)}
+                                    variant="ghost"
+                                    className="flex-1"
+                                >
+                                    Cancel
+                                </Button>
+                                <Button
+                                    onClick={async () => {
+                                        if (!rejectionReason.trim()) {
+                                            addNotification('alert', 'Please provide a reason for rejection');
+                                            return;
+                                        }
+                                        if (selectedBarcodeApproval) {
+                                            await rejectBarcodeMutation.mutateAsync({
+                                                id: selectedBarcodeApproval.id,
+                                                userId: user?.id || '',
+                                                reason: rejectionReason
+                                            });
+                                        }
+                                        setIsBarcodeRejectionModalOpen(false);
+                                        setRejectionReason('');
+                                    }}
+                                    variant="danger"
+                                    className="flex-[2]"
+                                    disabled={!rejectionReason.trim()}
+                                >
+                                    Confirm Rejection
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                </Modal>
+            )}
+
+            {/* --- Barcode Audit Details Modal --- */}
+            <Modal
+                isOpen={isApprovalDetailsOpen}
+                onClose={() => setIsApprovalDetailsOpen(false)}
+                title="Mapping Verification"
+                size="2xl"
+            >
+                {selectedAuditRecord && (
+                    <div className="p-1 sm:p-2 space-y-6 animate-in fade-in zoom-in duration-300">
+                        {/* Evidence Viewer Section */}
+                        <div className="relative rounded-3xl overflow-hidden bg-black/40 border border-white/10 flex items-center justify-center shadow-2xl w-full">
+                            {selectedAuditRecord.image_url ? (
+                                <div className="flex flex-col w-full">
+                                    <div className="relative max-h-[75vh] flex items-center justify-center p-2 bg-black/20">
+                                        <img
+                                            src={selectedAuditRecord.image_url}
+                                            alt="Evidence"
+                                            className="max-w-full max-h-[75vh] object-contain rounded-2xl"
+                                        />
+
+                                        {/* Floating Badge instead of gradient overlay */}
+                                        <div className="absolute top-4 right-4 px-4 py-2 bg-black/80 backdrop-blur-md rounded-2xl border border-white/10 text-blue-400 font-black text-xs tracking-widest flex items-center gap-2 shadow-2xl">
+                                            <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse shadow-[0_0_8px_rgba(59,130,246,0.5)]" />
+                                            EVIDENCE: {selectedAuditRecord.barcode}
+                                        </div>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="py-20 flex flex-col items-center justify-center text-gray-600 gap-4">
+                                    <Camera size={64} strokeWidth={1} />
+                                    <p className="text-xs uppercase tracking-widest font-black">No evidence photo available</p>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Metadata Grid */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {/* Product Info Card */}
+                            <div className="col-span-1 md:col-span-2 bg-white/[0.03] border border-white/5 rounded-3xl p-6 flex items-start gap-6 hover:bg-white/[0.05] transition-colors">
+                                <div className="w-20 h-20 rounded-2xl bg-black border border-white/10 flex-shrink-0 flex items-center justify-center overflow-hidden">
+                                    {selectedAuditRecord.product?.image ? (
+                                        <img src={selectedAuditRecord.product.image} alt="Ref" className="w-full h-full object-cover opacity-60" />
+                                    ) : (
+                                        <Package size={32} className="text-gray-700" />
+                                    )}
+                                </div>
+                                <div className="min-w-0">
+                                    <span className="text-[10px] font-black text-blue-400 uppercase tracking-[0.3em] mb-1 block">Linked Product</span>
+                                    <h3 className="text-xl font-black text-white truncate mb-2">{selectedAuditRecord.product?.name || 'Unknown Item'}</h3>
+                                    <div className="flex items-center gap-2">
+                                        <span className="px-3 py-1 bg-black/40 rounded-lg text-xs font-mono text-gray-400 border border-white/5">SKU: {selectedAuditRecord.product?.sku || 'N/A'}</span>
+                                        <span className="px-3 py-1 bg-black/40 rounded-lg text-xs font-bold text-gray-400 border border-white/5 uppercase">{selectedAuditRecord.product?.category || 'General'}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Attribution Details */}
+                            <div className="bg-white/[0.03] border border-white/5 rounded-3xl p-6 space-y-6">
+                                <div>
+                                    <span className="text-[10px] font-black text-cyan-400 uppercase tracking-[0.3em] mb-3 block">Logged By</span>
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-10 h-10 rounded-xl bg-cyan-500/10 flex items-center justify-center border border-cyan-500/20 drop-shadow-[0_0_8px_rgba(6,182,212,0.3)]">
+                                            <User size={18} className="text-cyan-400" />
+                                        </div>
+                                        <div>
+                                            <p className="text-sm font-black text-white">{getEmployeeName(selectedAuditRecord.created_by)}</p>
+                                            <p className="text-[10px] text-gray-500 uppercase font-black">Verified Session</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="pt-6 border-t border-white/5">
+                                    <span className="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em] mb-3 block">Site Location</span>
+                                    <div>
+                                        <div className="flex items-center gap-2 text-white font-bold text-sm">
+                                            <div className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(6,182,212,0.5)]" />
+                                            {sites.find(s => s.id === (selectedAuditRecord.site_id || selectedAuditRecord.siteId))?.name || 'Unknown Site'}
+                                        </div>
+                                        <p className="text-[10px] text-gray-500 font-mono mt-1 ml-4 uppercase tracking-wider">
+                                            ID: {sites.find(s => s.id === (selectedAuditRecord.site_id || selectedAuditRecord.siteId))?.code || 'N/A'}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="bg-white/[0.03] border border-white/5 rounded-3xl p-6 flex flex-col justify-between">
+                                <div>
+                                    <span className="text-[10px] font-black text-blue-400 uppercase tracking-[0.3em] mb-4 block">Audit Details</span>
+                                    <div className="space-y-3 bg-black/40 p-4 rounded-2xl border border-white/5">
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-gray-500 font-bold uppercase tracking-wider text-[9px]">Date</span>
+                                            <span className="text-white font-mono">
+                                                {selectedAuditRecord.created_at ? new Date(selectedAuditRecord.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A'}
+                                            </span>
+                                        </div>
+                                        <div className="flex justify-between items-center text-[11px]">
+                                            <span className="text-gray-500 font-bold uppercase tracking-wider">Time</span>
+                                            <span className="text-white font-mono">
+                                                {selectedAuditRecord.created_at ? new Date(selectedAuditRecord.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }) : 'N/A'}
+                                            </span>
+                                        </div>
+                                        {selectedAuditRecord.resolution_time !== undefined && selectedAuditRecord.resolution_time !== null && (
+                                            <div className="flex justify-between items-center text-[11px]">
+                                                <span className="text-gray-500 font-bold uppercase tracking-wider">Duration</span>
+                                                <span className="text-cyber-primary font-black uppercase">
+                                                    {selectedAuditRecord.resolution_time >= 60
+                                                        ? `${Math.floor(selectedAuditRecord.resolution_time / 60)}m ${selectedAuditRecord.resolution_time % 60}s`
+                                                        : `${selectedAuditRecord.resolution_time}s`}
+                                                </span>
+                                            </div>
+                                        )}
+                                        <div className="flex justify-between items-center text-[11px]">
+                                            <span className="text-gray-500 font-bold uppercase tracking-wider">Method</span>
+                                            <span className="text-orange-400 font-black uppercase">POS Entry</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="mt-6 pt-6 border-t border-white/5">
+                                    <div className="w-full py-4 rounded-2xl bg-black/40 border border-white/5 flex flex-col items-center justify-center">
+                                        <span className="text-[32px] font-black tracking-tighter text-blue-500/20 font-mono">#{selectedAuditRecord.id?.slice(0, 8).toUpperCase()}</span>
+                                        <span className="text-[8px] uppercase tracking-widest text-gray-600 font-black">Audit Reference</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Footer Info */}
+                        <div className="flex justify-center pt-8">
+                            <button
+                                onClick={() => setIsApprovalDetailsOpen(false)}
+                                className="px-12 py-4 rounded-2xl bg-blue-500 text-white font-black uppercase tracking-[0.2em] text-xs shadow-xl shadow-blue-500/20 hover:scale-105 transition-transform"
+                            >
+                                Dismiss Log
+                            </button>
+                        </div>
+                    </div>
+                )}
+            </Modal>
+
 
             {/* Label Print Modal */}
             <LabelPrintModal isOpen={isPrintHubOpen} onClose={() => setIsPrintHubOpen(false)} labels={Array.from(selectedIds).map(id => { const p = filteredProducts.find(p => p.id === id); return p ? { product: p, quantity: 1, location: p.location, receivedDate: new Date().toISOString().split('T')[0] } : null; }).filter(Boolean) as any[]} onPrint={() => { addNotification('success', `${selectedIds.size} labels sent.`); setIsPrintHubOpen(false); setSelectedIds(new Set()); }} />
@@ -2403,8 +2620,8 @@ export default function Inventory() {
                         </Button>
                         <Button
                             onClick={handleConfirmDelete}
-                            disabled={isSubmitting}
-                            loading={isSubmitting}
+                            disabled={isSubmitting || deleteMutation.isPending}
+                            loading={isSubmitting || deleteMutation.isPending}
                             variant="danger"
                             className="flex-1 py-3 text-white font-bold"
                         >

@@ -285,7 +285,7 @@ export default function StoreBonusDisplay({
                 <div className="h-3 bg-black/50 rounded-full overflow-hidden border border-white/10 relative">
                     <div
                         className={`h-full bg-gradient-to-r ${getTierColor(bonusInfo.tier.tierColor)} transition-all duration-1000 relative overflow-hidden`}
-                        style={{ width: `${tierProgress}%` }}
+                        ref={(el) => { if (el) el.style.width = `${tierProgress}%`; }}
                     >
                         <div className="absolute inset-0 bg-white/20 animate-[shimmer_2s_infinite]" />
                     </div>

@@ -14,9 +14,10 @@ import { CURRENCY_SYMBOL } from '../constants';
 import { useStore } from '../contexts/CentralStore';
 import { useData } from '../contexts/DataContext'; // Use Live Data
 import { formatCompactNumber, formatDateTime } from '../utils/formatting';
+import { formatJobId } from '../utils/jobIdFormatter';
 import Modal from '../components/Modal';
 import { Product } from '../types';
-import { productsService } from '../services/supabase.service';
+import { productsService, wmsJobsService } from '../services/supabase.service';
 import { LeaderboardWidget } from '../components/WorkerPointsDisplay';
 import StoreBonusDisplay from '../components/StoreBonusDisplay';
 import { useDateFilter, DateRangeOption } from '../hooks/useDateFilter'; // Import Hook
@@ -97,12 +98,33 @@ export default function POSDashboard() {
 
   // --- POS Receiving Handlers ---
   const handleScanOrderRef = (ref: string) => {
-    const transfer = transfers.find(t =>
+    if (!ref.trim()) return;
+
+    // 1. Check transfers by orderRef or ID
+    let foundTransfer = transfers.find(t =>
       (t as any).orderRef?.toLowerCase() === ref.toLowerCase() ||
       t.id?.toLowerCase() === ref.toLowerCase()
     );
-    if (transfer) {
-      handleSelectTransferForReceiving(transfer.id);
+
+    // 2. If not found, check jobs for trackingNumber or orderRef
+    if (!foundTransfer) {
+      const matchJob = jobs.find(j =>
+        (j as any).trackingNumber?.toLowerCase() === ref.toLowerCase() ||
+        j.orderRef?.toLowerCase() === ref.toLowerCase() ||
+        j.id?.toLowerCase() === ref.toLowerCase()
+      );
+
+      if (matchJob) {
+        // Find corresponding transfer from this job's orderRef
+        foundTransfer = transfers.find(t =>
+          t.id === matchJob.orderRef ||
+          (t as any).orderRef === matchJob.orderRef
+        );
+      }
+    }
+
+    if (foundTransfer) {
+      handleSelectTransferForReceiving(foundTransfer.id);
       setOrderRefScanInput('');
       addNotification('success', `Found shipment ${ref}`);
     } else {
@@ -111,18 +133,42 @@ export default function POSDashboard() {
   };
 
   const handleSelectTransferForReceiving = (transferId: string) => {
-    const transfer = transfers.find(t => t.id === transferId);
+    let transfer = transfers.find(t => t.id === transferId);
+
+    // [NEW] Fallback: Check WMS Jobs (for automated/external transfers)
+    if (!transfer) {
+      const job = jobs.find(j => j.id === transferId);
+      if (job) {
+        // Adapt WMS Job to Transfer-like shape for receiving
+        transfer = {
+          id: job.id,
+          sourceSiteId: (job as any).sourceSiteId || (job as any).source_site_id,
+          destSiteId: job.destSiteId,
+          status: job.status,
+          transferStatus: job.transferStatus,
+          items: job.lineItems || (job as any).line_items || [],
+          orderRef: job.orderRef,
+          createdAt: job.createdAt,
+          updatedAt: job.updatedAt
+        } as any;
+      }
+    }
+
     if (!transfer) return;
 
     setSelectedTransferForReceiving(transferId);
+    setIsReceivingModalOpen(true); // [FIX] Ensure modal opens when selected from list
 
     const items = (transfer.items || []).map((item: any) => {
-      const product = products.find(p => p.sku === item.sku || p.id === item.productId);
+      // [FIX] SKU is the authoritative product identifier
+      const itemSku = item.sku?.trim()?.toUpperCase();
+      const product = itemSku ? allProducts.find(p => p.sku?.trim()?.toUpperCase() === itemSku) : null;
+
       return {
-        productId: item.productId,
-        sku: item.sku,
+        productId: product?.productId || product?.id || item.productId,
+        sku: itemSku || item.sku,
         name: product?.name || item.name || 'Unknown Product',
-        expectedQty: item.quantity || (item as any).expectedQty || 0,
+        expectedQty: item.expectedQty ?? item.quantity ?? 0, // [FIX] Use nullish coalescing for proper 0 handling
         receivedQty: 0, // Default to 0 for forced scanning
         condition: 'Good' as const,
         notes: ''
@@ -139,9 +185,24 @@ export default function POSDashboard() {
   };
 
   const handleScanTransferItem = (barcode: string) => {
-    const itemIndex = transferReceivingItems.findIndex(item =>
-      item.sku.toLowerCase() === barcode.toLowerCase()
-    );
+    const scannedValue = barcode.trim().toUpperCase();
+    if (!scannedValue) return;
+
+    // [FIX] Support SKU, primary barcode, and barcode aliases
+    const itemIndex = transferReceivingItems.findIndex(item => {
+      const itemSku = item.sku?.trim().toUpperCase() || '';
+
+      // Find the product to get barcode aliases
+      const product = allProducts.find(p => p.sku?.trim().toUpperCase() === itemSku);
+      const primaryBarcode = (product?.barcode || '').trim().toUpperCase();
+      const barcodeAliases = (product?.barcodes || []).map((b: string) => b.trim().toUpperCase());
+
+      // Match against SKU, primary barcode, or any alias
+      return scannedValue === itemSku ||
+        (primaryBarcode && scannedValue === primaryBarcode) ||
+        barcodeAliases.includes(scannedValue);
+    });
+
     if (itemIndex !== -1) {
       handleUpdateTransferItem(itemIndex, 'receivedQty', transferReceivingItems[itemIndex].receivedQty + 1);
       setTransferScanBarcode('');
@@ -161,7 +222,27 @@ export default function POSDashboard() {
 
     try {
       const transferId = selectedTransferForReceiving;
-      const transfer = transfers.find(t => t.id === transferId);
+      let transfer = transfers.find(t => t.id === transferId) as any;
+
+      // [NEW] Fallback Check WMS Jobs
+      if (!transfer) {
+        const job = jobs.find(j => j.id === transferId);
+        if (job) {
+          transfer = {
+            id: job.id,
+            sourceSiteId: (job as any).sourceSiteId || (job as any).source_site_id,
+            destSiteId: job.destSiteId,
+            status: job.status,
+            transferStatus: job.transferStatus,
+            items: job.lineItems || (job as any).line_items || [],
+            orderRef: job.orderRef,
+            createdAt: job.createdAt,
+            updatedAt: job.updatedAt,
+            lineItems: job.lineItems || (job as any).line_items // Ensure lineItems is mapped for update logic
+          } as any;
+        }
+      }
+
       if (!transfer) throw new Error('Transfer not found');
 
       // Check for discrepancies
@@ -169,51 +250,207 @@ export default function POSDashboard() {
         item => item.receivedQty !== item.expectedQty || item.condition !== 'Good'
       );
 
-      // Update each product with POS receiving timestamp
-      for (const item of transferReceivingItems) {
-        const product = products.find(p => p.sku === item.sku || p.id === item.productId);
-        if (product) {
-          await updateProduct({
-            ...product,
-            posReceivedAt: new Date().toISOString(),
-            pos_received_at: new Date().toISOString(),
-            posReceivedBy: user?.name || 'POS User',
-            pos_received_by: user?.name || 'POS User',
-            needsReview: item.condition === 'Damaged',
-            receivingNotes: item.notes || undefined
-          }, user?.name || 'POS User');
+      // 1. Update TRANSFER Job
+      const updatedLineItems = (transfer.lineItems || []).map((item: any) => {
+        const rx = transferReceivingItems.find(i => i.sku === item.sku || i.productId === item.productId);
+        return {
+          ...item,
+          receivedQty: rx ? rx.receivedQty : 0,
+          condition: rx ? rx.condition : 'Good',
+          status: (rx && rx.receivedQty === (item.expectedQty || item.quantity)) ? 'Completed' : 'Discrepancy'
+        };
+      });
+
+      const hasDiscrepancy = updatedLineItems.some((i: any) => i.status === 'Discrepancy');
+
+      await wmsJobsService.update(transfer.id, {
+        transferStatus: 'Received',
+        receivedAt: new Date().toISOString(),
+        receivedBy: user?.name || 'POS User',
+        status: 'Completed',
+        lineItems: updatedLineItems
+      } as any);
+
+      // 2. Find and update linked DISPATCH job if exists
+      const dispatchJob = jobs.find(j =>
+        j.type === 'DISPATCH' &&
+        (j.orderRef === transfer.id || j.orderRef === transfer.jobNumber)
+      );
+
+      if (dispatchJob) {
+        await wmsJobsService.update(dispatchJob.id, {
+          status: 'Completed',
+          transferStatus: 'Received',
+          receivedAt: new Date().toISOString(),
+          receivedBy: user?.name || 'POS User'
+        } as any);
+      }
+
+      // 3. Update Inventory (Adjust Stock)
+      const destSiteId = transfer.destSiteId || activeSite?.id;
+      const failedItems: string[] = []; // Track failures for user feedback
+
+      if (destSiteId) {
+        for (const item of transferReceivingItems) {
+          if (item.receivedQty > 0) {
+            // [FIX] SKU is the authoritative product identifier
+            const itemSku = item.sku?.trim()?.toUpperCase();
+
+            // Find product at destination site by SKU (primary key)
+            const destProduct = itemSku
+              ? allProducts.find(p =>
+                p.sku?.trim()?.toUpperCase() === itemSku &&
+                (p.siteId === destSiteId || p.site_id === destSiteId)
+              )
+              : null;
+
+            if (destProduct) {
+              await adjustStock(
+                destProduct.id,
+                item.receivedQty,
+                'IN',
+                `POS Transfer Received: ${formatJobId({ orderRef: transfer.jobNumber || transfer.id, type: 'TRANSFER' })}`,
+                user?.name || 'POS User'
+              );
+            } else {
+              // [NEW] Product doesn't exist at this site - CREATE IT
+              // Find template by SKU from any site
+              const templateProduct = itemSku
+                ? allProducts.find(p => p.sku?.trim()?.toUpperCase() === itemSku)
+                : null;
+
+              try {
+                const created = await addProduct({
+                  name: item.name || templateProduct?.name || 'New Product',
+                  sku: item.sku,
+                  price: templateProduct?.price || 0,
+                  costPrice: (templateProduct as any)?.costPrice || (templateProduct as any)?.cost || 0,
+                  stock: 0, // [FIX] Start at 0, adjustStock will add the received qty
+                  unit: templateProduct?.unit || 'pcs',
+                  siteId: destSiteId,
+                  category: templateProduct?.category || 'Uncategorized',
+                  minStockLevel: 5,
+                  image: templateProduct?.image || '',
+                  productId: templateProduct?.productId || templateProduct?.id
+                } as any);
+
+                // [FIX] Call adjustStock after creation for proper audit trail
+                if (created?.id) {
+                  await adjustStock(
+                    created.id,
+                    item.receivedQty,
+                    'IN',
+                    `POS Transfer Received (New Product): ${formatJobId({ orderRef: transfer.jobNumber || transfer.id, type: 'TRANSFER' })}`,
+                    user?.name || 'POS User'
+                  );
+                  addNotification('success', `Created & received: ${item.name}`);
+                } else {
+                  // Product created but no ID returned - stock set directly in creation
+                  addNotification('success', `Created new product: ${item.name}`);
+                }
+              } catch (err) {
+                console.error('Failed to auto-create product:', err);
+                failedItems.push(item.sku || item.name);
+              }
+            }
+          }
         }
       }
 
-      // Show summary or notification
-      if (discrepancies.length > 0) {
-        const damagedCount = discrepancies.filter(d => d.condition === 'Damaged').length;
-        const shortCount = discrepancies.filter(d => d.receivedQty < d.expectedQty).length;
-        addNotification('alert', `Received with ${damagedCount} damaged and ${shortCount} short units.`);
-      } else {
-        addNotification('success', `✅ Successfully received all items from transfer.`);
+      // [FIX] Surface failed items to user
+      if (failedItems.length > 0) {
+        addNotification('alert', `Failed to create: ${failedItems.join(', ')}. Please add manually.`);
       }
 
-      // Record summary for display
-      setReceivingSummary({
-        orderRef: (transfer as any).orderRef || transfer.id,
-        items: [...transferReceivingItems],
-        timestamp: new Date().toISOString(),
-        hasDiscrepancies: discrepancies.length > 0
-      });
-
-      // Clear selection but keep modal open to show summary
-      setSelectedTransferForReceiving(null);
-      setTransferReceivingItems([]);
-
-      // Refresh data to update transfer status
+      // Refresh data to update local state
       await refreshData();
-
-    } catch (error) {
-      console.error('Error confirming transfer receiving:', error);
-      addNotification('alert', 'Failed to confirm receiving. Please try again.');
+      addNotification('success', 'Shipment fully received and inventoried.');
+      setIsReceivingModalOpen(false);
+      setSelectedTransferForReceiving(null);
+    } catch (err: any) {
+      console.error('Error confirming receipt:', err);
+      addNotification('alert', `Failed to finalize receipt: ${err.message}`);
     } finally {
       setIsConfirmingReceive(false);
+    }
+  };
+
+  const repairShipmentInventory = async (jobId: string) => {
+    const job = jobs.find(j => j.id === jobId);
+    if (!job) {
+      addNotification('alert', 'Shipment record not found for repair.');
+      return;
+    }
+
+    const items = job.lineItems || (job as any).line_items || [];
+    if (items.length === 0) {
+      addNotification('alert', 'No items found in this shipment record.');
+      return;
+    }
+
+    addNotification('info', `Starting repair for shipment ${job.orderRef || job.id.substring(0, 8)}...`);
+
+    try {
+      const destSiteId = job.destSiteId || (job as any).dest_site_id || activeSite?.id;
+      let repairCount = 0;
+
+      for (const item of items) {
+        // ROBUST QUANTITY FALLBACK: Check all likely fields for received/available quantity
+        const received = item.receivedQty || (item as any).quantity || item.expectedQty || item.pickedQty ||
+          (item as any).received_qty || (item as any).qty || 0;
+
+        if (received > 0) {
+          // 1. Resolve product globally by SKU (Authoritative identifier)
+          const itemSku = item.sku?.trim()?.toUpperCase();
+          const templateProduct = itemSku
+            ? allProducts.find(p => p.sku?.trim()?.toUpperCase() === itemSku)
+            : null;
+
+          if (!templateProduct && !item.sku && !item.name) continue;
+
+          // 2. Check if it exists in target site (site-aware check)
+          const destProduct = allProducts.find(p =>
+            (p.sku === (item.sku || templateProduct?.sku)) &&
+            (p.siteId === destSiteId || p.site_id === destSiteId)
+          );
+
+          let targetId = destProduct?.id;
+
+          if (!destProduct) {
+            // Auto-create missing site record using template metadata
+            const created = await addProduct({
+              name: item.name || templateProduct?.name || 'Restored Product',
+              sku: item.sku || templateProduct?.sku || 'N/A',
+              price: templateProduct?.price || 0,
+              costPrice: (templateProduct as any)?.costPrice || (templateProduct as any)?.cost || 0,
+              stock: 0, // [FIX] Use 'stock' not 'quantity' - will be adjusted by adjustStock below
+              unit: templateProduct?.unit || 'pcs',
+              siteId: destSiteId,
+              category: templateProduct?.category || 'Uncategorized',
+              productId: templateProduct?.productId || templateProduct?.id
+            } as any);
+            targetId = created?.id;
+            repairCount++;
+          }
+
+          // 3. Adjust stock if record exists now (or was just created)
+          if (targetId) {
+            await adjustStock(
+              targetId,
+              received,
+              'IN',
+              `Manual Repair: Syncing past shipment ${formatJobId(job)}`,
+              user?.name || 'POS Repair'
+            );
+          }
+        }
+      }
+
+      await refreshData();
+      addNotification('success', `Repair complete! Processed ${repairCount} missing records.`);
+    } catch (err: any) {
+      console.error('Repair failed:', err);
+      addNotification('alert', `Repair failed: ${err.message}`);
     }
   };
 
@@ -267,9 +504,10 @@ export default function POSDashboard() {
     return acc;
   }, {});
 
+  const totalFilteredSales = filteredSales.length;
   const paymentChartData = Object.keys(methodStats).map(key => ({
     name: key,
-    value: Math.round((methodStats[key] / txCount) * 100) || 0
+    value: totalFilteredSales > 0 ? Math.round((methodStats[key] / totalFilteredSales) * 100) : 0
   }));
 
   // Hourly Mock derived from total (Simplification)
@@ -394,33 +632,76 @@ export default function POSDashboard() {
         </div>
       </div>
 
-      {/* Site Team Roster & Scheduling Section */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-        <div className="bg-cyber-gray border border-white/5 rounded-3xl p-8 relative overflow-hidden group">
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyber-primary/20 to-transparent" />
-          <SiteRoster layout="list" limit={6} highlightUser={user?.id} />
-        </div>
-        <div className="bg-cyber-gray border border-white/5 rounded-3xl p-8 relative overflow-hidden group">
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyber-primary/20 to-transparent" />
-          <RosterManager />
-        </div>
-      </div>
+      {/* SHIFT COMMAND CENTER - Top Priority */}
+      <div className="bg-black/40 border border-white/10 backdrop-blur-xl rounded-2xl p-1 overflow-visible mb-6 relative z-0">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2">
 
-      {/* Motivation & Performance Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Store Performance Card */}
-        <div className="lg:col-span-2">
-          <StoreBonusDisplay
-            storePoints={storePoints.find(sp => sp.siteId === activeSite?.id)}
-            currentUserRole={user?.role}
-            workerPoints={myPoints}
-            leaderboard={siteWorkerPoints}
-          />
-        </div>
+          {/* Receive Items */}
+          <button
+            onClick={() => setIsReceivingModalOpen(true)}
+            className="group relative h-20 bg-blue-500/5 hover:bg-blue-500/10 border border-blue-500/20 hover:border-blue-500/50 rounded-xl flex flex-col items-center justify-center transition-all duration-300"
+          >
+            <div className="w-8 h-8 rounded-full bg-blue-500/10 text-blue-400 group-hover:scale-110 group-hover:bg-blue-500/20 transition-all flex items-center justify-center mb-1">
+              <Package size={16} />
+            </div>
+            <span className="text-[10px] font-bold text-blue-100 uppercase tracking-wider group-hover:text-white">Receive Stock</span>
+          </button>
 
-        {/* Top Store Performers */}
-        <div className="lg:col-span-1">
-          <LeaderboardWidget workers={siteWorkerPoints} currentUserId={user?.id} />
+          {/* Stock List */}
+          <button
+            onClick={() => setIsStockListOpen(true)}
+            className="group relative h-20 bg-purple-500/5 hover:bg-purple-500/10 border border-purple-500/20 hover:border-purple-500/50 rounded-xl flex flex-col items-center justify-center transition-all duration-300"
+          >
+            <div className="w-8 h-8 rounded-full bg-purple-500/10 text-purple-400 group-hover:scale-110 group-hover:bg-purple-500/20 transition-all flex items-center justify-center mb-1">
+              <List size={16} />
+            </div>
+            <span className="text-[10px] font-bold text-purple-100 uppercase tracking-wider group-hover:text-white">Stock List</span>
+          </button>
+
+          {/* Lock Screen */}
+          <button
+            onClick={handleLockScreen}
+            className="group relative h-20 bg-amber-500/5 hover:bg-amber-500/10 border border-amber-500/20 hover:border-amber-500/50 rounded-xl flex flex-col items-center justify-center transition-all duration-300"
+          >
+            <div className="w-8 h-8 rounded-full bg-amber-500/10 text-amber-400 group-hover:scale-110 group-hover:bg-amber-500/20 transition-all flex items-center justify-center mb-1">
+              <Lock size={16} />
+            </div>
+            <span className="text-[10px] font-bold text-amber-100 uppercase tracking-wider group-hover:text-white">Lock Screen</span>
+          </button>
+
+          {/* Employees */}
+          <button
+            onClick={() => navigate('/employees')}
+            className="group relative h-20 bg-pink-500/5 hover:bg-pink-500/10 border border-pink-500/20 hover:border-pink-500/50 rounded-xl flex flex-col items-center justify-center transition-all duration-300"
+          >
+            <div className="w-8 h-8 rounded-full bg-pink-500/10 text-pink-400 group-hover:scale-110 group-hover:bg-pink-500/20 transition-all flex items-center justify-center mb-1">
+              <Users size={16} />
+            </div>
+            <span className="text-[10px] font-bold text-pink-100 uppercase tracking-wider group-hover:text-white">Employees</span>
+          </button>
+
+          {/* Reprint Last */}
+          <button
+            onClick={handleReprint}
+            className="group relative h-20 bg-cyan-500/5 hover:bg-cyan-500/10 border border-cyan-500/20 hover:border-cyan-500/50 rounded-xl flex flex-col items-center justify-center transition-all duration-300"
+          >
+            <div className="w-8 h-8 rounded-full bg-cyan-500/10 text-cyan-400 group-hover:scale-110 group-hover:bg-cyan-500/20 transition-all flex items-center justify-center mb-1">
+              <Printer size={16} />
+            </div>
+            <span className="text-[10px] font-bold text-cyan-100 uppercase tracking-wider group-hover:text-white">Reprint Last</span>
+          </button>
+
+          {/* End Shift */}
+          <button
+            onClick={handleEndShift}
+            className="group relative h-20 bg-red-500/5 hover:bg-red-500/10 border border-red-500/20 hover:border-red-500/50 rounded-xl flex flex-col items-center justify-center transition-all duration-300"
+          >
+            <div className="w-8 h-8 rounded-full bg-red-500/10 text-red-400 group-hover:scale-110 group-hover:bg-red-500/20 transition-all flex items-center justify-center mb-1">
+              <LogOut size={16} />
+            </div>
+            <span className="text-[10px] font-bold text-red-100 uppercase tracking-wider group-hover:text-white">End Shift</span>
+          </button>
+
         </div>
       </div>
 
@@ -448,7 +729,7 @@ export default function POSDashboard() {
 
           <div
             className={`h-full bg-gradient-to-r from-cyber-primary to-cyber-accent shadow-[0_0_15px_rgba(0,255,157,0.3)] transition-all duration-1000 ease-out`}
-            style={{ width: `${Math.min((getShiftSummary().total / 100000) * 100, 100)}%` }}
+            ref={(el) => { if (el) el.style.width = `${Math.min((getShiftSummary().total / 100000) * 100, 100)}%`; }}
           />
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -508,6 +789,36 @@ export default function POSDashboard() {
         />
       </div>
 
+      {/* Site Team Roster & Scheduling Section */}
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        <div className="bg-cyber-gray border border-white/5 rounded-3xl p-8 relative overflow-hidden group">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyber-primary/20 to-transparent" />
+          <SiteRoster layout="list" limit={6} highlightUser={user?.id} />
+        </div>
+        <div className="bg-cyber-gray border border-white/5 rounded-3xl p-8 relative overflow-hidden group">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyber-primary/20 to-transparent" />
+          <RosterManager />
+        </div>
+      </div>
+
+      {/* Motivation & Performance Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Store Performance Card */}
+        <div className="lg:col-span-2">
+          <StoreBonusDisplay
+            storePoints={storePoints.find(sp => sp.siteId === activeSite?.id)}
+            currentUserRole={user?.role}
+            workerPoints={myPoints}
+            leaderboard={siteWorkerPoints}
+          />
+        </div>
+
+        {/* Top Store Performers */}
+        <div className="lg:col-span-1">
+          <LeaderboardWidget workers={siteWorkerPoints} currentUserId={user?.id} />
+        </div>
+      </div>
+
       {/* Charts & Actions Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Hourly Performance */}
@@ -530,7 +841,8 @@ export default function POSDashboard() {
           </div>
         </div>
 
-        {/* Shift Actions Panel */}
+
+        {/* Sidebar Actions */}
         <div className="space-y-6">
           {/* Payment Split */}
           <div className="bg-cyber-gray border border-white/5 rounded-2xl p-6 h-[200px]">
@@ -568,56 +880,6 @@ export default function POSDashboard() {
               </div>
             </div>
           </div>
-
-          {/* Quick Actions */}
-          <div className="bg-cyber-gray border border-white/5 rounded-2xl p-6">
-            <h3 className="font-bold text-white mb-4 text-sm">Shift Actions</h3>
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                onClick={() => setIsReceivingModalOpen(true)}
-                className="p-3 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 flex flex-col items-center justify-center gap-2 transition-colors"
-              >
-                <Package size={20} className="text-blue-400" />
-                <span className="text-xs text-blue-300">Receive Items</span>
-              </button>
-              <button
-                onClick={() => setIsStockListOpen(true)}
-                className="p-3 rounded-xl bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/30 flex flex-col items-center justify-center gap-2 transition-colors"
-              >
-                <List size={20} className="text-purple-400" />
-                <span className="text-xs text-purple-300">Stock List</span>
-              </button>
-              <button
-                onClick={handleLockScreen}
-                className="p-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 flex flex-col items-center justify-center gap-2 transition-colors"
-              >
-                <Lock size={20} className="text-yellow-400" />
-                <span className="text-xs text-gray-300">Lock Screen</span>
-              </button>
-              <button
-                onClick={() => navigate('/employees')}
-                className="p-3 rounded-xl bg-pink-500/10 hover:bg-pink-500/20 border border-pink-500/30 flex flex-col items-center justify-center gap-2 transition-colors"
-                aria-label="Manage Employees"
-              >
-                <Users size={20} className="text-pink-400" />
-                <span className="text-xs text-pink-300">Employees</span>
-              </button>
-              <button
-                onClick={handleReprint}
-                className="p-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 flex flex-col items-center justify-center gap-2 transition-colors"
-              >
-                <Printer size={20} className="text-blue-400" />
-                <span className="text-xs text-gray-300">Reprint Last</span>
-              </button>
-              <button
-                onClick={handleEndShift}
-                className="p-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 flex flex-col items-center justify-center gap-2 transition-colors col-span-2"
-              >
-                <LogOut size={20} className="text-red-400" />
-                <span className="text-xs text-gray-300">End Shift & Report</span>
-              </button>
-            </div>
-          </div>
         </div>
       </div>
 
@@ -649,8 +911,10 @@ export default function POSDashboard() {
               <tbody className="divide-y divide-white/5">
                 {products
                   .filter(p => {
-                    // Filter by site
-                    const matchesSite = p.siteId === activeSite?.id || p.site_id === activeSite?.id;
+                    // Filter by site - Robust check
+                    const siteId = activeSite?.id || user?.siteId;
+                    const matchesSite = !siteId || p.siteId === siteId || p.site_id === siteId;
+
                     // Filter by search
                     const matchesSearch = p.name.toLowerCase().includes(stockSearch.toLowerCase()) ||
                       p.sku.toLowerCase().includes(stockSearch.toLowerCase());
@@ -707,13 +971,63 @@ export default function POSDashboard() {
               </tbody>
             </table>
           </div>
+          {products.filter(p => (p.siteId === activeSite?.id || p.site_id === activeSite?.id || p.siteId === user?.siteId)).length === 0 && (
+            <div className="mt-4 p-4 bg-red-500/10 border border-red-500/20 rounded text-xs font-mono text-center">
+              <p className="font-bold text-red-400">Inventory Sync in Progress</p>
+              <p className="text-gray-400">Refreshing stock data for {activeSite?.name}...</p>
+
+              <div className="mt-4 p-2 bg-purple-500/10 border border-purple-500/20 rounded text-left">
+                <p className="text-purple-400 font-bold mb-2 uppercase tracking-tighter text-[10px]">🛠️ Data Recovery: Repair Past Shipments</p>
+                {(() => {
+                  const history = jobs.filter(j =>
+                    (j.destSiteId === activeSite?.id || (j as any).dest_site_id === activeSite?.id) &&
+                    (j.status === 'Completed' || (j as any).transferStatus === 'Received')
+                  ).sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
+
+                  if (history.length === 0) return <p className="text-gray-500 italic">No completed transfers found to repair.</p>;
+
+                  return history.slice(0, 5).map(h => {
+                    const items = (h.lineItems || (h as any).line_items || []);
+                    return (
+                      <div key={h.id} className="border-b border-white/5 mb-3 last:border-0 pb-3 last:pb-0">
+                        <div className="flex justify-between items-start gap-4">
+                          <div className="flex-1">
+                            <p className="text-white font-bold text-[11px] mb-1">{h.orderRef || h.id.substring(0, 8)} ({h.status})</p>
+                            <div className="text-gray-500 text-[9px] leading-relaxed flex flex-wrap gap-x-2">
+                              {items.map((i: any) => {
+                                const q = i.receivedQty || i.quantity || i.expectedQty || i.pickedQty ||
+                                  (i as any).received_qty || (i as any).qty || 0;
+                                return (
+                                  <span key={i.productId || i.sku}>
+                                    {i.sku || '??'}: <span className="text-purple-400 font-bold">{q}</span>
+                                  </span>
+                                );
+                              })}
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => repairShipmentInventory(h.id)}
+                            className="shrink-0 px-3 py-1.5 bg-purple-600 hover:bg-purple-500 rounded-lg text-[10px] font-black text-white uppercase tracking-widest transition-all shadow-lg active:scale-95 whitespace-nowrap"
+                          >
+                            Repair
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  });
+                })()}
+              </div>
+            </div>
+          )}
         </div>
-      </Modal>
+
+      </Modal >
 
       {/* Advanced Shift Closure Modal */}
-      <Modal
+      < Modal
         isOpen={isClosingShift}
-        onClose={() => !isSubmittingShift && setIsClosingShift(false)}
+        onClose={() => !isSubmittingShift && setIsClosingShift(false)
+        }
         title="Advanced Shift Reconciliation"
         size="lg"
       >
@@ -909,10 +1223,10 @@ export default function POSDashboard() {
             </div>
           )}
         </div>
-      </Modal>
+      </Modal >
 
       {/* Recent Transactions List */}
-      <div className="bg-cyber-gray border border-white/5 rounded-2xl overflow-hidden">
+      < div className="bg-cyber-gray border border-white/5 rounded-2xl overflow-hidden" >
         <div className="p-6 border-b border-white/5 flex justify-between items-center">
           <h3 className="font-bold text-white">Recent Transactions</h3>
           <button
@@ -979,10 +1293,10 @@ export default function POSDashboard() {
             </button>
           </div>
         </div>
-      </div>
+      </div >
 
       {/* Receiving Modal - Enhanced with Transfers + Manual Mode */}
-      <Modal isOpen={isReceivingModalOpen} onClose={handleCloseReceivingModal} title="Receive Inventory" size="xl">
+      < Modal isOpen={isReceivingModalOpen} onClose={handleCloseReceivingModal} title="Receive Inventory" size="xl" >
         <div className="space-y-4 p-1">
           {/* Internal Tab State for Modal */}
           {(() => {
@@ -1027,8 +1341,8 @@ export default function POSDashboard() {
                       </h3>
                       <p className="text-gray-400 text-sm">
                         {(receivingSummary as any).isHistory
-                          ? `Viewing details for shipment ${receivingSummary.orderRef}`
-                          : `Shipment ${receivingSummary.orderRef} has been added to inventory.`
+                          ? `Viewing details for shipment ${formatJobId({ orderRef: receivingSummary.orderRef, type: 'TRANSFER' })}`
+                          : `Shipment ${formatJobId({ orderRef: receivingSummary.orderRef, type: 'TRANSFER' })} has been added to inventory.`
                         }
                       </p>
                     </div>
@@ -1081,6 +1395,7 @@ export default function POSDashboard() {
                     </button>
                   </div>
                 )}
+
 
                 {/* Pending Transfers List / Form */}
                 {!receivingSummary && (
@@ -1173,7 +1488,7 @@ export default function POSDashboard() {
                                   className="bg-white/5 border border-white/10 rounded-xl p-4 flex items-center justify-between cursor-pointer hover:bg-white/10 transition-colors"
                                 >
                                   <div>
-                                    <p className="font-mono font-bold text-white">{(item as any).orderRef || item.id.slice(0, 8).toUpperCase()}</p>
+                                    <p className="font-mono font-bold text-white">{formatJobId({ ...item, type: 'TRANSFER' })}</p>
                                     <p className="text-xs text-gray-400">
                                       {(item as any).items?.length || 0} items • {formatDateTime((item as any).receivedAt || (item as any).updatedAt)}
                                     </p>
@@ -1277,7 +1592,11 @@ export default function POSDashboard() {
                             // Don't require product to exist in local products array
                             const items = Array.isArray(t.items) ? t.items : [];
                             const hasUnreceivedItems = items.some((item: any) => {
-                              const product = products.find(p => p.sku === item.sku || p.id === item.productId);
+                              // [FIX] SKU is the authoritative product identifier
+                              const itemSku = item.sku?.trim()?.toUpperCase();
+                              const product = itemSku
+                                ? products.find(p => p.sku?.trim()?.toUpperCase() === itemSku)
+                                : null;
                               // If product exists, check if it hasn't been received
                               // If product doesn't exist yet, it still needs receiving
                               return !product || !(product.posReceivedAt || product.pos_received_at);
@@ -1330,27 +1649,8 @@ export default function POSDashboard() {
 
                                 {/* CEO Debug Info */}
                                 {user?.role === 'super_admin' && (
-                                  <div className="mt-4 p-3 bg-black/40 rounded-lg text-xs text-left font-mono space-y-1">
-                                    <p className="text-gray-500 font-bold border-b border-gray-700 pb-1 mb-1">DEBUG INFO:</p>
-                                    <p className="text-gray-400">Current Site ID: <span className="text-white">{activeSite?.id}</span></p>
-                                    <p className="text-gray-400">Transfers Array: <span className="text-white">{transfersArrayCount}</span></p>
-                                    <p className="text-gray-400">WMS Jobs (TRANSFER): <span className="text-cyan-400">{wmsTransferJobsCount}</span></p>
-                                    <p className="text-gray-400">For This Site (Arr): <span className="text-white">{siteTransfersFromArr.length}</span></p>
-                                    <p className="text-gray-400">For This Site (Jobs): <span className="text-cyan-400">{siteTransfersFromJobs.length}</span></p>
-
-
-                                    {(siteTransfersFromArr.length > 0 || siteTransfersFromJobs.length > 0) && (
-                                      <div className="mt-2 pt-2 border-t border-gray-700">
-                                        <p className="text-gray-500 mb-1">Found statuses:</p>
-                                        {Array.from(new Set([
-                                          ...siteTransfersFromArr.map(t => (t as any).transferStatus || t.status),
-                                          ...siteTransfersFromJobs.map(t => t.transferStatus || t.status)
-                                        ])).map((s: any) => (
-                                          <span key={String(s)} className="inline-block px-1 bg-white/10 rounded mr-1 mb-1">{String(s)}</span>
-                                        ))}
-                                      </div>
-                                    )}
-                                  </div>
+                                  // Debug info removed as per user request
+                                  null
                                 )}
                               </div>
                             );
@@ -1366,11 +1666,18 @@ export default function POSDashboard() {
                                 const totalQty = items.reduce((sum: number, i: any) => sum + (i.quantity || i.expectedQty || 0), 0);
 
                                 // Find dispatch job for this transfer to get driver info
-                                const dispatchJob = jobs.find(j =>
-                                  j.type === 'DISPATCH' &&
-                                  (j.orderRef === transfer.id || j.id?.includes(transfer.id?.slice(-6) || '')) ||
-                                  j.orderRef === (transfer as any).orderRef
-                                );
+                                const dispatchJob = jobs.find(j => {
+                                  if (j.type !== 'DISPATCH') return false;
+
+                                  const jobRef = j.orderRef || (j as any).order_ref;
+                                  const transRef = transfer.id || (transfer as any).orderRef;
+
+                                  return jobRef === transfer.id ||
+                                    jobRef === (transfer as any).orderRef ||
+                                    (jobRef && transRef && jobRef.includes(transRef)) ||
+                                    (transRef && jobRef && transRef.includes(jobRef)) ||
+                                    (j.id?.includes(transfer.id?.slice(-6) || ''));
+                                });
                                 const driver = dispatchJob?.assignedTo
                                   ? employees.find(e => e.id === dispatchJob.assignedTo)
                                   : null;
@@ -1422,7 +1729,7 @@ export default function POSDashboard() {
                                           </div>
                                           <div>
                                             <p className="font-mono font-bold text-white text-sm">
-                                              {(transfer as any).orderRef || `TRF - ${transfer.id?.slice(-6).toUpperCase()} `}
+                                              {formatJobId({ ...transfer, type: 'TRANSFER' })}
                                             </p>
                                             <p className="text-xs text-gray-400">
                                               Created: {(transfer as any).createdAt || (transfer as any).created_at ? formatDateTime((transfer as any).createdAt || (transfer as any).created_at) : 'Unknown'}
@@ -1437,7 +1744,7 @@ export default function POSDashboard() {
                                             {/* Mask 'Delivered' as 'Shipped' for External providers */}
                                             {((transfer as any).deliveryMethod === 'External' || (dispatchJob && (dispatchJob as any).deliveryMethod === 'External'))
                                               ? 'Shipped'
-                                              : ((transfer as any).transferStatus || transfer.status)}
+                                              : (dispatchJob?.transferStatus || (transfer as any).transferStatus || transfer.status)}
                                           </span>
                                         </div>
                                       </div>
@@ -1503,12 +1810,14 @@ export default function POSDashboard() {
                                         {/* Driver-type based receiving validation */}
                                         {(() => {
                                           const status = ((transfer as any).transferStatus || transfer.status || '').toLowerCase();
+                                          const dispatchStatus = (dispatchJob?.transferStatus || "").toLowerCase();
                                           const isInternalDriver = driver && (!driver.driverType || driver.driverType === 'internal');
 
                                           const isDispatchCompleted = dispatchJob?.status === 'Completed';
 
-                                          const isDelivered = status === 'delivered' || status === 'arrived' || isDispatchCompleted;
-                                          const isDispatched = status === 'dispatched' || status === 'shipped' || status === 'in-transit';
+                                          // Fallback: If DISPATCH job is Delivered, allow receiving even if TRANSFER record is stale
+                                          const isDelivered = status === 'delivered' || status === 'arrived' || dispatchStatus === 'delivered' || isDispatchCompleted;
+                                          const isDispatched = status === 'dispatched' || status === 'shipped' || status === 'in-transit' || dispatchStatus === 'in-transit' || dispatchStatus === 'shipped';
 
                                           // Internal driver: MUST be Delivered or Dispatch Job completed
                                           // External/No driver: Can receive as long as it's left the warehouse
@@ -1603,7 +1912,7 @@ export default function POSDashboard() {
                                 <div>
                                   <div className="flex items-center gap-2">
                                     <p className="font-mono font-bold text-white">
-                                      {(source as any)?.orderRef || `TRF - ${selectedTransferForReceiving.slice(-6).toUpperCase()} `}
+                                      {formatJobId({ ...source, type: 'TRANSFER' })}
                                     </p>
                                     <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase border ${transferType.color}`}>
                                       {transferType.label}
@@ -1654,7 +1963,7 @@ export default function POSDashboard() {
                                     <>
                                       <div className="flex items-center gap-2">
                                         <p className="text-sm font-bold text-white">{driver.name}</p>
-                                        <span className={`text - [10px] px-1.5 py-0.5 rounded font-bold ${driver.driverType === 'internal' ? 'bg-green-500/20 text-green-400' :
+                                        <span className={`text-[10px] px-1.5 py-0.5 rounded font-bold ${driver.driverType === 'internal' ? 'bg-green-500/20 text-green-400' :
                                           driver.driverType === 'subcontracted' ? 'bg-blue-500/20 text-blue-400' :
                                             'bg-purple-500/20 text-purple-400'
                                           }`}>
@@ -1769,11 +2078,20 @@ export default function POSDashboard() {
                                       >
                                         <Minus size={14} />
                                       </button>
-                                      <span className={`text-sm font-mono w-8 text-center ${item.receivedQty < item.expectedQty ? 'text-red-400 font-bold' :
-                                        item.receivedQty > item.expectedQty ? 'text-purple-400 font-bold' : 'text-green-400'
-                                        }`}>
-                                        {item.receivedQty}
-                                      </span>
+                                      <input
+                                        type="number"
+                                        min="0"
+                                        aria-label="Received Quantity"
+                                        title="Enter received quantity"
+                                        value={item.receivedQty}
+                                        onChange={(e) => {
+                                          const val = parseInt(e.target.value) || 0;
+                                          handleUpdateTransferItem(idx, 'receivedQty', Math.max(0, val));
+                                        }}
+                                        className={`w-12 bg-black/30 border border-white/10 rounded px-1 text-center text-sm font-mono focus:border-cyber-primary outline-none ${item.receivedQty < item.expectedQty ? 'text-red-400 font-bold' :
+                                          item.receivedQty > item.expectedQty ? 'text-purple-400 font-bold' : 'text-green-400'
+                                          }`}
+                                      />
                                       <button
                                         onClick={() => handleUpdateTransferItem(idx, 'receivedQty', item.receivedQty + 1)}
                                         className="w-8 h-8 rounded bg-white/5 hover:bg-green-500/20 text-gray-400 hover:text-green-400 flex items-center justify-center transition-colors"
@@ -1866,15 +2184,16 @@ export default function POSDashboard() {
                             </button>
                           </div>
                         </>
-                      )
+                      );
                     })()}
                   </>
                 )}
               </>
             );
           })()}
-        </div>
-      </Modal>
-    </div>
+
+        </div >
+      </Modal >
+    </div >
   );
 }

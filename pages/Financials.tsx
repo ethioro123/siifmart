@@ -624,7 +624,7 @@ export default function Finance() {
                         {/* eslint-disable-next-line react/forbid-dom-props */}
                         <div
                            className="h-full bg-cyber-primary transition-all duration-500"
-                           style={{ width: `${getQuarterProgress()}%` }}
+                           ref={(el) => { if (el) el.style.width = `${getQuarterProgress()}%`; }}
                         />
                      </div>
                   </div>

@@ -177,22 +177,22 @@ export default function EmployeeIDCard({ employee, siteCode, onClose }: Employee
                     {/* THE CARD ITSELF - CR80 Size (85.6mm x 54mm) -> Scaled up for display */}
                     {/* Aspect Ratio: 1.586 */}
                     <div
-                        ref={cardRef}
-                        className="relative w-[400px] h-[252px] bg-black rounded-xl overflow-hidden shadow-2xl border border-white/10 flex flex-col"
-                        style={{
-                            boxShadow: `0 0 40px ${roleColor}20`,
-                            borderColor: `${roleColor}40`
+                        ref={(el) => {
+                            if (el) {
+                                el.style.setProperty('--role-color', roleColor);
+                                el.style.setProperty('--role-shadow', `${roleColor}20`);
+                                el.style.setProperty('--role-border', `${roleColor}40`);
+                                cardRef.current = el;
+                            }
                         }}
                     >
                         {/* Background Elements */}
                         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20"></div>
                         <div
-                            className="absolute top-0 right-0 w-64 h-64 rounded-full blur-3xl opacity-20 -translate-y-1/2 translate-x-1/3"
-                            style={{ backgroundColor: roleColor }}
+                            className="absolute top-0 right-0 w-64 h-64 rounded-full blur-3xl opacity-20 -translate-y-1/2 translate-x-1/3 bg-[var(--role-color)]"
                         ></div>
                         <div
-                            className="absolute bottom-0 left-0 w-48 h-48 rounded-full blur-3xl opacity-10 translate-y-1/3 -translate-x-1/3"
-                            style={{ backgroundColor: roleColor }}
+                            className="absolute bottom-0 left-0 w-48 h-48 rounded-full blur-3xl opacity-10 translate-y-1/3 -translate-x-1/3 bg-[var(--role-color)]"
                         ></div>
 
                         {/* Header */}
@@ -206,7 +206,7 @@ export default function EmployeeIDCard({ employee, siteCode, onClose }: Employee
                             </div>
                             <div className="flex flex-col items-end">
                                 <div className="flex items-center gap-1">
-                                    <div className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: roleColor }}></div>
+                                    <div className="w-2 h-2 rounded-full animate-pulse bg-[var(--role-color)]"></div>
                                     <span className="text-[8px] font-bold uppercase tracking-wider text-white">Active</span>
                                 </div>
                             </div>
@@ -217,8 +217,7 @@ export default function EmployeeIDCard({ employee, siteCode, onClose }: Employee
                             {/* Photo */}
                             <div className="relative group">
                                 <div
-                                    className="absolute -inset-0.5 rounded-lg blur opacity-50"
-                                    style={{ backgroundColor: roleColor }}
+                                    className="absolute -inset-0.5 rounded-lg blur opacity-50 bg-[var(--role-color)]"
                                 ></div>
                                 <div className="relative w-24 h-24 rounded-lg overflow-hidden border-2 border-white/20 bg-gray-800">
                                     <img
@@ -233,8 +232,7 @@ export default function EmployeeIDCard({ employee, siteCode, onClose }: Employee
                             <div className="flex-1 min-w-0">
                                 <h2 className="text-xl font-bold text-white truncate leading-tight">{employee.name}</h2>
                                 <p
-                                    className="text-xs font-bold uppercase tracking-wider mb-2 truncate"
-                                    style={{ color: roleColor }}
+                                    className="text-xs font-bold uppercase tracking-wider mb-2 truncate text-[var(--role-color)]"
                                 >
                                     {formatRole(employee.role)}
                                 </p>

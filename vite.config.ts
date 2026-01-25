@@ -1,6 +1,8 @@
 import path from 'path';
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
+import { VitePWA } from 'vite-plugin-pwa';
+import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, '.', '');
@@ -18,7 +20,48 @@ export default defineConfig(({ mode }) => {
         overlay: true,
       },
     },
-    plugins: [react()],
+    plugins: [
+      react(),
+      tailwindcss(),
+      VitePWA({
+        registerType: 'autoUpdate',
+        includeAssets: ['favicon.svg', 'robots.txt'],
+        manifest: {
+          name: 'SiifMart WMS',
+          short_name: 'SiifMart',
+          description: 'Warehouse Management System',
+          theme_color: '#000000',
+          background_color: '#000000',
+          display: 'standalone',
+          orientation: 'portrait',
+          icons: [
+            {
+              src: 'favicon.svg',
+              sizes: '192x192',
+              type: 'image/svg+xml'
+            },
+            {
+              src: 'favicon.svg',
+              sizes: '512x512',
+              type: 'image/svg+xml'
+            },
+            {
+              src: 'favicon.svg',
+              sizes: 'any',
+              type: 'image/svg+xml',
+              purpose: 'any maskable'
+            }
+          ]
+        },
+        workbox: {
+          maximumFileSizeToCacheInBytes: 6000000 // Increase limit for larger assets if needed
+        },
+        devOptions: {
+          enabled: true,
+          type: 'module'
+        }
+      })
+    ],
     define: {
       'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
       'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY)
@@ -35,7 +78,7 @@ export default defineConfig(({ mode }) => {
     test: {
       globals: true,
       environment: 'jsdom',
-      setupFiles: './src/setupTests.ts',
+      setupFiles: './tests/setup.ts',
       exclude: ['**/node_modules/**', '**/tests/e2e/**'],
     }
   };

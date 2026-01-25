@@ -963,10 +963,8 @@ const OrgChart: React.FC<OrgChartProps> = ({ employees, sites }) => {
                 </div>
             </div>
 
-            {/* Canvas Stage */}
-            <div className="flex-1 overflow-hidden relative" style={{ cursor: isConnecting ? 'crosshair' : 'grab' }}>
+            <div className={`flex-1 overflow-hidden relative ${isConnecting ? 'cursor-crosshair' : 'cursor-grab'}`}>
                 <Stage
-                    ref={stageRef}
                     width={window.innerWidth}
                     height={800} // Reset to sensible viewport height
                     draggable
@@ -991,7 +989,14 @@ const OrgChart: React.FC<OrgChartProps> = ({ employees, sites }) => {
                             y: Math.max(minY, Math.min(maxY, pos.y))
                         };
                     }}
-                    style={{ background: 'transparent' }}
+                    ref={(stage) => {
+                        if (stage) {
+                            stage.container().style.background = 'transparent';
+                            stageRef.current = stage;
+                        } else {
+                            stageRef.current = null;
+                        }
+                    }}
                 >
                     <Layer>
                         {/* Guide Lines */}
@@ -1088,97 +1093,99 @@ const OrgChart: React.FC<OrgChartProps> = ({ employees, sites }) => {
             </div>
 
             {/* Add Card Modal */}
-            {isAddModalOpen && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setIsAddModalOpen(false)}>
-                    <div className={`w-full max-w-md rounded-lg shadow-xl p-6 ${isDark ? 'bg-slate-800' : 'bg-white'}`} onClick={e => e.stopPropagation()}>
-                        <h3 className={`text-lg font-semibold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>Add New Card</h3>
+            {
+                isAddModalOpen && (
+                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setIsAddModalOpen(false)}>
+                        <div className={`w-full max-w-md rounded-lg shadow-xl p-6 ${isDark ? 'bg-slate-800' : 'bg-white'}`} onClick={e => e.stopPropagation()}>
+                            <h3 className={`text-lg font-semibold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>Add New Card</h3>
 
-                        {/* Tabs */}
-                        <div className="flex border-b mb-4">
-                            <button
-                                onClick={() => setAddModalTab('empty')}
-                                className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px ${addModalTab === 'empty' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
-                            >
-                                Empty Card
-                            </button>
-                            <button
-                                onClick={() => setAddModalTab('existing')}
-                                className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px ${addModalTab === 'existing' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
-                            >
-                                Existing Employee
-                            </button>
-                        </div>
+                            {/* Tabs */}
+                            <div className="flex border-b mb-4">
+                                <button
+                                    onClick={() => setAddModalTab('empty')}
+                                    className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px ${addModalTab === 'empty' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+                                >
+                                    Empty Card
+                                </button>
+                                <button
+                                    onClick={() => setAddModalTab('existing')}
+                                    className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px ${addModalTab === 'existing' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+                                >
+                                    Existing Employee
+                                </button>
+                            </div>
 
-                        {/* Tab Content */}
-                        {addModalTab === 'empty' ? (
-                            <div className="space-y-4">
+                            {/* Tab Content */}
+                            {addModalTab === 'empty' ? (
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className={`block text-sm font-medium mb-1 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>Role/Position</label>
+                                        <select
+                                            value={newCardRole}
+                                            onChange={(e) => setNewCardRole(e.target.value as UserRole)}
+                                            title="Select a role or position"
+                                            className={`w-full px-3 py-2 rounded border ${isDark ? 'bg-slate-700 border-slate-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
+                                        >
+                                            {Object.entries(ROLE_LABELS).map(([role, label]) => (
+                                                <option key={role} value={role}>{label}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className={`block text-sm font-medium mb-1 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>Label (Optional)</label>
+                                        <input
+                                            type="text"
+                                            value={newCardLabel}
+                                            onChange={(e) => setNewCardLabel(e.target.value)}
+                                            placeholder="e.g. John Doe or Leave empty for role name"
+                                            className={`w-full px-3 py-2 rounded border ${isDark ? 'bg-slate-700 border-slate-600 text-white placeholder-gray-400' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'}`}
+                                        />
+                                    </div>
+                                </div>
+                            ) : (
                                 <div>
-                                    <label className={`block text-sm font-medium mb-1 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>Role/Position</label>
+                                    <label className={`block text-sm font-medium mb-1 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>Select Employee</label>
                                     <select
-                                        value={newCardRole}
-                                        onChange={(e) => setNewCardRole(e.target.value as UserRole)}
-                                        title="Select a role or position"
+                                        value={selectedEmployeeId}
+                                        onChange={(e) => setSelectedEmployeeId(e.target.value)}
+                                        title="Select an employee"
                                         className={`w-full px-3 py-2 rounded border ${isDark ? 'bg-slate-700 border-slate-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
                                     >
-                                        {Object.entries(ROLE_LABELS).map(([role, label]) => (
-                                            <option key={role} value={role}>{label}</option>
-                                        ))}
+                                        <option value="">-- Select an employee --</option>
+                                        {employees
+                                            .filter(emp => !nodes.some(n => n.employee?.id === emp.id))
+                                            .map(emp => (
+                                                <option key={emp.id} value={emp.id}>{emp.name} ({ROLE_LABELS[emp.role] || emp.role})</option>
+                                            ))
+                                        }
                                     </select>
+                                    {employees.filter(emp => !nodes.some(n => n.employee?.id === emp.id)).length === 0 && (
+                                        <p className="text-sm text-gray-500 mt-2">All employees are already in the chart.</p>
+                                    )}
                                 </div>
-                                <div>
-                                    <label className={`block text-sm font-medium mb-1 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>Label (Optional)</label>
-                                    <input
-                                        type="text"
-                                        value={newCardLabel}
-                                        onChange={(e) => setNewCardLabel(e.target.value)}
-                                        placeholder="e.g. John Doe or Leave empty for role name"
-                                        className={`w-full px-3 py-2 rounded border ${isDark ? 'bg-slate-700 border-slate-600 text-white placeholder-gray-400' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'}`}
-                                    />
-                                </div>
-                            </div>
-                        ) : (
-                            <div>
-                                <label className={`block text-sm font-medium mb-1 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>Select Employee</label>
-                                <select
-                                    value={selectedEmployeeId}
-                                    onChange={(e) => setSelectedEmployeeId(e.target.value)}
-                                    title="Select an employee"
-                                    className={`w-full px-3 py-2 rounded border ${isDark ? 'bg-slate-700 border-slate-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
-                                >
-                                    <option value="">-- Select an employee --</option>
-                                    {employees
-                                        .filter(emp => !nodes.some(n => n.employee?.id === emp.id))
-                                        .map(emp => (
-                                            <option key={emp.id} value={emp.id}>{emp.name} ({ROLE_LABELS[emp.role] || emp.role})</option>
-                                        ))
-                                    }
-                                </select>
-                                {employees.filter(emp => !nodes.some(n => n.employee?.id === emp.id)).length === 0 && (
-                                    <p className="text-sm text-gray-500 mt-2">All employees are already in the chart.</p>
-                                )}
-                            </div>
-                        )}
+                            )}
 
-                        {/* Actions */}
-                        <div className="flex justify-end gap-3 mt-6">
-                            <button
-                                onClick={() => setIsAddModalOpen(false)}
-                                className={`px-4 py-2 text-sm rounded ${isDark ? 'text-gray-300 hover:bg-slate-700' : 'text-gray-600 hover:bg-gray-100'}`}
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={confirmAddCard}
-                                disabled={addModalTab === 'existing' && !selectedEmployeeId}
-                                className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                Add Card
-                            </button>
+                            {/* Actions */}
+                            <div className="flex justify-end gap-3 mt-6">
+                                <button
+                                    onClick={() => setIsAddModalOpen(false)}
+                                    className={`px-4 py-2 text-sm rounded ${isDark ? 'text-gray-300 hover:bg-slate-700' : 'text-gray-600 hover:bg-gray-100'}`}
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={confirmAddCard}
+                                    disabled={addModalTab === 'existing' && !selectedEmployeeId}
+                                    className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    Add Card
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
-        </div>
+                )
+            }
+        </div >
     );
 };
 

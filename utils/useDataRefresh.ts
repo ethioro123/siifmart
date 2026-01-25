@@ -25,16 +25,13 @@ export function useDataRefresh(intervalMinutes?: number) {
     const refresh = useCallback(async () => {
         // Request deduplication: Don't refresh if already in progress
         if (isRefreshing) {
-            console.log('Data refresh already in progress, skipping...');
             return;
         }
 
         setIsRefreshing(true);
 
         try {
-            console.log('Auto-refreshing data...');
             await refreshData();
-            console.log('Data refresh complete');
             retryCountRef.current = 0; // Reset retry count on success
         } catch (error) {
             console.error('Data refresh failed:', error);
@@ -43,7 +40,6 @@ export function useDataRefresh(intervalMinutes?: number) {
             if (retryCountRef.current < APP_CONFIG.DATA_REFRESH_MAX_RETRIES) {
                 retryCountRef.current++;
                 const delay = APP_CONFIG.DATA_REFRESH_RETRY_DELAY * Math.pow(2, retryCountRef.current - 1);
-                console.log(`Retrying in ${delay}ms (attempt ${retryCountRef.current}/${APP_CONFIG.DATA_REFRESH_MAX_RETRIES})`);
 
                 setTimeout(async () => {
                     setIsRefreshing(false);
@@ -79,13 +75,11 @@ export function useDataRefresh(intervalMinutes?: number) {
                 // Tab hidden - pause refresh timer
                 if (refreshIntervalRef.current) {
                     clearInterval(refreshIntervalRef.current);
-                    console.log('Data refresh paused (tab hidden)');
                 }
             } else {
                 // Tab visible - debounce to prevent rapid refreshes
                 visibilityTimeoutRef.current = setTimeout(() => {
                     if (isActive && isInitializedRef.current) {
-                        console.log('Data refresh resumed (tab visible)');
                         refresh(); // Immediate refresh on tab focus
 
                         // Restart interval

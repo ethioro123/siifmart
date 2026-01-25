@@ -38,7 +38,7 @@ export default function Customers() {
       setIsSubmitting(true);
       try {
          const customer: Customer = {
-            id: newCustomer.id || `CUST - ${Date.now()} `,
+            id: newCustomer.id || `CUST-${Date.now()}`,
             name: newCustomer.name,
             phone: newCustomer.phone,
             email: newCustomer.email || '',
@@ -147,7 +147,7 @@ export default function Customers() {
                   <div
                      key={customer.id}
                      onClick={() => setSelectedCustomer(customer)}
-                     className={`bg - cyber - gray border rounded - 2xl p - 5 cursor - pointer transition - all hover: border - cyber - primary / 30 group ${selectedCustomer?.id === customer.id ? 'border-cyber-primary bg-cyber-primary/5' : 'border-white/5'} `}
+                     className={`bg-cyber-gray border rounded-2xl p-5 cursor-pointer transition-all hover:border-cyber-primary/30 group ${selectedCustomer?.id === customer.id ? 'border-cyber-primary bg-cyber-primary/5' : 'border-white/5'}`}
                   >
                      <div className="flex justify-between items-start mb-4">
                         <div className="flex items-center gap-3">
@@ -159,11 +159,11 @@ export default function Customers() {
                               <p className="text-xs text-gray-500">{customer.phone}</p>
                            </div>
                         </div>
-                        <span className={`px - 2 py - 1 rounded text - [10px] font - bold uppercase border ${customer.tier === 'Platinum' ? 'text-purple-400 border-purple-500/30 bg-purple-500/10' :
+                        <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase border ${customer.tier === 'Platinum' ? 'text-purple-400 border-purple-500/30 bg-purple-500/10' :
                            customer.tier === 'Gold' ? 'text-yellow-400 border-yellow-500/30 bg-yellow-500/10' :
                               customer.tier === 'Silver' ? 'text-gray-300 border-gray-500/30 bg-gray-500/10' :
                                  'text-orange-400 border-orange-500/30 bg-orange-500/10'
-                           } `}>
+                           }`}>
                            {customer.tier}
                         </span>
                      </div>

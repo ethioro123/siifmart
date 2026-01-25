@@ -22,13 +22,23 @@ export const QRScanner: React.FC<QRScannerProps> = ({
     const [isScanning, setIsScanning] = useState(false);
     const animationFrameRef = useRef<number | null>(null);
 
+    const onScanRef = useRef(onScan);
+    const onCloseRef = useRef(onClose);
+
+    // Update refs when props change
     useEffect(() => {
+        onScanRef.current = onScan;
+        onCloseRef.current = onClose;
+    }, [onScan, onClose]);
+
+    useEffect(() => {
+        let mounted = true;
         let stream: MediaStream | null = null;
 
         const startCamera = async () => {
             try {
                 // Request camera access
-                stream = await navigator.mediaDevices.getUserMedia({
+                const mediaStream = await navigator.mediaDevices.getUserMedia({
                     video: {
                         facingMode: 'environment', // Use back camera on mobile
                         width: { ideal: 1280 },
@@ -36,20 +46,38 @@ export const QRScanner: React.FC<QRScannerProps> = ({
                     }
                 });
 
+                if (!mounted) {
+                    mediaStream.getTracks().forEach(track => track.stop());
+                    return;
+                }
+
+                stream = mediaStream;
+
                 if (videoRef.current) {
                     videoRef.current.srcObject = stream;
-                    videoRef.current.play();
-                    setIsScanning(true);
-                    scanQRCode();
+                    try {
+                        await videoRef.current.play();
+                        if (mounted) {
+                            setIsScanning(true);
+                            scanQRCode();
+                        }
+                    } catch (playErr: any) {
+                        // "The play() request was interrupted by a new load request" is common and safe to ignore
+                        if (playErr.name !== 'AbortError') {
+                            console.error('Video play error:', playErr);
+                        }
+                    }
                 }
             } catch (err) {
-                console.error('Camera access error:', err);
-                setError('Unable to access camera. Please check permissions.');
+                if (mounted) {
+                    console.error('Camera access error:', err);
+                    setError('Unable to access camera. Please check permissions.');
+                }
             }
         };
 
         const scanQRCode = () => {
-            if (!videoRef.current || !canvasRef.current || !isScanning) return;
+            if (!videoRef.current || !canvasRef.current || !mounted) return;
 
             const video = videoRef.current;
             const canvas = canvasRef.current;
@@ -77,17 +105,20 @@ export const QRScanner: React.FC<QRScannerProps> = ({
 
             if (code && code.data) {
                 // QR code detected!
-                onScan(code.data);
-                stopCamera();
-                onClose();
+                onScanRef.current(code.data);
+                if (mounted) {
+                    stopCamera();
+                    onCloseRef.current();
+                }
             } else {
                 // Continue scanning
-                animationFrameRef.current = requestAnimationFrame(scanQRCode);
+                if (mounted) {
+                    animationFrameRef.current = requestAnimationFrame(scanQRCode);
+                }
             }
         };
 
         const stopCamera = () => {
-            setIsScanning(false);
             if (animationFrameRef.current) {
                 cancelAnimationFrame(animationFrameRef.current);
             }
@@ -99,9 +130,10 @@ export const QRScanner: React.FC<QRScannerProps> = ({
         startCamera();
 
         return () => {
+            mounted = false;
             stopCamera();
         };
-    }, [onScan, onClose, isScanning]);
+    }, []);
 
     return (
         <div className="fixed inset-0 z-50 flex flex-col sm:items-center sm:justify-center bg-black sm:bg-black/90 sm:backdrop-blur-sm">
@@ -120,6 +152,8 @@ export const QRScanner: React.FC<QRScannerProps> = ({
                     <button
                         onClick={onClose}
                         className="w-10 h-10 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center text-gray-400 hover:text-white transition-colors"
+                        aria-label="Close Scanner"
+                        title="Close Scanner"
                     >
                         <X size={20} />
                     </button>

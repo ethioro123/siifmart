@@ -101,7 +101,7 @@ const FiscalYearDeck: React.FC<FiscalYearDeckProps> = ({ year, currentQuarter, m
                             <div className="w-full bg-black/40 h-1.5 rounded-full overflow-hidden mt-2">
                                 <div
                                     className="h-full bg-cyber-primary"
-                                    style={{ width: `${getProgress()}%` }}
+                                    ref={(el) => { if (el) el.style.width = `${getProgress()}%`; }}
                                 />
                             </div>
                         )}

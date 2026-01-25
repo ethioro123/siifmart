@@ -276,9 +276,7 @@ export default function GamificationSettings() {
     };
 
     const handleSavePointRule = () => {
-        console.log('handleSavePointRule called', editedPointRule);
         if (!editedPointRule.name || editedPointRule.name.trim() === '') {
-            console.log('Rule name validation failed');
             setRuleNameError(true);
             showToast('Please provide a rule name', 'error');
             return;
@@ -1146,12 +1144,16 @@ export default function GamificationSettings() {
                                             <button
                                                 onClick={() => openEditModal(tier, 'pos')}
                                                 className="p-2 bg-blue-500/20 hover:bg-blue-500/40 text-blue-400 rounded-lg transition-all"
+                                                title="Edit Tier"
+                                                aria-label="Edit Tier"
                                             >
                                                 <Edit2 size={16} />
                                             </button>
                                             <button
                                                 onClick={() => handleDeleteTier(tier.id, 'pos')}
                                                 className="p-2 bg-red-500/20 hover:bg-red-500/40 text-red-400 rounded-lg transition-all"
+                                                title="Delete Tier"
+                                                aria-label="Delete Tier"
                                             >
                                                 <Trash2 size={16} />
                                             </button>
@@ -1190,7 +1192,7 @@ export default function GamificationSettings() {
                                     <div
                                         key={role.id}
                                         className={`h-full bg-gradient-to-r ${getColorClass(role.color)} transition-all`}
-                                        style={{ width: `${role.percentage}%` }}
+                                        ref={(el) => { if (el) el.style.width = `${role.percentage}%`; }}
                                         title={`${role.role}: ${role.percentage}%`}
                                     />
                                 ))}
@@ -1389,12 +1391,16 @@ export default function GamificationSettings() {
                                             <button
                                                 onClick={() => openPointRuleModal(rule)}
                                                 className="p-2 bg-blue-500/20 hover:bg-blue-500/40 text-blue-400 rounded-lg transition-all"
+                                                title="Edit Rule"
+                                                aria-label="Edit Rule"
                                             >
                                                 <Edit2 size={16} />
                                             </button>
                                             <button
                                                 onClick={() => handleDeletePointRule(rule.id)}
                                                 className="p-2 bg-red-500/20 hover:bg-red-500/40 text-red-400 rounded-lg transition-all"
+                                                title="Delete Rule"
+                                                aria-label="Delete Rule"
                                             >
                                                 <Trash2 size={16} />
                                             </button>
@@ -1520,6 +1526,7 @@ export default function GamificationSettings() {
                             </label>
                             <input
                                 type="number"
+                                aria-label="Min Points"
                                 value={editedTier.minPoints || 0}
                                 onChange={(e) => setEditedTier({ ...editedTier, minPoints: parseInt(e.target.value) || 0 })}
                                 className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-purple-500 focus:outline-none"
@@ -1550,6 +1557,7 @@ export default function GamificationSettings() {
                             </label>
                             <input
                                 type="number"
+                                aria-label="Base Bonus"
                                 value={editedTier.bonusAmount || 0}
                                 onChange={(e) => setEditedTier({ ...editedTier, bonusAmount: parseFloat(e.target.value) || 0 })}
                                 className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-purple-500 focus:outline-none"
@@ -1563,6 +1571,7 @@ export default function GamificationSettings() {
                             <input
                                 type="number"
                                 step="0.01"
+                                aria-label="Per-Point Bonus"
                                 value={editedTier.bonusPerPoint || 0}
                                 onChange={(e) => setEditedTier({ ...editedTier, bonusPerPoint: parseFloat(e.target.value) || 0 })}
                                 className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-purple-500 focus:outline-none"
@@ -1661,6 +1670,7 @@ export default function GamificationSettings() {
                             type="number"
                             min="0"
                             max="100"
+                            aria-label="Bonus Percentage"
                             value={editedRole.percentage || 0}
                             onChange={(e) => setEditedRole({ ...editedRole, percentage: parseFloat(e.target.value) || 0 })}
                             className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-purple-500 focus:outline-none"
@@ -1753,6 +1763,7 @@ export default function GamificationSettings() {
                             </label>
                             <select
                                 value={editedPointRule.type || 'category'}
+                                aria-label="Rule Type"
                                 onChange={(e) => setEditedPointRule({ ...editedPointRule, type: e.target.value as PointRuleType })}
                                 className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-yellow-500 focus:outline-none"
                             >
@@ -1773,6 +1784,7 @@ export default function GamificationSettings() {
                             </label>
                             <select
                                 value={editedPointRule.categoryId || 'all'}
+                                aria-label="Category"
                                 onChange={(e) => setEditedPointRule({ ...editedPointRule, categoryId: e.target.value })}
                                 className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-yellow-500 focus:outline-none"
                             >
@@ -1811,6 +1823,7 @@ export default function GamificationSettings() {
                             <input
                                 type="number"
                                 min="0"
+                                aria-label="Points Per Unit Sold"
                                 value={editedPointRule.pointsPerUnit || 0}
                                 onChange={(e) => setEditedPointRule({ ...editedPointRule, pointsPerUnit: parseInt(e.target.value) || 0 })}
                                 className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-yellow-500 focus:outline-none"
@@ -1824,6 +1837,7 @@ export default function GamificationSettings() {
                                 type="number"
                                 min="1"
                                 max="100"
+                                aria-label="Priority"
                                 value={editedPointRule.priority || 5}
                                 onChange={(e) => setEditedPointRule({ ...editedPointRule, priority: parseInt(e.target.value) || 5 })}
                                 className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-yellow-500 focus:outline-none"
@@ -1841,6 +1855,7 @@ export default function GamificationSettings() {
                                 <input
                                     type="number"
                                     min="0"
+                                    aria-label="Points Per Revenue Threshold"
                                     value={editedPointRule.pointsPerRevenue || 0}
                                     onChange={(e) => setEditedPointRule({ ...editedPointRule, pointsPerRevenue: parseInt(e.target.value) || 0 })}
                                     className="w-full bg-black/40 border border-green-500/30 rounded-lg px-4 py-3 text-white focus:border-green-500 focus:outline-none"
@@ -1853,6 +1868,7 @@ export default function GamificationSettings() {
                                 <input
                                     type="number"
                                     min="1"
+                                    aria-label="Revenue Threshold"
                                     value={editedPointRule.revenueThreshold || 100}
                                     onChange={(e) => setEditedPointRule({ ...editedPointRule, revenueThreshold: parseInt(e.target.value) || 100 })}
                                     className="w-full bg-black/40 border border-green-500/30 rounded-lg px-4 py-3 text-white focus:border-green-500 focus:outline-none"
@@ -1874,6 +1890,7 @@ export default function GamificationSettings() {
                                 <input
                                     type="number"
                                     min="1"
+                                    aria-label="Minimum Quantity"
                                     value={editedPointRule.minQuantity || 1}
                                     onChange={(e) => setEditedPointRule({ ...editedPointRule, minQuantity: parseInt(e.target.value) || 1 })}
                                     className="w-full bg-black/40 border border-amber-500/30 rounded-lg px-4 py-3 text-white focus:border-amber-500 focus:outline-none"
@@ -1887,6 +1904,7 @@ export default function GamificationSettings() {
                                     type="number"
                                     min="1"
                                     step="0.1"
+                                    aria-label="Points Multiplier"
                                     value={editedPointRule.multiplier || 1}
                                     onChange={(e) => setEditedPointRule({ ...editedPointRule, multiplier: parseFloat(e.target.value) || 1 })}
                                     className="w-full bg-black/40 border border-amber-500/30 rounded-lg px-4 py-3 text-white focus:border-amber-500 focus:outline-none"
@@ -1906,6 +1924,7 @@ export default function GamificationSettings() {
                         <input
                             type="number"
                             min="0"
+                            aria-label="Max Points Per Transaction"
                             value={editedPointRule.maxPointsPerTransaction || ''}
                             onChange={(e) => setEditedPointRule({
                                 ...editedPointRule,
@@ -1926,6 +1945,7 @@ export default function GamificationSettings() {
                         </label>
                         <textarea
                             value={editedPointRule.description || ''}
+                            aria-label="Description"
                             onChange={(e) => setEditedPointRule({ ...editedPointRule, description: e.target.value })}
                             placeholder="Describe what this rule does..."
                             rows={2}
@@ -1967,6 +1987,7 @@ export default function GamificationSettings() {
                             <input
                                 type="checkbox"
                                 className="sr-only peer"
+                                aria-label="Enable point rule"
                                 checked={editedPointRule.enabled ?? true}
                                 onChange={(e) => setEditedPointRule({ ...editedPointRule, enabled: e.target.checked })}
                             />
@@ -2037,6 +2058,7 @@ export default function GamificationSettings() {
                         </label>
                         <input
                             type="number"
+                            aria-label="Points"
                             value={editedWarehouseRule.points || 0}
                             onChange={(e) => setEditedWarehouseRule({ ...editedWarehouseRule, points: parseInt(e.target.value) || 0 })}
                             className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-cyber-primary focus:outline-none"
