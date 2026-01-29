@@ -28,7 +28,7 @@ export default function Logo({ className = "", size = 32, showText = true }: Log
              */}
             <path
               d="M 5 38 L 5 26 Q 5 17 16 17 L 19 17 L 19 12 L 29 21.5 L 19 31 L 19 26 L 16 26 Q 11 26 11 38 Z"
-              fill="currentColor"
+              fill="white"
               stroke="#00cc7d"
               strokeWidth="4"
               strokeLinejoin="round"
@@ -41,7 +41,7 @@ export default function Logo({ className = "", size = 32, showText = true }: Log
           <g transform="translate(0, 0)">
             <use href="#sign-icon" />
 
-            {/* Main Text - Adapts to theme: black in light mode, white in dark mode */}
+            {/* Main Text - Always white as requested */}
             {/* Main Text - Rounded Font with Grey Border & Tight Spacing */}
             <text
               x="34"
@@ -50,7 +50,7 @@ export default function Logo({ className = "", size = 32, showText = true }: Log
               fontFamily="'Fredoka', 'Arial Rounded MT Bold', 'Nunito', 'Quicksand', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
               fontWeight="700"
               fontSize="46"
-              fill="currentColor"
+              fill="white"
               stroke="#00cc7d"
               strokeWidth="4"
               strokeLinejoin="round"
