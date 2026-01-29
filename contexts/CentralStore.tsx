@@ -75,10 +75,21 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const { isOnline, wasOffline } = useNetworkStatus();
 
   // Hydrate user profile from database to ensure metadata is sync'd
+  // IMPORTANT: Wrapped with timeout to prevent infinite loading on production
   const syncUserProfile = async () => {
+    const SYNC_TIMEOUT_MS = 5000; // 5 seconds max for profile sync
+
     try {
       console.log('CentralStore: Syncing user profile from database...');
-      const profile = await authService.getCurrentAuthUser();
+
+      // Race between profile fetch and timeout
+      const profilePromise = authService.getCurrentAuthUser();
+      const timeoutPromise = new Promise<null>((_, reject) =>
+        setTimeout(() => reject(new Error('Profile sync timeout')), SYNC_TIMEOUT_MS)
+      );
+
+      const profile = await Promise.race([profilePromise, timeoutPromise]);
+
       if (profile) {
         console.log('CentralStore: Profile found in DB, syncing state...');
         const rawRole = profile.role;
@@ -94,9 +105,15 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           employeeId: profile.id,
           email: profile.email
         });
+      } else {
+        console.warn('CentralStore: No profile returned, user may need to re-login');
       }
-    } catch (error) {
-      console.error('CentralStore: Sync failed', error);
+    } catch (error: any) {
+      if (error?.message === 'Profile sync timeout') {
+        console.warn('⚠️ CentralStore: Profile sync timed out after 5s - continuing without blocking');
+      } else {
+        console.error('CentralStore: Sync failed', error);
+      }
     }
   };
 
@@ -185,6 +202,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const checkSession = async () => {
+    // FAIL-SAFE: Ensure loading is ALWAYS set to false within 10 seconds
+    const failSafeTimeout = setTimeout(() => {
+      console.warn('⚠️ CentralStore: Session check fail-safe triggered after 10s');
+      setLoading(false);
+    }, 10000);
+
     try {
       const session = await authService.getSession();
       if (session?.user) {
@@ -193,6 +216,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error('Session check failed:', error);
     } finally {
+      clearTimeout(failSafeTimeout);
       setLoading(false);
     }
   };
