@@ -698,22 +698,27 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
 
     loadGlobalData();
 
-    // FAIL-SAFE: If hydration takes more than 15s (slow network), we warn but DO NOT unblock
-    // Strict Sync means we wait for data (cache or network)
-    const timeout = setTimeout(() => {
+    // CRITICAL FAIL-SAFE: If user is authenticated and loading still stuck after 5s, unblock
+    // This handles edge cases where queries fail, RLS blocks, or network is slow
+    const quickTimeout = setTimeout(() => {
       if (isDataInitialLoading) {
-        console.warn('⚠️ Hydration taking long - Checking for partial data...');
-        // Only unblock if we actually have something useful (e.g. products)
-        // Otherwise, stay blocked to prevent empty dashboard
-        if (products.length > 0 || sites.length > 0) {
-          setIsDataInitialLoading(false);
-        } else {
-          setLoadError('Synchronization is taking longer than expected. Please check your connection.');
-        }
+        console.warn('⚡ 5s fail-safe triggered - Unblocking UI for authenticated user');
+        setIsDataInitialLoading(false);
+      }
+    }, 5000);
+
+    // SECONDARY FAIL-SAFE: If still no data after 15s, show error but don't block
+    const timeout = setTimeout(() => {
+      if (products.length === 0 && sites.length === 0) {
+        console.warn('⚠️ Hydration taking long - No data loaded after 15s');
+        setLoadError('Synchronization is taking longer than expected. Please check your connection.');
       }
     }, 15000);
 
-    return () => clearTimeout(timeout);
+    return () => {
+      clearTimeout(quickTimeout);
+      clearTimeout(timeout);
+    };
   }, [user]);
 
   // --- SYNC TIMEZONE ---

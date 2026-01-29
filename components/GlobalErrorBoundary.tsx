@@ -14,7 +14,7 @@ function ErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
                     Neural Link Distorted
                 </h2>
                 <p className="text-gray-400 font-mono text-sm mb-6 bg-black/40 p-4 rounded-lg border border-white/5 break-words">
-                    {error.message || 'Unknown system anomaly detected.'}
+                    {(error as any).message || 'Unknown system anomaly detected.'}
                 </p>
                 <button
                     onClick={resetErrorBoundary}
