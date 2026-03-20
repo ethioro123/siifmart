@@ -6,17 +6,17 @@
 import { Product, Site } from '../types';
 
 /**
- * Location format: ZONE-AISLE-BIN
+ * Location format: ZONE-AISLE-BAY
  * Example: A-01-05
  * - Zone: A-Z (alphabetic zones)
  * - Aisle: 01-99 (numeric aisles within zone)
- * - Bin: 01-99 (specific bin/shelf position)
+ * - Bay: 01-99 (specific bay/shelf position)
  */
 
 export interface ParsedLocation {
     zone: string;
     aisle: string;
-    bin: string;
+    bay: string;
     formatted: string;
     isValid: boolean;
 }
@@ -32,7 +32,7 @@ export interface FullLocationInfo {
     location: ParsedLocation;
 
     // Full Address
-    fullPath: string; // e.g., "Aratanya Market (Store) > Zone A > Aisle 01 > Bin 05"
+    fullPath: string; // e.g., "Aratanya Market (Store) > Zone A > Aisle 01 > Bay 05"
     shortPath: string; // e.g., "Aratanya > A-01-05"
 }
 
@@ -40,35 +40,54 @@ export interface FullLocationInfo {
  * Parse a location string into components
  */
 export const parseLocation = (location: string | undefined): ParsedLocation => {
-    if (!location) {
+    const cleanLoc = location?.trim() || '';
+    if (!cleanLoc) {
         return {
             zone: '',
             aisle: '',
-            bin: '',
+            bay: '',
             formatted: '',
             isValid: false
         };
     }
 
-    // Match format: A-01-05
-    const match = location.match(/^([A-Z])-(\\d{2})-(\\d{2})$/);
+    // Attempt to normalize first (handles A0101, A 01 01, etc.)
+    const normalized = normalizeLocation(cleanLoc);
 
-    if (!match) {
+    // If normalization succeeded, we have a guaranteed ZONE-AISLE-BAY format
+    if (normalized) {
+        const parts = normalized.split('-');
         return {
-            zone: '',
-            aisle: '',
-            bin: '',
-            formatted: location,
-            isValid: false
+            zone: parts[0],
+            aisle: parts[1],
+            bay: parts[2],
+            formatted: `Zone ${parts[0]} - Aisle ${parts[1]} - Bay ${parts[2]}`,
+            isValid: true
+        };
+    }
+
+    // Fallback: Try to parse verbose descriptions if normalization failed
+    // e.g. "Zone A - Aisle 01..." that somehow didn't normalize (unlikely if valid)
+    const zoneMatch = cleanLoc.match(/Zone\s+([A-Z])/i);
+    const aisleMatch = cleanLoc.match(/Aisle\s+(\d{1,2})/i);
+    const bayMatch = cleanLoc.match(/(?:Bay|Bin|Shelf)\s+(\d{1,2})/i);
+
+    if (zoneMatch && aisleMatch && bayMatch) {
+        return {
+            zone: zoneMatch[1].toUpperCase(),
+            aisle: aisleMatch[1].padStart(2, '0'),
+            bay: bayMatch[1].padStart(2, '0'),
+            formatted: cleanLoc, // Keep original if it was verbose
+            isValid: true
         };
     }
 
     return {
-        zone: match[1],
-        aisle: match[2],
-        bin: match[3],
-        formatted: location,
-        isValid: true
+        zone: '',
+        aisle: '',
+        bay: '',
+        formatted: cleanLoc,
+        isValid: false
     };
 };
 
@@ -88,7 +107,7 @@ export const getFullLocationInfo = (
     const location = parseLocation(product.location);
 
     const fullPath = location.isValid
-        ? `${site.name} (${site.type}) > Zone ${location.zone} > Aisle ${location.aisle} > Bin ${location.bin}`
+        ? `${site.name} (${site.type}) > Zone ${location.zone} > Aisle ${location.aisle} > Bay ${location.bay}`
         : `${site.name} (${site.type}) > ${product.location || 'No Location'}`;
 
     const shortPath = location.isValid
@@ -130,19 +149,19 @@ export const suggestNextLocation = (
         return `${zone}-${startAisle.toString().padStart(2, '0')}-01`;
     }
 
-    // Find the highest bin number in the last aisle
+    // Find the highest bay number in the last aisle
     const sortedLocations = locationsInZone.sort((a, b) => {
         if (a.aisle !== b.aisle) {
             return parseInt(a.aisle) - parseInt(b.aisle);
         }
-        return parseInt(a.bin) - parseInt(b.bin);
+        return parseInt(a.bay) - parseInt(b.bay);
     });
 
     const lastLocation = sortedLocations[sortedLocations.length - 1];
-    const nextBin = parseInt(lastLocation.bin) + 1;
+    const nextBay = parseInt(lastLocation.bay) + 1;
 
-    if (nextBin <= 99) {
-        return `${zone}-${lastLocation.aisle}-${nextBin.toString().padStart(2, '0')}`;
+    if (nextBay <= 99) {
+        return `${zone}-${lastLocation.aisle}-${nextBay.toString().padStart(2, '0')}`;
     } else {
         // Move to next aisle
         const nextAisle = parseInt(lastLocation.aisle) + 1;
@@ -182,7 +201,7 @@ export const findProductsByLocation = (
     siteId?: string,
     zone?: string,
     aisle?: string,
-    bin?: string
+    bay?: string
 ): Product[] => {
     return products.filter(product => {
         // Filter by site
@@ -208,7 +227,7 @@ export const findProductsByLocation = (
             return false;
         }
 
-        if (bin && location.bin !== bin) {
+        if (bay && location.bay !== bay) {
             return false;
         }
 
@@ -268,6 +287,72 @@ export const formatLocationDisplay = (
     }
 
     return includeEmoji
-        ? `📍 Zone ${parsed.zone} • Aisle ${parsed.aisle} • Bin ${parsed.bin}`
-        : `Zone ${parsed.zone} • Aisle ${parsed.aisle} • Bin ${parsed.bin}`;
+        ? `📍 Zone ${parsed.zone} • Aisle ${parsed.aisle} • Bay ${parsed.bay}`
+        : `Zone ${parsed.zone} • Aisle ${parsed.aisle} • Bay ${parsed.bay}`;
+};
+
+/**
+ * Normalize a location string into standard format: ZONE-AISLE-BAY
+ * STRICT FORMAT: A-02-03
+ */
+export const normalizeLocation = (input: string): string | null => {
+    if (!input) return null;
+
+    // Remove "Zone", "Aisle", "Bay", "Bin", "Shelf" case-insensitively, then clean up
+    let cleaned = input.replace(/zone|aisle|bay|bin|shelf/gi, '').trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+
+    // Expecting roughly: Zone (1 char) + Aisle (1-2 chars) + Bay (1-2 chars)
+    // Minimum length 3 (A11), Max length 5 (A9999)
+    if (cleaned.length < 3 || cleaned.length > 5) return null;
+
+    // Extract the alphabetic zone (expecting exactly one letter A-Z)
+    const zoneLetterMatch = cleaned.match(/[A-Z]/);
+    if (!zoneLetterMatch) return null;
+    const zone = zoneLetterMatch[0];
+    const digits = cleaned.replace(zone, '');
+
+    let aisle = 0;
+    let bay = 0;
+
+    if (digits.length === 4) {
+        // e.g. 0101 (from A0101 or 01A01)
+        aisle = parseInt(digits.substring(0, 2), 10);
+        bay = parseInt(digits.substring(2, 4), 10);
+    } else if (digits.length === 2) {
+        // e.g. 11 (from A11 or 1A1)
+        aisle = parseInt(digits.substring(0, 1), 10);
+        bay = parseInt(digits.substring(1, 2), 10);
+    } else if (digits.length === 3) {
+        // e.g. 101 or 011
+        // Ambiguous. Let's look at relative position if possible, but simpler is to try to parse parts.
+        const parts = input.trim().toUpperCase().split(/[^A-Z0-9]+/);
+        if (parts.length === 3) {
+            aisle = parseInt(parts[1], 10);
+            bay = parseInt(parts[2], 10);
+        } else {
+            return null;
+        }
+    } else {
+        return null;
+    }
+
+    // Direct regex fallback for messy inputs that preserved structure
+    if (aisle === 0 && bay === 0) {
+        // Try lenient regex: Letter, separator?, digits, separator?, digits
+        const lenientMatch = input.trim().toUpperCase().match(/^([A-Z])\s*[-.]?\s*(\d{1,2})\s*[-.]?\s*(\d{1,2})$/);
+        if (lenientMatch) {
+            const z = lenientMatch[1];
+            aisle = parseInt(lenientMatch[2], 10);
+            bay = parseInt(lenientMatch[3], 10);
+            // Verify zone matches
+            if (z !== zone) return null;
+        } else {
+            return null;
+        }
+    }
+
+    // Range validation
+    if (aisle < 1 || aisle > 99 || bay < 1 || bay > 99) return null;
+
+    return `${zone}-${aisle.toString().padStart(2, '0')}-${bay.toString().padStart(2, '0')}`;
 };

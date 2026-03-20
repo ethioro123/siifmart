@@ -12,6 +12,7 @@ import { useNavigate } from 'react-router-dom';
 import { MOCK_ZONES } from '../constants';
 import { useStore } from '../contexts/CentralStore';
 import { useData } from '../contexts/DataContext'; // Live Data
+import { useGamification } from '../contexts/GamificationContext';
 import ManagerDashboardBanner from '../components/ManagerDashboardBanner';
 import ClickableKPICard from '../components/ClickableKPICard';
 import { calculateMetrics, METRIC_ROUTES } from '../utils/metrics';
@@ -25,9 +26,16 @@ import RosterManager from '../components/RosterManager';
 
 export default function WMSDashboard() {
   const navigate = useNavigate();
-  const { user } = useStore();
+  const { user, theme } = useStore();
   // Restore variables needed for UI (myPoints, movements for log list)
-  const { movements, addNotification, activeSite, workerPoints, getLeaderboard, employees } = useData();
+  const { movements, addNotification, activeSite, employees } = useData();
+  const { getWorkerPoints, getLeaderboard } = useGamification();
+
+  // Theme-aware colors for Charts
+  const chartStroke = theme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)';
+  const chartText = theme === 'dark' ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)';
+  const tooltipBg = theme === 'dark' ? '#111111' : '#ffffff';
+  const tooltipBorder = theme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)';
 
   // --- DATE FILTER ---
   // Using startDate and endDate from the hook to pass to server metrics
@@ -96,8 +104,20 @@ export default function WMSDashboard() {
     };
   }, [warehouseMetrics, inventoryMetrics, financialMetrics]);
 
-  // Get current user points (Client-side from Context is fine for personal gamification)
-  const myPoints = workerPoints.find(wp => wp.employeeId === user?.id || wp.employeeName === user?.name);
+  // Get current user's points
+  const myPoints = React.useMemo(() => {
+    if (!user?.id) return undefined;
+    // Try precise match first
+    let points = getWorkerPoints(user.id);
+
+    // If not found, try fuzzy match on employee ID if user ID might be different
+    if (!points) {
+      const employee = employees.find(e => e.email === user.email);
+      if (employee) points = getWorkerPoints(employee.id);
+    }
+
+    return points;
+  }, [user, getWorkerPoints, employees]);
 
   // --- SITE-SPECIFIC GAMIFICATION DATA ---
   const siteLeaderboard = React.useMemo(() => {
@@ -272,7 +292,7 @@ export default function WMSDashboard() {
               </div>
             </div>
             <div className="h-[340px] w-full relative">
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
                 <BarChart data={INBOUND_OUTBOUND_DATA} barGap={12}>
                   <defs>
                     <linearGradient id="inboundGradient" x1="0" y1="0" x2="0" y2="1">
@@ -284,10 +304,10 @@ export default function WMSDashboard() {
                       <stop offset="100%" stopColor="#3b82f6" stopOpacity={0.3} />
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="0" stroke="rgba(255,255,255,0.03)" vertical={false} />
+                  <CartesianGrid strokeDasharray="0" stroke={chartStroke} vertical={false} />
                   <XAxis
                     dataKey="name"
-                    stroke="rgba(255,255,255,0.3)"
+                    stroke={chartText}
                     fontSize={10}
                     fontWeight={800}
                     tickLine={false}
@@ -295,7 +315,7 @@ export default function WMSDashboard() {
                     dy={15}
                   />
                   <YAxis
-                    stroke="rgba(255,255,255,0.3)"
+                    stroke={chartText}
                     fontSize={10}
                     fontWeight={800}
                     tickLine={false}
@@ -303,20 +323,22 @@ export default function WMSDashboard() {
                     dx={-10}
                   />
                   <Tooltip
-                    cursor={{ fill: 'rgba(255,255,255,0.02)' }}
+                    cursor={{ fill: theme === 'dark' ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)' }}
                     content={({ active, payload }) => {
                       if (active && payload && payload.length) {
                         return (
-                          <div className="bg-cyber-dark/95 backdrop-blur-2xl border border-white/10 p-4 rounded-2xl shadow-2xl">
-                            <p className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] mb-3">{payload[0].payload.date}</p>
+                          <div
+                            className="backdrop-blur-2xl p-4 rounded-2xl shadow-2xl border bg-white/95 dark:bg-black/95 border-gray-200 dark:border-white/10"
+                          >
+                            <p className="text-[10px] font-black dark:text-gray-500 text-slate-500 uppercase tracking-[0.2em] mb-3">{payload[0].payload.date}</p>
                             <div className="space-y-2">
                               {payload.map((entry: any, i: number) => (
                                 <div key={i} className="flex items-center justify-between gap-8">
                                   <div className="flex items-center gap-2">
                                     <div className={`w-2 h-2 rounded-full ${entry.fill === 'url(#inboundGradient)' ? 'bg-[#00ff9d]' : 'bg-[#3b82f6]'}`} />
-                                    <span className="text-xs font-bold text-white uppercase tracking-tight">{entry.name}</span>
+                                    <span className="text-xs font-bold dark:text-white text-slate-900 uppercase tracking-tight">{entry.name}</span>
                                   </div>
-                                  <span className="text-sm font-black text-white">{entry.value}</span>
+                                  <span className="text-sm font-black dark:text-white text-slate-900">{entry.value}</span>
                                 </div>
                               ))}
                             </div>

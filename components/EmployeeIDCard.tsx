@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Employee, UserRole } from '../types';
 import QRCode from 'qrcode';
 import { X, Printer, Shield, MapPin, Building, CreditCard } from 'lucide-react';
@@ -121,12 +122,12 @@ export default function EmployeeIDCard({ employee, siteCode, onClose }: Employee
 
     const roleColor = ROLE_COLORS[employee.role] || '#00ff9d';
 
-    return (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[150] flex items-center justify-center p-4">
-            <div className="bg-cyber-dark border border-white/10 rounded-2xl p-6 max-w-4xl w-full flex flex-col md:flex-row gap-8 items-center md:items-start relative">
+    const modalContent = (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[99999] flex items-center justify-center p-4">
+            <div className="bg-white dark:bg-cyber-dark border border-gray-200 dark:border-white/10 rounded-2xl p-6 max-w-4xl w-full flex flex-col md:flex-row gap-8 items-center md:items-start relative shadow-2xl animate-in zoom-in-95 duration-200">
                 <button
                     onClick={onClose}
-                    className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"
+                    className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-white transition-colors"
                     title="Close"
                     aria-label="Close"
                 >
@@ -136,29 +137,29 @@ export default function EmployeeIDCard({ employee, siteCode, onClose }: Employee
                 {/* Left Side: Controls & Info */}
                 <div className="flex-1 space-y-6 w-full">
                     <div>
-                        <h2 className="text-2xl font-bold text-white mb-2 flex items-center gap-2">
+                        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
                             <CreditCard className="text-cyber-primary" />
                             Employee ID Generator
                         </h2>
-                        <p className="text-gray-400">Generate and print official identification cards for staff members.</p>
+                        <p className="text-gray-500 dark:text-gray-400">Generate and print official identification cards for staff members.</p>
                     </div>
 
-                    <div className="bg-white/5 rounded-xl p-4 space-y-3">
+                    <div className="bg-gray-50 dark:bg-white/5 rounded-xl p-4 space-y-3 border border-gray-100 dark:border-white/5">
                         <div className="flex justify-between text-sm">
-                            <span className="text-gray-400">Employee Name:</span>
-                            <span className="text-white font-medium">{employee.name}</span>
+                            <span className="text-gray-500 dark:text-gray-400">Employee Name:</span>
+                            <span className="text-gray-900 dark:text-white font-medium">{employee.name}</span>
                         </div>
                         <div className="flex justify-between text-sm">
-                            <span className="text-gray-400">Role:</span>
-                            <span className="text-white font-medium capitalize">{formatRole(employee.role)}</span>
+                            <span className="text-gray-500 dark:text-gray-400">Role:</span>
+                            <span className="text-gray-900 dark:text-white font-medium capitalize">{formatRole(employee.role)}</span>
                         </div>
                         <div className="flex justify-between text-sm">
-                            <span className="text-gray-400">Employee ID:</span>
-                            <span className="text-cyan-400 font-mono text-xs font-bold">{employee.code || 'NOT ASSIGNED'}</span>
+                            <span className="text-gray-500 dark:text-gray-400">Employee ID:</span>
+                            <span className="text-cyan-600 dark:text-cyan-400 font-mono text-xs font-bold">{employee.code || 'NOT ASSIGNED'}</span>
                         </div>
                         <div className="flex justify-between text-sm">
-                            <span className="text-gray-400">Site ID:</span>
-                            <span className="text-white font-medium">{siteCode || 'Unknown'}</span>
+                            <span className="text-gray-500 dark:text-gray-400">Site ID:</span>
+                            <span className="text-gray-900 dark:text-white font-medium">{siteCode || 'Unknown'}</span>
                         </div>
                     </div>
 
@@ -177,6 +178,7 @@ export default function EmployeeIDCard({ employee, siteCode, onClose }: Employee
                     {/* THE CARD ITSELF - CR80 Size (85.6mm x 54mm) -> Scaled up for display */}
                     {/* Aspect Ratio: 1.586 */}
                     <div
+                        className="relative w-[340px] h-[214px] bg-gradient-to-br from-gray-900 via-cyber-gray to-gray-900 rounded-xl overflow-hidden shadow-2xl flex flex-col"
                         ref={(el) => {
                             if (el) {
                                 el.style.setProperty('--role-color', roleColor);
@@ -194,14 +196,15 @@ export default function EmployeeIDCard({ employee, siteCode, onClose }: Employee
                         <div
                             className="absolute bottom-0 left-0 w-48 h-48 rounded-full blur-3xl opacity-10 translate-y-1/3 -translate-x-1/3 bg-[var(--role-color)]"
                         ></div>
-
                         {/* Header */}
-                        <div className="relative z-10 flex justify-between items-start p-5 pb-2">
+                        <div className="relative z-10 flex justify-between items-start p-4 pb-2">
                             <div className="flex items-center gap-2">
-                                <Logo size={28} />
+                                <div className="w-7 h-7 rounded-md bg-cyber-primary/20 flex items-center justify-center">
+                                    <div className="w-4 h-4 bg-cyber-primary rounded-sm" />
+                                </div>
                                 <div>
-                                    <h1 className="text-white font-bold text-lg leading-none tracking-wide">SIIFMART</h1>
-                                    <p className="text-[8px] text-gray-400 tracking-widest uppercase">Official Staff ID</p>
+                                    <h1 className="text-white font-bold text-base leading-none tracking-wide">SIIFMART</h1>
+                                    <p className="text-[7px] text-gray-400 tracking-widest uppercase mt-0.5">Official Staff ID</p>
                                 </div>
                             </div>
                             <div className="flex flex-col items-end">
@@ -279,4 +282,6 @@ export default function EmployeeIDCard({ employee, siteCode, onClose }: Employee
             </div>
         </div>
     );
+
+    return createPortal(modalContent, document.body);
 }

@@ -76,7 +76,7 @@ const ShiftPlanner: React.FC<ShiftPlannerProps> = ({ employees, canEdit = false,
             children: [
                 {
                     role: 'admin',
-                    label: 'System Admin',
+                    label: 'Assistant CEO',
                     employees: getByRole('admin'),
                     icon: Shield,
                     color: 'text-red-400',

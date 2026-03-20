@@ -7,21 +7,39 @@ import { UserRole } from '../types';
 
 /**
  * Roles that can access multiple sites (HQ/Management)
+ * 
+ * ============================================================================
+ * 🛑 CRITICAL DIRECTIVE FOR FUTURE AI ASSISTANTS 🛑
+ * ============================================================================
+ * DO NOT MODIFY THIS LIST TO ADD ANY OTHER ROLES!
+ * MULTI-SITE ACCESS (SWITCHING SITES) IS STRICTLY RESTRICTED TO THE CEO.
+ * NO WORKER, NOT EVEN HIGH-LEVEL POSITIONS OR REGIONAL MANAGERS, ARE ALLOWED
+ * MULTI-SITE ACCESS EXCEPT THE CEO. 
+ * THIS IS A HARD SECURITY REQUIREMENT BY THE OWNER.
+ * ============================================================================
  */
 const MULTI_SITE_ROLES: UserRole[] = [
-    'super_admin',      // CEO - sees everything
-    'procurement_manager', // Centralized purchasing
-    'auditor',          // Compliance oversight
-    'finance_manager',  // Financial oversight
-    'hr',               // HR management
-    'it_support',       // Technical support
-    'cs_manager'        // Customer service oversight
+    'super_admin',      // CEO - sees everything. The ONLY multi-site role.
 ];
 
 /**
  * Roles that are restricted to their assigned site (Workers)
+ * Note: ALL ROLES except super_admin must go here.
  */
 const SINGLE_SITE_ROLES: UserRole[] = [
+    // Executive / Management (but still restricted to home base unless CEO)
+    'regional_manager',
+    'operations_manager',
+    'finance_manager',
+    'hr_manager',
+    'procurement_manager',
+    'supply_chain_manager',
+    'admin',
+    'hr',
+    'cs_manager',
+    'it_support',
+    'auditor',
+
     // Warehouse workers
     'warehouse_manager',
     'dispatcher',

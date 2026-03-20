@@ -43,7 +43,7 @@ export default function DateRangeSelector({
         <div className={`relative ${className}`} ref={containerRef}>
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="flex items-center gap-3 px-4 py-2 bg-black/40 border border-white/10 rounded-xl hover:border-cyber-primary/50 transition-all cursor-pointer hover:bg-black/60 shadow-lg group h-[42px]"
+                className="flex items-center gap-3 px-4 py-2 dark:bg-black/40 bg-white border dark:border-white/10 border-black/5 rounded-xl hover:border-cyber-primary/50 transition-all cursor-pointer dark:hover:bg-black/60 hover:bg-slate-50 shadow-lg group h-[42px]"
             >
                 <Calendar size={16} className={`${isOpen ? 'text-cyber-accent' : 'text-cyber-primary'} transition-colors`} />
                 <span className="text-sm font-bold text-white tracking-tight">{value}</span>
@@ -51,7 +51,7 @@ export default function DateRangeSelector({
 
             {isOpen && (
                 <div
-                    className={`absolute ${align === 'right' ? 'right-0' : 'left-0'} mt-2 w-56 bg-cyber-dark/95 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden z-[100] animate-in fade-in slide-in-from-top-2 duration-200`}
+                    className={`absolute ${align === 'right' ? 'right-0' : 'left-0'} mt-2 w-56 dark:bg-cyber-dark/95 bg-white backdrop-blur-2xl border dark:border-white/10 border-black/5 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden z-[100] animate-in fade-in slide-in-from-top-2 duration-200`}
                 >
                     <div className="p-2 space-y-1 max-h-[400px] overflow-y-auto custom-scrollbar">
                         {options.map((option) => (

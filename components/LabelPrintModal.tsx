@@ -230,7 +230,7 @@ export default function LabelPrintModal({ isOpen, onClose, labels, onPrint }: La
                                         displayValue={false}
                                     />
                                 ) : (
-                                    <span style={{ color: 'red', fontSize: '8pt' }}>NO BARCODE</span>
+                                    <span className="text-red-500 text-[8pt]">NO BARCODE</span>
                                 )}
                             </div>
                             <div className="sku">{barcodeValue}</div>
@@ -258,8 +258,8 @@ export default function LabelPrintModal({ isOpen, onClose, labels, onPrint }: La
                                         displayValue={false}
                                     />
                                 ) : (
-                                    <div style={{ color: 'red', textAlign: 'center' }}>
-                                        <div style={{ fontWeight: 'bold' }}>NO BARCODE</div>
+                                    <div className="text-red-500 text-center">
+                                        <div className="font-bold">NO BARCODE</div>
                                     </div>
                                 )}
                             </div>
@@ -412,7 +412,7 @@ export default function LabelPrintModal({ isOpen, onClose, labels, onPrint }: La
             </div>
 
             {/* Hidden container for print content */}
-            <div ref={printRef} style={{ display: 'none' }}>
+            <div ref={printRef} className="hidden">
                 {renderLabels()}
             </div>
         </>

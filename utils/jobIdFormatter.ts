@@ -22,84 +22,58 @@ const isUUID = (str: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4
 
 export const formatJobId = (job: any): string => {
     let result = 'N/A';
+
+    // 1. If we have a stored job number (e.g., inherited from parent), use it first
+    const jn = job.jobNumber || job.job_number;
+    if (jn) {
+        let cleanJn = jn.toUpperCase();
+        // If it's a long string with dashes, take the last part (legacy support)
+        if (cleanJn.includes('-')) {
+            const parts = cleanJn.split('-');
+            const lastPart = parts[parts.length - 1];
+            if (lastPart.length >= 4 && lastPart.length <= 8) {
+                return lastPart;
+            }
+        }
+        return cleanJn;
+    }
+
     const isOutbound = ['PICK', 'PACK', 'DISPATCH'].includes(job.type?.toUpperCase());
 
-    // For Outbound jobs (Pick/Pack/Dispatch), extract the core ID from orderRef
-    // and apply the stage-specific prefix (PK-, PA-, DP-) for tracking.
-    // This ensures: TR-CARN → PK-CARN → PA-CARN → DP-CARN
+    // 2. Fallback for Outbound jobs: extract from orderRef (parent UUID)
     if (isOutbound && job.orderRef) {
         let cleanRef = job.orderRef.toUpperCase();
 
         // Strip ALL known prefixes to get the core ID
-        ['TR-', 'PK-', 'PA-', 'DP-', 'DIST-', 'TRF-', 'MTR-', 'REP-', 'REPLENISH-'].forEach(prefix => {
+        ['TR-', 'PK-', 'PA-', 'DP-', 'PICK-', 'PACK-', 'DIST-', 'TRF-', 'MTR-', 'REP-', 'REPLENISH-'].forEach(prefix => {
             if (cleanRef.startsWith(prefix)) {
                 cleanRef = cleanRef.replace(prefix, '');
             }
         });
 
-        // If it's a UUID, shorten it; otherwise keep as-is
+        // If it's a UUID, shorten to last 6 chars; otherwise keep as-is
         if (isUUID(cleanRef)) {
-            cleanRef = cleanRef.slice(-4).toUpperCase();
+            cleanRef = cleanRef.slice(-6).toUpperCase();
         }
 
-        // Apply stage-specific prefix
-        const type = job.type?.toUpperCase();
-        const stagePrefix = type === 'PICK' ? 'PK-' :
-            type === 'PACK' ? 'PA-' :
-                type === 'DISPATCH' ? 'DP-' : '';
-
-        return `${stagePrefix}${cleanRef}`;
+        return cleanRef;
     }
-    // Otherwise, try sequential job number (Most specific to the task)
-    else {
-        const jn = job.jobNumber || job.job_number;
-        if (jn) {
-            // If it's a long string like PICK-260104-2786, take the last part for the "four digits" look
-            if (jn.includes('-')) {
-                const parts = jn.split('-');
-                const lastPart = parts[parts.length - 1];
-                if (lastPart.length >= 4 && lastPart.length <= 6) {
-                    result = lastPart.toUpperCase();
-                } else {
-                    result = jn.toUpperCase();
-                }
-            } else {
-                result = jn.toUpperCase();
-            }
-        } else {
-            // Fallback: try PO number or orderRef
-            const ref = job.poNumber || job.po_number || job.orderRef || job.id;
-            let cleanRef = (ref || '').toUpperCase();
 
-            // Strip prefixes for fallback too
-            ['TR-', 'PK-', 'PA-', 'DP-', 'PW-', 'RP-', 'DIST-', 'TRF-', 'MTR-', 'REP-', 'REPLENISH-'].forEach(prefix => {
-                if (cleanRef.startsWith(prefix)) {
-                    cleanRef = cleanRef.replace(prefix, '');
-                }
-            });
+    // 3. Last resort fallback to orderRef/ID
+    const ref = job.poNumber || job.po_number || job.orderRef || job.id;
+    let cleanRef = (ref || '').toUpperCase();
 
-            if (cleanRef && !isUUID(cleanRef)) {
-                result = cleanRef;
-            } else if (cleanRef) {
-                result = cleanRef.slice(-4);
-            }
+    // Strip prefixes for fallback too
+    ['TR-', 'PK-', 'PA-', 'DP-', 'PW-', 'RP-', 'PICK-', 'PACK-', 'DIST-', 'TRF-', 'MTR-', 'REP-', 'REPLENISH-'].forEach(prefix => {
+        if (cleanRef.startsWith(prefix)) {
+            cleanRef = cleanRef.replace(prefix, '');
         }
-    }
+    });
 
-    // Prepend type for clarity (Enforce 2-char prefix) - For non-Outbound jobs
-    const type = job.type?.toUpperCase();
-    const typePrefix = type === 'PICK' ? 'PK-' :
-        type === 'PACK' ? 'PA-' :
-            type === 'PUTAWAY' ? 'PW-' :
-                type === 'DISPATCH' ? 'DP-' :
-                    type === 'TRANSFER' ? 'TR-' :
-                        type === 'REPLENISH' ? 'RP-' :
-                            '';
-
-    if (typePrefix && result !== 'N/A') {
-        // Ensure we don't double prefix
-        if (result.startsWith(typePrefix)) return result;
-        return `${typePrefix}${result}`;
+    if (cleanRef && !isUUID(cleanRef)) {
+        result = cleanRef;
+    } else if (cleanRef) {
+        result = cleanRef.slice(-6);
     }
 
     return result;

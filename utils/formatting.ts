@@ -177,11 +177,36 @@ export const formatRole = (role: string | undefined): string => {
 
     // Explicit Overrides
     if (role === 'super_admin') return 'CEO';
-    if (role === 'admin') return 'System Admin';
+    if (role === 'admin') return 'Assistant CEO';
 
     // General Formatting: replace underscores with spaces and capitalize words
     // e.g. "warehouse_manager" -> "Warehouse Manager"
     return role
         .replace(/_/g, ' ')
         .replace(/\b\w/g, char => char.toUpperCase());
+};
+
+/**
+ * Get the expiry status of a product based on its expiry date.
+ * Returns an object with color classes and a label.
+ */
+export const getExpiryStatus = (dateString?: string): { color: string; label: string } => {
+    if (!dateString) return { color: 'bg-gray-500/20 text-gray-400 border-gray-500/30', label: 'No Date' };
+
+    const expiryDate = new Date(dateString);
+    if (isNaN(expiryDate.getTime())) return { color: 'bg-gray-500/20 text-gray-400 border-gray-500/30', label: 'Invalid Date' };
+
+    const today = new Date();
+    // Reset time part for accurate day calculation
+    today.setHours(0, 0, 0, 0);
+    expiryDate.setHours(0, 0, 0, 0);
+
+    const diffTime = expiryDate.getTime() - today.getTime();
+    const days = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (days < 0) return { color: 'bg-red-500/20 text-red-400 border-red-500/30', label: 'Expired' };
+    if (days <= 7) return { color: 'bg-orange-500/20 text-orange-400 border-orange-500/30', label: 'Expiring Soon' };
+    if (days <= 30) return { color: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30', label: 'Expiring < 30d' };
+
+    return { color: 'bg-green-500/20 text-green-400 border-green-500/30', label: 'Good' };
 };

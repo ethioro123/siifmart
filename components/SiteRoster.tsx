@@ -5,7 +5,11 @@ import {
     MapPin, Shield, Clock, Phone, Mail, ChevronRight
 } from 'lucide-react';
 import { useData } from '../contexts/DataContext';
+
+import { useGamification } from '../contexts/GamificationContext';
+import { useRoster } from '../contexts/RosterContext';
 import { Employee, POINTS_CONFIG } from '../types';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface SiteRosterProps {
     layout?: 'grid' | 'list';
@@ -20,7 +24,10 @@ export default function SiteRoster({
     highlightUser,
     className = ""
 }: SiteRosterProps) {
-    const { employees, activeSite, workerPoints } = useData();
+    const { employees, activeSite } = useData();
+    const { getWorkerPoints } = useGamification();
+    const { schedules } = useRoster();
+    const { t } = useLanguage();
 
     const siteEmployees = useMemo(() => {
         if (!activeSite) return [];
@@ -30,17 +37,19 @@ export default function SiteRoster({
     const sortedEmployees = useMemo(() => {
         // Merge with points data and sort by points or name
         return siteEmployees.map(emp => {
-            const points = workerPoints.find(wp => wp.employeeId === emp.id);
+            const points = getWorkerPoints(emp.id); // Use helper instead of raw find
             return {
                 ...emp,
                 points: points?.totalPoints || 0,
                 weeklyPoints: points?.weeklyPoints || 0,
                 level: points?.level || 1,
                 levelTitle: points?.levelTitle || 'Rookie',
-                rank: points?.rank || 0
+                rank: points?.rank || 0,
+                // Add roster status check if needed using schedules
+                isRostered: schedules.some(s => s.employeeId === emp.id && s.date === new Date().toISOString().split('T')[0])
             };
         }).sort((a, b) => b.points - a.points);
-    }, [siteEmployees, workerPoints]);
+    }, [siteEmployees, getWorkerPoints, schedules]);
 
     const displayEmployees = limit ? sortedEmployees.slice(0, limit) : sortedEmployees;
 
@@ -55,10 +64,10 @@ export default function SiteRoster({
                             <div className="p-2.5 rounded-xl dark:bg-cyber-primary/10 bg-cyber-primary/5 border dark:border-cyber-primary/20 border-black/5 shadow-inner">
                                 <Users size={22} className="text-cyber-primary" />
                             </div>
-                            Site Personnel Roster
+                            {t('posCommand.siteRosterTitle')}
                         </h3>
                         <p className="dark:text-gray-500 text-slate-400 text-[10px] mt-2 font-bold uppercase tracking-[0.2em] opacity-60">
-                            {siteEmployees.length} Total Workers Employed at this Terminal
+                            {siteEmployees.length} {t('posCommand.totalEmployees')} {t('posCommand.siteDescription')}
                         </p>
                     </div>
                 </div>
@@ -132,11 +141,11 @@ export default function SiteRoster({
 
                                     <div className="grid grid-cols-2 gap-2 mb-6">
                                         <div className="p-3 rounded-xl dark:bg-white/[0.02] bg-slate-50 border dark:border-white/5 border-black/[0.02]">
-                                            <p className="text-[8px] dark:text-gray-500 text-slate-400 font-black uppercase tracking-widest mb-1">Efficiency</p>
+                                            <p className="text-[8px] dark:text-gray-500 text-slate-400 font-black uppercase tracking-widest mb-1">{t('posCommand.efficiency')}</p>
                                             <span className="text-sm font-bold dark:text-white text-slate-900">{(emp as any).performanceScore || 95}%</span>
                                         </div>
                                         <div className="p-3 rounded-xl dark:bg-white/[0.02] bg-slate-50 border dark:border-white/5 border-black/[0.02]">
-                                            <p className="text-[8px] dark:text-gray-500 text-slate-400 font-black uppercase tracking-widest mb-1">Weekly</p>
+                                            <p className="text-[8px] dark:text-gray-500 text-slate-400 font-black uppercase tracking-widest mb-1">{t('posCommand.weekly')}</p>
                                             <span className="text-sm font-bold dark:text-white text-slate-900">{emp.weeklyPoints.toLocaleString()} <span className="text-[9px] text-cyber-primary">PTS</span></span>
                                         </div>
                                     </div>
@@ -156,7 +165,7 @@ export default function SiteRoster({
                                         {emp.rank > 0 && emp.rank <= 3 && (
                                             <div className="flex items-center gap-1.5 text-yellow-400 font-black text-[10px] uppercase tracking-widest animate-pulse">
                                                 <TrendingUp size={12} />
-                                                Rank #{emp.rank}
+                                                {t('posCommand.rank')} #{emp.rank}
                                             </div>
                                         )}
                                     </div>
@@ -188,7 +197,7 @@ export default function SiteRoster({
 
                                     <div className="text-right">
                                         <p className="text-sm font-black dark:text-cyber-primary text-cyber-primary font-mono">{emp.weeklyPoints.toLocaleString()}</p>
-                                        <p className="text-[8px] dark:text-gray-600 text-slate-400 font-bold uppercase tracking-widest leading-none">PTS THIS WEEK</p>
+                                        <p className="text-[8px] dark:text-gray-600 text-slate-400 font-bold uppercase tracking-widest leading-none">{t('posCommand.ptsThisWeek')}</p>
                                     </div>
 
                                     <div className={`w-2 h-2 rounded-full ${emp.status === 'Active' ? 'bg-cyber-primary shadow-[0_0_8px_rgba(0,255,157,0.5)]' : 'bg-orange-500'} ml-2 animate-pulse`} />

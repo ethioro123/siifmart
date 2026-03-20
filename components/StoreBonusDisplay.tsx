@@ -6,6 +6,7 @@ import {
 import { StorePoints, BonusTier, POSRoleDistribution, WorkerPoints, DEFAULT_POS_BONUS_TIERS, DEFAULT_POS_ROLE_DISTRIBUTION, POINTS_CONFIG } from '../types';
 import { CURRENCY_SYMBOL } from '../constants';
 import { formatCompactNumber } from '../utils/formatting';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface StoreBonusDisplayProps {
     storePoints: StorePoints | undefined;
@@ -75,6 +76,7 @@ export function StoreBonusWidget({
     roleDistribution = DEFAULT_POS_ROLE_DISTRIBUTION,
     bonusTiers = DEFAULT_POS_BONUS_TIERS
 }: StoreBonusDisplayProps) {
+    const { t } = useLanguage();
     if (!storePoints) return null;
 
     const bonusInfo = useMemo(() =>
@@ -107,7 +109,7 @@ export function StoreBonusWidget({
                     </span>
                 </p>
                 <p className="text-[10px] text-gray-400">
-                    {storePoints.monthlyPoints.toLocaleString()} pts this month
+                    {storePoints.monthlyPoints.toLocaleString()} {t('posCommand.ptsThisMonth')}
                 </p>
             </div>
             {userShare && (
@@ -115,7 +117,7 @@ export function StoreBonusWidget({
                     <p className="text-xs text-green-400 font-bold">
                         {formatCompactNumber(userShare.amount, { currency: CURRENCY_SYMBOL, maxFractionDigits: 0 })}
                     </p>
-                    <p className="text-[10px] text-gray-500">your share ({userShare.percentage}%)</p>
+                    <p className="text-[10px] text-gray-500">{t('posCommand.yourShare')} ({userShare.percentage}%)</p>
                 </div>
             )}
         </div>
@@ -132,12 +134,13 @@ export default function StoreBonusDisplay({
     workerPoints,
     leaderboard
 }: StoreBonusDisplayProps) {
+    const { t } = useLanguage();
     if (!storePoints) {
         return (
             <div className="bg-gradient-to-r from-blue-500/5 to-purple-500/5 border border-blue-500/20 rounded-2xl p-6 text-center">
                 <Store className="mx-auto text-gray-500 mb-2" size={32} />
-                <p className="text-gray-400 text-sm">No store bonus data available yet</p>
-                <p className="text-gray-500 text-xs mt-1">Complete transactions to start earning team points!</p>
+                <p className="text-gray-400 text-sm">{t('posCommand.noBonusInfo')}</p>
+                <p className="text-gray-500 text-xs mt-1">{t('posCommand.completeTxToEarn')}</p>
             </div>
         );
     }
@@ -194,7 +197,7 @@ export default function StoreBonusDisplay({
     }
 
     return (
-        <div className="bg-gradient-to-br from-cyber-gray to-blue-900/10 border border-white/10 rounded-2xl p-6 h-full relative overflow-hidden group">
+        <div className="bg-black/60 backdrop-blur-2xl bg-gradient-to-br from-black/0 to-blue-900/20 border border-white/5 rounded-2xl p-6 h-full relative overflow-hidden group">
             {/* Animated Glow Effect */}
             <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-purple-500/5 to-pink-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
             <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
@@ -211,7 +214,7 @@ export default function StoreBonusDisplay({
                     </div>
                     <div>
                         <h3 className="font-bold text-white text-lg flex items-center gap-2">
-                            Team Performance
+                            {t('posCommand.performance')}
                             <span className={`px-2 py-0.5 rounded text-[10px] font-bold bg-gradient-to-r ${getTierColor(bonusInfo.tier.tierColor)} text-white shadow shadow-white/10`}>
                                 {bonusInfo.tier.tierName}
                             </span>
@@ -224,7 +227,7 @@ export default function StoreBonusDisplay({
                 </div>
                 {/* Points / Bonus Toggle View */}
                 <div className="text-right">
-                    <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">Store Pool</p>
+                    <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">{t('posCommand.storePool')}</p>
                     <p className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">
                         {formatCompactNumber(bonusInfo.bonus, { currency: CURRENCY_SYMBOL, maxFractionDigits: 0 })}
                     </p>
@@ -236,50 +239,50 @@ export default function StoreBonusDisplay({
                 {/* Total Store Sales/Points */}
                 <div className="bg-black/30 p-4 rounded-xl border border-white/5 backdrop-blur-sm">
                     <div className="flex items-center justify-between mb-2">
-                        <p className="text-[10px] text-gray-400 uppercase font-bold">Store Points</p>
+                        <p className="text-[10px] text-gray-400 uppercase font-bold">{t('posCommand.storePoints')}</p>
                         <Trophy size={14} className="text-yellow-500" />
                     </div>
                     <p className="text-2xl font-black text-white">{storePoints.monthlyPoints.toLocaleString()}</p>
                     <p className="text-[10px] text-green-400 flex items-center gap-1">
                         <TrendingUp size={10} />
-                        +{storePoints.todayPoints.toLocaleString()} today
+                        +{storePoints.todayPoints.toLocaleString()} {t('posCommand.today')}
                     </p>
                 </div>
 
                 {/* Personal Contribution (Gamified) */}
                 <div className="bg-gradient-to-br from-blue-500/10 to-transparent p-4 rounded-xl border border-blue-500/20 backdrop-blur-sm">
                     <div className="flex items-center justify-between mb-2">
-                        <p className="text-[10px] text-blue-300 uppercase font-bold">Your Score</p>
+                        <p className="text-[10px] text-blue-300 uppercase font-bold">{t('posCommand.yourScore')}</p>
                         <Zap size={14} className="text-blue-400" />
                     </div>
                     <p className="text-2xl font-black text-white">{workerPoints?.totalPoints.toLocaleString() || 0}</p>
                     <p className="text-[10px] text-blue-300">
-                        {levelInfo?.currentLevel.title || 'Rookie'} • Lvl {levelInfo?.currentLevel.level || 1}
+                        {(levelInfo?.currentLevel.title === 'Rookie' ? t('posCommand.rookie') : levelInfo?.currentLevel.title) || t('posCommand.rookie')} • Lvl {levelInfo?.currentLevel.level || 1}
                     </p>
                 </div>
 
                 {/* Rank */}
                 <div className="bg-black/30 p-4 rounded-xl border border-white/5 backdrop-blur-sm">
                     <div className="flex items-center justify-between mb-2">
-                        <p className="text-[10px] text-gray-400 uppercase font-bold">Store Rank</p>
+                        <p className="text-[10px] text-gray-400 uppercase font-bold">{t('posCommand.storeRank')}</p>
                         <Crown size={14} className="text-purple-500" />
                     </div>
                     <div className="flex items-baseline gap-2">
                         <p className="text-2xl font-black text-white">#{workerPoints?.rank || '-'}</p>
-                        <span className="text-xs text-gray-500">of {leaderboard?.length || '-'}</span>
+                        <span className="text-xs text-gray-500">{t('posCommand.of')} {leaderboard?.length || '-'}</span>
                     </div>
-                    <p className="text-[10px] text-gray-500 truncate">Top 10% of staff</p>
+                    <p className="text-[10px] text-gray-500 truncate">{t('posCommand.topStaff')}</p>
                 </div>
             </div>
 
             {/* Progress to Next Store Tier */}
             <div className="relative space-y-2 mb-6">
                 <div className="flex justify-between text-[10px] text-gray-400 uppercase font-bold">
-                    <span>Current: {bonusInfo.tier.tierName}</span>
+                    <span>{t('posCommand.current')} {bonusInfo.tier.tierName}</span>
                     {nextTier ? (
-                        <span className="text-blue-400">{nextTier.minPoints - storePoints.monthlyPoints} pts to {nextTier.tierName}</span>
+                        <span className="text-blue-400">{nextTier.minPoints - storePoints.monthlyPoints} {t('posCommand.ptsTo')} {nextTier.tierName}</span>
                     ) : (
-                        <span className="text-purple-400">Max Tier Reached!</span>
+                        <span className="text-purple-400">{t('posCommand.maxTierReached')}</span>
                     )}
                 </div>
                 <div className="h-3 bg-black/50 rounded-full overflow-hidden border border-white/10 relative">
@@ -292,7 +295,7 @@ export default function StoreBonusDisplay({
                 </div>
                 {nextTier && (
                     <p className="text-[10px] text-gray-500 text-center">
-                        Next tier unlocks <span className="text-white font-bold">{formatCompactNumber(nextTier.bonusAmount, { currency: CURRENCY_SYMBOL })}</span> base bonus
+                        {t('posCommand.nextTierUnlocks')} <span className="text-white font-bold">{formatCompactNumber(nextTier.bonusAmount, { currency: CURRENCY_SYMBOL })}</span> {t('posCommand.baseBonus')}
                     </p>
                 )}
             </div>
@@ -306,8 +309,8 @@ export default function StoreBonusDisplay({
                                 <DollarSign className="text-green-400" />
                             </div>
                             <div>
-                                <p className="text-xs text-gray-300 font-bold">Est. Personal Bonus</p>
-                                <p className="text-[10px] text-green-400/80">{userShare.percentage}% Share ({userShare.role})</p>
+                                <p className="text-xs text-gray-300 font-bold">{t('posCommand.estPersonalBonus')}</p>
+                                <p className="text-[10px] text-green-400/80">{userShare.percentage}% {t('posCommand.share')} ({userShare.role})</p>
                             </div>
                         </div>
                         <p className="text-2xl font-black text-green-400">
@@ -330,6 +333,7 @@ export function StoreLeaderboard({
     currentSiteId?: string;
     bonusTiers?: BonusTier[];
 }) {
+    const { t } = useLanguage();
     const sortedStores = useMemo(() =>
         [...stores].sort((a, b) => b.monthlyPoints - a.monthlyPoints),
         [stores]
@@ -339,7 +343,7 @@ export function StoreLeaderboard({
         return (
             <div className="bg-white/5 border border-white/10 rounded-2xl p-6 text-center">
                 <Trophy className="mx-auto text-gray-500 mb-2" size={32} />
-                <p className="text-gray-400 text-sm">No store rankings yet</p>
+                <p className="text-gray-400 text-sm">{t('posCommand.noStoreRankings')}</p>
             </div>
         );
     }
@@ -348,7 +352,7 @@ export function StoreLeaderboard({
         <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
             <h3 className="font-bold text-white mb-4 flex items-center gap-2">
                 <Trophy className="text-yellow-400" size={20} />
-                Store Rankings
+                {t('posCommand.storeRankings')}
             </h3>
             <div className="space-y-2">
                 {sortedStores.slice(0, 5).map((store, index) => {
@@ -373,7 +377,7 @@ export function StoreLeaderboard({
                             <div className="flex-1 min-w-0">
                                 <p className="font-bold text-white text-sm truncate flex items-center gap-1">
                                     {store.siteName}
-                                    {isCurrentStore && <span className="text-[10px] text-blue-400">(You)</span>}
+                                    {isCurrentStore && <span className="text-[10px] text-blue-400">({t('posCommand.you')})</span>}
                                 </p>
                                 <p className="text-[10px] text-gray-400">
                                     {store.monthlyPoints.toLocaleString()} pts • {bonus.tier.tierName}

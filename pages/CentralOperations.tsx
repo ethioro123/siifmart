@@ -1,5 +1,7 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { useData } from '../contexts/DataContext';
+import { useFulfillmentData } from '../components/fulfillment/FulfillmentDataProvider';
+import { useGamification } from '../contexts/GamificationContext';
 import { useStore } from '../contexts/CentralStore';
 import { useNavigate } from 'react-router-dom';
 import { generateQuarterlyReport } from '../utils/reportGenerator';
@@ -93,14 +95,14 @@ const SystemTicker = () => {
     ];
 
     return (
-        <div className="w-full bg-black/40 border-y border-white/5 backdrop-blur-md h-8 flex items-center overflow-hidden relative mb-6">
-            <div className="absolute left-0 bg-cyber-primary/20 px-2 h-full flex items-center z-10 border-r border-cyber-primary/30">
+        <div className="w-full bg-white/80 dark:bg-black/40 border-y border-gray-200 dark:border-white/5 backdrop-blur-md h-8 flex items-center overflow-hidden relative mb-6">
+            <div className="absolute left-0 bg-cyber-primary/10 dark:bg-cyber-primary/20 px-2 h-full flex items-center z-10 border-r border-cyber-primary/20 dark:border-cyber-primary/30">
                 <Terminal size={12} className="text-cyber-primary mr-1" />
                 <span className="text-[10px] font-bold text-cyber-primary">SYS.LOG</span>
             </div>
             <div className="animate-marquee whitespace-nowrap flex gap-12 items-center pl-24">
                 {messages.concat(messages).map((msg, i) => (
-                    <span key={i} className="text-[10px] font-mono font-medium text-gray-400 flex items-center">
+                    <span key={i} className="text-[10px] font-mono font-medium text-gray-500 dark:text-gray-400 flex items-center">
                         <span className="w-1.5 h-1.5 bg-cyber-primary/50 rounded-full mr-2 animate-pulse"></span>
                         {msg}
                     </span>
@@ -140,15 +142,15 @@ const SystemLoadWidget = () => {
     ];
 
     return (
-        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-5 flex flex-col justify-center relative overflow-hidden group hover:border-cyan-500/30 transition-all duration-500 hover:shadow-[0_0_30px_rgba(6,182,212,0.15)] h-full w-full min-w-0">
+        <div className="glass-panel rounded-3xl p-5 flex flex-col justify-center relative overflow-hidden group hover:border-cyan-500/30 transition-all duration-500 hover:shadow-[0_0_30px_rgba(6,182,212,0.15)] h-full w-full min-w-0">
             <div className="flex items-center justify-between mb-4 relative z-10 w-full">
                 <div className="flex items-center gap-2 min-w-0">
                     <div className="p-1.5 rounded-lg bg-cyan-500/10 group-hover:bg-cyan-500/20 transition-colors shrink-0">
-                        <Server className="text-cyan-400" size={16} />
+                        <Server className="text-cyan-600 dark:text-cyan-400" size={16} />
                     </div>
                     <div className="min-w-0 flex-1">
-                        <span className="text-[10px] text-white font-bold uppercase tracking-widest block truncate">Status</span>
-                        <span className="text-[9px] text-cyan-400 font-mono tracking-wider truncate block">OPTIMAL</span>
+                        <span className="text-[10px] text-gray-900 dark:text-white font-bold uppercase tracking-widest block truncate">Status</span>
+                        <span className="text-[9px] text-cyan-600 dark:text-cyan-400 font-mono tracking-wider truncate block">OPTIMAL</span>
                     </div>
                 </div>
                 <div className="flex gap-1.5">
@@ -161,16 +163,16 @@ const SystemLoadWidget = () => {
             <div className="space-y-5 relative z-10">
                 {metrics.map((m, i) => (
                     <div key={i} className="group/bar">
-                        <div className="flex justify-between text-[10px] uppercase font-bold text-gray-400 mb-1.5 tracking-wider">
+                        <div className="flex justify-between text-[10px] uppercase font-bold text-gray-500 dark:text-gray-400 mb-1.5 tracking-wider">
                             <span>{m.label}</span>
                             <span className={`${m.text} font-mono text-xs group-hover/bar:scale-110 transition-transform`}>
                                 {m.value}{m.unit || '%'}
                             </span>
                         </div>
-                        <div className="w-full bg-black/40 h-2 rounded-full overflow-hidden border border-white/5">
+                        <div className="w-full bg-gray-200 dark:bg-black/40 h-2 rounded-full overflow-hidden border border-gray-100 dark:border-white/5">
                             {/* eslint-disable-next-line react/forbid-dom-props */}
                             <div
-                                className={`h-full bg-gradient-to-r ${m.from} ${m.to} shadow-[0_0_10px_rgba(0,0,0,0.5)] transition-all duration-1000 ease-out relative`}
+                                className={`h-full bg-gradient-to-r ${m.from} ${m.to} shadow-sm transition-all duration-1000 ease-out relative`}
                                 ref={(el) => { if (el) el.style.width = `${m.value}%`; }}
                             >
                                 <div className="absolute inset-0 bg-white/20 animate-pulse"></div>
@@ -181,7 +183,7 @@ const SystemLoadWidget = () => {
             </div>
 
             {/* Premium Background FX */}
-            <div className="absolute -right-10 -top-10 w-40 h-40 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none group-hover:bg-cyan-500/20 transition-colors duration-700"></div>
+            <div className="absolute -right-10 -top-10 w-40 h-40 bg-cyan-500/5 dark:bg-cyan-500/10 rounded-full blur-3xl pointer-events-none group-hover:bg-cyan-500/10 dark:group-hover:bg-cyan-500/20 transition-colors duration-700"></div>
         </div>
     );
 };
@@ -217,11 +219,11 @@ const StatCard = ({ icon: Icon, title, value, color, delay }: any) => {
 const DashboardSection = ({ title, icon: Icon, children, className = "" }: { title: string, icon: any, children: React.ReactNode, className?: string }) => (
     <div className={`space-y-4 mb-12 ${className}`}>
         <div className="flex items-center gap-3 px-2">
-            <div className="p-1.5 bg-white/5 rounded-lg border border-white/10">
-                <Icon size={16} className="text-gray-400" />
+            <div className="p-1.5 bg-white/50 dark:bg-white/5 rounded-lg border border-gray-200 dark:border-white/10">
+                <Icon size={16} className="text-gray-500 dark:text-gray-400" />
             </div>
-            <h2 className="text-xs font-black text-gray-400 uppercase tracking-[0.3em]">{title}</h2>
-            <div className="flex-1 h-[1px] bg-gradient-to-r from-white/10 to-transparent ml-4"></div>
+            <h2 className="text-xs font-black text-gray-500 dark:text-gray-400 uppercase tracking-[0.3em]">{title}</h2>
+            <div className="flex-1 h-[1px] bg-gradient-to-r from-gray-200 to-transparent dark:from-white/10 dark:to-transparent ml-4"></div>
         </div>
         {children}
     </div>
@@ -232,10 +234,10 @@ const ActivityLogWidget = ({ logs }: { logs?: any[] }) => {
     const displayLogs = logs?.slice(0, 5) || [];
 
     return (
-        <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-3xl p-6 h-full relative overflow-hidden flex flex-col">
+        <div className="glass-panel rounded-3xl p-6 h-full relative overflow-hidden flex flex-col">
             <div className="flex justify-between items-center mb-4 relative z-10">
-                <h3 className="font-bold text-white flex items-center gap-2 text-sm">
-                    <Activity className="text-blue-400" size={16} />
+                <h3 className="font-bold text-gray-900 dark:text-white flex items-center gap-2 text-sm">
+                    <Activity className="text-blue-500 dark:text-blue-400" size={16} />
                     Live System Activity
                 </h3>
                 <span className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
@@ -246,14 +248,14 @@ const ActivityLogWidget = ({ logs }: { logs?: any[] }) => {
                     <div className="text-xs text-gray-500 font-mono text-center py-4">NO RECENT ACTIVITY</div>
                 ) : (
                     displayLogs.map((log: any, i: number) => (
-                        <div key={i} className="flex gap-3 items-start border-l-2 border-white/10 pl-3 py-1 hover:bg-white/5 hover:border-blue-500/50 transition-all rounded-r">
+                        <div key={i} className="flex gap-3 items-start border-l-2 border-gray-200 dark:border-white/10 pl-3 py-1 hover:bg-black/5 dark:hover:bg-white/5 hover:border-blue-500/50 transition-all rounded-r">
                             <div className="pt-0.5">
                                 <div className="text-[10px] font-bold text-cyber-primary font-mono leading-none">
                                     {formatRelativeTime(log.created_at || log.timestamp)}
                                 </div>
                             </div>
                             <div>
-                                <p className="text-white text-xs font-bold leading-tight">{log.action}</p>
+                                <p className="text-gray-900 dark:text-white text-xs font-bold leading-tight">{log.action}</p>
                                 <p className="text-[10px] text-gray-500 leading-tight">{log.details} • <span className="text-gray-400">{(log.user_name || log.user)?.split(' ')[0]}</span></p>
                             </div>
                         </div>
@@ -271,10 +273,10 @@ const ActivityLogWidget = ({ logs }: { logs?: any[] }) => {
 // --- NEW COMPONENT: Top Products Widget ---
 const TopProductsWidget = ({ products }: { products: any[] }) => {
     return (
-        <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-3xl p-6 h-full relative overflow-hidden flex flex-col">
+        <div className="glass-panel rounded-3xl p-6 h-full relative overflow-hidden flex flex-col">
             <div className="flex justify-between items-center mb-4 relative z-10">
-                <h3 className="font-bold text-white flex items-center gap-2 text-sm">
-                    <Zap className="text-yellow-400" size={16} />
+                <h3 className="font-bold text-gray-900 dark:text-white flex items-center gap-2 text-sm">
+                    <Zap className="text-yellow-500 dark:text-yellow-400" size={16} />
                     Top Performing Products
                 </h3>
             </div>
@@ -286,15 +288,15 @@ const TopProductsWidget = ({ products }: { products: any[] }) => {
                     products.map((p, i) => (
                         <div key={i} className="group relative">
                             <div className="flex justify-between items-end mb-1 text-xs">
-                                <span className="font-bold text-gray-300 truncate w-2/3 flex items-center gap-2">
-                                    <span className={`flex items-center justify-center w-4 h-4 rounded-full text-[9px] ${i === 0 ? 'bg-yellow-500 text-black' : 'bg-white/10 text-gray-400'}`}>
+                                <span className="font-bold text-gray-700 dark:text-gray-300 truncate w-2/3 flex items-center gap-2">
+                                    <span className={`flex items-center justify-center w-4 h-4 rounded-full text-[9px] ${i === 0 ? 'bg-yellow-500 text-black' : 'bg-gray-200 dark:bg-white/10 text-gray-500 dark:text-gray-400'}`}>
                                         {i + 1}
                                     </span>
                                     {p.name}
                                 </span>
                                 <span className="font-mono text-cyber-primary">{formatCurrency(p.sales)}</span>
                             </div>
-                            <div className="w-full bg-black/40 h-1.5 rounded-full overflow-hidden">
+                            <div className="w-full bg-gray-200 dark:bg-black/40 h-1.5 rounded-full overflow-hidden">
                                 {/* eslint-disable-next-line react/forbid-dom-props */}
                                 <div
                                     className="h-full bg-gradient-to-r from-cyber-primary to-cyan-400 rounded-full transition-all duration-1000"
@@ -315,7 +317,9 @@ import DateRangeSelector from '../components/DateRangeSelector';
 import FiscalYearDeck from '../components/FiscalYearDeck';
 
 export default function CentralOperations() {
-    const { sites, employees, allSales, allOrders, allProducts, setActiveSite, jobs, systemLogs, activeSite, workerPoints, storePoints } = useData();
+    const { sites, employees, allSales, allOrders, allProducts, setActiveSite, systemLogs, activeSite, storePoints } = useData();
+    const { jobs } = useFulfillmentData();
+    const { workerPoints } = useGamification();
     const { loading, theme } = useStore();
     const navigate = useNavigate();
 
@@ -540,24 +544,24 @@ export default function CentralOperations() {
     const GlassKPICard = ({ title, value, icon: Icon, color, sub, route, trend }: GlassKPICardProps) => (
         <div
             onClick={() => route && navigate(route)}
-            className="group relative overflow-hidden bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 cursor-pointer hover:border-white/20 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_10px_40px_-10px_rgba(0,0,0,0.5)]"
+            className="group relative overflow-hidden glass-panel glass-panel-hover rounded-3xl p-6 cursor-pointer"
         >
             <div className={`absolute -right-10 -top-10 p-16 rounded-full ${color.replace('text-', 'bg-')}/10 blur-3xl group-hover:blur-[60px] transition-all duration-700`}></div>
 
             <div className="flex justify-between items-start mb-4 relative z-10">
-                <div className={`p-3.5 rounded-2xl ${color.replace('text-', 'bg-')}/10 text-white border border-white/5 group-hover:scale-110 transition-transform duration-300`}>
+                <div className={`p-3.5 rounded-2xl ${color.replace('text-', 'bg-')}/10 text-gray-900 dark:text-white border border-gray-100 dark:border-white/5 group-hover:scale-110 transition-transform duration-300`}>
                     <Icon size={24} className={color} />
                 </div>
                 {trend && (
-                    <span className={`flex items-center text-[10px] font-bold px-2 py-1 rounded-full border backdrop-blur-sm ${trend.startsWith('+') ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' : 'text-rose-400 bg-rose-500/10 border-rose-500/20'}`}>
+                    <span className={`flex items-center text-[10px] font-bold px-2 py-1 rounded-full border backdrop-blur-sm ${trend.startsWith('+') ? 'text-emerald-500 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/20' : 'text-rose-500 dark:text-rose-400 bg-rose-500/10 border-rose-500/20'}`}>
                         <TrendingUp size={10} className={`mr-1 ${trend.startsWith('-') ? 'rotate-180' : ''}`} /> {trend}
                     </span>
                 )}
             </div>
 
             <div className="relative z-10">
-                <p className="text-gray-400 text-[10px] font-bold uppercase tracking-wider mb-1">{title}</p>
-                <h3 className="text-2xl lg:text-3xl font-mono font-bold text-white tracking-tight truncate drop-shadow-sm">
+                <p className="text-secondary text-[10px] font-bold uppercase tracking-wider mb-1">{title}</p>
+                <h3 className="text-2xl lg:text-3xl font-mono font-bold text-gray-900 dark:text-white tracking-tight truncate drop-shadow-sm">
                     {typeof value === 'number' ? formatCompactNumber(value) : value}
                 </h3>
                 {sub && <p className="text-[11px] text-gray-500 mt-2 font-medium flex items-center gap-1"><span className="w-1 h-1 rounded-full bg-gray-600"></span>{sub}</p>}
@@ -603,9 +607,9 @@ export default function CentralOperations() {
 
                     <CyberClock />
 
-                    <div className="text-right px-6 py-2 bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 h-[42px] flex flex-col justify-center">
+                    <div className="text-right px-6 py-2 bg-white/50 dark:bg-white/5 backdrop-blur-sm rounded-2xl border border-gray-200 dark:border-white/10 h-[42px] flex flex-col justify-center">
                         <p className="text-[10px] text-gray-500 font-bold uppercase leading-none mb-0.5">Active Sites</p>
-                        <p className="text-lg font-mono font-bold text-white leading-none">{totalSites}</p>
+                        <p className="text-lg font-mono font-bold text-gray-900 dark:text-white leading-none">{totalSites}</p>
                     </div>
 
                     <button
@@ -646,8 +650,7 @@ export default function CentralOperations() {
                         <WidgetErrorBoundary title="Total Revenue">
                             <GlassKPICard
                                 title={dateRange === 'All Time' ? "Total Revenue" : `${dateRange} Revenue`}
-                                value={formatCompactNumber(serverFinancials?.total_revenue !== undefined ? serverFinancials.total_revenue : metrics.totalNetworkRevenue, { currency: CURRENCY_SYMBOL })}
-                                trend="+12.5%"
+                                value={formatCompactNumber(metrics.totalNetworkRevenue, { currency: CURRENCY_SYMBOL })}
                                 sub="vs. Last Month"
                                 icon={DollarSign}
                                 color="text-green-400"
@@ -656,8 +659,7 @@ export default function CentralOperations() {
                         <WidgetErrorBoundary title="Net Profit">
                             <GlassKPICard
                                 title="Net Profit"
-                                value={formatCompactNumber(serverFinancials?.net_profit !== undefined ? serverFinancials.net_profit : metrics.netProfit, { currency: CURRENCY_SYMBOL })}
-                                trend={(serverFinancials?.net_profit || metrics.netProfit) > 0 ? "+15%" : "-2%"}
+                                value={formatCompactNumber(metrics.netProfit, { currency: CURRENCY_SYMBOL })}
                                 sub="Net Earnings"
                                 icon={Award}
                                 color="text-emerald-400"
@@ -666,8 +668,7 @@ export default function CentralOperations() {
                         <WidgetErrorBoundary title="Profit Margin">
                             <GlassKPICard
                                 title="Profit Margin"
-                                value={serverFinancials?.profit_margin !== undefined ? `${serverFinancials.profit_margin}%` : `${metrics.profitMargin.toFixed(1)}%`}
-                                trend="+1.2%"
+                                value={`${metrics.profitMargin.toFixed(1)}%`}
                                 sub="Efficiency Rate"
                                 icon={TrendingUp}
                                 color="text-teal-400"
@@ -677,7 +678,6 @@ export default function CentralOperations() {
                             <GlassKPICard
                                 title="Network Asset Value"
                                 value={formatCompactNumber(inventoryValue, { currency: CURRENCY_SYMBOL })}
-                                trend="+5.2%"
                                 sub={`Valued at Base Cost (Retail: ${formatCompactNumber(metrics.totalNetworkStockValueRetail, { currency: CURRENCY_SYMBOL })})`}
                                 icon={Package}
                                 color="text-blue-400"
@@ -687,11 +687,11 @@ export default function CentralOperations() {
 
                     <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 h-[400px]">
                         {/* Revenue Velocity Chart */}
-                        <div className="lg:col-span-3 bg-gradient-to-b from-white/10 to-white/5 backdrop-blur-2xl border border-white/10 rounded-3xl p-8 relative overflow-hidden group shadow-2xl">
+                        <div className="lg:col-span-3 glass-panel rounded-3xl p-8 relative overflow-hidden group shadow-2xl">
                             <WidgetErrorBoundary title="Revenue Chart">
                                 {revenueBySiteData.length === 0 && <EmptyState message="No revenue data available" />}
                                 <div className="flex justify-between items-center mb-6">
-                                    <h3 className="font-bold text-white flex items-center gap-2">
+                                    <h3 className="font-bold text-gray-900 dark:text-white flex items-center gap-2">
                                         <Activity className="text-cyber-primary" size={20} />
                                         Revenue Velocity <span className="text-xs font-normal text-gray-500 ml-2">(Top 10 Sites)</span>
                                     </h3>
@@ -715,10 +715,10 @@ export default function CentralOperations() {
                         </div>
 
                         {/* Category Sales Bar Chart */}
-                        <div className="lg:col-span-1 bg-white/5 backdrop-blur-lg border border-white/10 rounded-3xl p-6 flex flex-col overflow-hidden relative">
+                        <div className="lg:col-span-1 glass-panel rounded-3xl p-6 flex flex-col overflow-hidden relative">
                             <WidgetErrorBoundary title="Category Performance">
-                                <h3 className="font-bold text-white mb-4 flex items-center gap-2 text-sm">
-                                    <Layers className="text-yellow-400" size={18} />
+                                <h3 className="font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2 text-sm">
+                                    <Layers className="text-yellow-500 dark:text-yellow-400" size={18} />
                                     Category Sales
                                 </h3>
                                 <div className="flex-1 w-full min-h-0">
@@ -742,8 +742,7 @@ export default function CentralOperations() {
                         <WidgetErrorBoundary title="Active Orders">
                             <GlassKPICard
                                 title="Active Orders"
-                                value={serverMetrics?.active_orders !== undefined ? serverMetrics.active_orders : (allOrders.filter(o => o.status !== 'Received' && o.status !== 'Cancelled').length)}
-                                trend="-2.4%"
+                                value={metrics.pendingPicks + metrics.inProgressPacks}
                                 sub="Pending Fulfillment"
                                 icon={ShoppingCart}
                                 color="text-purple-400"
@@ -752,9 +751,8 @@ export default function CentralOperations() {
                         <WidgetErrorBoundary title="Return Rate">
                             <GlassKPICard
                                 title="Return Rate"
-                                value={serverMetrics?.return_rate !== undefined ? `${serverMetrics.return_rate}%` : `${metrics.returnRate.toFixed(1)}%`}
-                                trend={metrics.returnRate < 2 ? "-0.5%" : "+0.2%"}
-                                sub={`${formatCompactNumber(serverMetrics?.total_returned_value || metrics.totalReturnedValue, { currency: CURRENCY_SYMBOL })} Refunded`}
+                                value={`${metrics.returnRate.toFixed(1)}%`}
+                                sub={`${formatCompactNumber(metrics.totalReturnedValue, { currency: CURRENCY_SYMBOL })} Refunded`}
                                 icon={Undo}
                                 color="text-rose-400"
                             />
@@ -762,8 +760,7 @@ export default function CentralOperations() {
                         <WidgetErrorBoundary title="Cycle Time">
                             <GlassKPICard
                                 title="Avg. Cycle Time"
-                                value={serverMetrics?.avg_cycle_time || metrics?.avgCycleTime || '0m'}
-                                trend="-12%"
+                                value={metrics?.avgCycleTime || '0m'}
                                 sub="Processing Speed"
                                 icon={Clock}
                                 color="text-blue-400"
@@ -772,8 +769,7 @@ export default function CentralOperations() {
                         <WidgetErrorBoundary title="Inbound POs">
                             <GlassKPICard
                                 title="Inbound POs"
-                                value={serverMetrics?.inbound_pos !== undefined ? serverMetrics.inbound_pos : (metrics?.inboundPOs || 0)}
-                                trend="+5%"
+                                value={metrics.pendingPOs}
                                 sub="Pending Shipments"
                                 icon={Truck}
                                 color="text-orange-400"
@@ -783,10 +779,10 @@ export default function CentralOperations() {
 
                     <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 h-[400px]">
                         {/* Stock Health */}
-                        <div className="lg:col-span-1 bg-white/5 backdrop-blur-lg border border-white/10 rounded-3xl p-6 relative flex flex-col">
+                        <div className="lg:col-span-1 glass-panel rounded-3xl p-6 relative flex flex-col">
                             <WidgetErrorBoundary title="Stock Health">
-                                <h3 className="font-bold text-white mb-2 flex items-center gap-2 text-sm">
-                                    <PieChartIcon className="text-purple-400" size={16} />
+                                <h3 className="font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-2 text-sm">
+                                    <PieChartIcon className="text-purple-500 dark:text-purple-400" size={16} />
                                     Stock Health
                                 </h3>
                                 <div className="flex-1 w-full min-h-0 relative">
@@ -799,22 +795,22 @@ export default function CentralOperations() {
                                         </PieChart>
                                     </ResponsiveContainer>
                                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                        <span className="text-lg font-bold text-white">{metrics?.stockCount > 0 ? '100%' : '0%'}</span>
+                                        <span className="text-lg font-bold text-gray-900 dark:text-white">{metrics?.stockCount > 0 ? '100%' : '0%'}</span>
                                     </div>
                                 </div>
                             </WidgetErrorBoundary>
                         </div>
 
                         {/* Critical Alerts */}
-                        <div className="lg:col-span-1 bg-white/5 backdrop-blur-lg border border-white/10 rounded-3xl p-6 relative flex flex-col justify-between group">
-                            <h3 className="font-bold text-white flex items-center gap-2 text-sm">
-                                <AlertTriangle className="text-red-400" size={16} />
+                        <div className="lg:col-span-1 glass-panel rounded-3xl p-6 relative flex flex-col justify-between group">
+                            <h3 className="font-bold text-gray-900 dark:text-white flex items-center gap-2 text-sm">
+                                <AlertTriangle className="text-red-500 dark:text-red-400" size={16} />
                                 Critical Alerts
                             </h3>
                             <div>
-                                <p className="text-4xl font-mono font-bold text-white">{activeAlerts}</p>
-                                <p className="text-xs text-red-400 mt-1">{metrics?.lowStockCount} Low Stock Items</p>
-                                <p className="text-xs text-red-400">{metrics?.outOfStockCount} Out of Stock</p>
+                                <p className="text-4xl font-mono font-bold text-gray-900 dark:text-white">{activeAlerts}</p>
+                                <p className="text-xs text-red-500 dark:text-red-400 mt-1">{metrics?.lowStockCount} Low Stock Items</p>
+                                <p className="text-xs text-red-500 dark:text-red-400">{metrics?.outOfStockCount} Out of Stock</p>
                             </div>
                             <button onClick={() => navigate(METRIC_ROUTES.lowStock)} className="w-full py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs font-bold rounded-lg border border-red-500/20 transition-colors">
                                 View Alerts
@@ -834,22 +830,22 @@ export default function CentralOperations() {
                 <DashboardSection title="Network & Resource Management" icon={MapIcon} className="col-span-1 md:col-span-4">
                     <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
                         {/* Site Matrix */}
-                        <div className="lg:col-span-2 bg-white/5 backdrop-blur-lg border border-white/10 rounded-3xl p-6 overflow-hidden flex flex-col relative h-[400px]">
+                        <div className="lg:col-span-2 glass-panel rounded-3xl p-6 overflow-hidden flex flex-col relative h-[400px]">
                             <WidgetErrorBoundary title="Network Performance">
-                                <h3 className="font-bold text-white mb-6 flex items-center gap-2">
-                                    <MapIcon className="text-blue-400" size={20} />
+                                <h3 className="font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
+                                    <MapIcon className="text-blue-500 dark:text-blue-400" size={20} />
                                     Network Performance
                                 </h3>
                                 <div className="overflow-y-auto custom-scrollbar pr-2">
                                     <div className="space-y-3">
                                         {sitePerformance.map((site) => (
-                                            <div key={site.id} className="flex items-center justify-between p-4 bg-white/5 hover:bg-white/10 rounded-2xl transition-all duration-300 border border-white/5 group hover:border-white/20 hover:shadow-lg hover:shadow-black/20 hover:-translate-x-1 cursor-pointer">
+                                            <div key={site.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-white/5 hover:bg-gray-100 dark:hover:bg-white/10 rounded-2xl transition-all duration-300 border border-gray-200 dark:border-white/5 group hover:border-gray-300 dark:hover:border-white/20 hover:shadow-lg hover:shadow-black/5 dark:hover:shadow-black/20 hover:-translate-x-1 cursor-pointer">
                                                 <div className="flex items-center gap-4">
-                                                    <div className={`p-2 rounded-lg ${site.type === 'Warehouse' ? 'bg-purple-500/20 text-purple-400' : 'bg-blue-500/20 text-blue-400'}`}>
+                                                    <div className={`p-2 rounded-lg ${site.type === 'Warehouse' ? 'bg-purple-500/10 dark:bg-purple-500/20 text-purple-600 dark:text-purple-400' : 'bg-blue-500/10 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400'}`}>
                                                         <Package size={16} />
                                                     </div>
                                                     <div>
-                                                        <p className="font-bold text-white text-sm">{site.name}</p>
+                                                        <p className="font-bold text-gray-900 dark:text-white text-sm">{site.name}</p>
                                                         <p className="text-xs text-gray-500 font-mono">{site.type} • {site.staffCount} Staff</p>
                                                     </div>
                                                 </div>

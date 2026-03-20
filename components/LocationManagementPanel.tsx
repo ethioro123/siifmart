@@ -92,7 +92,7 @@ export default function LocationManagementPanel({ products, sites, currentSiteId
                     </div>
                     <input
                         type="text"
-                        placeholder="Search product, SKU, or bin..."
+                        placeholder="Search product, SKU, or bay..."
                         className="w-full md:w-80 bg-black/40 border border-white/10 rounded-xl py-2.5 pl-10 pr-4 text-sm text-white focus:border-cyber-primary/50 focus:ring-1 focus:ring-cyber-primary/50 transition-all outline-none"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
@@ -130,8 +130,8 @@ export default function LocationManagementPanel({ products, sites, currentSiteId
                                             setSearchQuery('');
                                         }}
                                         className={`w-full flex items-center justify-between p-3 rounded-lg border transition-all ${isSelected
-                                                ? 'bg-cyber-primary/10 border-cyber-primary/50 shadow-[0_0_15px_rgba(0,255,157,0.1)]'
-                                                : 'bg-white/5 border-white/5 hover:bg-white/10 hover:border-white/20'
+                                            ? 'bg-cyber-primary/10 border-cyber-primary/50 shadow-[0_0_15px_rgba(0,255,157,0.1)]'
+                                            : 'bg-white/5 border-white/5 hover:bg-white/10 hover:border-white/20'
                                             }`}
                                     >
                                         <div className="flex items-center gap-3">

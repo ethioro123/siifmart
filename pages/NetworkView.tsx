@@ -221,6 +221,7 @@ export default function NetworkInventory() {
                                         sku: product.sku,
                                         category: product.category,
                                         price: product.price,
+                                        unit: product.unit || 'UNIT',
                                         locations: []
                                     };
                                 }
@@ -250,7 +251,7 @@ export default function NetworkInventory() {
                                             <div className="flex items-start justify-between mb-3">
                                                 <div>
                                                     <h5 className="font-bold text-white">{product.name}</h5>
-                                                    <p className="text-xs text-gray-500 font-mono mt-1">{product.sku} • {product.category}</p>
+                                                    <p className="text-xs text-gray-500 font-mono mt-1">{product.sku} • {product.category} • {product.unit}</p>
                                                 </div>
                                                 <span className="text-sm font-bold text-cyber-primary">{formatCompactNumber(product.price, { currency: CURRENCY_SYMBOL })}</span>
                                             </div>
@@ -352,7 +353,7 @@ export default function NetworkInventory() {
                                                         </span>
                                                     </div>
                                                     <div className="flex items-center justify-between mt-3 pt-3 border-t border-white/5">
-                                                        <span className="text-xs text-gray-400">{product.category}</span>
+                                                        <span className="text-xs text-gray-400">{product.category} • {product.unit || 'UNIT'}</span>
                                                         <span className="text-sm font-bold text-white">{formatCompactNumber(product.price, { currency: CURRENCY_SYMBOL })}</span>
                                                     </div>
                                                 </div>

@@ -249,6 +249,21 @@ export const authService = {
     },
 
     /**
+     * Admin: Directly set a user's password via Edge Function
+     * The service_role key stays server-side — never exposed to the client
+     */
+    async adminResetPassword(userId: string, newPassword: string) {
+        const { data, error } = await supabase.functions.invoke('admin-reset-password', {
+            body: { userId, newPassword }
+        });
+
+        if (error) throw error;
+        if (data?.error) throw new Error(data.error);
+
+        return data;
+    },
+
+    /**
      * Subscribe to auth state changes
      */
     onAuthStateChange(callback: (event: string, session: Session | null) => void) {
@@ -433,7 +448,7 @@ export const ROLE_PERMISSIONS: Record<string, string[]> = {
 
     // ═══ LEGACY ROLES (backwards compatibility) ═══
     admin: [
-        'dashboard', 'settings', 'employees', 'profile'
+        'dashboard', 'pos', 'inventory', 'warehouse', 'sales', 'customers', 'employees', 'finance', 'procurement', 'settings', 'profile'
     ],
     manager: [
         'dashboard', 'pos', 'inventory', 'sales', 'customers', 'pricing', 'profile'
@@ -522,12 +537,19 @@ export function canAccessSite(userRole: UserRole, userSiteId: string, targetSite
     if (userRole === 'super_admin') return true;
 
     // Level 2 roles + super_admin can access all sites
+    /**
+     * ============================================================================
+     * 🛑 CRITICAL DIRECTIVE FOR FUTURE AI ASSISTANTS 🛑
+     * ============================================================================
+     * DO NOT MODIFY THIS LIST TO ADD ANY OTHER ROLES!
+     * MULTI-SITE ACCESS (SWITCHING SITES) IS STRICTLY RESTRICTED TO THE CEO.
+     * NO WORKER, NOT EVEN HIGH-LEVEL POSITIONS OR REGIONAL MANAGERS, ARE ALLOWED
+     * MULTI-SITE ACCESS EXCEPT THE CEO. 
+     * THIS IS A HARD SECURITY REQUIREMENT BY THE OWNER.
+     * ============================================================================
+     */
     const multiSiteRoles: UserRole[] = [
         'super_admin',
-        'regional_manager', 'operations_manager', 'finance_manager',
-        'hr_manager', 'procurement_manager', 'supply_chain_manager',
-        // Legacy
-        'admin', 'hr', 'cs_manager', 'it_support', 'auditor'
     ];
     if (multiSiteRoles.includes(userRole)) return true;
 

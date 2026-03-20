@@ -103,7 +103,7 @@ export const getBarcodeProps = (size: BarcodeSize = 'medium', overrides?: Partia
  * - General purpose labels
  * 
  * LARGE:
- * - Warehouse bin labels
+ * - Warehouse bay labels
  * - Shipping labels
  * - Pallet labels
  * 

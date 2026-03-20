@@ -6,8 +6,10 @@ import {
     Trash2, RefreshCw, Activity, CheckCircle, AlertTriangle,
     Smartphone, Terminal, HardDrive, CloudLightning, Lock, CreditCard,
     FileText, Percent, Tag, Banknote, Keyboard, Link, Plug, Mail, MessageSquare,
-    Eye, EyeOff, List, Plus, Code, Briefcase, Users, DollarSign, MapPin, Building, Store, Sparkles, Truck, Loader2, Trophy
+    Eye, EyeOff, List, Plus, Code, Briefcase, Users, DollarSign, MapPin, Building, Store, Sparkles, Truck, Loader2, Trophy,
+    FileDown
 } from 'lucide-react';
+import { encodeLocation, extractSitePrefix } from '../utils/locationEncoder';
 import { CURRENCY_SYMBOL } from '../constants';
 import Logo from '../components/Logo';
 import { useData } from '../contexts/DataContext';
@@ -118,6 +120,13 @@ export default function SettingsPage() {
     const [newSite, setNewSite] = useState<Partial<Site>>({});
     const [isSavingSite, setIsSavingSite] = useState(false);
 
+    // Test Location State for Barcode Preview
+    const [testLocation, setTestLocation] = useState({
+        zone: 'A',
+        aisle: '01',
+        bay: '01'
+    });
+
     // Delete Confirmation State
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [siteToDelete, setSiteToDelete] = useState<Site | null>(null);
@@ -126,7 +135,64 @@ export default function SettingsPage() {
 
     // Confirmation Modals
 
+    const [isGenerating, setIsGenerating] = useState(false);
 
+    const generateBarcodes = async (site: Partial<Site> & { barcodePrefix?: string }) => {
+        // Use centralized utility for site prefix
+        const usePrefix = site.barcodePrefix || extractSitePrefix(site.code);
+
+        if (!site.id && !site.code) {
+            // Fallback for testing/unsaved sites
+            addNotification('alert', 'Please ensure the site has a valid code to generate a barcode prefix.');
+            return;
+        }
+
+        // Defaults: 10 Zones (A-J), 20 Aisles, 20 Bays
+        const zoneCount = site.zoneCount || 10;
+        const aisleCount = site.aisleCount || 20;
+        const bayCount = site.bayCount || 20;
+
+        setIsGenerating(true);
+        try {
+            // Generate Rows
+            const rows = [['Location Label', 'Barcode', 'Zone', 'Aisle', 'Bay', 'Site Prefix', 'Site Name']];
+            const zones = Array.from({ length: zoneCount }, (_, i) => String.fromCharCode(65 + i)); // A, B, C...
+
+            zones.forEach(zone => {
+                for (let a = 1; a <= aisleCount; a++) {
+                    for (let b = 1; b <= bayCount; b++) {
+                        const aisleStr = a.toString().padStart(2, '0');
+                        const bayStr = b.toString().padStart(2, '0');
+                        const label = `${zone}-${aisleStr}-${bayStr}`;
+
+                        // Generate 15-digit barcode (encodeLocation handles 15-digit logic)
+                        const barcode = encodeLocation(label, usePrefix);
+
+                        if (barcode) {
+                            rows.push([label, barcode, zone, aisleStr, bayStr, usePrefix, site.name || 'Unknown']);
+                        }
+                    }
+                }
+            });
+
+            // Convert to CSV
+            const csvContent = "data:text/csv;charset=utf-8," + rows.map(e => e.join(",")).join("\n");
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `barcodes_${(site.name || 'site').replace(/\s+/g, '_')}_${usePrefix}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            addNotification('success', `Generated ${rows.length - 1} barcodes for ${site.name}`);
+        } catch (error) {
+            console.error('Barcode generation failed:', error);
+            addNotification('alert', 'Failed to generate barcodes');
+        } finally {
+            setIsGenerating(false);
+        }
+    };
 
     const handleSave = () => {
         setIsSaving(true);
@@ -162,7 +228,7 @@ export default function SettingsPage() {
                     terminalCount: newSite.terminalCount,
                     zoneCount: newSite.zoneCount,
                     aisleCount: newSite.aisleCount,
-                    binCount: newSite.binCount,
+                    bayCount: newSite.bayCount,
                     code: newSite.code || newSite.name?.substring(0, 3).toUpperCase() || 'UNK' // Use existing code if available
                 };
                 await updateSite(siteData, user?.name || 'Admin');
@@ -178,7 +244,7 @@ export default function SettingsPage() {
                     terminalCount: newSite.terminalCount,
                     zoneCount: newSite.zoneCount,
                     aisleCount: newSite.aisleCount,
-                    binCount: newSite.binCount,
+                    bayCount: newSite.bayCount,
                     code: 'GENERATED_BY_DB' // Placeholder, will be overwritten by sitesService
                 };
                 await addSite(siteData as Site, user?.name || 'Admin');
@@ -553,11 +619,12 @@ export default function SettingsPage() {
                                 <button
                                     key={type}
                                     type="button"
-                                    onClick={() => setNewSite({ ...newSite, type: type as SiteType, manager: type === 'Administration' ? undefined : newSite.manager })}
+                                    onClick={() => !newSite.id && setNewSite({ ...newSite, type: type as SiteType, manager: type === 'Administration' ? undefined : newSite.manager })}
+                                    disabled={!!newSite.id}
                                     className={`p-4 rounded-xl border-2 transition-all text-left ${newSite.type === type
                                         ? `border-${color}-500 bg-${color}-500/10`
                                         : 'border-white/10 bg-black/20 hover:border-white/30'
-                                        }`}
+                                        } ${!!newSite.id ? 'opacity-50 cursor-not-allowed' : ''}`}
                                 >
                                     <Icon size={24} className={`mb-2 ${newSite.type === type ? `text-${color}-400` : 'text-gray-500'}`} />
                                     <p className={`font-bold text-sm ${newSite.type === type ? 'text-white' : 'text-gray-300'}`}>{label}</p>
@@ -688,47 +755,115 @@ export default function SettingsPage() {
                                         />
                                     </div>
 
+                                    {/* Warehouse Structure Inputs Removed as per request */}
+
+                                    {/* Barcode Configuration Section */}
                                     <div className="md:col-span-2 pt-4 border-t border-white/5 mt-2">
-                                        <label className="text-xs text-cyber-primary uppercase font-bold mb-3 block">Warehouse Structure</label>
-                                        <div className="grid grid-cols-3 gap-4">
-                                            <div>
-                                                <label className="text-[10px] text-gray-500 uppercase font-bold mb-1 block">Number of Zones</label>
-                                                <input
-                                                    type="number"
-                                                    min="1"
-                                                    max="26"
-                                                    placeholder="A-Z"
-                                                    className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white text-sm outline-none focus:border-cyber-primary"
-                                                    value={newSite.zoneCount || ''}
-                                                    onChange={(e) => setNewSite({ ...newSite, zoneCount: e.target.value === '' ? undefined : parseInt(e.target.value) })}
-                                                />
-                                            </div>
-                                            <div>
-                                                <label className="text-[10px] text-gray-500 uppercase font-bold mb-1 block">Aisles per Zone</label>
-                                                <input
-                                                    type="number"
-                                                    min="1"
-                                                    placeholder="e.g. 10"
-                                                    className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white text-sm outline-none focus:border-cyber-primary"
-                                                    value={newSite.aisleCount || ''}
-                                                    onChange={(e) => setNewSite({ ...newSite, aisleCount: e.target.value === '' ? undefined : parseInt(e.target.value) })}
-                                                />
-                                            </div>
-                                            <div>
-                                                <label className="text-[10px] text-gray-500 uppercase font-bold mb-1 block">Bins per Aisle</label>
-                                                <input
-                                                    type="number"
-                                                    min="1"
-                                                    placeholder="e.g. 50"
-                                                    className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white text-sm outline-none focus:border-cyber-primary"
-                                                    value={newSite.binCount || ''}
-                                                    onChange={(e) => setNewSite({ ...newSite, binCount: e.target.value === '' ? undefined : parseInt(e.target.value) })}
-                                                />
+                                        <div className="flex justify-between items-center mb-3">
+                                            <label className="text-xs text-cyber-primary uppercase font-bold block">Barcode Configuration</label>
+                                            <div className="px-2 py-1 rounded bg-cyber-primary/10 border border-cyber-primary/20 text-[10px] text-cyber-primary font-mono">
+                                                PROTOCOL: 15-DIGIT
                                             </div>
                                         </div>
-                                        <p className="text-[10px] text-gray-500 mt-2 italic">
-                                            Structure: [Zone]-[Aisle]-[Bin] (e.g. A-01-05). Max 26 zones (A-Z).
-                                        </p>
+
+                                        {/* Location Tester */}
+                                        <div className="bg-white/5 border border-white/10 rounded-lg p-3 mb-4">
+                                            <label className="text-[10px] text-cyber-primary uppercase font-bold mb-2 block flex items-center gap-2">
+                                                <MapPin size={12} /> Test Location Barcode
+                                            </label>
+                                            <div className="flex gap-2 items-end">
+                                                <div className="flex-1">
+                                                    <label className="text-[9px] text-gray-500 uppercase font-bold mb-1 block">Zone</label>
+                                                    <select
+                                                        className="w-full bg-black/30 border border-white/10 rounded px-2 py-1.5 text-white text-xs outline-none focus:border-cyber-primary"
+                                                        value={testLocation.zone}
+                                                        onChange={(e) => setTestLocation({ ...testLocation, zone: e.target.value })}
+                                                        aria-label="Test Zone"
+                                                    >
+                                                        {Array.from({ length: newSite.zoneCount || 10 }, (_, i) => String.fromCharCode(65 + i)).map(z => (
+                                                            <option key={z} value={z}>{z}</option>
+                                                        ))}
+                                                    </select>
+                                                </div>
+                                                <div className="flex-1">
+                                                    <label className="text-[9px] text-gray-500 uppercase font-bold mb-1 block">Aisle</label>
+                                                    <select
+                                                        className="w-full bg-black/30 border border-white/10 rounded px-2 py-1.5 text-white text-xs outline-none focus:border-cyber-primary"
+                                                        value={parseInt(testLocation.aisle)}
+                                                        onChange={(e) => setTestLocation({ ...testLocation, aisle: e.target.value.padStart(2, '0') })}
+                                                        aria-label="Test Aisle"
+                                                    >
+                                                        {Array.from({ length: newSite.aisleCount || 20 }, (_, i) => i + 1).map(num => (
+                                                            <option key={num} value={num}>
+                                                                {num.toString().padStart(2, '0')}
+                                                            </option>
+                                                        ))}
+                                                    </select>
+                                                </div>
+                                                <div className="flex-1">
+                                                    <label className="text-[9px] text-gray-500 uppercase font-bold mb-1 block">Bay</label>
+                                                    <select
+                                                        className="w-full bg-black/30 border border-white/10 rounded px-2 py-1.5 text-white text-xs outline-none focus:border-cyber-primary"
+                                                        value={parseInt(testLocation.bay)}
+                                                        onChange={(e) => setTestLocation({ ...testLocation, bay: e.target.value.padStart(2, '0') })}
+                                                        aria-label="Test Bay"
+                                                    >
+                                                        {Array.from({ length: newSite.bayCount || 20 }, (_, i) => i + 1).map(num => (
+                                                            <option key={num} value={num}>
+                                                                {num.toString().padStart(2, '0')}
+                                                            </option>
+                                                        ))}
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div className="mt-3 flex items-center justify-between bg-black/40 p-2 rounded border border-white/5">
+                                                <span className="text-[10px] text-gray-500 font-mono">
+                                                    {testLocation.zone}-{testLocation.aisle.toString().padStart(2, '0')}-{testLocation.bay.toString().padStart(2, '0')}
+                                                </span>
+                                                <span className="text-xs font-mono font-bold text-cyber-primary">
+                                                    {(() => {
+                                                        const label = `${testLocation.zone}-${testLocation.aisle.toString().padStart(2, '0')}-${testLocation.bay.toString().padStart(2, '0')}`;
+                                                        // STRICT 4-DIGIT PREFIX for 15-digit barcode
+                                                        const prefix = newSite.barcodePrefix || extractSitePrefix(newSite.code);
+                                                        return encodeLocation(label, prefix);
+                                                    })()}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex gap-4 items-end">
+                                            <div className="w-1/3">
+                                                <label className="text-[10px] text-gray-500 uppercase font-bold mb-1 block">Validation Prefix (System)</label>
+                                                <div className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-cyber-primary text-sm font-mono tracking-widest text-center backdrop-blur-sm">
+                                                    {newSite.barcodePrefix || extractSitePrefix(newSite.code)}
+                                                </div>
+                                            </div>
+                                            <div className="flex-1">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        const prefix = newSite.barcodePrefix || extractSitePrefix(newSite.code);
+                                                        generateBarcodes({ ...newSite, barcodePrefix: prefix });
+                                                    }}
+                                                    disabled={false}
+                                                    className="w-full h-[38px] bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-xs font-bold text-gray-300 hover:text-white transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                >
+                                                    {isGenerating ? <Loader2 size={14} className="animate-spin" /> : <FileDown size={14} />}
+                                                    Download Location Labels (CSV)
+                                                </button>
+                                            </div>
+                                        </div>
+                                        {/* Live Preview */}
+                                        <div className="mt-3 flex items-center gap-2 text-[10px] text-gray-500 bg-white/5 p-2 rounded-lg border border-white/5">
+                                            <span className="uppercase font-bold">Preview:</span>
+                                            {newSite.code || newSite.barcodePrefix ? (
+                                                <span className="font-mono text-cyber-primary">
+                                                    {encodeLocation('A-01-01', newSite.barcodePrefix || extractSitePrefix(newSite.code))} (A-01-01)
+                                                </span>
+                                            ) : (
+                                                <span className="italic text-gray-600">Site Code or Prefix required for preview</span>
+                                            )}
+                                        </div>
                                     </div>
                                 </>
                             ) : (

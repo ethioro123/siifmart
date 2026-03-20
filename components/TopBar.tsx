@@ -3,6 +3,7 @@ import React, { useState, useMemo } from 'react';
 import { Menu, Search, Sun, Moon, Bell, X, AlertTriangle, CheckCircle, Info, MapPin, ChevronDown, Building, Store, Package, Users, ShoppingCart, FileText, LayoutDashboard, LogOut, User, Crown, Zap, Trophy, TrendingUp, ClipboardCheck, Clock, Play, Check, Plus, Send, UserPlus, Trash2, RefreshCw } from 'lucide-react';
 import { useStore } from '../contexts/CentralStore';
 import { useData } from '../contexts/DataContext';
+import { useGamification } from '../contexts/GamificationContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import { Globe } from 'lucide-react';
@@ -15,8 +16,9 @@ export default function TopBar() {
    const {
       activeSite, sites, setActiveSite, notifications, markNotificationsRead,
       addNotification, clearNotification, clearAllNotifications, employees, allProducts, customers, allOrders, allSales,
-      workerPoints, getWorkerPoints, tasks, setTasks, refreshData
+      tasks, setTasks, refreshData
    } = useData();
+   const { getWorkerPoints, workerPoints } = useGamification();
    const navigate = useNavigate();
    const location = useLocation();
 
@@ -316,7 +318,7 @@ export default function TopBar() {
    };
 
    return (
-      <header className="h-14 md:h-16 bg-cyber-black/95 backdrop-blur-sm sticky top-0 z-30 px-2 sm:px-4 md:px-6 flex items-center justify-between">
+      <header className="h-14 md:h-16 bg-cyber-black/95 backdrop-blur-sm sticky top-0 z-[100] px-2 sm:px-4 md:px-6 flex items-center justify-between">
          <div className="flex items-center space-x-2 sm:space-x-4">
             <button onClick={toggleSidebar} className="text-gray-400 hover:text-white p-1" aria-label="Toggle sidebar">
                <Menu size={20} className="md:w-6 md:h-6" />
@@ -645,7 +647,10 @@ export default function TopBar() {
                            )}
 
                            {/* Language Switcher */}
-                           <div className="mt-2 px-3 py-2 border-t border-white/5">
+                           <div
+                              className="mt-2 px-3 py-2 border-t border-white/5"
+                              onClick={(e) => e.stopPropagation()}
+                           >
                               <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Display Language</p>
                               <div className="flex items-center gap-2 bg-white/5 rounded-lg p-1.5 border border-white/5 hover:border-cyber-primary/30 transition-all">
                                  <Globe size={14} className="text-gray-400" />

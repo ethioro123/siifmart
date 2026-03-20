@@ -17,7 +17,7 @@ Main inventory table for all product data.
 | `site_id` | UUID | FK to `sites` |
 | `category` | TEXT | Product category |
 | `barcodes` | TEXT[] | Array of associated barcodes |
-| `bin_location` | TEXT | Warehouse bin location |
+| `bay_location` | TEXT | Warehouse bay location |
 | `locations` | TEXT[] | Array of locations |
 | `approval_status` | TEXT | 'approved', 'pending', 'rejected' |
 

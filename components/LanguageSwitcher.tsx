@@ -9,6 +9,7 @@ export const LanguageSwitcher = () => {
         <div className="flex items-center gap-2 bg-white/5 rounded-lg p-1 border border-white/10">
             <Globe size={16} className="text-gray-400 ml-2" />
             <select
+                aria-label="Select Language"
                 value={language}
                 onChange={(e) => setLanguage(e.target.value as any)}
                 className="bg-transparent text-white text-sm outline-none border-none p-1 cursor-pointer"

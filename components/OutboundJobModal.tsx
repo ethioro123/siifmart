@@ -5,7 +5,8 @@ import {
 } from 'lucide-react';
 import { WMSJob, User, Site, Product } from '../types';
 import { formatJobId } from '../utils/jobIdFormatter';
-import { generatePackLabelHTML } from '../utils/unifiedLabelGenerator';
+import { generatePackLabelHTML } from '../utils/labels/PackLabelGenerator';
+import { useLanguage } from '../contexts/LanguageContext';
 import Button from './shared/Button';
 
 interface OutboundJobModalProps {
@@ -35,9 +36,22 @@ export const OutboundJobModal: React.FC<OutboundJobModalProps> = ({
     onStartPicking,
     onStartPacking
 }) => {
+    const { t, language } = useLanguage();
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     if (!isOpen) return null;
+
+    // Helper: Translate generic status strings
+    const translateStatus = (status: string | undefined): string => {
+        if (!status) return '';
+        const lower = status.toLowerCase();
+        if (lower === 'pending') return t('warehouse.driverHub.itemPending');
+        if (lower === 'completed') return t('warehouse.driverHub.completed');
+        if (lower === 'packed') return t('warehouse.driverHub.packed');
+        if (lower === 'in-transit') return t('warehouse.driverHub.inTransit');
+        if (lower === 'delivered') return t('warehouse.driverHub.delivered');
+        return status;
+    };
 
     // Helper: Is this a Driver view?
     const isDriverView = user?.role === 'driver' || activeTab.includes('driver');
@@ -105,7 +119,7 @@ export const OutboundJobModal: React.FC<OutboundJobModalProps> = ({
                         <div>
                             <div className="flex items-center gap-3 mb-1">
                                 <h2 className="text-xl font-black text-white tracking-tight">
-                                    {job.type} MISSION
+                                    {job.type === 'DISPATCH' ? t('warehouse.driverHub.dispatchMissionTitle') : `${job.type} MISSION`}
                                 </h2>
                                 <span className="text-sm font-mono text-gray-500">#{formatJobId(job)}</span>
                             </div>
@@ -113,11 +127,13 @@ export const OutboundJobModal: React.FC<OutboundJobModalProps> = ({
                                 <span className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold border ${job.priority === 'Critical' ? 'border-red-500/30 text-red-400 bg-red-500/10' :
                                     'border-white/10 text-gray-400'
                                     }`}>
-                                    {job.priority} Priority
+                                    {job.type === 'DISPATCH' ?
+                                        ((job.priority === 'Normal' && language === 'or') ? 'Idilee' : job.priority)
+                                        : job.priority} {t('warehouse.driverHub.priority')}
                                 </span>
                                 <span className="flex items-center gap-1.5">
                                     <MapPin size={12} />
-                                    {sites.find(s => s.id === job.destSiteId)?.name || 'Unknown Destination'}
+                                    {sites.find(s => s.id === job.destSiteId)?.name || t('warehouse.driverHub.unknownDestination')}
                                 </span>
                             </div>
                         </div>
@@ -134,16 +150,16 @@ export const OutboundJobModal: React.FC<OutboundJobModalProps> = ({
                     <div className="flex flex-wrap items-center justify-between gap-4 p-4 bg-white/[0.03] rounded-2xl border border-white/5">
                         <div className="flex items-center gap-8">
                             <div>
-                                <span className="text-[10px] text-gray-500 uppercase font-bold tracking-wider block mb-1">Status</span>
+                                <span className="text-[10px] text-gray-500 uppercase font-bold tracking-wider block mb-1">{t('warehouse.driverHub.status')}</span>
                                 <span className={`text-sm font-bold ${job.status === 'Completed' ? 'text-green-400' :
                                     job.transferStatus === 'In-Transit' ? 'text-purple-400' : 'text-white'
                                     }`}>
-                                    {job.transferStatus || job.status}
+                                    {translateStatus(job.transferStatus || job.status)}
                                 </span>
                             </div>
                             {job.trackingNumber && (
                                 <div>
-                                    <span className="text-[10px] text-gray-500 uppercase font-bold tracking-wider block mb-1">Tracking</span>
+                                    <span className="text-[10px] text-gray-500 uppercase font-bold tracking-wider block mb-1">{t('warehouse.driverHub.tracking')}</span>
                                     <span className="text-sm font-mono text-cyan-400">{job.trackingNumber}</span>
                                 </div>
                             )}
@@ -157,7 +173,7 @@ export const OutboundJobModal: React.FC<OutboundJobModalProps> = ({
                                 icon={<Printer size={16} />}
                                 className="bg-purple-600 hover:bg-purple-500 text-white border-none shadow-lg shadow-purple-900/20"
                             >
-                                Reprint Label (XL)
+                                {t('warehouse.driverHub.printReturnLabel')}
                             </Button>
                         )}
                     </div>
@@ -166,7 +182,7 @@ export const OutboundJobModal: React.FC<OutboundJobModalProps> = ({
                     <div>
                         <h3 className="font-bold text-white mb-4 flex items-center gap-2 text-sm uppercase tracking-wider">
                             <Package size={16} className="text-cyber-primary" />
-                            Manifest ({job.lineItems?.length || 0} Items)
+                            {job.type === 'DISPATCH' ? t('warehouse.driverHub.itemList') : t('warehouse.driverHub.manifest')} ({t('warehouse.driverHub.itemsCount').replace('{count}', (job.lineItems?.length || 0).toString())})
                         </h3>
 
                         <div className="space-y-2">
@@ -191,7 +207,7 @@ export const OutboundJobModal: React.FC<OutboundJobModalProps> = ({
                                         <div className="flex items-center gap-8 pr-4">
                                             {/* Quantity Display - Only what matters for dispatch */}
                                             <div className="text-right">
-                                                <span className="text-[9px] text-gray-500 uppercase font-bold block">Qty</span>
+                                                <span className="text-[9px] text-gray-500 uppercase font-bold block">{t('warehouse.driverHub.qty')}</span>
                                                 <span className="text-base font-mono font-bold text-white">{qty}</span>
                                             </div>
 
@@ -199,14 +215,14 @@ export const OutboundJobModal: React.FC<OutboundJobModalProps> = ({
                                             {!isDriverView && (
                                                 <div className={`px-2 py-1 rounded text-[10px] font-bold uppercase ${item.status === 'Picked' || item.status === 'Completed' || (job.status === 'Completed' || (job as any).status === 'Received') ? 'bg-green-500/10 text-green-400' : 'bg-white/5 text-gray-500'
                                                     }`}>
-                                                    {item.status || ((job.status === 'Completed' || (job as any).status === 'Received') ? 'Completed' : 'Pending')}
+                                                    {translateStatus(item.status) || ((job.status === 'Completed' || (job as any).status === 'Received') ? t('warehouse.driverHub.completed') : t('warehouse.driverHub.itemPending'))}
                                                 </div>
                                             )}
                                         </div>
                                     </div>
                                 );
                             }) : (
-                                <div className="text-center py-8 text-gray-500 italic">No items manifest</div>
+                                <div className="text-center py-8 text-gray-500 italic">{t('warehouse.driverHub.noItemsManifest')}</div>
                             )}
                         </div>
                     </div>
@@ -224,7 +240,7 @@ export const OutboundJobModal: React.FC<OutboundJobModalProps> = ({
                                 }}
                                 className="text-xs text-gray-500 hover:text-white underline decoration-dashed underline-offset-4"
                             >
-                                Edit Tracking
+                                {t('warehouse.driverHub.editTracking')}
                             </button>
                         )}
                     </div>
@@ -237,7 +253,7 @@ export const OutboundJobModal: React.FC<OutboundJobModalProps> = ({
                                 className="bg-amber-500/20 text-amber-400 hover:bg-amber-500/30 border-amber-500/30"
                                 icon={<Package size={18} />}
                             >
-                                {job.status === 'In-Progress' ? 'Continue Picking' : 'Start Picking'}
+                                {job.status === 'In-Progress' ? t('warehouse.driverHub.continuePicking') : t('warehouse.driverHub.startPicking')}
                             </Button>
                         )}
 
@@ -248,7 +264,7 @@ export const OutboundJobModal: React.FC<OutboundJobModalProps> = ({
                                 className="bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 border-blue-500/30"
                                 icon={<Box size={18} />}
                             >
-                                {job.status === 'In-Progress' ? 'Continue Packing' : 'Start Packing'}
+                                {job.status === 'In-Progress' ? t('warehouse.driverHub.continuePacking') : t('warehouse.driverHub.startPacking')}
                             </Button>
                         )}
 
@@ -263,7 +279,7 @@ export const OutboundJobModal: React.FC<OutboundJobModalProps> = ({
                                 className="bg-purple-500/20 text-purple-400 hover:bg-purple-500/30 border-purple-500/30"
                                 icon={<Truck size={18} />}
                             >
-                                Confirm Pickup
+                                {t('warehouse.driverHub.confirmPickup')}
                             </Button>
                         )}
 
@@ -274,7 +290,7 @@ export const OutboundJobModal: React.FC<OutboundJobModalProps> = ({
                                     variant="secondary"
                                     icon={<Navigation size={18} />}
                                 >
-                                    Navigate
+                                    {t('warehouse.driverHub.navigate')}
                                 </Button>
                                 <Button
                                     onClick={async () => {
@@ -285,7 +301,7 @@ export const OutboundJobModal: React.FC<OutboundJobModalProps> = ({
                                     className="bg-cyber-primary text-black hover:bg-cyber-accent"
                                     icon={<CheckCircle size={18} />}
                                 >
-                                    Signal Arrival
+                                    {t('warehouse.driverHub.signalArrival')}
                                 </Button>
                             </>
                         )}
@@ -294,7 +310,7 @@ export const OutboundJobModal: React.FC<OutboundJobModalProps> = ({
                             onClick={onClose}
                             className="px-6 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl font-bold transition-colors"
                         >
-                            Close
+                            {t('warehouse.driverHub.close')}
                         </button>
                     </div>
                 </div>

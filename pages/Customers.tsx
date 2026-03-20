@@ -50,7 +50,7 @@ export default function Customers() {
          };
 
          if (newCustomer.id) {
-            await updateCustomer(customer);
+            await updateCustomer(customer.id, customer);
             addNotification('success', `Customer ${customer.name} updated.`);
          } else {
             await addCustomer(customer);

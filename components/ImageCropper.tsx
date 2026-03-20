@@ -173,7 +173,7 @@ const ImageCropper: React.FC<ImageCropperProps> = ({ imageSrc, onCropComplete, o
                         min={1}
                         max={3}
                         step={0.1}
-                        aria-labelledby="Zoom"
+                        aria-label="Zoom level"
                         onChange={(e) => setZoom(Number(e.target.value))}
                         className="w-full h-1 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-cyber-primary"
                     />

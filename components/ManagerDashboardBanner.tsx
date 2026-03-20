@@ -40,13 +40,10 @@ export default function ManagerDashboardBanner() {
         ];
 
     return (
-        <div className="bg-gradient-to-br from-cyber-dark via-cyber-gray to-cyber-dark border border-white/10 rounded-2xl p-6 relative overflow-hidden mb-6">
+        <div className="bg-gradient-to-br from-cyber-dark via-cyber-gray to-cyber-dark border dark:border-white/10 border-black/5 rounded-2xl p-6 relative overflow-hidden mb-6 shadow-sm">
             {/* Background Pattern */}
             <div className="absolute inset-0 opacity-5">
-                <div className="absolute inset-0" style={{
-                    backgroundImage: 'radial-gradient(circle at 2px 2px, rgba(0,255,157,0.3) 1px, transparent 0)',
-                    backgroundSize: '40px 40px'
-                }} />
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_2px_2px,rgba(0,255,157,0.3)_1px,transparent_0)] bg-[length:40px_40px]" />
             </div>
 
             {/* Content */}

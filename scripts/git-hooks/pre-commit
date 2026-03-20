@@ -1,0 +1,29 @@
+#!/bin/bash
+# Git Pre-Commit Hook
+# Automatically creates backups before each commit
+# 
+# To install:
+#   cp scripts/git-hooks/pre-commit .git/hooks/pre-commit
+#   chmod +x .git/hooks/pre-commit
+
+BACKUP_DIR=".backups/commits/$(date +%Y%m%d-%H%M%S)"
+
+# Get list of staged files
+STAGED_FILES=$(git diff --cached --name-only)
+
+if [ -z "$STAGED_FILES" ]; then
+    exit 0
+fi
+
+# Create backup of staged files
+mkdir -p "$BACKUP_DIR"
+
+echo "$STAGED_FILES" | while read -r file; do
+    if [ -f "$file" ]; then
+        mkdir -p "$BACKUP_DIR/$(dirname "$file")"
+        cp "$file" "$BACKUP_DIR/$file"
+    fi
+done
+
+echo "📦 Backup created: $BACKUP_DIR"
+exit 0

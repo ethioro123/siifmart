@@ -95,7 +95,7 @@ export const useDataQueries = ({ siteId, enabled, onProgress }: UseDataQueriesPr
             },
             {
                 queryKey: DATA_KEYS.suppliers(),
-                queryFn: trackProgress('suppliers', () => suppliersService.getAll().then(res => res.data)),
+                queryFn: trackProgress('suppliers', () => suppliersService.getAll(1000).then(res => res.data)),
                 enabled: enabled,
             }
         ]

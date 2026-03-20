@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { Camera, Upload, Link, X, Image as ImageIcon, RefreshCw, Loader2 } from 'lucide-react';
 
 interface ImageUploadProps {
@@ -63,6 +63,13 @@ export default function ImageUpload({
     const [error, setError] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const cameraInputRef = useRef<HTMLInputElement>(null);
+
+    // Set capture attribute programmatically to avoid IDE compatibility warning
+    useEffect(() => {
+        if (cameraInputRef.current) {
+            cameraInputRef.current.setAttribute('capture', 'environment');
+        }
+    }, []);
 
     const sizeClasses = {
         sm: 'w-24 h-24',
@@ -209,7 +216,7 @@ export default function ImageUpload({
             if (!blob.type.startsWith('image/')) {
                 throw new Error('URL does not point to an image');
             }
-            
+
             // Convert to base64 for consistency
             const file = new File([blob], 'image.jpg', { type: blob.type });
             await processFile(file);
@@ -249,15 +256,16 @@ export default function ImageUpload({
                 onChange={handleFileSelect}
                 className="hidden"
                 disabled={disabled}
+                aria-label="Upload image"
             />
             <input
                 ref={cameraInputRef}
                 type="file"
                 accept="image/*"
-                capture="environment"
                 onChange={handleFileSelect}
                 className="hidden"
                 disabled={disabled}
+                aria-label="Capture image"
             />
 
             {/* Main upload area */}
@@ -305,7 +313,7 @@ export default function ImageUpload({
                         )}
                     </div>
                 ) : (
-                    <div 
+                    <div
                         className="w-full h-full flex flex-col items-center justify-center p-2 text-center"
                         onClick={!disabled ? handleBrowse : undefined}
                     >
@@ -368,6 +376,7 @@ export default function ImageUpload({
                             type="button"
                             onClick={() => { setShowUrlInput(false); setUrlInput(''); }}
                             className="ml-auto p-1 hover:bg-white/10 rounded"
+                            aria-label="Clear URL"
                         >
                             <X size={14} className="text-gray-400" />
                         </button>

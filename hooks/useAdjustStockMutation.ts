@@ -13,6 +13,8 @@ interface AdjustStockParams {
     type: 'IN' | 'OUT';
     reason: string;
     canApprove: boolean;
+    expiryDate?: string;
+    batchNumber?: string;
 }
 
 export function useAdjustStockMutation() {
@@ -22,11 +24,11 @@ export function useAdjustStockMutation() {
 
     return useMutation({
         mutationFn: async (params: AdjustStockParams) => {
-            const { productId, productName, productSku, siteId, quantity, type, reason, canApprove } = params;
+            const { productId, productName, productSku, siteId, quantity, type, reason, canApprove, expiryDate, batchNumber } = params;
 
             if (canApprove) {
                 // Direct adjustment
-                await productsService.adjustStock(productId, quantity, type, reason, user?.name || 'System');
+                await productsService.adjustStock(productId, quantity, type, reason, user?.name || 'System', expiryDate, batchNumber);
                 return { type: 'direct', productName, quantity, adjustmentType: type };
             } else {
                 // Create request
@@ -49,7 +51,11 @@ export function useAdjustStockMutation() {
         },
         onSuccess: (result) => {
             if (result.type === 'direct') {
-                queryClient.invalidateQueries({ queryKey: ['products'] });
+                // CRITICAL: Use partial match to invalidate ALL product-related queries
+                // The products query key is ['products', siteId, limit, offset, sort]
+                queryClient.invalidateQueries({
+                    predicate: (query) => query.queryKey[0] === 'products'
+                });
                 addNotification('success', `Stock adjusted for "${result.productName}".`);
                 logSystemEvent(
                     'Stock Adjusted',

@@ -5,9 +5,11 @@ import {
     Check, X, ChevronLeft, ChevronRight, Briefcase
 } from 'lucide-react';
 import { useData } from '../contexts/DataContext';
+import { useRoster } from '../contexts/RosterContext';
 import { useStore } from '../contexts/CentralStore';
 import { StaffSchedule, Employee } from '../types';
 import Modal from './Modal';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface RosterManagerProps {
     className?: string;
@@ -16,13 +18,22 @@ interface RosterManagerProps {
 export default function RosterManager({ className = "" }: RosterManagerProps) {
     const {
         employees,
-        activeSite,
+        activeSite
+    } = useData();
+    const {
         schedules,
         addSchedule,
         updateSchedule,
         deleteSchedule
-    } = useData();
+    } = useRoster();
     const { user } = useStore();
+    const { t, language } = useLanguage();
+
+    const locale = useMemo(() => {
+        if (language === 'am') return 'am-ET';
+        if (language === 'or') return 'om-ET';
+        return 'en-US';
+    }, [language]);
 
     const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -116,10 +127,10 @@ export default function RosterManager({ className = "" }: RosterManagerProps) {
                         <div className="p-2.5 rounded-xl dark:bg-cyber-primary/10 bg-cyber-primary/5 border dark:border-cyber-primary/20 border-black/5 shadow-inner">
                             <Calendar size={22} className="text-cyber-primary" />
                         </div>
-                        Personnel E-Rostering
+                        {t('posCommand.rosterManager')}
                     </h3>
                     <p className="dark:text-gray-500 text-slate-400 text-[10px] mt-2 font-bold uppercase tracking-[0.2em] opacity-60">
-                        Shift Orchestration & Allocation Matrix
+                        {t('posCommand.shiftAssignment')}
                     </p>
                 </div>
 
@@ -134,7 +145,7 @@ export default function RosterManager({ className = "" }: RosterManagerProps) {
 
                     <div className="flex flex-col items-center min-w-[120px]">
                         <span className="text-xs font-black dark:text-white text-slate-900 uppercase">
-                            {new Date(selectedDate).toLocaleDateString('en-US', { weekday: 'long' })}
+                            {new Date(selectedDate).toLocaleDateString(locale, { weekday: 'long' })}
                         </span>
                         <span className="text-[10px] dark:text-cyber-primary text-cyber-primary font-mono font-bold">
                             {selectedDate}
@@ -199,12 +210,12 @@ export default function RosterManager({ className = "" }: RosterManagerProps) {
                 ) : (
                     <div className="py-20 text-center dark:bg-white/[0.01] bg-slate-50/50 rounded-[3rem] border border-dashed dark:border-white/5 border-black/5">
                         <Calendar size={48} className="mx-auto text-gray-400/20 mb-4" />
-                        <p className="text-xs dark:text-gray-600 text-slate-400 font-bold uppercase tracking-[0.2em]">No Operations Scheduled for this Log</p>
+                        <p className="text-xs dark:text-gray-600 text-slate-400 font-bold uppercase tracking-[0.2em]">{t('posCommand.noTasks')}</p>
                         <button
                             onClick={() => handleOpenModal()}
                             className="mt-6 px-8 py-3 dark:bg-cyber-primary/10 bg-cyber-primary/5 dark:text-cyber-primary text-cyber-primary rounded-2xl text-[10px] font-black uppercase tracking-widest border border-cyber-primary/20 hover:bg-cyber-primary/20 transition-all"
                         >
-                            Allocate First Node
+                            {t('common.add')}
                         </button>
                     </div>
                 )}

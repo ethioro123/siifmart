@@ -31,3 +31,6 @@ docs/OPENROUTER_API_KEY.md
 docs/*_API_KEY.md
 .env.local
 .env.*.local
+
+# AI Session Backups
+.backups/

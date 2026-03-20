@@ -46,7 +46,7 @@ const ROLE_LABELS: Record<string, string> = {
     auditor: 'Auditor',
     it_support: 'IT Support',
     // Legacy (backwards compatibility)
-    admin: 'Admin',
+    admin: 'Assistant CEO',
     manager: 'Manager',
     hr: 'HR',
     pos: 'POS Staff',

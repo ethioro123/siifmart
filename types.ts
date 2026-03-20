@@ -49,6 +49,7 @@ export interface User {
   avatar: string;
   title: string;
   siteId?: string;
+  email?: string;
 }
 
 export interface Notification {
@@ -87,6 +88,8 @@ export interface TaxJurisdiction {
 export interface Site {
   id: string;
   code: string; // Simplified Display ID (e.g., "001", "ADM")
+  siteNumber?: number; // Numeric ID for receipt numbering
+  site_number?: number; // DB field
   name: string;
   type: SiteType;
   address: string;
@@ -105,6 +108,7 @@ export interface Site {
   // Warehouse Structure Configuration
   zoneCount?: number;
   aisleCount?: number;
+  bayCount?: number;
   binCount?: number;
 
   // Tax configuration
@@ -113,6 +117,9 @@ export interface Site {
   // Fulfillment & Picking Control
   fulfillmentStrategy?: FulfillmentStrategy;
   isFulfillmentNode?: boolean;
+
+  // Barcode Configuration
+  barcodePrefix?: string; // 4-digit unique prefix for location barcodes (e.g. "1001")
 }
 
 export type FulfillmentStrategy = 'LOCAL_ONLY' | 'NEAREST' | 'SPLIT' | 'MANUAL';
@@ -122,7 +129,8 @@ export interface SystemConfig {
   currency: string;
   taxRate: number;
   fefoRotation: boolean;
-  binScan: boolean;
+  bayScan?: boolean;
+  binScan?: boolean;
   lowStockThreshold: number;
   enableLoyalty: boolean;
   loyaltyPointsRate?: number; // ETB spent per 1 loyalty point earned (0 or undefined = disabled)
@@ -512,9 +520,13 @@ export interface Product {
   size?: string;
   unit?: string;
   packQuantity?: number;
+  customAttributes?: any;    // Full 6-layer PO attribute model
+  description?: string;      // PO attribute description summary
   needsReview?: boolean;
   receivingNotes?: string;
   pack_quantity?: number; // Supabase compatibility
+  custom_attributes?: any; // Supabase compatibility
+  preferredSupplierId?: string;
 }
 
 export interface BarcodeApproval {
@@ -581,6 +593,8 @@ export interface PendingInventoryChange {
   rejected_by?: string; // Supabase compatibility
   rejectedAt?: string;
   rejected_at?: string; // Supabase compatibility
+  approvalRole?: 'warehouse_manager' | 'procurement_manager'; // Role required to approve
+  approval_role?: 'warehouse_manager' | 'procurement_manager'; // Supabase compatibility
   createdAt?: string;
   created_at?: string; // Supabase compatibility
 }
@@ -632,13 +646,27 @@ export interface WarehouseZone {
   name: string;
   capacity: number;
   occupied: number;
+  // Movement Rules
+  allowPicking?: boolean;
+  allow_picking?: boolean;
+  allowPutaway?: boolean;
+  allow_putaway?: boolean;
   siteId: string; // Hardened: Zone must belong to a site
   site_id?: string; // Supabase compatibility
   temperature?: string;
-  type: 'Dry' | 'Cold' | 'Secure';
+  type: 'Dry' | 'Cold' | 'Secure' | 'Bulk' | 'Forward' | 'Staging' | 'Damaged';
   pickingPriority: number; // Lower = Higher Priority
   zoneType: string; // Advanced type override
-  status: 'Active' | 'Maintenance';
+  status?: 'Active' | 'Maintenance'; // Made optional as not in DB provided schema
+  // Locking fields
+  isLocked?: boolean | null;
+  is_locked?: boolean | null;
+  lockReason?: string | null;
+  lock_reason?: string | null;
+  lockedAt?: string | null;
+  locked_at?: string | null;
+  lockedBy?: string | null;
+  locked_by?: string | null;
 }
 
 export interface StockMovement {
@@ -660,8 +688,9 @@ export interface JobItem {
   productId: string;
   name: string;
   sku: string;
-  image: string;
+  image?: string;
   expectedQty: number;
+  orderedQty?: number; // Tracks original order amount for short pick visibility
   quantity?: number; // Legacy fallback
   pickedQty: number;
   status: 'Pending' | 'Picked' | 'Short' | 'Skipped' | 'Completed' | 'Resolved' | 'Discrepancy' | 'Discontinued';
@@ -670,6 +699,29 @@ export interface JobItem {
   receivedQty?: number;
   condition?: 'Good' | 'Damaged' | 'Short';
   receivedAt?: string;
+  // Pricing data passed from PO for inventory creation
+  cost?: number;
+  retailPrice?: number;
+  unit?: string;
+  // Execution details
+  containerId?: string;
+  barcode?: string;
+  // condition removed (duplicate)
+  startedAt?: string;
+  started_at?: string;
+  location?: string;
+  // Return tracking
+  returnedQty?: number;    // Qty returned via RTW
+  returnedAt?: string;     // When the return was submitted
+  // PO attributes carried through receive → putaway → product creation
+  size?: string;
+  brand?: string;
+  packQuantity?: number;
+  category?: string;
+  customAttributes?: any;
+  description?: string;
+  minStock?: number;
+  maxStock?: number;
 }
 
 export interface WMSJob {
@@ -678,12 +730,13 @@ export interface WMSJob {
   site_id?: string; // Supabase compatibility - Warehouse/Site where job is fulfilled
   type: 'PICK' | 'PACK' | 'PUTAWAY' | 'TRANSFER' | 'DISPATCH' | 'REPLENISH' | 'COUNT' | 'WASTE' | 'RETURNS' | 'DRIVER' | 'RECEIVE';
   priority: 'Critical' | 'High' | 'Normal';
-  status: 'Pending' | 'In-Progress' | 'Completed' | 'Cancelled';
+  status: 'Pending' | 'In-Progress' | 'Completed' | 'Cancelled' | 'Dispatched';
   items: number;
   items_count?: number; // Compatibility alias
   lineItems: JobItem[];
   line_items?: JobItem[]; // Compatibility alias
   assignedTo?: string;
+  startedAt?: string;
   location: string;
   orderRef: string;
   notes?: string;
@@ -714,7 +767,22 @@ export interface WMSJob {
   updatedAt?: string;
   updated_at?: string; // Supabase compatibility
   deliveryMethod?: 'Internal' | 'External';
+  // Job creation tracking - WHO created the job
+  createdBy?: string; // User ID or name of who created the job
+  created_by?: string; // Supabase compatibility
+  // Job completion tracking - WHO completed the job and WHEN
+  completedBy?: string; // User ID or name of who completed the job
+  completed_by?: string; // Supabase compatibility
+  completedAt?: string; // Timestamp when job was completed
+  completed_at?: string; // Supabase compatibility
+  externalCarrierName?: string; // [NEW] For external driver selection
+  external_carrier_name?: string; // Supabase compatibility
+  // Dispatch tracking
+  assignedBy?: string; // User who assigned the driver
+  assigned_by?: string; // Supabase compatibility
 }
+
+
 
 export type JobAssignmentStatus = 'Assigned' | 'Accepted' | 'In-Progress' | 'Paused' | 'Completed' | 'Cancelled';
 
@@ -886,10 +954,27 @@ export interface POItem {
   unit?: string;
   packQuantity?: number; // Added for PO consistency
   category?: string;
+  description?: string;
+  minStock?: number;
+  maxStock?: number;
   sku?: string; // Missing but used in DataContext
   receivedQty?: number;
   rejectedQty?: number;
   identityType?: 'known' | 'variant' | 'new'; // Product identity declaration for receiving
+  expiryDate?: string;
+  batchNumber?: string;
+  customAttributes?: {
+    identity?: { variant?: string; type?: string; subcategory?: string };
+    physical?: { netWeight?: string; grossWeight?: string; volume?: string; unit?: string; sizeType?: string; dims?: string; color?: string; form?: string; texture?: string };
+    packaging?: { unitSize?: string; packQty?: string; caseSize?: string; packagingLevel?: string; material?: string; isBreakable?: boolean; packageType?: string };
+    storage?: { type?: string; isPerishable?: boolean; stackLimit?: string; isHazardous?: boolean; isFragile?: boolean; isLightSensitive?: boolean };
+    commercial?: { isWeighted?: boolean; sellBy?: string; priceType?: string; isBundleEligible?: boolean; isReturnable?: boolean };
+    descriptive?: { usage?: string; audience?: string; ingredients?: string; keyFeatures?: string; scent?: string; flavor?: string; strength?: string };
+  };
+  // Backend/DB fields
+  po_id?: string;
+  product_id?: string;
+  quantity_received?: number;
 }
 
 export interface PurchaseOrder {
@@ -904,7 +989,7 @@ export interface PurchaseOrder {
   status: 'Draft' | 'Pending' | 'Approved' | 'Received' | 'Partially Received' | 'Ordered' | 'Cancelled' | 'Rejected';
   totalAmount: number;
   itemsCount: number;
-  expectedDelivery: string;
+  expectedDelivery: string | null;
   requestedBy?: string;
   supplierEmail?: string;
   supplierPhone?: string;
@@ -951,6 +1036,12 @@ export interface ReceivingItem {
   verifiedCount?: number; // Scanned quantity
   manualCount?: number;   // Typed quantity
   barcode?: string;       // Barcode used for verification
+}
+
+export interface POReceivingInput {
+  index: number;
+  received: number;
+  // Optional if needed for deeper logic, but minimal for now
 }
 
 export interface Customer {
@@ -1132,33 +1223,51 @@ export interface StatMetric {
 
 export interface TransferItem {
   productId: string;
-  sku: string;
-  name: string;
-  productName?: string;
+  sku?: string;
+  name?: string;
+  productName: string;
   quantity: number;
   receivedQty?: number;
   condition?: 'Good' | 'Damaged' | 'Short';
   receivedAt?: string;
 }
 
-export type TransferStatus = 'Requested' | 'Approved' | 'In-Transit' | 'Delivered' | 'Completed' | 'Rejected' | 'Received' | 'Cancelled';
+export type TransferStatus = 'Requested' | 'Approved' | 'Picking' | 'Packed' | 'Shipped' | 'In-Transit' | 'Delivered' | 'Completed' | 'Rejected' | 'Received' | 'Cancelled';
 
 export interface TransferRecord {
   id: string;
   sourceSiteId: string;
-  sourceSiteName: string;
+  source_site_id?: string; // Supabase compatibility
+  sourceSiteName?: string;
   destSiteId: string;
-  destSiteName: string;
+  dest_site_id?: string; // Supabase compatibility
+  destSiteName?: string;
+
   status: TransferStatus;
   transferStatus?: string; // legacy support
-  date: string;
+
+  date?: string; // Legacy
+  requestedAt: string;
+  approvedAt?: string;
+  shippedAt?: string;
+  receivedAt?: string;
+  completedAt?: string; // consistent with Job
+  createdAt?: string;
+
+  // Users
+  requestedBy: string;
+  approvedBy?: string;
+
   items: TransferItem[];
   notes?: string;
-  createdAt?: string;
-  hasDiscrepancy?: boolean;
-  discrepancyDetails?: string;
+
+  // Job linkage
   jobNumber?: string;
   orderRef?: string;
+
+  // Discrepancy
+  hasDiscrepancy?: boolean;
+  discrepancyDetails?: string;
 }
 
 export enum NavSection {
@@ -1281,4 +1390,13 @@ export interface DiscrepancyClaim {
 
   documents?: any;
   notes?: string;
+}
+
+// --- METRICS ---
+export interface ServerMetrics {
+  total_value_cost: number;
+  total_value_retail: number;
+  stock_turnover_rate: number;
+  low_stock_count: number;
+  dead_stock_value: number;
 }

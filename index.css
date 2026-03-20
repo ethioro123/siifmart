@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@variant dark (&:where(.dark, .dark *));
 
 @theme {
   --font-sans: "Inter", sans-serif;
@@ -162,19 +163,31 @@ input {
 }
 
 [data-theme="light"] .border-white\/5,
-[data-theme="light"] .border-white\/10 {
+[data-theme="light"] .border-white\/10,
+[data-theme="light"] .border-white\/20,
+[data-theme="light"] .border-white\/30 {
   border-color: #e5e7eb;
 }
 
 [data-theme="light"] .bg-white\/5,
-[data-theme="light"] .bg-white\/10 {
+[data-theme="light"] .bg-white\/10,
+[data-theme="light"] .bg-white\/20,
+[data-theme="light"] .bg-white\/30 {
   background-color: #f9fafb;
 }
 
-[data-theme="light"] .bg-black\/20,
+[data-theme="light"] .bg-black\/20 {
+  background-color: #f9fafb;
+}
+
 [data-theme="light"] .bg-black\/30,
 [data-theme="light"] .bg-black\/40 {
   background-color: #f3f4f6;
+}
+
+[data-theme="light"] .bg-black\/50,
+[data-theme="light"] .bg-black\/60 {
+  background-color: #e5e7eb;
 }
 
 [data-theme="light"] input {
@@ -237,6 +250,18 @@ input {
   height: var(--progress, 0%);
 }
 
+.glow-cyber-primary {
+  text-shadow: 0 0 20px rgba(0, 255, 157, 0.4);
+}
+
+.animation-delay-300 {
+  animation-delay: 0.3s;
+}
+
+.animation-delay-600 {
+  animation-delay: 0.6s;
+}
+
 /* Cockpit Breathing & Vibrant Status Animations */
 @keyframes cockpit-breathing {
   0% {
@@ -291,4 +316,103 @@ input {
   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
   background-size: 200% 100%;
   animation: action-shimmer 3s linear infinite;
+}
+
+/* =========================================
+   THEME REFACTOR UTILITIES (Phase 1)
+   ========================================= */
+
+/* 
+   .glass-panel: 
+   - Light Mode: White background, subtle shadow, light gray border
+   - Dark Mode: Dark transparent background (bg-black/40), white/10 border
+*/
+.glass-panel {
+  @apply bg-white dark:bg-black/40 border border-gray-200 dark:border-white/10 shadow-sm dark:shadow-none backdrop-blur-xl transition-all;
+}
+
+/* 
+   .glass-panel-pushed:
+   - For darker/inset panels inside a main panel
+*/
+.glass-panel-pushed {
+  @apply bg-gray-50 dark:bg-black/20 border border-gray-100 dark:border-white/5;
+}
+
+/*
+   .glass-panel-hover:
+   - Adds hover effects consistent with the theme
+*/
+.glass-panel-hover {
+  @apply hover:border-gray-300 dark:hover:border-white/20 hover:shadow-md dark:hover:bg-white/[0.03] transition-all duration-300;
+}
+
+/*
+  .text-secondary:
+  - Muted text for labels/subtitles
+*/
+.text-secondary {
+  @apply text-gray-500 dark:text-gray-400;
+}
+
+/* =========================================
+   FUTURISTIC PRINT STYLES
+   ========================================= */
+
+@media print {
+
+  /* Core Page Overrides */
+  body {
+    background: white !important;
+    color: black !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Aggressively hide all UI chrome AND main root so background POs don't print */
+  #root,
+  aside,
+  nav,
+  header,
+  .no-print,
+  button:not(.print-only),
+  .print\:hidden {
+    display: none !important;
+  }
+
+  /* Force Main Content to use full paper width */
+  main {
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: visible !important;
+  }
+
+  /* (Modal Web Constraints stripped directly in Modal.tsx via tailwind print: classes) */
+
+  /* Allow soft borders and borders radii for elegant design */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Soften general text colors for elegance, allowing explicit tailwind classes to govern */
+  body {
+    background: white !important;
+    color: #111827 !important;
+    /* text-gray-900 */
+  }
+
+  /* Table Hardening - keep this for structural robustness on A4 */
+  table {
+    border-collapse: collapse !important;
+    width: 100% !important;
+  }
+
+  tr {
+    page-break-inside: avoid;
+  }
 }

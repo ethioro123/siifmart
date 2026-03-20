@@ -15,15 +15,8 @@ export function useRelocateProductMutation() {
     return useMutation({
         mutationFn: async ({ productId, newLocation, user }: RelocateProductParams) => {
             const product = allProducts.find(p => p.id === productId);
-            const currentLocations = product?.location ? product.location.split(',').map(l => l.trim()) : [];
-
-            if (currentLocations.includes(newLocation.trim())) {
-                return { skipped: true, productId, newLocation };
-            }
-
-            const updatedLocation = product?.location
-                ? `${product.location}, ${newLocation.trim()}`
-                : newLocation.trim();
+            // [FIX] Overwrite location instead of appending to prevent duplicates
+            const updatedLocation = newLocation.trim();
 
             await productsService.update(productId, { location: updatedLocation });
             return { skipped: false, productId, newLocation, user, updatedLocation };

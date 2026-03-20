@@ -18,9 +18,10 @@ interface ProductFormProps {
     onSubmit: (data: any) => Promise<void>;
     onCancel: () => void;
     isSubmitting: boolean;
+    isReadOnly?: boolean;
 }
 
-export function ProductForm({ initialData, onSubmit, onCancel, isSubmitting }: ProductFormProps) {
+export function ProductForm({ initialData, onSubmit, onCancel, isSubmitting, isReadOnly = false }: ProductFormProps) {
     const {
         register,
         handleSubmit,
@@ -61,6 +62,11 @@ export function ProductForm({ initialData, onSubmit, onCancel, isSubmitting }: P
 
     return (
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col h-[80vh]" noValidate>
+            {isReadOnly && (
+                <div className="bg-amber-500/10 border-b border-amber-500/20 p-2 text-center text-xs text-amber-500 font-bold">
+                    READ ONLY MODE - EDITING DISABLED
+                </div>
+            )}
 
             {/* --- HEADER PREVIEW --- */}
             <div className="flex-shrink-0 p-6 bg-[#0a0a0a] border-b border-white/10 flex items-center gap-6">
@@ -345,7 +351,7 @@ export function ProductForm({ initialData, onSubmit, onCancel, isSubmitting }: P
                                         </div>
                                     </div>
                                     <div>
-                                        <label className="text-[10px] text-gray-500 font-bold uppercase mb-1.5 block">Bin Location</label>
+                                        <label className="text-[10px] text-gray-500 font-bold uppercase mb-1.5 block">Bay Location</label>
                                         <div className="relative">
                                             <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-600" size={14} />
                                             <input
@@ -384,17 +390,19 @@ export function ProductForm({ initialData, onSubmit, onCancel, isSubmitting }: P
                     variant="ghost"
                     className="flex-1 py-4 text-gray-400 font-bold hover:bg-white/5 rounded-xl transition-colors"
                 >
-                    Discard
+                    Close
                 </Button>
-                <Button
-                    type="submit"
-                    disabled={isSubmitting}
-                    loading={isSubmitting}
-                    icon={<CheckCircle size={18} />}
-                    className="flex-[2] py-4 bg-cyber-primary hover:bg-cyber-accent text-black font-black uppercase tracking-[0.2em] rounded-xl shadow-[0_0_20px_rgba(0,255,157,0.3)] hover:shadow-[0_0_30px_rgba(0,255,157,0.5)] transition-all transform hover:scale-[1.02] active:scale-[0.98]"
-                >
-                    {initialData?.id ? 'Save Updates' : 'Initialize Product'}
-                </Button>
+                {!isReadOnly && (
+                    <Button
+                        type="submit"
+                        disabled={isSubmitting}
+                        loading={isSubmitting}
+                        icon={<CheckCircle size={18} />}
+                        className="flex-[2] py-4 bg-cyber-primary hover:bg-cyber-accent text-black font-black uppercase tracking-[0.2em] rounded-xl shadow-[0_0_20px_rgba(0,255,157,0.3)] hover:shadow-[0_0_30px_rgba(0,255,157,0.5)] transition-all transform hover:scale-[1.02] active:scale-[0.98]"
+                    >
+                        {initialData?.id ? 'Save Updates' : 'Initialize Product'}
+                    </Button>
+                )}
             </div>
         </form>
     );

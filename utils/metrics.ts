@@ -147,12 +147,26 @@ export function calculateMetrics(
   const inProgressPacks = filteredJobs.filter(j => j.type === 'PACK' && j.status === 'In-Progress').length;
   const pendingPutaways = filteredJobs.filter(j => j.type === 'PUTAWAY' && j.status === 'Pending').length;
 
-  // Calculate average cycle time (simplified - in real app, use actual timestamps)
-  const completedJobs = filteredJobs.filter(j => j.status === 'Completed');
-  const avgCycleTime = completedJobs.length > 0 ? '4.2m' : '0m';
+  // Real mathematical calculation for average cycle time
+  const completedJobs = filteredJobs.filter(j => j.status === 'Completed' && j.createdAt && j.updatedAt);
+  let avgCycleTime = '0m';
+  if (completedJobs.length > 0) {
+      const totalMinutes = completedJobs.reduce((sum, j) => {
+          const start = new Date(j.createdAt || '').getTime();
+          const end = new Date(j.updatedAt || '').getTime();
+          return sum + ((end - start) / 60000);
+      }, 0);
+      const avg = totalMinutes / completedJobs.length;
+      avgCycleTime = avg > 60 ? `${(avg / 60).toFixed(1)}h` : `${Math.round(avg)}m`;
+  }
 
-  // Pick accuracy (simplified - in real app, track errors)
-  const pickAccuracy = '99.4%';
+  // Pick accuracy: ratio of expected vs picked/packed (simplified heuristics)
+  let pickAccuracy = '100%';
+  if (completedJobs.length > 0) {
+      const issues = completedJobs.filter(j => j.notes && j.notes.toLowerCase().includes('short'));
+      const accuracy = ((completedJobs.length - issues.length) / completedJobs.length) * 100;
+      pickAccuracy = `${accuracy.toFixed(1)}%`;
+  }
 
   // Procurement Metrics
   const pendingPOs = filteredOrders.filter(o => o.status === 'Pending' || o.status === 'Draft').length;

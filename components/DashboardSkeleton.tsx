@@ -1,4 +1,5 @@
 import React from 'react';
+import { VerticalBar } from './shared/ProgressBar';
 
 const CardSkeleton = ({ className }: { className?: string }) => (
     <div className={`bg-white/5 border border-white/5 rounded-3xl p-6 relative overflow-hidden ${className}`}>
@@ -21,10 +22,10 @@ const ChartSkeleton = ({ height = "h-[400px]", className }: { height?: string, c
         <div className="w-48 h-6 rounded bg-white/10 mb-8" />
         <div className="flex items-end space-x-4 h-[calc(100%-60px)] pb-4">
             {[...Array(8)].map((_, i) => (
-                <div
+                <VerticalBar
                     key={i}
                     className="bg-white/5 rounded-t-lg w-full"
-                    style={{ height: `${Math.random() * 60 + 20}%` }}
+                    heightPercent={Math.random() * 60 + 20}
                 />
             ))}
         </div>

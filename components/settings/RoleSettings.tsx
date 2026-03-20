@@ -106,7 +106,7 @@ export default function RoleSettings() {
     const [permissions, setPermissions] = useState<any>(defaultPermissions);
     const [policies, setPolicies] = useState<any>(defaultPolicies);
     const [roles, setRoles] = useState([
-        { id: 'admin', name: 'System Admin', users: 0, badge: 'bg-red-500/20 text-red-400 border-red-500/30' },
+        { id: 'admin', name: 'Assistant CEO', users: 0, badge: 'bg-red-500/20 text-red-400 border-red-500/30' },
         { id: 'manager', name: 'Store Manager', users: 0, badge: 'bg-purple-500/20 text-purple-400 border-purple-500/30' },
         { id: 'cashier', name: 'Retail Staff', users: 0, badge: 'bg-green-500/20 text-green-400 border-green-500/30' },
         { id: 'warehouse', name: 'Warehouse Ops', users: 0, badge: 'bg-orange-500/20 text-orange-400 border-orange-500/30' },

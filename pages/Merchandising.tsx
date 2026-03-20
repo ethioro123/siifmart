@@ -1639,7 +1639,7 @@ export default function Pricing() {
                <div className="p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
                   {/* Shelf Visualization */}
                   <div className="lg:col-span-2 bg-black/30 border border-white/10 rounded-xl p-8 relative">
-                     <div className="absolute top-2 left-2 text-[10px] text-gray-500 uppercase tracking-widest">Aisle 4 - Zone B</div>
+                     <div className="absolute top-2 left-2 text-[10px] text-gray-500 uppercase tracking-widest">Zone B - Aisle 4</div>
 
                      <div className="space-y-6 mt-4">
                         {['Top Shelf', 'Eye Level', 'Bottom Shelf'].map((shelf, shelfIdx) => (

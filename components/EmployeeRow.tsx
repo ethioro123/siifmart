@@ -35,7 +35,7 @@ export default function EmployeeRow({
 
     return (
         <div
-            className="px-4 py-3 flex items-center gap-4 hover:bg-white/[0.03] transition-colors cursor-pointer border-b border-white/[0.04] last:border-b-0"
+            className="px-4 py-3 flex items-center gap-4 hover:bg-gray-50 dark:hover:bg-white/[0.03] transition-colors cursor-pointer border-b border-gray-100 dark:border-white/[0.04] last:border-b-0"
             onClick={onSelect}
         >
             {/* Avatar */}
@@ -52,12 +52,12 @@ export default function EmployeeRow({
 
             {/* Name & Role */}
             <div className="flex-1 min-w-0">
-                <h3 className="text-sm font-medium text-white truncate">{employee.name}</h3>
-                <p className={`text-xs ${roleConfig?.styles?.text || 'text-gray-400'}`}>{roleConfig?.label || formatRole(employee.role)}</p>
+                <h3 className="text-sm font-medium text-gray-900 dark:text-white truncate">{employee.name}</h3>
+                <p className={`text-xs ${roleConfig?.styles?.text || 'text-gray-500 dark:text-gray-400'}`}>{roleConfig?.label || formatRole(employee.role)}</p>
             </div>
 
             {/* Location - Hidden on mobile */}
-            <div className="hidden md:flex items-center gap-1.5 text-xs text-gray-500 min-w-0 max-w-[160px]">
+            <div className="hidden md:flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-500 min-w-0 max-w-[160px]">
                 <MapPin size={12} className="flex-shrink-0" />
                 <span className="truncate">{employeeSite?.name || 'Unassigned'}</span>
             </div>

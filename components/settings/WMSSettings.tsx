@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import {
     Shield, Truck, Package, RotateCw, AlertTriangle, Scan, Search,
     Barcode, ClipboardCheck, ArrowRight, Layers, Save, Globe, Clock,
-    Play, CheckCircle, MapPin
+    Play, CheckCircle, MapPin, Printer
 } from 'lucide-react';
 import { useData } from '../../contexts/DataContext';
 import { useStore } from '../../contexts/CentralStore';
@@ -10,6 +10,7 @@ import Button from '../shared/Button';
 import { FulfillmentStrategy } from '../../types';
 import { sitesService, warehouseZonesService } from '../../services/supabase.service';
 import { formatDateTime } from '../../utils/formatting';
+import { BarcodeGenerator } from './BarcodeGenerator';
 
 // --- SUB-COMPONENTS ---
 const SectionHeader = ({ title, desc }: { title: string, desc: string }) => (
@@ -104,7 +105,7 @@ export default function WMSSettings() {
     const { user } = useStore();
     const {
         settings, updateSettings, addNotification,
-        sites, allZones, allSales, releaseOrder, refreshData
+        sites, allSales, releaseOrder, refreshData
     } = useData();
 
     const [activeTab, setActiveTab] = useState<'rules' | 'pick-control'>('rules');
@@ -127,7 +128,7 @@ export default function WMSSettings() {
     const [outbound, setOutbound] = useState({
         pickingMethod: 'order',
         strictScanning: true,
-        binScan: true
+        bayScan: true
     });
 
     const [isSaving, setIsSaving] = useState<string | null>(null);
@@ -149,7 +150,7 @@ export default function WMSSettings() {
             setOutbound({
                 pickingMethod: settings.pickingMethod || 'order',
                 strictScanning: settings.strictScanning ?? true,
-                binScan: settings.binScan ?? true
+                bayScan: settings.bayScan ?? true
             });
         }
     }, [settings]);
@@ -203,10 +204,13 @@ export default function WMSSettings() {
     };
 
     const [selectedSiteId, setSelectedSiteId] = useState<string>(fulfillmentSites[0]?.id || '');
-    const siteZones = useMemo(() =>
-        allZones.filter(z => z.siteId === selectedSiteId),
-        [allZones, selectedSiteId]
-    );
+    // Fetch zones for selected site
+    const [siteZones, setSiteZones] = useState<any[]>([]);
+
+    useEffect(() => {
+        if (!selectedSiteId) return;
+        warehouseZonesService.getAll(selectedSiteId).then(setSiteZones);
+    }, [selectedSiteId]);
 
     const handlePriorityChange = async (zoneId: string, priority: number) => {
         setIsSaving(zoneId);
@@ -303,7 +307,7 @@ export default function WMSSettings() {
                                     label="Putaway Logic"
                                     icon={ArrowRight}
                                     options={[
-                                        { value: 'manual', label: 'User Directed', desc: 'Operator chooses bin' },
+                                        { value: 'manual', label: 'User Directed', desc: 'Operator chooses bay' },
                                         { value: 'system', label: 'System Directed', desc: 'Algorithm optimizes path' },
                                     ]}
                                     value={inbound.putawayLogic}
@@ -342,7 +346,7 @@ export default function WMSSettings() {
                                         icon={RotateCw}
                                         options={[
                                             { value: 'abc', label: 'ABC Analysis', desc: 'Count High-Value often' },
-                                            { value: 'random', label: 'Random Sample', desc: 'Daily random bins' },
+                                            { value: 'random', label: 'Random Sample', desc: 'Daily random bays' },
                                         ]}
                                         value={health.cycleCountStrategy}
                                         onChange={(val: 'abc' | 'random') => setHealth(prev => ({ ...prev, cycleCountStrategy: val }))}
@@ -375,9 +379,9 @@ export default function WMSSettings() {
                                             onChange={() => setOutbound(prev => ({ ...prev, strictScanning: !prev.strictScanning }))}
                                         />
                                         <ToggleRow
-                                            label="Bin Verification"
-                                            checked={outbound.binScan}
-                                            onChange={() => setOutbound(prev => ({ ...prev, binScan: !prev.binScan }))}
+                                            label="Bay Verification"
+                                            checked={outbound.bayScan}
+                                            onChange={() => setOutbound(prev => ({ ...prev, bayScan: !prev.bayScan }))}
                                             warning="Disabling increases errors"
                                         />
                                     </div>
@@ -388,150 +392,153 @@ export default function WMSSettings() {
                             </div>
                         </div>
                     </div>
+
                 </div>
             )}
 
-            {activeTab === 'pick-control' && (
-                <div className="space-y-6">
-                    <div className="flex items-center gap-2 p-1 bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 mb-6">
-                        <button
-                            onClick={() => setActivePickSubTab('strategies')}
-                            className={`flex-1 px-4 py-2 rounded-xl text-[10px] font-black tracking-widest uppercase transition-all flex items-center justify-center gap-2 ${activePickSubTab === 'strategies' ? 'bg-cyber-primary text-black' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
-                        >
-                            <Globe size={14} /> Strategies
-                        </button>
-                        <button
-                            onClick={() => setActivePickSubTab('zones')}
-                            className={`flex-1 px-4 py-2 rounded-xl text-[10px] font-black tracking-widest uppercase transition-all flex items-center justify-center gap-2 ${activePickSubTab === 'zones' ? 'bg-cyber-primary text-black' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
-                        >
-                            <Layers size={14} /> Zone Priority
-                        </button>
-                        <button
-                            onClick={() => setActivePickSubTab('release')}
-                            className={`flex-1 px-4 py-2 rounded-xl text-[10px] font-black tracking-widest uppercase transition-all flex items-center justify-center gap-2 ${activePickSubTab === 'release' ? 'bg-cyber-primary text-black' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
-                        >
-                            <Clock size={14} /> Order Release
-                            {pendingOrders.length > 0 && <span className="px-1.5 py-0.5 bg-red-500 text-white rounded-md text-[8px] animate-pulse">{pendingOrders.length}</span>}
-                        </button>
-                    </div>
-
-                    {activePickSubTab === 'strategies' && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {fulfillmentSites.map(site => (
-                                <div key={site.id} className={`p-5 rounded-2xl border transition-all duration-300 ${isSaving === site.id ? 'border-cyber-primary bg-cyber-primary/5' : 'border-white/5 bg-black/20'}`}>
-                                    <div className="flex items-center justify-between mb-4">
-                                        <div className="flex items-center gap-3">
-                                            <div className={`p-2 rounded-lg ${site.type === 'Warehouse' ? 'bg-blue-500/10 text-blue-400' : 'bg-green-500/10 text-green-400'}`}>
-                                                <MapPin size={18} />
-                                            </div>
-                                            <div>
-                                                <p className="text-sm font-bold text-white">{site.name}</p>
-                                                <p className="text-[10px] text-gray-500 font-bold uppercase">{site.type}</p>
-                                            </div>
-                                        </div>
-                                        <button
-                                            onClick={() => handleToggleFulfillmentNode(site.id, !site.isFulfillmentNode)}
-                                            disabled={!!isSaving}
-                                            title={`Toggle node for ${site.name}`}
-                                            className={`w-10 h-5 rounded-full relative transition-all ${site.isFulfillmentNode ? 'bg-cyber-primary' : 'bg-white/10 opacity-50'}`}
-                                        >
-                                            <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-all ${site.isFulfillmentNode ? 'left-6 bg-black' : 'left-1'}`} />
-                                        </button>
-                                    </div>
-                                    <div className="space-y-3">
-                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block">Operational Strategy</label>
-                                        <select
-                                            value={site.fulfillmentStrategy || 'NEAREST'}
-                                            onChange={(e) => handleStrategyChange(site.id, e.target.value as FulfillmentStrategy)}
-                                            disabled={!!isSaving}
-                                            title={`Select strategy for ${site.name}`}
-                                            className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-xs font-bold text-white outline-none focus:border-cyber-primary transition-all disabled:opacity-50"
-                                        >
-                                            <option value="NEAREST">Nearest Warehouse</option>
-                                            <option value="LOCAL_ONLY">Local Only</option>
-                                            <option value="SPLIT">Split (Cross-Site)</option>
-                                            <option value="MANUAL">Manual Control</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            ))}
+            {
+                activeTab === 'pick-control' && (
+                    <div className="space-y-6">
+                        <div className="flex items-center gap-2 p-1 bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 mb-6">
+                            <button
+                                onClick={() => setActivePickSubTab('strategies')}
+                                className={`flex-1 px-4 py-2 rounded-xl text-[10px] font-black tracking-widest uppercase transition-all flex items-center justify-center gap-2 ${activePickSubTab === 'strategies' ? 'bg-cyber-primary text-black' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
+                            >
+                                <Globe size={14} /> Strategies
+                            </button>
+                            <button
+                                onClick={() => setActivePickSubTab('zones')}
+                                className={`flex-1 px-4 py-2 rounded-xl text-[10px] font-black tracking-widest uppercase transition-all flex items-center justify-center gap-2 ${activePickSubTab === 'zones' ? 'bg-cyber-primary text-black' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
+                            >
+                                <Layers size={14} /> Zone Priority
+                            </button>
+                            <button
+                                onClick={() => setActivePickSubTab('release')}
+                                className={`flex-1 px-4 py-2 rounded-xl text-[10px] font-black tracking-widest uppercase transition-all flex items-center justify-center gap-2 ${activePickSubTab === 'release' ? 'bg-cyber-primary text-black' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
+                            >
+                                <Clock size={14} /> Order Release
+                                {pendingOrders.length > 0 && <span className="px-1.5 py-0.5 bg-red-500 text-white rounded-md text-[8px] animate-pulse">{pendingOrders.length}</span>}
+                            </button>
                         </div>
-                    )}
 
-                    {activePickSubTab === 'zones' && (
-                        <div className="space-y-6">
-                            <div className="flex items-center gap-4 bg-white/5 p-4 rounded-2xl border border-white/10">
-                                <Layers size={20} className="text-cyber-primary" />
-                                <select
-                                    value={selectedSiteId}
-                                    onChange={(e) => setSelectedSiteId(e.target.value)}
-                                    title="Select site"
-                                    className="bg-black/40 border border-white/10 rounded-xl px-4 py-2 text-xs font-bold text-white outline-none focus:border-cyber-primary transition-all"
-                                >
-                                    {fulfillmentSites.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-                                </select>
-                            </div>
+                        {activePickSubTab === 'strategies' && (
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                {siteZones.map(zone => (
-                                    <div key={zone.id} className={`p-5 rounded-2xl border transition-all ${isSaving === zone.id ? 'border-cyber-primary bg-cyber-primary/5' : 'border-white/5 bg-black/20'}`}>
+                                {fulfillmentSites.map(site => (
+                                    <div key={site.id} className={`p-5 rounded-2xl border transition-all duration-300 ${isSaving === site.id ? 'border-cyber-primary bg-cyber-primary/5' : 'border-white/5 bg-black/20'}`}>
                                         <div className="flex items-center justify-between mb-4">
-                                            <div>
-                                                <h4 className="text-sm font-black text-white uppercase">{zone.name}</h4>
-                                                <span className="text-[9px] font-black px-1.5 py-0.5 bg-cyber-primary/10 text-cyber-primary rounded uppercase mt-1 inline-block">{zone.zoneType || 'Standard'}</span>
+                                            <div className="flex items-center gap-3">
+                                                <div className={`p-2 rounded-lg ${site.type === 'Warehouse' ? 'bg-blue-500/10 text-blue-400' : 'bg-green-500/10 text-green-400'}`}>
+                                                    <MapPin size={18} />
+                                                </div>
+                                                <div>
+                                                    <p className="text-sm font-bold text-white">{site.name}</p>
+                                                    <p className="text-[10px] text-gray-500 font-bold uppercase">{site.type}</p>
+                                                </div>
                                             </div>
-                                            <input
-                                                type="number"
-                                                min="1" max="100"
-                                                title={`Priority for ${zone.name}`}
-                                                value={zone.pickingPriority || 10}
-                                                onChange={(e) => handlePriorityChange(zone.id, parseInt(e.target.value))}
-                                                className="w-16 bg-black/40 border border-white/10 rounded-lg px-2 py-1 text-center text-xs font-bold text-cyber-primary outline-none focus:border-cyber-primary"
-                                            />
+                                            <button
+                                                onClick={() => handleToggleFulfillmentNode(site.id, !site.isFulfillmentNode)}
+                                                disabled={!!isSaving}
+                                                title={`Toggle node for ${site.name}`}
+                                                className={`w-10 h-5 rounded-full relative transition-all ${site.isFulfillmentNode ? 'bg-cyber-primary' : 'bg-white/10 opacity-50'}`}
+                                            >
+                                                <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-all ${site.isFulfillmentNode ? 'left-6 bg-black' : 'left-1'}`} />
+                                            </button>
+                                        </div>
+                                        <div className="space-y-3">
+                                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block">Operational Strategy</label>
+                                            <select
+                                                value={site.fulfillmentStrategy || 'NEAREST'}
+                                                onChange={(e) => handleStrategyChange(site.id, e.target.value as FulfillmentStrategy)}
+                                                disabled={!!isSaving}
+                                                title={`Select strategy for ${site.name}`}
+                                                className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-xs font-bold text-white outline-none focus:border-cyber-primary transition-all disabled:opacity-50"
+                                            >
+                                                <option value="NEAREST">Nearest Warehouse</option>
+                                                <option value="LOCAL_ONLY">Local Only</option>
+                                                <option value="SPLIT">Split (Cross-Site)</option>
+                                                <option value="MANUAL">Manual Control</option>
+                                            </select>
                                         </div>
                                     </div>
                                 ))}
                             </div>
-                        </div>
-                    )}
+                        )}
 
-                    {activePickSubTab === 'release' && (
-                        <div className="bg-black/20 border border-white/5 rounded-2xl overflow-hidden">
-                            <div className="p-4 border-b border-white/5 flex items-center justify-between bg-white/5">
-                                <h3 className="text-xs font-black text-white uppercase tracking-widest flex items-center gap-2">
-                                    <Clock size={16} className="text-cyber-primary" /> Pending Release
-                                </h3>
+                        {activePickSubTab === 'zones' && (
+                            <div className="space-y-6">
+                                <div className="flex items-center gap-4 bg-white/5 p-4 rounded-2xl border border-white/10">
+                                    <Layers size={20} className="text-cyber-primary" />
+                                    <select
+                                        value={selectedSiteId}
+                                        onChange={(e) => setSelectedSiteId(e.target.value)}
+                                        title="Select site"
+                                        className="bg-black/40 border border-white/10 rounded-xl px-4 py-2 text-xs font-bold text-white outline-none focus:border-cyber-primary transition-all"
+                                    >
+                                        {fulfillmentSites.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                                    </select>
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {siteZones.map(zone => (
+                                        <div key={zone.id} className={`p-5 rounded-2xl border transition-all ${isSaving === zone.id ? 'border-cyber-primary bg-cyber-primary/5' : 'border-white/5 bg-black/20'}`}>
+                                            <div className="flex items-center justify-between mb-4">
+                                                <div>
+                                                    <h4 className="text-sm font-black text-white uppercase">{zone.name}</h4>
+                                                    <span className="text-[9px] font-black px-1.5 py-0.5 bg-cyber-primary/10 text-cyber-primary rounded uppercase mt-1 inline-block">{zone.zoneType || 'Standard'}</span>
+                                                </div>
+                                                <input
+                                                    type="number"
+                                                    min="1" max="100"
+                                                    title={`Priority for ${zone.name}`}
+                                                    value={zone.pickingPriority || 10}
+                                                    onChange={(e) => handlePriorityChange(zone.id, parseInt(e.target.value))}
+                                                    className="w-16 bg-black/40 border border-white/10 rounded-lg px-2 py-1 text-center text-xs font-bold text-cyber-primary outline-none focus:border-cyber-primary"
+                                                />
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
-                            <div className="overflow-x-auto text-xs">
-                                <table className="w-full text-left border-collapse">
-                                    <thead>
-                                        <tr className="bg-white/5 border-b border-white/5 text-[10px] font-black text-gray-500 uppercase">
-                                            <th className="px-6 py-4">Order Ref</th>
-                                            <th className="px-6 py-4">Date</th>
-                                            <th className="px-6 py-4">Items</th>
-                                            <th className="px-6 py-4 text-right">Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-white/5">
-                                        {pendingOrders.map(sale => (
-                                            <tr key={sale.id} className="hover:bg-white/[0.02] transition-colors">
-                                                <td className="px-6 py-4"><div className="font-bold text-white">{sale.receiptNumber}</div></td>
-                                                <td className="px-6 py-4 text-gray-400">{formatDateTime(sale.date || sale.created_at || '')}</td>
-                                                <td className="px-6 py-4"><span className="bg-white/5 px-2 py-1 rounded border border-white/10 text-white">{sale.items.length} units</span></td>
-                                                <td className="px-6 py-4 text-right">
-                                                    <Button onClick={() => handleReleaseOrder(sale.id)} loading={isSaving === sale.id} icon={<Play size={12} />} className="text-[9px] font-black uppercase tracking-widest h-8 px-4 rounded-lg">Release</Button>
-                                                </td>
+                        )}
+
+                        {activePickSubTab === 'release' && (
+                            <div className="bg-black/20 border border-white/5 rounded-2xl overflow-hidden">
+                                <div className="p-4 border-b border-white/5 flex items-center justify-between bg-white/5">
+                                    <h3 className="text-xs font-black text-white uppercase tracking-widest flex items-center gap-2">
+                                        <Clock size={16} className="text-cyber-primary" /> Pending Release
+                                    </h3>
+                                </div>
+                                <div className="overflow-x-auto text-xs">
+                                    <table className="w-full text-left border-collapse">
+                                        <thead>
+                                            <tr className="bg-white/5 border-b border-white/5 text-[10px] font-black text-gray-500 uppercase">
+                                                <th className="px-6 py-4">Order Ref</th>
+                                                <th className="px-6 py-4">Date</th>
+                                                <th className="px-6 py-4">Items</th>
+                                                <th className="px-6 py-4 text-right">Action</th>
                                             </tr>
-                                        ))}
-                                        {pendingOrders.length === 0 && (
-                                            <tr><td colSpan={4} className="px-6 py-12 text-center text-gray-600 uppercase text-[10px] font-black tracking-widest">Queue Clear</td></tr>
-                                        )}
-                                    </tbody>
-                                </table>
+                                        </thead>
+                                        <tbody className="divide-y divide-white/5">
+                                            {pendingOrders.map(sale => (
+                                                <tr key={sale.id} className="hover:bg-white/[0.02] transition-colors">
+                                                    <td className="px-6 py-4"><div className="font-bold text-white">{sale.receiptNumber}</div></td>
+                                                    <td className="px-6 py-4 text-gray-400">{formatDateTime(sale.date || sale.created_at || '')}</td>
+                                                    <td className="px-6 py-4"><span className="bg-white/5 px-2 py-1 rounded border border-white/10 text-white">{sale.items.length} units</span></td>
+                                                    <td className="px-6 py-4 text-right">
+                                                        <Button onClick={() => handleReleaseOrder(sale.id)} loading={isSaving === sale.id} icon={<Play size={12} />} className="text-[9px] font-black uppercase tracking-widest h-8 px-4 rounded-lg">Release</Button>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                            {pendingOrders.length === 0 && (
+                                                <tr><td colSpan={4} className="px-6 py-12 text-center text-gray-600 uppercase text-[10px] font-black tracking-widest">Queue Clear</td></tr>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
-                        </div>
-                    )}
-                </div>
-            )}
+                        )}
+                    </div>
+                )
+            }
         </div>
     );
 }

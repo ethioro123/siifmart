@@ -137,7 +137,9 @@ export default function HardwareSettings() {
                         <div className="space-y-3">
                             <div className="group">
                                 <label className="text-[10px] text-gray-500 uppercase font-bold mb-1 block">Default Printer</label>
-                                <select className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-cyber-primary">
+                                <select
+                                    aria-label="Default Printer"
+                                    className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-cyber-primary">
                                     <option>Main Receipt Printer</option>
                                     <option>Kitchen Printer</option>
                                 </select>

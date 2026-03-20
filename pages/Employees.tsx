@@ -22,6 +22,8 @@ import OrgChart from '../components/OrgChart';
 import ShiftPlanner from '../components/ShiftPlanner';
 import { useStore } from '../contexts/CentralStore';
 import { useData } from '../contexts/DataContext';
+import { useFulfillmentData } from '../components/fulfillment/FulfillmentDataProvider';
+import { useGamification } from '../contexts/GamificationContext';
 import { Protected, ProtectedButton } from '../components/Protected';
 import {
    autoSelectSiteForRole,
@@ -38,6 +40,7 @@ import { processImageFile } from '../utils/imageProcessor';
 import { employeesService, workerPointsService } from '../services/supabase.service';
 import ImageCropper from '../components/ImageCropper';
 import StaffProfileView from '../components/StaffProfileView';
+import { SYSTEM_ROLES, getRoleHierarchy } from '../utils/roles';
 
 // --- TYPES & MOCKS ---
 type ViewMode = 'directory' | 'org' | 'shifts';
@@ -53,136 +56,6 @@ const ATTENDANCE_DATA = [
 
 const DEPARTMENTS = ['Retail Operations', 'Logistics & Warehouse', 'Management', 'Human Resources', 'Security', 'Transport'];
 
-// Role Definitions with Complete Tailwind Classes for visibility
-const SYSTEM_ROLES: {
-   id: UserRole,
-   label: string,
-   desc: string,
-   level: number,
-   styles: { text: string, bg: string, border: string, badge: string }
-}[] = [
-      // ═══ LEVEL 1 - EXECUTIVE ═══
-      {
-         id: 'super_admin', label: 'CEO', desc: 'Unrestricted Access (Owner)', level: 1,
-         styles: { text: 'text-yellow-400', bg: 'bg-yellow-400/10', border: 'border-yellow-400/20', badge: 'bg-yellow-400/20 text-yellow-400' }
-      },
-
-      // ═══ LEVEL 2 - REGIONAL/DIRECTORS ═══
-      {
-         id: 'regional_manager', label: 'Regional Manager', desc: 'Multi-Store Oversight', level: 2,
-         styles: { text: 'text-blue-500', bg: 'bg-blue-500/10', border: 'border-blue-500/20', badge: 'bg-blue-500/20 text-blue-500' }
-      },
-      {
-         id: 'operations_manager', label: 'Operations Manager', desc: 'HQ Operations', level: 2,
-         styles: { text: 'text-blue-400', bg: 'bg-blue-400/10', border: 'border-blue-400/20', badge: 'bg-blue-400/20 text-blue-400' }
-      },
-      {
-         id: 'finance_manager', label: 'Finance Manager', desc: 'Financial Oversight', level: 2,
-         styles: { text: 'text-emerald-400', bg: 'bg-emerald-400/10', border: 'border-emerald-400/20', badge: 'bg-emerald-400/20 text-emerald-400' }
-      },
-      {
-         id: 'hr_manager', label: 'HR Manager', desc: 'Staff & Payroll Management', level: 2,
-         styles: { text: 'text-pink-400', bg: 'bg-pink-400/10', border: 'border-pink-400/20', badge: 'bg-pink-400/20 text-pink-400' }
-      },
-      {
-         id: 'procurement_manager', label: 'Procurement Manager', desc: 'Supply Chain & Purchasing', level: 2,
-         styles: { text: 'text-indigo-400', bg: 'bg-indigo-400/10', border: 'border-indigo-400/20', badge: 'bg-indigo-400/20 text-indigo-400' }
-      },
-      {
-         id: 'supply_chain_manager', label: 'Supply Chain Manager', desc: 'End-to-End Logistics', level: 2,
-         styles: { text: 'text-violet-400', bg: 'bg-violet-400/10', border: 'border-violet-400/20', badge: 'bg-violet-400/20 text-violet-400' }
-      },
-
-      // ═══ LEVEL 3 - SITE MANAGERS ═══
-      {
-         id: 'store_manager', label: 'Store Manager', desc: 'Single Store Operations', level: 3,
-         styles: { text: 'text-teal-400', bg: 'bg-teal-400/10', border: 'border-teal-400/20', badge: 'bg-teal-400/20 text-teal-400' }
-      },
-      {
-         id: 'warehouse_manager', label: 'Warehouse Manager', desc: 'Warehouse Operations Lead', level: 3,
-         styles: { text: 'text-teal-500', bg: 'bg-teal-500/10', border: 'border-teal-500/20', badge: 'bg-teal-500/20 text-teal-500' }
-      },
-      {
-         id: 'dispatch_manager', label: 'Dispatch Manager', desc: 'Fleet & Delivery Management', level: 3,
-         styles: { text: 'text-lime-400', bg: 'bg-lime-400/10', border: 'border-lime-400/20', badge: 'bg-lime-400/20 text-lime-400' }
-      },
-      {
-         id: 'assistant_manager', label: 'Assistant Manager', desc: 'Deputy Management', level: 3,
-         styles: { text: 'text-cyan-400', bg: 'bg-cyan-400/10', border: 'border-cyan-400/20', badge: 'bg-cyan-400/20 text-cyan-400' }
-      },
-      {
-         id: 'shift_lead', label: 'Shift Lead', desc: 'Team Lead', level: 3,
-         styles: { text: 'text-blue-200', bg: 'bg-blue-200/10', border: 'border-blue-200/20', badge: 'bg-blue-200/20 text-blue-200' }
-      },
-
-      // ═══ LEVEL 4 - STAFF ═══
-      {
-         id: 'cashier', label: 'Cashier', desc: 'POS Operations', level: 4,
-         styles: { text: 'text-green-400', bg: 'bg-green-400/10', border: 'border-green-400/20', badge: 'bg-green-400/20 text-green-400' }
-      },
-      {
-         id: 'sales_associate', label: 'Sales Associate', desc: 'Floor Sales', level: 4,
-         styles: { text: 'text-green-300', bg: 'bg-green-300/10', border: 'border-green-300/20', badge: 'bg-green-300/20 text-green-300' }
-      },
-      {
-         id: 'stock_clerk', label: 'Stock Clerk', desc: 'Shelving & Stocking', level: 4,
-         styles: { text: 'text-amber-400', bg: 'bg-amber-400/10', border: 'border-amber-400/20', badge: 'bg-amber-400/20 text-amber-400' }
-      },
-      {
-         id: 'picker', label: 'Picker', desc: 'Order Picking', level: 4,
-         styles: { text: 'text-orange-400', bg: 'bg-orange-400/10', border: 'border-orange-400/20', badge: 'bg-orange-400/20 text-orange-400' }
-      },
-      {
-         id: 'packer', label: 'Packer', desc: 'Order Packing', level: 4,
-         styles: { text: 'text-orange-300', bg: 'bg-orange-300/10', border: 'border-orange-300/20', badge: 'bg-orange-300/20 text-orange-300' }
-      },
-      {
-         id: 'receiver', label: 'Receiver', desc: 'Goods Receiving', level: 4,
-         styles: { text: 'text-cyan-400', bg: 'bg-cyan-400/10', border: 'border-cyan-400/20', badge: 'bg-cyan-400/20 text-cyan-400' }
-      },
-      {
-         id: 'driver', label: 'Driver', desc: 'Delivery', level: 4,
-         styles: { text: 'text-slate-400', bg: 'bg-slate-400/10', border: 'border-slate-400/20', badge: 'bg-slate-400/20 text-slate-400' }
-      },
-      {
-         id: 'forklift_operator', label: 'Forklift Operator', desc: 'Equipment Operator', level: 4,
-         styles: { text: 'text-gray-400', bg: 'bg-gray-400/10', border: 'border-gray-400/20', badge: 'bg-gray-400/20 text-gray-400' }
-      },
-      {
-         id: 'inventory_specialist', label: 'Inventory Specialist', desc: 'Stock Control', level: 4,
-         styles: { text: 'text-amber-300', bg: 'bg-amber-300/10', border: 'border-amber-300/20', badge: 'bg-amber-300/20 text-amber-300' }
-      },
-      {
-         id: 'customer_service', label: 'Customer Service', desc: 'Returns & Inquiries', level: 4,
-         styles: { text: 'text-sky-400', bg: 'bg-sky-400/10', border: 'border-sky-400/20', badge: 'bg-sky-400/20 text-sky-400' }
-      },
-      {
-         id: 'auditor', label: 'Auditor', desc: 'Compliance & Audit', level: 4,
-         styles: { text: 'text-rose-400', bg: 'bg-rose-400/10', border: 'border-rose-400/20', badge: 'bg-rose-400/20 text-rose-400' }
-      },
-      {
-         id: 'it_support', label: 'IT Support', desc: 'Technical Assistance', level: 4,
-         styles: { text: 'text-purple-300', bg: 'bg-purple-300/10', border: 'border-purple-300/20', badge: 'bg-purple-300/20 text-purple-300' }
-      },
-
-      // ═══ LEGACY ROLES (backwards compatibility) ═══
-      {
-         id: 'admin', label: 'Admin (Legacy)', desc: 'System Admin', level: 2,
-         styles: { text: 'text-purple-400', bg: 'bg-purple-400/10', border: 'border-purple-400/20', badge: 'bg-purple-400/20 text-purple-400' }
-      },
-      {
-         id: 'manager', label: 'Manager (Legacy)', desc: 'Department Manager', level: 3,
-         styles: { text: 'text-blue-400', bg: 'bg-blue-400/10', border: 'border-blue-400/20', badge: 'bg-blue-400/20 text-blue-400' }
-      },
-      {
-         id: 'hr', label: 'HR (Legacy)', desc: 'Human Resources', level: 2,
-         styles: { text: 'text-pink-400', bg: 'bg-pink-400/10', border: 'border-pink-400/20', badge: 'bg-pink-400/20 text-pink-400' }
-      },
-      {
-         id: 'pos', label: 'POS Staff (Legacy)', desc: 'Point of Sale', level: 4,
-         styles: { text: 'text-green-400', bg: 'bg-green-400/10', border: 'border-green-400/20', badge: 'bg-green-400/20 text-green-400' }
-      }
-   ];
 
 // Mock Shifts
 const SHIFT_TYPES = {
@@ -196,9 +69,13 @@ export default function Employees() {
    const { user, updateUserAvatar } = useStore();
    const {
       employees, addEmployee, updateEmployee, deleteEmployee, activeSite, sites, addNotification, logSystemEvent,
-      workerPoints, getWorkerPoints, storePoints, getStorePoints, settings, calculateWorkerBonusShare,
+      storePoints, getStorePoints, settings,
       tasks, setTasks
    } = useData();
+   // workerPointsService import removed as it is not used directly, only via context now? 
+   // Actually checking imports... the file imports workerPointsService at top.
+   // But here we replace the hook usage.
+   const { workerPoints, getWorkerPoints, calculateWorkerBonusShare } = useGamification();
 
    const [viewMode, setViewMode] = useState<ViewMode>('directory');
    const [searchTerm, setSearchTerm] = useState('');
@@ -312,54 +189,6 @@ export default function Employees() {
    const canApproveEmployees = hasPermission(user?.role, 'APPROVE_EMPLOYEE');
    const isDepartmentManager = hasPermission(user?.role, 'ACCESS_EMPLOYEES') && !canManageEmployees;
 
-   // Role hierarchy for termination checks - 4-level structure
-   const getRoleHierarchy = (role: UserRole): number => {
-      const hierarchy: Record<string, number> = {
-         // Level 1 - Executive (100)
-         'super_admin': 100,
-         // Level 2 - Regional/Directors (80-95)
-         'regional_manager': 95,
-         'operations_manager': 90,
-         'finance_manager': 85,
-         'hr_manager': 85,
-         'procurement_manager': 82,
-         'supply_chain_manager': 80,
-         // Level 3 - Site Managers (50-70)
-         'store_manager': 70,
-         'warehouse_manager': 68,
-         'dispatch_manager': 65,
-         'assistant_manager': 60,
-         'shift_lead': 55,
-         // Level 4 - Staff (10-40)
-         'cashier': 30,
-         'sales_associate': 28,
-         'stock_clerk': 25,
-         'picker': 22,
-         'packer': 22,
-         'receiver': 22,
-         'driver': 20,
-         'forklift_operator': 20,
-         'inventory_specialist': 25,
-         'customer_service': 25,
-         'auditor': 40,
-         'it_support': 35,
-         // Legacy roles
-         'admin': 90,
-         'manager': 65,
-         'hr': 85,
-         'pos': 28,
-         'dispatcher': 35,
-         'cs_manager': 60,
-         'store_supervisor': 55,
-         'returns_clerk': 22,
-         'merchandiser': 25,
-         'loss_prevention': 30,
-         'accountant': 35,
-         'data_analyst': 35,
-         'training_coordinator': 35
-      };
-      return hierarchy[role] || 0;
-   };
 
    const canTerminateTargetEmployee = (targetEmployee: Employee | null): boolean => {
       if (!targetEmployee || !user) return false;
@@ -2172,7 +2001,7 @@ export default function Employees() {
                }
                onClose={() => setSelectedEmployee(null)}
                title="Staff Profile"
-               size="lg"
+               size="2xl"
             >
                {selectedEmployee && (
                   <StaffProfileView

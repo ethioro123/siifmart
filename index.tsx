@@ -4,6 +4,9 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import { StoreProvider } from './contexts/CentralStore';
 import { DataProvider } from './contexts/DataContext';
+import { FulfillmentDataProvider } from './components/fulfillment/FulfillmentDataProvider';
+import { RosterProvider } from './contexts/RosterContext';
+import { GamificationProvider } from './contexts/GamificationContext';
 import { LanguageProvider } from './contexts/LanguageContext';
 import { GlobalErrorBoundary } from './components/GlobalErrorBoundary';
 
@@ -50,9 +53,15 @@ root.render(
     >
       <StoreProvider>
         <DataProvider>
-          <LanguageProvider>
-            <App />
-          </LanguageProvider>
+          <FulfillmentDataProvider>
+            <RosterProvider>
+              <GamificationProvider>
+                <LanguageProvider>
+                  <App />
+                </LanguageProvider>
+              </GamificationProvider>
+            </RosterProvider>
+          </FulfillmentDataProvider>
         </DataProvider>
       </StoreProvider>
       <ReactQueryDevtools initialIsOpen={false} />

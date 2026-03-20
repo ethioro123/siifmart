@@ -1,8 +1,11 @@
 import React, { useMemo } from 'react';
 import {
     Trophy, Star, Zap, Target, Flame, Award, TrendingUp,
-    Clock, Package, CheckCircle, Sparkles, Crown, Medal, DollarSign, Gift, TrendingDown, User
+    Clock, Package, CheckCircle, Sparkles, Crown, Medal, DollarSign, Gift, User as UserIcon
 } from 'lucide-react';
+import { useData } from '../contexts/DataContext';
+import { useGamification } from '../contexts/GamificationContext';
+import { useStore } from '../contexts/CentralStore';
 import { WorkerPoints, POINTS_CONFIG, WorkerAchievement, BonusTier, DEFAULT_BONUS_TIERS } from '../types';
 
 interface WorkerPointsDisplayProps {
@@ -12,6 +15,8 @@ interface WorkerPointsDisplayProps {
     bonusTiers?: BonusTier[];
     currency?: string;
     showBonus?: boolean;
+    employeeId?: string; // Added employeeId
+    showHistory?: boolean; // Changed from showLeaderboard
 }
 
 // Calculate bonus from points and tiers
@@ -105,14 +110,11 @@ const getAchievementIcon = (type: string) => {
     return icons[type] || '🏆';
 };
 
-export default function WorkerPointsDisplay({
-    points,
-    compact = false,
-    showLeaderboard = false,
-    bonusTiers = DEFAULT_BONUS_TIERS,
-    currency = 'ETB ',
-    showBonus = true
-}: WorkerPointsDisplayProps) {
+const WorkerPointsDisplay: React.FC<WorkerPointsDisplayProps> = ({ employeeId, compact = false, showHistory = false, points, bonusTiers = DEFAULT_BONUS_TIERS, currency = 'ETB ', showBonus = true }) => {
+    const { activeSite, settings } = useData();
+    const { getWorkerPoints, calculateWorkerBonusShare } = useGamification();
+    const { user } = useStore();
+
     const levelInfo = useMemo(() => getLevelInfo(points.totalPoints), [points.totalPoints]);
     const rankStyle = useMemo(() => getRankStyle(points.rank), [points.rank]);
     const levelColor = useMemo(() => getLevelColor(levelInfo.currentLevel.level), [levelInfo.currentLevel.level]);
@@ -214,7 +216,7 @@ export default function WorkerPointsDisplay({
                                 <div className="w-full h-full rounded-full bg-cyber-gray" />
                             </div>
                             <div className="relative w-20 h-20 rounded-full bg-cyber-gray border-2 border-cyber-gray flex items-center justify-center">
-                                <User size={40} className="text-gray-400" />
+                                <UserIcon size={40} className="text-gray-400" />
                             </div>
                             {/* Level badge */}
                             <div className={`absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-gradient-to-br ${levelColor} flex items-center justify-center shadow-lg border-2 border-cyber-gray`}>
@@ -370,7 +372,7 @@ export default function WorkerPointsDisplay({
 
             {/* Achievements Section */}
             {points.achievements && points.achievements.length > 0 && (
-                <div className="bg-cyber-gray rounded-2xl border border-white/10 p-6">
+                <div className="bg-black/60 backdrop-blur-2xl rounded-2xl border border-white/5 p-6">
                     <h4 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
                         <Trophy className="text-yellow-400" size={20} />
                         Achievements ({points.achievements.length})
@@ -431,7 +433,7 @@ export function LeaderboardWidget({ workers, currentUserId }: { workers: WorkerP
     );
 
     return (
-        <div className="bg-cyber-gray rounded-2xl border border-white/10 overflow-hidden">
+        <div className="bg-black/60 backdrop-blur-2xl rounded-2xl border border-white/5 overflow-hidden">
             <div className="p-4 border-b border-white/5 flex items-center justify-between">
                 <h4 className="font-bold text-white flex items-center gap-2">
                     <Crown className="text-yellow-400" size={18} />
@@ -457,7 +459,7 @@ export function LeaderboardWidget({ workers, currentUserId }: { workers: WorkerP
                             {/* Avatar */}
                             {/* Avatar Replaced with Icon */}
                             <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center border border-white/10">
-                                <User size={16} className="text-gray-400" />
+                                <UserIcon size={16} className="text-gray-400" />
                             </div>
                             {/* Name & Level */}
                             <div className="flex-1 min-w-0">
@@ -523,4 +525,6 @@ export function PointsEarnedPopup({
         </div>
     );
 }
+
+export default WorkerPointsDisplay;
 

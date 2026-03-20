@@ -283,7 +283,7 @@ export function isSuperAdmin(userRole: UserRole | undefined): boolean {
 export function getRoleDisplayName(role: UserRole): string {
     const displayNames: Partial<Record<UserRole, string>> = {
         super_admin: 'CEO',
-        admin: 'Administrator',
+        admin: 'Assistant CEO',
         manager: 'Store Manager',
         hr: 'HR Manager',
         warehouse_manager: 'Warehouse Manager',
@@ -321,7 +321,7 @@ export function getRoleDisplayName(role: UserRole): string {
 export function getRoleDescription(role: UserRole): string {
     const descriptions: Partial<Record<UserRole, string>> = {
         super_admin: 'Chief Executive Officer - Full system access and executive oversight',
-        admin: 'System Administrator - Technical and IT operations',
+        admin: 'Assistant CEO - Executive and Operations support',
         manager: 'Store Manager - Retail operations and customer service',
         hr: 'Human Resources Manager - Employee management and payroll',
         warehouse_manager: 'Warehouse Manager - Logistics and inventory operations',

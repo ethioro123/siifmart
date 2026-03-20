@@ -5,6 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:safe": "npm run auto-save & vite",
+    "auto-save": "./scripts/auto-save-daemon.sh",
+    "backup": "./scripts/pre-ai-backup.sh",
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest",

@@ -1,0 +1,28 @@
+import { TranslationBlock } from '../types';
+
+export const messages: TranslationBlock = {
+    jobComplete: { en: 'Job Complete!', am: 'ስራ ተጠናቀቀ!', or: 'Hojiin Xumurameera!' },
+    jobAssigned: { en: 'Job assigned to {name}', am: 'ሥራው ለ{name} ተሰጥቷል', or: 'Hojiin {name}-tti kennameera' },
+    jobAssignFailed: { en: 'Failed to assign job', am: 'ስራውን መመደብ አልተቻለም', or: 'Hojii ramaduun hin danda\'amne' },
+    jobResetSuccess: { en: 'Job reset successfully', am: 'ስራው በተሳካ ሁኔታ ተጀምሯል', or: 'Hojiin milkaa\'inaan deebi\'ee jalqabameera' },
+    jobCompletedSuccess: { en: 'Job {id} completed!', am: 'ስራ {id} ተጠናቋል!', or: 'Hojiin {id} xumurameera!' },
+    jobCompleteFailed: { en: 'Failed to complete job', am: 'ስራውን ማጠናቀቅ አልተቻለም', or: 'Hojii xumuruun hin danda\'amne' },
+    unitsReceivedJobsCreated: { en: 'Received {qty} units. {count} PUTAWAY job(s) created.', am: '{qty} እቃዎች ተቀብለዋል። {count} የትክክለኛ ቦታ ማቆያ ስራዎች ተፈጥረዋል።', or: '{qty} fudhatameera. Hojiin PUTAWAY {count} uumameera.' },
+    employeeHasActiveJobs: { en: '{name} already has {count} active jobs', am: '{name} ቀድሞውኑ {count} ንቁ ስራዎች አሉት', or: '{name} duraan hojiiwwan {count} qaba' },
+    jobNotFoundRefresh: { en: 'Job not found - please refresh and try again.', am: 'ሥራው አልተገኘም - እባክዎን አድሰው እንደገና ይሞክሩ።', or: 'Hojiin hin argamne - maaloo haaromsaatii irra deebi\'ii yaalaa.' },
+    itemNotFoundInJob: { en: 'Item not found in job - please refresh and try again.', am: 'እቃው በስራው ውስጥ አልተገኘም - እባክዎን አድሰው እንደገና ይሞክሩ።', or: 'Meeshaan hojii keessatti hin argamne - maaloo haaromsaatii irra deebi\'ii yaalaa.' },
+    failedToUpdateJobItem: { en: 'Failed to update job item - please try again.', am: 'የስራ እቃውን ማዘመን አልተቻለም - እባክዎን እንደገና ይሞክሩ።', or: 'Meeshaa hojii haaromsuun hin danda\'amne - maaloo irra deebi\'ii yaalaa.' },
+    poReceivedLocalOnly: { en: 'PO {id} received (Local Update Only)', am: 'PO {id} ተቀብሏል (የአካባቢ ማዘመኛ ብቻ)', or: 'PO {id} fudhatameera (Haaromsa Naannoo Qofa)' },
+    jobDeleted: { en: 'Job deleted', am: 'ስራው ተሰርዟል', or: 'Hojiin haqameera' },
+    jobDeleteFailed: { en: 'Failed to delete job', am: 'ስራውን መሰረዝ አልተቻለም', or: 'Hojii balleessuu hin danda\'amne' },
+    shippingRequired: { en: 'Shipping Required', am: 'ማጓጓዣ ያስፈልጋል', or: 'Ergiin Barbaachisaadha' },
+    orderNotStarted: { en: 'Order Not Started', am: 'ትዕዛዙ አልተጀመረም', or: 'Ajajiin hin jalqabamne' },
+    jobStarted: { en: 'Job Started', am: 'ስራ ተጀምሯል', or: 'Hojiin jalqabameera' },
+    sortingHigh: { en: 'Sorting High', am: 'ከፍተኛ ደረጃ መለየት', or: 'Addaan Baasuu Ol\'aana' },
+    readyForDispatch: { en: 'Ready for Dispatch', am: 'ለመላክ ዝግጁ', or: 'Erguuf Qophaa\'aa' },
+    pendingSync: { en: 'Pending Sync', am: 'በዝግጅት ላይ', or: 'Sync Eeggachaa' },
+    intelligence: { en: 'Intelligence', am: 'መረጃ', or: 'Odeeffannoo' },
+    volume: { en: 'Volume', am: 'መጠን', or: 'Hanga' },
+    state: { en: 'State', am: 'ሁኔታ', or: 'Haala' },
+    orderColon: { en: 'Order:', am: 'ትዕዛዝ:', or: 'Ajaja:' },
+};
