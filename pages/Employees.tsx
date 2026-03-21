@@ -41,6 +41,11 @@ import { employeesService, workerPointsService } from '../services/supabase.serv
 import ImageCropper from '../components/ImageCropper';
 import StaffProfileView from '../components/StaffProfileView';
 import { SYSTEM_ROLES, getRoleHierarchy } from '../utils/roles';
+import AddEmployeeWizard from '../components/employees/modals/AddEmployeeWizard';
+import TerminateEmployeeModal from '../components/employees/modals/TerminateEmployeeModal';
+import DeleteEmployeeModal from '../components/employees/modals/DeleteEmployeeModal';
+import ApproveEmployeeModal from '../components/employees/modals/ApproveEmployeeModal';
+import ValidationWarningModal from '../components/employees/modals/ValidationWarningModal';
 
 // --- TYPES & MOCKS ---
 type ViewMode = 'directory' | 'org' | 'shifts';
@@ -90,9 +95,14 @@ export default function Employees() {
    const [photoRequests, setPhotoRequests] = useState<any[]>([]); // { id, userId, userName, newUrl, timestamp }
    const [idCardEmployee, setIdCardEmployee] = useState<Employee | null>(null);
    const [isTerminateModalOpen, setIsTerminateModalOpen] = useState(false);
-   const [terminateInput, setTerminateInput] = useState('');
+    const [terminateInput, setTerminateInput] = useState('');
 
-   // Floating Task Queue State
+    const isSuperAdmin = user?.role === 'super_admin';
+    const isHR = user?.role === 'hr' || user?.role === 'hr_manager';
+    const isAdmin = user?.role === 'admin';
+    const canAdjustPayroll = isSuperAdmin || isHR || isAdmin;
+
+    // Floating Task Queue State
    const [isTaskQueueOpen, setIsTaskQueueOpen] = useState(false);
 
    // Server-Side Pagination State
@@ -1482,7 +1492,7 @@ export default function Employees() {
                            })}
 
                            {displayedEmployees.length === 0 && !isLoadingEmployees && (
-                              <div className="col-span-full py-16 text-center text-gray-500">
+                              <div className="col-span-full flex justify-center py-16 text-center text-gray-500">
                                  <User size={32} className="mx-auto mb-3 opacity-30" />
                                  <p className="text-sm">No employees found</p>
                               </div>
@@ -1498,27 +1508,27 @@ export default function Employees() {
                                  </div>
                               )}
 
-                              {displayedEmployees.map((employee) => {
-                                 const roleConfig = SYSTEM_ROLES.find(r => r.id === employee.role) || SYSTEM_ROLES[8];
+                              {displayedEmployees.length > 0 ? (
+                                 displayedEmployees.map((employee) => {
+                                    const roleConfig = SYSTEM_ROLES.find(r => r.id === employee.role) || SYSTEM_ROLES[8];
 
-                                 return (
-                                    <EmployeeRow
-                                       key={employee.id}
-                                       employee={employee}
-                                       sites={sites}
-                                       roleConfig={roleConfig}
-                                       pendingTasks={0}
-                                       onSelect={() => setSelectedEmployee(employee)}
-                                       onMessage={() => setSelectedEmployee(employee)}
-                                       canResetPassword={false}
-                                       canDelete={false}
-                                       canApprove={false}
-                                       isSuperAdmin={false}
-                                    />
-                                 );
-                              })}
-
-                              {displayedEmployees.length === 0 && !isLoadingEmployees && (
+                                    return (
+                                       <EmployeeRow
+                                          key={employee.id}
+                                          employee={employee}
+                                          sites={sites}
+                                          roleConfig={roleConfig}
+                                          pendingTasks={0}
+                                          onSelect={() => setSelectedEmployee(employee)}
+                                          onMessage={() => setSelectedEmployee(employee)}
+                                          canResetPassword={false}
+                                          canDelete={false}
+                                          canApprove={false}
+                                          isSuperAdmin={false}
+                                       />
+                                    );
+                                 })
+                              ) : (
                                  <div className="px-6 py-16 text-center text-gray-500">
                                     <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-4">
                                        <User size={32} className="opacity-50" />
@@ -1595,405 +1605,27 @@ export default function Employees() {
 
 
             {/* WIZARD MODAL WITH SITE SELECTION */}
-            <Modal isOpen={isAddModalOpen} onClose={resetWizard} title="Onboard Talent" size="lg">
-               <div className="flex flex-col h-[500px]">
-                  {/* Stepper */}
-                  <div className="flex justify-between items-center mb-8 px-4">
-                     {[1, 2, 3, 4].map(step => (
-                        <div key={step} className="flex flex-col items-center relative z-10">
-                           <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-300 ${step === addStep ? 'bg-cyber-primary text-black scale-110 shadow-[0_0_15px_rgba(0,255,157,0.5)]' :
-                              step < addStep ? 'bg-green-500 text-black' : 'bg-white/10 text-gray-500'
-                              }`}>
-                              {step < addStep ? <CheckCircle size={16} /> : step}
-                           </div>
-                           <span className={`text-[10px] mt-2 uppercase font-bold ${step === addStep ? 'text-cyber-primary' : 'text-gray-500'}`}>
-                              {['Identity', 'Role', 'Details', 'Review'][step - 1]}
-                           </span>
-                        </div>
-                     ))}
-                     <div className="absolute top-[88px] left-12 right-12 h-0.5 bg-white/10 -z-0">
-                        {/* eslint-disable-next-line react/forbid-dom-props */}
-                        <div className="h-full bg-cyber-primary transition-all duration-500" ref={(el) => { if (el) el.style.width = `${((addStep - 1) / 3) * 100}%`; }}></div>
-                     </div>
-                  </div>
-
-                  {/* Content Area */}
-                  <div className="flex-1 overflow-y-auto px-4 py-2">
-
-                     {/* STEP 1: IDENTITY */}
-                     {addStep === 1 && (
-                        <div className="space-y-6 animate-in fade-in slide-in-from-right-4">
-                           <div className="flex gap-6">
-                              <div
-                                 onClick={handlePhotoClick}
-                                 className="w-32 h-32 bg-black/30 border border-white/10 rounded-2xl flex flex-col items-center justify-center text-gray-500 hover:text-white hover:border-cyber-primary cursor-pointer transition-all group overflow-hidden relative"
-                              >
-                                 {newEmpData.avatar ? (
-                                    <img src={newEmpData.avatar} alt="Profile" className="w-full h-full object-cover" />
-                                 ) : (
-                                    <>
-                                       <Upload size={24} className="mb-2 group-hover:scale-110 transition-transform" />
-                                       <span className="text-xs text-center px-2">Upload Photo</span>
-                                    </>
-                                 )}
-                              </div>
-                              {/* Hidden Input Moved Outside Container */}
-                              <input
-                                 type="file"
-                                 ref={fileInputRef}
-                                 onChange={handleFileChange}
-                                 accept="image/*,.heic,.heif"
-                                 className="hidden"
-                                 aria-label="Upload Profile Photo"
-                                 title="Upload Profile Photo"
-                              />
-                              <div className="flex-1 space-y-4">
-                                 <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                       <label className="text-xs text-gray-400 uppercase font-bold mb-1 block">First Name <span className="text-red-500">*</span></label>
-                                       <input
-                                          className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white focus:border-cyber-primary outline-none"
-                                          value={newEmpData.firstName}
-                                          onChange={e => setNewEmpData({ ...newEmpData, firstName: e.target.value })}
-                                          aria-label="First Name"
-                                          title="First Name"
-                                       />
-                                    </div>
-                                    <div>
-                                       <label className="text-xs text-gray-400 uppercase font-bold mb-1 block">Last Name</label>
-                                       <input
-                                          className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white focus:border-cyber-primary outline-none"
-                                          value={newEmpData.lastName}
-                                          onChange={e => setNewEmpData({ ...newEmpData, lastName: e.target.value })}
-                                          aria-label="Last Name"
-                                          title="Last Name"
-                                       />
-                                    </div>
-                                 </div>
-                                 <div>
-                                    <label className="text-xs text-gray-400 uppercase font-bold mb-1 block">Email Address (Optional)</label>
-                                    <input
-                                       className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white focus:border-cyber-primary outline-none"
-                                       value={newEmpData.email}
-                                       placeholder="e.g. user@company.com"
-                                       onChange={e => setNewEmpData({ ...newEmpData, email: e.target.value })}
-                                       aria-label="Email Address"
-                                       title="Email Address"
-                                    />
-                                 </div>
-                                 <div>
-                                    <label className="text-xs text-gray-400 uppercase font-bold mb-1 block">Password (For Login)</label>
-                                    <input
-                                       type="password"
-                                       className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white focus:border-cyber-primary outline-none"
-                                       value={newEmpData.password}
-                                       onChange={e => setNewEmpData({ ...newEmpData, password: e.target.value })}
-                                       placeholder="••••••••"
-                                       aria-label="Password"
-                                       title="Password"
-                                    />
-                                 </div>
-                              </div>
-                           </div>
-
-                           {/* NEW: SITE SELECTION (Admin/HR Only) */}
-                           {(user?.role === 'admin' || user?.role === 'super_admin' || user?.role === 'hr') && (
-                              <div>
-                                 <label className="text-xs text-cyber-primary uppercase font-bold mb-2 block flex items-center gap-2"><MapPin size={14} /> Assign Workplace</label>
-                                 <select
-                                    className="w-full bg-cyber-primary/10 border border-cyber-primary/30 text-white rounded-lg px-3 py-3 outline-none"
-                                    value={newEmpData.siteId}
-                                    onChange={e => setNewEmpData({ ...newEmpData, siteId: e.target.value })}
-                                    aria-label="Assign Workplace"
-                                    title="Assign Workplace"
-                                 >
-                                    {sites.map(s => (
-                                       <option key={s.id} value={s.id} className="text-black">{s.name} ({s.type})</option>
-                                    ))}
-                                 </select>
-                                 <p className="text-[10px] text-gray-500 mt-1">Employee will only see data for this location.</p>
-                              </div>
-                           )}
-
-                           <div className="grid grid-cols-2 gap-4">
-                              <div>
-                                 <label className="text-xs text-gray-400 uppercase font-bold mb-1 block">Phone Number</label>
-                                 <input
-                                    className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white focus:border-cyber-primary outline-none"
-                                    value={newEmpData.phone}
-                                    placeholder="e.g. +251 911..."
-                                    onChange={e => setNewEmpData({ ...newEmpData, phone: e.target.value })}
-                                    aria-label="Phone Number"
-                                    title="Phone Number"
-                                 />
-                              </div>
-                              <div>
-                                 <label className="text-xs text-gray-400 uppercase font-bold mb-1 block">Address</label>
-                                 <input
-                                    className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white focus:border-cyber-primary outline-none"
-                                    value={newEmpData.address}
-                                    onChange={e => setNewEmpData({ ...newEmpData, address: e.target.value })}
-                                    aria-label="Address"
-                                    title="Address"
-                                 />
-                              </div>
-                           </div>
-                        </div>
-                     )}
-
-                     {/* STEP 2: ROLE (FILTERED BY AUTHORITY) */}
-                     {addStep === 2 && (
-                        <div className="space-y-4 animate-in fade-in slide-in-from-right-4">
-                           <p className="text-sm text-gray-400 mb-2">Select System Access Level (Filtered by your permissions)</p>
-                           <div className="grid grid-cols-2 gap-3">
-                              {availableRoles.map(roleObj => {
-                                 const violations = authService.validateSeparationOfDuties(roleObj.id);
-                                 const hasViolations = violations.length > 0;
-
-                                 return (
-                                    <div
-                                       key={roleObj.id}
-                                       onClick={() => handleRoleChange(roleObj.id)}
-                                       className={`p-4 rounded-xl border cursor-pointer transition-all flex items-center gap-3 relative ${newEmpData.role === roleObj.id
-                                          ? `bg-white/10 ${roleObj.styles.text} ${roleObj.styles.border} shadow-[0_0_15px_rgba(255,255,255,0.1)]`
-                                          : 'bg-black/20 border-white/5 hover:border-white/20'
-                                          }`}
-                                    >
-                                       <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${newEmpData.role === roleObj.id ? 'border-white' : 'border-gray-500'
-                                          }`}>
-                                          {newEmpData.role === roleObj.id && <div className="w-2 h-2 bg-white rounded-full" />}
-                                       </div>
-                                       <div className="flex-1">
-                                          <div className="flex items-center gap-2">
-                                             <p className="text-white font-bold uppercase text-sm">{roleObj.label}</p>
-                                             {hasViolations && (
-                                                <div className="group/sod relative">
-                                                   <AlertTriangle size={14} className="text-yellow-500" />
-                                                   <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2 bg-black border border-yellow-500/50 rounded text-[10px] text-yellow-200 opacity-0 group-hover/sod:opacity-100 pointer-events-none transition-opacity z-50">
-                                                      Warning: This role has inherent Separation of Duties conflicts: {violations.join(', ')}
-                                                   </div>
-                                                </div>
-                                             )}
-                                          </div>
-                                          <p className="text-[10px] text-gray-400">{roleObj.desc}</p>
-                                       </div>
-                                    </div>
-                                 )
-                              })}
-                           </div>
-                        </div>
-                     )}
-
-                     {/* STEP 3: DETAILS */}
-                     {addStep === 3 && (
-                        <div className="space-y-6 animate-in fade-in slide-in-from-right-4">
-                           <div>
-                              <label className="text-xs text-gray-400 uppercase font-bold mb-2 block">Department (Filtered)</label>
-                              <div className="grid grid-cols-2 gap-2">
-                                 {availableDepartments.map(dept => (
-                                    <button
-                                       key={dept}
-                                       onClick={() => setNewEmpData({ ...newEmpData, department: dept })}
-                                       className={`px-3 py-2 rounded-lg text-xs font-bold text-left transition-colors ${newEmpData.department === dept ? 'bg-blue-500 text-white' : 'bg-white/5 text-gray-400 hover:bg-white/10'
-                                          }`}
-                                    >
-                                       {dept}
-                                    </button>
-                                 ))}
-                              </div>
-                           </div>
-                           <div className="grid grid-cols-2 gap-4">
-                              <div>
-                                 <label className="text-xs text-gray-400 uppercase font-bold mb-1 block">Monthly Salary ({CURRENCY_SYMBOL})</label>
-                                 <input
-                                    type="number"
-                                    className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white focus:border-cyber-primary outline-none font-mono"
-                                    value={newEmpData.salary}
-                                    onChange={e => setNewEmpData({ ...newEmpData, salary: e.target.value })}
-                                    aria-label="Monthly Salary"
-                                    title="Monthly Salary"
-                                 />
-                              </div>
-                              <div>
-                                 <label className="text-xs text-gray-400 uppercase font-bold mb-1 block">Specialization</label>
-                                 <input
-                                    className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white focus:border-cyber-primary outline-none"
-                                    placeholder="e.g. Cold Storage"
-                                    value={newEmpData.specialization}
-                                    onChange={e => setNewEmpData({ ...newEmpData, specialization: e.target.value })}
-                                    aria-label="Specialization"
-                                    title="Specialization"
-                                 />
-                              </div>
-                           </div>
-                           <div>
-                              <label className="text-xs text-gray-400 uppercase font-bold mb-1 block">Start Date</label>
-                              <input
-                                 type="date"
-                                 className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white focus:border-cyber-primary outline-none"
-                                 value={newEmpData.joinDate}
-                                 onChange={e => setNewEmpData({ ...newEmpData, joinDate: e.target.value })}
-                                 aria-label="Start Date"
-                                 title="Start Date"
-                              />
-                           </div>
-                        </div>
-                     )}
-
-                     {/* STEP 4: REVIEW */}
-                     {addStep === 4 && (
-                        <div className="space-y-4 animate-in fade-in slide-in-from-right-4">
-                           <p className="text-sm text-gray-400 mb-4">Review and confirm all details before creating the employee profile.</p>
-
-                           <div className="grid grid-cols-2 gap-4">
-                              {/* Personal Information */}
-                              <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-                                 <h4 className="text-xs text-gray-400 uppercase font-bold mb-3 flex items-center gap-2">
-                                    <User size={14} /> Personal Information
-                                 </h4>
-                                 <div className="space-y-2 text-sm">
-                                    <div className="flex justify-between">
-                                       <span className="text-gray-400">Full Name:</span>
-                                       <span className="text-white font-medium">{newEmpData.firstName} {newEmpData.lastName}</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                       <span className="text-gray-400">Email:</span>
-                                       <span className="text-white font-mono text-xs">{newEmpData.email || 'Not provided'}</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                       <span className="text-gray-400">Phone:</span>
-                                       <span className="text-white">{newEmpData.phone || 'Not provided'}</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                       <span className="text-gray-400">Join Date:</span>
-                                       <span className="text-white">{newEmpData.joinDate || new Date().toISOString().split('T')[0]}</span>
-                                    </div>
-                                 </div>
-                              </div>
-
-                              {/* Role & Location */}
-                              <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-                                 <h4 className="text-xs text-gray-400 uppercase font-bold mb-3 flex items-center gap-2">
-                                    <Briefcase size={14} /> Role & Location
-                                 </h4>
-                                 <div className="space-y-2 text-sm">
-                                    <div className="flex justify-between">
-                                       <span className="text-gray-400">Role:</span>
-                                       <span className="text-cyber-primary font-bold uppercase text-xs">{newEmpData.role.replace('_', ' ')}</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                       <span className="text-gray-400">Department:</span>
-                                       <span className="text-white">{newEmpData.department}</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                       <span className="text-gray-400">Location:</span>
-                                       <span className="text-white font-medium">{sites.find(s => s.id === newEmpData.siteId)?.name || 'Central Operations'}</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                       <span className="text-gray-400">Site Type:</span>
-                                       <span className="text-white">{sites.find(s => s.id === newEmpData.siteId)?.type || 'Administration'}</span>
-                                    </div>
-                                 </div>
-                              </div>
-
-                              {/* Compensation */}
-                              {newEmpData.salary && (
-                                 <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-                                    <h4 className="text-xs text-gray-400 uppercase font-bold mb-3 flex items-center gap-2">
-                                       <DollarSign size={14} /> Compensation
-                                    </h4>
-                                    <div className="space-y-2 text-sm">
-                                       <div className="flex justify-between">
-                                          <span className="text-gray-400">Base Salary:</span>
-                                          <span className="text-green-400 font-bold">${parseFloat(newEmpData.salary).toLocaleString()}/mo</span>
-                                       </div>
-                                       <div className="flex justify-between">
-                                          <span className="text-gray-400">Specialization:</span>
-                                          <span className="text-white">{newEmpData.specialization || 'Generalist'}</span>
-                                       </div>
-                                    </div>
-                                 </div>
-                              )}
-
-                              {/* Login Credentials */}
-                              {newEmpData.email && newEmpData.password && (
-                                 <div className="bg-cyber-primary/10 rounded-xl p-4 border border-cyber-primary/30">
-                                    <h4 className="text-xs text-cyber-primary uppercase font-bold mb-3 flex items-center gap-2">
-                                       <Key size={14} /> Login Credentials
-                                    </h4>
-                                    <div className="space-y-2 text-sm">
-                                       <div className="flex justify-between">
-                                          <span className="text-gray-400">Email:</span>
-                                          <span className="text-white font-mono text-xs">{newEmpData.email}</span>
-                                       </div>
-                                       <div className="flex justify-between items-center">
-                                          <span className="text-gray-400">Password:</span>
-                                          <span className="text-white font-mono text-xs">
-                                             {['super_admin', 'hr'].includes(user?.role || '')
-                                                ? newEmpData.password
-                                                : '•'.repeat(newEmpData.password.length)}
-                                          </span>
-                                       </div>
-                                       <p className="text-xs text-cyan-400 mt-2">✓ Login account will be created</p>
-                                    </div>
-                                 </div>
-                              )}
-                           </div>
-
-                           {/* Preview Card */}
-                           <div className="bg-gradient-to-br from-white/5 to-white/10 rounded-xl p-4 border border-white/20">
-                              <div className="flex items-center gap-4">
-                                 <img
-                                    src={newEmpData.avatar || `https://ui-avatars.com/api/?name=${newEmpData.firstName}+${newEmpData.lastName}&background=random`}
-                                    alt=""
-                                    className="w-16 h-16 rounded-xl object-cover border-2 border-cyber-primary"
-                                 />
-                                 <div className="flex-1">
-                                    <h3 className="text-lg font-bold text-white">{newEmpData.firstName} {newEmpData.lastName}</h3>
-                                    <p className="text-cyber-primary text-sm font-bold uppercase">{newEmpData.role.replace('_', ' ')}</p>
-                                    <p className="text-gray-400 text-xs">{newEmpData.department} • {sites.find(s => s.id === newEmpData.siteId)?.name || 'Central Operations'}</p>
-                                 </div>
-                                 <div className="text-right">
-                                    <p className="text-xs text-gray-400">Employee ID</p>
-                                    <p className="text-cyan-400 font-mono font-bold">Will be assigned</p>
-                                 </div>
-                              </div>
-                           </div>
-                        </div>
-                     )}
-
-                  </div>
-
-                  {/* Navigation Footer */}
-                  <div className="pt-4 border-t border-white/10 flex justify-between mt-auto">
-                     <button
-                        onClick={handleWizardBack}
-                        disabled={addStep === 1}
-                        className="px-6 py-3 rounded-xl text-gray-400 font-bold hover:text-white disabled:opacity-30 transition-colors flex items-center gap-2"
-                     >
-                        <ArrowLeft size={16} /> Back
-                     </button>
-
-                     {addStep < 4 ? (
-                        <button
-                           onClick={handleWizardNext}
-                           className="px-8 py-3 bg-white text-black font-bold rounded-xl hover:bg-gray-200 transition-colors flex items-center gap-2"
-                        >
-                           Next Step <ArrowRight size={16} />
-                        </button>
-                     ) : (
-                        <button
-                           onClick={handleFinalSubmit}
-                           disabled={isSubmitting}
-                           className={`px-8 py-3 bg-cyber-primary text-black font-bold rounded-xl hover:bg-cyber-accent transition-colors shadow-[0_0_20px_rgba(0,255,157,0.3)] flex items-center gap-2 ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
-                        >
-                           {isSubmitting ? <Loader2 className="animate-spin" size={16} /> : <CheckCircle size={16} />}
-                           {isSubmitting ? 'Creating...' : 'Confirm & Create'}
-                        </button>
-                     )}
-                  </div>
-               </div>
-            </Modal>
+            <AddEmployeeWizard
+               isOpen={isAddModalOpen}
+               onClose={resetWizard}
+               addStep={addStep}
+               newEmpData={newEmpData}
+               setNewEmpData={setNewEmpData}
+               handlePhotoClick={handlePhotoClick}
+               fileInputRef={fileInputRef}
+               handleFileChange={handleFileChange}
+               user={user}
+               sites={sites}
+               availableRoles={availableRoles}
+               handleRoleChange={handleRoleChange}
+               availableDepartments={availableDepartments}
+               handleWizardBack={handleWizardBack}
+               handleWizardNext={handleWizardNext}
+               handleFinalSubmit={handleFinalSubmit}
+               isSubmitting={isSubmitting}
+               resetWizard={resetWizard}
+               canAdjustPayroll={canAdjustPayroll}
+            />
 
             {/* --- MODAL: EMPLOYEE PROFILE --- */}
             <Modal
@@ -2007,6 +1639,9 @@ export default function Employees() {
                   <StaffProfileView
                      employee={selectedEmployee}
                      onClose={() => setSelectedEmployee(null)}
+                     terminateInput={terminateInput}
+                     setTerminateInput={setTerminateInput}
+                     handleConfirmTermination={handleConfirmTermination}
                   />
                )}
             </Modal>
@@ -2023,167 +1658,41 @@ export default function Employees() {
             }
 
             {/* --- MODAL: TERMINATE EMPLOYEE --- */}
-            <Modal isOpen={isTerminateModalOpen} onClose={() => setIsTerminateModalOpen(false)} title="Confirm Termination" size="md">
-               <div className="p-6 space-y-4">
-                  <div className="flex items-center gap-3 p-4 bg-red-500/10 border border-red-500/20 rounded-xl">
-                     <AlertTriangle className="text-red-400" size={24} />
-                     <div>
-                        <h4 className="font-bold text-red-400">Critical Action</h4>
-                        <p className="text-xs text-gray-400">You are about to terminate {selectedEmployee?.name}. This will revoke access and update their status to "Terminated".</p>
-                     </div>
-                  </div>
-
-                  <div className="space-y-2">
-                     <label className="text-xs font-bold text-gray-500 uppercase">Type "TERMINATE" to confirm</label>
-                     <input
-                        type="text"
-                        value={terminateInput}
-                        onChange={(e) => setTerminateInput(e.target.value)}
-                        className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-red-500 outline-none transition-colors"
-                        placeholder="TERMINATE"
-                     />
-                  </div>
-
-                  <div className="flex gap-3 pt-2">
-                     <button
-                        onClick={() => setIsTerminateModalOpen(false)}
-                        className="flex-1 py-3 px-4 bg-white/5 hover:bg-white/10 text-gray-400 rounded-xl font-bold transition-all"
-                     >
-                        Cancel
-                     </button>
-                     <button
-                        onClick={handleConfirmTermination}
-                        disabled={terminateInput !== 'TERMINATE'}
-                        className={`flex-1 py-3 px-4 rounded-xl font-bold transition-all flex items-center justify-center gap-2 ${terminateInput === 'TERMINATE' ? 'bg-red-500 text-white hover:bg-red-600 shadow-lg shadow-red-500/20' : 'bg-gray-800 text-gray-500 cursor-not-allowed'}`}
-                     >
-                        Confirm Termination
-                     </button>
-                  </div>
-               </div>
-            </Modal>
+            <TerminateEmployeeModal
+               isOpen={isTerminateModalOpen}
+               onClose={() => setIsTerminateModalOpen(false)}
+               employee={selectedEmployee}
+               terminateInput={terminateInput}
+               setTerminateInput={setTerminateInput}
+               handleConfirmTermination={handleConfirmTermination}
+            />
 
             {/* --- MODAL: DELETE RECORD --- */}
-            <Modal isOpen={isDeleteModalOpen} onClose={() => setIsDeleteModalOpen(false)} title="Delete Employee Record" size="md">
-               <div className="p-6 space-y-4">
-                  <div className="flex items-center gap-3 p-4 bg-red-500/10 border border-red-500/20 rounded-xl">
-                     <Trash2 className="text-red-400" size={24} />
-                     <div>
-                        <h4 className="font-bold text-red-400">Irreversible Action</h4>
-                        <p className="text-xs text-gray-400">This will permanently delete {employeeToDelete?.name}'s record from the database. This cannot be undone.</p>
-                     </div>
-                  </div>
-
-                  <div className="p-4 bg-white/5 border border-white/10 rounded-xl text-xs text-gray-400">
-                     <p className="font-bold text-gray-300 mb-1">Requirements for deletion:</p>
-                     <ul className="list-disc list-inside space-y-1">
-                        <li>Employee must be <strong>Terminated</strong> first</li>
-                        <li>You must be a <strong>CEO</strong></li>
-                        <li>Record cannot be restored after deletion</li>
-                     </ul>
-                  </div>
-
-                  <div className="space-y-2">
-                     <label className="text-xs font-bold text-gray-500 uppercase">Type "DELETE" to confirm permanent removal</label>
-                     <input
-                        type="text"
-                        value={deleteInput}
-                        onChange={(e) => setDeleteInput(e.target.value)}
-                        className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-red-500 outline-none transition-colors"
-                        placeholder="DELETE"
-                     />
-                  </div>
-
-                  <div className="flex gap-3 pt-2">
-                     <button
-                        onClick={() => setIsDeleteModalOpen(false)}
-                        className="flex-1 py-3 px-4 bg-white/5 hover:bg-white/10 text-gray-400 rounded-xl font-bold transition-all"
-                     >
-                        Cancel
-                     </button>
-                     <button
-                        onClick={handleConfirmDelete}
-                        disabled={deleteInput !== 'DELETE'}
-                        className={`flex-1 py-3 px-4 rounded-xl font-bold transition-all flex items-center justify-center gap-2 ${deleteInput === 'DELETE' ? 'bg-red-500 text-white hover:bg-red-600 shadow-lg shadow-red-500/20' : 'bg-gray-800 text-gray-500 cursor-not-allowed'}`}
-                     >
-                        Permanently Delete
-                     </button>
-                  </div>
-               </div>
-            </Modal>
+            <DeleteEmployeeModal
+               isOpen={isDeleteModalOpen}
+               onClose={() => setIsDeleteModalOpen(false)}
+               employee={employeeToDelete}
+               deleteInput={deleteInput}
+               setDeleteInput={setDeleteInput}
+               handleConfirmDelete={handleConfirmDelete}
+            />
 
             {/* --- MODAL: APPROVE EMPLOYEE --- */}
-            <Modal isOpen={isApproveModalOpen} onClose={() => setIsApproveModalOpen(false)} title="Approve Employee" size="md">
-               <div className="p-6 space-y-6">
-                  <div className="text-center space-y-3">
-                     <div className="w-20 h-20 bg-green-500/10 rounded-full flex items-center justify-center mx-auto border border-green-500/20 animate-pulse">
-                        <UserCheck className="text-green-400" size={40} />
-                     </div>
-                     <div>
-                        <h3 className="text-xl font-bold text-white">Activate Talent</h3>
-                        <p className="text-sm text-gray-400">Approving {employeeToApprove?.name} will grant them system access based on the assigned role: <span className="text-cyber-primary font-bold">{employeeToApprove?.role}</span></p>
-                     </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3">
-                     <div className="p-3 bg-white/5 border border-white/10 rounded-xl">
-                        <p className="text-[10px] text-gray-500 uppercase font-bold mb-1">Department</p>
-                        <p className="text-sm text-white font-medium">{employeeToApprove?.department || 'Unassigned'}</p>
-                     </div>
-                     <div className="p-3 bg-white/5 border border-white/10 rounded-xl">
-                        <p className="text-[10px] text-gray-500 uppercase font-bold mb-1">Location</p>
-                        <p className="text-sm text-white font-medium">{sites.find(s => s.id === employeeToApprove?.siteId)?.name || 'Unassigned'}</p>
-                     </div>
-                  </div>
-
-                  <div className="flex gap-3">
-                     <button
-                        onClick={() => setIsApproveModalOpen(false)}
-                        className="flex-1 py-3 px-4 bg-white/5 hover:bg-white/10 text-gray-400 rounded-xl font-bold transition-all"
-                     >
-                        Decline
-                     </button>
-                     <button
-                        onClick={handleConfirmApprove}
-                        className="flex-1 py-4 px-4 bg-cyber-primary text-black hover:bg-cyber-primary/90 rounded-xl font-bold transition-all flex items-center justify-center gap-2 shadow-lg shadow-cyber-primary/20"
-                     >
-                        <CheckCircle size={18} />
-                        Approve & Activate
-                     </button>
-                  </div>
-               </div>
-            </Modal>
+            <ApproveEmployeeModal
+               isOpen={isApproveModalOpen}
+               onClose={() => setIsApproveModalOpen(false)}
+               employee={employeeToApprove}
+               sites={sites}
+               handleConfirmApprove={handleConfirmApprove}
+            />
 
             {/* --- MODAL: VALIDATION WARNING --- */}
-            <Modal isOpen={isValidationModalOpen} onClose={() => setIsValidationModalOpen(false)} title="Validation Warning" size="md">
-               <div className="p-6 space-y-4">
-                  <div className="flex items-center gap-3 p-4 bg-amber-500/10 border border-amber-500/20 rounded-xl">
-                     <AlertTriangle className="text-amber-400" size={24} />
-                     <div>
-                        <h4 className="font-bold text-amber-400">Configuration Mismatch</h4>
-                        <p className="text-xs text-gray-400">A potential issue was identified with the role and location assignment.</p>
-                     </div>
-                  </div>
-
-                  <div className="p-5 bg-black/40 border border-white/5 rounded-xl text-amber-200/90 text-sm leading-relaxed italic">
-                     "{validationMessage}"
-                  </div>
-
-                  <div className="flex gap-3 pt-2">
-                     <button
-                        onClick={() => setIsValidationModalOpen(false)}
-                        className="flex-1 py-3 px-4 bg-white/5 hover:bg-white/10 text-gray-400 rounded-xl font-bold transition-all"
-                     >
-                        Cancel & Edit
-                     </button>
-                     <button
-                        onClick={handleConfirmValidation}
-                        className="flex-1 py-3 px-4 bg-amber-500 text-black hover:bg-amber-600 rounded-xl font-bold transition-all flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20"
-                     >
-                        Proceed Anyway
-                     </button>
-                  </div>
-               </div>
-            </Modal>
+            <ValidationWarningModal
+               isOpen={isValidationModalOpen}
+               onClose={() => setIsValidationModalOpen(false)}
+               validationMessage={validationMessage}
+               handleConfirmValidation={handleConfirmValidation}
+            />
          </div >
       </>
    );

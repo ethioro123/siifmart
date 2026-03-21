@@ -1,22 +1,24 @@
 import React from 'react';
 import { AlertTriangle, Loader2 } from 'lucide-react';
-import Modal from '../../ui/Modal';
+import Modal from '../../Modal';
 import { Employee } from '../../../types';
 
 interface TerminateEmployeeModalProps {
     isOpen: boolean;
     onClose: () => void;
     employee: Employee;
-    isTerminating: boolean;
-    handleTerminate: () => void;
+    terminateInput: string;
+    setTerminateInput: (val: string) => void;
+    handleConfirmTermination: () => void;
 }
 
 export default function TerminateEmployeeModal({
     isOpen,
     onClose,
     employee,
-    isTerminating,
-    handleTerminate
+    terminateInput,
+    setTerminateInput,
+    handleConfirmTermination
 }: TerminateEmployeeModalProps) {
     return (
         <Modal isOpen={isOpen} onClose={onClose} title="Operational Action: Termination" size="sm">
@@ -33,24 +35,33 @@ export default function TerminateEmployeeModal({
                     <p className="text-gray-900 dark:text-white font-bold">{employee.name}</p>
                     <p className="text-[10px] text-cyber-primary font-mono">{employee.id}</p>
                 </div>
+                <div className="space-y-4 mb-6">
+                    <p className="text-[10px] text-gray-500 uppercase font-bold tracking-widest block text-center">Type "TERMINATE" to confirm action</p>
+                    <input
+                        type="text"
+                        value={terminateInput}
+                        onChange={(e) => setTerminateInput(e.target.value)}
+                        placeholder="TERMINATE"
+                        className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-orange-500 focus:ring-1 focus:ring-orange-500/20 outline-none text-center font-mono placeholder:text-gray-600 transition-all font-bold"
+                    />
+                </div>
                 <div className="flex justify-end gap-3">
                     <button
-                        disabled={isTerminating}
                         onClick={onClose}
                         className="px-4 py-2 text-gray-500 dark:text-gray-400 font-bold text-xs uppercase hover:text-gray-900 dark:hover:text-white transition-colors"
                     >
                         Cancel
                     </button>
                     <button
-                        disabled={isTerminating}
-                        onClick={handleTerminate}
-                        className="px-6 py-2 bg-orange-500 hover:bg-orange-600 text-white font-black rounded-lg text-xs uppercase shadow-lg shadow-orange-500/20 flex items-center gap-2"
+                        disabled={terminateInput !== 'TERMINATE'}
+                        onClick={handleConfirmTermination}
+                        className={`px-6 py-2 font-black rounded-lg text-xs uppercase shadow-lg flex items-center gap-2 transition-all ${
+                            terminateInput === 'TERMINATE' 
+                            ? 'bg-orange-500 hover:bg-orange-600 text-white shadow-orange-500/20' 
+                            : 'bg-black/40 text-gray-500 cursor-not-allowed border border-white/5'
+                        }`}
                     >
-                        {isTerminating ? (
-                            <><Loader2 size={14} className="animate-spin" /> Processing...</>
-                        ) : (
-                            "Confirm Termination"
-                        )}
+                        Confirm Termination
                     </button>
                 </div>
             </div>

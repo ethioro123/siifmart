@@ -3,8 +3,8 @@ import {
     Briefcase, Mail, Phone, Shield, Star, Calendar, Award, CheckCircle, Clock,
     AlertTriangle, DollarSign, ClipboardList, TrendingUp, User, Plus, Trash2,
     ArrowRight, MapPin, Upload, CreditCard, MessageSquare, Download, XCircle,
-    Key, Camera, Trophy, Zap, Target, Gift, Crown, Building, LayoutDashboard, FileText, Settings,
-    Store, UserCheck, Package, Loader2, Eye, EyeOff
+    Key, Camera, Trophy, Zap, Target, Gift, Crown, Building, LayoutDashboard, 
+    FileText, Settings, Store, UserCheck, Package, Loader2, Eye, EyeOff, ChevronDown
 } from 'lucide-react';
 import {
     ResponsiveContainer, BarChart, Bar, CartesianGrid, XAxis, Tooltip
@@ -17,6 +17,9 @@ import OverviewTab from './staff-profile/tabs/OverviewTab';
 import GamificationTab from './staff-profile/tabs/GamificationTab';
 import PayrollTab from './staff-profile/tabs/PayrollTab';
 import SettingsTab from './staff-profile/tabs/SettingsTab';
+import TasksTab from './staff-profile/tabs/TasksTab';
+import TimeOffTab from './staff-profile/tabs/TimeOffTab';
+import DocumentsTab from './staff-profile/tabs/DocumentsTab';
 import ResetPasswordModal from './staff-profile/modals/ResetPasswordModal';
 import SendMessageModal from './staff-profile/modals/SendMessageModal';
 import AdjustSalaryModal from './staff-profile/modals/AdjustSalaryModal';
@@ -51,13 +54,26 @@ const ATTENDANCE_DATA = [
 
 type ProfileTab = 'overview' | 'tasks' | 'timeoff' | 'payroll' | 'docs' | 'gamification' | 'settings';
 
+const PROFILE_TABS = [
+    { id: 'overview', label: 'Overview', icon: LayoutDashboard },
+    { id: 'gamification', label: 'Gamification', icon: Trophy },
+    { id: 'tasks', label: 'Tasks', icon: ClipboardList },
+    { id: 'timeoff', label: 'Leave', icon: Calendar },
+    { id: 'docs', label: 'Documents', icon: FileText },
+    { id: 'payroll', label: 'Payroll', icon: DollarSign },
+    { id: 'settings', label: 'Settings', icon: Settings }
+];
+
 interface StaffProfileViewProps {
     employee: Employee;
     isOwnProfile?: boolean;
     onClose?: () => void;
+    terminateInput?: string;
+    setTerminateInput?: (val: string) => void;
+    handleConfirmTermination?: () => void;
 }
 
-export default function StaffProfileView({ employee, isOwnProfile = false, onClose }: StaffProfileViewProps) {
+export default function StaffProfileView({ employee, isOwnProfile = false, onClose, terminateInput = '', setTerminateInput = () => {}, handleConfirmTermination = () => {} }: StaffProfileViewProps) {
     const { user, updateUserAvatar } = useStore();
     const {
         tasks: allTasks,
@@ -97,8 +113,8 @@ export default function StaffProfileView({ employee, isOwnProfile = false, onClo
     // Terminate / Delete states
     const [isTerminateModalOpen, setIsTerminateModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-    const [isTerminating, setIsTerminating] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
+    const [isMobileTabsOpen, setIsMobileTabsOpen] = useState(false);
 
     // Refs
     const profilePhotoInputRef = useRef<HTMLInputElement>(null);
@@ -113,7 +129,9 @@ export default function StaffProfileView({ employee, isOwnProfile = false, onClo
     const userRoleLevel = user ? getRoleHierarchy(user.role) : 0;
     const targetRoleLevel = getRoleHierarchy(employee.role);
     const isSuperAdmin = user?.role === 'super_admin';
-    const isHR = user?.role === 'hr';
+    const isHR = user?.role === 'hr' || user?.role === 'hr_manager';
+    const isAdmin = user?.role === 'admin';
+    const canAdjustPayroll = (isSuperAdmin || isHR || isAdmin) && !isOwnProfile;
     const canResetPassword = isSuperAdmin || (userRoleLevel > targetRoleLevel);
     const canTerminate = (isSuperAdmin || isHR) && userRoleLevel > targetRoleLevel && !isOwnProfile;
     const canDelete = isSuperAdmin && userRoleLevel > targetRoleLevel && !isOwnProfile;
@@ -270,18 +288,7 @@ export default function StaffProfileView({ employee, isOwnProfile = false, onClo
     };
 
     const handleTerminate = async () => {
-        setIsTerminating(true);
-        try {
-            await updateEmployee({ ...employee, status: 'Terminated' }, user?.name || 'System');
-            addNotification('success', `${employee.name} has been terminated`);
-            setIsTerminateModalOpen(false);
-            if (onClose) onClose();
-        } catch (error) {
-            console.error('Failed to terminate employee:', error);
-            addNotification('alert', 'Failed to terminate employee');
-        } finally {
-            setIsTerminating(false);
-        }
+        setIsTerminateModalOpen(true);
     };
 
     const handleDelete = async () => {
@@ -312,13 +319,13 @@ export default function StaffProfileView({ employee, isOwnProfile = false, onClo
 
 
     return (
-        <div className="bg-white dark:bg-cyber-gray border border-gray-200 dark:border-white/5 rounded-2xl p-6 shadow-lg dark:shadow-2xl animate-in fade-in duration-500">
+        <div className="bg-white dark:bg-cyber-gray border border-gray-200 dark:border-white/5 rounded-2xl p-4 md:p-6 shadow-lg dark:shadow-2xl animate-in fade-in duration-500">
             {/* Header Profile */}
-            <div className="flex flex-col md:flex-row items-center md:items-start gap-6 mb-8 p-6 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/10 relative overflow-hidden group">
+            <div className="flex flex-col md:flex-row items-center md:items-start gap-4 md:gap-6 mb-8 p-4 md:p-6 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/10 relative overflow-hidden group">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-cyber-primary/5 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-cyber-primary/10 transition-all"></div>
 
                 <div className="relative">
-                    <div className="w-32 h-32 rounded-3xl overflow-hidden border-4 border-cyber-primary/30 shadow-lg dark:shadow-2xl relative bg-gray-200 dark:bg-gray-800">
+                    <div className="w-24 h-24 md:w-32 md:h-32 rounded-3xl overflow-hidden border-4 border-cyber-primary/30 shadow-lg dark:shadow-2xl relative bg-gray-200 dark:bg-gray-800">
                         {employee.avatar ? (
                             <img src={employee.avatar} className="w-full h-full object-cover" alt={employee.name} />
                         ) : (
@@ -349,7 +356,7 @@ export default function StaffProfileView({ employee, isOwnProfile = false, onClo
                 <div className="flex-1 text-center md:text-left">
                     <div className="flex flex-col md:flex-row justify-between items-center md:items-start gap-4">
                         <div>
-                            <h2 className="text-3xl font-black text-gray-900 dark:text-white mb-1">{employee.name}</h2>
+                            <h2 className="text-2xl md:text-3xl font-black text-gray-900 dark:text-white mb-1 uppercase tracking-tight">{employee.name}</h2>
                             <div className="flex flex-wrap justify-center md:justify-start gap-3 items-center mt-2">
                                 <span className="px-3 py-1 bg-cyber-primary/10 text-cyber-primary border border-cyber-primary/20 rounded-full text-xs font-bold uppercase tracking-wider">
                                     {formatRole(employee.role)}
@@ -374,30 +381,30 @@ export default function StaffProfileView({ employee, isOwnProfile = false, onClo
                     </div>
 
                     {/* Quick Actions Row */}
-                    <div className="flex flex-wrap justify-center md:justify-start gap-2 mt-6">
+                    <div className="grid grid-cols-2 sm:flex sm:flex-wrap justify-center md:justify-start gap-2 mt-6 w-full md:w-auto">
                         {/* Generate ID - Available for all profiles */}
-                        <button onClick={() => setIdCardOpen(true)} className="flex items-center gap-2 text-xs font-bold bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-700 dark:text-white px-4 py-2 rounded-xl border border-gray-200 dark:border-white/10 transition-all">
-                            <CreditCard size={14} /> Generate ID
+                        <button onClick={() => setIdCardOpen(true)} className="flex items-center justify-center md:justify-start gap-2 text-[10px] md:text-xs font-bold bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-700 dark:text-white px-3 md:px-4 py-3 md:py-2 rounded-xl border border-gray-200 dark:border-white/10 transition-all uppercase tracking-widest">
+                            <CreditCard size={14} /> ID Card
                         </button>
 
                         {/* Manager-only actions */}
                         {!isOwnProfile && (
                             <>
-                                <button onClick={handleSendMessage} className="flex items-center gap-2 text-xs font-bold bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-700 dark:text-white px-4 py-2 rounded-xl border border-gray-200 dark:border-white/10 transition-all">
-                                    <MessageSquare size={14} /> Send Message
+                                <button onClick={handleSendMessage} className="flex items-center justify-center md:justify-start gap-2 text-[10px] md:text-xs font-bold bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-700 dark:text-white px-3 md:px-4 py-3 md:py-2 rounded-xl border border-gray-200 dark:border-white/10 transition-all uppercase tracking-widest">
+                                    <MessageSquare size={14} /> Message
                                 </button>
                                 {canResetPassword && (
-                                    <button onClick={handleResetPassword} className="flex items-center gap-2 text-xs font-bold bg-yellow-100 dark:bg-yellow-400/10 hover:bg-yellow-200 dark:hover:bg-yellow-400/20 text-yellow-600 dark:text-yellow-500 px-4 py-2 rounded-xl border border-yellow-200 dark:border-yellow-400/20 transition-all">
-                                        <Key size={14} /> Reset Password
+                                    <button onClick={handleResetPassword} className="flex items-center justify-center md:justify-start gap-2 text-[10px] md:text-xs font-bold bg-yellow-100 dark:bg-yellow-400/10 hover:bg-yellow-200 dark:hover:bg-yellow-400/20 text-yellow-600 dark:text-yellow-500 px-3 md:px-4 py-3 md:py-2 rounded-xl border border-yellow-200 dark:border-yellow-400/20 transition-all uppercase tracking-widest">
+                                        <Key size={14} /> Reset
                                     </button>
                                 )}
                                 {canTerminate && employee.status !== 'Terminated' && (
-                                    <button onClick={() => setIsTerminateModalOpen(true)} className="flex items-center gap-2 text-xs font-bold bg-orange-100 dark:bg-orange-500/10 hover:bg-orange-200 dark:hover:bg-orange-500/20 text-orange-600 dark:text-orange-500 px-4 py-2 rounded-xl border border-orange-200 dark:border-orange-500/20 transition-all">
+                                    <button onClick={() => setIsTerminateModalOpen(true)} className="flex items-center justify-center md:justify-start gap-2 text-[10px] md:text-xs font-bold bg-orange-100 dark:bg-orange-500/10 hover:bg-orange-200 dark:hover:bg-orange-500/20 text-orange-600 dark:text-orange-500 px-3 md:px-4 py-3 md:py-2 rounded-xl border border-orange-200 dark:border-orange-500/20 transition-all uppercase tracking-widest">
                                         <AlertTriangle size={14} /> Terminate
                                     </button>
                                 )}
                                 {canDelete && (
-                                    <button onClick={() => setIsDeleteModalOpen(true)} className="flex items-center gap-2 text-xs font-bold bg-red-100 dark:bg-red-500/10 hover:bg-red-200 dark:hover:bg-red-500/20 text-red-600 dark:text-red-500 px-4 py-2 rounded-xl border border-red-200 dark:border-red-500/20 transition-all">
+                                    <button onClick={() => setIsDeleteModalOpen(true)} className="flex items-center justify-center md:justify-start gap-2 text-[10px] md:text-xs font-bold bg-red-100 dark:bg-red-500/10 hover:bg-red-200 dark:hover:bg-red-500/20 text-red-600 dark:text-red-500 px-3 md:px-4 py-3 md:py-2 rounded-xl border border-red-200 dark:border-red-500/20 transition-all uppercase tracking-widest">
                                         <Trash2 size={14} /> Delete
                                     </button>
                                 )}
@@ -407,17 +414,9 @@ export default function StaffProfileView({ employee, isOwnProfile = false, onClo
                 </div>
             </div>
 
-            {/* Tabs Navigation */}
-            <div className="flex border-b border-gray-200 dark:border-white/10 mb-8 overflow-x-auto no-scrollbar" role="tablist">
-                {[
-                    { id: 'overview', label: 'Overview', icon: LayoutDashboard },
-                    { id: 'gamification', label: 'Gamification', icon: Trophy },
-                    { id: 'tasks', label: 'Tasks', icon: ClipboardList },
-                    { id: 'timeoff', label: 'Leave', icon: Calendar },
-                    { id: 'docs', label: 'Documents', icon: FileText },
-                    { id: 'payroll', label: 'Payroll', icon: DollarSign },
-                    { id: 'settings', label: 'Settings', icon: Settings }
-                ].map((tab) => {
+            {/* Tabs Navigation - Desktop */}
+            <div className="hidden md:flex border-b border-gray-200 dark:border-white/10 mb-8 overflow-x-auto no-scrollbar" role="tablist">
+                {PROFILE_TABS.map((tab) => {
                     const isSelected = activeProfileTab === tab.id;
                     return (
                         <button
@@ -435,6 +434,49 @@ export default function StaffProfileView({ employee, isOwnProfile = false, onClo
                         </button>
                     );
                 })}
+            </div>
+
+            {/* Tabs Navigation - Mobile Dropdown */}
+            <div className="md:hidden mb-6 relative">
+                <button 
+                    onClick={() => setIsMobileTabsOpen(!isMobileTabsOpen)}
+                    className="w-full flex items-center justify-between px-5 py-4 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl text-gray-900 dark:text-white font-black uppercase tracking-widest text-sm shadow-lg overflow-hidden"
+                >
+                    <div className="flex items-center gap-3">
+                        {(() => {
+                            const TabIcon = PROFILE_TABS.find(t => t.id === activeProfileTab)?.icon || LayoutDashboard;
+                            return <TabIcon size={20} className="text-cyber-primary" />;
+                        })()}
+                        {PROFILE_TABS.find(t => t.id === activeProfileTab)?.label}
+                    </div>
+                    <ChevronDown size={20} className={`text-cyber-primary transition-transform duration-300 ${isMobileTabsOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                {isMobileTabsOpen && (
+                    <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-cyber-dark border border-gray-200 dark:border-white/10 rounded-2xl shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in duration-200">
+                        {PROFILE_TABS.map((tab) => {
+                            const isSelected = activeProfileTab === tab.id;
+                            if (tab.id === 'payroll' && !canViewPayroll) return null;
+                            
+                            return (
+                                <button
+                                    key={tab.id}
+                                    onClick={() => {
+                                        setActiveProfileTab(tab.id as ProfileTab);
+                                        setIsMobileTabsOpen(false);
+                                    }}
+                                    className={`w-full flex items-center gap-4 px-6 py-4 text-sm font-bold transition-all transition-colors ${isSelected
+                                        ? 'bg-cyber-primary/10 text-cyber-primary'
+                                        : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5'
+                                    }`}
+                                >
+                                    <tab.icon size={18} />
+                                    {tab.label}
+                                </button>
+                            );
+                        })}
+                    </div>
+                )}
             </div>
 
             {/* Tab Content */}
@@ -484,7 +526,7 @@ export default function StaffProfileView({ employee, isOwnProfile = false, onClo
                 {activeProfileTab === 'payroll' && (
                     <PayrollTab 
                         employee={employee}
-                        canManageEmployees={canManageEmployees}
+                        canManageEmployees={canAdjustPayroll}
                         handleEditSalary={handleEditSalary}
                         handleDownloadPayslip={handleDownloadPayslip}
                     />
@@ -582,8 +624,9 @@ export default function StaffProfileView({ employee, isOwnProfile = false, onClo
                 isOpen={isTerminateModalOpen}
                 onClose={() => setIsTerminateModalOpen(false)}
                 employee={employee}
-                isTerminating={isTerminating}
-                handleTerminate={handleTerminate}
+                terminateInput={terminateInput}
+                setTerminateInput={setTerminateInput}
+                handleConfirmTermination={handleConfirmTermination}
             />
 
             {/* Permanent Delete Confirmation */}
