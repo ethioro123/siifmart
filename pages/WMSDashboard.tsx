@@ -13,7 +13,7 @@ import { MOCK_ZONES } from '../constants';
 import { useStore } from '../contexts/CentralStore';
 import { useData } from '../contexts/DataContext'; // Live Data
 import { useGamification } from '../contexts/GamificationContext';
-import ManagerDashboardBanner from '../components/ManagerDashboardBanner';
+
 import ClickableKPICard from '../components/ClickableKPICard';
 import { calculateMetrics, METRIC_ROUTES } from '../utils/metrics';
 import { native } from '../utils/native';
@@ -196,8 +196,7 @@ export default function WMSDashboard() {
       </div>
 
       <div className="relative z-10 space-y-8">
-        {/* Manager Quick Access Banner */}
-        <ManagerDashboardBanner />
+
 
         {/* Header with Date Filter & Alerts */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 dark:border-white/[0.08] border-black/[0.05]">

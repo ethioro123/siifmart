@@ -125,9 +125,9 @@ const ShiftPlanner: React.FC<ShiftPlannerProps> = ({ employees, canEdit = false,
                     children: []
                 },
                 {
-                    role: 'manager',
+                    role: 'store_manager',
                     label: 'Retail Operations',
-                    employees: getByRoleAndDept('manager', 'Retail Operations'),
+                    employees: getByRoleAndDept('store_manager', 'Retail Operations'),
                     icon: Briefcase,
                     color: 'text-blue-400',
                     children: [

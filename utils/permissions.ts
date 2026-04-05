@@ -28,18 +28,18 @@ export const PERMISSIONS = {
     VIEW_ADMIN_DASHBOARD: ['super_admin', 'admin', 'hr', 'auditor', 'finance_manager', 'it_support'],
     ACCESS_ADMIN_MODULE: ['super_admin'],
     VIEW_WMS_DASHBOARD: ['super_admin', 'warehouse_manager', 'dispatcher', 'picker', 'driver', 'procurement_manager', 'inventory_specialist'],
-    VIEW_POS_DASHBOARD: ['super_admin', 'manager', 'pos', 'store_supervisor', 'cs_manager'],
+    VIEW_POS_DASHBOARD: ['super_admin', 'store_manager', 'assistant_manager', 'shift_lead', 'pos', 'store_supervisor', 'cs_manager'],
 
     // POS
-    ACCESS_POS: ['super_admin', 'manager', 'pos', 'store_supervisor'],
-    PROCESS_SALE: ['super_admin', 'manager', 'pos', 'store_supervisor'],
-    VOID_SALE: ['super_admin', 'manager', 'store_supervisor'],
-    REFUND_SALE: ['super_admin', 'manager', 'store_supervisor', 'cs_manager'],
-    APPLY_DISCOUNT: ['super_admin', 'manager', 'store_supervisor'],
-    VIEW_ALL_TRANSACTIONS: ['super_admin', 'manager', 'auditor', 'finance_manager', 'store_supervisor'],
+    ACCESS_POS: ['super_admin', 'store_manager', 'assistant_manager', 'shift_lead', 'pos', 'store_supervisor'],
+    PROCESS_SALE: ['super_admin', 'store_manager', 'assistant_manager', 'shift_lead', 'pos', 'store_supervisor'],
+    VOID_SALE: ['super_admin', 'store_manager', 'store_supervisor'],
+    REFUND_SALE: ['super_admin', 'store_manager', 'assistant_manager', 'store_supervisor', 'cs_manager'],
+    APPLY_DISCOUNT: ['super_admin', 'store_manager', 'assistant_manager', 'shift_lead', 'store_supervisor'],
+    VIEW_ALL_TRANSACTIONS: ['super_admin', 'store_manager', 'assistant_manager', 'shift_lead', 'auditor', 'finance_manager', 'store_supervisor'],
 
     // Inventory
-    ACCESS_INVENTORY: ['super_admin', 'manager', 'warehouse_manager', 'dispatcher', 'auditor', 'procurement_manager', 'inventory_specialist', 'store_supervisor', 'pos'],
+    ACCESS_INVENTORY: ['super_admin', 'store_manager', 'assistant_manager', 'shift_lead', 'warehouse_manager', 'dispatcher', 'auditor', 'procurement_manager', 'inventory_specialist', 'store_supervisor', 'pos'],
     ADD_PRODUCT: ['super_admin', 'warehouse_manager'],
     EDIT_PRODUCT: ['super_admin', 'warehouse_manager'],
     DELETE_PRODUCT: ['super_admin'],
@@ -48,26 +48,26 @@ export const PERMISSIONS = {
     VIEW_COST_PRICE: ['super_admin', 'auditor', 'finance_manager', 'procurement_manager'],
 
     // Sales
-    ACCESS_SALES: ['super_admin', 'manager', 'auditor', 'finance_manager', 'cs_manager'],
-    VIEW_SALES_REPORTS: ['super_admin', 'manager', 'auditor', 'finance_manager', 'cs_manager'],
+    ACCESS_SALES: ['super_admin', 'store_manager', 'assistant_manager', 'shift_lead', 'auditor', 'finance_manager', 'cs_manager'],
+    VIEW_SALES_REPORTS: ['super_admin', 'store_manager', 'assistant_manager', 'shift_lead', 'auditor', 'finance_manager', 'cs_manager'],
     EXPORT_SALES_DATA: ['super_admin', 'auditor', 'finance_manager'],
     DELETE_SALE: ['super_admin'],
     EDIT_SALE: ['super_admin'],
 
     // Customers
-    ACCESS_CUSTOMERS: ['super_admin', 'manager', 'pos', 'cs_manager', 'store_supervisor'],
-    ADD_CUSTOMER: ['super_admin', 'manager', 'cs_manager', 'pos'],
-    EDIT_CUSTOMER: ['super_admin', 'manager', 'cs_manager'],
+    ACCESS_CUSTOMERS: ['super_admin', 'store_manager', 'assistant_manager', 'shift_lead', 'pos', 'cs_manager', 'store_supervisor'],
+    ADD_CUSTOMER: ['super_admin', 'store_manager', 'assistant_manager', 'shift_lead', 'cs_manager', 'pos'],
+    EDIT_CUSTOMER: ['super_admin', 'store_manager', 'assistant_manager', 'shift_lead', 'cs_manager'],
     DELETE_CUSTOMER: ['super_admin'],
-    VIEW_CUSTOMER_HISTORY: ['super_admin', 'manager', 'auditor', 'cs_manager'],
+    VIEW_CUSTOMER_HISTORY: ['super_admin', 'store_manager', 'assistant_manager', 'shift_lead', 'auditor', 'cs_manager'],
 
     // Employees
-    ACCESS_EMPLOYEES: ['super_admin', 'admin', 'hr', 'manager', 'store_supervisor'],
+    ACCESS_EMPLOYEES: ['super_admin', 'admin', 'hr', 'store_manager', 'assistant_manager', 'shift_lead', 'store_supervisor'],
     ADD_EMPLOYEE: ['super_admin', 'hr'],
     EDIT_EMPLOYEE: ['super_admin', 'hr', 'it_support'],
     DELETE_EMPLOYEE: ['super_admin'],
     TERMINATE_EMPLOYEE: ['super_admin', 'admin', 'hr'],
-    MANAGE_SHIFTS: ['super_admin', 'admin', 'hr', 'manager', 'warehouse_manager', 'dispatcher', 'store_supervisor'],
+    MANAGE_SHIFTS: ['super_admin', 'admin', 'hr', 'store_manager', 'assistant_manager', 'shift_lead', 'warehouse_manager', 'dispatcher', 'store_supervisor'],
     VIEW_SALARY: ['super_admin', 'hr', 'finance_manager'],
     RESET_PASSWORD: ['super_admin', 'admin', 'it_support'],
     CREATE_LOGIN_ACCOUNT: ['super_admin', 'admin', 'it_support'],
@@ -91,16 +91,16 @@ export const PERMISSIONS = {
     EXPORT_FINANCIAL_DATA: ['super_admin', 'auditor', 'finance_manager'],
 
     // Pricing
-    ACCESS_PRICING: ['super_admin', 'manager', 'finance_manager', 'procurement_manager'],
+    ACCESS_PRICING: ['super_admin', 'finance_manager', 'procurement_manager'],
     EDIT_PRICE: ['super_admin', 'finance_manager'],
-    CREATE_PROMOTION: ['super_admin', 'manager', 'store_supervisor'],
+    CREATE_PROMOTION: ['super_admin', 'store_supervisor'],
     APPROVE_PRICE_CHANGE: ['super_admin', 'finance_manager'],
 
     // Warehouse
-    ACCESS_WAREHOUSE: ['super_admin', 'warehouse_manager', 'dispatcher', 'picker', 'driver', 'inventory_specialist'],
+    ACCESS_WAREHOUSE: ['super_admin', 'warehouse_manager', 'dispatcher', 'picker', 'driver', 'inventory_specialist', 'packer', 'receiver'],
     MANAGE_WAREHOUSE: ['super_admin', 'warehouse_manager', 'inventory_specialist'],
     ASSIGN_TASKS: ['super_admin', 'warehouse_manager', 'dispatcher', 'inventory_specialist'],
-    COMPLETE_TASKS: ['super_admin', 'warehouse_manager', 'dispatcher', 'picker', 'driver'],
+    COMPLETE_TASKS: ['super_admin', 'warehouse_manager', 'dispatcher', 'picker', 'driver', 'packer', 'receiver'],
     VIEW_ALL_TASKS: ['super_admin', 'warehouse_manager', 'dispatcher', 'inventory_specialist'],
     PROCESS_RETURNS: ['super_admin', 'warehouse_manager', 'dispatcher'],
     MANAGE_WASTE: ['super_admin', 'warehouse_manager', 'inventory_specialist'],
@@ -110,7 +110,7 @@ export const PERMISSIONS = {
     // Settings
     ACCESS_SETTINGS: ['super_admin', 'admin', 'hr', 'it_support'],
     EDIT_SYSTEM_SETTINGS: ['super_admin', 'it_support'],
-    EDIT_OPERATIONAL_SETTINGS: ['super_admin', 'manager'],
+    EDIT_OPERATIONAL_SETTINGS: ['super_admin'],
     EDIT_HR_SETTINGS: ['super_admin', 'hr'],
     VIEW_AUDIT_LOGS: ['super_admin', 'admin', 'auditor', 'it_support'],
     MANAGE_ROLES: ['super_admin'],
@@ -284,7 +284,7 @@ export function getRoleDisplayName(role: UserRole): string {
     const displayNames: Partial<Record<UserRole, string>> = {
         super_admin: 'CEO',
         admin: 'Assistant CEO',
-        manager: 'Store Manager',
+        store_manager: 'Store Manager',
         hr: 'HR Manager',
         warehouse_manager: 'Warehouse Manager',
         dispatcher: 'Warehouse Dispatcher',
@@ -322,7 +322,7 @@ export function getRoleDescription(role: UserRole): string {
     const descriptions: Partial<Record<UserRole, string>> = {
         super_admin: 'Chief Executive Officer - Full system access and executive oversight',
         admin: 'Assistant CEO - Executive and Operations support',
-        manager: 'Store Manager - Retail operations and customer service',
+        store_manager: 'Store Manager - Retail operations and customer service',
         hr: 'Human Resources Manager - Employee management and payroll',
         warehouse_manager: 'Warehouse Manager - Logistics and inventory operations',
         dispatcher: 'Warehouse Dispatcher - Task assignment and workflow coordination',
@@ -360,7 +360,7 @@ export function getRoleColor(role: UserRole): string {
     const colors: Partial<Record<UserRole, string>> = {
         super_admin: 'text-red-400 bg-red-500/10 border-red-500/20',
         admin: 'text-purple-400 bg-purple-500/10 border-purple-500/20',
-        manager: 'text-blue-400 bg-blue-500/10 border-blue-500/20',
+        store_manager: 'text-blue-400 bg-blue-500/10 border-blue-500/20',
         hr: 'text-pink-400 bg-pink-500/10 border-pink-500/20',
         warehouse_manager: 'text-orange-400 bg-orange-500/10 border-orange-500/20',
         dispatcher: 'text-amber-400 bg-amber-500/10 border-amber-500/20',
@@ -399,14 +399,14 @@ export function getRoleColor(role: UserRole): string {
  * Check if user should see all sites or just their own
  */
 export function canViewAllSites(userRole: UserRole | undefined): boolean {
-    return ['super_admin', 'admin', 'auditor', 'hr', 'finance_manager', 'procurement_manager', 'cs_manager', 'it_support'].includes(userRole || '');
+    return ['super_admin', 'regional_manager', 'operations_manager', 'finance_manager', 'hr_manager', 'supply_chain_manager', 'admin', 'hr', 'auditor', 'it_support', 'cs_manager'].includes(userRole || '');
 }
 
 /**
  * Check if user should see all employees or filtered
  */
 export function canViewAllEmployees(userRole: UserRole | undefined): boolean {
-    return ['super_admin', 'admin', 'hr', 'manager', 'store_supervisor'].includes(userRole || '');
+    return ['super_admin', 'regional_manager', 'operations_manager', 'finance_manager', 'hr_manager', 'supply_chain_manager', 'admin', 'hr', 'it_support'].includes(userRole || '');
 }
 
 /**

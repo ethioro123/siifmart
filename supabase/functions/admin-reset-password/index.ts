@@ -72,7 +72,6 @@ Deno.serve(async (req) => {
         'dispatch_manager': 52,
         'warehouse_manager': 50,
         'store_manager': 50,
-        'manager': 45,
         'store_supervisor': 40,
         'accountant': 38,
         'data_analyst': 36,

@@ -55,13 +55,14 @@ export const PickHistory: React.FC<PickHistoryProps> = ({
             const isCurrentUser = user && userId === user.id;
             const resolvedName = userObj?.name || (isCurrentUser ? user.name : null);
             const displayId = userObj?.code || (isCurrentUser ? (user.name?.slice(0, 3).toUpperCase() || '') : (userId && userId.length > 20 ? userId.slice(0, 5).toUpperCase() : userId));
-            const userName = resolvedName
-                ? `${resolvedName} (${displayId})`
-                : (userId ? `Unknown (${displayId})` : 'System');
+            const resolvedUser = {
+                name: resolvedName || (userId ? 'Unknown' : 'System'),
+                displayId: displayId || ''
+            };
 
             return {
                 ...j,
-                user: userName
+                resolvedUser
             };
         }).sort((a, b) => {
             const dateA = new Date(a.completedAt || a.updatedAt || a.createdAt || 0).getTime();
@@ -210,12 +211,12 @@ export const PickHistory: React.FC<PickHistoryProps> = ({
                                         <div className="relative flex items-center justify-between border-t border-zinc-100 dark:border-white/5 pt-3 mt-auto">
                                             <div className="flex items-center gap-2">
                                                 <div className="w-6 h-6 rounded-full bg-zinc-100 dark:bg-purple-950 flex items-center justify-center border border-zinc-300 dark:border-purple-500/30 shadow-inner group-hover/history:scale-110 transition-transform">
-                                                    <span className="text-[9px] font-black text-zinc-950 dark:text-purple-400">{((job as any).user || 'S').charAt(0).toUpperCase()}</span>
+                                                    <span className="text-[9px] font-black text-zinc-950 dark:text-purple-400">{(job.resolvedUser?.name || 'S').charAt(0).toUpperCase()}</span>
                                                 </div>
                                                 <div className="flex flex-col">
                                                     <span className="text-[9px] font-black text-zinc-500 dark:text-zinc-600 uppercase tracking-widest leading-tight">By</span>
                                                     <span className="text-[9px] font-black text-zinc-900 dark:text-zinc-400 uppercase tracking-wider leading-tight">
-                                                        {(job as any).user || 'System'}
+                                                        {job.resolvedUser?.name} <span className="text-zinc-500 dark:text-zinc-600 font-normal lowercase">({job.resolvedUser?.displayId})</span>
                                                     </span>
                                                 </div>
                                             </div>
@@ -224,7 +225,7 @@ export const PickHistory: React.FC<PickHistoryProps> = ({
                                                 {job.status === 'Completed' && (
                                                     <button
                                                         onClick={(e) => { e.stopPropagation(); setReturnJob(job); }}
-                                                        className="flex items-center gap-1.5 bg-amber-500/5 hover:bg-amber-500/15 px-2 py-1 rounded-lg border border-amber-500/10 hover:border-amber-500/30 transition-all text-amber-400 hover:text-amber-300"
+                                                        className="flex items-center gap-1.5 bg-amber-100 hover:bg-amber-200 dark:bg-amber-500/5 dark:hover:bg-amber-500/15 px-2 py-1 rounded-lg border border-amber-300 dark:border-amber-500/10 hover:border-amber-400 dark:hover:border-amber-500/30 transition-all text-amber-800 hover:text-amber-900 dark:text-amber-400 dark:hover:text-amber-300"
                                                         title="Return items to warehouse"
                                                     >
                                                         <Undo2 size={10} />

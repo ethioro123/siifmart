@@ -58,7 +58,7 @@ class POSDBService {
         }
     }
 
-    private async _openDB(): Promise<IDBPDatabase<POSDB>> {
+    private async _openDB(isRetry: boolean = false): Promise<IDBPDatabase<POSDB>> {
         // HMR / Singleton Check:
         // Use a global variable to track the connection across HMR updates
         const globalDB = (window as any).__SIFMART_POS_DB__;
@@ -80,51 +80,89 @@ class POSDBService {
             }
 
             // 2. OPEN NEW CONNECTION
-            return openDB<POSDB>(DB_NAME, DB_VERSION, {
-                upgrade(db) {
-                    // Sales Store
-                    if (!db.objectStoreNames.contains('sales')) {
-                        const salesStore = db.createObjectStore('sales', { keyPath: 'id' });
-                        salesStore.createIndex('by-date', 'date');
-                    }
-                    // Sync Queue Store
-                    if (!db.objectStoreNames.contains('sync_queue')) {
-                        const queueStore = db.createObjectStore('sync_queue', { keyPath: 'id', autoIncrement: true });
-                        queueStore.createIndex('by-status', 'status');
-                    }
-                    // Query Cache Store (React Query)
-                    if (!db.objectStoreNames.contains('query_cache')) {
-                        db.createObjectStore('query_cache'); // Key-value store
-                    }
-                },
-                blocked: () => {
-                    console.warn('POSDB: Connection is blocked. Attempting to force close...');
-                },
-                blocking: () => {
-                    console.warn('POSDB: This connection is blocking a newer version. Closing...');
-                    // Close automatically to allow upgrade
-                    if (this.db) {
-                        this.db.close();
+            try {
+                return await openDB<POSDB>(DB_NAME, DB_VERSION, {
+                    upgrade(db) {
+                        // Sales Store
+                        if (!db.objectStoreNames.contains('sales')) {
+                            const salesStore = db.createObjectStore('sales', { keyPath: 'id' });
+                            salesStore.createIndex('by-date', 'date');
+                        }
+                        // Sync Queue Store
+                        if (!db.objectStoreNames.contains('sync_queue')) {
+                            const queueStore = db.createObjectStore('sync_queue', { keyPath: 'id', autoIncrement: true });
+                            queueStore.createIndex('by-status', 'status');
+                        }
+                        // Query Cache Store (React Query)
+                        if (!db.objectStoreNames.contains('query_cache')) {
+                            db.createObjectStore('query_cache'); // Key-value store
+                        }
+                    },
+                    blocked: () => {
+                        console.warn('POSDB: Connection is blocked. Attempting to force close...');
+                    },
+                    blocking: () => {
+                        console.warn('POSDB: This connection is blocking a newer version. Closing...');
+                        // Close automatically to allow upgrade
+                        if (this.db) {
+                            this.db.close();
+                            this.db = null;
+                            (window as any).__SIFMART_POS_DB__ = undefined;
+                        }
+                    },
+                    terminated: () => {
+                        console.warn('POSDB: Connection terminated by browser.');
                         this.db = null;
                         (window as any).__SIFMART_POS_DB__ = undefined;
                     }
-                },
-                terminated: () => {
-                    console.error('POSDB: Connection terminated.');
-                    this.db = null;
-                    (window as any).__SIFMART_POS_DB__ = undefined;
+                });
+            } catch (err: any) {
+                // DETECT CORRUPTION OR BROWSER STORAGE ERROR
+                const isInternalError = 
+                    err?.name === 'UnknownError' || 
+                    err?.message?.includes('Internal error') || 
+                    err?.message?.includes('backing store');
+
+                if (isInternalError && !isRetry) {
+                    console.warn('POSDB: Detected internal storage error. Attempting database reset...', err);
+                    try {
+                        // Use native API to delete the database
+                        await new Promise<void>((resolve, reject) => {
+                            const req = indexedDB.deleteDatabase(DB_NAME);
+                            req.onsuccess = () => resolve();
+                            req.onerror = () => reject(new Error('Failed to delete corrupted database'));
+                            req.onblocked = () => {
+                                console.warn('POSDB: Delete blocked by other tabs. Closing them might help.');
+                                resolve(); // Proceed anyway, openDB might still fail but we tried
+                            };
+                        });
+                        console.log('POSDB: Database reset initiated. Retrying open...');
+                        return await this._openDB(true); // Retry once
+                    } catch (resetErr) {
+                        console.warn('POSDB: Failed to reset database:', resetErr);
+                    }
                 }
-            });
+                
+                // If not internal error, or reset failed, or already retried
+                throw err;
+            }
         })();
 
         try {
             this.db = await this.connectionPromise;
             // Store globally for HMR survival
             (window as any).__SIFMART_POS_DB__ = this.db;
+            this.failureCount = 0; // Reset on success
             return this.db;
         } catch (error) {
-            console.error('POSDB: Failed to open database', error);
+            console.warn('POSDB: Failed to open database', error);
             this.connectionPromise = null;
+            this.failureCount++;
+            
+            if (this.failureCount >= this.MAX_FAILURES) {
+                console.warn('POSDB: Persistent failures detected. Disabling IndexedDB for this session.');
+                this.disabled = true;
+            }
             throw error;
         } finally {
             // Clear promise so subsequent calls check this.db or try again
@@ -133,6 +171,7 @@ class POSDBService {
     }
 
     private async getDB(timeoutMs: number = 10000): Promise<IDBPDatabase<POSDB>> {
+        this.checkDisabled();
         try {
             // Race the connection opening against a timeout
             const dbPromise = this._openDB();
@@ -144,7 +183,7 @@ class POSDBService {
         } catch (err) {
             // If we timed out or failed, ensure we reset state so we can retry next time
             if (this.connectionPromise) this.connectionPromise = null;
-            console.error('Failed to get POS DB connection:', err);
+            console.warn('POSDB: DB Connection unavailable:', (err as any)?.message);
             throw err;
         }
     }
@@ -154,17 +193,25 @@ class POSDBService {
     // ═══════════════════════════════════════════════════════════════
 
     async saveSale(sale: SaleRecord) {
-        if (DISABLE_IDB) return; // No-op when disabled
-        const db = await this.getDB();
-        await db.put('sales', sale);
+        if (DISABLE_IDB || this.disabled) return;
+        try {
+            const db = await this.getDB();
+            await db.put('sales', sale);
+        } catch (err) {
+            console.warn('POSDB: Gracefully skipping saveSale due to DB error');
+        }
     }
 
     async getRecentSales(limit: number = 50): Promise<SaleRecord[]> {
-        if (DISABLE_IDB) return []; // Return empty when disabled
-        const db = await this.getDB();
-        const sales = await db.getAll('sales');
-        // Sort in memory for now (newest first)
-        return sales.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, limit);
+        if (DISABLE_IDB || this.disabled) return [];
+        try {
+            const db = await this.getDB();
+            const sales = await db.getAll('sales');
+            return sales.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, limit);
+        } catch (err) {
+            console.warn('POSDB: Gracefully returning empty array for getRecentSales');
+            return [];
+        }
     }
 
     // ═══════════════════════════════════════════════════════════════
@@ -172,27 +219,40 @@ class POSDBService {
     // ═══════════════════════════════════════════════════════════════
 
     async enqueueOperation(type: 'CREATE_SALE', payload: any) {
-        if (DISABLE_IDB) return; // No-op when disabled
-        const db = await this.getDB();
-        await db.add('sync_queue', {
-            type,
-            payload,
-            createdAt: new Date().toISOString(),
-            status: 'PENDING',
-            retryCount: 0
-        });
+        if (DISABLE_IDB || this.disabled) return;
+        try {
+            const db = await this.getDB();
+            await db.add('sync_queue', {
+                type,
+                payload,
+                createdAt: new Date().toISOString(),
+                status: 'PENDING',
+                retryCount: 0
+            });
+        } catch (err) {
+            console.warn('POSDB: Gracefully skipping enqueueOperation due to DB error');
+        }
     }
 
     async getPendingOperations(): Promise<SyncOperation[]> {
-        if (DISABLE_IDB) return []; // Return empty when disabled
-        const db = await this.getDB();
-        return db.getAll('sync_queue');
+        if (DISABLE_IDB || this.disabled) return [];
+        try {
+            const db = await this.getDB();
+            return await db.getAll('sync_queue');
+        } catch (err) {
+            console.warn('POSDB: Gracefully returning empty array for getPendingOperations');
+            return [];
+        }
     }
 
     async removeOperation(id: number) {
-        if (DISABLE_IDB) return; // No-op when disabled
-        const db = await this.getDB();
-        await db.delete('sync_queue', id);
+        if (DISABLE_IDB || this.disabled) return;
+        try {
+            const db = await this.getDB();
+            await db.delete('sync_queue', id);
+        } catch (err) {
+            console.warn('POSDB: Gracefully skipping removeOperation due to DB error');
+        }
     }
 
     // ═══════════════════════════════════════════════════════════════
@@ -200,21 +260,34 @@ class POSDBService {
     // ═══════════════════════════════════════════════════════════════
 
     async getQueryCache(key: string): Promise<any> {
-        if (DISABLE_IDB) return undefined;
-        const db = await this.getDB();
-        return db.get('query_cache', key);
+        if (DISABLE_IDB || this.disabled) return undefined;
+        try {
+            const db = await this.getDB();
+            return await db.get('query_cache', key);
+        } catch (err) {
+            console.warn(`POSDB: Gracefully skipping getQueryCache for ${key}`);
+            return undefined;
+        }
     }
 
     async saveQueryCache(key: string, value: any) {
-        if (DISABLE_IDB) return;
-        const db = await this.getDB();
-        await db.put('query_cache', value, key);
+        if (DISABLE_IDB || this.disabled) return;
+        try {
+            const db = await this.getDB();
+            await db.put('query_cache', value, key);
+        } catch (err) {
+            console.warn(`POSDB: Gracefully skipping saveQueryCache for ${key}`);
+        }
     }
 
     async removeQueryCache(key: string) {
-        if (DISABLE_IDB) return;
-        const db = await this.getDB();
-        await db.delete('query_cache', key);
+        if (DISABLE_IDB || this.disabled) return;
+        try {
+            const db = await this.getDB();
+            await db.delete('query_cache', key);
+        } catch (err) {
+            console.warn(`POSDB: Gracefully skipping removeQueryCache for ${key}`);
+        }
     }
 }
 

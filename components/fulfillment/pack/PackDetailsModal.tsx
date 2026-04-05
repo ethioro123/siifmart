@@ -32,9 +32,8 @@ export const PackDetailsModal: React.FC<PackDetailsModalProps> = ({
     // Use code if available, otherwise fallback to short UUID
     const displayId = userObj?.code || (userId ? userId.slice(0, 5).toUpperCase() : '');
 
-    const userName = userObj
-        ? `${userObj.name} (${displayId})`
-        : (userId ? `Unknown (${displayId})` : 'System');
+    const userName = userObj ? userObj.name : (userId ? 'Unknown' : 'System');
+    const userDisplayId = displayId;
 
     const sourceSite = sites.find(s => s.id === selectedItem.siteId);
     const destSite = sites.find(s => s.id === selectedItem.destSiteId);
@@ -61,9 +60,10 @@ export const PackDetailsModal: React.FC<PackDetailsModalProps> = ({
         title: 'Pack Order',
         status: selectedItem.status,
         date: selectedItem.updatedAt || selectedItem.createdAt || new Date().toISOString(),
-        user: userName,
-        source: sourceSite?.name || 'Unknown Source',
-        destination: destSite?.name || 'Unknown Destination',
+        userName: userName,
+        userDisplayId: displayId,
+        sourceSite: sourceSite,
+        destSite: destSite,
         trackingNumber: trackingNum,
         items: itemsArray,
     };
@@ -101,7 +101,7 @@ export const PackDetailsModal: React.FC<PackDetailsModalProps> = ({
                             </p>
                         </div>
                     </div>
-                    <button onClick={onClose} className="p-1.5 md:p-2 hover:bg-zinc-100 dark:hover:bg-white/10 rounded-lg text-zinc-600 dark:text-zinc-600 hover:text-zinc-900 dark:hover:text-zinc-200 transition-colors" aria-label="Close details">
+                    <button onClick={onClose} className="p-1.5 md:p-2 hover:bg-zinc-100 dark:hover:bg-white/10 rounded-lg text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-gray-200 transition-colors" aria-label="Close details">
                         <X size={18} className="md:w-5 md:h-5" />
                     </button>
                 </div>
@@ -120,11 +120,13 @@ export const PackDetailsModal: React.FC<PackDetailsModalProps> = ({
                     
                     <div className="bg-white dark:bg-black p-3 md:p-4 flex items-center gap-2 md:gap-3 border-l border-zinc-100 dark:border-white/5 lg:col-span-1">
                         <div className="w-6 h-6 md:w-8 md:h-8 shrink-0 rounded-full bg-zinc-100 dark:bg-cyan-950 flex items-center justify-center border border-zinc-300 dark:border-cyan-500/30 shadow-inner">
-                            <span className="text-[8px] md:text-[10px] font-black text-zinc-950 dark:text-cyan-400">{(data.user || 'S').charAt(0).toUpperCase()}</span>
+                            <span className="text-[8px] md:text-[10px] font-black text-zinc-950 dark:text-cyan-400">{(data.userName || 'S').charAt(0).toUpperCase()}</span>
                         </div>
                         <div className="min-w-0">
                             <p className="text-[8px] md:text-[10px] text-zinc-400 dark:text-zinc-500 uppercase font-black tracking-widest leading-none mb-0.5 md:mb-1 truncate">User</p>
-                            <p className="text-[10px] md:text-xs text-zinc-950 dark:text-zinc-200 font-black uppercase tracking-tight truncate">{data.user}</p>
+                            <p className="text-[10px] md:text-xs text-zinc-950 dark:text-zinc-200 font-black uppercase break-words leading-tight">
+                                {data.userName} <span className="text-gray-500 dark:text-gray-600 font-normal lowercase">({data.userDisplayId})</span>
+                            </p>
                         </div>
                     </div>
 
@@ -144,7 +146,13 @@ export const PackDetailsModal: React.FC<PackDetailsModalProps> = ({
                         </div>
                         <div className="min-w-0">
                             <p className="text-[8px] md:text-[10px] text-zinc-400 dark:text-zinc-500 uppercase font-black tracking-widest leading-none mb-0.5 md:mb-1 truncate">Source</p>
-                            <p className="text-[10px] md:text-xs text-zinc-950 dark:text-zinc-200 font-black uppercase tracking-tight truncate">{data.source}</p>
+                            <p className="text-[10px] md:text-xs text-zinc-950 dark:text-zinc-200 font-black uppercase break-words leading-tight">
+                                {data.sourceSite ? (
+                                    <>
+                                        {data.sourceSite.name} <span className="text-zinc-500 dark:text-zinc-600 font-normal lowercase">({data.sourceSite.code || data.sourceSite.id})</span>
+                                    </>
+                                ) : 'Unknown Source'}
+                            </p>
                         </div>
                     </div>
                     <div className="bg-white dark:bg-black p-3 md:p-4 flex items-center gap-2 md:gap-3 border-t lg:border-t-0 border-zinc-100 dark:border-white/5 lg:col-span-1 lg:border-l">
@@ -153,7 +161,13 @@ export const PackDetailsModal: React.FC<PackDetailsModalProps> = ({
                         </div>
                         <div className="min-w-0">
                             <p className="text-[8px] md:text-[10px] text-zinc-400 dark:text-zinc-500 uppercase font-black tracking-widest leading-none mb-0.5 md:mb-1 truncate">Destination</p>
-                            <p className="text-[10px] md:text-xs text-zinc-950 dark:text-zinc-200 font-black uppercase tracking-tight truncate">{data.destination}</p>
+                            <p className="text-[10px] md:text-xs text-zinc-950 dark:text-zinc-200 font-black uppercase break-words leading-tight">
+                                {data.destSite ? (
+                                    <>
+                                        {data.destSite.name} <span className="text-zinc-500 dark:text-zinc-600 font-normal lowercase">({data.destSite.code || data.destSite.id})</span>
+                                    </>
+                                ) : 'Unknown Destination'}
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -203,11 +217,6 @@ export const PackDetailsModal: React.FC<PackDetailsModalProps> = ({
                                                     </span>
                                                 )}
 
-                                                {selectedItem.orderRef && (
-                                                    <span className="text-[8px] md:text-[10px] text-zinc-400 dark:text-zinc-600 font-black uppercase tracking-widest flex items-center gap-1 shrink-0">
-                                                        REF: <span className="font-mono">{resolveOrderRef(selectedItem.orderRef)}</span>
-                                                    </span>
-                                                )}
                                             </div>
                                         </div>
                                     </div>

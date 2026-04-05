@@ -173,21 +173,25 @@ input {
 [data-theme="light"] .bg-white\/10,
 [data-theme="light"] .bg-white\/20,
 [data-theme="light"] .bg-white\/30 {
-  background-color: #f9fafb;
+  background-color: rgba(0, 0, 0, 0.03); /* Subtle dim for light mode */
 }
 
+/* 
+   Preserve transparency for overlays (e.g. Sidebar backdrop) 
+   by removing opaque overrides for these specific classes.
+*/
 [data-theme="light"] .bg-black\/20 {
-  background-color: #f9fafb;
+  background-color: rgba(0, 0, 0, 0.1);
 }
 
 [data-theme="light"] .bg-black\/30,
 [data-theme="light"] .bg-black\/40 {
-  background-color: #f3f4f6;
+  background-color: rgba(0, 0, 0, 0.2);
 }
 
 [data-theme="light"] .bg-black\/50,
 [data-theme="light"] .bg-black\/60 {
-  background-color: #e5e7eb;
+  background-color: rgba(0, 0, 0, 0.3);
 }
 
 [data-theme="light"] input {

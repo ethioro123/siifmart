@@ -231,10 +231,17 @@ export const ScannerInterface: React.FC = () => {
         const normalized = inputVal.toUpperCase().trim();
         const product = currentProduct; // from hook
 
+        // Normalize SKU for matching: strip hyphens, slashes, and whitespace
+        // Handles barcode labels that encode "GN019" matching DB SKU "GN-019"
+        const normSku = (s: string) => s.replace(/[-\/\s]/g, '').toUpperCase();
+        const normalizedInput = normSku(normalized);
+
         const isValid =
             normalized === currentItem.sku?.toUpperCase() ||
             normalized === product?.barcode?.toUpperCase() ||
-            (product?.barcodes && product.barcodes.includes(normalized));
+            (product?.barcodes && product.barcodes.includes(normalized)) ||
+            normalizedInput === normSku(currentItem.sku || '') ||
+            normalizedInput === normSku(product?.barcode || '');
 
         if (isValid) {
             playBeep('success');

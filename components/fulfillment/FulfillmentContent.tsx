@@ -25,12 +25,12 @@ import { inventoryRequestsService } from '../../services/supabase.service'; // N
 import { generatePackLabelHTML } from '../../utils/labels/PackLabelGenerator'; // Needed for DocksTab
 
 const TAB_PERMISSIONS: Record<OpTab, string[]> = {
-    RECEIVE: ['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher', 'inventory_specialist'],
-    PUTAWAY: ['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher', 'picker', 'inventory_specialist'],
-    TRANSFER: ['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher', 'retail_manager'], // Store managers can request transfers
-    PICK: ['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher', 'picker'],
-    PACK: ['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher', 'picker'],
-    DOCKS: ['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher', 'driver'],
+    RECEIVE: ['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher', 'inventory_specialist', 'picker', 'packer', 'driver', 'receiver'],
+    PUTAWAY: ['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher', 'inventory_specialist', 'picker', 'packer', 'driver', 'receiver'],
+    TRANSFER: ['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher', 'retail_manager'],
+    PICK: ['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher', 'picker', 'packer', 'driver', 'receiver'],
+    PACK: ['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher', 'picker', 'packer', 'driver', 'receiver'],
+    DOCKS: ['super_admin', 'warehouse_manager', 'dispatcher'],
     DRIVER: ['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher', 'driver'],
     REPLENISH: ['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher', 'inventory_specialist'],
     COUNT: ['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'inventory_specialist'],
@@ -102,34 +102,6 @@ export const FulfillmentContent: React.FC = () => {
         return tabs.filter(tab => canAccessTab(tab));
     }, [user?.role]);
 
-    // 🚚 DRIVER INTERFACE
-    if (user?.role === 'driver') {
-        return (
-            <Protected permission="ACCESS_WAREHOUSE" showMessage>
-                <DriverTab
-                    filteredJobs={filteredJobs}
-                    historicalJobs={historicalJobs}
-                    employees={employees}
-                    user={user}
-                    sites={sites}
-                    products={products}
-                    activeSite={activeSite || null}
-                    isSubmitting={isSubmitting}
-                    setIsSubmitting={setIsSubmitting}
-                    refreshData={refreshData}
-                    setSelectedJob={setSelectedJob}
-                    setIsDetailsOpen={setIsDetailsOpen}
-                    selectedJob={null}
-                    resolveOrderRef={resolveOrderRef}
-                    addNotification={addNotification}
-                    wmsJobsService={wmsJobsService}
-                    addProduct={addProduct}
-                    jobs={jobs}
-                    t={t}
-                />
-            </Protected>
-        );
-    }
 
     return (
         <div className="h-full flex flex-col gap-4 md:gap-6 p-2 md:p-0">
@@ -203,7 +175,8 @@ export const FulfillmentContent: React.FC = () => {
                     refreshData={refreshData}
                     setSelectedJob={setSelectedJob}
                     setIsDetailsOpen={setIsDetailsOpen}
-                    selectedJob={null}
+                    isDetailsOpen={isDetailsOpen}
+                    selectedJob={selectedJob}
                     resolveOrderRef={resolveOrderRef}
                     addNotification={addNotification}
                     wmsJobsService={wmsJobsService}
@@ -238,7 +211,7 @@ export const FulfillmentContent: React.FC = () => {
                 setSelectedJob={setSelectedJob}
                 setIsDetailsOpen={setIsDetailsOpen}
                 isDetailsOpen={isDetailsOpen}
-                selectedJob={null}
+                selectedJob={selectedJob}
                 addNotification={addNotification}
                 wmsJobsService={wmsJobsService}
                 canAccessTab={canAccessTab}
@@ -267,6 +240,7 @@ export const FulfillmentContent: React.FC = () => {
                         setIsDetailsOpen={setIsDetailsOpen}
                         isDetailsOpen={isDetailsOpen}
                         resolveOrderRef={resolveOrderRef}
+                        sites={sites}
                     />
                 )
             }

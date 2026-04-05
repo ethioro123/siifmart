@@ -57,11 +57,20 @@ const CyberClock = () => {
     }, []);
 
     const formatTime = (date: Date) => {
-        return formatDateTime(date, { showTime: true }).split(', ')[1];
+        try {
+            // Use 'medium' time to get the WB/WD (AM/PM) translation in Oromo
+            return new Intl.DateTimeFormat('om-ET', { timeStyle: 'medium' }).format(date);
+        } catch {
+            return formatDateTime(date, { showTime: true }).split(', ')[1];
+        }
     };
 
     const formatDate = (date: Date) => {
-        return formatDateTime(date).toUpperCase();
+        try {
+            return new Intl.DateTimeFormat('om-ET', { dateStyle: 'full' }).format(date).toUpperCase();
+        } catch {
+            return formatDateTime(date).toUpperCase();
+        }
     };
 
     return (
@@ -73,9 +82,63 @@ const CyberClock = () => {
                     </span>
                 ))}
             </div>
-            <div className="text-xs text-cyber-primary font-bold tracking-[0.2em] mt-1 opacity-80">
+            <div className="text-xs text-cyber-primary font-bold tracking-[0.2em] mt-1.5 opacity-80 border-t border-white/5 pt-1 w-full text-right">
                 {formatDate(time)}
             </div>
+        </div>
+    );
+};
+
+const EthiopianDateWidget = () => {
+    const [time, setTime] = useState(new Date());
+
+    useEffect(() => {
+        const timer = setInterval(() => setTime(new Date()), 60000);
+        return () => clearInterval(timer);
+    }, []);
+
+    const formatOromoDate = (date: Date) => {
+        try {
+            // Generate English standard Ethiopic string (e.g. "Sunday, Megabit 27, 2018 ERA1")
+            let str = new Intl.DateTimeFormat('en-US', { calendar: 'ethiopic', dateStyle: 'full' }).format(date).toLowerCase();
+            
+            // Map English Weekdays to Oromo
+            str = str.replace('sunday', 'Dilbata');
+            str = str.replace('monday', 'Wiixata');
+            str = str.replace('tuesday', 'Kibxata');
+            str = str.replace('wednesday', 'Roobii');
+            str = str.replace('thursday', 'Kamisa');
+            str = str.replace('friday', 'Jimaata');
+            str = str.replace('saturday', 'Sanbata');
+
+            // Map Ethiopian Months (Amharic transliteration) to Oromo Names
+            str = str.replace('meskerem', 'Fuulbana');
+            str = str.replace('tikimt', 'Onkoloolessa');
+            str = str.replace('hidar', 'Sadaasa');
+            str = str.replace('tahsas', 'Muddee');
+            str = str.replace('tirr', 'Amajjii');
+            str = str.replace('yakatit', 'Guraandhala');
+            str = str.replace('megabit', 'Bitooteessa');
+            str = str.replace('miyazya', 'Ebla');
+            str = str.replace('ginbot', 'Caamsaa');
+            str = str.replace('sene', 'Waxabajjii');
+            str = str.replace('hamle', 'Adoolessa');
+            str = str.replace('nehase', 'Hagayya');
+            str = str.replace('pagume', 'Qaammee');
+
+            // Clean up ERA markers
+            return str.replace(/ era[0-9]/ig, '').toUpperCase();
+        } catch (e) {
+            return '';
+        }
+    };
+
+    return (
+        <div className="hidden lg:flex px-5 py-2 bg-gradient-to-r from-orange-500/10 to-yellow-500/5 dark:bg-white/5 backdrop-blur-md rounded-2xl border border-orange-500/20 dark:border-white/10 h-[46px] flex-col justify-center items-end text-right relative overflow-hidden group shadow-inner">
+            <p className="text-[8px] text-orange-600 dark:text-orange-400 font-black uppercase tracking-[0.25em] leading-none mb-1 shadow-sm">Ethiopian Calendar</p>
+            <p className="text-[10px] sm:text-[11px] font-mono font-bold text-gray-900 dark:text-orange-50 leading-none tracking-widest truncate max-w-[250px] drop-shadow-sm">
+                {formatOromoDate(time)}
+            </p>
         </div>
     );
 };
@@ -597,24 +660,25 @@ export default function CentralOperations() {
                     </p>
                 </div>
 
-                <div className="flex items-end gap-6 mt-4 md:mt-0">
-                    {/* NEW DATE SELECTOR */}
+                <div className="flex items-center gap-6 mt-4 md:mt-0 h-full">
                     <DateRangeSelector
                         value={dateRange}
                         onChange={setDateRange}
-                        className="hidden md:block"
+                        className="hidden xl:block"
                     />
+
+                    <EthiopianDateWidget />
 
                     <CyberClock />
 
-                    <div className="text-right px-6 py-2 bg-white/50 dark:bg-white/5 backdrop-blur-sm rounded-2xl border border-gray-200 dark:border-white/10 h-[42px] flex flex-col justify-center">
+                    <div className="text-right px-6 py-2 bg-white/50 dark:bg-white/5 backdrop-blur-sm rounded-2xl border border-gray-200 dark:border-white/10 h-[46px] flex flex-col justify-center">
                         <p className="text-[10px] text-gray-500 font-bold uppercase leading-none mb-0.5">Active Sites</p>
-                        <p className="text-lg font-mono font-bold text-gray-900 dark:text-white leading-none">{totalSites}</p>
+                        <p className="text-xl font-mono font-bold text-gray-900 dark:text-white leading-none">{totalSites}</p>
                     </div>
 
                     <button
                         onClick={handleGenerateReport}
-                        className="hidden md:flex items-center gap-2 bg-cyber-primary text-black px-4 py-2.5 rounded-xl font-bold hover:bg-cyber-primary/90 transition-all shadow-[0_0_15px_rgba(0,255,157,0.3)] h-[42px]"
+                        className="hidden md:flex items-center gap-2 bg-cyber-primary text-black px-4 py-2.5 rounded-xl font-bold hover:bg-cyber-primary/90 transition-all shadow-[0_0_15px_rgba(0,255,157,0.3)] h-[46px]"
                     >
                         <Download size={18} />
                         <span className="hidden lg:inline">Report</span>

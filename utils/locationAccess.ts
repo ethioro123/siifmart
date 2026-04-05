@@ -48,7 +48,6 @@ const SINGLE_SITE_ROLES: UserRole[] = [
     'inventory_specialist',
 
     // Store workers
-    'manager',
     'shift_lead',
     'pos'
 ];

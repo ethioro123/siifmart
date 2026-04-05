@@ -64,4 +64,6 @@ export const core: TranslationBlock = {
     reference: { en: 'Ref', am: 'ማጣቀሻ', or: 'Wabii' },
     active: { en: 'active', am: 'ንቁ', or: 'jireenyaa' },
     noRecords: { en: 'No Records', am: 'ምንም መዝገቦች የሉም', or: 'Galmeen hin jiru' },
+    availableStaff: { en: 'Available Staff', am: 'የሚገኙ ሰራተኞች', or: 'Hojjettoota Jiran' },
+    selectJobFirst: { en: 'Select a job first', am: 'መጀመሪያ ስራ ይምረጡ', or: 'Dursa hojii filadhu' },
 };

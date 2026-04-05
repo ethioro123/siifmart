@@ -18,7 +18,7 @@ export const ReceiveTab: React.FC = () => {
         t, jobs, orders, products, allProducts, employees,
         isSubmitting, setIsSubmitting, receivePOSplit, addNotification,
         refreshData, historicalJobs, selectedJob, setSelectedJob, isDetailsOpen, setIsDetailsOpen,
-        resolveOrderRef, activeTab, finalizePO, user, wmsJobsService
+        resolveOrderRef, activeTab, finalizePO, user, wmsJobsService, sites
     } = useFulfillment();
 
     // --- STATE ---
@@ -322,6 +322,7 @@ export const ReceiveTab: React.FC = () => {
                         inventoryRequestsService={inventoryRequestsService}
                         wmsJobsService={wmsJobsService}
                         jobs={jobs}
+                        sites={sites}
                     />
                 </div>
             )}
@@ -406,6 +407,7 @@ export const ReceiveTab: React.FC = () => {
                     }}
                     resolveOrderRef={resolveOrderRef}
                     setReprintItem={setReprintItem}
+                    sites={sites}
                 />
             )}
         </div>

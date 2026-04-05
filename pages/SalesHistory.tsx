@@ -20,6 +20,7 @@ const ITEMS_PER_PAGE = 20;
 
 import { realtimeService } from '../services/realtime.service';
 import { useStore } from '../contexts/CentralStore';
+import { canViewAllSites } from '../utils/permissions';
 
 export default function SalesHistory() {
    const { movements, sites, addNotification, settings, allSales, posSyncStatus, posPendingSyncCount } = useData();
@@ -29,11 +30,14 @@ export default function SalesHistory() {
    const [loading, setLoading] = useState(true);
    const [totalCount, setTotalCount] = useState(0);
 
+   const { user } = useStore();
+   const restricted = !canViewAllSites(user?.role);
+
    // --- FILTER STATE ---
    const [searchTerm, setSearchTerm] = useState('');
    const [statusFilter, setStatusFilter] = useState('All');
    const [methodFilter, setMethodFilter] = useState('All');
-   const [storeFilter, setStoreFilter] = useState('All');
+   const [storeFilter, setStoreFilter] = useState(restricted && user?.siteId ? user.siteId : 'All');
 
    const [dateRange, setDateRange] = useState({
       start: new Date(new Date().setFullYear(new Date().getFullYear() - 1)).toISOString().split('T')[0], // Default to last 1 year
@@ -67,8 +71,9 @@ export default function SalesHistory() {
          };
 
          // Call service with pagination and filters
+         const effectiveSiteId = restricted ? (user?.siteId || 'NONE') : (storeFilter === 'All' ? undefined : storeFilter);
          const { data, count } = await salesService.getAll(
-            storeFilter === 'All' ? undefined : storeFilter,
+            effectiveSiteId,
             ITEMS_PER_PAGE,
             offset,
             filters
@@ -83,8 +88,9 @@ export default function SalesHistory() {
          let filtered = [...(allSales || [])];
 
          // Apply Filters Locally
-         if (storeFilter !== 'All') {
-            filtered = filtered.filter(s => s.siteId === storeFilter);
+         const effectiveSiteId = restricted ? (user?.siteId || 'NONE') : storeFilter;
+         if (effectiveSiteId !== 'All') {
+            filtered = filtered.filter(s => s.siteId === effectiveSiteId);
          }
          if (statusFilter !== 'All') {
             filtered = filtered.filter(s => s.status === statusFilter);
@@ -124,7 +130,7 @@ export default function SalesHistory() {
       } finally {
          setLoading(false);
       }
-   }, [currentPage, searchTerm, statusFilter, methodFilter, storeFilter, dateRange, addNotification, allSales]);
+   }, [currentPage, searchTerm, statusFilter, methodFilter, storeFilter, dateRange, addNotification, allSales, restricted, user?.siteId]);
 
    // Debounce Search
    useEffect(() => {
@@ -551,21 +557,23 @@ export default function SalesHistory() {
                   <ChevronDown size={12} className="absolute right-2 top-2.5 text-gray-400 pointer-events-none" />
                </div>
 
-               {/* Store Filter */}
-               <div className="relative">
-                  <select
-                     className="appearance-none bg-white/5 border border-white/10 rounded-lg pl-3 pr-8 py-2 text-xs font-bold text-white outline-none cursor-pointer hover:bg-white/10"
-                     value={storeFilter}
-                     onChange={(e) => handleFilterChange(setStoreFilter, e.target.value)}
-                     aria-label="Filter by Store"
-                  >
-                     <option value="All">All Stores</option>
-                     {sites.map(site => (
-                        <option key={site.id} value={site.id}>{site.name}</option>
-                     ))}
-                  </select>
-                  <ChevronDown size={12} className="absolute right-2 top-2.5 text-gray-400 pointer-events-none" />
-               </div>
+               {/* Store Filter - Only show if not restricted */}
+               {!restricted && (
+                  <div className="relative">
+                     <select
+                        className="appearance-none bg-white/5 border border-white/10 rounded-lg pl-3 pr-8 py-2 text-xs font-bold text-white outline-none cursor-pointer hover:bg-white/10"
+                        value={storeFilter}
+                        onChange={(e) => handleFilterChange(setStoreFilter, e.target.value)}
+                        aria-label="Filter by Store"
+                     >
+                        <option value="All">All Stores</option>
+                        {sites.map(site => (
+                           <option key={site.id} value={site.id}>{site.name}</option>
+                        ))}
+                     </select>
+                     <ChevronDown size={12} className="absolute right-2 top-2.5 text-gray-400 pointer-events-none" />
+                  </div>
+               )}
             </div>
          </div>
 

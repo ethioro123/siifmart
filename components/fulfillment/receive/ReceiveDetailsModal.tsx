@@ -14,13 +14,15 @@ interface ReceiveDetailsModalProps {
     onClose: () => void;
     resolveOrderRef: (ref: string) => string;
     setReprintItem: (item: any) => void;
+    sites: any[];
 }
 
 export const ReceiveDetailsModal: React.FC<ReceiveDetailsModalProps> = ({
     selectedItem,
     onClose,
     resolveOrderRef,
-    setReprintItem
+    setReprintItem,
+    sites
 }) => {
     const { addNotification, isSubmitting, setIsSubmitting, employees } = useFulfillment();
     const [printingId, setPrintingId] = useState<string | null>(null);
@@ -30,10 +32,13 @@ export const ReceiveDetailsModal: React.FC<ReceiveDetailsModalProps> = ({
     };
 
     const resolveUser = (userId?: string) => {
-        if (!userId || userId === 'System') return 'System';
+        if (!userId || userId === 'System') return { name: 'System', displayId: '' };
         const userObj = employees.find(e => e.id === userId || e.name === userId);
         const displayId = userObj?.code || (userId.length > 20 ? userId.slice(0, 5).toUpperCase() : userId);
-        return userObj ? `${userObj.name} (${displayId})` : `${userId} (${displayId})`;
+        return {
+            name: userObj ? userObj.name : userId,
+            displayId: displayId
+        };
     };
 
     const data = isPO(selectedItem) ? {
@@ -53,8 +58,16 @@ export const ReceiveDetailsModal: React.FC<ReceiveDetailsModalProps> = ({
         status: selectedItem.status,
         date: selectedItem.completedAt || selectedItem.updatedAt || selectedItem.createdAt,
         user: resolveUser(selectedItem.completedBy || selectedItem.createdBy),
-        items: selectedItem.lineItems || []
+        items: selectedItem.lineItems || [],
+        destination: sites.find(s => s.id === (selectedItem as any).siteId)?.name || 'Unknown'
     };
+
+    const destSite = isPO(selectedItem) ? sites.find(s => s.id === selectedItem.siteId) : sites.find(s => s.id === (selectedItem as any).siteId);
+    const destDisplay = destSite ? (
+        <>
+            {destSite.name} <span className="text-blue-600/50 dark:text-blue-400/50 font-normal lowercase">({destSite.code || destSite.id})</span>
+        </>
+    ) : 'Unknown Site';
 
     const handleOpenReprint = (item: any) => {
         setReprintItem({
@@ -67,105 +80,118 @@ export const ReceiveDetailsModal: React.FC<ReceiveDetailsModalProps> = ({
     };
 
     return (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-stretch md:items-center justify-center z-[200] p-0 md:p-4 animate-in fade-in duration-200">
-            <div className="bg-white dark:bg-black md:border-2 border-zinc-900 dark:border-white/10 md:rounded-3xl w-full md:max-w-2xl shadow-2xl flex flex-col h-full md:h-auto md:max-h-[90vh] overflow-hidden relative">
+        <div className="fixed inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-sm flex items-stretch md:items-center justify-center z-[200] p-0 md:p-4 animate-in fade-in duration-200">
+            <div className="bg-white dark:bg-black md:border-2 border-slate-200 dark:border-white/10 md:rounded-3xl w-full md:max-w-2xl shadow-2xl flex flex-col h-full md:h-auto md:max-h-[90vh] overflow-hidden relative">
                 {/* 🌟 Modal Ambient Glow — hidden on mobile */}
                 <div className="hidden md:block absolute -top-24 -right-24 w-64 h-64 bg-cyan-500/5 dark:bg-cyan-500/10 blur-[100px] rounded-full pointer-events-none" />
                 <div className="hidden md:block absolute -bottom-24 -left-24 w-64 h-64 bg-violet-500/5 dark:bg-violet-500/10 blur-[100px] rounded-full pointer-events-none" />
 
                 {/* Header */}
-                <div className="p-4 md:p-6 border-b border-zinc-200 dark:border-white/10 flex justify-between items-start bg-zinc-50/80 dark:bg-zinc-950/50 backdrop-blur-sm">
+                <div className="p-4 md:p-6 border-b border-slate-200 dark:border-white/10 flex justify-between items-start bg-slate-50/80 dark:bg-zinc-950/50 backdrop-blur-sm">
                     <div className="flex gap-3 md:gap-4 relative z-10">
-                        <div className={`hidden md:flex p-3 rounded-xl border border-zinc-300 dark:border-white/10 transition-all duration-500 ${data.type === 'PO' ? 'bg-zinc-100 dark:bg-cyan-500 text-zinc-950 dark:text-black shadow-md dark:shadow-cyan-500/20' : 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100'}`}>
+                        <div className={`hidden md:flex p-3 rounded-xl border border-slate-200 dark:border-white/10 transition-all duration-500 ${data.type === 'PO' ? 'bg-cyan-50 dark:bg-cyan-500 text-cyan-600 dark:text-black shadow-md dark:shadow-cyan-500/20' : 'bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-100'}`}>
                             {data.type === 'PO' ? <FileText size={24} /> : <Box size={24} />}
                         </div>
                         <div>
                             <div className="flex items-center gap-2 mb-1">
-                                <h3 className="text-base md:text-xl font-black text-zinc-950 dark:text-zinc-100 uppercase tracking-tight font-mono">{data.reference}</h3>
-                                <Badge variant="neutral" className="border-zinc-300 dark:border-zinc-700 bg-zinc-100 dark:bg-white/5 text-[9px] font-mono">
+                                <h3 className="text-base md:text-xl font-black text-slate-900 dark:text-white uppercase tracking-tight font-mono">{data.reference}</h3>
+                                <Badge variant="neutral" className="border-slate-200 dark:border-zinc-700 bg-slate-100 dark:bg-white/5 text-[9px] font-mono text-slate-600 dark:text-gray-400">
                                     {data.status}
                                 </Badge>
                             </div>
-                            <p className="text-zinc-600 dark:text-zinc-500 text-[10px] font-black uppercase tracking-widest flex items-center gap-2 mt-1">
-                                {data.type === 'PO' ? <Truck size={12} className="text-zinc-950 dark:text-zinc-400" /> : <Package size={12} className="text-zinc-950 dark:text-zinc-400" />}
+                            <p className="text-slate-500 dark:text-zinc-500 text-[10px] font-black uppercase tracking-widest flex items-center gap-2 mt-1">
+                                {data.type === 'PO' ? <Truck size={12} className="text-slate-400 dark:text-zinc-500" /> : <Package size={12} className="text-slate-400 dark:text-zinc-500" />}
                                 {data.title}
                             </p>
                         </div>
                     </div>
-                    <button onClick={onClose} className="p-2 hover:bg-zinc-100 dark:hover:bg-white/10 rounded-lg text-zinc-600 dark:text-zinc-600 hover:text-zinc-900 dark:hover:text-zinc-200 transition-colors" aria-label="Close details">
+                    <button onClick={onClose} className="p-2 hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors" aria-label="Close details">
                         <X size={20} />
                     </button>
                 </div>
 
                 {/* Metadata Grid */}
-                <div className="grid grid-cols-2 gap-px bg-zinc-200 dark:bg-zinc-900 border-b border-zinc-200 dark:border-white/10">
+                <div className="grid grid-cols-2 gap-px bg-slate-200 dark:bg-zinc-900 border-b border-slate-200 dark:border-white/10">
                     <div className="bg-white dark:bg-black p-3 md:p-4 flex items-center gap-2 md:gap-3">
-                        <div className="hidden md:flex p-2 bg-zinc-50 dark:bg-white/5 rounded-lg text-zinc-900 dark:text-zinc-400">
+                        <div className="hidden md:flex p-2 bg-slate-50 dark:bg-white/5 rounded-lg text-slate-600 dark:text-zinc-400 border border-slate-100 dark:border-white/5">
                             <Calendar size={18} />
                         </div>
                         <div>
-                            <p className="text-[10px] text-zinc-400 dark:text-zinc-500 uppercase font-black tracking-widest leading-none mb-1">Date</p>
-                            <p className="text-xs text-zinc-950 dark:text-zinc-200 font-mono tracking-tighter">{formatDateTime(data.date)}</p>
+                            <p className="text-[10px] text-slate-400 dark:text-zinc-600 uppercase font-black tracking-widest leading-none mb-1.5">Date</p>
+                            <p className="text-xs text-slate-900 dark:text-zinc-200 font-mono tracking-tighter font-black">{formatDateTime(data.date, { showTime: true })}</p>
                         </div>
                     </div>
                     <div className="bg-white dark:bg-black p-3 md:p-4 flex items-center gap-2 md:gap-3">
-                        <div className="hidden md:flex p-2 bg-zinc-50 dark:bg-white/5 rounded-lg text-zinc-900 dark:text-zinc-400">
+                        <div className="hidden md:flex p-2 bg-slate-50 dark:bg-white/5 rounded-lg text-slate-600 dark:text-zinc-400 border border-slate-100 dark:border-white/5">
                             <User size={18} />
                         </div>
                         <div>
-                            <p className="text-[10px] text-zinc-400 dark:text-zinc-500 uppercase font-black tracking-widest leading-none mb-1">Processed By</p>
-                            <p className="text-xs text-zinc-950 dark:text-zinc-200 font-black uppercase tracking-tight">{data.user}</p>
+                            <p className="text-[10px] text-slate-400 dark:text-zinc-600 uppercase font-black tracking-widest leading-none mb-1.5">Processed By</p>
+                            <p className="text-xs text-slate-900 dark:text-zinc-200 font-black uppercase break-words leading-tight">
+                                {data.user.name} {data.user.displayId && <span className="text-slate-400 dark:text-zinc-600 font-normal lowercase">({data.user.displayId})</span>}
+                            </p>
+                        </div>
+                    </div>
+                    <div className="bg-white dark:bg-black p-3 md:p-4 flex items-center gap-2 md:gap-3 col-span-2">
+                        <div className="hidden md:flex p-2 bg-blue-50 dark:bg-blue-500/10 rounded-lg text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-500/20">
+                            <ArrowRight size={18} />
+                        </div>
+                        <div>
+                            <p className="text-[10px] text-slate-400 dark:text-zinc-600 uppercase font-black tracking-widest leading-none mb-1.5">Destination Site</p>
+                            <p className="text-xs text-blue-600 dark:text-blue-400 font-black uppercase break-words leading-tight">{destDisplay}</p>
                         </div>
                     </div>
                 </div>
 
                 {/* Line Items */}
-                <div className="flex-1 overflow-y-auto p-4 md:p-6 custom-scrollbar bg-white dark:bg-black/50">
-                    <h4 className="text-[10px] font-black text-zinc-600 dark:text-gray-500 uppercase tracking-[0.2em] mb-3 md:mb-4">Items Received</h4>
-                    <div className="space-y-2 md:space-y-3">
+                <div className="flex-1 overflow-y-auto p-4 md:p-6 custom-scrollbar bg-slate-50/30 dark:bg-black/50">
+                    <h4 className="text-[10px] font-black text-slate-500 dark:text-gray-500 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
+                        <Package size={12} className="text-slate-400" /> Items Received
+                    </h4>
+                    <div className="space-y-3">
                         {data.items.map((item: any, idx: number) => (
-                            <div key={idx} className="bg-zinc-50/50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-lg md:rounded-xl p-3 md:p-4 flex items-center justify-between group hover:bg-zinc-100 dark:hover:bg-white/[0.07] transition-all">
+                            <div key={idx} className="bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl p-3 md:p-4 flex items-center justify-between group hover:border-cyan-500/30 dark:hover:border-cyan-400/30 transition-all shadow-sm">
                                 <div className="flex items-center gap-3 md:gap-4 flex-1 min-w-0">
-                                    <div className="hidden md:flex w-10 h-10 bg-zinc-100 dark:bg-black/40 rounded-lg border border-zinc-200 dark:border-white/10 items-center justify-center text-zinc-600 dark:text-zinc-600 font-black text-xs">
-                                        {idx + 1}
+                                    <div className="hidden md:flex w-10 h-10 bg-slate-50 dark:bg-black/40 rounded-lg border border-slate-100 dark:border-white/10 items-center justify-center text-slate-400 dark:text-zinc-600 font-black text-xs font-mono">
+                                        {String(idx + 1).padStart(2, '0')}
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <p className="text-zinc-950 dark:text-zinc-100 font-black uppercase tracking-tight text-xs md:text-sm truncate">{item.name || item.productName || 'Unknown Item'}</p>
+                                        <p className="text-slate-900 dark:text-white font-black uppercase tracking-tight text-xs md:text-sm truncate">{item.name || item.productName || 'Unknown Item'}</p>
                                         <div className="flex flex-wrap items-center gap-3 mt-1.5">
-                                            <span className="text-[10px] text-zinc-500 dark:text-zinc-400 font-mono tracking-widest bg-zinc-100 dark:bg-white/5 px-1.5 py-0.5 rounded uppercase">
+                                            <span className="text-[9px] text-slate-500 dark:text-gray-400 font-black font-mono tracking-widest bg-slate-100 dark:bg-white/5 px-1.5 py-0.5 rounded uppercase border border-slate-200 dark:border-white/5">
                                                 {item.sku}
                                             </span>
                                             {item.barcode && (
-                                                <span className="text-[10px] text-zinc-400 dark:text-zinc-600 font-black uppercase tracking-widest flex items-center gap-1">
+                                                <span className="text-[9px] text-slate-400 dark:text-zinc-600 font-black uppercase tracking-widest flex items-center gap-1">
                                                     <ScanBarcode size={10} /> {item.barcode}
                                                 </span>
                                             )}
                                             {item.condition && (
-                                                <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full border ${item.condition === 'Good' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400' :
-                                                    item.condition === 'Damaged' ? 'bg-rose-500/10 border-rose-500/20 text-rose-600 dark:text-rose-400' :
-                                                        'bg-amber-500/10 border-amber-500/20 text-amber-600 dark:text-amber-400'
+                                                <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full border ${item.condition === 'Good' ? 'bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-500/10 dark:border-emerald-500/20 dark:text-emerald-400' :
+                                                    item.condition === 'Damaged' ? 'bg-rose-50 text-rose-600 border-rose-200 dark:bg-rose-500/10 dark:border-rose-500/20 dark:text-rose-400' :
+                                                        'bg-amber-50 text-amber-600 border-amber-200 dark:bg-amber-500/10 dark:border-amber-500/20 dark:text-amber-400'
                                                     }`}>
                                                     {item.condition}
                                                 </span>
                                             )}
                                         </div>
 
-                                        {/* Granular Metadata (Batch / Expiry) — hidden on mobile */}
-                                        <div className="hidden md:flex items-center gap-3 mt-1.5">
+                                        {/* Granular Metadata (Batch / Expiry) */}
+                                        <div className="flex items-center gap-3 mt-2">
                                             {item.batchNumber && (
                                                 <div className="flex items-center gap-1.5">
-                                                    <Box size={10} className="text-zinc-400" />
-                                                    <span className="text-[9px] font-black text-zinc-500 dark:text-zinc-500 uppercase tracking-widest">Batch:</span>
-                                                    <span className="text-[9px] font-black text-zinc-900 dark:text-zinc-300 font-mono">{item.batchNumber}</span>
+                                                    <Box size={10} className="text-slate-400 dark:text-zinc-600" />
+                                                    <span className="text-[9px] font-black text-slate-400 dark:text-zinc-500 uppercase tracking-widest">Batch:</span>
+                                                    <span className="text-[9px] font-black text-slate-900 dark:text-zinc-300 font-mono">{item.batchNumber}</span>
                                                 </div>
                                             )}
                                         </div>
 
-                                        {/* Extra Barcodes — hidden on mobile */}
+                                        {/* Extra Barcodes */}
                                         {item.barcodes && item.barcodes.length > 0 && (
-                                            <div className="hidden md:flex flex-wrap gap-1.5 mt-2">
+                                            <div className="flex flex-wrap gap-1.5 mt-2">
                                                 {item.barcodes.map((code: string, cIdx: number) => (
-                                                    <span key={cIdx} className="text-[8px] font-mono text-zinc-400 dark:text-zinc-600 bg-zinc-50 dark:bg-white/[0.02] border border-zinc-100 dark:border-white/5 px-1.5 py-0.5 rounded">
+                                                    <span key={cIdx} className="text-[8px] font-mono text-slate-400 dark:text-zinc-600 bg-slate-50 dark:bg-white/[0.02] border border-slate-100 dark:border-white/5 px-1.5 py-0.5 rounded">
                                                         {code}
                                                     </span>
                                                 ))}
@@ -176,8 +202,8 @@ export const ReceiveDetailsModal: React.FC<ReceiveDetailsModalProps> = ({
 
                                 <div className="flex items-center gap-3 md:gap-6 flex-shrink-0 ml-2">
                                     <div className="text-right">
-                                        <p className="text-[9px] text-zinc-400 dark:text-zinc-600 uppercase font-black tracking-widest">Qty</p>
-                                        <p className="text-lg font-black text-zinc-950 dark:text-cyan-400 tabular-nums font-mono">
+                                        <p className="text-[9px] text-slate-400 dark:text-zinc-600 uppercase font-black tracking-widest mb-1.5">Quantity</p>
+                                        <p className="text-lg font-black text-slate-900 dark:text-cyan-400 tabular-nums font-mono leading-none">
                                             {(() => {
                                                 const baseQty = item.receivedQty || item.quantity || item.expectedQty || 0;
                                                 const itemUnit = getSellUnit(item.unit);
@@ -188,7 +214,7 @@ export const ReceiveDetailsModal: React.FC<ReceiveDetailsModalProps> = ({
                                                     return (
                                                         <>
                                                             {baseQty}
-                                                            <span className="text-[10px] text-zinc-400 dark:text-zinc-500 font-bold ml-1">× {sizeNum}{itemUnit.shortLabel.toLowerCase()}</span>
+                                                            <span className="text-[10px] text-slate-400 dark:text-zinc-500 font-bold ml-1 uppercase">× {sizeNum}{itemUnit.shortLabel.toLowerCase()}</span>
                                                         </>
                                                     );
                                                 }
@@ -196,7 +222,7 @@ export const ReceiveDetailsModal: React.FC<ReceiveDetailsModalProps> = ({
                                                     <>
                                                         {baseQty}
                                                         {itemUnit.code !== 'UNIT' && (
-                                                            <span className="text-[10px] text-zinc-400 dark:text-zinc-500 font-bold ml-1 uppercase">{itemUnit.shortLabel}</span>
+                                                            <span className="text-[10px] text-slate-400 dark:text-zinc-500 font-bold ml-1 uppercase">{itemUnit.shortLabel}</span>
                                                         )}
                                                     </>
                                                 );
@@ -204,14 +230,14 @@ export const ReceiveDetailsModal: React.FC<ReceiveDetailsModalProps> = ({
                                         </p>
                                     </div>
 
-                                    <div className="hidden md:block w-px h-8 bg-zinc-200 dark:bg-white/10" />
+                                    <div className="hidden md:block w-px h-8 bg-slate-200 dark:bg-white/10" />
 
                                     <button
                                         onClick={() => handleOpenReprint(item)}
-                                        className="p-2.5 md:p-2 bg-zinc-100 dark:bg-cyan-500 text-zinc-950 dark:text-black rounded-lg hover:bg-zinc-200 dark:hover:bg-cyan-400 transition-all shadow-md dark:shadow-cyan-500/20 active:scale-95 border border-zinc-300 dark:border-cyan-400/30"
+                                        className="p-2.5 md:p-3 bg-cyan-50 dark:bg-cyan-500 text-cyan-600 dark:text-black rounded-lg hover:bg-cyan-100 dark:hover:bg-cyan-400 transition-all shadow-md dark:shadow-cyan-500/20 active:scale-95 border border-cyan-100 dark:border-cyan-400/30"
                                         title="Print Label"
                                     >
-                                        <Printer size={20} />
+                                        <Printer size={18} />
                                     </button>
                                 </div>
                             </div>
@@ -220,15 +246,14 @@ export const ReceiveDetailsModal: React.FC<ReceiveDetailsModalProps> = ({
                 </div>
 
                 {/* Footer */}
-                <div className="p-4 md:p-6 border-t border-zinc-200 dark:border-zinc-900 bg-zinc-50/50 dark:bg-zinc-950/40 flex justify-end gap-3 shrink-0">
+                <div className="p-4 md:p-6 border-t border-slate-200 dark:border-zinc-900 bg-slate-50/50 dark:bg-zinc-950/40 flex justify-end gap-3 shrink-0">
                     <button
                         onClick={onClose}
-                        className="w-full md:w-auto px-8 py-3 bg-zinc-100 dark:bg-white text-zinc-950 dark:text-black hover:bg-zinc-200 dark:hover:bg-zinc-100 font-black uppercase tracking-widest text-[10px] rounded-xl transition-all shadow-md border border-zinc-300 dark:border-white/10"
+                        className="w-full md:w-auto px-10 py-3.5 bg-slate-100 dark:bg-white text-slate-900 dark:text-black hover:bg-slate-200 dark:hover:bg-gray-100 font-black uppercase tracking-widest text-[10px] rounded-xl transition-all shadow-md border border-slate-200 dark:border-white/10 active:scale-[0.98]"
                     >
-                        Dismiss
+                        Dismiss Manifest
                     </button>
                 </div>
-
             </div>
         </div>
     );

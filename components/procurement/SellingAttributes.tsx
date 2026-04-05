@@ -156,28 +156,28 @@ export const SellingAttributes: React.FC<SellingAttributesProps> = ({
     return (
         <div className="space-y-4">
             {/* ─── SECTION HEADER ───────────────────────────── */}
-            <div className="flex items-center gap-2 pb-2 border-b border-green-500/20">
-                <div className="w-1.5 h-1.5 rounded-full bg-green-400" />
-                <span className="text-[10px] text-green-400 font-black uppercase tracking-[0.2em]">Selling & Retail</span>
+            <div className="flex items-center gap-2 pb-2 border-b border-green-600/20 dark:border-green-500/20">
+                <div className="w-1.5 h-1.5 rounded-full bg-green-600 dark:bg-green-400 shadow-[0_0_8px_rgba(22,163,74,0.4)] dark:shadow-[0_0_8px_rgba(74,222,128,0.4)]" />
+                <span className="text-[10px] text-green-600 dark:text-green-400 font-black uppercase tracking-[0.2em]">Selling & Retail</span>
             </div>
 
             {/* ─── SELL UNIT + RETAIL PRICE ─────────────────── */}
             <div className="relative overflow-hidden rounded-xl p-[1px]">
-                <div className="absolute inset-0 bg-gradient-to-br from-green-500/20 via-transparent to-emerald-500/20 opacity-30" />
-                <div className="relative bg-black/60 backdrop-blur-xl rounded-xl p-5 space-y-4">
-                    <div className="flex items-center gap-2 mb-2 pb-2 border-b border-white/10">
-                        <DollarSign size={14} className="text-green-400" />
-                        <h5 className="text-[10px] text-green-400 font-bold uppercase tracking-widest">Pricing & Units</h5>
+                <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 via-transparent to-emerald-500/10 dark:from-green-500/20 dark:via-transparent dark:to-emerald-500/20 opacity-30" />
+                <div className="relative bg-white dark:bg-black/60 backdrop-blur-xl rounded-xl p-5 space-y-4 border border-gray-100 dark:border-white/5 shadow-sm dark:shadow-none">
+                    <div className="flex items-center gap-2 mb-2 pb-2 border-b border-gray-100 dark:border-white/10">
+                        <DollarSign size={14} className="text-green-600 dark:text-green-400" />
+                        <h5 className="text-[10px] text-green-600 dark:text-green-400 font-black uppercase tracking-widest">Pricing & Units</h5>
                     </div>
 
                     <div className="grid grid-cols-6 gap-4">
                         {/* Sell Unit */}
                         <div className="col-span-2 space-y-1.5">
-                            <label className="text-[10px] text-gray-400 uppercase font-bold ml-1">Sell Unit <span className="text-green-400">*</span></label>
+                            <label className="text-[10px] text-gray-500 dark:text-gray-400 uppercase font-black ml-1">Sell Unit <span className="text-green-600 dark:text-green-400">*</span></label>
                             <div className="relative">
                                 <select
                                     title="Sell Unit"
-                                    className={`w-full bg-black/40 border ${errors.unit ? 'border-red-500/50' : 'border-white/10'} rounded-lg px-3 py-2 text-xs text-white focus:border-green-400/50 outline-none appearance-none transition-all`}
+                                    className={`w-full bg-gray-50 dark:bg-black/40 border ${errors.unit ? 'border-red-500/50' : 'border-gray-200 dark:border-white/10'} rounded-lg px-3 py-2 text-xs text-gray-900 dark:text-white focus:border-green-500/50 dark:focus:border-green-400/50 outline-none appearance-none transition-all font-bold`}
                                     value={customItemUnit}
                                     onChange={e => {
                                         const code = e.target.value;
@@ -202,25 +202,25 @@ export const SellingAttributes: React.FC<SellingAttributesProps> = ({
                                         }));
                                     }}
                                 >
-                                    <option value="" className="bg-gray-900 text-gray-500">Select unit...</option>
+                                    <option value="" className="bg-white dark:bg-gray-900 text-gray-500">Select unit...</option>
                                     {(() => {
                                         const groups = getGroupedUnits();
                                         return (
                                             <>
-                                                <optgroup label="Count" className="bg-gray-900 text-gray-300">
-                                                    {groups.count.map(u => <option key={u.code} value={u.code} className="bg-gray-900 text-white">{u.label}</option>)}
+                                                <optgroup label="Count" className="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-300">
+                                                    {groups.count.map(u => <option key={u.code} value={u.code} className="bg-white dark:bg-gray-900 text-gray-900 dark:text-white">{u.label}</option>)}
                                                 </optgroup>
-                                                <optgroup label="Weight" className="bg-gray-900 text-gray-300">
-                                                    {groups.weight.map(u => <option key={u.code} value={u.code} className="bg-gray-900 text-white">{u.label}</option>)}
+                                                <optgroup label="Weight" className="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-300">
+                                                    {groups.weight.map(u => <option key={u.code} value={u.code} className="bg-white dark:bg-gray-900 text-gray-900 dark:text-white">{u.label}</option>)}
                                                 </optgroup>
-                                                <optgroup label="Volume" className="bg-gray-900 text-gray-300">
-                                                    {groups.volume.map(u => <option key={u.code} value={u.code} className="bg-gray-900 text-white">{u.label}</option>)}
+                                                <optgroup label="Volume" className="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-300">
+                                                    {groups.volume.map(u => <option key={u.code} value={u.code} className="bg-white dark:bg-gray-900 text-gray-900 dark:text-white">{u.label}</option>)}
                                                 </optgroup>
                                             </>
                                         );
                                     })()}
                                 </select>
-                                <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
+                                <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 pointer-events-none" />
                             </div>
                             {customItemUnit && (
                                 <span className="text-[9px] text-gray-500 ml-1">
@@ -232,15 +232,15 @@ export const SellingAttributes: React.FC<SellingAttributesProps> = ({
 
                         {/* Retail Price + Margin — always both visible */}
                         <div className="col-span-4 space-y-1.5">
-                            <label className="text-[10px] text-gray-400 uppercase font-bold ml-1">
-                                Retail Price{showPerUnit ? ` /${unitDef.shortLabel}` : ''} <span className="text-green-400">*</span>
+                            <label className="text-[10px] text-gray-500 dark:text-gray-400 uppercase font-black ml-1">
+                                Retail Price{showPerUnit ? ` /${unitDef.shortLabel}` : ''} <span className="text-green-600 dark:text-green-400">*</span>
                             </label>
 
                             {/* Cost per sell unit hint */}
                             {costPerSellUnit !== null && (
-                                <div className="bg-white/5 rounded-lg px-3 py-1 border border-white/5">
-                                    <span className="text-[9px] text-gray-500">Cost/{unitDef.shortLabel}: </span>
-                                    <span className="text-[10px] text-white font-mono font-bold">{costPerSellUnit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                <div className="bg-gray-50 dark:bg-white/5 rounded-lg px-3 py-1 border border-gray-100 dark:border-white/5 shadow-inner">
+                                    <span className="text-[9px] text-gray-400 dark:text-gray-500 uppercase font-black tracking-tight">Cost/{unitDef.shortLabel}: </span>
+                                    <span className="text-[10px] text-gray-900 dark:text-white font-mono font-black">{costPerSellUnit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                 </div>
                             )}
 
@@ -253,19 +253,19 @@ export const SellingAttributes: React.FC<SellingAttributesProps> = ({
                                         min="0.1"
                                         max="99.99"
                                         step="0.01"
-                                        className="w-full bg-black/40 border border-green-500/30 rounded-lg pl-3 pr-8 py-2.5 text-sm text-green-400 font-mono font-bold focus:border-green-400/50 outline-none transition-all text-center"
+                                        className="w-full bg-gray-50 dark:bg-black/40 border border-green-500/20 dark:border-green-500/30 rounded-lg pl-3 pr-8 py-2.5 text-sm text-green-700 dark:text-green-400 font-mono font-black focus:border-green-500/50 dark:focus:border-green-400/50 outline-none transition-all text-center shadow-sm"
                                         value={marginPercent}
                                         onChange={e => handleMarginChange(e.target.value)}
                                         placeholder="e.g. 33.5"
                                     />
-                                    <Percent size={12} className="absolute right-3 bottom-3.5 text-green-500/50" />
+                                    <Percent size={12} className="absolute right-3 bottom-3.5 text-green-600/50 dark:text-green-500/50" />
                                 </div>
                                 {/* Retail Price — always visible */}
                                 <div>
                                     <label className="text-[8px] text-gray-600 uppercase font-bold ml-1 block mb-0.5">Price</label>
                                     <input
                                         type="number"
-                                        className={`w-full bg-black/40 border ${errors.retail ? 'border-red-500/50' : 'border-white/10'} rounded-lg px-3 py-2.5 text-sm text-white font-mono focus:border-green-400/50 outline-none transition-all text-center`}
+                                        className={`w-full bg-gray-50 dark:bg-black/40 border ${errors.retail ? 'border-red-500/50' : 'border-gray-200 dark:border-white/10'} rounded-lg px-3 py-2.5 text-sm text-gray-900 dark:text-white font-mono focus:border-green-500/50 dark:focus:border-green-400/50 outline-none transition-all text-center font-black shadow-sm`}
                                         value={currentRetailPrice || ''}
                                         onChange={e => handleRetailChange(parseFloat(e.target.value) || 0)}
                                         placeholder="0.00"
@@ -273,7 +273,7 @@ export const SellingAttributes: React.FC<SellingAttributesProps> = ({
                                 </div>
                             </div>
                             {currentRetailPrice > 0 && costPerSellUnit && costPerSellUnit > 0 && (
-                                <span className="text-[9px] text-green-400/60 block text-center">
+                                <span className="text-[9px] text-green-600 dark:text-green-400/60 block text-center font-black uppercase tracking-tight">
                                     Profit: {(currentRetailPrice - costPerSellUnit).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}/{unitDef.shortLabel}
                                 </span>
                             )}
@@ -284,28 +284,28 @@ export const SellingAttributes: React.FC<SellingAttributesProps> = ({
                     {/* Sell By, Price Type, Flags */}
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-2 border-t border-white/5">
                         <div className="col-span-1 space-y-1">
-                            <label className="text-[9px] text-gray-500 uppercase font-bold ml-1">Sell By</label>
-                            <select title="Sell By" className="w-full bg-black/40 border border-white/10 rounded-lg px-2 py-1.5 text-xs text-white outline-none appearance-none" value={customAttributes.commercial.sellBy} onChange={e => setCustomAttributes((prev: any) => ({ ...prev, commercial: { ...prev.commercial, sellBy: e.target.value } }))}>
-                                <option value="Unit" className="bg-gray-900 text-white">Unit</option>
-                                <option value="Weight" className="bg-gray-900 text-white">Weight</option>
-                                <option value="Volume" className="bg-gray-900 text-white">Volume</option>
+                            <label className="text-[9px] text-gray-500 dark:text-gray-500 uppercase font-black ml-1">Sell By</label>
+                            <select title="Sell By" className="w-full bg-gray-50 dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-lg px-2 py-1.5 text-xs text-gray-900 dark:text-white outline-none appearance-none font-bold" value={customAttributes.commercial.sellBy} onChange={e => setCustomAttributes((prev: any) => ({ ...prev, commercial: { ...prev.commercial, sellBy: e.target.value } }))}>
+                                <option value="Unit" className="bg-white dark:bg-gray-900 text-gray-900 dark:text-white">Unit</option>
+                                <option value="Weight" className="bg-white dark:bg-gray-900 text-gray-900 dark:text-white">Weight</option>
+                                <option value="Volume" className="bg-white dark:bg-gray-900 text-gray-900 dark:text-white">Volume</option>
                             </select>
                         </div>
                         <div className="col-span-1 space-y-1">
-                            <label className="text-[9px] text-gray-500 uppercase font-bold ml-1">Price Type</label>
-                            <select title="Price Type" className="w-full bg-black/40 border border-white/10 rounded-lg px-2 py-1.5 text-xs text-white outline-none appearance-none" value={customAttributes.commercial.priceType} onChange={e => setCustomAttributes((prev: any) => ({ ...prev, commercial: { ...prev.commercial, priceType: e.target.value } }))}>
-                                <option value="Fixed" className="bg-gray-900 text-white">Fixed</option>
-                                <option value="Variable" className="bg-gray-900 text-white">Variable</option>
+                            <label className="text-[9px] text-gray-500 dark:text-gray-500 uppercase font-black ml-1">Price Type</label>
+                            <select title="Price Type" className="w-full bg-gray-50 dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-lg px-2 py-1.5 text-xs text-gray-900 dark:text-white outline-none appearance-none font-bold" value={customAttributes.commercial.priceType} onChange={e => setCustomAttributes((prev: any) => ({ ...prev, commercial: { ...prev.commercial, priceType: e.target.value } }))}>
+                                <option value="Fixed" className="bg-white dark:bg-gray-900 text-gray-900 dark:text-white">Fixed</option>
+                                <option value="Variable" className="bg-white dark:bg-gray-900 text-gray-900 dark:text-white">Variable</option>
                             </select>
                         </div>
-                        <div className="col-span-2 flex flex-wrap items-center gap-5 pt-1">
+                        <div className="col-span-2 flex flex-wrap items-center gap-5 pt-1 uppercase tracking-tight">
                             <label className="flex items-center gap-2 cursor-pointer group">
-                                <input type="checkbox" className="peer w-3 h-3 rounded border-white/10 bg-black/40 text-green-400" checked={customAttributes.commercial.isReturnable} onChange={e => setCustomAttributes((prev: any) => ({ ...prev, commercial: { ...prev.commercial, isReturnable: e.target.checked } }))} />
-                                <span className="text-[10px] text-gray-400 group-hover:text-green-400 transition-colors">Returnable</span>
+                                <input type="checkbox" className="peer w-3 h-3 rounded border-gray-300 dark:border-white/10 bg-gray-50 dark:bg-black/40 text-green-600 dark:text-green-400" checked={customAttributes.commercial.isReturnable} onChange={e => setCustomAttributes((prev: any) => ({ ...prev, commercial: { ...prev.commercial, isReturnable: e.target.checked } }))} />
+                                <span className="text-[10px] text-gray-500 dark:text-gray-400 group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors font-black">Returnable</span>
                             </label>
                             <label className="flex items-center gap-2 cursor-pointer group">
-                                <input type="checkbox" className="peer w-3 h-3 rounded border-white/10 bg-black/40 text-green-400" checked={customAttributes.commercial.isBundleEligible} onChange={e => setCustomAttributes((prev: any) => ({ ...prev, commercial: { ...prev.commercial, isBundleEligible: e.target.checked } }))} />
-                                <span className="text-[10px] text-gray-400 group-hover:text-green-400 transition-colors">Bundle Eligible</span>
+                                <input type="checkbox" className="peer w-3 h-3 rounded border-gray-300 dark:border-white/10 bg-gray-50 dark:bg-black/40 text-green-600 dark:text-green-400" checked={customAttributes.commercial.isBundleEligible} onChange={e => setCustomAttributes((prev: any) => ({ ...prev, commercial: { ...prev.commercial, isBundleEligible: e.target.checked } }))} />
+                                <span className="text-[10px] text-gray-500 dark:text-gray-400 group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors font-black">Bundle Eligible</span>
                             </label>
                         </div>
                     </div>

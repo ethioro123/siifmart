@@ -22,7 +22,7 @@ export function useScanOnly(
         onReject?: (reason: string) => void;
     }
 ) {
-    const threshold = options?.thresholdMs ?? 80;
+    const threshold = options?.thresholdMs ?? 150;
     const lastKeyTime = useRef<number>(0);
     const charCount = useRef<number>(0);
     const firstKeyTime = useRef<number>(0);
@@ -50,6 +50,15 @@ export function useScanOnly(
             return;
         }
 
+        // If there's been a long gap since the last key, treat this as a NEW scan sequence
+        // (e.g., after a success overlay or item transition). Reset and allow through.
+        if (now - lastKeyTime.current > threshold * 2) {
+            firstKeyTime.current = now;
+            charCount.current = 1;
+            lastKeyTime.current = now;
+            return;
+        }
+
         charCount.current++;
         const timeSinceLast = now - lastKeyTime.current;
         lastKeyTime.current = now;
@@ -71,5 +80,12 @@ export function useScanOnly(
         options?.onReject?.('PASTING NOT ALLOWED — PLEASE SCAN');
     }, [options?.onReject]);
 
-    return { onKeyDown, onPaste };
+    // Reset all internal state — call this when transitioning between scan targets
+    const reset = useCallback(() => {
+        charCount.current = 0;
+        firstKeyTime.current = 0;
+        lastKeyTime.current = 0;
+    }, []);
+
+    return { onKeyDown, onPaste, reset };
 }

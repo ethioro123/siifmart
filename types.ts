@@ -36,7 +36,7 @@ export type UserRole =
   | 'receiver' | 'driver' | 'forklift_operator' | 'inventory_specialist'
   | 'customer_service' | 'auditor' | 'it_support'
   // Legacy roles (for backwards compatibility during migration)
-  | 'admin' | 'manager' | 'hr' | 'pos' | 'dispatcher'
+  | 'admin' | 'hr' | 'pos' | 'dispatcher'
   | 'cs_manager' | 'returns_clerk' | 'merchandiser' | 'loss_prevention'
   | 'accountant' | 'data_analyst' | 'training_coordinator';
 export type ThemeMode = 'dark' | 'light';
@@ -58,6 +58,8 @@ export interface Notification {
   message: string;
   timestamp: string;
   read: boolean;
+  userId?: string;     // [NEW] Target user ID
+  isGlobal?: boolean;  // [NEW] Flag for global administrative alerts
 }
 
 export interface SystemLog {
@@ -730,7 +732,7 @@ export interface WMSJob {
   site_id?: string; // Supabase compatibility - Warehouse/Site where job is fulfilled
   type: 'PICK' | 'PACK' | 'PUTAWAY' | 'TRANSFER' | 'DISPATCH' | 'REPLENISH' | 'COUNT' | 'WASTE' | 'RETURNS' | 'DRIVER' | 'RECEIVE';
   priority: 'Critical' | 'High' | 'Normal';
-  status: 'Pending' | 'In-Progress' | 'Completed' | 'Cancelled' | 'Dispatched';
+  status: 'Pending' | 'In-Progress' | 'Completed' | 'Cancelled' | 'Dispatched' | 'Deleted';
   items: number;
   items_count?: number; // Compatibility alias
   lineItems: JobItem[];

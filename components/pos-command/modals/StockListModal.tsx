@@ -14,18 +14,27 @@ export const StockListModal: React.FC = () => {
         isStockListOpen, setIsStockListOpen, stockSearch, setStockSearch
     } = usePOSCommand();
 
-    const [selectedProduct, setSelectedProduct] = React.useState<any>(null);
+    const [currentPage, setCurrentPage] = React.useState(1);
+    const pageSize = 20;
 
+    const [selectedProduct, setSelectedProduct] = React.useState<any>(null);
     const { products, activeSite } = useData();
     const { user } = useStore();
 
-    const filteredProducts = products.filter(p => {
+    const filteredProducts = products.filter((p: any) => {
         const siteId = activeSite?.id || user?.siteId;
         const matchesSite = !siteId || p.siteId === siteId || p.site_id === siteId;
         const matchesSearch = p.name.toLowerCase().includes(stockSearch.toLowerCase()) ||
             p.sku.toLowerCase().includes(stockSearch.toLowerCase());
         return matchesSite && matchesSearch;
     });
+
+    const totalPages = Math.ceil(filteredProducts.length / pageSize);
+    const paginatedProducts = filteredProducts.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
+    React.useEffect(() => {
+        setCurrentPage(1);
+    }, [stockSearch]);
 
     return (
         <Modal
@@ -56,10 +65,12 @@ export const StockListModal: React.FC = () => {
                                 <th className="text-right p-3 font-medium uppercase tracking-wider">{t('inventory.stock')}</th>
                                 <th className="text-center p-3 font-medium uppercase tracking-wider">{t('inventory.unit')}</th>
                                 <th className="text-center p-3 font-medium uppercase tracking-wider">{t('common.status')}</th>
+                                <th className="text-right p-3 font-medium uppercase tracking-wider">Last Updated</th>
+                                <th className="text-right p-3 font-medium uppercase tracking-wider">Added By</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-white/5">
-                            {filteredProducts.map(product => {
+                            {paginatedProducts.map(product => {
                                 const unit = getSellUnit(product.unit);
                                 return (
                                     <tr
@@ -78,9 +89,9 @@ export const StockListModal: React.FC = () => {
                                             {CURRENCY_SYMBOL}{product.price.toLocaleString()}
                                         </td>
                                         <td className="p-3 text-right">
-                                            <span className={`font-medium ${product.stock <= 5 ? 'text-red-400' : 'text-green-400'}`}>
+                                            <div className={`font-medium ${product.stock <= 5 ? 'text-red-400' : 'text-green-400'}`}>
                                                 {product.stock}
-                                            </span>
+                                            </div>
                                         </td>
                                         <td className="p-3 text-center text-gray-400 uppercase text-[10px] font-bold">
                                             {unit.shortLabel}
@@ -88,19 +99,35 @@ export const StockListModal: React.FC = () => {
                                         <td className="p-3 text-center">
                                             <span className={`px-2 py-0.5 rounded-full text-[10px] uppercase font-bold ${product.stock > 10 ? 'bg-green-500/10 text-green-500' :
                                                 product.stock > 0 ? 'bg-amber-500/10 text-amber-500' :
-                                                    'bg-red-500/10 text-red-500'
+                                                    'bg-red-50/10 text-red-500'
                                                 }`}>
                                                 {product.stock > 10 ? t('common.active') :
                                                     product.stock > 0 ? t('common.low') :
                                                         t('common.outOfStock')}
                                             </span>
                                         </td>
+                                        <td className="p-3 text-right text-gray-400 text-xs whitespace-nowrap font-mono">
+                                            {(() => {
+                                                const dateStr = product.posReceivedAt || product.pos_received_at || product.createdAt || product.created_at;
+                                                if (!dateStr) return '—';
+                                                try {
+                                                    const d = new Date(dateStr);
+                                                    if (isNaN(d.getTime())) return '—';
+                                                    return d.toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+                                                } catch (e) {
+                                                    return '—';
+                                                }
+                                            })()}
+                                        </td>
+                                        <td className="p-3 text-right text-gray-400 text-[11px] whitespace-nowrap font-medium tracking-wide">
+                                            {product.posReceivedBy || product.pos_received_by || product.createdBy || product.created_by || '—'}
+                                        </td>
                                     </tr>
                                 );
                             })}
                             {filteredProducts.length === 0 && (
                                 <tr>
-                                    <td colSpan={6} className="p-8 text-center text-gray-500">
+                                    <td colSpan={8} className="p-8 text-center text-gray-500">
                                         {t('posCommand.noProductsLocation')}
                                     </td>
                                 </tr>
@@ -108,6 +135,32 @@ export const StockListModal: React.FC = () => {
                         </tbody>
                     </table>
                 </div>
+
+                {totalPages > 1 && (
+                    <div className="flex items-center justify-between border-t border-white/10 pt-4 bg-transparent mt-4">
+                        <div className="text-xs text-gray-500 flex items-center gap-2">
+                            <span>{t('common.page')} {currentPage} / {totalPages}</span>
+                            <span className="opacity-50">|</span>
+                            <span>{filteredProducts.length} {t('inventory.products')}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                                disabled={currentPage === 1}
+                                className="px-3 py-1.5 text-xs font-bold uppercase tracking-widest text-white bg-white/5 border border-white/10 rounded hover:bg-white/10 disabled:opacity-20 transition-all outline-none active:scale-95"
+                            >
+                                {t('common.previous')}
+                            </button>
+                            <button
+                                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                                disabled={currentPage === totalPages}
+                                className="px-3 py-1.5 text-xs font-bold uppercase tracking-widest text-white bg-white/5 border border-white/10 rounded hover:bg-white/10 disabled:opacity-20 transition-all outline-none active:scale-95"
+                            >
+                                {t('common.next')}
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div>
 
             <ProductDetailsModal

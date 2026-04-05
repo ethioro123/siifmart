@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import {
-    WMSJob, JobItem, PurchaseOrder, Product
+    WMSJob, JobItem, PurchaseOrder, Product, Site, User
 } from '../../types';
 import {
     wmsJobsService
@@ -28,7 +28,8 @@ interface UseJobMaintenanceDeps {
     jobs: WMSJob[];
     orders: PurchaseOrder[];
     products: Product[];
-    activeSite: any;
+    activeSite: Site | null;
+    user: User | null;
     setJobs: React.Dispatch<React.SetStateAction<WMSJob[]>>;
     addNotification: (type: 'alert' | 'success' | 'info', message: string) => void;
     refreshJobs: () => void;
@@ -38,7 +39,7 @@ interface UseJobMaintenanceDeps {
 // ─── Hook ───────────────────────────────────────────────────────────────────
 
 export const useJobMaintenance = (deps: UseJobMaintenanceDeps) => {
-    const { jobs, orders, products, activeSite, setJobs, addNotification, refreshJobs, queryClient } = deps;
+    const { jobs, orders, products, activeSite, user, setJobs, addNotification, refreshJobs, queryClient } = deps;
 
     const resetJob = useCallback(async (jobId: string) => {
         try {
@@ -170,13 +171,45 @@ export const useJobMaintenance = (deps: UseJobMaintenanceDeps) => {
             }
         }
 
-        if (fixedPOs > 0 || fixedNumbers > 0) {
-            addNotification('success', `Maintenance Complete: Fixed ${fixedPOs} POs and synced ${fixedNumbers} job numbers.`);
+        // 3. Fix Orphaned RECEIVE Jobs
+        const orphanedReceiveJobs = jobs.filter(j => 
+            j.type === 'RECEIVE' && 
+            ['Pending', 'In-Progress'].includes(j.status || '')
+        );
+
+        let fixedGhosts = 0;
+        for (const job of orphanedReceiveJobs) {
+            const po = orders.find(o => o.id === job.orderRef);
+            if (!po || po.status !== 'Approved') {
+                console.log(`🔧 Syncing Ghost RECEIVE Job: ${job.id}`);
+                try {
+                    await wmsJobsService.update(job.id, { 
+                        status: 'Completed',
+                        completed_at: new Date().toISOString(),
+                        completed_by: user?.id || 'System Manual-Fix'
+                    } as any);
+                    
+                    setJobs(prev => prev.map(j => j.id === job.id ? { 
+                        ...j, 
+                        status: 'Completed', 
+                        completedAt: new Date().toISOString(),
+                        completedBy: user?.id || 'System Manual-Fix'
+                    } as WMSJob : j));
+                    
+                    fixedGhosts++;
+                } catch (e) {
+                    console.error(`Failed to sync ghost job ${job.id}:`, e);
+                }
+            }
+        }
+
+        if (fixedPOs > 0 || fixedNumbers > 0 || fixedGhosts > 0) {
+            addNotification('success', `Maintenance Complete: Fixed ${fixedPOs} POs, synced ${fixedNumbers} job numbers, and cleaned ${fixedGhosts} ghost jobs.`);
             refreshJobs();
         } else {
             addNotification('info', 'All jobs look healthy.');
         }
-    }, [jobs, orders, products, activeSite, setJobs, addNotification, refreshJobs]);
+    }, [jobs, orders, products, activeSite, setJobs, addNotification, refreshJobs, user]);
 
     const createPutawayJob = useCallback(async (product: Product, quantity: number, user: string, source: string = 'Inventory') => {
         try {
@@ -253,14 +286,19 @@ export const useJobMaintenance = (deps: UseJobMaintenanceDeps) => {
 
     const deleteJob = useCallback(async (id: string) => {
         try {
-            await wmsJobsService.delete(id);
-            setJobs(prev => prev.filter(j => j.id !== id));
+            await wmsJobsService.update(id, {
+                status: 'Deleted',
+                completedAt: new Date().toISOString(),
+                completedBy: user?.id || 'System'
+            } as any);
+            setJobs(prev => prev.map(j => j.id === id ? { ...j, status: 'Deleted', completedAt: new Date().toISOString(), completedBy: user?.id || 'System' } : j));
             addNotification('success', 'Job deleted');
+            queryClient.invalidateQueries({ queryKey: ['wms_jobs'] });
         } catch (error) {
             console.error(error);
             addNotification('alert', 'Failed to delete job');
         }
-    }, [setJobs, addNotification]);
+    }, [setJobs, addNotification, queryClient, user]);
 
     return { resetJob, fixBrokenJobs, createPutawayJob, deleteJob };
 };

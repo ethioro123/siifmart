@@ -63,20 +63,20 @@ export default function Modal({
       />
 
       {/* Modal Content */}
-      <div className={`relative w-full ${isSide ? 'h-full max-w-md rounded-l-3xl rounded-r-none animate-in slide-in-from-right duration-300' : `${sizeClasses[size]} rounded-2xl animate-in fade-in zoom-in duration-200`} bg-cyber-dark border border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.5)] transform transition-all flex flex-col ${isSide ? 'max-h-full' : 'max-h-[90vh]'} print:max-w-none print:w-full print:max-h-none print:shadow-none print:border-none print:rounded-none print:bg-white`}>
+      <div className={`relative w-full ${isSide ? 'h-full max-w-md rounded-l-3xl rounded-r-none animate-in slide-in-from-right duration-300' : `${sizeClasses[size]} rounded-2xl animate-in fade-in zoom-in duration-200`} bg-cyber-dark dark:bg-cyber-dark border border-gray-200 dark:border-white/10 shadow-2xl dark:shadow-[0_0_50px_rgba(0,0,0,0.5)] transform transition-all flex flex-col ${isSide ? 'max-h-full' : 'max-h-[90vh]'} print:max-w-none print:w-full print:max-h-none print:shadow-none print:border-none print:rounded-none print:bg-white`}>
 
         {/* Glow Effect */}
         <div className={`absolute -inset-[1px] bg-gradient-to-r from-transparent via-cyber-primary/20 to-transparent ${isSide ? 'rounded-l-3xl' : 'rounded-2xl'} blur-sm -z-10 pointer-events-none print:hidden`} />
 
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-white/5 shrink-0 print:hidden">
-          <h3 className="text-xl font-bold text-white flex items-center gap-2">
+        <div className="flex items-center justify-between p-6 border-b border-gray-100 dark:border-white/5 shrink-0 print:hidden">
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
             {title}
           </h3>
           <button
             onClick={onClose}
             aria-label="Close"
-            className="p-2 rounded-full bg-white/5 text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
+            className="p-2 rounded-full bg-gray-100 dark:bg-white/5 text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-white/10 transition-colors"
           >
             <X size={20} />
           </button>
@@ -89,7 +89,7 @@ export default function Modal({
 
         {/* Footer */}
         {footer && (
-          <div className="p-6 border-t border-white/5 shrink-0">
+          <div className="p-6 border-t border-gray-100 dark:border-white/5 shrink-0">
             {footer}
           </div>
         )}

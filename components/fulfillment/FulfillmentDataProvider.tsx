@@ -59,6 +59,8 @@ interface FulfillmentDataContextType {
     updateJobItem: (jobId: string, itemId: number, status: JobItem['status'], qty: number, location?: string) => Promise<void>;
     updateJobStatus: (jobId: string, status: WMSJob['status']) => Promise<void>;
     updateJob: (id: string, updates: Partial<WMSJob>) => Promise<void>;
+    autoAssignJobs: () => Promise<void>;
+    autoUnassignJobs: () => Promise<void>;
     completeJob: (jobId: string, user: string, skipValidation?: boolean, optimisticLineItems?: any[]) => Promise<any>;
     resetJob: (jobId: string) => Promise<void>;
     fixBrokenJobs: () => Promise<void>;
@@ -117,6 +119,17 @@ export const FulfillmentDataProvider = ({ children }: { children: ReactNode }) =
     const [barcodeApprovals, setBarcodeApprovals] = useState<BarcodeApproval[]>([]);
     const [refreshCounter, setRefreshCounter] = useState(0);
 
+    // --- STRICT SITE-FILTERED EMPLOYEES ---
+    // The raw `employees` from useData() contains ALL employees across ALL sites.
+    // For auto-assign and assignment operations, we MUST restrict to the active site.
+    const siteFilteredEmployees = useMemo(() => {
+        if (!activeSiteId) return [];
+        return employees.filter((e: any) => {
+            const empSiteId = e.siteId || e.site_id;
+            return empSiteId === activeSiteId;
+        });
+    }, [employees, activeSiteId]);
+
     // Call this from any child component to force a fresh fetch of WMS jobs
     const refreshJobs = useCallback(() => setRefreshCounter(c => c + 1), []);
 
@@ -136,6 +149,14 @@ export const FulfillmentDataProvider = ({ children }: { children: ReactNode }) =
 
         const loadFulfillmentData = async () => {
             try {
+                const currentEmployee = employees.find((e: any) => 
+                    (user?.email && e.email === user.email) ||
+                    (user?.name && e.name?.toLowerCase() === user.name.toLowerCase()) ||
+                    (user?.employeeId && e.id === user.employeeId) ||
+                    e.id === user?.id
+                );
+                const employeeId = currentEmployee?.id || user?.id;
+
                 const [
                     loadedJobs,
                     loadedTransfers,
@@ -143,15 +164,13 @@ export const FulfillmentDataProvider = ({ children }: { children: ReactNode }) =
                     loadedZones,
                     loadedApprovals
                 ] = await Promise.all([
-                    wmsJobsService.getAll(activeSiteId),
+                    wmsJobsService.getAll(activeSiteId, 500, employeeId),
                     transfersService.getAll(activeSiteId),
-                    jobAssignmentsService.getAll(activeSiteId),
                     jobAssignmentsService.getAll(activeSiteId),
                     warehouseZonesService.getAll(activeSiteId),
                     barcodeApprovalsService.getAuditLog()
                 ]);
 
-                setJobs(loadedJobs);
 
                 setJobs(loadedJobs);
                 setTransfers(loadedTransfers);
@@ -166,7 +185,7 @@ export const FulfillmentDataProvider = ({ children }: { children: ReactNode }) =
         };
 
         loadFulfillmentData();
-    }, [activeSiteId, refreshCounter]);
+    }, [activeSiteId, refreshCounter, employees.length, user?.email, user?.id]);
 
     // Enriched Jobs Memoization (Previously in DataContext)
     const enrichedJobs = useMemo(() => {
@@ -197,9 +216,40 @@ export const FulfillmentDataProvider = ({ children }: { children: ReactNode }) =
 
         const subscriptions = realtimeService.subscribeToSite(activeSiteId, {
             onWMSJobChange: (event, payload) => {
-                if (event === 'INSERT') setJobs(prev => prev.find(j => j.id === payload.id) ? prev : [payload, ...prev]);
-                else if (event === 'UPDATE') setJobs(prev => prev.map(j => j.id === payload.id ? payload : j));
-                else if (event === 'DELETE') setJobs(prev => prev.filter(j => j.id !== payload.id));
+                // Map raw DB payload (snake_case) to camelCase domain model
+                // Without this mapping, realtime payloads create "ghost" jobs with undefined fields
+                const mapped = {
+                    ...payload,
+                    siteId: payload.site_id,
+                    items: payload.items_count,
+                    assignedTo: payload.assigned_to,
+                    orderRef: payload.order_ref,
+                    lineItems: payload.line_items || [],
+                    jobNumber: payload.job_number,
+                    sourceSiteId: payload.source_site_id,
+                    destSiteId: payload.dest_site_id,
+                    transferStatus: payload.transfer_status,
+                    requestedBy: payload.requested_by,
+                    approvedBy: payload.approved_by,
+                    shippedAt: payload.shipped_at,
+                    deliveredAt: payload.delivered_at,
+                    receivedAt: payload.received_at,
+                    receivedBy: payload.received_by,
+                    trackingNumber: payload.tracking_number,
+                    createdAt: payload.created_at,
+                    updatedAt: payload.updated_at,
+                    deliveryMethod: payload.delivery_method,
+                    hasDiscrepancy: payload.has_discrepancy,
+                    discrepancyDetails: payload.discrepancy_details,
+                    completedBy: payload.completed_by,
+                    completedAt: payload.completed_at,
+                    externalCarrierName: payload.external_carrier_name,
+                    assignedBy: payload.assigned_by,
+                    notes: payload.notes
+                };
+                if (event === 'INSERT') setJobs(prev => prev.find(j => j.id === mapped.id) ? prev : [mapped, ...prev]);
+                else if (event === 'UPDATE') setJobs(prev => prev.map(j => j.id === mapped.id ? mapped : j));
+                else if (event === 'DELETE') setJobs(prev => prev.filter(j => j.id !== (payload.old?.id || payload.id)));
             },
             onJobAssignmentChange: (event, payload) => {
                 if (event === 'INSERT') setJobAssignments(prev => [payload, ...prev]);
@@ -207,34 +257,89 @@ export const FulfillmentDataProvider = ({ children }: { children: ReactNode }) =
                 else if (event === 'DELETE') setJobAssignments(prev => prev.filter(a => a.id !== payload.id));
             },
             onTransferChange: (event, payload) => {
-                if (event === 'INSERT') setTransfers(prev => [payload, ...prev]);
-                else if (event === 'UPDATE') setTransfers(prev => prev.map(t => t.id === payload.id ? payload : t));
+                const mapRealtimeTransfer = (data: any): TransferRecord => ({
+                    ...data,
+                    sourceSiteId: data.source_site_id,
+                    destSiteId: data.dest_site_id,
+                    requestedBy: data.requested_by,
+                    approvedBy: data.approved_by,
+                    shippedAt: data.shipped_at,
+                    deliveredAt: data.delivered_at,
+                    receivedAt: data.received_at,
+                    receivedBy: data.received_by,
+                    trackingNumber: data.tracking_number,
+                    createdAt: data.created_at,
+                    updatedAt: data.updated_at,
+                    deliveryMethod: data.delivery_method
+                });
+                
+                if (event === 'INSERT') {
+                    const mapped = mapRealtimeTransfer(payload);
+                    setTransfers(prev => [mapped, ...prev]);
+                }
+                else if (event === 'UPDATE') {
+                    const mapped = mapRealtimeTransfer(payload);
+                    setTransfers(prev => prev.map(t => t.id === payload.id ? mapped : t));
+                }
                 else if (event === 'DELETE') setTransfers(prev => prev.filter(t => t.id !== payload.id));
             }
         });
 
         return () => {
+            console.log('Unsubscribing from fulfillment real-time updates...');
             realtimeService.unsubscribeAll(subscriptions);
         };
     }, [activeSiteId]);
 
+    // --- AUTO CLEANUP OF GHOST JOBS ---
+    // Cleans up orphaned RECEIVE jobs where the PO was finalized,
+    // but the RECEIVE WMS job was stuck in Pending/In-Progress due to UI disconnects.
+    const hasRunGhostCleanup = React.useRef(false);
+    useEffect(() => {
+        if (!hasRunGhostCleanup.current && jobs.length > 0 && orders.length > 0) {
+            hasRunGhostCleanup.current = true;
+            let cleanupCount = 0;
 
-    // ═══════════════════════════════════════════════════════════════
-    // ACTIONS (Copied & Adapted from DataContext)
-    // ═══════════════════════════════════════════════════════════════
+            const ghostReceiveJobs = jobs.filter(j => 
+                j.type === 'RECEIVE' && 
+                ['Pending', 'In-Progress'].includes(j.status || '')
+            );
 
-    // ... (I will paste the actions in the next chunks using multi_replace or sequential writes to avoid huge artifacts)
+            for (const job of ghostReceiveJobs) {
+                const po = orders.find(o => o.id === job.orderRef);
+                // If PO is missing or status is no longer 'Approved', map it as ghost job
+                if (!po || po.status !== 'Approved') {
+                    console.log(`🧹 [Auto-Cleanup] Completing orphaned ghost job: ${job.jobNumber} (${job.id})`);
+                    cleanupCount++;
+                    
+                    wmsJobsService.update(job.id, { 
+                        status: 'Completed',
+                        completed_at: new Date().toISOString(),
+                        completed_by: user?.id || 'System Auto-Cleanup'
+                    } as any).catch(e => console.error('Failed to auto-cleanup ghost job:', e));
 
-    // For now, I'll return the provider structure with empty actions to establish the file, then populate.
+                    setJobs(prev => prev.map(j => j.id === job.id ? { 
+                        ...j, 
+                        status: 'Completed', 
+                        completedAt: new Date().toISOString(),
+                        completedBy: user?.id || 'System Auto-Cleanup'
+                    } as WMSJob : j));
+                }
+            }
+            if (cleanupCount > 0) {
+                console.log(`✅ [Auto-Cleanup] Successfully cleared ${cleanupCount} ghost jobs.`);
+            }
+        }
+    }, [jobs, orders, user]);
+
 
     // ═══════════════════════════════════════════════════════════════════
     // EXTRACTED HOOKS — all business logic lives in focused hook files
     // ═══════════════════════════════════════════════════════════════════
 
-    // Job Actions: assign, unassign, updateJobItem, updateJobStatus, updateJob
-    const { assignJob, unassignJob, updateJobItem, updateJobStatus, updateJob } = useJobActions({
-        jobs, jobAssignments, employees, user,
-        setJobs, setJobAssignments, addNotification, queryClient
+    const { assignJob, unassignJob, updateJobItem, updateJobStatus, updateJob, autoAssignJobs, autoUnassignJobs } = useJobActions({
+        jobs, jobAssignments, employees: siteFilteredEmployees, user,
+        setJobs, setJobAssignments, addNotification, queryClient, activeSiteId
     });
 
     // Job Completion: completeJob (with job chaining, putaway, gamification)
@@ -246,7 +351,7 @@ export const FulfillmentDataProvider = ({ children }: { children: ReactNode }) =
 
     // Job Maintenance: resetJob, fixBrokenJobs, createPutawayJob, deleteJob
     const { resetJob, fixBrokenJobs, createPutawayJob, deleteJob } = useJobMaintenance({
-        jobs, orders, products, activeSite,
+        jobs, orders, products, activeSite: activeSite || null, user,
         setJobs, addNotification, refreshJobs, queryClient
     });
 
@@ -303,6 +408,8 @@ export const FulfillmentDataProvider = ({ children }: { children: ReactNode }) =
             updateJobItem,
             updateJobStatus,
             updateJob,
+            autoAssignJobs,
+            autoUnassignJobs,
             completeJob,
             resetJob,
             fixBrokenJobs,

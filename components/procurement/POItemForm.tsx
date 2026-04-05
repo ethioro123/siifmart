@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { POItem, Product } from '../../types';
 import { Plus, Package, Save, Search, Check, Info, ChevronDown, ChevronRight } from 'lucide-react';
 import { useStore } from '../../contexts/CentralStore';
-import { generateSequentialSKU } from '../../utils/sequentialSkuGenerator';
+import { generateSequentialSKU } from '../../utils/skuGenerator';
 import { getSellUnit } from '../../utils/units';
 import { ItemPreviewCard } from './ItemPreviewCard';
 import { BuyingAttributes } from './BuyingAttributes';
@@ -254,34 +254,34 @@ export const POItemForm: React.FC<POItemFormProps> = ({
        ═══════════════════════════════════════════════════ */
 
     return (
-        <div id="po-item-form-container" className="bg-cyber-gray/50 p-5 rounded-xl border border-white/10 relative overflow-hidden group">
-            <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-cyber-primary to-blue-500 opacity-80 group-hover:opacity-100 transition-opacity" />
+        <div id="po-item-form-container" className="bg-gray-50/50 dark:bg-cyber-gray/50 p-5 rounded-xl border border-gray-200 dark:border-white/10 relative overflow-hidden group shadow-sm dark:shadow-none">
+            <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-blue-600 to-blue-400 dark:from-cyber-primary dark:to-blue-500 opacity-80 group-hover:opacity-100 transition-opacity" />
             <div className="absolute top-0 right-0 p-4 opacity-10">
-                <Package size={80} className="text-cyber-primary" />
+                <Package size={80} className="text-blue-600 dark:text-cyber-primary" />
             </div>
 
-            <h3 className="text-sm font-bold text-white mb-6 flex items-center gap-2 relative z-10">
-                <div className="p-1.5 bg-cyber-primary/20 rounded-lg">
-                    <Plus size={16} className="text-cyber-primary" />
+            <h3 className="text-sm font-black text-gray-900 dark:text-white mb-6 flex items-center gap-2 relative z-10 transition-colors">
+                <div className="p-1.5 bg-blue-600/10 dark:bg-cyber-primary/20 rounded-lg">
+                    <Plus size={16} className="text-blue-600 dark:text-cyber-primary" />
                 </div>
                 {editingItem ? 'EDIT PRODUCT' : 'ADD PRODUCTS'}
             </h3>
 
             {/* ─── Type Toggle ───────────────────────────── */}
-            <div className="flex gap-6 mb-6 border-b border-white/5 pb-4 relative z-10">
+            <div className="flex gap-6 mb-6 border-b border-gray-100 dark:border-white/5 pb-4 relative z-10">
                 <label className="flex items-center cursor-pointer gap-3 group/toggle">
-                    <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-colors ${productType === 'catalog' ? 'border-cyber-primary' : 'border-gray-600'}`}>
-                        {productType === 'catalog' && <div className="w-2 h-2 rounded-full bg-cyber-primary" />}
+                    <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-colors ${productType === 'catalog' ? 'border-blue-600 dark:border-cyber-primary' : 'border-gray-300 dark:border-gray-600'}`}>
+                        {productType === 'catalog' && <div className="w-2 h-2 rounded-full bg-blue-600 dark:bg-cyber-primary" />}
                     </div>
                     <input type="radio" checked={productType === 'catalog'} onChange={() => setProductType('catalog')} className="hidden" />
-                    <span className={`text-sm tracking-wide ${productType === 'catalog' ? 'text-white' : 'text-gray-400'}`}>CATALOG</span>
+                    <span className={`text-xs font-black tracking-widest ${productType === 'catalog' ? 'text-gray-900 dark:text-white' : 'text-gray-400 dark:text-gray-500'}`}>CATALOG</span>
                 </label>
                 <label className="flex items-center cursor-pointer gap-3 group/toggle">
-                    <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-colors ${productType === 'new' ? 'border-cyber-primary' : 'border-gray-600'}`}>
-                        {productType === 'new' && <div className="w-2 h-2 rounded-full bg-cyber-primary" />}
+                    <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-colors ${productType === 'new' ? 'border-blue-600 dark:border-cyber-primary' : 'border-gray-300 dark:border-gray-600'}`}>
+                        {productType === 'new' && <div className="w-2 h-2 rounded-full bg-blue-600 dark:bg-cyber-primary" />}
                     </div>
                     <input type="radio" checked={productType === 'new'} onChange={() => setProductType('new')} className="hidden" />
-                    <span className={`text-sm tracking-wide ${productType === 'new' ? 'text-white' : 'text-gray-400'}`}>CUSTOM</span>
+                    <span className={`text-xs font-black tracking-widest ${productType === 'new' ? 'text-gray-900 dark:text-white' : 'text-gray-400 dark:text-gray-500'}`}>CUSTOM</span>
                 </label>
             </div>
 
@@ -307,12 +307,12 @@ export const POItemForm: React.FC<POItemFormProps> = ({
                 {productType === 'catalog' ? (
                     /* ═══ CATALOG SEARCH ═══════════════════════ */
                     <div className="space-y-2">
-                        <label className="text-[10px] text-cyber-primary/70 uppercase tracking-widest font-bold ml-1 block">Search Product</label>
+                        <label className="text-[10px] text-blue-600/70 dark:text-cyber-primary/70 uppercase tracking-widest font-black ml-1 block">Search Product</label>
                         <div className="relative">
-                            <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" />
+                            <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" />
                             <input
                                 type="text"
-                                className={`w-full bg-black/40 border ${errors.search ? 'border-red-500/50' : 'border-white/10'} rounded-lg pl-10 pr-4 py-3 text-sm text-white focus:border-cyber-primary/50 outline-none placeholder-gray-600`}
+                                className={`w-full bg-white dark:bg-black/40 border ${errors.search ? 'border-red-500/50' : 'border-gray-200 dark:border-white/10'} rounded-lg pl-10 pr-4 py-3 text-sm text-gray-900 dark:text-white focus:border-blue-500/50 dark:focus:border-cyber-primary/50 outline-none placeholder-gray-400 dark:placeholder-gray-700 font-bold transition-all shadow-sm`}
                                 placeholder="Type to search product..."
                                 value={searchTerm}
                                 onChange={(e) => {
@@ -324,9 +324,9 @@ export const POItemForm: React.FC<POItemFormProps> = ({
                                 onFocus={() => setIsSearchOpen(true)}
                                 onBlur={() => setIsSearchOpen(false)}
                             />
-                            {errors.search && <span className="absolute right-3 top-3.5 text-[10px] text-red-500 font-bold">{errors.search}</span>}
+                            {errors.search && <span className="absolute right-3 top-3.5 text-[10px] text-red-500 font-black">{errors.search}</span>}
                             {isSearchOpen && (
-                                <div className="absolute z-50 w-full mt-1 bg-[#1a1a1a] border border-white/20 rounded-lg shadow-2xl max-h-60 overflow-y-auto">
+                                <div className="absolute z-50 w-full mt-1 bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-white/20 rounded-lg shadow-2xl max-h-60 overflow-y-auto ring-1 ring-black/5 dark:ring-white/10">
                                     {filteredProducts.length > 0 ? (
                                         filteredProducts.map(p => (
                                             <div
@@ -339,19 +339,19 @@ export const POItemForm: React.FC<POItemFormProps> = ({
                                                     if (p.costPrice) setCurrentCost(p.costPrice);
                                                     if (p.unit) setCustomItemUnit(p.unit);
                                                 }}
-                                                className="px-4 py-3 hover:bg-white/10 cursor-pointer flex justify-between items-center group border-b border-white/5 last:border-0 transition-colors"
+                                                className="px-4 py-3 hover:bg-gray-50 dark:hover:bg-white/10 cursor-pointer flex justify-between items-center group border-b border-gray-100 dark:border-white/5 last:border-0 transition-colors"
                                             >
                                                 <div className="flex flex-col">
-                                                    <span className="text-sm text-white group-hover:text-cyber-primary transition-colors font-medium">{p.name}</span>
-                                                    <span className="text-[10px] text-gray-500">{p.sku || 'No SKU'}</span>
+                                                    <span className="text-sm text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-cyber-primary transition-colors font-black">{p.name}</span>
+                                                    <span className="text-[10px] text-gray-500 dark:text-gray-500 font-bold uppercase tracking-tight">{p.sku || 'No SKU'}</span>
                                                 </div>
                                                 <div className="flex items-center gap-2">
-                                                    <span className="text-xs text-gray-400 bg-white/5 px-1.5 py-0.5 rounded">Stock: {p.stock}</span>
+                                                    <span className="text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-white/5 px-1.5 py-0.5 rounded font-black">Stock: {p.stock}</span>
                                                 </div>
                                             </div>
                                         ))
                                     ) : (
-                                        <div className="px-4 py-3 text-xs text-gray-500 text-center italic">No products found matching "{searchTerm}"</div>
+                                        <div className="px-4 py-3 text-xs text-gray-500 dark:text-gray-500 text-center italic font-bold">No products found matching "{searchTerm}"</div>
                                     )}
                                 </div>
                             )}
@@ -394,7 +394,7 @@ export const POItemForm: React.FC<POItemFormProps> = ({
                 )}
 
                 {/* ─── ORDER ROW (Buying: Qty + Cost) + Submit ── */}
-                <div className="grid grid-cols-12 gap-4 relative z-10 pt-4 border-t border-white/5">
+                <div className="grid grid-cols-12 gap-4 relative z-10 pt-4 border-t border-gray-100 dark:border-white/5">
                     {(() => {
                         const caseSize = parseInt(customAttributes.packaging?.caseSize) || 0;
                         const packQty = parseInt(customAttributes.packaging?.packQty) || 1;
@@ -412,7 +412,7 @@ export const POItemForm: React.FC<POItemFormProps> = ({
                                     type="number"
                                     step="1"
                                     min="1"
-                                    className={`w-full bg-black/40 border ${errors.qty ? 'border-red-500/50' : 'border-white/10'} rounded-lg px-4 py-3 text-sm text-white font-mono focus:border-blue-400/50 text-center`}
+                                    className={`w-full bg-white dark:bg-black/40 border ${errors.qty ? 'border-red-500/50' : 'border-gray-200 dark:border-white/10'} rounded-lg px-4 py-3 text-sm text-gray-900 dark:text-white font-mono focus:border-blue-500/50 dark:focus:border-blue-400/50 text-center font-black shadow-sm`}
                                     value={currentQty || ''}
                                     onChange={e => { const val = parseInt(e.target.value) || 0; setCurrentQty(val); if (errors.qty) setErrors({ ...errors, qty: '' }); }}
                                     placeholder="0"
@@ -430,7 +430,7 @@ export const POItemForm: React.FC<POItemFormProps> = ({
                         <label className="text-[10px] text-gray-500 uppercase tracking-widest font-bold ml-1 block">Unit Cost <span className="text-red-500">*</span></label>
                         <input
                             type="number"
-                            className={`w-full bg-black/40 border ${errors.cost ? 'border-red-500/50' : 'border-white/10'} rounded-lg px-4 py-3 text-sm text-white font-mono focus:border-blue-400/50 text-center`}
+                            className={`w-full bg-white dark:bg-black/40 border ${errors.cost ? 'border-red-500/50' : 'border-gray-200 dark:border-white/10'} rounded-lg px-4 py-3 text-sm text-gray-900 dark:text-white font-mono focus:border-blue-500/50 dark:focus:border-blue-400/50 text-center font-black shadow-sm`}
                             value={currentCost || ''}
                             onChange={e => { setCurrentCost(parseFloat(e.target.value) || 0); if (errors.cost) setErrors({ ...errors, cost: '' }); }}
                             placeholder="0.00"
@@ -454,7 +454,7 @@ export const POItemForm: React.FC<POItemFormProps> = ({
                                 )}
                                 <input
                                     type="number"
-                                    className={`w-full bg-black/40 border ${errors.retail ? 'border-red-500/50' : 'border-white/10'} rounded-lg py-3 text-sm text-white font-mono focus:border-green-400/50 text-center ${currentRetailPrice > 0 && currentCost > 0 ? 'pl-14 pr-2' : 'px-4'}`}
+                                    className={`w-full bg-white dark:bg-black/40 border ${errors.retail ? 'border-red-500/50' : 'border-gray-200 dark:border-white/10'} rounded-lg py-3 text-sm text-gray-900 dark:text-white font-mono focus:border-green-500/50 dark:focus:border-green-400/50 text-center font-black shadow-sm ${currentRetailPrice > 0 && currentCost > 0 ? 'pl-14 pr-2' : 'px-4'}`}
                                     value={currentRetailPrice || ''}
                                     onChange={e => { setCurrentRetailPrice(parseFloat(e.target.value) || 0); if (errors.retail) setErrors({ ...errors, retail: '' }); }}
                                     placeholder="0.00"
@@ -467,14 +467,14 @@ export const POItemForm: React.FC<POItemFormProps> = ({
                     {/* Submit */}
                     <div className={`${productType === 'new' ? 'col-span-4' : 'col-span-12'} flex items-end`}>
                         {editingItem ? (
-                            <div className="flex w-full gap-2">
-                                <button onClick={onCancelEdit} className="w-1/3 py-3 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-all">Cancel</button>
-                                <button onClick={handleAddItem} className="w-2/3 py-3 bg-cyber-primary hover:bg-cyber-primary/90 text-black font-bold rounded-lg transition-all flex items-center justify-center gap-2">
+                            <div className="flex w-full gap-2 font-black">
+                                <button onClick={onCancelEdit} className="w-1/3 py-3 bg-gray-200 dark:bg-white/10 hover:bg-gray-300 dark:hover:bg-white/20 text-gray-900 dark:text-white rounded-lg transition-all shadow-sm">Cancel</button>
+                                <button onClick={handleAddItem} className="w-2/3 py-3 bg-blue-600 dark:bg-cyber-primary hover:bg-blue-700 dark:hover:bg-cyber-primary/90 text-white dark:text-black font-black rounded-lg transition-all flex items-center justify-center gap-2 shadow-md">
                                     <Save size={16} /> Update
                                 </button>
                             </div>
                         ) : (
-                            <button onClick={handleAddItem} className="w-full py-3 bg-cyber-primary hover:bg-cyber-primary/90 text-black font-bold rounded-lg transition-all flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(0,255,157,0.3)]">
+                            <button onClick={handleAddItem} className="w-full py-3 bg-blue-600 dark:bg-cyber-primary hover:bg-blue-700 dark:hover:bg-cyber-primary/90 text-white dark:text-black font-black rounded-lg transition-all flex items-center justify-center gap-2 shadow-md dark:shadow-[0_0_15px_rgba(0,255,157,0.3)]">
                                 <Plus size={16} /> Add Item
                             </button>
                         )}

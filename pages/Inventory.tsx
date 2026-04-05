@@ -61,6 +61,15 @@ export default function Inventory() {
     const isNativeApp = native.isNative();
     const [activeTab, setActiveTab] = useState<Tab>(isNativeApp ? 'stock' : 'overview');
 
+    // Notification states
+    const [hasViewedBarcodeAudit, setHasViewedBarcodeAudit] = useState(false);
+
+    useEffect(() => {
+        if (activeTab === 'barcode_audit') {
+            setHasViewedBarcodeAudit(true);
+        }
+    }, [activeTab]);
+
     // --- READ-ONLY & PERMISSIONS ---
     const isReadOnly = useMemo(() => {
         if (!activeSite) return true; // HQ View is Read-Only
@@ -318,7 +327,7 @@ export default function Inventory() {
     };
 
     return (
-        <div className="flex flex-col h-full bg-gray-50 dark:bg-black/20 text-gray-900 dark:text-white transition-colors duration-300">
+        <div className="flex flex-col min-h-screen bg-gray-50 dark:bg-black/20 text-gray-900 dark:text-white transition-colors duration-300">
             {/* --- HEADER --- */}
             <div className="flex-none p-6 md:p-8 space-y-6">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -360,7 +369,7 @@ export default function Inventory() {
                         { id: 'stock', label: 'Stock List', icon: ClipboardList },
                         { id: 'zones', label: 'Zones', icon: Map },
                         { id: 'movements', label: 'Movements', icon: TrendingUp },
-                        { id: 'barcode_audit', label: 'Barcode Audit', icon: Barcode, count: barcodeApprovals.length },
+                        { id: 'barcode_audit', label: 'Barcode Audit', icon: Barcode, count: hasViewedBarcodeAudit ? 0 : barcodeApprovals.length },
                         { id: 'pending', label: 'Pending', icon: Clock, count: pendingCount }
                     ].map((tab) => (
                         <button
@@ -387,7 +396,7 @@ export default function Inventory() {
             </div>
 
             {/* --- CONTENT --- */}
-            <div className="flex-1 px-6 md:px-8 pb-8 overflow-hidden flex flex-col">
+            <div className="flex-1 px-6 md:px-8 pb-8 flex flex-col">
                 {activeTab === 'overview' && (
                     <InventoryOverview serverMetrics={serverMetrics || null} categoryData={categoryData} abcData={abcData} totalInventoryValueCost={totalInventoryValueCost} totalInventoryValueRetail={totalInventoryValueRetail} filteredProducts={localProducts} />
                 )}

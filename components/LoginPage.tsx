@@ -5,15 +5,13 @@ import { authService } from '../services/auth.service';
 import { supabase } from '../lib/supabase';
 import Logo from './Logo';
 
-type Mode = 'login' | 'signup' | 'forgot';
+type Mode = 'login' | 'forgot';
 
 export default function LoginPage() {
   const { login, toggleTheme, theme } = useStore();
   const [mode, setMode] = useState<Mode>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -32,39 +30,6 @@ export default function LoginPage() {
         if (!success) {
           setError('Invalid credentials. Please check your email/username and password.');
         }
-      } else if (mode === 'signup') {
-        // Validate passwords match
-        if (password !== confirmPassword) {
-          setError('Passwords do not match.');
-          setLoading(false);
-          return;
-        }
-
-        if (password.length < 6) {
-          setError('Password must be at least 6 characters.');
-          setLoading(false);
-          return;
-        }
-
-        // Sign up with Supabase Auth
-        const { data, error: signUpError } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            data: { name }
-          }
-        });
-
-        if (signUpError) {
-          throw signUpError;
-        }
-
-        if (data.user) {
-          setSuccess('Account created! Please check your email to confirm, then log in.');
-          setMode('login');
-          setPassword('');
-          setConfirmPassword('');
-        }
       } else if (mode === 'forgot') {
         await authService.resetPassword(email);
         setSuccess('Password reset email sent! Check your inbox.');
@@ -81,7 +46,6 @@ export default function LoginPage() {
     setError('');
     setSuccess('');
     setPassword('');
-    setConfirmPassword('');
   };
 
   return (
@@ -93,12 +57,13 @@ export default function LoginPage() {
       </button>
 
       <div className="max-w-md w-full bg-cyber-dark border border-white/10 rounded-2xl p-8 relative z-10 shadow-[0_0_50px_rgba(0,255,157,0.1)]">
-        <div className="flex flex-col items-center justify-center mb-8">
-          <div className="mb-4">
-            <Logo size={60} />
+        <div className="flex flex-col items-center justify-center mb-10">
+          <div className="mb-6 transform hover:scale-105 transition-transform duration-500">
+            <Logo size={64} className="drop-shadow-[0_0_15px_rgba(0,255,157,0.2)]" />
           </div>
-          <p className="text-cyber-primary tracking-widest uppercase text-xs font-bold opacity-80">
-            {mode === 'login' ? 'Sign In' : mode === 'signup' ? 'Create Account' : 'Password Recovery'}
+          <div className="h-px w-12 bg-gradient-to-r from-transparent via-cyber-primary/30 to-transparent mb-4" />
+          <p className="text-cyber-primary tracking-[0.3em] uppercase text-[10px] font-black opacity-60">
+            {mode === 'login' ? 'System Access' : 'Security Recovery'}
           </p>
         </div>
 
@@ -118,35 +83,19 @@ export default function LoginPage() {
 
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Name field for signup */}
-          {mode === 'signup' && (
-            <div>
-              <label className="block text-xs text-gray-400 uppercase font-bold mb-1">Full Name</label>
-              <div className="relative">
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full bg-black/30 border border-white/10 rounded-lg px-4 py-3 pl-10 text-white focus:border-cyber-primary focus:outline-none transition-colors"
-                  placeholder="Your full name"
-                  required
-                />
-                <UserPlus className="absolute left-3 top-3.5 text-gray-500" size={16} />
-              </div>
-            </div>
-          )}
+
 
           <div>
             <label className="block text-xs text-gray-400 uppercase font-bold mb-1">
-              {mode === 'signup' ? 'Email' : 'Email Address'}
+              Email Address
             </label>
             <div className="relative">
               <input
-                type={mode === 'signup' ? 'email' : 'text'}
+                type="text"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full bg-black/30 border border-white/10 rounded-lg px-4 py-3 pl-10 text-white focus:border-cyber-primary focus:outline-none transition-colors"
-                placeholder={mode === 'signup' ? 'name@company.com' : 'name@company.com'}
+                placeholder="name@company.com"
                 required
               />
               <Mail className="absolute left-3 top-3.5 text-gray-500" size={16} />
@@ -177,23 +126,7 @@ export default function LoginPage() {
             </div>
           )}
 
-          {/* Confirm password for signup */}
-          {mode === 'signup' && (
-            <div>
-              <label className="block text-xs text-gray-400 uppercase font-bold mb-1">Confirm Password</label>
-              <div className="relative">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full bg-black/30 border border-white/10 rounded-lg px-4 py-3 pl-10 text-white focus:border-cyber-primary focus:outline-none transition-colors"
-                  placeholder="••••••••"
-                  required
-                />
-                <Lock className="absolute left-3 top-3.5 text-gray-500" size={16} />
-              </div>
-            </div>
-          )}
+
 
           <button
             type="submit"
@@ -203,10 +136,10 @@ export default function LoginPage() {
             {loading ? (
               <>
                 <Loader className="animate-spin" size={20} />
-                <span>{mode === 'signup' ? 'Creating Account...' : mode === 'forgot' ? 'Sending...' : 'Logging in...'}</span>
+                <span>{mode === 'forgot' ? 'Sending...' : 'Logging in...'}</span>
               </>
             ) : (
-              mode === 'login' ? 'Log In' : mode === 'signup' ? 'Create Account' : 'Send Reset Link'
+              mode === 'login' ? 'Log In' : 'Send Reset Link'
             )}
           </button>
 
@@ -214,13 +147,9 @@ export default function LoginPage() {
           <div className="flex flex-col gap-2 mt-4">
             {mode === 'login' && (
               <>
-                <button
-                  type="button"
-                  onClick={() => { setMode('signup'); resetForm(); }}
-                  className="text-sm text-cyber-primary/70 hover:text-cyber-primary transition-colors"
-                >
-                  Need an account? <span className="font-bold">Sign Up</span>
-                </button>
+                <div className="text-sm text-center text-gray-400 mb-2">
+                  Need access? Contact your HR Manager.
+                </div>
                 <button
                   type="button"
                   onClick={() => { setMode('forgot'); resetForm(); }}
@@ -230,7 +159,7 @@ export default function LoginPage() {
                 </button>
               </>
             )}
-            {(mode === 'signup' || mode === 'forgot') && (
+            {mode === 'forgot' && (
               <button
                 type="button"
                 onClick={() => { setMode('login'); resetForm(); }}
@@ -241,6 +170,7 @@ export default function LoginPage() {
               </button>
             )}
           </div>
+
         </form>
 
 

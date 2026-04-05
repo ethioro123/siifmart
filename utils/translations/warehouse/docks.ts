@@ -12,6 +12,7 @@ export const docks: TranslationBlock = {
     outgoing: { en: 'Outgoing', am: 'የሚወጡ', or: 'Ba’u' },
     driver: { en: 'Driver Portal', am: 'አሽከርካሪ ፖርታል', or: 'Poortaalii Konkolaachisaa' },
     currentMission: { en: 'Active Mission', am: 'ንቁ ተልዕኮ', or: 'Ergama Jireenyaa' },
+    availableMissions: { en: 'Available Missions', am: 'የሚገኙ ተልእኮዎች', or: 'Ergama Jiru' },
     inboundTitle: { en: 'Inbound Docks (Receiving)', am: 'የገቢ መርከቦች (መቀበያ)', or: 'Buufata Seensaa (Fudhannaa)' },
     outboundTitle: { en: 'Outbound Dock', am: 'የመውጫ ዶክ', or: 'Dock Ba’u' },
     occupied: { en: 'OCCUPIED', am: 'የተያዘ', or: 'QABAMEERA' },
@@ -29,4 +30,5 @@ export const docks: TranslationBlock = {
     history: { en: 'History', am: 'ታሪክ', or: 'Seenaa' },
     dockLabel: { en: 'Dock', am: 'መርከብ ማቆሚያ', or: 'Buufata' },
     noActive: { en: 'No Active Shipments', am: 'ንቁ ጭነት የለም', or: 'Ergaa Hin Jiru' },
+    welcome: { en: 'Welcome, {name}', am: 'እንኳን ደህና መጡ፣ {name}', or: 'Baga nagaan dhufte, {name}' },
 };

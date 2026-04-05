@@ -43,6 +43,8 @@ export const receiving: TranslationBlock = {
     // Receiving Section
     noApprovedPOs: { en: 'No Approved Purchase Orders', am: 'ምንም የተጸድቁ የግዢ ትዕዛዞች የሉም', or: 'Ajajoota bittaa mirkaneeffaman hin jiran' },
     approvedPOsWillAppear: { en: 'Approved Purchase Orders will appear here.', am: 'የተፈቀዱ የግዢ ትዕዛዞች እዚህ ይታያሉ።', or: 'Ajajoonni bittaa mirkanaa\'an asitti mul\'atu.' },
+    noApprovedManifests: { en: 'No Approved Manifests', am: 'ምንም የተጸድቁ ዝርዝሮች የሉም', or: 'Gabaasa mirkanaa\'e hin jiru' },
+    approvedManifestsWillAppear: { en: 'Approved Manifests will appear here.', am: 'የተፈቀዱ ዝርዝሮች እዚህ ይታያሉ።', or: 'Gabaasaaleen mirkanaa\'an asitti mul\'atu.' },
     unloadingRequired: { en: 'Unloading Not Complete', am: 'ማውረድ አልተጠናቀቀም', or: 'Buusiisuun Hin Xumuramne' },
     unloadingMustComplete: { en: 'Please confirm unloading at the dock before receiving', am: 'መቀበል ከመጀመርዎ በፊት እባክዎ በመርከቡ ማውረድን ያረጋግጡ', or: 'Maaloo fudhachuu dura buufata irratti buusisuu mirkaneessi' },
     receivingQueue: { en: 'Receiving Queue', am: 'የመቀበያ ወረፋ', or: 'Tarree Fudhannaa' },

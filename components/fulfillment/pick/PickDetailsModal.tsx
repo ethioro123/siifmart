@@ -11,6 +11,7 @@ interface PickDetailsModalProps {
     resolveOrderRef: (ref?: string) => string;
     employees: any[];
     products?: Product[];
+    sites?: any[];
     onReturn?: (job: WMSJob) => void;
 }
 
@@ -20,6 +21,7 @@ export const PickDetailsModal: React.FC<PickDetailsModalProps> = ({
     resolveOrderRef,
     employees,
     products,
+    sites = [],
     onReturn
 }) => {
     // Resolve User Name
@@ -28,9 +30,8 @@ export const PickDetailsModal: React.FC<PickDetailsModalProps> = ({
     // Use code if available, otherwise fallback to short UUID
     const displayId = userObj?.code || (userId ? userId.slice(0, 5).toUpperCase() : '');
 
-    const userName = userObj
-        ? `${userObj.name} (${displayId})`
-        : (userId ? `Unknown (${displayId})` : 'System');
+    const userName = userObj ? userObj.name : (userId ? 'Unknown' : 'System');
+    const userDisplayId = displayId;
 
     // For Pick, the destination is usually Pack/Shipping, but the SOURCE location is what we care about per item
     let rawItems = selectedItem.lineItems || selectedItem.items || [];
@@ -51,7 +52,26 @@ export const PickDetailsModal: React.FC<PickDetailsModalProps> = ({
         date: selectedItem.updatedAt || selectedItem.createdAt || new Date().toISOString(),
         user: userName,
         items: itemsArray,
+        sourceSite: sites.find(s => s.id === (selectedItem.siteId || (selectedItem as any).site_id)),
+        destSite: sites.find(s => s.id === (selectedItem.destSiteId || (selectedItem as any).dest_site_id)),
+        userDisplay: (
+            <>
+                {userName} <span className="text-zinc-500 dark:text-zinc-600 font-normal lowercase">({userDisplayId})</span>
+            </>
+        )
     };
+
+    const sourceDisplay = data.sourceSite ? (
+        <>
+            {data.sourceSite.name} <span className="text-emerald-600/50 dark:text-emerald-400/50 font-normal lowercase">({data.sourceSite.code || data.sourceSite.id})</span>
+        </>
+    ) : 'Unknown Site';
+
+    const destDisplay = data.destSite ? (
+        <>
+            {data.destSite.name} <span className="text-blue-600/50 dark:text-blue-400/50 font-normal lowercase">({data.destSite.code || data.destSite.id})</span>
+        </>
+    ) : 'Internal / Unknown';
 
     return (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[200] p-4 animate-in fade-in duration-200">
@@ -92,7 +112,7 @@ export const PickDetailsModal: React.FC<PickDetailsModalProps> = ({
                 </div>
 
                 {/* Metadata Grid */}
-                <div className="grid grid-cols-2 gap-px bg-zinc-200 dark:bg-zinc-900 border-b border-zinc-200 dark:border-white/10">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-zinc-200 dark:bg-zinc-900 border-b border-zinc-200 dark:border-white/10">
                     <div className="bg-white dark:bg-black p-4 flex items-center gap-3">
                         <div className="p-2 bg-zinc-50 dark:bg-white/5 rounded-lg text-zinc-900 dark:text-zinc-400">
                             <Calendar size={18} />
@@ -108,7 +128,25 @@ export const PickDetailsModal: React.FC<PickDetailsModalProps> = ({
                         </div>
                         <div>
                             <p className="text-[10px] text-zinc-400 dark:text-zinc-500 uppercase font-black tracking-widest leading-none mb-1">Performed By</p>
-                            <p className="text-xs text-zinc-950 dark:text-zinc-200 font-black uppercase tracking-tight">{data.user}</p>
+                            <p className="text-xs text-zinc-950 dark:text-zinc-200 font-black uppercase break-words leading-tight">{data.userDisplay}</p>
+                        </div>
+                    </div>
+                    <div className="bg-white dark:bg-black p-4 flex items-center gap-3">
+                        <div className="p-2 bg-zinc-50 dark:bg-white/5 rounded-lg text-emerald-600 dark:text-emerald-400">
+                            <MapPin size={18} />
+                        </div>
+                        <div>
+                            <p className="text-[10px] text-zinc-400 dark:text-zinc-500 uppercase font-black tracking-widest leading-none mb-1">Source Site</p>
+                            <p className="text-xs text-emerald-600 dark:text-emerald-400 font-black uppercase break-words leading-tight">{sourceDisplay}</p>
+                        </div>
+                    </div>
+                    <div className="bg-white dark:bg-black p-4 flex items-center gap-3">
+                        <div className="p-2 bg-zinc-50 dark:bg-white/5 rounded-lg text-blue-600 dark:text-blue-400">
+                            <ArrowRight size={18} />
+                        </div>
+                        <div>
+                            <p className="text-[10px] text-zinc-400 dark:text-zinc-500 uppercase font-black tracking-widest leading-none mb-1">Destination</p>
+                            <p className="text-xs text-blue-600 dark:text-blue-400 font-black uppercase break-words leading-tight">{destDisplay}</p>
                         </div>
                     </div>
                 </div>
@@ -158,11 +196,6 @@ export const PickDetailsModal: React.FC<PickDetailsModalProps> = ({
                                                     </span>
                                                 )}
 
-                                                {selectedItem.orderRef && (
-                                                    <span className="text-[10px] text-zinc-400 dark:text-zinc-600 font-black uppercase tracking-widest flex items-center gap-1">
-                                                        REF: {resolveOrderRef(selectedItem.orderRef)}
-                                                    </span>
-                                                )}
                                             </div>
 
                                             {/* Source Location */}

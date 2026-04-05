@@ -7,7 +7,7 @@ import { formatCompactNumber } from '../../utils/formatting';
 import { useData } from '../../contexts/DataContext';
 import { useStore } from '../../contexts/CentralStore';
 import { purchaseOrdersService, productsService, suppliersService } from '../../services/supabase.service';
-import { generateSequentialSKU } from '../../utils/sequentialSkuGenerator';
+import { generateSequentialSKU } from '../../utils/skuGenerator';
 
 import { POItemForm } from './POItemForm';
 import { POSupplierLogistics } from './POSupplierLogistics';
@@ -322,10 +322,10 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
     const createPOFooter = (
         <div className="flex justify-between items-center w-full px-2">
             <div className="flex items-center gap-4">
-                <div className="h-8 w-[1px] bg-white/10 hidden md:block"></div>
+                <div className="h-8 w-[1px] bg-gray-200 dark:bg-white/10 hidden md:block"></div>
                 <div className="flex flex-col">
-                    <span className="text-[10px] text-gray-500 uppercase font-black tracking-widest leading-none">Total Value</span>
-                    <span className="text-lg font-mono text-cyber-primary tracking-tight font-bold">
+                    <span className="text-[10px] text-gray-500 dark:text-gray-500 uppercase font-black tracking-widest leading-none">Total Value</span>
+                    <span className="text-lg font-mono text-blue-600 dark:text-cyber-primary tracking-tight font-black">
                         {CURRENCY_SYMBOL} {formatCompactNumber(poTotal)}
                     </span>
                 </div>
@@ -333,20 +333,20 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
             <div className="flex gap-4">
                 <button
                     onClick={onClose}
-                    className="px-6 py-2.5 rounded-xl text-xs font-bold transition-all text-gray-500 hover:text-white hover:bg-white/5 border border-transparent hover:border-white/10 uppercase tracking-widest"
+                    className="px-6 py-2.5 rounded-xl text-xs font-black transition-all text-gray-500 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 border border-transparent hover:border-gray-200 dark:hover:border-white/10 uppercase tracking-widest"
                 >
                     Cancel
                 </button>
                 <button
                     onClick={handleCreatePO}
                     disabled={isSubmitting || newPOItems.length === 0}
-                    className="relative group px-10 py-2.5 bg-cyber-primary hover:bg-cyber-primary/90 text-black font-black rounded-xl text-xs transition-all shadow-[0_0_25px_rgba(0,255,157,0.3)] hover:shadow-[0_0_40px_rgba(0,255,157,0.5)] transform hover:scale-[1.02] disabled:opacity-30 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none flex items-center gap-3 uppercase tracking-widest overflow-hidden"
+                    className="relative group px-10 py-2.5 bg-blue-600 dark:bg-cyber-primary hover:bg-blue-700 dark:hover:bg-cyber-primary/90 text-white dark:text-black font-black rounded-xl text-xs transition-all shadow-md dark:shadow-[0_0_25px_rgba(0,255,157,0.3)] hover:shadow-lg dark:hover:shadow-[0_0_40px_rgba(0,255,157,0.5)] transform hover:scale-[1.02] disabled:opacity-30 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none flex items-center gap-3 uppercase tracking-widest overflow-hidden"
                 >
                     <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
                     {isSubmitting ? (
                         <Loader2 size={16} className="animate-spin" />
                     ) : (
-                        <div className="w-1.5 h-1.5 rounded-full bg-black shadow-[0_0_5px_rgba(0,0,0,0.5)]"></div>
+                        <div className="w-1.5 h-1.5 rounded-full bg-white dark:bg-black shadow-[0_0_5px_rgba(0,0,0,0.5)]"></div>
                     )}
                     {editingPO ? 'Sync Directive' : 'Authorize Order'}
                 </button>

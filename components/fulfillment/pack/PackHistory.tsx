@@ -61,13 +61,14 @@ export const PackHistory: React.FC<PackHistoryProps> = ({
             const isCurrentUser = user && userId === user.id;
             const resolvedName = userObj?.name || (isCurrentUser ? user.name : null);
             const displayId = userObj?.code || (isCurrentUser ? (user.name?.slice(0, 3).toUpperCase() || '') : (userId && userId.length > 20 ? userId.slice(0, 5).toUpperCase() : userId));
-            const userName = resolvedName
-                ? `${resolvedName} (${displayId})`
-                : (userId ? `Unknown (${displayId})` : 'System');
+            const resolvedUser = {
+                name: resolvedName || (userId ? 'Unknown' : 'System'),
+                displayId: displayId || ''
+            };
 
             return {
                 ...j,
-                user: userName
+                resolvedUser
             };
         });
     }, [historicalJobs, search, resolveOrderRef, employees]);
@@ -79,30 +80,30 @@ export const PackHistory: React.FC<PackHistoryProps> = ({
     }, [filteredHistory, currentPage]);
 
     return (
-        <div className="border-t border-white/10 mt-8 pt-8 relative overflow-hidden group/history">
+        <div className="border-t border-gray-100 dark:border-white/10 mt-8 pt-8 relative overflow-hidden group/history">
             {/* 🌈 Futuristic Mesh Accent */}
             <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-cyan-500/10 blur-[120px] rounded-full -mr-40 -mt-40 pointer-events-none opacity-50 group-hover/history:opacity-100 transition-opacity duration-1000" />
             <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
 
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 mb-8">
-                <h4 className="text-xl font-black text-cyan-100 flex items-center gap-3 uppercase tracking-tight">
-                    <div className="p-2 bg-cyan-500/10 rounded-xl border border-cyan-500/20 group-hover/history:bg-cyan-500/20 transition-colors">
-                        <HistoryIcon size={20} className="text-cyan-400" />
+                <h4 className="text-xl font-black text-gray-700 dark:text-cyan-100 flex items-center gap-3 uppercase tracking-tight">
+                    <div className="p-2 bg-gray-100 dark:bg-cyan-500/10 rounded-xl border border-gray-200 dark:border-cyan-500/20 group-hover/history:bg-gray-200 dark:group-hover/history:bg-cyan-500/20 transition-colors">
+                        <HistoryIcon size={20} className="text-gray-500 dark:text-cyan-400" />
                     </div>
                     Pack History
                 </h4>
 
                 {/* History Search */}
                 <div className="relative w-full sm:w-72 group">
-                    <div className="absolute -inset-0.5 bg-cyan-100 rounded-xl blur opacity-0 group-hover:opacity-5 transition duration-500"></div>
-                    <div className="relative flex items-center bg-black/40 border border-white/10 rounded-xl focus-within:border-cyan-500 transition-all shadow-sm">
-                        <Search className="absolute left-3 text-gray-600 group-focus-within:text-cyan-200 transition-colors" size={16} />
+                    <div className="absolute -inset-0.5 bg-cyan-600 dark:bg-cyan-100 rounded-xl blur opacity-0 group-hover:opacity-5 transition duration-500"></div>
+                    <div className="relative flex items-center bg-gray-50 dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-xl focus-within:border-cyan-500 transition-all shadow-sm">
+                        <Search className="absolute left-3 text-gray-400 dark:text-gray-600 group-focus-within:text-cyan-600 dark:group-focus-within:text-cyan-200 transition-colors" size={16} />
                         <input
                             type="text"
                             placeholder="Search by ID or Order..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            className="w-full bg-transparent border-none rounded-xl pl-10 pr-4 py-3 text-xs text-cyan-200 font-black uppercase tracking-widest focus:outline-none placeholder:text-gray-600"
+                            className="w-full bg-transparent border-none rounded-xl pl-10 pr-4 py-3 text-xs text-gray-700 dark:text-cyan-200 font-black uppercase tracking-widest focus:outline-none placeholder:text-gray-400 dark:placeholder:text-gray-600"
                         />
                     </div>
                 </div>
@@ -131,16 +132,16 @@ export const PackHistory: React.FC<PackHistoryProps> = ({
                                             animate={{ opacity: 1, y: 0 }}
                                             transition={{ delay: index * 0.02 }}
                                             onClick={() => onJobSelect && onJobSelect(job)}
-                                            className="md:hidden group relative bg-black/60 hover:bg-black border border-white/10 rounded-xl p-3 transition-all duration-300 overflow-hidden cursor-pointer active:bg-white/5 mb-2"
+                                            className="md:hidden group relative bg-gray-50 dark:bg-black/60 hover:bg-white dark:hover:bg-black border border-gray-100 dark:border-white/10 rounded-xl p-3 transition-all duration-300 overflow-hidden cursor-pointer active:bg-gray-100 dark:active:bg-white/5 mb-2 shadow-sm"
                                         >
                                             <div className="flex items-center justify-between">
                                                 <div className="flex items-center gap-3">
-                                                    <div className="w-8 h-8 rounded-full bg-cyan-500/10 flex items-center justify-center shrink-0 border border-cyan-500/20">
-                                                        <Archive size={14} className="text-cyan-400" />
+                                                    <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-cyan-500/10 flex items-center justify-center shrink-0 border border-gray-200 dark:border-cyan-500/20">
+                                                        <Archive size={14} className="text-gray-500 dark:text-cyan-400" />
                                                     </div>
                                                     <div className="flex flex-col">
                                                         <div className="flex items-center gap-2">
-                                                            <span className="text-xs font-black text-gray-200">{formattedId}</span>
+                                                            <span className="text-xs font-black text-gray-700 dark:text-gray-200">{formattedId}</span>
                                                             <span className="text-[8px] px-1.5 py-0.5 rounded uppercase font-black tracking-widest bg-green-500/10 text-green-400 border border-green-500/20">
                                                                 {job.status}
                                                             </span>
@@ -154,7 +155,7 @@ export const PackHistory: React.FC<PackHistoryProps> = ({
                                                 </div>
                                                 <div className="flex items-center gap-2 shrink-0">
                                                     <div className="w-6 h-6 rounded-full bg-cyan-950 flex items-center justify-center border border-cyan-500/30">
-                                                        <span className="text-[8px] font-black text-cyan-400">{((job as any).user || 'S').charAt(0).toUpperCase()}</span>
+                                                        <span className="text-[8px] font-black text-cyan-400">{(job.resolvedUser?.name || 'S').charAt(0).toUpperCase()}</span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -166,7 +167,7 @@ export const PackHistory: React.FC<PackHistoryProps> = ({
                                             animate={{ opacity: 1, y: 0 }}
                                             transition={{ delay: index * 0.05 }}
                                             onClick={() => onJobSelect && onJobSelect(job)}
-                                            className="hidden md:block group relative bg-black/60 hover:bg-black border-2 border-white/5 hover:border-cyan-400/50 rounded-2xl p-5 transition-all duration-300 overflow-hidden shadow-sm hover:shadow-cyan-500/10 cursor-pointer"
+                                            className="hidden md:block group relative bg-gray-50 dark:bg-black/60 hover:bg-white dark:hover:bg-black border-2 border-gray-100 dark:border-white/5 hover:border-cyan-500 dark:hover:border-cyan-400/50 rounded-2xl p-5 transition-all duration-300 overflow-hidden shadow-sm hover:shadow-cyan-500/10 cursor-pointer"
                                         >
                                             {/* Hover Glow */}
                                             <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
@@ -191,7 +192,7 @@ export const PackHistory: React.FC<PackHistoryProps> = ({
                                             </div>
 
                                             <div className="relative mb-4">
-                                                <h5 className="text-gray-200 font-black text-sm truncate pr-2 group-hover:text-white transition-colors uppercase tracking-tight">
+                                                <h5 className="text-gray-700 dark:text-gray-200 font-black text-sm truncate pr-2 group-hover:text-gray-900 dark:group-hover:text-white transition-colors uppercase tracking-tight">
                                                     {formattedId}
                                                 </h5>
                                                 <div className="flex flex-col gap-2 mt-2">
@@ -203,8 +204,8 @@ export const PackHistory: React.FC<PackHistoryProps> = ({
                                                     </div>
                                                     {job.trackingNumber && (
                                                         <div className="flex items-center gap-1.5 transition-colors">
-                                                            <Barcode size={10} className="text-cyan-500/40 group-hover:text-cyan-400" />
-                                                            <span className="text-[10px] font-mono font-black text-gray-400 bg-white/5 px-1.5 py-0.5 rounded tracking-widest uppercase transition-all group-hover:text-cyan-100 group-hover:bg-cyan-900/40 border border-transparent group-hover:border-cyan-500/30 shadow-[0_0_10px_rgba(6,182,212,0)] group-hover:shadow-[0_0_10px_rgba(6,182,212,0.2)]">
+                                                            <Barcode size={10} className="text-cyan-600/40 dark:text-cyan-500/40 group-hover:text-cyan-600 dark:group-hover:text-cyan-400" />
+                                                            <span className="text-[10px] font-mono font-black text-gray-500 dark:text-gray-400 bg-gray-200/50 dark:bg-white/5 px-1.5 py-0.5 rounded tracking-widest uppercase transition-all group-hover:text-cyan-700 dark:group-hover:text-cyan-100 group-hover:bg-cyan-100 dark:group-hover:bg-cyan-900/40 border border-transparent group-hover:border-cyan-500/30 shadow-[0_0_10px_rgba(6,182,212,0)] group-hover:shadow-[0_0_10px_rgba(6,182,212,0.2)]">
                                                                 {job.trackingNumber}
                                                             </span>
                                                         </div>
@@ -222,23 +223,23 @@ export const PackHistory: React.FC<PackHistoryProps> = ({
                                                 </div>
                                             )}
 
-                                            <div className="relative flex items-center justify-between border-t border-white/5 pt-3 mt-auto">
+                                            <div className="relative flex items-center justify-between border-t border-gray-100 dark:border-white/5 pt-3 mt-auto">
                                                 <div className="flex items-center gap-2">
-                                                    <div className="w-6 h-6 rounded-full bg-cyan-950 flex items-center justify-center border border-cyan-500/30 shadow-inner group-hover/history:scale-110 transition-transform">
-                                                        <span className="text-[9px] font-black text-cyan-400">{((job as any).user || 'S').charAt(0).toUpperCase()}</span>
+                                                    <div className="w-6 h-6 rounded-full bg-gray-100 dark:bg-cyan-950 flex items-center justify-center border border-gray-200 dark:border-cyan-500/30 shadow-inner group-hover/history:scale-110 transition-transform">
+                                                        <span className="text-[9px] font-black text-gray-500 dark:text-cyan-400">{(job.resolvedUser?.name || 'S').charAt(0).toUpperCase()}</span>
                                                     </div>
                                                     <div className="flex flex-col">
-                                                        <span className="text-[9px] font-black text-gray-600 uppercase tracking-widest leading-tight">By</span>
-                                                        <span className="text-[9px] font-black text-gray-400 uppercase tracking-wider leading-tight">
-                                                            {(job as any).user || 'System'}
+                                                        <span className="text-[9px] font-black text-gray-400 dark:text-gray-600 uppercase tracking-widest leading-tight">By</span>
+                                                        <span className="text-[9px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-wider leading-tight">
+                                                            {job.resolvedUser?.name} <span className="text-gray-400 dark:text-gray-600 font-normal lowercase">({job.resolvedUser?.displayId})</span>
                                                         </span>
                                                     </div>
                                                 </div>
 
                                                 <div className="flex items-center gap-3">
-                                                    <div className="flex items-center gap-1.5 bg-cyan-500/5 px-2 py-1 rounded-lg border border-cyan-500/10 group-hover:border-cyan-500/30 transition-all">
-                                                        <Box size={12} className="text-cyan-400" />
-                                                        <span className="text-[10px] font-black text-cyan-100 tabular-nums">{totalItems} {totalItems === 1 ? 'Item' : 'Items'}</span>
+                                                    <div className="flex items-center gap-1.5 bg-gray-100 dark:bg-cyan-500/5 px-2 py-1 rounded-lg border border-gray-200 dark:border-cyan-500/10 group-hover:border-cyan-600 dark:group-hover:border-cyan-500/30 transition-all">
+                                                        <Box size={12} className="text-gray-500 dark:text-cyan-400" />
+                                                        <span className="text-[10px] font-black text-gray-700 dark:text-cyan-100 tabular-nums">{totalItems} {totalItems === 1 ? 'Item' : 'Items'}</span>
                                                     </div>
                                                     {job.status === 'Completed' && (
                                                         <button
@@ -264,14 +265,14 @@ export const PackHistory: React.FC<PackHistoryProps> = ({
 
                                                         <AnimatePresence>
                                                             {openPrintMenuId === job.id && (
-                                                                <motion.div
+                                                                    <motion.div
                                                                     initial={{ opacity: 0, scale: 0.95, y: 10 }}
                                                                     animate={{ opacity: 1, scale: 1, y: 0 }}
                                                                     exit={{ opacity: 0, scale: 0.95, y: 5 }}
-                                                                    className="absolute bottom-[calc(100%+8px)] right-0 w-32 bg-black/95 border border-cyan-500/30 rounded-xl p-2 shadow-xl shadow-cyan-900/20 z-[100] flex flex-col gap-1 backdrop-blur-md"
+                                                                    className="absolute bottom-[calc(100%+8px)] right-0 w-32 bg-white dark:bg-black/95 border border-gray-200 dark:border-cyan-500/30 rounded-xl p-2 shadow-xl dark:shadow-cyan-900/20 z-[100] flex flex-col gap-1 backdrop-blur-md"
                                                                     onClick={(e) => e.stopPropagation()}
                                                                 >
-                                                                    <div className="text-[9px] font-black text-cyan-500/50 uppercase tracking-widest px-2 pb-1 border-b border-white/5 mb-1">Select Size</div>
+                                                                    <div className="text-[9px] font-black text-gray-400 dark:text-cyan-500/50 uppercase tracking-widest px-2 pb-1 border-b border-gray-100 dark:border-white/5 mb-1">Select Size</div>
                                                                     {(['Small', 'Medium', 'Large', 'XL'] as const).map(size => (
                                                                         <button
                                                                             key={size}
@@ -308,7 +309,7 @@ export const PackHistory: React.FC<PackHistoryProps> = ({
                     />
                 </>
             ) : (
-                <div className="flex flex-col items-center justify-center py-20 text-gray-500 bg-black/20 rounded-2xl border border-white/5 border-dashed">
+                <div className="flex flex-col items-center justify-center py-20 text-gray-400 dark:text-gray-500 bg-gray-50 dark:bg-black/20 rounded-2xl border border-gray-200 dark:border-white/5 border-dashed">
                     <HistoryIcon size={32} className="mb-4 opacity-50 dark:text-cyan-500" />
                     <p className="font-bold tracking-widest uppercase text-sm">No historical records found.</p>
                 </div>

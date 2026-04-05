@@ -33,7 +33,7 @@ export type UserRole =
     | 'receiver' | 'driver' | 'forklift_operator' | 'inventory_specialist'
     | 'customer_service' | 'auditor' | 'it_support'
     // Legacy (backwards compatibility)
-    | 'admin' | 'manager' | 'hr' | 'pos' | 'dispatcher'
+    | 'admin' | 'hr' | 'pos' | 'dispatcher'
     | 'cs_manager' | 'returns_clerk' | 'merchandiser' | 'loss_prevention'
     | 'accountant' | 'data_analyst' | 'training_coordinator' | 'store_supervisor';
 
@@ -393,7 +393,7 @@ export const ROLE_PERMISSIONS: Record<string, string[]> = {
 
     // ═══ LEVEL 3 - SITE MANAGERS ═══
     store_manager: [
-        'dashboard', 'pos', 'inventory', 'sales', 'customers', 'employees', 'pricing', 'profile'
+        'dashboard', 'pos', 'inventory', 'sales', 'customers', 'employees', 'profile'
     ],
     warehouse_manager: [
         'dashboard', 'inventory', 'warehouse', 'procurement', 'employees', 'profile'
@@ -428,7 +428,7 @@ export const ROLE_PERMISSIONS: Record<string, string[]> = {
         'dashboard', 'warehouse', 'inventory', 'profile'
     ],
     driver: [
-        'dashboard', 'warehouse', 'profile'
+        'dashboard', 'warehouse', 'inventory', 'profile'
     ],
     forklift_operator: [
         'dashboard', 'warehouse', 'inventory', 'profile'

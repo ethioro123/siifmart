@@ -44,7 +44,7 @@ export const POTotalsSummary: React.FC<POTotalsSummaryProps> = ({
                         <FileText size={12} className="text-cyber-primary" /> Transaction Notes
                     </label>
                     <textarea
-                        className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-4 text-sm text-white focus:border-cyber-primary/50 outline-none transition-all resize-none h-32 placeholder-gray-700 shadow-inner"
+                        className="w-full bg-gray-50 dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-4 text-sm text-gray-900 dark:text-white focus:border-blue-500/50 dark:focus:border-cyber-primary/50 outline-none transition-all resize-none h-32 placeholder-gray-400 dark:placeholder-gray-700 shadow-inner font-bold"
                         placeholder="Specify internal directives or supplier instructions..."
                         value={poNotes}
                         onChange={(e) => setPoNotes(e.target.value)}
@@ -56,7 +56,7 @@ export const POTotalsSummary: React.FC<POTotalsSummaryProps> = ({
                         <input
                             type="text"
                             placeholder="e.g. Net 30"
-                            className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-sm text-white focus:border-cyber-primary/50 outline-none transition-all placeholder-gray-700"
+                            className="w-full bg-gray-50 dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-lg px-4 py-3 text-sm text-gray-900 dark:text-white focus:border-blue-500/50 dark:focus:border-cyber-primary/50 outline-none transition-all placeholder-gray-400 dark:placeholder-gray-700 font-bold"
                             value={paymentTerms}
                             onChange={(e) => setPaymentTerms(e.target.value)}
                         />
@@ -66,7 +66,7 @@ export const POTotalsSummary: React.FC<POTotalsSummaryProps> = ({
                         <input
                             type="text"
                             placeholder="e.g. EXW"
-                            className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-sm text-white focus:border-cyber-primary/50 outline-none transition-all placeholder-gray-700"
+                            className="w-full bg-gray-50 dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-lg px-4 py-3 text-sm text-gray-900 dark:text-white focus:border-blue-500/50 dark:focus:border-cyber-primary/50 outline-none transition-all placeholder-gray-400 dark:placeholder-gray-700 font-bold"
                             value={incoterms}
                             onChange={(e) => setIncoterms(e.target.value)}
                         />
@@ -76,19 +76,19 @@ export const POTotalsSummary: React.FC<POTotalsSummaryProps> = ({
 
             {/* Right: Financial Totals */}
             <div className="relative overflow-hidden rounded-2xl p-[1px]">
-                <div className="absolute inset-0 bg-gradient-to-br from-cyber-primary/30 via-transparent to-purple-500/20 opacity-40"></div>
-                <div className="relative bg-black/60 backdrop-blur-2xl rounded-2xl p-8 space-y-6 border border-white/5 shadow-2xl">
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-transparent to-purple-500/10 dark:from-cyber-primary/30 dark:via-transparent dark:to-purple-500/20 opacity-40"></div>
+                <div className="relative bg-white dark:bg-black/60 backdrop-blur-2xl rounded-2xl p-8 space-y-6 border border-gray-200 dark:border-white/5 shadow-xl dark:shadow-2xl">
 
                     {/* Header */}
-                    <div className="flex items-center gap-3 mb-2 pb-2 border-b border-white/10">
-                        <div className="w-2 h-2 rounded-full bg-cyber-primary shadow-[0_0_10px_rgba(0,255,157,0.8)]"></div>
-                        <h3 className="text-xs font-bold text-white uppercase tracking-widest">Financial Overview</h3>
+                    <div className="flex items-center gap-3 mb-2 pb-2 border-b border-gray-100 dark:border-white/10">
+                        <div className="w-2 h-2 rounded-full bg-blue-600 dark:bg-cyber-primary shadow-[0_0_10px_rgba(37,99,235,0.4)] dark:shadow-[0_0_10px_rgba(0,255,157,0.8)]"></div>
+                        <h3 className="text-xs font-black text-gray-900 dark:text-white uppercase tracking-widest">Financial Overview</h3>
                     </div>
 
                     {/* Subtotal */}
                     <div className="flex justify-between items-center group">
-                        <span className="text-gray-400 text-sm font-medium group-hover:text-white transition-colors">Net Subtotal</span>
-                        <span className="text-white font-mono text-xl tracking-tight">{formatCompactNumber(poSubtotal, { currency: CURRENCY_SYMBOL })}</span>
+                        <span className="text-gray-500 dark:text-gray-400 text-sm font-black uppercase tracking-widest group-hover:text-gray-900 dark:group-hover:text-white transition-colors">Net Subtotal</span>
+                        <span className="text-gray-900 dark:text-white font-mono text-xl tracking-tight font-black">{formatCompactNumber(poSubtotal, { currency: CURRENCY_SYMBOL })}</span>
                     </div>
 
                     {/* Discount */}
@@ -97,16 +97,16 @@ export const POTotalsSummary: React.FC<POTotalsSummaryProps> = ({
                             <span className="text-gray-400 text-sm flex items-center gap-2 group-hover:text-white transition-colors">
                                 <Percent size={14} className="text-cyber-primary/70" /> Applied Discount
                             </span>
-                            <div className="flex items-center bg-black/60 rounded-lg border border-white/10 px-3 py-1.5 focus-within:border-cyber-primary/50 transition-all shadow-lg">
+                             <div className="flex items-center bg-gray-50 dark:bg-black/60 rounded-lg border border-gray-200 dark:border-white/10 px-3 py-1.5 focus-within:border-blue-500/50 dark:focus-within:border-cyber-primary/50 transition-all shadow-sm">
                                 <input
                                     type="number"
                                     min="0" max="100"
-                                    className="w-12 bg-transparent text-right text-white font-mono text-sm outline-none"
+                                    className="w-12 bg-transparent text-right text-gray-900 dark:text-white font-mono text-sm outline-none font-bold"
                                     value={discountRate}
                                     onChange={(e) => setDiscountRate(parseFloat(e.target.value) || 0)}
                                     placeholder="0"
                                 />
-                                <span className="text-gray-500 text-xs ml-1">%</span>
+                                <span className="text-gray-400 dark:text-gray-500 text-xs ml-1 font-bold">%</span>
                             </div>
                         </div>
                         {discountRate > 0 && (
@@ -124,16 +124,16 @@ export const POTotalsSummary: React.FC<POTotalsSummaryProps> = ({
                             <span className="text-gray-400 text-sm flex items-center gap-2 group-hover:text-white transition-colors">
                                 <Percent size={14} className="text-purple-400/70" /> Regulatory Tax
                             </span>
-                            <div className="flex items-center bg-black/60 rounded-lg border border-white/10 px-3 py-1.5 focus-within:border-purple-500/50 transition-all shadow-lg">
+                             <div className="flex items-center bg-gray-50 dark:bg-black/60 rounded-lg border border-gray-200 dark:border-white/10 px-3 py-1.5 focus-within:border-purple-500/50 transition-all shadow-sm">
                                 <input
                                     type="number"
                                     min="0" max="100"
-                                    className="w-12 bg-transparent text-right text-white font-mono text-sm outline-none"
+                                    className="w-12 bg-transparent text-right text-gray-900 dark:text-white font-mono text-sm outline-none font-bold"
                                     value={taxRate}
                                     onChange={(e) => setTaxRate(parseFloat(e.target.value) || 0)}
                                     placeholder="0"
                                 />
-                                <span className="text-gray-500 text-xs ml-1">%</span>
+                                <span className="text-gray-400 dark:text-gray-500 text-xs ml-1 font-bold">%</span>
                             </div>
                         </div>
                         {taxRate > 0 && (
@@ -150,12 +150,12 @@ export const POTotalsSummary: React.FC<POTotalsSummaryProps> = ({
                         <span className="text-gray-400 text-sm flex items-center gap-2 group-hover:text-white transition-colors">
                             <DollarSign size={14} className="text-blue-400/70" /> Freight / Shipping
                         </span>
-                        <div className="flex items-center bg-black/60 rounded-lg border border-white/10 px-3 py-1.5 focus-within:border-blue-500/50 transition-all shadow-lg">
-                            <span className="text-gray-600 text-xs mr-2">{CURRENCY_SYMBOL}</span>
+                         <div className="flex items-center bg-gray-50 dark:bg-black/60 rounded-lg border border-gray-200 dark:border-white/10 px-3 py-1.5 focus-within:border-blue-500/50 transition-all shadow-sm">
+                            <span className="text-gray-400 dark:text-gray-600 text-xs mr-2 font-bold">{CURRENCY_SYMBOL}</span>
                             <input
                                 type="number"
                                 min="0"
-                                className="w-24 bg-transparent text-right text-white font-mono text-sm outline-none"
+                                className="w-24 bg-transparent text-right text-gray-900 dark:text-white font-mono text-sm outline-none font-bold"
                                 value={shippingCost}
                                 onChange={(e) => setShippingCost(parseFloat(e.target.value) || 0)}
                                 placeholder="0"
@@ -166,23 +166,23 @@ export const POTotalsSummary: React.FC<POTotalsSummaryProps> = ({
                     {/* Divider with high-end glowing effect */}
                     <div className="relative py-2">
                         <div className="absolute inset-0 flex items-center" aria-hidden="true">
-                            <div className="w-full h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
+                            <div className="w-full h-[1px] bg-gradient-to-r from-transparent via-gray-200 dark:via-white/10 to-transparent"></div>
                         </div>
                         <div className="relative flex justify-center">
-                            <span className="bg-black px-2 text-[8px] text-gray-600 uppercase font-black tracking-widest">Verification Layer</span>
+                            <span className="bg-white dark:bg-black px-2 text-[8px] text-gray-400 dark:text-gray-600 uppercase font-black tracking-widest">Verification Layer</span>
                         </div>
                     </div>
 
                     {/* Total */}
                     <div className="flex justify-between items-end pt-2">
                         <div className="space-y-1">
-                            <span className="text-gray-300 font-black uppercase tracking-[0.2em] text-[10px]">Grand Total</span>
-                            <div className="text-[9px] text-gray-600 font-mono uppercase tracking-widest">
+                            <span className="text-gray-500 dark:text-gray-300 font-black uppercase tracking-[0.2em] text-[10px]">Grand Total</span>
+                            <div className="text-[9px] text-gray-400 dark:text-gray-600 font-mono uppercase font-black tracking-widest">
                                 {incoterms ? `Terms: ${incoterms}` : 'Ready for settlement'}
                             </div>
                         </div>
                         <div className="text-right">
-                            <div className="text-3xl font-black text-white font-mono tracking-tighter drop-shadow-[0_0_15px_rgba(0,255,157,0.6)]">
+                            <div className="text-3xl font-black text-blue-600 dark:text-white font-mono tracking-tighter dark:drop-shadow-[0_0_15px_rgba(0,255,157,0.6)]">
                                 {formatCompactNumber(poTotal, { currency: CURRENCY_SYMBOL })}
                             </div>
                         </div>

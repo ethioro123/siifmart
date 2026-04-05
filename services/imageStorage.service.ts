@@ -196,9 +196,10 @@ export async function uploadProfilePhoto(
         return { success: false, error: 'Storage not configured. Please contact your administrator to set up the avatars storage bucket.' };
       } else if (errorMessage.includes('payload too large') || errorMessage.includes('413')) {
         return { success: false, error: 'Image file is too large for upload. Please reduce the file size and try again.' };
-      } else if (errorMessage.includes('unauthorized') || errorMessage.includes('403')) {
-        return { success: false, error: 'Storage access denied. You may not have permission to upload photos.' };
-      } else if (errorMessage.includes('network') || errorMessage.includes('timeout') || errorMessage.includes('fetch')) {
+      } else if (errorMessage.includes('row-level security') || errorMessage.includes('policy')) {
+        return { success: false, error: 'Storage permission error. Please ensure the avatars bucket policy is configured (run any pending SQL migrations if you haven\'t already).' };
+      }
+ else if (errorMessage.includes('network') || errorMessage.includes('timeout') || errorMessage.includes('fetch')) {
         return { success: false, error: 'Network error during upload. Please check your connection and try again.' };
       } else if (errorMessage.includes('duplicate') || errorMessage.includes('already exists')) {
         return { success: false, error: 'A file with this name already exists. Please try again.' };
@@ -273,10 +274,9 @@ export async function initializeAvatarsBucket(): Promise<void> {
     const { data: buckets, error: listError } = await supabase.storage.listBuckets();
 
     if (listError) {
-      if (listError.message.toLowerCase().includes('row-level security') || listError.message.toLowerCase().includes('permission')) {
-      } else {
-        console.warn(`[Storage] Could not list avatars buckets: ${listError.message}`);
-      }
+      // If we can't list buckets, it's usually an RLS restriction on the buckets table.
+      // This is expected for standard users. We'll assume the bucket exists 
+      // if we've run the SQL migrations.
       return;
     }
 
@@ -284,17 +284,12 @@ export async function initializeAvatarsBucket(): Promise<void> {
 
     if (!bucketExists) {
       const { error: createError } = await supabase.storage.createBucket(BUCKET_NAME, {
-        public: true, // Make avatars publicly accessible
+        public: true,
         fileSizeLimit: MAX_FILE_SIZE
       });
 
       if (createError) {
-        if (createError.message.toLowerCase().includes('row-level security')) {
-          console.warn(`[Storage] RLS Restriction: Cannot create '${BUCKET_NAME}' bucket from client. Please run the SQL migration or create it manually.`);
-        } else {
-          console.warn(`[Storage] Could not create '${BUCKET_NAME}' bucket:`, createError.message);
-        }
-      } else {
+        // Silently fail - if they can't create it here, it must be created via SQL
       }
     }
   } catch (error) {

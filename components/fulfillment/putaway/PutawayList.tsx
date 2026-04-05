@@ -1,10 +1,11 @@
 import React from 'react';
-import { Box, Zap, UserIcon, Lock, RefreshCw, Play, Info, Archive, Clock, Package, MapPin, User, ChevronRight, Loader2 } from 'lucide-react';
+import { Box, Zap, UserIcon, Lock, RefreshCw, Play, Info, Archive, Clock, Package, MapPin, User, ChevronRight, Loader2, Trash2 } from 'lucide-react';
 import { WMSJob, Employee } from '../../../types';
 import Pagination from '../../shared/Pagination';
 import { formatJobId } from '../../../utils/jobIdFormatter';
 import { isUUID } from '../FulfillmentShared';
 import Protected from '../../Protected';
+import { useFulfillment } from '../FulfillmentContext';
 
 interface PutawayListProps {
     sortedPutawayJobs: WMSJob[];
@@ -41,15 +42,24 @@ export const PutawayList: React.FC<PutawayListProps> = ({
     handleStartJob,
     onShowDetails
 }) => {
+    const { deleteJob } = useFulfillment();
+
+    const handleDelete = async (e: React.MouseEvent, jobId: string) => {
+        e.stopPropagation();
+        if (window.confirm('Are you sure you want to permanently delete this job?')) {
+            await deleteJob(jobId);
+        }
+    };
+
     if (sortedPutawayJobs.length === 0) {
         return (
-            <div className="col-span-full flex flex-col items-center justify-center py-20 text-center space-y-4">
-                <div className="p-6 bg-white/5 rounded-full border border-white/10">
-                    <Box size={48} className="text-gray-600" />
+            <div className="col-span-full flex flex-col items-center justify-center py-20 text-center space-y-4 bg-white dark:bg-black rounded-3xl border-2 border-dashed border-gray-200 dark:border-white/10 shadow-sm transition-all">
+                <div className="p-6 md:p-8 bg-gray-50 dark:bg-white/[0.05] rounded-full border border-gray-100 dark:border-white/5 shadow-inner">
+                    <Box size={48} className="text-gray-300 dark:text-gray-600" />
                 </div>
                 <div>
-                    <p className="text-gray-300 font-black uppercase tracking-widest text-sm">Storage Queue Empty</p>
-                    <p className="text-gray-500 text-xs mt-1">No pending putaway jobs matching current filters.</p>
+                    <p className="text-gray-900 dark:text-white font-black uppercase tracking-[0.2em] text-sm">No Jobs Found</p>
+                    <p className="text-gray-500 dark:text-gray-500 font-black uppercase tracking-widest text-[9px] mt-2">No jobs found matching your filters.</p>
                 </div>
             </div>
         );
@@ -57,168 +67,205 @@ export const PutawayList: React.FC<PutawayListProps> = ({
 
     return (
         <>
-            {paginatedPutawayJobs.map(job => {
-                const completedItems = job.lineItems?.filter(item => item.status === 'Completed').length || 0;
-                const progress = job.lineItems ? (completedItems / job.lineItems.length) * 100 : 0;
-                const isCritical = job.priority === 'Critical';
+            <div className="col-span-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {paginatedPutawayJobs.map(job => {
+                    const completedItems = job.lineItems?.filter(item => item.status === 'Completed').length || 0;
+                    const progress = job.lineItems ? (completedItems / job.lineItems.length) * 100 : 0;
+                    const isCritical = job.priority === 'Critical';
 
-                return (
-                    <React.Fragment key={job.id}>
-                        {/* ── MOBILE: Compact tappable row ── */}
-                        <div
-                            className={`md:hidden flex items-center gap-3 bg-white/5 border rounded-xl p-3 active:bg-white/10 transition-all cursor-pointer ${isCritical ? 'border-red-500/30' : 'border-white/10'}`}
-                            onClick={() => onShowDetails(job)}
-                        >
-                            {/* Progress circle */}
-                            <div className={`w-10 h-10 rounded-full flex items-center justify-center text-xs font-black flex-shrink-0 border ${
-                                progress >= 100 ? 'bg-green-500/20 border-green-500/30 text-green-400' : 'bg-blue-500/15 border-blue-500/30 text-blue-400'
-                            }`}>
-                                {Math.round(progress)}%
-                            </div>
-                            {/* Job info */}
-                            <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2">
-                                    <span className="text-sm font-black text-white tracking-wider uppercase">{formatJobId(job)}</span>
-                                    {isCritical && (
-                                        <span className="bg-red-500 text-white text-[8px] font-black px-1 py-0.5 rounded uppercase animate-pulse">!</span>
-                                    )}
+                    return (
+                        <React.Fragment key={job.id}>
+                            {/* ── MOBILE: Compact tappable row ── */}
+                            <div
+                                className={`md:hidden flex items-center gap-3 bg-white dark:bg-black/40 border rounded-xl p-4 active:bg-slate-50 dark:active:bg-white/10 transition-all cursor-pointer shadow-sm ${isCritical ? 'border-red-500/50' : 'border-slate-200 dark:border-white/10'}`}
+                                onClick={() => onShowDetails(job)}
+                            >
+                                {/* Progress circle */}
+                                <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-[10px] font-black flex-shrink-0 border transition-all ${
+                                    progress >= 100 ? 'bg-emerald-50 dark:bg-emerald-500/20 border-emerald-100 dark:border-emerald-500/30 text-emerald-600 dark:text-emerald-400' : 'bg-blue-50 dark:bg-blue-500/15 border-blue-100 dark:border-blue-500/30 text-blue-600 dark:text-blue-400'
+                                } shadow-sm`}>
+                                    {Math.round(progress)}%
                                 </div>
-                                <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">{job.items} items</span>
-                            </div>
-                            <ChevronRight size={18} className="text-gray-600 flex-shrink-0" />
-                        </div>
-
-                        {/* ── DESKTOP: Full card (unchanged) ── */}
-                        <div className={`hidden md:block group bg-white/5 backdrop-blur-sm border rounded-3xl p-5 hover:bg-white/10 transition-all duration-500 relative overflow-hidden ${isCritical ? 'border-red-500/20' : 'border-white/10 hover:border-blue-500/30'}`}>
-                            {isCritical && <div className="absolute top-0 right-0 w-24 h-24 bg-red-500/5 blur-2xl rounded-full" />}
-
-                            <div className="flex justify-between items-start mb-6 relative z-10">
-                                <div>
+                                {/* Job info */}
+                                <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2">
-                                        <span className="text-sm font-black text-white tracking-widest uppercase">{formatJobId(job)}</span>
-                                        {job.orderRef && (
-                                            <span className="text-[10px] text-gray-400 font-bold border-l border-white/10 pl-2 uppercase tracking-widest">
-                                                PO: {resolveOrderRef(job.orderRef)}
-                                            </span>
-                                        )}
+                                        <span className="text-sm font-black text-slate-900 dark:text-white tracking-wider uppercase">{formatJobId(job)}</span>
                                         {isCritical && (
-                                            <div className="flex items-center gap-1 bg-red-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded uppercase tracking-wider animate-pulse">
-                                                <Zap size={8} className="fill-current" />
-                                                Critical
-                                            </div>
+                                            <span className="bg-red-500 text-white text-[8px] font-black px-2 py-0.5 rounded-lg uppercase animate-pulse shadow-lg shadow-red-500/20">!</span>
                                         )}
                                     </div>
-                                    <div className="flex items-center gap-2 mt-1">
-                                        <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
-                                            {job.items} Items
-                                        </span>
-                                        <span className="w-1 h-1 rounded-full bg-gray-600" />
-                                        <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
-                                            {(job.lineItems || [])[0]?.sku || 'No SKU'}
-                                        </span>
-                                        <span className="w-1 h-1 rounded-full bg-gray-600" />
-                                        <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
-                                            {(() => {
-                                                const loc = (job as any).zone || job.location;
-                                                if (!loc) return 'Unassigned';
-                                                if (loc.toLowerCase().startsWith('zone')) return loc;
-                                                return `Zone ${loc}`;
-                                            })()}
-                                        </span>
-                                    </div>
+                                    <p className="text-[10px] text-slate-500 dark:text-zinc-500 font-black uppercase tracking-widest mt-1">{job.items} Inventory Items</p>
                                 </div>
-                                <Protected permission="ASSIGN_TASKS">
-                                    <div className="relative group/user">
-                                        <button
-                                            onClick={() => setSelectedJob(selectedJob?.id === job.id ? null : job)}
-                                            className={`w-8 h-8 rounded-full border flex items-center justify-center transition-all ${selectedJob?.id === job.id
-                                                ? 'bg-blue-500 border-blue-400 text-white shadow-lg scale-110'
-                                                : 'bg-white/5 border-white/10 text-gray-400 hover:text-white hover:border-white/30'
-                                                }`}
-                                            aria-label="Assign User"
-                                        >
-                                            <UserIcon size={14} />
-                                        </button>
-                                    </div>
-                                </Protected>
+                                <div className="p-2 bg-slate-50 dark:bg-white/5 rounded-lg border border-slate-100 dark:border-white/5">
+                                    <ChevronRight size={18} className="text-slate-400 dark:text-zinc-600 flex-shrink-0" />
+                                </div>
                             </div>
 
-                            <div className="space-y-4 relative z-10">
-                                <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest text-gray-400">
-                                    <span>Progress</span>
-                                    <span className={progress === 100 ? 'text-green-400' : 'text-blue-400'}>{Math.round(progress)}%</span>
+                            {/* ── DESKTOP: Full card ── */}
+                            <div className={`hidden md:block group bg-white dark:bg-black/40 backdrop-blur-sm border-2 rounded-[2.5rem] p-6 hover:shadow-xl transition-all duration-500 relative overflow-hidden active:scale-[0.99] ${isCritical ? 'border-red-500/30 dark:border-red-500/20 shadow-red-500/5' : 'border-gray-100 dark:border-white/10 hover:border-blue-500/30 dark:hover:border-blue-400/30 shadow-blue-500/5'}`}>
+                                {isCritical && <div className="absolute top-0 right-0 w-32 h-32 bg-red-500/5 dark:bg-red-500/10 blur-[60px] rounded-full pointer-events-none" />}
+                                <div className="absolute -bottom-16 -left-16 w-32 h-32 bg-blue-500/5 dark:bg-blue-500/10 blur-[80px] rounded-full pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
+
+                                <div className="flex justify-between items-start mb-8 relative z-10">
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex items-center gap-3 flex-wrap">
+                                            <span className="text-base font-black text-gray-900 dark:text-white tracking-widest uppercase drop-shadow-sm">{formatJobId(job)}</span>
+                                            {job.orderRef && (
+                                                <span className="text-[10px] text-gray-400 dark:text-gray-500 font-black border-l border-gray-200 dark:border-white/10 pl-3 uppercase tracking-widest font-mono">
+                                                    Ref: {resolveOrderRef(job.orderRef)}
+                                                </span>
+                                            )}
+                                        </div>
+                                        <div className="flex items-center gap-2 mt-2 font-mono">
+                                            <div className="flex items-center gap-1.5 px-2.5 py-1 bg-gray-50 dark:bg-white/5 rounded-lg border border-gray-100 dark:border-white/5">
+                                                <div className="w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.4)]" />
+                                                <span className="text-[9px] text-gray-500 dark:text-gray-400 font-black uppercase tracking-widest">
+                                                    {job.items} Items
+                                                </span>
+                                            </div>
+                                            <div className="flex items-center gap-1.5 px-2.5 py-1 bg-gray-50 dark:bg-white/5 rounded-lg border border-gray-100 dark:border-white/5">
+                                                <MapPin size={10} className="text-gray-400 dark:text-gray-500" />
+                                                <span className="text-[9px] text-gray-500 dark:text-gray-400 font-black uppercase tracking-widest truncate max-w-[120px]">
+                                                    {(() => {
+                                                        const loc = (job as any).zone || job.location;
+                                                        if (!loc) return 'UNASSIGNED';
+                                                        if (loc.toLowerCase().startsWith('zone')) return loc.toUpperCase();
+                                                        return `ZONE ${loc}`.toUpperCase();
+                                                    })()}
+                                                </span>
+                                            </div>
+                                            {isCritical && (
+                                                <div className="flex items-center gap-1.5 px-2.5 py-1 bg-red-500 text-white text-[9px] font-black rounded-lg uppercase tracking-wider animate-pulse shadow-lg shadow-red-500/20">
+                                                    <Zap size={10} className="fill-current" />
+                                                    Critical
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-2 ml-4">
+                                        <Protected permission="ASSIGN_TASKS">
+                                            <button
+                                                onClick={() => setSelectedJob(selectedJob?.id === job.id ? null : job)}
+                                                className={`w-10 h-10 rounded-xl border-2 flex items-center justify-center transition-all shadow-md ${selectedJob?.id === job.id
+                                                    ? 'bg-slate-900 dark:bg-blue-600 border-slate-900 dark:border-blue-400 text-white scale-110'
+                                                    : 'bg-white dark:bg-white/5 border-slate-100 dark:border-white/10 text-slate-400 dark:text-zinc-500 hover:text-slate-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-white/30'
+                                                    }`}
+                                                aria-label="Assign User"
+                                            >
+                                                <UserIcon size={16} />
+                                            </button>
+                                        </Protected>
+                                        {['super_admin', 'warehouse_manager'].includes(user?.role) && (
+                                            <button
+                                                onClick={(e) => handleDelete(e, job.id)}
+                                                disabled={isSubmitting}
+                                                className="w-10 h-10 rounded-xl border-2 bg-white dark:bg-white/5 border-slate-100 dark:border-white/10 text-rose-500 hover:text-white hover:bg-rose-500 hover:border-rose-500 transition-all flex items-center justify-center disabled:opacity-50 shadow-md"
+                                                title="Delete Job"
+                                            >
+                                                <Trash2 size={16} />
+                                            </button>
+                                        )}
+                                    </div>
                                 </div>
 
-                                {job.status === 'In-Progress' && (
-                                    <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden">
+                                <div className="space-y-5 relative z-10">
+                                    <div className="flex justify-between items-center px-1">
+                                        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 dark:text-gray-500">Processing Status</p>
+                                        <p className={`text-[10px] font-black uppercase tracking-[0.2em] ${progress === 100 ? 'text-emerald-600 dark:text-emerald-400' : 'text-blue-600 dark:text-blue-400'}`}>{Math.round(progress)}% COMPLETED</p>
+                                    </div>
+
+                                    <div className="w-full h-2 bg-gray-100 dark:bg-white/5 rounded-full overflow-hidden shadow-inner border border-gray-200/50 dark:border-white/5">
                                         <div
-                                            className="h-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.6)] transition-all duration-700"
+                                            className={`h-full transition-all duration-1000 ease-out relative ${progress >= 100 ? 'bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.4)]' : 'bg-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.4)]'}`}
                                             ref={(el) => { if (el) el.style.width = `${Math.round(progress)}%`; }}
                                         />
                                     </div>
-                                )}
 
-                                <div className="flex items-center justify-between mt-2 mb-4">
-                                    <div className="flex items-center gap-2">
-                                        {job.assignedTo ? (
-                                            (() => {
-                                                const employee = employees.find(e => e.id === job.assignedTo || e.name === job.assignedTo || e.email === job.assignedTo);
-                                                const displayName = employee?.name || (isUUID(job.assignedTo) ? job.assignedTo.slice(-4).toUpperCase() : job.assignedTo);
-                                                const displayInitial = displayName.charAt(0).toUpperCase();
+                                    <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-white/[0.03] rounded-2xl border border-gray-100 dark:border-white/5 shadow-inner">
+                                        <div className="flex items-center gap-3">
+                                            {job.assignedTo ? (
+                                                (() => {
+                                                    const employee = employees.find(e => e.id === job.assignedTo || e.name === job.assignedTo || e.email === job.assignedTo);
+                                                    const displayName = employee?.name || (isUUID(job.assignedTo) ? job.assignedTo.slice(-4).toUpperCase() : job.assignedTo);
+                                                    const displayInitial = displayName.charAt(0).toUpperCase();
 
-                                                return (
-                                                    <>
-                                                        <div className="w-5 h-5 rounded-full bg-gradient-to-br from-indigo-500 to-blue-500 flex items-center justify-center">
-                                                            <span className="text-[9px] font-bold text-white">{displayInitial}</span>
-                                                        </div>
-                                                        <span className="text-[10px] text-gray-400 truncate max-w-[80px]">{displayName}</span>
-                                                    </>
-                                                );
-                                            })()
-                                        ) : (
-                                            <span className="text-[10px] text-gray-600 italic">Unassigned</span>
-                                        )}
-                                    </div>
-                                    <div className="text-[9px] text-gray-500 font-bold uppercase tracking-wider">
-                                        {Math.round(progress)}% Complete
-                                    </div>
-                                </div>
-
-                                {(() => {
-                                    return (
-                                        <div className="flex">
-                                            <button
-                                                onClick={() => onShowDetails(job)}
-                                                disabled={isSubmitting}
-                                                className="w-full h-12 bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 font-black rounded-xl text-[10px] transition-all flex items-center justify-center gap-2 uppercase tracking-[0.2em] border border-blue-500/30 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
-                                            >
-                                                {isSubmitting ? (
-                                                    <Loader2 size={16} className="animate-spin" />
-                                                ) : (
-                                                    <>
-                                                        Open Mission Checklist <ChevronRight size={16} />
-                                                    </>
-                                                )}
-                                            </button>
+                                                    return (
+                                                        <>
+                                                            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg border border-white/20">
+                                                                <span className="text-xs font-black text-white">{displayInitial}</span>
+                                                            </div>
+                                                            <div>
+                                                                <p className="text-[8px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-0.5">Assigned To</p>
+                                                                <p className="text-[10px] font-black text-gray-900 dark:text-white uppercase truncate max-w-[120px]">{displayName}</p>
+                                                            </div>
+                                                        </>
+                                                    );
+                                                })()
+                                            ) : (
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-9 h-9 rounded-xl bg-gray-200 dark:bg-white/5 flex items-center justify-center border border-gray-300 dark:border-white/10">
+                                                        <User size={18} className="text-gray-400 dark:text-gray-600" />
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-[8px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-0.5">Assigned To</p>
+                                                        <p className="text-[10px] font-black text-gray-300 dark:text-gray-800 uppercase italic">Unassigned</p>
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
-                                    );
-                                })()}
-                            </div>
-                        </div>
-                    </React.Fragment>
-                );
-            })}
+                                        <div className="flex flex-col items-end">
+                                            <p className="text-[8px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-0.5">Registered</p>
+                                            <div className="flex items-center gap-1.5 text-gray-900 dark:text-white">
+                                                <Clock size={12} className="text-blue-500 dark:text-blue-400" />
+                                                <span className="text-[10px] font-black font-mono">
+                                                    {(() => {
+                                                        const date = new Date(job.createdAt || '');
+                                                        const now = new Date();
+                                                        const diffInMins = Math.floor((now.getTime() - date.getTime()) / 60000);
+                                                        if (diffInMins < 1) return 'JUST NOW';
+                                                        if (diffInMins < 60) return `${diffInMins}M AGO`;
+                                                        const diffInHours = Math.floor(diffInMins / 60);
+                                                        if (diffInHours < 24) return `${diffInHours}H AGO`;
+                                                        return date.toLocaleDateString([], { month: 'short', day: 'numeric' }).toUpperCase();
+                                                    })()}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
 
-            {/* Standardized PUTAWAY Pagination */}
-            <Pagination
-                currentPage={putawayCurrentPage}
-                totalPages={putawayTotalPages}
-                totalItems={sortedPutawayJobs.length}
-                itemsPerPage={putawayItemsPerPage}
-                onPageChange={setPutawayCurrentPage}
-                itemName="jobs"
-                className="col-span-full"
-            />
+                                    <button
+                                        onClick={() => onShowDetails(job)}
+                                        disabled={isSubmitting}
+                                        className="w-full h-14 bg-slate-900 dark:bg-white text-white dark:text-black hover:bg-slate-800 dark:hover:bg-gray-100 font-black rounded-2xl text-[10px] transition-all flex items-center justify-center gap-3 uppercase tracking-[0.25em] shadow-xl dark:shadow-white/5 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed group border border-slate-800 dark:border-white/10"
+                                    >
+                                        {isSubmitting ? (
+                                            <Loader2 size={20} className="animate-spin" />
+                                        ) : (
+                                            <>
+                                                View Job Details
+                                                <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                                            </>
+                                        )}
+                                    </button>
+                                </div>
+                            </div>
+                        </React.Fragment>
+                    );
+                })}
+            </div>
+
+            <div className="col-span-full pt-8 border-t border-slate-100 dark:border-white/5">
+                <Pagination
+                    currentPage={putawayCurrentPage}
+                    totalPages={putawayTotalPages}
+                    totalItems={sortedPutawayJobs.length}
+                    itemsPerPage={putawayItemsPerPage}
+                    onPageChange={setPutawayCurrentPage}
+                    itemName="putaway jobs"
+                    className="col-span-full"
+                />
+            </div>
         </>
+
     );
 };

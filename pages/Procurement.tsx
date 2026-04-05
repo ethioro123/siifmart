@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Truck, Plus, Filter, Download, UploadCloud, RefreshCw } from 'lucide-react';
+import { Truck, Plus, Filter, Download, RefreshCw } from 'lucide-react';
 import { useData } from '../contexts/DataContext';
 import { useStore } from '../contexts/CentralStore';
 import { PurchaseOrder, Supplier, Product } from '../types';
@@ -175,9 +175,7 @@ export default function Procurement() {
                     </p>
                 </div>
                 <div className="flex gap-3">
-                    <button className="px-4 py-2 bg-white/5 hover:bg-white/10 text-white rounded-xl font-bold border border-white/10 transition-colors flex items-center gap-2">
-                        <UploadCloud size={18} /> Import Order
-                    </button>
+
                     <Protected permission="CREATE_PO">
                         <button
                             onClick={() => handleCreatePOOpen()}

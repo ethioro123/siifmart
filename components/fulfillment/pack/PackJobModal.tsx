@@ -153,13 +153,13 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
     };
 
     return (
-        <div className="fixed inset-0 z-[150] flex items-center justify-center p-2 md:p-4 bg-black/80 backdrop-blur-sm">
-            <div className="bg-[#0f0f11] w-full max-w-5xl min-h-[70dvh] max-h-[95dvh] md:min-h-0 md:max-h-[90vh] rounded-3xl border border-white/10 shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-[150] flex items-center justify-center p-2 md:p-4 bg-black/50 dark:bg-black/80 backdrop-blur-sm">
+            <div className="bg-white dark:bg-black w-full max-w-5xl min-h-[70dvh] max-h-[95dvh] md:min-h-0 md:max-h-[90vh] rounded-3xl border border-gray-200 dark:border-white/10 shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
 
                 {/* Header */}
-                <div className="relative p-2 md:p-6 border-b border-white/10 bg-black/40 overflow-hidden shrink-0">
-                    <div className="absolute -top-10 -right-10 w-40 h-40 bg-cyan-500/10 blur-[80px] rounded-full pointer-events-none hidden md:block" />
-                    <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-blue-500/10 blur-[80px] rounded-full pointer-events-none hidden md:block" />
+                <div className="relative p-2 md:p-6 border-b border-gray-100 dark:border-white/10 bg-gray-50 dark:bg-black/40 overflow-hidden shrink-0">
+                    <div className="absolute -top-10 -right-10 w-40 h-40 bg-cyan-500/10 dark:bg-cyan-500/5 blur-[80px] rounded-full pointer-events-none hidden md:block" />
+                    <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-blue-500/10 dark:bg-blue-500/5 blur-[80px] rounded-full pointer-events-none hidden md:block" />
 
                     <div className="relative flex justify-between items-start">
                         <div className="flex items-center gap-3 md:gap-4">
@@ -168,42 +168,48 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
                             </div>
                             <div>
                                 <div className="flex items-center gap-2 mb-0.5 md:mb-1">
-                                    <h2 className="text-lg md:text-2xl font-black text-white tracking-tight uppercase italic leading-none">
+                                    <h2 className="text-lg md:text-2xl font-black text-gray-900 dark:text-white tracking-tight uppercase italic leading-none">
                                         {isFullyPacked ? 'Ready to Ship' : 'Pack Mission'}
                                     </h2>
-                                    <span className="px-2 py-0.5 rounded-lg bg-white/5 border border-white/10 text-[10px] md:text-xs font-mono text-gray-500">
+                                    <span className="px-2 py-0.5 rounded-lg bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-[10px] md:text-xs font-mono text-gray-600 dark:text-gray-400">
                                         #{formatJobId(job)}
                                     </span>
                                 </div>
-                                <div className="hidden md:flex items-center gap-4 text-xs font-medium text-gray-400">
-                                    <span className={`px-2 py-0.5 rounded text-[10px] uppercase font-black tracking-widest border ${job.priority === 'Critical' ? 'border-red-500/30 text-red-400 bg-red-500/10' :
-                                        job.priority === 'High' ? 'border-amber-500/30 text-amber-400 bg-amber-500/10' :
-                                            'border-white/10 text-gray-400'
+                                <div className="hidden md:flex items-center gap-4 text-xs font-medium text-gray-600 dark:text-gray-400">
+                                    <span className={`px-2 py-0.5 rounded text-[10px] uppercase font-black tracking-widest border ${job.priority === 'Critical' ? 'border-red-500/30 text-red-600 dark:text-red-400 bg-red-500/10' :
+                                        job.priority === 'High' ? 'border-amber-500/30 text-amber-600 dark:text-amber-400 bg-amber-500/10' :
+                                            'border-gray-200 dark:border-white/10 text-gray-500 dark:text-gray-400'
                                         }`}>
                                         {job.priority}
                                     </span>
                                     <span className="flex items-center gap-1.5">
                                         <MapPin size={12} className="text-cyan-400" />
-                                        <span>{destSite?.name || (job as any).customerName || 'Customer'}</span>
+                                        <span className="break-words leading-tight">
+                                            {destSite ? (
+                                                <>
+                                                    {destSite.name} <span className="text-zinc-500 dark:text-zinc-600 font-normal lowercase">({destSite.code || destSite.id})</span>
+                                                </>
+                                            ) : ((job as any).customerName || 'Customer')}
+                                        </span>
                                     </span>
                                     <span className="flex items-center gap-1.5">
-                                        <Clock size={12} className="text-gray-500" />
+                                        <Clock size={12} className="text-gray-400 dark:text-gray-600" />
                                         {new Date(job.createdAt || (job as any).date || '').toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}
                                     </span>
                                 </div>
                             </div>
                         </div>
-                        <button onClick={onClose} aria-label="Close" className="p-1 md:p-2 hover:bg-white/10 rounded-lg text-gray-400 hover:text-white transition-colors">
+                        <button onClick={onClose} aria-label="Close" className="p-1 md:p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors">
                             <X size={18} className="md:w-6 md:h-6" />
                         </button>
                     </div>
                 </div>
 
                 {/* Content */}
-                <div className="flex-1 min-h-0 flex flex-col bg-[radial-gradient(circle_at_50%_0%,rgba(6,182,212,0.03),transparent)]">
+                <div className="flex-1 min-h-0 flex flex-col bg-[radial-gradient(circle_at_50%_0%,rgba(6,182,212,0.05),transparent)]">
                     
                     {/* Top Row / Scanner & Stats */}
-                    <div className="p-3 md:p-6 shrink-0 border-b border-white/5">
+                    <div className="p-3 md:p-6 shrink-0 border-b border-gray-100 dark:border-white/5">
                         <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 shrink-0">
                             {/* Scanner Input */}
                             {!isFullyPacked && (
@@ -231,18 +237,18 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
                                             }
                                         }}
                                         placeholder="Scan item..."
-                                        className={`w-full bg-black/60 border md:border-2 ${scanError ? 'border-red-500/50 focus:border-red-500' : 'border-white/10 focus:border-cyan-500'} rounded-lg md:rounded-xl py-2 md:py-3 pl-10 md:pl-12 pr-3 md:pr-4 text-xs md:text-base text-white font-mono outline-none transition-all`}
+                                        className={`w-full bg-gray-50 dark:bg-black/60 border md:border-2 ${scanError ? 'border-red-500/50 focus:border-red-500' : 'border-gray-200 dark:border-white/10 focus:border-cyan-500'} rounded-lg md:rounded-xl py-2 md:py-3 pl-10 md:pl-12 pr-3 md:pr-4 text-xs md:text-sm text-gray-900 dark:text-white font-mono outline-none transition-all`}
                                     />
-                                    {scanError && <span className="absolute -bottom-4 left-3 text-[10px] text-red-400 font-bold hidden md:block">{scanError}</span>}
+                                    {scanError && <span className="absolute -bottom-4 left-3 text-[10px] text-red-500 dark:text-red-400 font-bold hidden md:block">{scanError}</span>}
                                 </form>
                             )}
 
                             {/* Job Progress Pill */}
-                            <div className="flex items-center justify-between md:justify-end gap-3 shrink-0 bg-white/5 border border-white/10 px-4 py-2 md:py-3 rounded-lg md:rounded-xl">
-                                <span className="text-[10px] md:text-xs font-black text-gray-400 uppercase tracking-widest">
-                                    <span className="text-white">{completedItems}</span> / {totalItems} Pkd
+                            <div className="flex items-center justify-between md:justify-end gap-3 shrink-0 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 px-4 py-2 md:py-3 rounded-lg md:rounded-xl">
+                                <span className="text-[10px] md:text-xs font-black text-gray-600 dark:text-gray-500 uppercase tracking-widest">
+                                    <span className="text-gray-900 dark:text-white">{completedItems}</span> / {totalItems} Pkd
                                 </span>
-                                <div className="w-20 md:w-24 h-2 bg-black/40 rounded-full overflow-hidden shrink-0">
+                                <div className="w-20 md:w-24 h-2 bg-gray-200 dark:bg-black/40 rounded-full overflow-hidden shrink-0">
                                     <ProgressBar
                                         progress={progressPercent}
                                         containerClassName="h-full bg-transparent"
@@ -253,9 +259,9 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
                             
                             {/* Tracking Number (Compact) */}
                             {job.trackingNumber && (
-                                <div className="flex items-center gap-2 bg-cyan-500/10 border border-cyan-500/30 px-3 py-1.5 rounded-xl shrink-0">
-                                    <Hash size={14} className="text-cyan-400" />
-                                    <span className="text-xs font-mono font-black text-white">{job.trackingNumber}</span>
+                                <div className="flex items-center gap-2 bg-cyan-500/10 dark:bg-cyan-500/5 border border-cyan-500/30 dark:border-cyan-500/20 px-3 py-1.5 rounded-xl shrink-0">
+                                    <Hash size={14} className="text-cyan-600 dark:text-cyan-400" />
+                                    <span className="text-xs font-mono font-black text-gray-900 dark:text-white">{job.trackingNumber}</span>
                                 </div>
                             )}
                         </div>
@@ -274,35 +280,35 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
                                 const isScanningThis = scannedItemIndex === idx;
 
                                 return (
-                                    <div key={idx} className={`group relative bg-white/[0.02] border ${isScanningThis ? 'border-cyan-500 bg-cyan-500/10 shadow-[0_0_20px_rgba(6,182,212,0.15)]' :
-                                        isDone ? 'border-green-500/20 bg-green-500/[0.01]' : 'border-white/5'
-                                        } rounded-xl md:rounded-2xl p-2.5 md:p-4 flex flex-col hover:bg-white/[0.04] transition-all duration-300`}>
+                                    <div key={idx} className={`group relative bg-gray-50/50 dark:bg-white/[0.02] border ${isScanningThis ? 'border-cyan-500 bg-cyan-500/10 shadow-[0_0_20px_rgba(6,182,212,0.15)]' :
+                                        isDone ? 'border-green-500/30 bg-green-500/[0.01]' : 'border-gray-200 dark:border-white/5'
+                                        } rounded-xl md:rounded-2xl p-2.5 md:p-4 flex flex-col hover:bg-white dark:hover:bg-white/[0.04] transition-all duration-300 shadow-sm`}>
 
                                         <div className="flex items-center justify-between">
                                             <div className="flex items-center gap-3 md:gap-5 flex-1 min-w-0">
                                                 {/* Item Thumbnail */}
-                                                <div className="md:flex relative w-12 h-12 md:w-16 md:h-16 rounded-lg md:rounded-xl bg-black/40 border border-white/10 items-center justify-center overflow-hidden shrink-0">
+                                                <div className="md:flex relative w-12 h-12 md:w-16 md:h-16 rounded-lg md:rounded-xl bg-gray-100 dark:bg-black/40 border border-gray-200 dark:border-white/10 items-center justify-center overflow-hidden shrink-0">
                                                     {product?.image ? (
                                                         <img src={product.image} alt={item.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                                                     ) : (
-                                                        <div className="w-full h-full bg-white/[0.03] flex items-center justify-center text-white/20">
+                                                        <div className="w-full h-full bg-gray-50/50 dark:bg-white/[0.03] flex items-center justify-center text-gray-400 dark:text-white/20">
                                                             <Package size={24} strokeWidth={1.5} className="md:w-[28px] md:h-[28px]" />
                                                         </div>
                                                     )}
                                                     {isDone && (
                                                         <div className="absolute inset-0 bg-green-500/20 backdrop-blur-[1px] flex items-center justify-center">
-                                                            <CheckCircle size={20} className="text-green-400 md:w-5 md:h-5" />
+                                                            <CheckCircle size={20} className="text-green-500 dark:text-green-400 md:w-5 md:h-5" />
                                                         </div>
                                                     )}
                                                 </div>
 
                                                 {/* Item Info */}
                                                 <div className="min-w-0 pr-2">
-                                                    <h4 className="text-white font-bold text-sm md:text-sm tracking-tight mb-0.5 md:mb-1 group-hover:text-cyan-400 transition-colors truncate">
+                                                    <h4 className="text-gray-900 dark:text-white font-bold text-sm md:text-sm tracking-tight mb-0.5 md:mb-1 group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors truncate">
                                                         {item.name || product?.name || 'Unknown SKU'}
                                                     </h4>
                                                     <div className="flex items-center gap-2 flex-wrap">
-                                                        <span className="text-[10px] md:text-[11px] font-mono font-black text-gray-500 bg-black/40 px-1.5 md:px-2 py-0.5 rounded border border-white/5 uppercase tracking-tighter">
+                                                        <span className="text-[10px] md:text-[11px] font-mono font-black text-gray-500 bg-gray-100 dark:bg-black/40 px-1.5 md:px-2 py-0.5 rounded border border-gray-200 dark:border-white/5 uppercase tracking-tighter">
                                                             {item.sku || product?.sku || 'NO SKU'}
                                                         </span>
                                                         {product?.barcode && (
@@ -323,15 +329,15 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
                                                         let expected = item.expectedQty || (item as any).quantity || 0;
                                                         if ((item as any).requestedMeasureQty) {
                                                             const unitDef = product?.unit ? product.unit : '';
-                                                            return <span className="text-sm md:text-lg font-mono font-black text-white leading-none">{(item as any).requestedMeasureQty} <span className="hidden sm:inline text-[8px] md:text-[10px] text-gray-400 font-bold uppercase tracking-widest">{unitDef}</span></span>;
+                                                            return <span className="text-sm md:text-lg font-mono font-black text-gray-900 dark:text-white leading-none">{(item as any).requestedMeasureQty} <span className="hidden sm:inline text-[8px] md:text-[10px] text-gray-400 font-bold uppercase tracking-widest">{unitDef}</span></span>;
                                                         }
                                                         return item.orderedQty && item.orderedQty > expected ? (
                                                             <div className="flex flex-col items-end">
                                                                 <span className="text-[10px] font-mono font-bold text-red-500 line-through opacity-80 -mb-1 leading-none" title="Short Picked">{item.orderedQty}</span>
-                                                                <span className="text-sm md:text-lg font-mono font-black text-white leading-none">{expected}</span>
+                                                                <span className="text-sm md:text-lg font-mono font-black text-gray-900 dark:text-white leading-none">{expected}</span>
                                                             </div>
                                                         ) : (
-                                                            <span className="text-sm md:text-lg font-mono font-black text-white leading-none">{expected}</span>
+                                                            <span className="text-sm md:text-lg font-mono font-black text-gray-900 dark:text-white leading-none">{expected}</span>
                                                         );
                                                     })()}
                                                 </div>
@@ -344,9 +350,9 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
 
                                                         if ((item as any).requestedMeasureQty) {
                                                             const unitDef = product?.unit ? product.unit : '';
-                                                            return <span className="text-sm md:text-lg font-mono font-black text-teal-400 leading-none">{displayPicked} <span className="hidden sm:inline text-[8px] md:text-[10px] text-teal-500/60 font-bold uppercase tracking-widest">{unitDef}</span></span>;
+                                                            return <span className="text-sm md:text-lg font-mono font-black text-teal-600 dark:text-teal-400 leading-none">{displayPicked} <span className="hidden sm:inline text-[8px] md:text-[10px] text-teal-500/60 font-bold uppercase tracking-widest">{unitDef}</span></span>;
                                                         }
-                                                        return <span className={`text-sm md:text-lg font-mono font-black leading-none ${isDone ? 'text-green-400' : 'text-gray-500'}`}>{picked}</span>;
+                                                        return <span className={`text-sm md:text-lg font-mono font-black leading-none ${isDone ? 'text-green-600 dark:text-green-400' : 'text-gray-400 dark:text-gray-500'}`}>{picked}</span>;
                                                     })()}
                                                 </div>
 
@@ -356,12 +362,12 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
                                                             <button
                                                                 onClick={() => onPrintItemLabel(item, product, boxSize)}
                                                                 title="Print label"
-                                                                className="hidden sm:flex p-1 md:p-1.5 rounded-lg bg-white/5 hover:bg-cyan-500/20 border border-white/5 hover:border-cyan-500/30 text-gray-500 hover:text-cyan-400 transition-all active:scale-95"
+                                                                className="hidden sm:flex p-1 md:p-1.5 rounded-lg bg-gray-100 dark:bg-white/5 hover:bg-cyan-500/20 border border-gray-200 dark:border-white/5 hover:border-cyan-500/30 text-gray-400 hover:text-cyan-600 dark:hover:text-cyan-400 transition-all active:scale-95"
                                                             >
                                                                 <Printer size={12} className="md:w-3.5 md:h-3.5" />
                                                             </button>
                                                         )}
-                                                        <div className={`px-1.5 md:px-3 py-1 md:py-1.5 rounded-md md:rounded-lg text-[9px] md:text-xs font-black uppercase tracking-wider ${isDone ? 'bg-green-500/10 border border-green-500/20 text-green-400' : 'bg-white/5 border border-white/5 text-gray-500'}`}>
+                                                        <div className={`px-1.5 md:px-3 py-1 md:py-1.5 rounded-md md:rounded-lg text-[9px] md:text-xs font-black uppercase tracking-wider ${isDone ? 'bg-green-500/10 border border-green-500/20 text-green-600 dark:text-green-400' : 'bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/5 text-gray-500'}`}>
                                                             {isDone ? '✓' : '...'} <span className="hidden sm:inline">{isDone ? ' Packed' : ' Pending'}</span>
                                                         </div>
                                                     </div>
@@ -372,29 +378,29 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
                                         {/* Confirmation UI (Expanded) */}
                                         {isScanningThis && (
                                             <div className="mt-3 md:mt-4 pt-3 md:pt-4 border-t border-cyan-500/20 flex flex-col sm:flex-row items-center gap-3 md:gap-4 justify-between animate-in fade-in slide-in-from-top-2">
-                                                <p className="text-xs md:text-sm text-cyan-400 font-bold flex items-center gap-1.5 md:gap-2 self-start sm:self-auto w-full sm:w-auto">
+                                                <p className="text-xs md:text-sm text-cyan-600 dark:text-cyan-400 font-bold flex items-center gap-1.5 md:gap-2 self-start sm:self-auto w-full sm:w-auto">
                                                     <CheckCircle size={14} className="md:w-4 md:h-4" /> Confirm Qty
                                                 </p>
                                                 <div className="flex items-center gap-2 md:gap-3 w-full sm:w-auto justify-between sm:justify-end">
-                                                    <div className="flex items-center bg-black/60 border border-cyan-500/50 rounded-lg md:rounded-xl overflow-hidden shrink-0">
+                                                    <div className="flex items-center bg-gray-50 dark:bg-black/60 border border-cyan-500/50 rounded-lg md:rounded-xl overflow-hidden shrink-0">
                                                         <button
                                                             type="button"
                                                             onClick={() => setConfirmQty(String(Math.max(1, parseInt(confirmQty || '1') - 1)))}
-                                                            className="px-3 md:px-4 py-1.5 md:py-2 hover:bg-white/10 text-white font-black"
+                                                            className="px-3 md:px-4 py-1.5 md:py-2 hover:bg-gray-100 dark:hover:bg-white/10 text-gray-900 dark:text-white font-black"
                                                         >-</button>
                                                         <input
                                                             type="number"
                                                             aria-label="Confirm Quantity"
                                                             value={confirmQty}
                                                             onChange={e => setConfirmQty(e.target.value)}
-                                                            className="w-12 md:w-16 bg-transparent text-center text-white font-mono font-bold outline-none text-sm md:text-base"
+                                                            className="w-12 md:w-16 bg-transparent text-center text-gray-900 dark:text-white font-mono font-bold outline-none text-sm md:text-base"
                                                             autoFocus
                                                             onKeyDown={e => e.key === 'Enter' && submitQtyConfirm()}
                                                         />
                                                         <button
                                                             type="button"
                                                             onClick={() => setConfirmQty(String((parseInt(confirmQty || '0')) + 1))}
-                                                            className="px-3 md:px-4 py-1.5 md:py-2 hover:bg-white/10 text-white font-black"
+                                                            className="px-3 md:px-4 py-1.5 md:py-2 hover:bg-gray-100 dark:hover:bg-white/10 text-gray-900 dark:text-white font-black"
                                                         >+</button>
                                                     </div>
                                                     <div className="flex gap-2 shrink-0">
@@ -419,46 +425,52 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
                     {/* Right Col: Details & Action */}
                     <div className="w-full lg:w-80 flex flex-col gap-4 shrink-0 p-4 lg:p-6 border-t lg:border-t-0 border-white/5 bg-black/20 lg:bg-transparent">
                         {/* Progress */}
-                        <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-5">
+                        <div className="bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 rounded-2xl p-5">
                             <div className="flex justify-between items-end mb-2">
                                 <span className="text-[10px] text-gray-500 font-black uppercase tracking-widest block">Progress</span>
-                                <span className="text-xl font-mono font-black text-white leading-none">{Math.round(progressPercent)}%</span>
+                                <span className="text-xl font-mono font-black text-gray-900 dark:text-white leading-none">{Math.round(progressPercent)}%</span>
                             </div>
                             <ProgressBar
                                 progress={progressPercent}
-                                containerClassName="h-2 bg-black/40 rounded-full overflow-hidden"
+                                containerClassName="h-2 bg-gray-200 dark:bg-black/40 rounded-full overflow-hidden"
                                 fillClassName={`h-full transition-all duration-300 ${isFullyPacked ? 'bg-green-500' : 'bg-cyan-500'}`}
                             />
                         </div>
 
                         {/* Shipping Info */}
-                        <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-5 flex flex-col gap-3">
+                        <div className="bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 rounded-2xl p-5 flex flex-col gap-3">
                             <span className="text-[10px] text-gray-500 font-black uppercase tracking-widest block">Shipping</span>
 
                             <div className="flex items-center gap-3">
                                 <Truck size={14} className="text-cyan-400 shrink-0 w-4 h-4" />
                                 <div className="min-w-0">
                                     <span className="text-[9px] text-gray-600 font-black uppercase tracking-widest block truncate">Dest</span>
-                                    <span className="text-white text-sm font-bold truncate block">{destSite?.name || (job as any).customerName || 'Customer'}</span>
+                                    <span className="text-gray-900 dark:text-white text-sm font-bold break-words leading-tight block">
+                                        {destSite ? (
+                                            <>
+                                                {destSite.name} <span className="text-zinc-500 dark:text-zinc-600 font-normal lowercase">({destSite.code || destSite.id})</span>
+                                            </>
+                                        ) : ((job as any).customerName || 'Customer')}
+                                    </span>
                                 </div>
                             </div>
                             
                             <div className="flex items-center gap-3">
-                                <Info size={14} className="text-cyan-400 shrink-0 w-4 h-4" />
+                                <Info size={14} className="text-cyan-600 dark:text-cyan-400 shrink-0 w-4 h-4" />
                                 <div className="min-w-0">
                                     <span className="text-[9px] text-gray-600 font-black uppercase tracking-widest block truncate">Job/Ref</span>
-                                    <span className="text-white text-sm font-bold font-mono truncate block">{formatJobId(job)}</span>
+                                    <span className="text-gray-900 dark:text-white text-sm font-bold font-mono truncate block">{formatJobId(job)}</span>
                                 </div>
                             </div>
                         </div>
 
                         {/* Packing Options */}
-                        <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-5 flex flex-col gap-4">
+                        <div className="bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 rounded-2xl p-5 flex flex-col gap-4">
                             <span className="text-[10px] text-gray-500 font-black uppercase tracking-widest block">Options</span>
 
                             <div>
                                 <label className="text-[9px] text-gray-600 font-black uppercase tracking-widest block mb-2">Box Size</label>
-                                <select title="Box Size" aria-label="Select Box Size" value={boxSize} onChange={(e) => setBoxSize(e.target.value as any)} className="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-white text-sm outline-none focus:border-cyan-500 focus:bg-white/5 transition-all">
+                                <select title="Box Size" aria-label="Select Box Size" value={boxSize} onChange={(e) => setBoxSize(e.target.value as any)} className="w-full bg-white dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-xl p-3 text-gray-900 dark:text-white text-sm outline-none focus:border-cyan-500 focus:bg-gray-50 dark:focus:bg-white/5 transition-all">
                                     <option value="Small">{t('warehouse.boxSmall')}</option>
                                     <option value="Medium">{t('warehouse.boxMedium')}</option>
                                     <option value="Large">{t('warehouse.boxLarge')}</option>
@@ -470,22 +482,22 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
                                 <div className="pt-2 border-t border-white/5">
                                     <p className="text-[9px] text-red-500/80 font-black uppercase tracking-widest mb-2 flex items-center gap-1"><AlertTriangle size={10} /> Fragile</p>
                                     <label className="flex items-center gap-3 mb-2 cursor-pointer group">
-                                        <input type="checkbox" checked={packingMaterials.bubbleWrap} onChange={e => setPackingMaterials({ ...packingMaterials, bubbleWrap: e.target.checked })} className="w-4 h-4 rounded border-white/20 text-cyan-500 focus:ring-cyan-500 focus:ring-offset-gray-900 bg-black/40" />
-                                        <span className="text-sm text-gray-300 font-medium group-hover:text-white transition-colors">Bubble Wrap</span>
+                                        <input type="checkbox" checked={packingMaterials.bubbleWrap} onChange={e => setPackingMaterials({ ...packingMaterials, bubbleWrap: e.target.checked })} className="w-4 h-4 rounded border-gray-300 dark:border-white/20 text-cyan-600 dark:text-cyan-500 focus:ring-cyan-500 focus:ring-offset-white dark:focus:ring-offset-gray-900 bg-gray-50 dark:bg-black/40" />
+                                        <span className="text-sm text-gray-600 dark:text-gray-300 font-medium group-hover:text-gray-900 dark:group-hover:text-white transition-colors">Bubble Wrap</span>
                                     </label>
                                     <label className="flex items-center gap-3 cursor-pointer group">
-                                        <input type="checkbox" checked={packingMaterials.fragileStickers} onChange={e => setPackingMaterials({ ...packingMaterials, fragileStickers: e.target.checked })} className="w-4 h-4 rounded border-white/20 text-cyan-500 focus:ring-cyan-500 focus:ring-offset-gray-900 bg-black/40" />
-                                        <span className="text-sm text-gray-300 font-medium group-hover:text-white transition-colors">Stickers</span>
+                                        <input type="checkbox" checked={packingMaterials.fragileStickers} onChange={e => setPackingMaterials({ ...packingMaterials, fragileStickers: e.target.checked })} className="w-4 h-4 rounded border-gray-300 dark:border-white/20 text-cyan-600 dark:text-cyan-500 focus:ring-cyan-500 focus:ring-offset-white dark:focus:ring-offset-gray-900 bg-gray-50 dark:bg-black/40" />
+                                        <span className="text-sm text-gray-600 dark:text-gray-300 font-medium group-hover:text-gray-900 dark:group-hover:text-white transition-colors">Stickers</span>
                                     </label>
                                 </div>
                             )}
 
                             {hasColdItems && (
-                                <div className="pt-2 border-t border-white/5">
-                                    <p className="text-[9px] text-blue-400/80 font-black uppercase tracking-widest mb-2 flex items-center gap-1"><Snowflake size={10} /> Cold Chain</p>
+                                <div className="pt-2 border-t border-gray-100 dark:border-white/5">
+                                    <p className="text-[9px] text-blue-600 dark:text-blue-400/80 font-black uppercase tracking-widest mb-2 flex items-center gap-1"><Snowflake size={10} /> Cold Chain</p>
                                     <label className="flex items-center gap-3 cursor-pointer group">
-                                        <input type="checkbox" checked={hasIcePack} onChange={e => setHasIcePack(e.target.checked)} className="w-4 h-4 rounded border-white/20 text-cyan-500 focus:ring-cyan-500 focus:ring-offset-gray-900 bg-black/40" />
-                                        <span className="text-sm text-gray-300 font-medium group-hover:text-white transition-colors">Ice Packs</span>
+                                        <input type="checkbox" checked={hasIcePack} onChange={e => setHasIcePack(e.target.checked)} className="w-4 h-4 rounded border-gray-300 dark:border-white/20 text-cyan-600 dark:text-cyan-500 focus:ring-cyan-500 focus:ring-offset-white dark:focus:ring-offset-gray-900 bg-gray-50 dark:bg-black/40" />
+                                        <span className="text-sm text-gray-600 dark:text-gray-300 font-medium group-hover:text-gray-900 dark:group-hover:text-white transition-colors">Ice Packs</span>
                                     </label>
                                 </div>
                             )}
@@ -494,20 +506,19 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
                 </div>
             </div>
 
-            {/* Footer Actions */}
-                <div className="p-3 md:p-6 border-t border-white/10 bg-black/40 flex items-center justify-between gap-3 shrink-0">
+                <div className="p-3 md:p-6 border-t border-gray-100 dark:border-white/10 bg-white dark:bg-black/40 flex items-center justify-between gap-3 shrink-0">
                     <div className="flex items-center gap-2 md:gap-4 shrink-0">
                         <button
                             onClick={() => onPrintLabel(boxDetails)}
                             disabled={isSubmitting}
-                            className="p-2 md:px-6 md:py-3 bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/10 text-gray-300 hover:text-white rounded-lg md:rounded-2xl font-black text-xs md:text-sm uppercase tracking-widest transition-all md:flex items-center gap-2 active:scale-95 disabled:opacity-50"
+                            className="p-2 md:px-6 md:py-3 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 border border-gray-200 dark:border-white/5 hover:border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white rounded-lg md:rounded-2xl font-black text-xs md:text-sm uppercase tracking-widest transition-all md:flex items-center gap-2 active:scale-95 disabled:opacity-50"
                         >
                             <Printer size={18} className="md:w-4 md:h-4" /> <span className="hidden md:inline">Print Label</span>
                         </button>
                         {!isFullyPacked && onOpenScanner && (
                             <button
                                 onClick={onOpenScanner}
-                                className="p-2 md:px-6 md:py-3 bg-cyan-600/20 hover:bg-cyan-600/30 border border-cyan-500/30 hover:border-cyan-500/50 text-cyan-400 hover:text-cyan-300 rounded-lg md:rounded-2xl font-black text-xs md:text-sm uppercase tracking-widest transition-all md:flex items-center gap-2 active:scale-95 shadow-[0_0_15px_rgba(6,182,212,0.1)]"
+                                className="p-2 md:px-6 md:py-3 bg-cyan-600/20 hover:bg-cyan-600/30 border border-cyan-500/30 hover:border-cyan-500/50 text-cyan-600 dark:text-cyan-400 hover:text-cyan-500 dark:hover:text-cyan-300 rounded-lg md:rounded-2xl font-black text-xs md:text-sm uppercase tracking-widest transition-all md:flex items-center gap-2 active:scale-95 shadow-[0_0_15px_rgba(6,182,212,0.1)]"
                             >
                                 <Barcode size={18} className="md:w-4 md:h-4" /> <span className="hidden md:inline">Open Scanner</span>
                             </button>

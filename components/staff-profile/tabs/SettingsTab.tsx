@@ -46,6 +46,7 @@ export default function SettingsTab({
                                 type="password"
                                 value={currentPasswordInput}
                                 onChange={(e) => setCurrentPasswordInput(e.target.value)}
+                                autoComplete="current-password"
                                 placeholder="••••••••"
                                 className="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 text-gray-900 dark:text-white outline-none focus:border-yellow-400 transition-colors placeholder:text-gray-400"
                             />
@@ -56,6 +57,7 @@ export default function SettingsTab({
                                 type="password"
                                 value={newPasswordInput}
                                 onChange={(e) => setNewPasswordInput(e.target.value)}
+                                autoComplete="new-password"
                                 placeholder="Minimum 6 characters"
                                 className="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 text-gray-900 dark:text-white outline-none focus:border-yellow-400 transition-colors placeholder:text-gray-400"
                             />
@@ -66,6 +68,7 @@ export default function SettingsTab({
                                 type="password"
                                 value={confirmPasswordInput}
                                 onChange={(e) => setConfirmPasswordInput(e.target.value)}
+                                autoComplete="new-password"
                                 placeholder="Confirm your new password"
                                 className="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 text-gray-900 dark:text-white outline-none focus:border-yellow-400 transition-colors placeholder:text-gray-400"
                             />

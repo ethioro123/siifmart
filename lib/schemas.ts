@@ -12,7 +12,7 @@ export const UserRoleSchema = z.enum([
     'warehouse_manager', 'dispatch_manager', 'assistant_manager', 'shift_lead',
     'store_supervisor', 'cashier', 'sales_associate', 'stock_clerk', 'picker',
     'packer', 'receiver', 'driver', 'forklift_operator', 'inventory_specialist',
-    'customer_service', 'auditor', 'it_support', 'admin', 'manager', 'hr', 'pos',
+    'customer_service', 'auditor', 'it_support', 'admin', 'hr', 'pos',
     'dispatcher', 'cs_manager', 'returns_clerk', 'merchandiser', 'loss_prevention',
     'accountant', 'data_analyst', 'training_coordinator'
 ]);

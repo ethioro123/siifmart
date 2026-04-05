@@ -209,7 +209,7 @@ interface DataContextType {
 
 
   // System Actions
-  addNotification: (type: 'alert' | 'success' | 'info', message: string) => void;
+  addNotification: (type: 'alert' | 'success' | 'info', message: string, userId?: string, isGlobal?: boolean) => void;
   clearNotification: (id: string) => void;
   clearAllNotifications: () => void;
   markNotificationsRead: () => void;
@@ -461,12 +461,10 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
 
       setNotifications(prev => {
         const filtered = prev.filter(n => {
-          // Parse timestamp - handle both ISO string and number
           const notifTime = new Date(n.timestamp).getTime();
           return (now - notifTime) < oneDayMs;
-        });
+        }).slice(0, 500);
 
-        // Only update if count changed to prevent render loops
         return filtered.length !== prev.length ? filtered : prev;
       });
     };
@@ -477,17 +475,19 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
     return () => clearInterval(interval);
   }, []);
 
-  const addNotification = useCallback((type: 'alert' | 'success' | 'info', message: string) => {
+  const addNotification = useCallback((type: 'alert' | 'success' | 'info', message: string, userId?: string, isGlobal?: boolean) => {
     const newNotif: Notification = {
       id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       type,
       message,
       timestamp: new Date().toISOString(),
-      read: false
+      read: false,
+      userId: userId || user?.id,
+      isGlobal: isGlobal || false
     };
-    setNotifications(prev => [newNotif, ...prev]);
+    setNotifications(prev => [newNotif, ...prev].slice(0, 500));
     // NO AUTO REMOVAL - Persist for 24h
-  }, []);
+  }, [user]);
 
   const clearNotification = useCallback((id: string) => {
     setNotifications(prev => prev.filter(n => n.id !== id));

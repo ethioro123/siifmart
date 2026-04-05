@@ -34,24 +34,24 @@ export const ItemPreviewCard: React.FC<ItemPreviewCardProps> = ({
         const displayLabel = typeof value === 'boolean' ? '' : label;
 
         return (
-            <div className={`flex items-center gap-1.5 ${color ? `bg-${color}-500/10 border-${color}-500/30` : 'bg-white/5 border-white/5'} border rounded px-1.5 py-1 min-w-0`}>
-                {Icon && <Icon size={10} className={color ? `text-${color}-400` : 'text-gray-400'} />}
-                {displayLabel && <span className={`text-[9px] ${color ? `text-${color}-400` : 'text-gray-500'} uppercase tracking-tighter`}>{displayLabel}</span>}
-                <span className={`text-[10px] ${color ? `text-${color}-200` : 'text-gray-200'} font-medium leading-none truncate`}>{displayValue}</span>
+            <div className={`flex items-center gap-1.5 ${color ? `bg-${color}-500/10 border-${color}-500/30` : 'bg-gray-100 dark:bg-white/5 border-gray-200 dark:border-white/5'} border rounded px-1.5 py-1 min-w-0`}>
+                {Icon && <Icon size={10} className={color ? `text-${color}-600 dark:text-${color}-400` : 'text-gray-400 dark:text-gray-500'} />}
+                {displayLabel && <span className={`text-[9px] ${color ? `text-${color}-600 dark:text-${color}-400` : 'text-gray-500'} uppercase tracking-tighter font-bold`}>{displayLabel}</span>}
+                <span className={`text-[10px] ${color ? `text-${color}-900 dark:text-${color}-200` : 'text-gray-900 dark:text-gray-200'} font-black leading-none truncate`}>{displayValue}</span>
             </div>
         );
     };
 
     return (
-        <div className="bg-black/40 border border-white/10 rounded-lg p-3 h-auto flex flex-col gap-3">
+        <div className="bg-gray-50 dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-lg p-3 h-auto flex flex-col gap-3 shadow-sm dark:shadow-none">
             {/* Header */}
-            <div className="flex justify-between items-start gap-2 border-b border-white/5 pb-2">
+            <div className="flex justify-between items-start gap-2 border-b border-gray-100 dark:border-white/5 pb-2">
                 <div>
-                    <h3 className="text-sm font-bold text-white leading-tight">
-                        {brand && <span className="text-cyber-primary">{brand} </span>}
+                    <h3 className="text-sm font-black text-gray-900 dark:text-white leading-tight">
+                        {brand && <span className="text-blue-600 dark:text-cyber-primary">{brand} </span>}
                         {name || "Item Name"}
                     </h3>
-                    <p className="text-[10px] text-gray-500 mt-0.5 font-mono">
+                    <p className="text-[10px] text-gray-500 dark:text-gray-500 mt-0.5 font-mono font-bold uppercase">
                         {customAttributes?.identity?.variant ? `${customAttributes.identity.variant} • ` : ''}
                         {size ? `${size}${unit}` : "Size"} • {category || "Category"}
                         {customAttributes?.identity?.subcategory ? ` • ${customAttributes.identity.subcategory}` : ''}
@@ -59,7 +59,7 @@ export const ItemPreviewCard: React.FC<ItemPreviewCardProps> = ({
                 </div>
                 {(price > 0) && (
                     <div className="text-right whitespace-nowrap">
-                        <span className="text-xs font-bold text-emerald-400">{CURRENCY_SYMBOL}{price.toLocaleString()}</span>
+                        <span className="text-xs font-black text-emerald-600 dark:text-emerald-400">{CURRENCY_SYMBOL}{price.toLocaleString()}</span>
                     </div>
                 )}
             </div>
@@ -103,12 +103,12 @@ export const ItemPreviewCard: React.FC<ItemPreviewCardProps> = ({
             </div>
 
             {/* Generated Description Preview */}
-            <div className="bg-white/5 rounded px-2 py-2 mt-1 border border-white/5">
+            <div className="bg-white dark:bg-white/5 rounded px-2 py-2 mt-1 border border-gray-100 dark:border-white/5 shadow-inner">
                 <div className="flex items-center gap-1.5 mb-1.5">
-                    <Info size={12} className="text-cyber-primary" />
-                    <span className="text-[10px] text-cyber-primary uppercase font-bold tracking-wider">System Description</span>
+                    <Info size={12} className="text-blue-600 dark:text-cyber-primary" />
+                    <span className="text-[10px] text-blue-600 dark:text-cyber-primary uppercase font-black tracking-widest leading-none">System Description</span>
                 </div>
-                <p className="text-[11px] text-gray-300 font-mono leading-relaxed">
+                <p className="text-[11px] text-gray-900 dark:text-gray-300 font-mono leading-relaxed font-bold">
                     {[
                         brand,
                         name,

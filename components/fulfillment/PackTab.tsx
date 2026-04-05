@@ -529,7 +529,7 @@ export const PackTab: React.FC = () => {
                         <div className="px-4 pb-4">
                             <form onSubmit={handleGlobalScan} className="relative group">
                                 <div className={`absolute inset-0 rounded-2xl blur-xl transition-opacity duration-500 ${scanSuccess ? 'bg-green-500/20 opacity-100' : scanError ? 'bg-red-500/20 opacity-100' : 'bg-cyan-500/10 opacity-0 group-focus-within:opacity-100'}`} />
-                                <div className={`relative flex items-center gap-3 bg-black/60 border-2 rounded-2xl px-5 py-4 transition-all duration-300 ${scanSuccess ? 'border-green-500/50 bg-green-500/5' : scanError ? 'border-red-500/50 bg-red-500/5' : 'border-white/10 focus-within:border-cyan-500'}`}>
+                                <div className={`relative flex items-center gap-3 bg-gray-50 dark:bg-black/60 border-2 rounded-2xl px-5 py-4 transition-all duration-300 ${scanSuccess ? 'border-green-500/50 bg-green-500/5' : scanError ? 'border-red-500/50 bg-red-500/5' : 'border-gray-200 dark:border-white/10 focus-within:border-cyan-500 shadow-sm'}`}>
                                     {isScanning ? (
                                         <Loader2 size={22} className="text-cyan-400 animate-spin shrink-0" />
                                     ) : scanSuccess ? (
@@ -547,7 +547,7 @@ export const PackTab: React.FC = () => {
                                         onKeyDown={scanOnlyHandlers.onKeyDown}
                                         onPaste={scanOnlyHandlers.onPaste}
                                         disabled={isScanning}
-                                        className="flex-1 bg-transparent text-white text-lg font-mono tracking-wider outline-none placeholder-gray-600 disabled:opacity-50"
+                                        className="flex-1 bg-transparent text-gray-900 dark:text-white text-lg font-mono tracking-wider outline-none placeholder-gray-400 dark:placeholder-gray-600 disabled:opacity-50"
                                         placeholder="Scan barcode to start packing..."
                                         autoComplete="off"
                                     />

@@ -137,7 +137,7 @@ export const PickTab: React.FC = () => {
         return filteredJobs.filter(j => {
             if (j.type !== 'PICK') return false;
             if (j.status === 'Completed') return false;
-            if (j.assignedTo && j.assignedTo !== user?.name && !['admin', 'manager', 'super_admin'].includes(user?.role || '')) return false;
+            if (j.assignedTo && j.assignedTo !== user?.name && !['admin', 'warehouse_manager', 'super_admin'].includes(user?.role || '')) return false;
 
             if (pickSearch) {
                 const searchLower = pickSearch.toLowerCase();
@@ -263,6 +263,7 @@ export const PickTab: React.FC = () => {
                             resolveOrderRef={resolveOrderRef}
                             employees={employees}
                             products={products}
+                            sites={sites}
                             onReturn={(job) => setReturnJob(job)}
                         />
                     )}

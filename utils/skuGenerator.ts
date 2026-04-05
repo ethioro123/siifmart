@@ -5,7 +5,7 @@
  * Generates unique SKUs by checking the LIVE inventory list.
  * Eliminates risk of localStorage synchronization issues.
  * 
- * Format: [CATEGORY_PREFIX]-[SEQUENTIAL_NUMBER]
+ * Format: [CATEGORY_PREFIX][SEQUENTIAL_NUMBER] (e.g. GN019, BV003)
  */
 
 // Category to SKU prefix mapping
@@ -94,21 +94,21 @@ export function generateSKU(
         if (!p.sku) return;
         const normalized = p.sku.trim().toUpperCase();
 
-        // Check if SKU matches current prefix pattern (PREFIX-NUMBER)
-        if (normalized.startsWith(prefix + '-')) {
-            const parts = normalized.split('-');
-            // Ensure format is exactly PREFIX-NUMBER
-            if (parts.length === 2 && parts[0] === prefix) {
-                const num = parseInt(parts[1], 10);
-                if (!isNaN(num) && num > maxSequence) {
-                    maxSequence = num;
-                }
+        // Check if SKU matches current prefix pattern: PREFIX-NUMBER or PREFIXNUMBER
+        if (normalized.startsWith(prefix + '-') || normalized.startsWith(prefix)) {
+            // Strip prefix (with or without hyphen)
+            const numPart = normalized.startsWith(prefix + '-')
+                ? normalized.slice(prefix.length + 1)
+                : normalized.slice(prefix.length);
+            const num = parseInt(numPart, 10);
+            if (!isNaN(num) && num > maxSequence) {
+                maxSequence = num;
             }
         }
     });
 
-    // 4. Generate Next (Max + 1)
-    return `${prefix}-${padNumber(maxSequence + 1, 3)}`;
+    // 4. Generate Next (Max + 1) — no hyphen for scanner compatibility
+    return `${prefix}${padNumber(maxSequence + 1, 3)}`;
 }
 
 /**
@@ -120,8 +120,8 @@ export function isValidSKU(sku: string): boolean {
     const trimmed = sku.trim();
     if (trimmed === '') return false;
 
-    // Accept format: XX-XXX or XXX-XXXX (2-4 letter prefix, 3-5 digit number)
-    const skuPattern = /^[A-Z]{2,4}-\d{3,5}$/;
+    // Accept format: XX-XXX, XXXXX, XXX-XXXX, XXXXXXX (2-4 letter prefix, optional hyphen, 3-5 digit number)
+    const skuPattern = /^[A-Z]{2,4}-?\d{3,5}$/;
     return skuPattern.test(trimmed);
 }
 
@@ -139,7 +139,9 @@ export function registerExistingSKU(sku: string): void {
 export function extractCategoryFromSKU(sku: string): string | null {
     if (!isValidSKU(sku)) return null;
 
-    const prefix = sku.split('-')[0];
+    // Strip hyphen if present, then take first 2 chars as prefix
+    const cleaned = sku.replace(/-/g, '');
+    const prefix = cleaned.substring(0, 2);
 
     // Find matching category
     for (const [category, categoryPrefix] of Object.entries(CATEGORY_PREFIXES)) {
@@ -149,4 +151,34 @@ export function extractCategoryFromSKU(sku: string): string | null {
     }
 
     return null;
+}
+
+/**
+ * Async wrapper for generateSKU — drop-in replacement for sequentialSkuGenerator
+ * Uses the same logic but fetches products from supabase first
+ */
+export async function generateSequentialSKU(
+    category: string = 'General',
+    existingProducts?: Array<{ sku?: string }>
+): Promise<string> {
+    // If products already provided, use them directly
+    if (existingProducts && existingProducts.length > 0) {
+        return generateSKU(category, existingProducts);
+    }
+
+    // Otherwise fetch from supabase
+    try {
+        const { supabase } = await import('../lib/supabase');
+        const prefix = getCategoryPrefix(category);
+        const { data } = await supabase
+            .from('products')
+            .select('sku')
+            .or(`sku.ilike.${prefix}-%,sku.ilike.${prefix}0%,sku.ilike.${prefix}1%,sku.ilike.${prefix}2%,sku.ilike.${prefix}3%,sku.ilike.${prefix}4%,sku.ilike.${prefix}5%,sku.ilike.${prefix}6%,sku.ilike.${prefix}7%,sku.ilike.${prefix}8%,sku.ilike.${prefix}9%`)
+            .limit(100);
+
+        return generateSKU(category, (data || []) as Array<{ sku?: string }>);
+    } catch {
+        // Fallback: generate with empty list (starts at 001)
+        return generateSKU(category, []);
+    }
 }

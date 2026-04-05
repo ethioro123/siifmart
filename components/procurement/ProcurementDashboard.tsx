@@ -30,16 +30,16 @@ export const ProcurementDashboard: React.FC<ProcurementDashboardProps> = ({
 }) => {
 
     const KpiCard = ({ title, value, sub, icon: Icon, color }: any) => (
-        <div className="bg-black/60 backdrop-blur-2xl border border-white/5 rounded-2xl p-5 hover:border-white/10 transition-colors group">
+        <div className="bg-white dark:bg-black/60 backdrop-blur-2xl border border-gray-200 dark:border-white/5 rounded-2xl p-5 hover:border-blue-500/30 dark:hover:border-white/10 transition-colors group shadow-sm dark:shadow-none">
             <div className="flex justify-between items-start mb-4">
-                <div className={`p-3 rounded-xl bg-white/5 ${color} group-hover:scale-110 transition-transform`}>
+                <div className={`p-3 rounded-xl bg-gray-50 dark:bg-white/5 ${color} group-hover:scale-110 transition-transform`}>
                     <Icon size={24} />
                 </div>
                 {/* <div className="text-xs text-green-400 font-mono bg-green-500/10 px-2 py-1 rounded">+12.5%</div> */}
             </div>
-            <h3 className="text-gray-400 text-xs uppercase font-bold tracking-wider mb-1">{title}</h3>
-            <div className="text-2xl font-bold text-white tracking-tight mb-1">{value}</div>
-            <p className="text-xs text-gray-500">{sub}</p>
+            <h3 className="text-gray-500 dark:text-gray-400 text-xs uppercase font-bold tracking-wider mb-1">{title}</h3>
+            <div className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight mb-1">{value}</div>
+            <p className="text-xs text-gray-400 dark:text-gray-500">{sub}</p>
         </div>
     );
 
@@ -91,14 +91,14 @@ export const ProcurementDashboard: React.FC<ProcurementDashboardProps> = ({
     return (
         <div className="space-y-6 animate-in fade-in">
             {/* Date Analysis Filter */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-black/60 backdrop-blur-2xl p-4 rounded-xl border border-white/5 relative z-10">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-black/60 backdrop-blur-2xl p-4 rounded-xl border border-gray-200 dark:border-white/5 relative z-10 shadow-sm dark:shadow-none">
                 <div className="flex items-center gap-3">
-                    <div className="p-2 bg-cyber-primary/10 rounded-lg">
-                        <Calendar className="w-5 h-5 text-cyber-primary" />
+                    <div className="p-2 bg-blue-500/10 dark:bg-cyber-primary/10 rounded-lg">
+                        <Calendar className="w-5 h-5 text-blue-600 dark:text-cyber-primary" />
                     </div>
                     <div>
-                        <h3 className="text-white font-bold text-sm">Temporal Analysis</h3>
-                        <p className="text-gray-400 text-[10px]">{getDateRangeLabels()}</p>
+                        <h3 className="text-gray-900 dark:text-white font-bold text-sm">Temporal Analysis</h3>
+                        <p className="text-gray-500 dark:text-gray-400 text-[10px]">{getDateRangeLabels()}</p>
                     </div>
                 </div>
 
@@ -132,8 +132,8 @@ export const ProcurementDashboard: React.FC<ProcurementDashboardProps> = ({
 
             {/* Charts */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="bg-black/60 backdrop-blur-2xl border border-white/5 rounded-2xl p-6">
-                    <h3 className="font-bold text-white mb-6">Spend by Category</h3>
+                <div className="bg-white dark:bg-black/60 backdrop-blur-2xl border border-gray-200 dark:border-white/5 rounded-2xl p-6 shadow-sm dark:shadow-none">
+                    <h3 className="font-bold text-gray-900 dark:text-white mb-6">Spend by Category</h3>
                     <div className="h-[300px]">
                         <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                             <PieChart>
@@ -165,8 +165,8 @@ export const ProcurementDashboard: React.FC<ProcurementDashboardProps> = ({
                     </div>
                 </div>
 
-                <div className="bg-black/60 backdrop-blur-2xl border border-white/5 rounded-2xl p-6">
-                    <h3 className="font-bold text-white mb-6">Monthly Spend Trend</h3>
+                <div className="bg-white dark:bg-black/60 backdrop-blur-2xl border border-gray-200 dark:border-white/5 rounded-2xl p-6 shadow-sm dark:shadow-none">
+                    <h3 className="font-bold text-gray-900 dark:text-white mb-6">Monthly Spend Trend</h3>
                     <div className="h-[300px]">
                         <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                             <AreaChart data={metrics.trendData}>

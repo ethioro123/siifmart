@@ -149,9 +149,10 @@ export const generateUnifiedBatchLabelsHTML = async (
                 `;
             } else {
                 const bh = 32;
-                const bw = 1.7;
-                // Force native text off so we can control the SKU line completely
-                const barcode = generateBarcodeSVG(item.value, { format: 'CODE128', width: bw, height: bh, displayValue: false, margin: 0 });
+                const bw = 2.2;
+                // CODE128 — industry standard, compact and high-density
+                const barcodeValue = item.value.replace(/-/g, '');
+                const barcode = generateBarcodeSVG(barcodeValue, { format: 'CODE128', width: bw, height: bh, displayValue: false, margin: 4 });
                 contentHTML = `
                     <div class="lbl-inner">
                         ${nameBar}
@@ -173,8 +174,9 @@ export const generateUnifiedBatchLabelsHTML = async (
             const showBarcode = validFormat === 'Barcode' || validFormat === 'Both';
             const qr = showQR ? await generateQRCode({ data: qrData, size: 130 }) : '';
 
-            // Turn off native displayValue to guarantee clean rendering
-            const barcode = showBarcode ? generateBarcodeSVG(item.value, { format: 'CODE128', width: 1.8, height: 42, displayValue: false, margin: 0 }) : '';
+            // CODE128 — compact barcode, hyphens stripped for safety
+            const barcodeValue = item.value.replace(/-/g, '');
+            const barcode = showBarcode ? generateBarcodeSVG(barcodeValue, { format: 'CODE128', width: 2.2, height: 42, displayValue: false, margin: 4 }) : '';
 
             // Name header
             const nameBar = showName && item.label ? `<div class="name-bar">${item.label.toUpperCase()}</div>` : '';
@@ -233,8 +235,10 @@ export const generateUnifiedBatchLabelsHTML = async (
             const bh = isXL ? 65 : 52;
             const bw = isXL ? 2.6 : 2.0;
 
-            // Notice we set displayValue to false and control font size here but actually render it manually
-            const barcode = showBarcode ? generateBarcodeSVG(item.value, { format: 'CODE128', width: bw, height: bh, displayValue: false, margin: 0 }) : '';
+            // CODE128 — compact barcode, hyphens stripped for safety
+            const barcodeValue = item.value.replace(/-/g, '');
+            const safeBw = Math.max(bw, 2.2);
+            const barcode = showBarcode ? generateBarcodeSVG(barcodeValue, { format: 'CODE128', width: safeBw, height: bh, displayValue: false, margin: 6 }) : '';
 
             // Header band
             const nameBar = showName && item.label

@@ -210,9 +210,22 @@ async function getCroppedImg(
         return null;
     }
 
-    // set canvas size to match the bounding box
-    canvas.width = pixelCrop.width;
-    canvas.height = pixelCrop.height;
+    // Goal: Keep profile photos high quality but under 300KB.
+    // 512px is industry standard for high-res icons/avatars (LinkedIn/GitHub use similar).
+    const MAX_DIMENSION = 512;
+    
+    // Calculate the output dimensions (always 1:1 since the cropper aspect is 1)
+    // If the crop is smaller than 512px, keep original size.
+    // If larger, scale down to 512px.
+    const outputWidth = Math.min(pixelCrop.width, MAX_DIMENSION);
+    const outputHeight = Math.min(pixelCrop.height, MAX_DIMENSION);
+
+    canvas.width = outputWidth;
+    canvas.height = outputHeight;
+
+    // smooth image when scaling down
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
 
     // draw image on canvas
     ctx.drawImage(
@@ -223,9 +236,11 @@ async function getCroppedImg(
         pixelCrop.height,
         0,
         0,
-        pixelCrop.width,
-        pixelCrop.height
+        outputWidth,
+        outputHeight
     );
 
-    return canvas.toDataURL('image/jpeg');
+    // 0.8 quality is the "Sweet spot" - nearly perfect visuals but 5-10x smaller file size.
+    // At 512px, this will result in a photo around 50KB - 150KB.
+    return canvas.toDataURL('image/jpeg', 0.8);
 }

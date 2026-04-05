@@ -1,7 +1,8 @@
 import React from 'react';
-import { Upload, Truck, X, User as UserIcon, Printer, Package, Box, Plus, Clock, Navigation } from 'lucide-react';
+import { Upload, Truck, X, User as UserIcon, Printer, Package, Box, Plus, Clock, Navigation, Trash2 } from 'lucide-react';
 import { WMSJob, Site, User, Product } from '../../../types';
 import { DocksOutboundHistory } from './DocksOutboundHistory';
+import { useFulfillment } from '../FulfillmentContext';
 
 // ────────────────────────────────────────────────────────────────
 //  CONSTANTS — single source of truth for dock bay identifiers
@@ -83,6 +84,14 @@ export const DocksOutboundView: React.FC<DocksOutboundViewProps> = ({
 }) => {
     const stagingJobs = getStagingJobs(jobs);
     const shippedJobs = getShippedJobs(jobs);
+    const { deleteJob } = useFulfillment();
+
+    const handleDelete = async (e: React.MouseEvent, jobId: string) => {
+        e.stopPropagation();
+        if (window.confirm('Are you sure you want to permanently delete this job?')) {
+            await deleteJob(jobId);
+        }
+    };
 
     return (
         <div className="flex flex-col lg:flex-row gap-6 flex-1 min-h-0 overflow-y-auto lg:overflow-hidden custom-scrollbar pr-2">
@@ -90,10 +99,10 @@ export const DocksOutboundView: React.FC<DocksOutboundViewProps> = ({
                 <>
                     <div className="flex-1 flex flex-col gap-6 lg:overflow-y-auto custom-scrollbar pr-2">
                         {/* ─── DOCK BAYS ─── */}
-                        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-[2rem] p-6 lg:p-8 relative overflow-hidden group shadow-2xl shrink-0">
+                        <div className="bg-white dark:bg-white/5 backdrop-blur-xl border border-slate-200 dark:border-white/10 rounded-[2rem] p-6 lg:p-8 relative overflow-hidden group shadow-sm dark:shadow-2xl shrink-0">
                             <div className="absolute -top-24 -right-24 w-64 h-64 bg-purple-600/10 blur-[100px] rounded-full pointer-events-none" />
 
-                            <h3 className="text-xl font-black text-white tracking-tight uppercase flex items-center gap-3 mb-8">
+                            <h3 className="text-xl font-black text-slate-900 dark:text-white tracking-tight uppercase flex items-center gap-3 mb-8">
                                 <div className="p-2 bg-purple-600/20 rounded-xl">
                                     <Upload className="text-purple-400" size={20} />
                                 </div>
@@ -116,13 +125,13 @@ export const DocksOutboundView: React.FC<DocksOutboundViewProps> = ({
                                                     setIsDetailsOpen(true);
                                                 }
                                             }}
-                                            className={`relative flex flex-col rounded-[2.5rem] border-2 transition-all duration-500 overflow-hidden shadow-2xl group cursor-pointer ${!isOccupied ? 'border-dashed border-white/5 bg-black/20' : 'border-purple-500/30 bg-purple-500/5 hover:bg-purple-500/10'}`}
+                                            className={`relative flex flex-col rounded-[2.5rem] border-2 transition-all duration-500 overflow-hidden shadow-sm dark:shadow-2xl group cursor-pointer ${!isOccupied ? 'border-dashed border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-black/20' : 'border-purple-500/30 bg-purple-500/5 hover:bg-purple-500/10'}`}
                                         >
-                                            <span className="absolute top-4 left-5 font-black text-white/10 text-xl tracking-tighter z-0">{dock}</span>
+                                            <span className="absolute top-4 left-5 font-black text-slate-200 dark:text-white/10 text-xl tracking-tighter z-0">{dock}</span>
 
                                             {!isOccupied ? (
                                                 <div className="flex-1 flex flex-col items-center justify-center p-8 gap-4 opacity-40 group-hover:opacity-60 transition-opacity">
-                                                    <div className="w-16 h-16 rounded-3xl border-2 border-white/10 border-dashed flex items-center justify-center">
+                                                    <div className="w-16 h-16 rounded-3xl border-2 border-slate-200 dark:border-white/10 border-dashed flex items-center justify-center">
                                                         <Upload size={24} className="text-gray-600" />
                                                     </div>
                                                     <span className="text-[10px] font-black uppercase tracking-widest text-gray-500">{t('warehouse.docks.empty')}</span>
@@ -150,28 +159,45 @@ export const DocksOutboundView: React.FC<DocksOutboundViewProps> = ({
                                                                     addNotification('alert', 'Failed to release dock');
                                                                 }
                                                             }}
-                                                            className="p-1.5 hover:bg-white/10 rounded-lg text-gray-500 hover:text-white transition-colors"
+                                                            className="p-1.5 hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg text-slate-500 hover:text-slate-900 dark:text-gray-500 dark:hover:text-white transition-colors"
                                                             title="Return to Staging"
                                                         >
                                                             <X size={14} />
                                                         </button>
                                                     </div>
 
-                                                    <div className="mb-4">
-                                                        <p className="text-[10px] text-purple-400 font-black tracking-widest uppercase mb-1">{formatJobId(assignedJob)}</p>
-                                                        <p className="text-sm font-black text-white uppercase truncate">{destSite?.name || 'In-Transport'}</p>
+                                                    <div className="mb-4 flex justify-between items-start">
+                                                        <div>
+                                                            <p className="text-[10px] text-purple-400 font-black tracking-widest uppercase mb-1">{formatJobId(assignedJob)}</p>
+                                                            <p className="text-sm font-black text-slate-900 dark:text-white uppercase break-words leading-tight">
+                                                                {destSite ? (
+                                                                    <>
+                                                                        {destSite.name} <span className="text-zinc-500 dark:text-zinc-600 font-normal lowercase">({destSite.code || destSite.id})</span>
+                                                                    </>
+                                                                ) : 'In-Transport'}
+                                                            </p>
+                                                        </div>
+                                                        {['super_admin', 'warehouse_manager'].includes(user?.role as string) && (
+                                                            <button
+                                                                onClick={(e) => handleDelete(e, assignedJob.id)}
+                                                                className="w-6 h-6 rounded border bg-slate-100 dark:bg-white/5 border-slate-200 dark:border-white/10 text-red-500 hover:text-white hover:bg-red-500 hover:border-red-500 transition-all flex items-center justify-center shrink-0"
+                                                                title="Delete Job"
+                                                            >
+                                                                <Trash2 size={12} />
+                                                            </button>
+                                                        )}
                                                     </div>
 
                                                     <div className="grid grid-cols-2 gap-3 mb-6">
-                                                        <div className="bg-white/5 rounded-2xl p-2.5 border border-white/5">
+                                                        <div className="bg-slate-100 dark:bg-white/5 rounded-2xl p-2.5 border border-slate-200 dark:border-white/5">
                                                             <p className="text-[8px] text-gray-500 font-black uppercase tracking-wider mb-1">Payload</p>
-                                                            <p className="text-xs font-mono font-bold text-white">
+                                                            <p className="text-xs font-mono font-bold text-slate-900 dark:text-white">
                                                                 {(assignedJob.lineItems?.length || 0) > 0
                                                                     ? assignedJob.lineItems.length
                                                                     : (assignedJob.items || 0)} Units
                                                             </p>
                                                         </div>
-                                                        <div className="bg-white/5 rounded-2xl p-2.5 border border-white/5">
+                                                        <div className="bg-slate-100 dark:bg-white/5 rounded-2xl p-2.5 border border-slate-200 dark:border-white/5">
                                                             <p className="text-[8px] text-gray-500 font-black uppercase tracking-wider mb-1">Status</p>
                                                             <p className="text-[10px] font-black text-green-400 uppercase tracking-widest">DOCK LOADED</p>
                                                         </div>
@@ -179,7 +205,7 @@ export const DocksOutboundView: React.FC<DocksOutboundViewProps> = ({
 
                                                     <div className="mt-auto space-y-3" onClick={e => e.stopPropagation()}>
                                                         {/* Driver Assignment Type Toggle */}
-                                                        <div className="flex bg-black/40 p-1 rounded-lg border border-white/10">
+                                                        <div className="flex bg-slate-100 dark:bg-black/40 p-1 rounded-lg border border-slate-200 dark:border-white/10">
                                                             <button
                                                                 onClick={async () => {
                                                                     try {
@@ -193,7 +219,7 @@ export const DocksOutboundView: React.FC<DocksOutboundViewProps> = ({
                                                                         addNotification('alert', 'Toggle Failed');
                                                                     }
                                                                 }}
-                                                                className={`flex-1 py-1 text-[8px] font-bold rounded-md transition-all ${assignedJob.deliveryMethod !== 'External' ? 'bg-purple-500 text-white shadow-[0_0_10px_rgba(168,85,247,0.4)]' : 'text-gray-500 hover:text-gray-300'}`}
+                                                                className={`flex-1 py-1 text-[8px] font-bold rounded-md transition-all ${assignedJob.deliveryMethod !== 'External' ? 'bg-purple-500 text-white shadow-[0_0_10px_rgba(168,85,247,0.4)]' : 'text-slate-500 hover:text-slate-900 dark:text-gray-500 dark:hover:text-gray-300'}`}
                                                             >
                                                                 INTERNAL
                                                             </button>
@@ -210,7 +236,7 @@ export const DocksOutboundView: React.FC<DocksOutboundViewProps> = ({
                                                                         addNotification('alert', 'Toggle Failed');
                                                                     }
                                                                 }}
-                                                                className={`flex-1 py-1 text-[8px] font-bold rounded-md transition-all ${assignedJob.deliveryMethod === 'External' ? 'bg-purple-500 text-white shadow-[0_0_10px_rgba(168,85,247,0.4)]' : 'text-gray-500 hover:text-gray-300'}`}
+                                                                className={`flex-1 py-1 text-[8px] font-bold rounded-md transition-all ${assignedJob.deliveryMethod === 'External' ? 'bg-purple-500 text-white shadow-[0_0_10px_rgba(168,85,247,0.4)]' : 'text-slate-500 hover:text-slate-900 dark:text-gray-500 dark:hover:text-gray-300'}`}
                                                             >
                                                                 EXTERNAL
                                                             </button>
@@ -243,7 +269,7 @@ export const DocksOutboundView: React.FC<DocksOutboundViewProps> = ({
                                                                             addNotification('alert', 'Save Failed');
                                                                         }
                                                                     }}
-                                                                    className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-[10px] font-bold text-white outline-none focus:border-purple-500/50 transition-all"
+                                                                    className="w-full bg-slate-100 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-xl px-3 py-2 text-[10px] font-bold text-slate-900 dark:text-white outline-none focus:border-purple-500/50 transition-all"
                                                                 />
                                                             ) : (
                                                                 <select
@@ -262,7 +288,7 @@ export const DocksOutboundView: React.FC<DocksOutboundViewProps> = ({
                                                                             addNotification('alert', 'Assignment Failed');
                                                                         }
                                                                     }}
-                                                                    className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-[10px] font-bold text-white outline-none focus:border-purple-500/50 transition-all appearance-none cursor-pointer"
+                                                                    className="w-full bg-slate-100 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-xl px-3 py-2 text-[10px] font-bold text-slate-900 dark:text-white outline-none focus:border-purple-500/50 transition-all appearance-none cursor-pointer"
                                                                 >
                                                                     <option value="">Select Driver...</option>
                                                                     {employees
@@ -325,14 +351,14 @@ export const DocksOutboundView: React.FC<DocksOutboundViewProps> = ({
 
                             {/* ─── STAGING AREA ─── */}
                             <div className="relative z-10 shrink-0">
-                                <h4 className="text-sm font-black text-white uppercase tracking-widest flex items-center gap-2 mb-6">
+                                <h4 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-widest flex items-center gap-2 mb-6">
                                     <Package size={16} className="text-orange-500" />
                                     {t('warehouse.docks.stagingArea')}
-                                    <span className="text-[10px] text-gray-500 bg-white/5 px-2 py-0.5 rounded-full ml-auto">
+                                    <span className="text-[10px] text-slate-500 dark:text-gray-500 bg-slate-100 dark:bg-white/5 px-2 py-0.5 rounded-full ml-auto">
                                         {stagingJobs.length} READY
                                     </span>
                                 </h4>
-                                <div className="bg-black/30 rounded-[2rem] p-6 border border-white/5 shadow-inner">
+                                <div className="bg-slate-100/50 dark:bg-black/30 rounded-[2rem] p-6 border border-slate-200 dark:border-white/5 shadow-inner">
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-4 max-h-[300px] overflow-y-auto custom-scrollbar pr-2">
                                         {stagingJobs.length === 0 ? (
                                             <div className="col-span-full py-12 text-center">
@@ -349,7 +375,7 @@ export const DocksOutboundView: React.FC<DocksOutboundViewProps> = ({
                                                             setSelectedJob(job);
                                                             setIsDetailsOpen(true);
                                                         }}
-                                                        className="bg-white/5 p-4 rounded-2xl border border-white/5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 group hover:bg-white/10 hover:border-purple-500/30 transition-all cursor-pointer shadow-lg"
+                                                        className="bg-slate-50 dark:bg-white/5 p-4 rounded-2xl border border-slate-200 dark:border-white/5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 group hover:bg-slate-100 dark:hover:bg-white/10 hover:border-purple-500/30 transition-all cursor-pointer shadow-sm dark:shadow-lg"
                                                     >
                                                         <div className="flex items-center gap-4">
                                                             <div className="w-10 h-10 sm:w-12 sm:h-12 bg-purple-500/20 rounded-xl flex shrink-0 items-center justify-center text-purple-400 shadow-[0_0_10px_rgba(168,85,247,0.2)]">
@@ -357,10 +383,16 @@ export const DocksOutboundView: React.FC<DocksOutboundViewProps> = ({
                                                             </div>
                                                             <div className="min-w-0">
                                                                 <div className="flex items-center gap-2 flex-wrap">
-                                                                    <p className="text-[10px] sm:text-[11px] font-black text-white uppercase tracking-widest truncate">{formatJobId(job)}</p>
+                                                                    <p className="text-[10px] sm:text-[11px] font-black text-slate-900 dark:text-white uppercase tracking-widest truncate">{formatJobId(job)}</p>
                                                                     <span className="px-1.5 py-0.5 bg-purple-500/10 text-purple-400 text-[8px] font-black rounded border border-purple-500/20">READY</span>
                                                                 </div>
-                                                                <p className="text-[8px] sm:text-[9px] text-gray-500 font-bold uppercase mt-1 truncate">Dest: {destSite?.name || 'Unknown'}</p>
+                                                                <p className="text-[8px] sm:text-[9px] text-gray-500 font-bold uppercase mt-1 break-words leading-tight">
+                                                                    Dest: {destSite ? (
+                                                                        <>
+                                                                            {destSite.name} <span className="text-zinc-500 dark:text-zinc-600 font-normal lowercase">({destSite.code || destSite.id})</span>
+                                                                        </>
+                                                                    ) : 'Unknown'}
+                                                                </p>
                                                                 {job.deliveryMethod === 'External' ? (
                                                                     <div className="flex items-center gap-1 mt-1">
                                                                         <Truck size={10} className="text-purple-400" />
@@ -379,7 +411,18 @@ export const DocksOutboundView: React.FC<DocksOutboundViewProps> = ({
                                                             </div>
                                                         </div>
                                                         <div className="text-left sm:text-right shrink-0">
-                                                            <p className="text-[10px] text-gray-400 font-mono font-bold tracking-tighter">{job.items || job.lineItems?.length || 0} Units</p>
+                                                            <div className="flex items-center justify-end gap-2 mb-2">
+                                                                <p className="text-[10px] text-gray-400 font-mono font-bold tracking-tighter">{job.items || job.lineItems?.length || 0} Units</p>
+                                                                {['super_admin', 'warehouse_manager'].includes(user?.role as string) && (
+                                                                    <button
+                                                                        onClick={(e) => handleDelete(e, job.id)}
+                                                                        className="w-5 h-5 rounded border bg-slate-100 dark:bg-white/5 border-slate-200 dark:border-white/10 text-red-500 hover:text-white hover:bg-red-500 hover:border-red-500 transition-all flex items-center justify-center shrink-0"
+                                                                        title="Delete Job"
+                                                                    >
+                                                                        <Trash2 size={10} />
+                                                                    </button>
+                                                                )}
+                                                            </div>
                                                             <button
                                                                 onClick={async (e) => {
                                                                     e.stopPropagation();
@@ -416,11 +459,11 @@ export const DocksOutboundView: React.FC<DocksOutboundViewProps> = ({
                         </div>
 
                         {/* ─── OUTBOUND SCHEDULE (Shipped / In-Transit) ─── */}
-                        <div className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-[2rem] p-6 flex flex-col shadow-2xl relative overflow-hidden shrink-0 mt-2">
+                        <div className="w-full bg-white dark:bg-white/5 backdrop-blur-xl border border-slate-200 dark:border-white/10 rounded-[2rem] p-6 flex flex-col shadow-sm dark:shadow-2xl relative overflow-hidden shrink-0 mt-2">
                             <div className="absolute -top-32 -left-32 w-64 h-64 bg-cyan-600/10 blur-[100px] rounded-full pointer-events-none" />
                             
                             <div className="flex justify-between items-center mb-6 shrink-0 relative z-10">
-                                <h3 className="text-sm font-black text-white tracking-widest uppercase flex items-center gap-3">
+                                <h3 className="text-sm font-black text-slate-900 dark:text-white tracking-widest uppercase flex items-center gap-3">
                                     <div className="p-1.5 bg-cyan-500/20 rounded-lg">
                                         <Navigation className="text-cyan-400" size={16} />
                                     </div>
@@ -433,9 +476,9 @@ export const DocksOutboundView: React.FC<DocksOutboundViewProps> = ({
                             
                             <div className="flex gap-4 overflow-x-auto pb-4 custom-scrollbar relative z-10 snap-x">
                                 {shippedJobs.length === 0 ? (
-                                    <div className="w-full py-12 text-center bg-black/20 rounded-3xl border border-dashed border-white/5 opacity-60">
-                                        <Truck size={32} className="text-gray-700 mx-auto mb-3" />
-                                        <p className="text-xs text-gray-500 font-bold uppercase tracking-widest">No Active Shipments</p>
+                                    <div className="w-full py-12 text-center bg-slate-50 dark:bg-black/20 rounded-3xl border border-dashed border-slate-200 dark:border-white/5 opacity-60">
+                                        <Truck size={32} className="text-slate-300 dark:text-gray-700 mx-auto mb-3" />
+                                        <p className="text-xs text-slate-400 dark:text-gray-500 font-bold uppercase tracking-widest">No Active Shipments</p>
                                     </div>
                                 ) : (
                                     shippedJobs.map(job => {
@@ -444,7 +487,7 @@ export const DocksOutboundView: React.FC<DocksOutboundViewProps> = ({
                                         const isExternal = job.deliveryMethod === 'External';
                                         
                                         return (
-                                            <div key={job.id} className="min-w-[320px] max-w-[360px] p-5 bg-gradient-to-br from-black/60 to-black/40 backdrop-blur-md rounded-3xl border border-white/10 relative overflow-hidden group hover:border-cyan-500/40 transition-all duration-300 flex flex-col justify-between shadow-xl snap-start hover:shadow-[0_0_20px_rgba(6,182,212,0.15)] hover:-translate-y-1">
+                                            <div key={job.id} className="min-w-[320px] max-w-[360px] p-5 bg-gradient-to-br from-slate-50 to-white dark:from-black/60 dark:to-black/40 backdrop-blur-md rounded-3xl border border-slate-200 dark:border-white/10 relative overflow-hidden group hover:border-cyan-500/40 transition-all duration-300 flex flex-col justify-between shadow-sm dark:shadow-xl snap-start hover:shadow-[0_0_20px_rgba(6,182,212,0.15)] hover:-translate-y-1">
                                                 {/* Card Glow Effect */}
                                                 <div className="absolute -top-10 -right-10 w-32 h-32 bg-cyan-500/10 blur-[40px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                                                 
@@ -452,7 +495,7 @@ export const DocksOutboundView: React.FC<DocksOutboundViewProps> = ({
                                                     {/* Header: Status & Time */}
                                                     <div className="flex justify-between items-start mb-4 gap-2">
                                                         <div className="flex flex-col gap-1">
-                                                            <span className="text-[11px] font-black text-white uppercase tracking-wider">
+                                                            <span className="text-[11px] font-black text-slate-900 dark:text-white uppercase tracking-wider">
                                                                 {job.transferStatus?.toUpperCase()}
                                                             </span>
                                                             <span className="text-[9px] text-cyan-400 font-bold uppercase tracking-widest flex items-center gap-1">
@@ -460,26 +503,41 @@ export const DocksOutboundView: React.FC<DocksOutboundViewProps> = ({
                                                                 {job.shippedAt ? new Date(job.shippedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'PENDING'}
                                                             </span>
                                                         </div>
-                                                        <span className="text-[9px] bg-white/5 text-gray-400 px-2 py-0.5 rounded border border-white/10 font-mono tracking-wider">
-                                                            #{formatJobId(job)}
-                                                        </span>
+                                                        <div className="flex gap-2 items-center">
+                                                            <span className="text-[9px] bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-gray-400 px-2 py-0.5 rounded border border-slate-200 dark:border-white/10 font-mono tracking-wider">
+                                                                #{formatJobId(job)}
+                                                            </span>
+                                                            {['super_admin', 'warehouse_manager'].includes(user?.role as string) && (
+                                                                <button
+                                                                    onClick={(e) => handleDelete(e, job.id)}
+                                                                    className="w-6 h-6 rounded border bg-slate-100 dark:bg-white/5 border-slate-200 dark:border-white/10 text-red-500 hover:text-white hover:bg-red-500 hover:border-red-500 transition-all flex items-center justify-center shrink-0"
+                                                                    title="Delete Job"
+                                                                >
+                                                                    <Trash2 size={12} />
+                                                                </button>
+                                                            )}
+                                                        </div>
                                                     </div>
                                                     
                                                     {/* Body: Destination & Driver */}
-                                                    <div className="mb-5 bg-black/30 rounded-2xl p-3 border border-white/5">
+                                                    <div className="mb-5 bg-slate-100/50 dark:bg-black/30 rounded-2xl p-3 border border-slate-200 dark:border-white/5">
                                                         <div className="flex items-center gap-3 mb-2">
                                                             <div className="w-8 h-8 rounded-lg bg-indigo-500/20 flex items-center justify-center border border-indigo-500/20 shrink-0">
                                                                 <Box size={14} className="text-indigo-400" />
                                                             </div>
                                                             <div className="min-w-0">
                                                                 <p className="text-[9px] text-gray-500 font-black uppercase tracking-widest mb-0.5">Destination</p>
-                                                                <p className="text-xs font-black text-white uppercase tracking-wider truncate">
-                                                                    {destSite?.name || 'External Hub'}
+                                                                <p className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider break-words leading-tight">
+                                                                    {destSite ? (
+                                                                        <>
+                                                                            {destSite.name} <span className="text-zinc-500 dark:text-zinc-600 font-normal lowercase">({destSite.code || destSite.id})</span>
+                                                                        </>
+                                                                    ) : 'External Hub'}
                                                                 </p>
                                                             </div>
                                                         </div>
                                                         
-                                                        <div className="h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent my-2" />
+                                                        <div className="h-px w-full bg-gradient-to-r from-transparent via-slate-200 dark:via-white/10 to-transparent my-2" />
                                                         
                                                         <div className="flex items-center gap-3">
                                                             <div className={`w-8 h-8 rounded-lg ${isExternal ? 'bg-orange-500/20 border-orange-500/20' : 'bg-blue-500/20 border-blue-500/20'} flex items-center justify-center border shrink-0`}>
@@ -492,7 +550,7 @@ export const DocksOutboundView: React.FC<DocksOutboundViewProps> = ({
                                                                         {isExternal ? 'EXTERNAL' : 'INTERNAL'}
                                                                     </span>
                                                                 </div>
-                                                                <p className="text-xs font-bold text-gray-300 truncate">
+                                                                <p className="text-xs font-bold text-slate-500 dark:text-gray-300 truncate">
                                                                     {isExternal ? (job.externalCarrierName || 'Unlabeled Carrier') : (driver?.name || 'Unassigned')}
                                                                 </p>
                                                             </div>

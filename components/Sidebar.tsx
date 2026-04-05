@@ -53,34 +53,35 @@ export default function Sidebar() {
   // Map each nav item to its required permission section
   const getNavItems = (userRole: UserRole) => {
     const allItems = [
+      // WMS DASHBOARD - Overview (Managers Only)
+      { to: "/wms-dashboard", icon: LayoutDashboard, label: "WMS Dashboard", section: "warehouse", roles: ['super_admin', 'warehouse_manager', 'dispatcher', 'inventory_specialist'] },
+
+      // NETWORK INVENTORY - All users can view (Except low-level ops)
+      { to: "/network-inventory", icon: Globe, label: "Network View", section: "inventory", roles: ['super_admin', 'warehouse_manager', 'dispatcher', 'dispatch_manager', 'pos', 'hr', 'auditor', 'finance_manager', 'procurement_manager', 'store_supervisor', 'inventory_specialist', 'cs_manager', 'it_support'] },
+
+      // INVENTORY
+      { to: "/inventory", icon: Package, label: "Inventory", section: "inventory", roles: ['super_admin', 'store_manager', 'assistant_manager', 'shift_lead', 'warehouse_manager', 'dispatcher', 'dispatch_manager', 'auditor', 'procurement_manager', 'inventory_specialist', 'store_supervisor', 'pos'] },
+
+      // FULFILLMENT (WMS) - Warehouse staff only
+      { to: "/wms-ops", icon: ClipboardList, label: "Fulfillment", section: "warehouse", roles: ['warehouse_manager', 'dispatch_manager', 'dispatcher', 'picker', 'driver', 'inventory_specialist'] },
+
+      // PROCUREMENT - Warehouse and procurement only
+      { to: "/procurement", icon: Truck, label: "Procurement", section: "procurement", roles: ['super_admin', 'warehouse_manager', 'dispatcher', 'procurement_manager', 'finance_manager'] },
+
+      // ROADMAP
+      { to: "/roadmap", icon: Map, label: "Roadmap", section: "dashboard", roles: ['super_admin', 'admin', 'store_manager', 'assistant_manager', 'shift_lead', 'warehouse_manager', 'dispatcher', 'dispatch_manager', 'pos', 'hr', 'auditor', 'finance_manager', 'procurement_manager', 'store_supervisor', 'inventory_specialist', 'cs_manager', 'it_support'] },
+
       // CENTRAL OPERATIONS - CEO Only
       { to: "/admin", icon: Activity, label: "Central Operations", section: "dashboard", roles: ['super_admin'] },
 
       // POS
-      { to: "/pos", icon: ShoppingCart, label: "POS Terminal", section: "pos", roles: ['manager', 'pos', 'store_supervisor'] },
+      { to: "/pos", icon: ShoppingCart, label: "POS Terminal", section: "pos", roles: ['store_manager', 'assistant_manager', 'shift_lead', 'pos', 'store_supervisor'] },
 
       // POS COMMAND CENTER - Store management
-      { to: "/pos-dashboard", icon: Eye, label: "POS Command", section: "pos", roles: ['manager', 'pos', 'store_supervisor'] },
+      { to: "/pos-dashboard", icon: Eye, label: "POS Command", section: "pos", roles: ['store_manager', 'assistant_manager', 'shift_lead', 'pos', 'store_supervisor'] },
 
       // SALES
-      { to: "/sales", icon: FileText, label: "Sales History", section: "sales", roles: ['super_admin', 'manager', 'pos', 'auditor', 'finance_manager', 'cs_manager', 'store_supervisor'] },
-
-      // INVENTORY
-      { to: "/inventory", icon: Package, label: "Inventory", section: "inventory", roles: ['super_admin', 'manager', 'warehouse_manager', 'dispatcher', 'auditor', 'procurement_manager', 'inventory_specialist', 'store_supervisor', 'pos'] },
-
-      // NETWORK INVENTORY - All users can view (Except low-level ops)
-      { to: "/network-inventory", icon: Globe, label: "Network View", section: "inventory", roles: ['super_admin', 'manager', 'warehouse_manager', 'dispatcher', 'pos', 'hr', 'auditor', 'finance_manager', 'procurement_manager', 'store_supervisor', 'inventory_specialist', 'cs_manager', 'it_support'] },
-
-      // WMS DASHBOARD - Overview (Managers Only)
-      { to: "/wms-dashboard", icon: LayoutDashboard, label: "WMS Dashboard", section: "warehouse", roles: ['super_admin', 'warehouse_manager', 'dispatcher', 'inventory_specialist'] },
-
-      // FULFILLMENT (WMS) - Warehouse staff only
-      { to: "/wms-ops", icon: ClipboardList, label: "Fulfillment", section: "warehouse", roles: ['warehouse_manager', 'dispatcher', 'picker', 'driver', 'inventory_specialist'] },
-
-      // PICKING CONTROL - Admins and Warehouse Managers
-
-      // PROCUREMENT - Warehouse and procurement only
-      { to: "/procurement", icon: Truck, label: "Procurement", section: "procurement", roles: ['super_admin', 'warehouse_manager', 'dispatcher', 'procurement_manager', 'finance_manager'] },
+      { to: "/sales", icon: FileText, label: "Sales History", section: "sales", roles: ['super_admin', 'store_manager', 'assistant_manager', 'shift_lead', 'pos', 'auditor', 'finance_manager', 'cs_manager', 'store_supervisor'] },
 
       // MERCHANDISING
       { to: "/pricing", icon: Tags, label: "Merchandising", section: "pricing", roles: ['super_admin', 'finance_manager', 'procurement_manager'] },
@@ -89,13 +90,10 @@ export default function Sidebar() {
       { to: "/finance", icon: DollarSign, label: "Financials", section: "finance", roles: ['super_admin', 'auditor', 'finance_manager'] },
 
       // CUSTOMERS
-      { to: "/customers", icon: Users, label: "Customers", section: "customers", roles: ['super_admin', 'manager', 'pos', 'cs_manager', 'store_supervisor'] },
+      { to: "/customers", icon: Users, label: "Customers", section: "customers", roles: ['super_admin', 'store_manager', 'assistant_manager', 'shift_lead', 'pos', 'cs_manager', 'store_supervisor'] },
 
       // EMPLOYEES
-      { to: "/employees", icon: Briefcase, label: "Employees", section: "employees", roles: ['super_admin', 'admin', 'hr', 'manager', 'store_supervisor'] },
-
-      // ROADMAP
-      { to: "/roadmap", icon: Map, label: "Roadmap", section: "dashboard", roles: ['super_admin', 'admin', 'manager', 'warehouse_manager', 'dispatcher', 'pos', 'hr', 'auditor', 'finance_manager', 'procurement_manager', 'store_supervisor', 'inventory_specialist', 'cs_manager', 'it_support'] },
+      { to: "/employees", icon: Briefcase, label: "Employees", section: "employees", roles: ['super_admin', 'admin', 'hr', 'store_manager', 'assistant_manager', 'shift_lead', 'store_supervisor'] },
 
       // SETTINGS
       { to: "/settings", icon: Settings, label: "Settings", section: "settings", roles: ['super_admin', 'admin', 'hr', 'it_support'] },
@@ -106,7 +104,7 @@ export default function Sidebar() {
     let effectiveRole = userRole;
     if (userRole === 'super_admin' && activeSite) {
       if (['Store', 'Dark Store'].includes(activeSite.type)) {
-        effectiveRole = 'manager';
+        effectiveRole = 'store_manager';
       } else if (['Warehouse', 'Distribution Center'].includes(activeSite.type)) {
         effectiveRole = 'warehouse_manager';
       }
@@ -159,12 +157,12 @@ export default function Sidebar() {
     <>
       {/* Mobile Overlay - Only visible on small screens to prevent "dark thing" effect on desktop */}
       <div
-        className={`fixed inset-0 bg-black/40 lg:bg-black/20 z-40 backdrop-blur-sm lg:backdrop-blur-none transition-opacity duration-500 ${isSidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+        className={`fixed inset-0 bg-black/40 lg:bg-black/20 z-[1000] backdrop-blur-sm lg:backdrop-blur-none transition-opacity duration-500 ${isSidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
         onClick={toggleSidebar}
       />
 
       <aside className={`
-        fixed inset-y-0 left-0 z-50
+        fixed inset-y-0 left-0 z-[1001]
         w-72 bg-cyber-dark border-r border-white/5
         transform transition-transform duration-300 ease-in-out
         flex flex-col

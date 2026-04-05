@@ -1,6 +1,6 @@
 import React from 'react';
 import { DollarSign } from 'lucide-react';
-import Modal from '../../ui/Modal';
+import Modal from '../../Modal';
 import { CURRENCY_SYMBOL } from '../../../constants';
 
 interface AdjustSalaryModalProps {

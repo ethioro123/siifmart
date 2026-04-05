@@ -223,6 +223,7 @@ export const PackScanner: React.FC<PackScannerProps> = ({
                 setQtyVal('');
                 setInputVal('');
                 setStep('SCAN');
+                scanOnlyHandlers.reset(); // Clear stale timing so next scan starts fresh
             }, 1500);
         } catch (err: any) {
             playBeep('error');
@@ -232,6 +233,7 @@ export const PackScanner: React.FC<PackScannerProps> = ({
                 setShowError(false);
                 setStep('SCAN');
                 setMatchedIndex(null);
+                scanOnlyHandlers.reset(); // Clear stale timing so next scan starts fresh
             }, 2500);
         } finally {
             setIsSubmitting(false);
@@ -242,11 +244,11 @@ export const PackScanner: React.FC<PackScannerProps> = ({
     const matchedProduct = matchedItem ? getProduct(matchedItem) : null;
 
     return (
-        <div className="fixed inset-0 z-[200] bg-black flex flex-col">
+        <div className="fixed inset-0 z-[200] bg-white dark:bg-black flex flex-col transition-colors duration-500">
             {/* Top Bar */}
-            <div className="p-4 bg-gray-900 border-b border-white/10 flex justify-between items-center text-white">
+            <div className="p-4 bg-gray-50 dark:bg-gray-900 border-b border-gray-100 dark:border-white/10 flex justify-between items-center text-gray-900 dark:text-white">
                 <div className="flex items-center gap-3">
-                    <button onClick={onClose} className="p-2 -ml-2 text-gray-400 hover:text-white" aria-label="Close Scanner">
+                    <button onClick={onClose} className="p-2 -ml-2 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white" aria-label="Close Scanner">
                         <X size={24} />
                     </button>
                     <div>
@@ -257,7 +259,7 @@ export const PackScanner: React.FC<PackScannerProps> = ({
                     </div>
                 </div>
                 <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold bg-white/10 px-2 py-1 rounded text-gray-300">
+                    <span className="text-xs font-bold bg-gray-200 dark:bg-white/10 px-2 py-1 rounded text-gray-700 dark:text-gray-300">
                         {packedItems.length}/{totalItems}
                     </span>
                     <button
@@ -267,7 +269,7 @@ export const PackScanner: React.FC<PackScannerProps> = ({
                         }}
                         title="Toggle Fullscreen"
                         aria-label="Toggle Fullscreen"
-                        className="p-2 bg-white/5 hover:bg-white/10 rounded-xl text-gray-400 hover:text-white transition-colors"
+                        className="p-2 bg-gray-200 dark:bg-white/5 hover:bg-gray-300 dark:hover:bg-white/10 rounded-xl text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
                     >
                         <Maximize2 size={20} />
                     </button>
@@ -308,7 +310,7 @@ export const PackScanner: React.FC<PackScannerProps> = ({
                     </div>
 
                     {/* Instruction / Status */}
-                    <h1 className={`text-4xl md:text-5xl font-black text-white text-center uppercase italic tracking-tight mb-2 z-10 transition-all duration-300 ${showError ? 'text-red-500 animate-pulse' : ''
+                    <h1 className={`text-4xl md:text-5xl font-black text-gray-900 dark:text-white text-center uppercase italic tracking-tight mb-2 z-10 transition-all duration-300 ${showError ? 'text-red-500 animate-pulse' : ''
                         }`}>
                         {showSuccess ? 'Packed!' : showError ? 'Error!' : isFullyPacked ? 'All Packed' : step === 'CONFIRM_QTY' ? 'Confirm Qty' : 'Scan Item'}
                     </h1>
@@ -324,17 +326,17 @@ export const PackScanner: React.FC<PackScannerProps> = ({
                     ) : isFullyPacked ? (
                         /* COMPLETION VIEW */
                         <div className="text-center z-10 mb-8 bg-green-500/10 border-2 border-green-500/50 p-6 rounded-2xl shadow-[0_0_30px_rgba(34,197,94,0.1)] w-full max-w-md">
-                            <p className="text-green-400 text-lg font-bold uppercase tracking-widest mb-4">All Items Verified!</p>
-                            <div className="bg-black/40 rounded-xl p-4 mb-4 text-left max-h-48 overflow-y-auto border border-green-500/20">
-                                <h4 className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-3 border-b border-white/10 pb-2">Pack Summary</h4>
+                            <p className="text-green-600 dark:text-green-400 text-lg font-bold uppercase tracking-widest mb-4">All Items Verified!</p>
+                            <div className="bg-white dark:bg-black/40 rounded-xl p-4 mb-4 text-left max-h-48 overflow-y-auto border border-green-500/20 shadow-inner">
+                                <h4 className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-3 border-b border-gray-100 dark:border-white/10 pb-2">Pack Summary</h4>
                                 <div className="flex flex-col gap-3">
                                     {job.lineItems?.map((item: any, idx: number) => (
                                         <div key={idx} className="flex justify-between items-start">
                                             <div>
-                                                <p className="text-white text-sm font-bold line-clamp-1">{item.name}</p>
-                                                <p className="text-cyan-400 text-xs font-mono">{item.sku}</p>
+                                                <p className="text-gray-900 dark:text-white text-sm font-bold line-clamp-1">{item.name}</p>
+                                                <p className="text-cyan-600 dark:text-cyan-400 text-xs font-mono">{item.sku}</p>
                                             </div>
-                                            <div className="bg-green-500/20 text-green-400 px-2 py-1 rounded text-sm font-black font-mono whitespace-nowrap ml-4">
+                                            <div className="bg-green-500/20 text-green-600 dark:text-green-400 px-2 py-1 rounded text-sm font-black font-mono whitespace-nowrap ml-4 border border-green-500/10">
                                                 {(() => {
                                                     let expected = item.expectedQty || 1;
                                                     let picked = item.pickedQty || 0;
@@ -352,26 +354,27 @@ export const PackScanner: React.FC<PackScannerProps> = ({
                                     ))}
                                 </div>
                             </div>
-                            <p className="text-white text-sm opacity-80 max-w-[200px] mx-auto">Tap below to complete packing and seal this shipment.</p>
+                            <p className="text-gray-600 dark:text-white text-sm opacity-80 max-w-[200px] mx-auto">Tap below to complete packing and seal this shipment.</p>
                         </div>
                     ) : step === 'CONFIRM_QTY' && matchedItem ? (
                         /* CONFIRM QUANTITY VIEW */
                         <div className="text-center z-10 mb-8">
                             <div className="flex items-center justify-center gap-4 mb-4">
-                                <div className="w-20 h-20 rounded-xl bg-black/30 border border-white/10 flex items-center justify-center overflow-hidden">
+                                <div className="w-20 h-20 rounded-xl bg-gray-100 dark:bg-black/30 border border-gray-200 dark:border-white/10 flex items-center justify-center overflow-hidden shadow-inner">
                                     {matchedProduct?.image ? (
                                         <img src={matchedProduct.image} alt="" className="w-full h-full object-cover" />
                                     ) : (
-                                        <Package size={32} className="text-gray-600" />
+                                        <Package size={32} className="text-gray-400 dark:text-gray-600" />
                                     )}
                                 </div>
                             </div>
-                            <p className="text-white text-2xl font-bold mt-1">{matchedItem.name}</p>
-                            <p className="text-cyan-400 font-mono text-xl mt-1">{matchedItem.sku}</p>
+                            <p className="text-gray-900 dark:text-white text-2xl font-bold mt-1">{matchedItem.name}</p>
+                            <p className="text-cyan-600 dark:text-cyan-400 font-mono text-xl mt-1">{matchedItem.sku}</p>
                             <div className="mt-4 flex items-center justify-center gap-6">
                                 <div className="text-center">
                                     <span className="text-[10px] text-gray-500 font-black uppercase tracking-widest block">Expected</span>
-                                    <span className="text-3xl font-mono font-black text-white">
+                                    <span className="text-3xl font-mono font-black text-gray-900 dark:text-white"> drug</span>
+                                    <span className="text-3xl font-mono font-black text-gray-900 dark:text-white">
                                         {(() => {
                                             if ((matchedItem as any)?.requestedMeasureQty) {
                                                 const unitDef = matchedProduct?.unit || '';
@@ -384,7 +387,7 @@ export const PackScanner: React.FC<PackScannerProps> = ({
                                 <div className="text-gray-600 text-2xl">→</div>
                                 <div className="text-center">
                                     <span className="text-[10px] text-gray-500 font-black uppercase tracking-widest block">Packed</span>
-                                    <span className="text-3xl font-mono font-black text-cyan-400">
+                                    <span className="text-3xl font-mono font-black text-cyan-600 dark:text-cyan-400">
                                         {(() => {
                                             const expected = matchedItem.expectedQty || 1;
                                             const picked = matchedItem.pickedQty || 0;
@@ -414,12 +417,12 @@ export const PackScanner: React.FC<PackScannerProps> = ({
                             <p className="text-gray-400 text-lg">Scan product barcode to verify:</p>
                             {nextUnpackedItem && (
                                 <>
-                                    <p className="text-white text-2xl font-bold mt-2">{nextUnpackedItem.name}</p>
-                                    <p className="text-cyan-400 font-mono text-xl mt-1">{nextUnpackedItem.sku}</p>
-                                    <p className="text-gray-500 text-xs mt-1">Qty: {(() => {
+                                    <p className="text-gray-900 dark:text-white text-2xl font-bold mt-2">{nextUnpackedItem.name}</p>
+                                    <p className="text-cyan-600 dark:text-cyan-400 font-mono text-xl mt-1">{nextUnpackedItem.sku}</p>
+                                    <p className="text-gray-400 dark:text-gray-500 text-xs mt-1">Qty: {(() => {
                                         if ((nextUnpackedItem as any)?.requestedMeasureQty) {
                                             const unitDef = getProduct(nextUnpackedItem)?.unit || '';
-                                            return <>{(nextUnpackedItem as any).requestedMeasureQty} <span className="text-[10px] uppercase text-gray-500">{unitDef}</span></>;
+                                            return <>{(nextUnpackedItem as any).requestedMeasureQty} <span className="text-[10px] uppercase text-gray-400 dark:text-gray-500">{unitDef}</span></>;
                                         }
                                         return nextUnpackedItem.expectedQty || 1;
                                     })()}</p>
@@ -440,7 +443,7 @@ export const PackScanner: React.FC<PackScannerProps> = ({
                                         type="number"
                                         value={qtyVal}
                                         onChange={(e) => setQtyVal(e.target.value)}
-                                        className="w-full bg-gray-900/90 border-2 rounded-2xl py-6 px-4 text-center text-5xl font-mono text-white placeholder:text-gray-700 focus:outline-none relative z-10 shadow-xl transition-all border-teal-500 focus:border-teal-300"
+                                        className="w-full bg-gray-50 dark:bg-gray-900/90 border-2 rounded-2xl py-6 px-4 text-center text-5xl font-mono text-gray-900 dark:text-white placeholder:text-gray-300 dark:placeholder:text-gray-700 focus:outline-none relative z-10 shadow-xl transition-all border-teal-500 focus:border-teal-400"
                                         placeholder="QTY"
                                         autoFocus
                                         onFocus={(e) => e.target.select()}
@@ -453,7 +456,7 @@ export const PackScanner: React.FC<PackScannerProps> = ({
                                         onChange={(e) => setInputVal(e.target.value)}
                                         onKeyDown={scanOnlyHandlers.onKeyDown}
                                         onPaste={scanOnlyHandlers.onPaste}
-                                        className="w-full bg-gray-900/90 border-2 rounded-2xl py-6 px-4 text-center text-3xl font-mono text-white placeholder:text-gray-700 focus:outline-none relative z-10 shadow-xl transition-all border-white/10 focus:border-white/30"
+                                        className="w-full bg-gray-50 dark:bg-gray-900/90 border-2 rounded-2xl py-6 px-4 text-center text-3xl font-mono text-gray-900 dark:text-white placeholder:text-gray-300 dark:placeholder:text-gray-700 focus:outline-none relative z-10 shadow-xl transition-all border-gray-200 dark:border-white/10 focus:border-cyan-500 dark:focus:border-white/30"
                                         placeholder="SCAN BARCODE"
                                         autoFocus
                                         disabled={isProcessing}
@@ -478,7 +481,7 @@ export const PackScanner: React.FC<PackScannerProps> = ({
 
                         {isProcessing && (
                             <div className="absolute right-4 top-1/2 -translate-y-1/2 z-30">
-                                <RotateCcw className="animate-spin text-white opacity-50" size={24} />
+                                <RotateCcw className="animate-spin text-gray-900 dark:text-white opacity-50" size={24} />
                             </div>
                         )}
 
@@ -488,14 +491,14 @@ export const PackScanner: React.FC<PackScannerProps> = ({
                             onClick={isFullyPacked ? onCompleteJob : undefined}
                             disabled={(!isFullyPacked && step === 'SCAN' && !inputVal.trim()) || isProcessing || isSubmitting}
                             className={`mt-6 w-full py-6 rounded-2xl flex items-center justify-center gap-3 transition-all duration-500 active:scale-95 shadow-2xl border-2 relative z-30 ${isProcessing || isSubmitting
-                                ? 'bg-zinc-800/50 border-white/5 text-zinc-600 opacity-50 cursor-not-allowed'
+                                ? 'bg-gray-100 dark:bg-zinc-800/50 border-gray-200 dark:border-white/5 text-gray-400 dark:text-zinc-600 opacity-50 cursor-not-allowed'
                                 : isFullyPacked
                                     ? 'bg-gradient-to-r from-green-500 to-emerald-600 border-green-400 text-white font-black uppercase tracking-widest shadow-[0_0_40px_rgba(34,197,94,0.4)] scale-105'
                                     : step === 'CONFIRM_QTY'
                                         ? 'bg-teal-600 border-teal-400 text-white font-black uppercase tracking-widest shadow-[0_0_40px_rgba(20,184,166,0.3)]'
                                         : !inputVal.trim()
-                                            ? 'bg-zinc-800/50 border-white/5 text-zinc-600 grayscale opacity-50 cursor-not-allowed'
-                                            : 'bg-gradient-to-r from-cyan-600 to-teal-600 border-white/20 text-white font-black uppercase tracking-widest shadow-cyan-500/20'
+                                            ? 'bg-gray-200 dark:bg-zinc-800/50 border-gray-100 dark:border-white/5 text-gray-400 dark:text-zinc-600 grayscale opacity-50 cursor-not-allowed'
+                                            : 'bg-gradient-to-r from-cyan-600 to-teal-600 border-gray-200 dark:border-white/20 text-white font-black uppercase tracking-widest shadow-cyan-500/20'
                                 }`}
                         >
                             {isProcessing || isSubmitting ? (
@@ -521,18 +524,18 @@ export const PackScanner: React.FC<PackScannerProps> = ({
                                     <CheckCircle size={10} className="text-green-500" />
                                     Packed So Far
                                 </h4>
-                                <span className="text-[10px] font-mono font-black text-green-500/60 bg-green-500/10 px-2 py-0.5 rounded-full border border-green-500/20">
+                                <span className="text-[10px] font-mono font-black text-green-600 dark:text-green-500/60 bg-green-500/10 px-2 py-0.5 rounded-full border border-green-500/20">
                                     {packedItems.length}/{totalItems}
                                 </span>
                             </div>
-                            <div className="bg-white/[0.03] border border-white/10 rounded-2xl overflow-hidden divide-y divide-white/5">
+                            <div className="bg-gray-50 dark:bg-white/[0.03] border border-gray-100 dark:border-white/10 rounded-2xl overflow-hidden divide-y divide-gray-100 dark:divide-white/5 shadow-inner">
                                 {packedItems.map((item: any, idx: number) => (
                                     <div key={idx} className="flex items-center justify-between px-4 py-3">
                                         <div className="flex-1 min-w-0 mr-3">
-                                            <p className="text-white text-sm font-bold truncate">{item.name}</p>
-                                            <p className="text-gray-500 text-[10px] font-mono">{item.sku}</p>
+                                            <p className="text-gray-900 dark:text-white text-sm font-bold truncate">{item.name}</p>
+                                            <p className="text-gray-400 dark:text-gray-500 text-[10px] font-mono">{item.sku}</p>
                                         </div>
-                                        <span className="bg-green-500/15 text-green-400 text-xs font-mono font-black px-2 py-1 rounded-lg border border-green-500/20 whitespace-nowrap">
+                                        <span className="bg-green-500/10 dark:bg-green-500/15 text-green-600 dark:text-green-400 text-xs font-mono font-black px-2 py-1 rounded-lg border border-green-500/20 whitespace-nowrap">
                                             {(() => {
                                                 let expected = item.expectedQty || 1;
                                                 let picked = item.pickedQty || 0;

@@ -45,7 +45,10 @@ export const PurchaseOrdersList: React.FC<PurchaseOrdersListProps> = ({
     const [isBulkApproving, setIsBulkApproving] = useState(false);
 
     const ITEMS_PER_PAGE = 20;
-    const canApprove = user?.role === 'manager' || user?.role === 'admin' || user?.role === 'super_admin';
+    const isCEO = user?.role === 'super_admin';
+    const isProcurementManager = user?.role === 'procurement_manager';
+    const canApprove = isProcurementManager || user?.role === 'finance_manager' || user?.role === 'admin' || isCEO;
+    const canFullDelete = isCEO; // Only Super Admin can delete anything non-received
 
     const handleBulkApprove = async () => {
         if (!confirm(`Approve ${selectedPOIds.length} selected POs?`)) return;
@@ -104,18 +107,18 @@ export const PurchaseOrdersList: React.FC<PurchaseOrdersListProps> = ({
     };
 
     return (
-        <div className="bg-black/60 backdrop-blur-2xl border border-white/5 rounded-2xl overflow-hidden animate-in fade-in">
+        <div className="bg-white dark:bg-black/60 backdrop-blur-2xl border border-gray-200 dark:border-white/5 rounded-2xl overflow-hidden animate-in fade-in shadow-sm dark:shadow-none">
             {/* Modern Filter Toolbar */}
-            <div className="p-4 border-b border-white/5 space-y-4">
+            <div className="p-4 border-b border-gray-100 dark:border-white/5 space-y-4">
                 {/* Row 1: Search & Dropdowns */}
                 <div className="flex flex-col md:flex-row gap-4">
                     {/* Search */}
-                    <div className="flex items-center bg-black/30 border border-white/10 rounded-xl px-4 py-2.5 flex-1 focus-within:border-cyber-primary/50 transition-colors">
+                    <div className="flex items-center bg-gray-50 dark:bg-black/30 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2.5 flex-1 focus-within:border-blue-500/50 dark:focus-within:border-cyber-primary/50 transition-colors shadow-inner">
                         <Search className="w-4 h-4 text-gray-400" />
                         <input
                             type="text"
                             placeholder="Search PO # or Supplier..."
-                            className="bg-transparent border-none ml-3 flex-1 text-white text-sm outline-none"
+                            className="bg-transparent border-none ml-3 flex-1 text-gray-900 dark:text-white text-sm outline-none placeholder:text-gray-400"
                             value={searchTerm}
                             onChange={(e) => onSearchChange(e.target.value)}
                         />
@@ -126,20 +129,20 @@ export const PurchaseOrdersList: React.FC<PurchaseOrdersListProps> = ({
                         aria-label="Filter by Supplier"
                         value={supplierFilter}
                         onChange={(e) => onSupplierFilterChange(e.target.value)}
-                        className="bg-black/30 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-cyber-primary/50 min-w-[150px]"
+                        className="bg-gray-50 dark:bg-black/30 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-blue-500/50 dark:focus:border-cyber-primary/50 min-w-[150px] transition-colors"
                     >
                         <option value="All">All Suppliers</option>
                         {suppliers.map(s => (
                             <option key={s.id} value={s.id}>{s.name}</option>
                         ))}
                     </select>
-
+ 
                     {/* Sort */}
                     <select
                         aria-label="Sort POs"
                         value={sort}
                         onChange={(e) => onSortChange(e.target.value as any)}
-                        className="bg-black/30 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-cyber-primary/50 min-w-[150px]"
+                        className="bg-gray-50 dark:bg-black/30 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-blue-500/50 dark:focus:border-cyber-primary/50 min-w-[150px] transition-colors"
                     >
                         <option value="dateDesc">Date: Newest</option>
                         <option value="dateAsc">Date: Oldest</option>
@@ -156,8 +159,8 @@ export const PurchaseOrdersList: React.FC<PurchaseOrdersListProps> = ({
                             key={status}
                             onClick={() => onStatusFilterChange(status as any)}
                             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${statusFilter === status
-                                ? 'bg-cyber-primary text-black border-cyber-primary shadow-[0_0_10px_rgba(0,255,157,0.2)]'
-                                : 'bg-white/5 text-gray-400 border-white/5 hover:text-white hover:border-white/20'
+                                ? 'bg-blue-600 dark:bg-cyber-primary text-white dark:text-black border-blue-600 dark:border-cyber-primary shadow-[0_0_10px_rgba(0,255,157,0.2)]'
+                                : 'bg-gray-50 dark:bg-white/5 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-white/5 hover:bg-gray-100 dark:hover:bg-white/10 hover:text-gray-900 dark:hover:text-white'
                                 }`}
                         >
                             {status}
@@ -193,14 +196,14 @@ export const PurchaseOrdersList: React.FC<PurchaseOrdersListProps> = ({
             <div className="overflow-x-auto p-4">
                 <table className="w-full text-left">
                     <thead>
-                        <tr className="bg-white/5 border-b border-white/5">
+                        <tr className="bg-gray-50 dark:bg-white/5 border-b border-gray-100 dark:border-white/5">
                             {/* Bulk Selection Checkbox (CEO Only) */}
                             {user?.role === 'super_admin' && (
                                 <th className="p-4 w-12">
                                     <input
                                         type="checkbox"
                                         aria-label="Select all drafts"
-                                        className="w-4 h-4 rounded border-gray-600 text-cyber-primary bg-black/50"
+                                        className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 dark:text-cyber-primary bg-white dark:bg-black/50"
                                         onChange={(e) => {
                                             if (e.target.checked) setSelectedPOIds(orders.filter(o => o.status === 'Draft').map(o => o.id));
                                             else setSelectedPOIds([]);
@@ -209,25 +212,25 @@ export const PurchaseOrdersList: React.FC<PurchaseOrdersListProps> = ({
                                     />
                                 </th>
                             )}
-                            <th className="p-4 text-xs text-gray-400 uppercase whitespace-nowrap">PO Number</th>
-                            <th className="p-4 text-xs text-gray-400 uppercase font-bold text-center whitespace-nowrap">Priority</th>
-                            <th className="p-4 text-xs text-gray-400 uppercase font-bold whitespace-nowrap">Supplier</th>
-                            <th className="p-4 text-xs text-gray-400 uppercase font-bold whitespace-nowrap">Destination</th>
-                            <th className="p-4 text-xs text-gray-400 uppercase font-bold whitespace-nowrap">Date</th>
-                            <th className="p-4 text-xs text-gray-400 uppercase font-bold whitespace-nowrap">Expected</th>
-                            <th className="p-4 text-xs text-gray-400 uppercase font-bold text-right whitespace-nowrap">Items</th>
-                            <th className="p-4 text-xs text-gray-400 uppercase font-bold text-right whitespace-nowrap">Amount</th>
-                            <th className="p-4 text-xs text-gray-400 uppercase text-center font-bold whitespace-nowrap">Status</th>
-                            <th className="p-4 text-xs text-gray-400 uppercase font-bold whitespace-nowrap">Requested By</th>
-                            <th className="p-4 text-xs text-gray-400 uppercase"></th>
+                            <th className="p-4 text-xs text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">PO Number</th>
+                            <th className="p-4 text-xs text-gray-500 dark:text-gray-400 uppercase font-bold text-center whitespace-nowrap">Priority</th>
+                            <th className="p-4 text-xs text-gray-500 dark:text-gray-400 uppercase font-bold whitespace-nowrap">Supplier</th>
+                            <th className="p-4 text-xs text-gray-500 dark:text-gray-400 uppercase font-bold whitespace-nowrap">Destination</th>
+                            <th className="p-4 text-xs text-gray-500 dark:text-gray-400 uppercase font-bold whitespace-nowrap">Date</th>
+                            <th className="p-4 text-xs text-gray-500 dark:text-gray-400 uppercase font-bold whitespace-nowrap">Expected</th>
+                            <th className="p-4 text-xs text-gray-500 dark:text-gray-400 uppercase font-bold text-right whitespace-nowrap">Items</th>
+                            <th className="p-4 text-xs text-gray-500 dark:text-gray-400 uppercase font-bold text-right whitespace-nowrap">Amount</th>
+                            <th className="p-4 text-xs text-gray-500 dark:text-gray-400 uppercase text-center font-bold whitespace-nowrap">Status</th>
+                            <th className="p-4 text-xs text-gray-500 dark:text-gray-400 uppercase font-bold whitespace-nowrap">Requested By</th>
+                            <th className="p-4 text-xs text-gray-500 dark:text-gray-400 uppercase"></th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-white/5">
+                    <tbody className="divide-y divide-gray-100 dark:divide-white/5">
                         {orders.map((po) => {
                             const isDraft = po.status === 'Draft';
                             const isSelected = selectedPOIds.includes(po.id);
                             return (
-                                <tr key={po.id} className={`hover:bg-white/5 group transition-colors ${isSelected ? 'bg-cyber-primary/5 border-l-2 border-cyber-primary' : ''}`}>
+                                <tr key={po.id} className={`hover:bg-gray-50 dark:hover:bg-white/5 group transition-colors ${isSelected ? 'bg-blue-50 dark:bg-cyber-primary/5 border-l-2 border-blue-500 dark:border-cyber-primary' : ''}`}>
                                     {user?.role === 'super_admin' && (
                                         <td className="p-4">
                                             {isDraft ? (
@@ -239,12 +242,12 @@ export const PurchaseOrdersList: React.FC<PurchaseOrdersListProps> = ({
                                                         if (e.target.checked) setSelectedPOIds(prev => [...prev, po.id]);
                                                         else setSelectedPOIds(prev => prev.filter(id => id !== po.id));
                                                     }}
-                                                    className="w-4 h-4 rounded border-gray-600 text-cyber-primary bg-black/50"
+                                                    className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 dark:text-cyber-primary bg-white dark:bg-black/50"
                                                 />
                                             ) : <span className="w-4 h-4 block"></span>}
                                         </td>
                                     )}
-                                    <td className="p-4 text-sm font-mono text-white font-bold">{formatPONumber(po)}</td>
+                                    <td className="p-4 text-sm font-mono text-gray-900 dark:text-white font-bold">{formatPONumber(po)}</td>
                                     <td className="p-4">
                                         <div className={`mx-auto px-2 py-0.5 rounded text-[9px] font-bold border uppercase text-center w-fit ${po.priority === 'High' || po.priority === 'Urgent' ? 'text-red-400 border-red-500/20 bg-red-500/10' :
                                             po.priority === 'Low' ? 'text-blue-400 border-blue-500/20 bg-blue-500/10' :
@@ -253,17 +256,17 @@ export const PurchaseOrdersList: React.FC<PurchaseOrdersListProps> = ({
                                             {po.priority || 'Normal'}
                                         </div>
                                     </td>
-                                    <td className="p-4 text-sm text-gray-300">{po.supplierName}</td>
-                                    <td className="p-4 text-sm text-gray-300">
+                                    <td className="p-4 text-sm text-gray-600 dark:text-gray-300">{po.supplierName}</td>
+                                    <td className="p-4 text-sm text-gray-600 dark:text-gray-300">
                                         <div className="flex items-center gap-1.5 max-w-[180px]">
-                                            <MapPin size={12} className="text-gray-500 flex-shrink-0" />
+                                            <MapPin size={12} className="text-gray-400 dark:text-gray-500 flex-shrink-0" />
                                             <span className="truncate">{po.destination || sites.find(s => s.id === po.siteId)?.name || 'Central Operations'}</span>
                                         </div>
                                     </td>
-                                    <td className="p-4 text-xs text-gray-500 whitespace-nowrap">{po.date}</td>
-                                    <td className="p-4 text-xs text-blue-400 whitespace-nowrap">{po.expectedDelivery || 'N/A'}</td>
-                                    <td className="p-4 text-sm text-gray-300 font-mono text-right">{po.itemsCount}</td>
-                                    <td className="p-4 text-sm text-cyber-primary font-mono text-right font-bold">{CURRENCY_SYMBOL} {po.totalAmount.toLocaleString()}</td>
+                                    <td className="p-4 text-xs text-gray-400 dark:text-gray-500 whitespace-nowrap">{po.date}</td>
+                                    <td className="p-4 text-xs text-blue-600 dark:text-blue-400 whitespace-nowrap">{po.expectedDelivery || 'N/A'}</td>
+                                    <td className="p-4 text-sm text-gray-600 dark:text-gray-300 font-mono text-right">{po.itemsCount}</td>
+                                    <td className="p-4 text-sm text-blue-600 dark:text-cyber-primary font-mono text-right font-bold">{CURRENCY_SYMBOL} {po.totalAmount.toLocaleString()}</td>
                                     <td className="p-4 text-center">
                                         <span className={`inline-flex items-center px-2 py-1 rounded text-[10px] font-bold uppercase border ${po.status === 'Received' ? 'text-green-400 border-green-500/20 bg-green-500/10' :
                                             po.status === 'Partially Received' ? 'text-indigo-400 border-indigo-500/20 bg-indigo-500/10' :
@@ -294,7 +297,12 @@ export const PurchaseOrdersList: React.FC<PurchaseOrdersListProps> = ({
                                                     <CheckCircle size={12} /> Approve
                                                 </button>
                                             )}
-                                            {(po.status === 'Draft' || po.status === 'Approved') && (
+                                            {/* Edit Logic:
+                                                1. CEO/Super Admin can edit anything NOT received.
+                                                2. Other staff can ONLY edit their own Draft POs.
+                                            */}
+                                            {((isCEO && po.status !== 'Received') || 
+                                              (po.status === 'Draft' && (po.createdBy === user?.name || po.requestedBy === user?.name))) && (
                                                 <button
                                                     onClick={(e) => { e.stopPropagation(); onEdit(po); }}
                                                     className="p-1 text-blue-400 hover:text-blue-300"
@@ -303,7 +311,13 @@ export const PurchaseOrdersList: React.FC<PurchaseOrdersListProps> = ({
                                                     <Edit3 size={14} />
                                                 </button>
                                             )}
-                                            {(po.status === 'Draft' || po.status === 'Rejected' || po.status === 'Cancelled') && (
+
+                                            {/* Deletion Logic:
+                                                1. Super Admin can delete anything NOT received.
+                                                2. Other staff can ONLY delete their own Draft POs.
+                                            */}
+                                            {((isCEO && po.status !== 'Received') || 
+                                              (po.status === 'Draft' && (po.createdBy === user?.name || po.requestedBy === user?.name))) && (
                                                 <button
                                                     onClick={(e) => handleDeletePO(e, po)}
                                                     className="p-1 text-red-400 hover:text-red-300"
@@ -327,28 +341,28 @@ export const PurchaseOrdersList: React.FC<PurchaseOrdersListProps> = ({
             </div>
 
             {/* Pagination Controls */}
-            <div className="flex items-center justify-between p-4 border-t border-white/5 bg-black/20 rounded-b-2xl">
-                <p className="text-xs text-gray-500 font-mono">
-                    Showing <span className="text-gray-300">{orders.length}</span> of <span className="text-gray-300">{totalCount}</span> Results
+            <div className="flex items-center justify-between p-4 border-t border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-black/20 rounded-b-2xl">
+                <p className="text-xs text-gray-500 dark:text-gray-500 font-mono">
+                    Showing <span className="text-gray-900 dark:text-gray-300">{orders.length}</span> of <span className="text-gray-900 dark:text-gray-300">{totalCount}</span> Results
                 </p>
                 <div className="flex gap-2">
                     <button
                         onClick={() => onPageChange(Math.max(1, currentPage - 1))}
                         disabled={currentPage === 1 || loading}
-                        className="px-3 py-1.5 border border-white/10 rounded-lg text-xs font-bold text-gray-400 hover:bg-white/5 disabled:opacity-30 transition-colors"
+                        className="px-3 py-1.5 border border-gray-200 dark:border-white/10 rounded-lg text-xs font-bold text-gray-500 dark:text-gray-400 hover:bg-white dark:hover:bg-white/5 disabled:opacity-30 transition-colors shadow-sm dark:shadow-none"
                     >
                         Previous
                     </button>
-                    <div className="flex items-center px-4 bg-white/5 rounded-lg border border-white/10">
-                        <span className="text-[10px] text-gray-500 uppercase font-bold tracking-wider mr-2">Page</span>
-                        <span className="text-sm font-mono font-bold text-cyber-primary">{currentPage}</span>
-                        <span className="text-[10px] text-gray-500 mx-2">of</span>
-                        <span className="text-sm font-mono text-white">{Math.ceil(totalCount / ITEMS_PER_PAGE)}</span>
+                    <div className="flex items-center px-4 bg-white dark:bg-white/5 rounded-lg border border-gray-200 dark:border-white/10 shadow-inner">
+                        <span className="text-[10px] text-gray-400 dark:text-gray-500 uppercase font-bold tracking-wider mr-2">Page</span>
+                        <span className="text-sm font-mono font-bold text-blue-600 dark:text-cyber-primary">{currentPage}</span>
+                        <span className="text-[10px] text-gray-400 dark:text-gray-500 mx-2">of</span>
+                        <span className="text-sm font-mono text-gray-900 dark:text-white">{Math.ceil(totalCount / ITEMS_PER_PAGE)}</span>
                     </div>
                     <button
                         onClick={() => onPageChange(currentPage + 1)}
                         disabled={currentPage * ITEMS_PER_PAGE >= totalCount || loading}
-                        className="px-3 py-1.5 border border-white/10 rounded-lg text-xs font-bold text-gray-400 hover:bg-white/5 disabled:opacity-30 transition-colors"
+                        className="px-3 py-1.5 border border-gray-200 dark:border-white/10 rounded-lg text-xs font-bold text-gray-500 dark:text-gray-400 hover:bg-white dark:hover:bg-white/5 disabled:opacity-30 transition-colors shadow-sm dark:shadow-none"
                     >
                         Next
                     </button>

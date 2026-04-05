@@ -37,11 +37,11 @@ export const DocksHistory: React.FC<DocksHistoryProps> = ({ orders, t }) => {
     }, [filteredHistory, currentPage]);
 
     return (
-        <div className="lg:col-span-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-[2rem] p-8 mt-6 relative overflow-hidden group shadow-2xl">
+        <div className="lg:col-span-3 bg-white dark:bg-white/5 backdrop-blur-xl border border-slate-200 dark:border-white/10 rounded-[2rem] p-8 mt-6 relative overflow-hidden group shadow-sm dark:shadow-2xl">
             <div className="absolute -top-24 -right-24 w-64 h-64 bg-blue-600/10 blur-[100px] rounded-full pointer-events-none" />
 
             <div className="flex justify-between items-center mb-8 relative z-10">
-                <h3 className="text-xl font-black text-white tracking-tight uppercase flex items-center gap-3">
+                <h3 className="text-xl font-black text-slate-900 dark:text-white tracking-tight uppercase flex items-center gap-3">
                     <div className="p-2 bg-blue-600/20 rounded-xl">
                         <HistoryIcon className="text-blue-400" size={20} />
                     </div>
@@ -56,7 +56,7 @@ export const DocksHistory: React.FC<DocksHistoryProps> = ({ orders, t }) => {
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                             placeholder="Search PO, Supplier..."
-                            className="w-64 bg-black/40 border border-white/10 rounded-xl py-2.5 pl-10 pr-4 text-xs font-bold text-white placeholder-gray-600 focus:outline-none focus:border-blue-500/50 focus:bg-blue-500/5 transition-all"
+                            className="w-64 bg-slate-100 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-xl py-2.5 pl-10 pr-4 text-xs font-bold text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-gray-600 focus:outline-none focus:border-blue-500/50 focus:bg-blue-500/5 transition-all"
                         />
                     </div>
                 </div>
@@ -65,7 +65,7 @@ export const DocksHistory: React.FC<DocksHistoryProps> = ({ orders, t }) => {
             <div className="overflow-x-auto">
                 <table className="w-full">
                     <thead>
-                        <tr className="border-b border-white/5">
+                        <tr className="border-b border-slate-200 dark:border-white/5">
                             <th className="px-6 py-4 text-left text-[10px] font-black text-gray-500 uppercase tracking-widest">Unloaded At</th>
                             <th className="px-6 py-4 text-left text-[10px] font-black text-gray-500 uppercase tracking-widest">PO Number</th>
                             <th className="px-6 py-4 text-left text-[10px] font-black text-gray-500 uppercase tracking-widest">Supplier</th>
@@ -74,7 +74,7 @@ export const DocksHistory: React.FC<DocksHistoryProps> = ({ orders, t }) => {
                             <th className="px-6 py-4 text-right text-[10px] font-black text-gray-500 uppercase tracking-widest">Status</th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-white/5">
+                    <tbody className="divide-y divide-slate-100 dark:divide-white/5">
                         {paginatedHistory.length === 0 ? (
                             <tr>
                                 <td colSpan={6} className="px-6 py-8 text-center text-gray-500 text-xs font-bold">
@@ -83,7 +83,7 @@ export const DocksHistory: React.FC<DocksHistoryProps> = ({ orders, t }) => {
                             </tr>
                         ) : (
                             paginatedHistory.map((po: any) => (
-                                <tr key={po.id} className="hover:bg-white/5 transition-colors group">
+                                <tr key={po.id} className="hover:bg-slate-50 dark:hover:bg-white/5 transition-colors group">
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-2">
                                             <Clock size={12} className="text-gray-600" />
@@ -93,7 +93,7 @@ export const DocksHistory: React.FC<DocksHistoryProps> = ({ orders, t }) => {
                                         </div>
                                     </td>
                                     <td className="px-6 py-4">
-                                        <span className="text-xs font-black text-white">{po.poNumber || po.id.slice(0, 8)}</span>
+                                        <span className="text-xs font-black text-slate-900 dark:text-white">{po.poNumber || po.id.slice(0, 8)}</span>
                                     </td>
                                     <td className="px-6 py-4">
                                         <span className="text-xs font-bold text-gray-400">{po.supplierName}</span>

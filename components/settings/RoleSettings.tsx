@@ -72,31 +72,31 @@ export default function RoleSettings() {
     // Default Permissions
     const defaultPermissions = {
         'POS & Sales': [
-            { id: 'pos_access', label: 'Access POS Terminal', admin: true, manager: true, cashier: true, warehouse: false },
-            { id: 'void_bill', label: 'Void Transaction', admin: true, manager: true, cashier: false, warehouse: false },
-            { id: 'give_discount', label: 'Apply Custom Discount', admin: true, manager: true, cashier: false, warehouse: false },
+            { id: 'pos_access', label: 'Access POS Terminal', admin: true, store_manager: true, cashier: true, warehouse: false },
+            { id: 'void_bill', label: 'Void Transaction', admin: true, store_manager: true, cashier: false, warehouse: false },
+            { id: 'give_discount', label: 'Apply Custom Discount', admin: true, store_manager: true, cashier: false, warehouse: false },
         ],
         'Inventory': [
-            { id: 'view_stock', label: 'View Stock Levels', admin: true, manager: true, cashier: true, warehouse: true },
-            { id: 'adjust_stock', label: 'Manual Stock Adjustment', admin: true, manager: true, cashier: false, warehouse: true },
-            { id: 'cost_price', label: 'View Cost Prices', admin: true, manager: true, cashier: false, warehouse: false },
+            { id: 'view_stock', label: 'View Stock Levels', admin: true, store_manager: true, cashier: true, warehouse: true },
+            { id: 'adjust_stock', label: 'Manual Stock Adjustment', admin: true, store_manager: true, cashier: false, warehouse: true },
+            { id: 'cost_price', label: 'View Cost Prices', admin: true, store_manager: true, cashier: false, warehouse: false },
         ],
         'Finance': [
-            { id: 'view_reports', label: 'View Financial Reports', admin: true, manager: true, cashier: false, warehouse: false },
-            { id: 'approve_expense', label: 'Approve Expenses', admin: true, manager: false, cashier: false, warehouse: false },
+            { id: 'view_reports', label: 'View Financial Reports', admin: true, store_manager: true, cashier: false, warehouse: false },
+            { id: 'approve_expense', label: 'Approve Expenses', admin: true, store_manager: false, cashier: false, warehouse: false },
         ],
         'System Notifications': [
-            { id: 'alert_low_stock', label: 'Low Stock Alerts', admin: true, manager: true, cashier: false, warehouse: true },
-            { id: 'alert_void', label: 'Void / Refund Alerts', admin: true, manager: true, cashier: false, warehouse: false },
-            { id: 'alert_security', label: 'Security & Login Alerts', admin: true, manager: false, cashier: false, warehouse: false },
-            { id: 'alert_shift', label: 'Shift End Reports', admin: true, manager: true, cashier: false, warehouse: false },
+            { id: 'alert_low_stock', label: 'Low Stock Alerts', admin: true, store_manager: true, cashier: false, warehouse: true },
+            { id: 'alert_void', label: 'Void / Refund Alerts', admin: true, store_manager: true, cashier: false, warehouse: false },
+            { id: 'alert_security', label: 'Security & Login Alerts', admin: true, store_manager: false, cashier: false, warehouse: false },
+            { id: 'alert_shift', label: 'Shift End Reports', admin: true, store_manager: true, cashier: false, warehouse: false },
         ]
     };
 
     // Default Security Policies
     const defaultPolicies = {
         admin: { mfa_required: true, session_timeout: 15, ip_restriction: false, time_restriction: false, password_complexity: 'high' },
-        manager: { mfa_required: false, session_timeout: 30, ip_restriction: false, time_restriction: true, password_complexity: 'medium' },
+        store_manager: { mfa_required: false, session_timeout: 30, ip_restriction: false, time_restriction: true, password_complexity: 'medium' },
         cashier: { mfa_required: false, session_timeout: 60, ip_restriction: true, time_restriction: true, password_complexity: 'low' },
         warehouse: { mfa_required: false, session_timeout: 60, ip_restriction: false, time_restriction: true, password_complexity: 'low' }
     };
@@ -107,7 +107,7 @@ export default function RoleSettings() {
     const [policies, setPolicies] = useState<any>(defaultPolicies);
     const [roles, setRoles] = useState([
         { id: 'admin', name: 'Assistant CEO', users: 0, badge: 'bg-red-500/20 text-red-400 border-red-500/30' },
-        { id: 'manager', name: 'Store Manager', users: 0, badge: 'bg-purple-500/20 text-purple-400 border-purple-500/30' },
+        { id: 'store_manager', name: 'Store Manager', users: 0, badge: 'bg-purple-500/20 text-purple-400 border-purple-500/30' },
         { id: 'cashier', name: 'Retail Staff', users: 0, badge: 'bg-green-500/20 text-green-400 border-green-500/30' },
         { id: 'warehouse', name: 'Warehouse Ops', users: 0, badge: 'bg-orange-500/20 text-orange-400 border-orange-500/30' },
     ]);
@@ -123,7 +123,7 @@ export default function RoleSettings() {
 
         // Calculate counts
         if (employees) {
-            const counts: any = { admin: 0, manager: 0, cashier: 0, warehouse: 0 };
+            const counts: any = { admin: 0, store_manager: 0, cashier: 0, warehouse: 0 };
             employees.forEach(emp => { if (counts[emp.role] !== undefined) counts[emp.role]++; });
             setRoles(prev => prev.map(r => ({ ...r, users: counts[r.id] || 0 })));
         }

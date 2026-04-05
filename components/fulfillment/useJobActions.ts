@@ -33,14 +33,15 @@ interface UseJobActionsDeps {
     setJobAssignments: React.Dispatch<React.SetStateAction<JobAssignment[]>>;
     addNotification: (type: 'alert' | 'success' | 'info', message: string) => void;
     queryClient: QueryClient;
+    activeSiteId: string | undefined;
 }
 
 // ─── Hook ───────────────────────────────────────────────────────────────────
 
 export const useJobActions = (deps: UseJobActionsDeps) => {
-    const { jobs, jobAssignments, employees, user, setJobs, setJobAssignments, addNotification, queryClient } = deps;
+    const { jobs, jobAssignments, employees, user, setJobs, setJobAssignments, addNotification, queryClient, activeSiteId } = deps;
 
-    const assignJob = useCallback(async (jobId: string, employeeIdOrName: string) => {
+    const assignJob = useCallback(async (jobId: string, employeeIdOrName: string, source?: string) => {
         try {
             const job = jobs.find(j => j.id === jobId);
             if (!job) {
@@ -57,15 +58,26 @@ export const useJobActions = (deps: UseJobActionsDeps) => {
                 return;
             }
 
+            // Block double-assignment: if someone is already on this job, it must be unassigned first
+            if (job.assignedTo && job.assignedTo !== employee.id) {
+                const currentWorker = employees.find((e: any) => e.id === job.assignedTo);
+                const workerName = currentWorker?.name || 'another worker';
+                addNotification('alert', `This job is already assigned to ${workerName}. Unassign it first before reassigning.`);
+                return;
+            }
+
             const activeAssignments = jobAssignments.filter(
                 a => a.employeeId === employee.id &&
                     ['Assigned', 'Accepted', 'In-Progress'].includes(a.status)
             );
 
+            // Removed 3-job limit as per user request
+            /*
             if (activeAssignments.length >= 3) {
                 addNotification('alert', getTranslation('warehouse.employeeHasActiveJobs').replace('{name}', employee.name).replace('{count}', activeAssignments.length.toString()));
                 return;
             }
+            */
 
             let estimatedDuration = 15;
             if (job.type === 'PICK') {
@@ -95,7 +107,7 @@ export const useJobActions = (deps: UseJobActionsDeps) => {
             const updatedJob = await wmsJobsService.update(jobId, {
                 assignedTo: employee.id,
                 status: 'In-Progress',
-                assignedBy: user?.name || 'System' // [NEW] Track dispatcher
+                assignedBy: source || user?.name || 'System'
             });
 
             setJobs(prev => prev.map(j => j.id === jobId ? updatedJob : j));
@@ -195,6 +207,81 @@ export const useJobActions = (deps: UseJobActionsDeps) => {
         }
     }, [setJobs, queryClient]);
 
+    const autoAssignJobs = useCallback(async () => {
+        try {
+            const pendingJobs = jobs
+                .filter(j => j.status?.toLowerCase() === 'pending' && !j.assignedTo && j.type !== 'TRANSFER')
+                .sort((a, b) => {
+                    const priorityOrder: Record<string, number> = { 'Critical': 0, 'High': 1, 'Normal': 2 };
+                    return (priorityOrder[a.priority] ?? 3) - (priorityOrder[b.priority] ?? 3);
+                });
+
+            if (pendingJobs.length === 0) {
+                addNotification('info', 'No pending jobs to assign');
+                return;
+            }
+
+            const eligibleEmployees = employees.filter(e =>
+                e.status?.toLowerCase() === 'active' &&
+                (e.siteId === activeSiteId || e.site_id === activeSiteId) &&
+                !['dispatcher', 'warehouse_manager', 'super_admin', 'admin'].includes((e.role || '').toLowerCase())
+            );
+
+            if (eligibleEmployees.length === 0) {
+                addNotification('alert', 'No active staff available for auto-assignment');
+                return;
+            }
+
+            const currentWorkloads = new Map<string, number>();
+            eligibleEmployees.forEach(e => {
+                const count = jobAssignments.filter(a =>
+                    a.employeeId === e.id && ['Assigned', 'Accepted', 'In-Progress'].includes(a.status)
+                ).length;
+                currentWorkloads.set(e.id, count);
+            });
+
+            const getRoleMatch = (employee: any, job: WMSJob) => {
+                const role = (employee.role || '').toLowerCase();
+                const type = (job.type || '').toUpperCase();
+                
+                if (['manager', 'regional_manager', 'operations_manager'].includes(role)) return true;
+
+                // Specific role restrictions for specialized jobs
+                if (type === 'PICK' && !['picker', 'dispatcher', 'warehouse_manager'].includes(role)) return false;
+                if (type === 'PACK' && !['packer', 'picker', 'dispatcher', 'warehouse_manager'].includes(role)) return false;
+                if (type === 'PUTAWAY' && !['inventory_specialist', 'picker', 'dispatcher', 'warehouse_manager'].includes(role)) return false;
+                if (type === 'RECEIVE' && !['receiver', 'inventory_specialist', 'picker', 'dispatcher', 'warehouse_manager'].includes(role)) return false;
+                if ((type === 'DRIVER' || type === 'DISPATCH') && !['driver', 'dispatcher', 'warehouse_manager'].includes(role)) return false;
+                
+                // Allow any active worker for general tasks (COUNT, REPLENISH) if they passed the specific checks above
+                return true;
+            };
+
+            let assignedCount = 0;
+            for (const job of pendingJobs) {
+                const candidates = eligibleEmployees
+                    .filter(e => getRoleMatch(e, job))
+                    .sort((a, b) => (currentWorkloads.get(a.id) || 0) - (currentWorkloads.get(b.id) || 0));
+
+                if (candidates.length > 0) {
+                    const bestCandidate = candidates[0];
+                    await assignJob(job.id, bestCandidate.id, 'Auto-Assign');
+                    currentWorkloads.set(bestCandidate.id, (currentWorkloads.get(bestCandidate.id) || 0) + 1);
+                    assignedCount++;
+                }
+            }
+
+            if (assignedCount > 0) {
+                addNotification('success', `Auto-assigned ${assignedCount} jobs successfully`);
+            } else {
+                addNotification('info', 'No matching staff found for pending jobs');
+            }
+        } catch (error) {
+            console.error('Auto-assign failed:', error);
+            addNotification('alert', 'Auto-assignment failed');
+        }
+    }, [jobs, employees, jobAssignments, assignJob, addNotification]);
+
     const updateJob = useCallback(async (id: string, updates: Partial<WMSJob>) => {
         try {
             await wmsJobsService.update(id, updates);
@@ -206,5 +293,31 @@ export const useJobActions = (deps: UseJobActionsDeps) => {
         }
     }, [setJobs, addNotification]);
 
-    return { assignJob, unassignJob, updateJobItem, updateJobStatus, updateJob };
+    // Auto-Unassign: only unassigns jobs that were auto-assigned
+    const autoUnassignJobs = useCallback(async () => {
+        try {
+            const autoAssignedJobs = jobs.filter(j => {
+                const assignedBy = (j as any).assignedBy || (j as any).assigned_by || '';
+                return assignedBy === 'Auto-Assign' && j.assignedTo && j.status !== 'Completed';
+            });
+
+            if (autoAssignedJobs.length === 0) {
+                addNotification('info', 'No auto-assigned jobs to unassign');
+                return;
+            }
+
+            let count = 0;
+            for (const job of autoAssignedJobs) {
+                await unassignJob(job.id);
+                count++;
+            }
+
+            addNotification('success', `Unassigned ${count} auto-assigned jobs`);
+        } catch (error) {
+            console.error('Auto-unassign failed:', error);
+            addNotification('alert', 'Auto-unassign failed');
+        }
+    }, [jobs, unassignJob, addNotification]);
+
+    return { assignJob, unassignJob, updateJobItem, updateJobStatus, updateJob, autoAssignJobs, autoUnassignJobs };
 };

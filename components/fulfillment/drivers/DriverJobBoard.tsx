@@ -3,201 +3,98 @@ import { Shield, RefreshCw, Zap } from 'lucide-react';
 import { WMSJob, Site, User } from '../../../types';
 import Pagination from '../../shared/Pagination';
 import { formatJobId } from '../../../utils/jobIdFormatter';
+import { useLanguage } from '../../../contexts/LanguageContext';
 
 interface DriverJobBoardProps {
-    filteredJobs: WMSJob[];
-    sites: Site[];
-    employees: any[];
-    user: User | null;
-    setSelectedJob: (job: WMSJob | null) => void;
-    setIsDetailsOpen: (val: boolean) => void;
-    processingJobIds: Set<string>;
-    setProcessingJobIds: React.Dispatch<React.SetStateAction<Set<string>>>;
-    wmsJobsService: any;
-    refreshData: () => Promise<void>;
-    addNotification: (type: string, message: string) => void;
+    t?: (key: string) => string;
+    filteredJobs: WMSJob[]; sites: Site[]; employees: any[]; user: User | null;
+    setSelectedJob: (job: WMSJob | null) => void; setIsDetailsOpen: (val: boolean) => void;
+    processingJobIds: Set<string>; setProcessingJobIds: React.Dispatch<React.SetStateAction<Set<string>>>;
+    wmsJobsService: any; refreshData: () => Promise<void>; addNotification: (type: string, message: string) => void;
+    globalSearch: string; jobs: WMSJob[];
 }
 
 export const DriverJobBoard: React.FC<DriverJobBoardProps> = ({
-    filteredJobs,
-    sites,
-    employees,
-    user,
-    setSelectedJob,
-    setIsDetailsOpen,
-    processingJobIds,
-    setProcessingJobIds,
-    wmsJobsService,
-    refreshData,
-    addNotification
+    t, filteredJobs, sites, employees, user, setSelectedJob, setIsDetailsOpen, processingJobIds, setProcessingJobIds, wmsJobsService, refreshData, addNotification, globalSearch, jobs
 }) => {
-    // Local State
-    const [dispatchCurrentPage, setDispatchCurrentPage] = useState(1);
-    const DISPATCH_ITEMS_PER_PAGE = 6;
-
-    // Filter Logic
+    const { t: contextT } = useLanguage();
+    const finalT = t || contextT;
+    const [dispatchCurrentPage, setDispatchCurrentPage] = useState(1); const DISPATCH_ITEMS_PER_PAGE = 6;
     const filteredDispatchJobs = useMemo(() => {
-        return filteredJobs.filter(j =>
-            j.type === 'DISPATCH' &&
-            j.status === 'Pending' &&
-            !j.assignedTo
-        );
-    }, [filteredJobs]);
+        const canSeeGlobalQueue = ['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher'].includes((user?.role || '').toLowerCase());
+        const currentEmployee = employees.find(e => (user?.email && e.email === user.email) || (user?.name && e.name?.toLowerCase() === user.name.toLowerCase()) || ((user as any)?.employeeId && e.id === (user as any).employeeId) || e.id === user?.id);
+        const employeeId = currentEmployee?.id || user?.id;
+        let baseJobs = filteredJobs.filter(j => {
+            if (j.type !== 'DISPATCH' && j.type !== 'TRANSFER' && j.type !== 'DRIVER') return false;
+            const isUnassigned = !j.assignedTo && j.status === 'Pending';
+            const isNotPickedUp = j.transferStatus !== 'In-Transit' && j.transferStatus !== 'Shipped' && j.transferStatus !== 'Delivered' && j.transferStatus !== 'Received' && j.status !== 'Completed';
+            return isUnassigned || (j.assignedTo === employeeId && isNotPickedUp) || (canSeeGlobalQueue && j.assignedTo && isNotPickedUp);
+        });
+        if (globalSearch) { const query = globalSearch.toLowerCase().trim(); baseJobs = baseJobs.filter(j => formatJobId(j).toLowerCase().includes(query) || sites.find(s => s.id === j.destSiteId)?.name?.toLowerCase().includes(query) || sites.find(s => s.id === j.sourceSiteId || s.id === j.siteId)?.name?.toLowerCase().includes(query) || j.trackingNumber?.toLowerCase().includes(query)); }
+        return baseJobs;
+    }, [filteredJobs, globalSearch, sites]);
 
     const dispatchTotalPages = Math.ceil(filteredDispatchJobs.length / DISPATCH_ITEMS_PER_PAGE);
-    const paginatedDispatchJobs = useMemo(() => {
-        const start = (dispatchCurrentPage - 1) * DISPATCH_ITEMS_PER_PAGE;
-        return filteredDispatchJobs.slice(start, start + DISPATCH_ITEMS_PER_PAGE);
-    }, [filteredDispatchJobs, dispatchCurrentPage]);
+    const paginatedDispatchJobs = useMemo(() => filteredDispatchJobs.slice((dispatchCurrentPage - 1) * DISPATCH_ITEMS_PER_PAGE, dispatchCurrentPage * DISPATCH_ITEMS_PER_PAGE), [filteredDispatchJobs, dispatchCurrentPage]);
+    useEffect(() => { setDispatchCurrentPage(prev => Math.min(prev, Math.max(1, dispatchTotalPages))); }, [dispatchTotalPages]);
 
-    // Reset dispatch page if list changes drastically
-    useEffect(() => {
-        setDispatchCurrentPage(prev => Math.min(prev, Math.max(1, dispatchTotalPages)));
-    }, [dispatchTotalPages]);
+    const [isExpanded, setIsExpanded] = useState(false);
+    useEffect(() => { if (globalSearch) setIsExpanded(true); }, [globalSearch]);
 
     return (
-        <div className="space-y-6 pt-4">
-            <div className="flex items-center justify-between px-2">
-                <div className="space-y-1">
-                    <h4 className="text-sm font-black text-white uppercase tracking-[0.3em] flex items-center gap-3">
-                        <div className="w-2 h-2 rounded-full bg-yellow-500 shadow-[0_0_10px_#eab308] animate-pulse" />
-                        Job Board
-                        <span className="text-yellow-500/40 ml-2 font-mono">[{filteredDispatchJobs.length} AVAILABLE]</span>
-                    </h4>
-                    <p className="text-[10px] text-gray-500 uppercase font-bold tracking-widest pl-5 opacity-60">Available delivery assignments</p>
-                </div>
-                <div className="h-px flex-1 bg-gradient-to-r from-yellow-500/20 via-white/5 to-transparent mx-8 hidden lg:block" />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-                {paginatedDispatchJobs.length === 0 ? (
-                    <div className="col-span-full bg-white/[0.02] backdrop-blur-md rounded-[2.5rem] p-8 lg:p-20 border border-dashed border-white/10 text-center relative overflow-hidden group">
-                        <div className="absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
-                        <div className="w-24 h-24 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-6 border border-white/5 shadow-inner">
-                            <Shield size={48} className="text-gray-600" />
+        <div className="space-y-4 pt-4">
+            <button onClick={() => setIsExpanded(!isExpanded)} className="w-full flex items-center justify-between p-4 bg-gray-50 dark:bg-white/5 border-2 border-gray-100 dark:border-white/10 rounded-2xl hover:bg-gray-100 dark:hover:bg-white/10 transition-all shadow-sm active:scale-[0.98]">
+                <div className="flex items-center gap-3"><div className="w-2.5 h-2.5 rounded-full bg-yellow-500 shadow-[0_0_10px_rgba(234,179,8,0.4)] animate-pulse" /><span className="text-[11px] font-black text-gray-900 dark:text-white uppercase tracking-widest italic">{finalT('warehouse.docks.availableMissions') || 'Available Missions'}</span></div>
+                <span className="text-[9px] font-black text-yellow-600 dark:text-yellow-500 bg-yellow-500/10 dark:bg-yellow-500/10 px-3 py-1 rounded-full uppercase border border-yellow-500/20">{filteredDispatchJobs.length} Available</span>
+            </button>
+            {isExpanded && (
+                <div className="space-y-5">
+                    {paginatedDispatchJobs.length === 0 ? (
+                        <div className="bg-gray-50 dark:bg-black/20 rounded-2xl p-8 border-2 border-dashed border-gray-200 dark:border-white/10 text-center shadow-inner">
+                            <Shield size={28} className="text-gray-300 dark:text-gray-700 mx-auto mb-3" />
+                            <h3 className="text-[10px] font-black text-gray-400 dark:text-white uppercase tracking-widest italic">All Quiet on the Front</h3>
                         </div>
-                        <h3 className="text-xl font-black text-white uppercase tracking-widest mb-2">No Jobs Available</h3>
-                        <p className="text-gray-600 font-bold uppercase tracking-widest text-xs">Check back later for new assignments...</p>
-                    </div>
-                ) : (
-                    paginatedDispatchJobs.map(job => {
-                        const dest = sites.find(s => s.id === job.destSiteId);
-                        const source = sites.find(s => s.id === job.sourceSiteId || s.id === job.siteId);
-                        const isCritical = job.priority === 'Critical';
-
-                        return (
-                            <div
-                                key={job.id}
-                                onClick={() => {
-                                    setSelectedJob(job);
-                                    setIsDetailsOpen(true);
-                                }}
-                                className={`group relative bg-gradient-to-br from-white/5 to-white/[0.02] border ${isCritical ? 'border-red-500/20 hover:border-red-500/50' : 'border-white/10 hover:border-yellow-500/40'} rounded-[2rem] lg:rounded-[2.5rem] p-6 lg:p-8 transition-all duration-500 flex flex-col h-full cursor-pointer overflow-hidden shadow-2xl hover:-translate-y-2`}
-                            >
-                                {/* Card Accents */}
-                                <div className="absolute top-0 right-0 w-32 h-32 bg-yellow-500/5 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity" />
-                                <div className="absolute top-4 right-4 flex gap-1 opacity-20 group-hover:opacity-60 transition-opacity">
-                                    <div className="w-1 h-3 bg-white/20 rounded-full" />
-                                    <div className="w-1 h-3 bg-white/20 rounded-full" />
-                                </div>
-
-                                <div className="flex justify-between items-start mb-6 relative z-10">
-                                    <div className="space-y-1">
-                                        <div className="flex items-center gap-2">
-                                            <div className={`w-2 h-2 rounded-full ${isCritical ? 'bg-red-500 animate-ping' : 'bg-cyan-500'}`} />
-                                            <p className="text-[10px] font-mono text-gray-400 font-bold tracking-tighter uppercase">REF: {formatJobId(job)}</p>
-                                        </div>
-                                        <h5 className="font-black text-white text-2xl leading-none uppercase tracking-tighter group-hover:text-yellow-400 transition-colors">{dest?.name || 'Local Hub'}</h5>
+                    ) : (
+                        paginatedDispatchJobs.map(job => {
+                            const dest = sites.find(s => s.id === job.destSiteId); const source = sites.find(s => s.id === job.sourceSiteId || s.id === job.siteId); const isCritical = job.priority === 'Critical';
+                            const progress = 0;
+                            return (
+                                <div key={job.id} onClick={() => { setSelectedJob(job); setIsDetailsOpen(true); }} className={`group border-2 ${isCritical ? 'border-red-500/20 shadow-red-500/5' : 'border-gray-100 dark:border-white/10'} rounded-[2rem] p-6 bg-white dark:bg-white/5 cursor-pointer relative overflow-hidden shadow-sm active:scale-[0.98] transition-all`}>
+                                    <div className="flex justify-between items-start mb-4">
+                                        <div className="flex items-center gap-2"><div className={`w-2 h-2 rounded-full ${isCritical ? 'bg-red-500 animate-ping' : 'bg-yellow-500'}`} /><p className="text-[10px] font-black text-gray-500 dark:text-gray-400 tracking-widest uppercase">{formatJobId(job)}</p></div>
+                                        <div className={`px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-[0.2em] border ${isCritical ? 'bg-red-500/10 text-red-600 dark:text-red-500 border-red-500/20' : 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-500 border-yellow-500/20'}`}>{job.priority}</div>
                                     </div>
-                                    <div className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${isCritical ? 'bg-red-500 text-white shadow-[0_0_15px_rgba(239,68,68,0.4)]' :
-                                        job.priority === 'High' ? 'bg-orange-500/20 text-orange-400' :
-                                            'bg-cyan-500/20 text-cyan-400'
-                                        }`}>
-                                        {job.priority}
+                                    <div className="mb-5">
+                                        <p className="text-[9px] text-gray-400 dark:text-gray-500 font-black uppercase tracking-widest mb-1.5 italic">Payload Route</p>
+                                        <div className="flex items-center gap-3 text-xs font-black text-gray-900 dark:text-white uppercase leading-none italic"><span>{source?.name || 'Central'}</span><span className="text-cyan-500">→</span><span>{dest?.name || 'Client'}</span></div>
+                                    </div>
+                                    <div className="flex items-center justify-between gap-4 pt-4 border-t-2 border-gray-50 dark:border-white/5">
+                                        <div className="bg-gray-100 dark:bg-black/40 px-4 py-2 rounded-xl border border-gray-200 dark:border-white/5 shadow-inner"><span className="text-[10px] font-black text-gray-900 dark:text-white">{job.items || 0}</span><span className="text-[8px] text-gray-400 dark:text-gray-500 ml-1.5 uppercase font-bold tracking-widest">Units</span></div>
+                                        {job.assignedTo ? (
+                                            <button disabled={processingJobIds.has(job.id)} onClick={async (e) => {
+                                                e.stopPropagation(); const currentEmployee = employees.find(emp => (user?.email && emp.email === user.email) || (user?.name && emp.name?.toLowerCase() === user.name.toLowerCase()) || ((user as any)?.employeeId && emp.id === (user as any).employeeId) || emp.id === user?.id); const employeeId = currentEmployee?.id || user?.id;
+                                                if (job.assignedTo !== employeeId) { addNotification('info', 'Locked mission.'); return; }
+                                                setProcessingJobIds(prev => new Set(prev).add(job.id));
+                                                try {
+                                                    await wmsJobsService.update(job.id, { status: 'In-Progress', transferStatus: 'In-Transit', shippedAt: new Date().toISOString() } as any);
+                                                    if (job.orderRef) { const parentTransfer = jobs.find(j => j.id === job.orderRef && j.type === 'TRANSFER'); if (parentTransfer) await wmsJobsService.update(parentTransfer.id, { transferStatus: 'In-Transit' } as any); }
+                                                    await refreshData(); addNotification('success', 'Payload secure. Departing.');
+                                                } catch (err) { addNotification('alert', 'Comm link error.'); } finally { setProcessingJobIds(prev => { const next = new Set(prev); next.delete(job.id); return next; }); }
+                                            }} className="flex-1 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 disabled:opacity-50 transition-all shadow-xl bg-purple-600 dark:bg-purple-600 text-white active:scale-95">{processingJobIds.has(job.id) ? <RefreshCw className="animate-spin" size={14} /> : <Zap size={14} />} PICKUP</button>
+                                        ) : (
+                                            <button onClick={async (e) => {
+                                                e.stopPropagation(); const currentEmployee = employees.find(emp => (user?.email && emp.email === user.email) || (user?.name && emp.name?.toLowerCase() === user.name.toLowerCase()) || ((user as any)?.employeeId && emp.id === (user as any).employeeId) || emp.id === user?.id);
+                                                if (!currentEmployee) { addNotification('alert', 'Protocol fault. Identify profile.'); return; }
+                                                const isInternal = !currentEmployee?.driverType || currentEmployee?.driverType === 'internal'; setProcessingJobIds(prev => new Set(prev).add(job.id));
+                                                try { await wmsJobsService.update(job.id, { assignedTo: currentEmployee.id, status: isInternal ? 'In-Progress' : 'Pending' }); await refreshData(); addNotification('success', 'Mission Accepted.'); } catch (err) { addNotification('alert', 'Auth failed.'); } finally { setProcessingJobIds(prev => { const next = new Set(prev); next.delete(job.id); return next; }); }
+                                            }} className={`flex-1 py-3 rounded-2xl text-[10px] font-black uppercase tracking-[0.15em] flex items-center justify-center gap-2 disabled:opacity-50 transition-all shadow-xl active:scale-95 ${isCritical ? 'bg-red-600 text-white' : 'bg-yellow-500 hover:bg-yellow-400 text-black'}`}>{processingJobIds.has(job.id) ? <RefreshCw className="animate-spin" size={14} /> : <Zap size={14} />} ACCEPT</button>
+                                        )}
                                     </div>
                                 </div>
-
-                                <div className="flex-1 space-y-6 mb-8 relative z-10">
-                                    <div className="grid grid-cols-1 gap-3">
-                                        <div className="bg-black/40 backdrop-blur-md p-4 rounded-3xl border border-white/5 group-hover:border-white/10 transition-colors">
-                                            <p className="text-[9px] text-gray-500 font-black uppercase mb-1 tracking-widest">Items</p>
-                                            <div className="flex items-baseline gap-1">
-                                                <span className="text-2xl font-black text-white leading-none">{job.items || 0}</span>
-                                                <span className="text-[9px] text-gray-600 font-bold uppercase">Units</span>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-3 px-2">
-                                        <div className="flex items-center gap-4">
-                                            <div className="flex flex-col items-center gap-1">
-                                                <div className="w-2 h-2 rounded-full border border-gray-600" />
-                                                <div className="w-[1px] h-8 bg-gradient-to-b from-gray-600 to-yellow-500/50" />
-                                                <div className="w-2 h-2 rounded-full bg-yellow-500 shadow-[0_0_8px_rgba(234,179,8,0.5)]" />
-                                            </div>
-                                            <div className="flex-1 min-w-0">
-                                                <div className="mb-3">
-                                                    <p className="text-[8px] text-gray-600 font-black uppercase tracking-widest mb-0.5">Origin</p>
-                                                    <p className="text-[11px] text-gray-400 font-bold uppercase truncate">{source?.name || 'Unknown Origin'}</p>
-                                                </div>
-                                                <div>
-                                                    <p className="text-[8px] text-yellow-500 font-black uppercase tracking-widest mb-0.5">Destination</p>
-                                                    <p className="text-[13px] text-white font-black uppercase truncate tracking-tight">{dest?.name || 'Unknown Destination'}</p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <button
-                                    onClick={async (e) => {
-                                        e.stopPropagation();
-                                        const currentEmployee = employees.find(e => e.email === user?.email);
-                                        if (!currentEmployee) return;
-                                        const isInternal = !currentEmployee?.driverType || currentEmployee?.driverType === 'internal';
-                                        setProcessingJobIds(prev => new Set(prev).add(job.id));
-                                        try {
-                                            await wmsJobsService.update(job.id, { assignedTo: currentEmployee.id, status: isInternal ? 'In-Progress' : 'Pending' });
-                                            await refreshData();
-                                            addNotification('success', 'Job successfully accepted.');
-                                        } catch (err) { addNotification('alert', 'Failed to accept job.'); } finally {
-                                            setProcessingJobIds(prev => {
-                                                const next = new Set(prev);
-                                                next.delete(job.id);
-                                                return next;
-                                            });
-                                        }
-                                    }}
-                                    className={`w-full py-5 rounded-[1.5rem] text-[10px] font-black uppercase tracking-[0.3em] transition-all relative overflow-hidden flex items-center justify-center gap-3
-                                    ${isCritical ? 'bg-red-600 hover:bg-red-500 text-white' : 'bg-white hover:bg-yellow-400 text-black'}
-                                    group/btn hover:shadow-[0_0_30px_rgba(255,255,255,0.1)] active:scale-95`}
-                                >
-                                    {processingJobIds.has(job.id) ? (
-                                        <RefreshCw className="animate-spin" size={16} />
-                                    ) : (
-                                        <>
-                                            <Zap size={14} className={isCritical ? 'text-white' : 'text-black'} />
-                                            ACCEPT JOB
-                                        </>
-                                    )}
-                                </button>
-                            </div>
-                        );
-                    })
-                )}
-            </div>
-
-            {filteredDispatchJobs.length > 0 && (
-                <div className="mt-4">
-                    <Pagination
-                        currentPage={dispatchCurrentPage}
-                        totalPages={dispatchTotalPages}
-                        totalItems={filteredDispatchJobs.length}
-                        itemsPerPage={DISPATCH_ITEMS_PER_PAGE}
-                        onPageChange={setDispatchCurrentPage}
-                        isLoading={false}
-                        itemName="requests"
-                    />
+                            );
+                        })
+                    )}
+                    {filteredDispatchJobs.length > 0 && <Pagination currentPage={dispatchCurrentPage} totalPages={dispatchTotalPages} totalItems={filteredDispatchJobs.length} itemsPerPage={DISPATCH_ITEMS_PER_PAGE} onPageChange={setDispatchCurrentPage} isLoading={false} itemName="missions" />}
                 </div>
             )}
         </div>

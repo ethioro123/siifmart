@@ -41,16 +41,34 @@ export const ROLE_SEGREGATION_RULES: RoleSegregationRule[] = [
         description: 'HR Manager - Workforce management at HQ'
     },
     {
+        role: 'hr_manager',
+        siteType: 'Administration',
+        department: 'Human Resources',
+        description: 'HR Director - Workforce management at HQ'
+    },
+    {
         role: 'finance_manager',
         siteType: 'Administration',
         department: 'Management',
         description: 'Finance Manager - Financial oversight at HQ'
     },
     {
+        role: 'accountant',
+        siteType: 'Administration',
+        department: 'Management',
+        description: 'Accountant - Financial tracking'
+    },
+    {
         role: 'procurement_manager',
         siteType: 'Administration',
         department: 'Management',
         description: 'Procurement Manager - Supply chain management at HQ'
+    },
+    {
+        role: 'supply_chain_manager',
+        siteType: 'Administration',
+        department: 'Management',
+        description: 'Supply Chain Manager - Supply chain oversight'
     },
     {
         role: 'cs_manager',
@@ -68,7 +86,19 @@ export const ROLE_SEGREGATION_RULES: RoleSegregationRule[] = [
         role: 'it_support',
         siteType: 'Administration',
         department: 'Management',
-        description: 'IT Support - Technical support at HQ'
+        description: 'IT Support - Technical support'
+    },
+    {
+        role: 'data_analyst',
+        siteType: 'Administration',
+        department: 'Management',
+        description: 'Data Analyst - Business intelligence'
+    },
+    {
+        role: 'training_coordinator',
+        siteType: 'Administration',
+        department: 'Human Resources',
+        description: 'Training Coordinator - Staff onboarding'
     },
 
     // ========================================
@@ -79,6 +109,12 @@ export const ROLE_SEGREGATION_RULES: RoleSegregationRule[] = [
         siteType: 'Warehouse',
         department: 'Logistics & Warehouse',
         description: 'Warehouse Manager - Oversees warehouse operations'
+    },
+    {
+        role: 'dispatch_manager',
+        siteType: 'Warehouse',
+        department: 'Logistics & Warehouse',
+        description: 'Dispatch Manager - Oversees dispatch operations'
     },
     {
         role: 'dispatcher',
@@ -93,6 +129,24 @@ export const ROLE_SEGREGATION_RULES: RoleSegregationRule[] = [
         description: 'Picker - Order fulfillment at warehouse'
     },
     {
+        role: 'packer',
+        siteType: 'Warehouse',
+        department: 'Logistics & Warehouse',
+        description: 'Packer - Order packing at warehouse'
+    },
+    {
+        role: 'receiver',
+        siteType: 'Warehouse',
+        department: 'Logistics & Warehouse',
+        description: 'Receiver - Inbound shipment receiving'
+    },
+    {
+        role: 'forklift_operator',
+        siteType: 'Warehouse',
+        department: 'Logistics & Warehouse',
+        description: 'Forklift Operator - Heavy stock movement'
+    },
+    {
         role: 'driver',
         siteType: 'Warehouse',
         department: 'Transport',
@@ -103,31 +157,98 @@ export const ROLE_SEGREGATION_RULES: RoleSegregationRule[] = [
     // RETAIL ROLES - Must be at Store
     // ========================================
     {
+        role: 'store_manager',
+        siteType: 'Store',
+        department: 'Retail Operations',
+        description: 'Store Manager - Overall store leadership'
+    },
+    {
         role: 'store_supervisor',
         siteType: 'Store',
         department: 'Retail Operations',
         description: 'Store Supervisor - Floor management at retail store'
     },
     {
+        role: 'assistant_manager',
+        siteType: 'Store',
+        department: 'Retail Operations',
+        description: 'Assistant Manager - Store operations'
+    },
+    {
+        role: 'shift_lead',
+        siteType: 'Store',
+        department: 'Retail Operations',
+        description: 'Shift Lead - Shift supervision'
+    },
+    {
         role: 'pos',
         siteType: 'Store',
         department: 'Retail Operations',
-        description: 'Cashier - Point of sale at retail store'
+        description: 'Legacy Cashier - Point of sale'
+    },
+    {
+        role: 'cashier',
+        siteType: 'Store',
+        department: 'Retail Operations',
+        description: 'Cashier - Point of sale operations'
+    },
+    {
+        role: 'sales_associate',
+        siteType: 'Store',
+        department: 'Retail Operations',
+        description: 'Sales Associate - Customer floor assistance'
+    },
+    {
+        role: 'stock_clerk',
+        siteType: 'Store',
+        department: 'Retail Operations',
+        description: 'Stock Clerk - Shelf replenishment'
+    },
+    {
+        role: 'customer_service',
+        siteType: 'Store',
+        department: 'Retail Operations',
+        description: 'Customer Service - Returns and assistance'
     },
     {
         role: 'inventory_specialist',
         siteType: 'Store',
         department: 'Retail Operations',
-        description: 'Inventory Specialist - Stock control at retail store'
+        description: 'Inventory Specialist - Stock control'
+    },
+    {
+        role: 'merchandiser',
+        siteType: 'Store',
+        department: 'Retail Operations',
+        description: 'Merchandiser - Display arrangement'
+    },
+    {
+        role: 'loss_prevention',
+        siteType: 'Store',
+        department: 'Security',
+        description: 'Loss Prevention - Store security'
+    },
+    {
+        role: 'returns_clerk',
+        siteType: 'Store',
+        department: 'Retail Operations',
+        description: 'Returns Clerk - Product returns'
     },
 
     // ========================================
     // FLEXIBLE ROLES - Can be at any location
     // ========================================
     {
-        role: 'manager',
+        role: 'regional_manager',
         siteType: 'Any',
-        description: 'Department Manager - Can manage any location type'
+        department: 'Management',
+        description: 'Regional Manager - Oversees multiple locations'
+    },
+    {
+        role: 'operations_manager',
+        siteType: 'Any',
+        department: 'Management',
+        description: 'Operations Manager - Field operations'
     }
 ];
 
@@ -247,8 +368,9 @@ export function autoSelectSiteForRole(
     const requiredType = getRequiredSiteType(role);
 
     if (requiredType === 'Any') {
-        // For flexible roles, return the first available site
-        return sites.length > 0 ? sites[0].id : null;
+        // For flexible roles, we should return null so it doesn't 
+        // forcibly overwrite the user's previously selected site!
+        return null;
     }
 
     // Find a site that matches the required type

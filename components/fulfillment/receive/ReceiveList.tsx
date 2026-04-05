@@ -55,11 +55,14 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
 
     if (filteredReceiveOrdersLength === 0) {
         return (
-            <div className="flex flex-col items-center justify-center py-12 md:py-20 text-center space-y-4 bg-white dark:bg-black rounded-2xl md:rounded-3xl border-2 border-dashed border-zinc-300 dark:border-white/10 shadow-sm">
-                <div className="p-6 md:p-8 bg-zinc-50 dark:bg-white/[0.05] rounded-full border border-zinc-200 dark:border-white/5 shadow-inner">
-                    <Package size={48} className="text-zinc-600 dark:text-zinc-600" />
+            <div className="flex flex-col items-center justify-center py-12 md:py-20 text-center space-y-4 bg-white dark:bg-black rounded-2xl md:rounded-3xl border-2 border-dashed border-slate-200 dark:border-white/10 shadow-sm transition-all">
+                <div className="p-6 md:p-8 bg-slate-50 dark:bg-white/[0.05] rounded-full border border-slate-100 dark:border-white/5 shadow-inner">
+                    <Package size={48} className="text-slate-300 dark:text-zinc-700" />
                 </div>
-                <p className="text-zinc-600 dark:text-zinc-400 font-black uppercase tracking-widest text-xs mt-4">{t('warehouse.noApprovedPOs')}</p>
+                <div>
+                    <p className="text-slate-900 dark:text-white font-black uppercase tracking-[0.2em] text-sm">{t('warehouse.noApprovedManifests') || 'No Active Manifests'}</p>
+                    <p className="text-slate-500 dark:text-zinc-500 font-black uppercase tracking-widest text-[9px] mt-2">{t('warehouse.approvedManifestsWillAppear') || 'Approved manifests will appear here in real-time'}</p>
+                </div>
             </div>
         );
     }
@@ -79,7 +82,6 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                             }
                         });
                     });
-                    console.log('🔍 [ReceiveList] poJobs for', po.id.slice(0, 8), ':', poJobs.length, 'jobs');
                     const allItemsReceived = po.lineItems?.every(item => {
                         const dbReceived = item.receivedQty || 0;
                         const mapReceived = item.productId ? (receivedMap[item.productId] || 0) : 0;
@@ -87,20 +89,24 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                     }) || false;
 
                     return (
-                        <div key={po.id} className={`group bg-white dark:bg-black/40 backdrop-blur-sm border-2 rounded-xl md:rounded-2xl p-3 md:p-6 transition-all relative overflow-hidden shadow-sm hover:shadow-cyan-500/10 active:scale-[0.99] ${allItemsReceived ? 'border-zinc-950 dark:border-white/10' : 'border-zinc-200 dark:border-white/5 hover:border-cyan-500/30 dark:hover:border-cyan-400/30'}`}>
+                        <div key={po.id} className={`group bg-white dark:bg-black/40 backdrop-blur-sm border-2 rounded-xl md:rounded-2xl p-4 md:p-6 transition-all relative overflow-hidden shadow-sm hover:shadow-cyan-500/10 active:scale-[0.995] ${allItemsReceived ? 'border-slate-900 dark:border-white/10' : 'border-slate-200 dark:border-white/5 hover:border-cyan-500/30 dark:hover:border-cyan-400/30'}`}>
                             {/* 🌟 Card Ambient Glow — hidden on mobile */}
                             <div className="hidden md:block absolute -top-24 -right-24 w-48 h-48 bg-cyan-500/5 dark:bg-cyan-500/10 blur-3xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
-                            <div className="flex flex-col sm:flex-row justify-between items-start gap-3 md:gap-4 mb-3 md:mb-5 relative z-10">
+                            <div className="flex flex-col sm:flex-row justify-between items-start gap-3 md:gap-4 mb-4 md:mb-6 relative z-10">
                                 <div className="flex items-center gap-3 md:gap-4 flex-1 min-w-0">
-                                    <div className={`hidden md:flex p-3 rounded-xl flex-shrink-0 transition-all duration-500 ${allItemsReceived ? 'bg-zinc-100 dark:bg-zinc-200 scale-110 shadow-md' : 'bg-zinc-50 dark:bg-white/5 group-hover:bg-cyan-500/10'}`}>
-                                        <Layers size={20} className={allItemsReceived ? 'text-zinc-950 dark:text-zinc-900' : 'text-zinc-900 dark:text-zinc-400 group-hover:text-cyan-400'} />
+                                    <div className={`hidden md:flex p-3.5 rounded-2xl flex-shrink-0 transition-all duration-500 ${allItemsReceived ? 'bg-slate-900 dark:bg-white scale-110 shadow-lg' : 'bg-slate-50 dark:bg-white/5 group-hover:bg-cyan-500/10 border border-slate-100 dark:border-white/5'}`}>
+                                        <Layers size={20} className={allItemsReceived ? 'text-white dark:text-black' : 'text-slate-400 dark:text-zinc-600 group-hover:text-cyan-400'} />
                                     </div>
                                     <div className="min-w-0 flex-1">
-                                        <h3 className="text-base md:text-lg font-black text-zinc-950 dark:text-zinc-200 uppercase tracking-tight truncate">{po.supplierName}</h3>
-                                        <p className="text-[10px] text-zinc-600 dark:text-zinc-500 font-black uppercase tracking-widest mt-1 font-mono">#{po.po_number || po.id.slice(0, 8)} • <span className="text-zinc-900 dark:text-zinc-400">{po.lineItems?.length || 0} Items</span></p>
+                                        <h3 className="text-base md:text-xl font-black text-slate-900 dark:text-white uppercase tracking-tight truncate drop-shadow-sm">{po.supplierName}</h3>
+                                        <div className="flex items-center gap-3 mt-1.5 flex-wrap">
+                                            <span className="text-[10px] text-slate-500 dark:text-zinc-500 font-black uppercase tracking-widest font-mono">#{po.po_number || po.id.slice(0, 8)}</span>
+                                            <span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-zinc-800" />
+                                            <span className="text-[10px] text-slate-900 dark:text-zinc-300 font-black uppercase tracking-widest">{po.lineItems?.length || 0} Line Items</span>
+                                        </div>
                                     </div>
                                 </div>
-                                <div className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-[0.2em] border shadow-sm transition-all ${allItemsReceived ? 'text-zinc-950 dark:text-white border-zinc-950 dark:border-white/20 bg-white dark:bg-white/10' : 'text-zinc-600 dark:text-zinc-500 border-zinc-300 dark:border-white/5 bg-zinc-50/50 dark:bg-black/20 group-hover:border-cyan-500/50'}`}>
+                                <div className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] border shadow-sm transition-all ${allItemsReceived ? 'text-slate-900 dark:text-white border-slate-900 dark:border-white/20 bg-white dark:bg-white/10' : 'text-slate-400 dark:text-zinc-500 border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-black/20 group-hover:border-cyan-500/50'}`}>
                                     {allItemsReceived ? '✓ Authenticated' : 'Awaiting Processing'}
                                 </div>
                             </div>
@@ -115,13 +121,13 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                                     const product = products.find(p => p.id === item.productId);
 
                                     return (
-                                        <div key={item.productId || idx} className={`p-3 md:p-4 rounded-lg md:rounded-xl border-2 transition-all group/item ${isComplete ? 'bg-zinc-50 dark:bg-zinc-900/10 opacity-60 border-zinc-200 dark:border-zinc-800/40' : 'bg-white dark:bg-black/30 border-zinc-200 dark:border-white/10 shadow-sm hover:border-cyan-500/20'}`}>
-                                            <div className="flex flex-col gap-4">
+                                        <div key={item.productId || idx} className={`p-4 md:p-5 rounded-xl border transition-all group/item ${isComplete ? 'bg-slate-50 dark:bg-zinc-900/10 opacity-60 border-slate-200 dark:border-zinc-800/40 shadow-inner' : 'bg-white dark:bg-black/30 border-slate-200 dark:border-white/10 shadow-sm hover:border-cyan-500/30 active:scale-[0.99] cursor-pointer'}`}>
+                                            <div className="flex flex-col gap-5">
                                                 <div className="flex justify-between items-start gap-3">
                                                     <div className="flex-1 min-w-0">
-                                                        <p className={`text-[11px] font-black uppercase tracking-tight truncate ${isComplete ? 'text-zinc-400 dark:text-zinc-600' : 'text-zinc-900 dark:text-zinc-200'}`}>{formatPOItemDescription(item)}</p>
-                                                        <p className="hidden md:block text-[9px] text-zinc-400 dark:text-zinc-500 font-black uppercase tracking-[0.2em] mt-0.5">
-                                                            {jobSkuMap[item.productId || ''] || finalizedSkus[item.productId || ''] || product?.sku || item.sku || 'PENDING'}
+                                                        <p className={`text-[11px] md:text-xs font-black uppercase tracking-tight truncate ${isComplete ? 'text-slate-400 dark:text-zinc-600' : 'text-slate-900 dark:text-white'}`}>{formatPOItemDescription(item)}</p>
+                                                        <p className="text-[9px] text-slate-400 dark:text-zinc-500 font-black uppercase tracking-[0.2em] mt-1.5 font-mono">
+                                                            SKU: {jobSkuMap[item.productId || ''] || finalizedSkus[item.productId || ''] || product?.sku || item.sku || 'PENDING'}
                                                         </p>
                                                     </div>
                                                     <div className="flex flex-col items-end flex-shrink-0">
@@ -131,30 +137,32 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                                                             const isWeightOrVolume = itemUnit.category === 'weight' || itemUnit.category === 'volume';
 
                                                             if (isWeightOrVolume && sizeNum > 0) {
-                                                                // Show as: received/ordered × size+unit  (e.g. 0/30 × 400g)
                                                                 const label = itemUnit.shortLabel.toLowerCase();
                                                                 return (
-                                                                    <span className={`text-lg font-black tabular-nums tracking-tighter ${isComplete ? 'text-zinc-400 dark:text-zinc-600' : 'text-zinc-900 dark:text-zinc-100'}`}>
-                                                                        {receivedQty}<span className="text-zinc-400">/{item.quantity}</span>
-                                                                        <span className="text-[10px] font-black text-zinc-500 dark:text-zinc-400 ml-1">× {sizeNum}{label}</span>
+                                                                    <span className={`text-lg font-black tabular-nums tracking-tighter leading-none ${isComplete ? 'text-slate-400 dark:text-zinc-600' : 'text-slate-900 dark:text-white'}`}>
+                                                                        {receivedQty}<span className="text-slate-400 dark:text-zinc-700">/{item.quantity}</span>
+                                                                        <span className="text-[10px] font-black text-slate-400 dark:text-zinc-500 ml-1 uppercase">× {sizeNum}{label}</span>
                                                                     </span>
                                                                 );
                                                             }
 
-                                                            // Count-based: just show raw numbers
                                                             return (
-                                                                <span className={`text-lg font-black tabular-nums tracking-tighter ${isComplete ? 'text-zinc-400 dark:text-zinc-600' : 'text-zinc-900 dark:text-zinc-100'}`}>
-                                                                    {receivedQty}<span className="text-zinc-400">/{item.quantity}</span>
+                                                                <span className={`text-xl font-black tabular-nums tracking-tighter leading-none ${isComplete ? 'text-slate-400 dark:text-zinc-600' : 'text-slate-900 dark:text-cyan-400'}`}>
+                                                                    {receivedQty}<span className="text-slate-400 dark:text-zinc-700">/{item.quantity}</span>
                                                                 </span>
                                                             );
                                                         })()}
                                                     </div>
                                                 </div>
                                                 <div className="space-y-2">
+                                                    <div className="flex justify-between items-center px-1">
+                                                        <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Inbound Velocity</span>
+                                                        <span className={`text-[8px] font-black uppercase tracking-widest ${isComplete ? 'text-slate-400' : 'text-cyan-500'}`}>{isComplete ? '100% COMPLETE' : `${Math.round((receivedQty / item.quantity) * 100)}% RECEIVED`}</span>
+                                                    </div>
                                                     <ProgressBar
                                                         progress={(receivedQty / item.quantity) * 100}
-                                                        containerClassName="h-1.5 bg-zinc-200 dark:bg-white/5 rounded-full overflow-hidden"
-                                                        fillClassName={`h-full transition-all duration-700 relative ${isComplete ? 'bg-zinc-950 dark:bg-white' : 'bg-cyan-500 dark:bg-cyan-400 shadow-[0_0_10px_rgba(34,211,238,0.5)]'}`}
+                                                        containerClassName="h-1.5 bg-slate-100 dark:bg-white/5 rounded-full overflow-hidden"
+                                                        fillClassName={`h-full transition-all duration-700 relative ${isComplete ? 'bg-slate-900 dark:bg-white' : 'bg-cyan-500 dark:bg-cyan-400 shadow-[0_0_10px_rgba(34,211,238,0.5)]'}`}
                                                     />
                                                 </div>
                                                 {
@@ -166,8 +174,8 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                                                             price: product?.retailPrice,
                                                             category: product?.category,
                                                             expiry: ''
-                                                        })} className="w-full h-8 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-300 text-[10px] font-black uppercase tracking-widest rounded-lg flex items-center justify-center gap-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all">
-                                                            <Printer size={12} className="text-zinc-900 dark:text-zinc-500" /> Reprint
+                                                        })} className="w-full h-10 bg-slate-100 dark:bg-zinc-800/50 border border-slate-200 dark:border-zinc-700 text-slate-900 dark:text-zinc-200 text-[10px] font-black uppercase tracking-widest rounded-xl flex items-center justify-center gap-2 hover:bg-slate-200 dark:hover:bg-zinc-800 transition-all shadow-sm">
+                                                            <Printer size={14} className="text-slate-600 dark:text-zinc-500" /> Reprint Label
                                                         </button>
                                                     ) : (
                                                         <Protected permission="RECEIVE_PO">
@@ -177,13 +185,11 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                                                                 const randomStr = Math.random().toString(36).substring(2, 6).toUpperCase();
                                                                 const newBatch = `BN-${dateStr}-${randomStr}`;
 
-                                                                // Look up SKU from product catalog if PO item doesn't have one
                                                                 const resolvedSku = item.sku
                                                                     || (item.productId ? (allProducts.find(p => p.id === item.productId)?.sku || '') : '')
                                                                     || allProducts.find(p => p.name === item.productName)?.sku
                                                                     || '';
 
-                                                                // Just use the exact name saved on the PO
                                                                 let fullName = item.productName || '';
 
                                                                 setSplitReceivingItem({
@@ -196,7 +202,7 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                                                                     id: `variant-${Date.now()}`,
                                                                     sku: resolvedSku,
                                                                     skuType: 'existing',
-                                                                    quantity: remainingQty,
+                                                                    quantity: 0,
                                                                     productId: item.productId,
                                                                     productName: fullName,
                                                                     batchNumber: newBatch
@@ -204,12 +210,12 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                                                                 setIsSplitReceiving(true);
                                                             }}
                                                                 disabled={isSubmitting}
-                                                                className="w-full h-12 md:h-10 bg-zinc-100 dark:bg-cyan-500 text-zinc-950 dark:text-black hover:bg-zinc-200 dark:hover:bg-cyan-400 text-[10px] font-black uppercase tracking-widest rounded-xl flex items-center justify-center gap-1.5 shadow-sm dark:shadow-cyan-500/20 active:scale-[0.98] transition-all border border-zinc-300 dark:border-cyan-400/30 disabled:opacity-50 disabled:cursor-not-allowed">
+                                                                className="w-full h-12 md:h-11 bg-cyan-500 dark:bg-cyan-500 text-white dark:text-black hover:bg-cyan-600 dark:hover:bg-cyan-400 text-[10px] font-black uppercase tracking-widest rounded-xl flex items-center justify-center gap-2 shadow-md dark:shadow-cyan-500/20 active:scale-[0.98] transition-all border border-cyan-400 dark:border-cyan-400/30 disabled:opacity-50 disabled:cursor-not-allowed">
                                                                 {isSubmitting ? (
-                                                                    <Loader2 size={14} className="animate-spin" />
+                                                                    <Loader2 size={16} className="animate-spin" />
                                                                 ) : (
                                                                     <>
-                                                                        <Plus size={14} /> Receive Item
+                                                                        <Plus size={16} /> Receive Item
                                                                     </>
                                                                 )}
                                                             </button>
@@ -224,21 +230,27 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
 
                             {
                                 allItemsReceived && (
-                                    <div className="mt-4 md:mt-6 pt-4 md:pt-6 border-t border-zinc-100 dark:border-white/5 flex flex-col sm:flex-row justify-between items-center gap-3 md:gap-4 relative z-10">
-                                        <div className="flex items-center gap-3 text-zinc-900 dark:text-zinc-300">
-                                            <div className="p-2 bg-zinc-100 dark:bg-zinc-800 rounded-lg">
-                                                <CheckCircle size={18} className="text-zinc-950 dark:text-zinc-400" />
+                                    <div className="mt-4 md:mt-8 pt-4 md:pt-8 border-t-2 border-slate-100 dark:border-white/5 flex flex-col sm:flex-row justify-between items-center gap-4 md:gap-6 relative z-10">
+                                        <div className="flex items-center gap-3">
+                                            <div className="p-2.5 bg-slate-900 dark:bg-zinc-800 rounded-xl shadow-lg border border-slate-800 dark:border-zinc-700">
+                                                <CheckCircle size={20} className="text-white dark:text-cyan-400" />
                                             </div>
-                                            <p className="text-[10px] font-black uppercase tracking-[0.2em]">Inbound Authenticated</p>
+                                            <div>
+                                                <p className="text-[10px] font-black text-slate-900 dark:text-white uppercase tracking-[0.2em] leading-none mb-1">Inbound Verified</p>
+                                                <p className="text-[9px] font-black text-slate-400 dark:text-zinc-600 uppercase tracking-widest">Awaiting final manifest authentication</p>
+                                            </div>
                                         </div>
                                         <button
                                             onClick={() => { setReviewPO(po); setShowReviewModal(true); }}
                                             disabled={isSubmitting}
-                                            className="w-full sm:w-auto px-8 py-3 bg-zinc-100 dark:bg-white text-zinc-950 dark:text-black hover:bg-zinc-200 dark:hover:bg-zinc-50 text-xs font-black uppercase tracking-widest rounded-xl shadow-md active:scale-[0.98] transition-all border border-zinc-300 dark:border-white/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
+                                            className="w-full sm:w-auto px-10 py-4 bg-slate-900 dark:bg-white text-white dark:text-black hover:bg-slate-800 dark:hover:bg-gray-100 text-[10px] font-black uppercase tracking-widest rounded-2xl shadow-xl active:scale-[0.98] transition-all border border-slate-800 dark:border-white/10 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3">
                                             {isSubmitting ? (
-                                                <Loader2 size={16} className="animate-spin" />
+                                                <Loader2 size={18} className="animate-spin" />
                                             ) : (
-                                                'Finalize Manifest'
+                                                <>
+                                                    Authenticate Manifest
+                                                    <CheckCircle size={16} />
+                                                </>
                                             )}
                                         </button>
                                     </div>
@@ -248,7 +260,9 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                     );
                 })}
             </div>
-            <Pagination currentPage={receiveCurrentPage} totalPages={receiveOrdersTotalPages} totalItems={filteredReceiveOrdersLength} itemsPerPage={itemsPerPage} onPageChange={setReceiveCurrentPage} itemName="orders" />
+            <div className="pt-4 border-t border-slate-100 dark:border-white/5">
+                <Pagination currentPage={receiveCurrentPage} totalPages={receiveOrdersTotalPages} totalItems={filteredReceiveOrdersLength} itemsPerPage={itemsPerPage} onPageChange={setReceiveCurrentPage} itemName="manifests" />
+            </div>
         </div>
     );
 };

@@ -34,7 +34,10 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
 
     if (!po) return null;
 
-    const canApprove = user?.role === 'manager' || user?.role === 'admin' || user?.role === 'super_admin';
+    const isCEO = user?.role === 'super_admin';
+    const isProcurementManager = user?.role === 'procurement_manager';
+    const canApprove = isProcurementManager || user?.role === 'finance_manager' || user?.role === 'admin' || isCEO;
+    const canFullDelete = isCEO || isProcurementManager;
 
     const handleApprovePO = async () => {
         if (!window.confirm(`Are you sure you want to approve PO ${formatPONumber(po)}?`)) return;
@@ -105,10 +108,10 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
             <div className="space-y-6 print:hidden">
                 <div className="flex items-start justify-between">
                     <div>
-                        <h2 className="text-2xl font-bold text-white tracking-tight">
+                        <h2 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">
                             {formatPONumber(po)}
                         </h2>
-                        <p className="text-sm text-gray-400 mt-1">
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                             {po.supplierName}
                             {po.supplierId?.startsWith('MANUAL') && (
                                 <span className="ml-2 text-[10px] bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded">MANUAL</span>
@@ -134,26 +137,26 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
 
                 {/* Key Info - Dark Dashboard Grid */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                    <div className="bg-white/5 rounded-xl p-4">
-                        <p className="text-xs text-secondary uppercase tracking-widest font-medium mb-1">Date</p>
-                        <p className="text-white font-medium">{po.date || (po.created_at ? formatDateTime(po.created_at, { showTime: true }) : 'N/A')}</p>
+                    <div className="bg-gray-50 dark:bg-white/5 rounded-xl p-4 border border-gray-100 dark:border-white/5 shadow-sm dark:shadow-none">
+                        <p className="text-[10px] text-gray-500 dark:text-secondary uppercase tracking-widest font-bold mb-1">Date</p>
+                        <p className="text-gray-900 dark:text-white font-bold">{po.date || (po.created_at ? formatDateTime(po.created_at, { showTime: true }) : 'N/A')}</p>
                     </div>
-                    <div className="bg-white/5 rounded-xl p-4">
-                        <p className="text-xs text-secondary uppercase tracking-widest font-medium mb-1">Requested By</p>
-                        <p className="text-white font-medium truncate">{po.requestedBy || po.createdBy || 'Unknown'}</p>
+                    <div className="bg-gray-50 dark:bg-white/5 rounded-xl p-4 border border-gray-100 dark:border-white/5 shadow-sm dark:shadow-none">
+                        <p className="text-[10px] text-gray-500 dark:text-secondary uppercase tracking-widest font-bold mb-1">Requested By</p>
+                        <p className="text-gray-900 dark:text-white font-bold truncate">{po.requestedBy || po.createdBy || 'Unknown'}</p>
                     </div>
-                    <div className="bg-white/5 rounded-xl p-4">
-                        <p className="text-xs text-secondary uppercase tracking-widest font-medium mb-1">Destination</p>
+                    <div className="bg-gray-50 dark:bg-white/5 rounded-xl p-4 border border-gray-100 dark:border-white/5 shadow-sm dark:shadow-none">
+                        <p className="text-[10px] text-gray-500 dark:text-secondary uppercase tracking-widest font-bold mb-1">Destination</p>
                         <div className="flex items-center gap-1">
-                            <MapPin size={12} className="text-gray-500" />
-                            <p className="text-white font-medium truncate">
+                            <MapPin size={12} className="text-gray-400 dark:text-gray-500" />
+                            <p className="text-gray-900 dark:text-white font-bold truncate">
                                 {sites?.find(s => s.id === po.siteId)?.name || po.destination || 'N/A'}
                             </p>
                         </div>
                     </div>
-                    <div className="bg-white/5 rounded-xl p-4">
-                        <p className="text-xs text-secondary uppercase tracking-widest font-medium mb-1">Expected</p>
-                        <p className="text-white font-medium">{po.expectedDelivery || 'N/A'}</p>
+                    <div className="bg-gray-50 dark:bg-white/5 rounded-xl p-4 border border-gray-100 dark:border-white/5 shadow-sm dark:shadow-none">
+                        <p className="text-[10px] text-gray-500 dark:text-secondary uppercase tracking-widest font-bold mb-1">Expected</p>
+                        <p className="text-gray-900 dark:text-white font-bold">{po.expectedDelivery || 'N/A'}</p>
                     </div>
                 </div>
 
@@ -161,9 +164,9 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
                 {(po.paymentTerms || po.approvedBy) && (
                     <div className="flex flex-wrap gap-4 text-sm">
                         {po.paymentTerms && (
-                            <div className="flex items-center gap-1 text-gray-400">
-                                <span className="text-gray-500 uppercase font-medium">Terms:</span>
-                                <span className="text-white font-semibold">{po.paymentTerms}</span>
+                            <div className="flex items-center gap-1 text-gray-500 dark:text-gray-400 text-xs">
+                                <span className="uppercase font-bold tracking-widest text-[9px]">Terms:</span>
+                                <span className="text-gray-900 dark:text-white font-black italic">{po.paymentTerms}</span>
                             </div>
                         )}
                         {po.approvedBy && (
@@ -180,46 +183,46 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
 
                 {/* Order Items Table */}
                 <div>
-                    <div className="flex items-center justify-between mb-3">
-                        <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider">
-                            Order Items
+                    <div className="flex items-center justify-between mb-3 px-1">
+                        <h3 className="text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest">
+                            Order Payload
                         </h3>
-                        <span className="text-xs text-gray-500">
-                            {po.lineItems?.reduce((sum, item) => sum + item.quantity, 0) || 0} Total Units
+                        <span className="text-[10px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest">
+                            {po.lineItems?.reduce((sum, item) => sum + item.quantity, 0) || 0} Total Manifest Units
                         </span>
                     </div>
-                    <div className="bg-white/5 rounded-xl overflow-hidden">
+                    <div className="bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-200 dark:border-white/5 overflow-hidden shadow-sm dark:shadow-none">
                         <table className="w-full">
                             <thead>
-                                <tr className="border-b border-white/10">
-                                    <th className="text-left p-4 text-xs text-gray-500 font-medium uppercase tracking-wider w-8">#</th>
-                                    <th className="text-left p-4 text-xs text-gray-500 font-medium uppercase tracking-wider w-24">Item Code</th>
-                                    <th className="text-left p-4 text-xs text-gray-500 font-medium uppercase tracking-wider min-w-[250px]">Description</th>
-                                    <th className="text-right p-4 text-xs text-gray-500 font-medium uppercase tracking-wider w-20">Qty</th>
-                                    <th className="text-right p-4 text-xs text-gray-500 font-medium uppercase tracking-wider w-24">Unit Price</th>
-                                    <th className="text-right p-4 text-xs text-gray-500 font-medium uppercase tracking-wider w-24">Amount</th>
-                                    <th className="w-10"></th>
+                                <tr className="bg-gray-100/50 dark:bg-black/20 border-b border-gray-200 dark:border-white/5">
+                                    <th className="text-left p-4 text-[10px] text-gray-500 dark:text-gray-500 font-black uppercase tracking-widest w-8">#</th>
+                                    <th className="text-left p-4 text-[10px] text-gray-500 dark:text-gray-500 font-black uppercase tracking-widest w-24">SKU</th>
+                                    <th className="text-left p-4 text-[10px] text-gray-500 dark:text-gray-500 font-black uppercase tracking-widest min-w-[250px]">Manifest Description</th>
+                                    <th className="text-right p-4 text-[10px] text-gray-500 dark:text-gray-500 font-black uppercase tracking-widest w-20">Qty</th>
+                                    <th className="text-right p-4 text-[10px] text-gray-500 dark:text-gray-500 font-black uppercase tracking-widest w-24">Cost</th>
+                                    <th className="text-right p-4 text-[10px] text-gray-500 dark:text-gray-500 font-black uppercase tracking-widest w-24">Total</th>
+                                    <th className="w-10 px-4"></th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-white/5">
+                            <tbody className="divide-y divide-gray-200 dark:divide-white/5">
                                 {po.lineItems?.map((item, i) => (
                                     <React.Fragment key={i}>
                                         <tr
-                                            className={`hover:bg-white/5 transition-colors cursor-pointer ${expandedItems[i] ? 'bg-white/5' : ''}`}
+                                            className={`hover:bg-blue-50 dark:hover:bg-white/5 transition-colors cursor-pointer ${expandedItems[i] ? 'bg-blue-50 dark:bg-black/20' : ''}`}
                                             onClick={() => toggleItem(i)}
                                         >
-                                            <td className="p-4 text-gray-500 text-sm">{(i + 1).toString().padStart(2, '0')}</td>
-                                            <td className="p-4 text-gray-300 text-xs font-mono">{item.sku || allProducts?.find(p => p.id === item.productId)?.sku || allProducts?.find(p => p.name === item.productName)?.sku || '—'}</td>
+                                            <td className="p-4 text-gray-400 dark:text-gray-500 text-[10px] font-black">{(i + 1).toString().padStart(2, '0')}</td>
+                                            <td className="p-4 text-gray-600 dark:text-gray-400 text-xs font-mono font-bold">{item.sku || allProducts?.find(p => p.id === item.productId)?.sku || allProducts?.find(p => p.name === item.productName)?.sku || '—'}</td>
                                             <td className="p-4">
-                                                <div className="text-white font-bold truncate max-w-xs">{formatPOItemDescription(item)}</div>
+                                                <div className="text-gray-900 dark:text-white font-black text-sm tracking-tight truncate max-w-xs">{formatPOItemDescription(item)}</div>
                                                 {item.productId?.startsWith('CUSTOM') && (
-                                                    <span className="inline-block mt-1 text-[10px] bg-green-500/20 text-green-400 px-1.5 py-0.5 rounded">Custom</span>
+                                                    <span className="inline-block mt-1 text-[10px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-1.5 py-0.5 rounded font-black tracking-widest uppercase italic">Custom Resource</span>
                                                 )}
                                             </td>
-                                            <td className="p-4 text-gray-300 text-right font-black">{item.quantity}</td>
-                                            <td className="p-4 text-gray-400 text-right font-mono">{formatCompactNumber(item.unitCost, { currency: CURRENCY_SYMBOL })}</td>
-                                            <td className="p-4 text-cyber-primary text-right font-mono font-black">{formatCompactNumber(item.totalCost, { currency: CURRENCY_SYMBOL })}</td>
-                                            <td className="p-4 text-gray-500">
+                                            <td className="p-4 text-gray-900 dark:text-white text-right font-black tabular-nums">{item.quantity}</td>
+                                            <td className="p-4 text-gray-500 dark:text-gray-500 text-right font-black font-mono tabular-nums">{formatCompactNumber(item.unitCost, { currency: CURRENCY_SYMBOL })}</td>
+                                            <td className="p-4 text-blue-600 dark:text-cyber-primary text-right font-black font-mono tabular-nums">{formatCompactNumber(item.totalCost, { currency: CURRENCY_SYMBOL })}</td>
+                                            <td className="p-4 text-gray-400 dark:text-gray-500">
                                                 {expandedItems[i] ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                                             </td>
                                         </tr>
@@ -260,28 +263,28 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
                 </div>
 
                 {/* Summary */}
-                <div className="flex justify-end">
-                    <div className="bg-cyber-primary/10 border border-cyber-primary/30 rounded-xl p-5 min-w-[280px]">
-                        <div className="space-y-3 text-sm">
-                            <div className="flex justify-between text-gray-400">
-                                <span className="uppercase tracking-widest text-[10px] font-semibold">Subtotal</span>
-                                <span className="font-mono text-white">{CURRENCY_SYMBOL} {(po.totalAmount - (po.taxAmount || 0)).toLocaleString()}</span>
+                <div className="flex justify-end pt-2">
+                    <div className="bg-blue-50 dark:bg-cyber-primary/10 border border-blue-200 dark:border-cyber-primary/30 rounded-2xl p-6 min-w-[300px] shadow-sm dark:shadow-none">
+                        <div className="space-y-4 text-sm font-black">
+                            <div className="flex justify-between text-gray-500 dark:text-gray-400">
+                                <span className="uppercase tracking-[0.2em] text-[9px]">Base Payload</span>
+                                <span className="font-mono text-gray-900 dark:text-white tabular-nums">{CURRENCY_SYMBOL} {(po.totalAmount - (po.taxAmount || 0)).toLocaleString()}</span>
                             </div>
                             {po.shippingCost && po.shippingCost > 0 ? (
-                                <div className="flex justify-between text-gray-400">
-                                    <span className="uppercase tracking-widest text-[10px] font-semibold">Shipping</span>
-                                    <span className="font-mono text-white">{CURRENCY_SYMBOL} {po.shippingCost.toLocaleString()}</span>
+                                <div className="flex justify-between text-gray-500 dark:text-gray-400">
+                                    <span className="uppercase tracking-[0.2em] text-[9px]">Logistics Filter</span>
+                                    <span className="font-mono text-gray-900 dark:text-white tabular-nums">{CURRENCY_SYMBOL} {po.shippingCost.toLocaleString()}</span>
                                 </div>
                             ) : null}
                             {po.taxAmount && po.taxAmount > 0 ? (
-                                <div className="flex justify-between text-gray-400">
-                                    <span className="uppercase tracking-widest text-[10px] font-semibold">Tax</span>
-                                    <span className="font-mono text-white">{CURRENCY_SYMBOL} {po.taxAmount.toLocaleString()}</span>
+                                <div className="flex justify-between text-gray-500 dark:text-gray-400">
+                                    <span className="uppercase tracking-[0.2em] text-[9px]">Territory Levy</span>
+                                    <span className="font-mono text-gray-900 dark:text-white tabular-nums">{CURRENCY_SYMBOL} {po.taxAmount.toLocaleString()}</span>
                                 </div>
                             ) : null}
-                            <div className="flex justify-between pt-4 mt-2 border-t border-cyber-primary/30">
-                                <span className="text-gray-400 font-bold uppercase tracking-widest text-xs mt-1">Total</span>
-                                <span className="text-2xl font-black text-cyber-primary font-mono">{CURRENCY_SYMBOL} {po.totalAmount.toLocaleString()}</span>
+                            <div className="flex justify-between pt-5 mt-2 border-t-2 border-blue-100 dark:border-cyber-primary/30 items-center">
+                                <span className="text-gray-600 dark:text-gray-400 uppercase tracking-[0.3em] text-[10px]">Total Authority</span>
+                                <span className="text-3xl font-black text-blue-600 dark:text-cyber-primary font-mono tabular-nums leading-none tracking-tighter">{CURRENCY_SYMBOL}{po.totalAmount.toLocaleString()}</span>
                             </div>
                         </div>
                     </div>
@@ -289,9 +292,9 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
 
                 {/* Notes */}
                 {po.notes && !po.notes.includes('Order received and processed') && (
-                    <div className="bg-white/5 rounded-xl p-4">
-                        <p className="text-xs text-gray-500 uppercase tracking-widest font-semibold mb-2">Notes & Instructions</p>
-                        <p className="text-sm text-gray-400 whitespace-pre-wrap">
+                    <div className="bg-gray-50 dark:bg-white/5 rounded-2xl p-6 border border-gray-100 dark:border-white/5">
+                        <p className="text-[10px] text-gray-500 dark:text-gray-500 uppercase tracking-widest font-black mb-3">Protocol Notes & Instructions</p>
+                        <p className="text-sm text-gray-700 dark:text-gray-400 whitespace-pre-wrap leading-relaxed italic">
                             {po.notes.replace(/\[APPROVED_BY:.*?\]/g, '').replace(/\[SITES:.*?\]/g, '').replace(/\[Multi-Site Order.*?\]/g, '').trim()}
                         </p>
                     </div>
@@ -345,25 +348,29 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
                             <Printer size={16} /> Print
                         </button>
 
-                        {(po.status === 'Draft' || po.status === 'Approved') && (
-                            <button
-                                onClick={() => {
-                                    onEdit(po);
-                                    onClose();
-                                }}
-                                className="py-3 bg-white/5 hover:bg-blue-500/10 text-gray-300 hover:text-blue-400 rounded-xl transition-colors flex items-center justify-center gap-2 font-medium border border-transparent hover:border-blue-500/20"
-                            >
-                                <Edit3 size={16} /> Edit
-                            </button>
-                        )}
-
-                        {(po.status === 'Approved' || po.status === 'Pending' || po.status === 'Draft' || po.status === 'Rejected' || po.status === 'Cancelled') && (
-                            <button
-                                onClick={handleDeletePO}
-                                className="py-3 bg-white/5 hover:bg-red-500/10 text-gray-300 hover:text-red-400 rounded-xl transition-colors flex items-center justify-center gap-2 font-medium border border-transparent hover:border-red-500/20"
-                            >
-                                <Trash2 size={16} /> Delete
-                            </button>
+                        {/* Edit & Delete Action Logic:
+                            1. CEO/Procurement Manager can Edit/Delete anything NOT fully Received.
+                            2. Other staff can ONLY Edit/Delete their own Draft POs.
+                        */}
+                        {((canFullDelete && po.status !== 'Received') || 
+                          (po.status === 'Draft' && (po.createdBy === user?.name || po.requestedBy === user?.name))) && (
+                            <>
+                                <button
+                                    onClick={() => {
+                                        onEdit(po);
+                                        onClose();
+                                    }}
+                                    className="py-3 bg-white/5 hover:bg-blue-500/10 text-gray-300 hover:text-blue-400 rounded-xl transition-colors flex items-center justify-center gap-2 font-medium border border-transparent hover:border-blue-500/20"
+                                >
+                                    <Edit3 size={16} /> Edit
+                                </button>
+                                <button
+                                    onClick={handleDeletePO}
+                                    className="py-3 bg-white/5 hover:bg-red-500/10 text-gray-300 hover:text-red-400 rounded-xl transition-colors flex items-center justify-center gap-2 font-medium border border-transparent hover:border-red-500/20"
+                                >
+                                    <Trash2 size={16} /> Delete
+                                </button>
+                            </>
                         )}
 
                         <button

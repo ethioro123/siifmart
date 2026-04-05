@@ -52,12 +52,12 @@ export const DocksInboundView: React.FC<DocksInboundViewProps> = ({
             {viewMode === 'Process' ? (
                 <>
                     {/* DOCK TERMINAL MAP */}
-                    <div className="flex-1 bg-white/5 backdrop-blur-xl border border-white/10 rounded-[2rem] p-6 lg:p-8 relative overflow-hidden group shadow-2xl lg:overflow-y-auto custom-scrollbar">
+                    <div className="flex-1 bg-white dark:bg-white/5 backdrop-blur-xl border border-slate-200 dark:border-white/10 rounded-[2rem] p-6 lg:p-8 relative overflow-hidden group shadow-sm dark:shadow-2xl lg:overflow-y-auto custom-scrollbar">
                         <div className="absolute -top-24 -right-24 w-64 h-64 bg-blue-600/10 blur-[100px] rounded-full pointer-events-none" />
 
                         <div className="flex justify-between items-center mb-8 relative z-10">
                             <div>
-                                <h3 className="text-xl font-black text-white tracking-tight uppercase flex items-center gap-3">
+                                <h3 className="text-xl font-black text-slate-900 dark:text-white tracking-tight uppercase flex items-center gap-3">
                                     <div className="p-2 bg-blue-600/20 rounded-xl">
                                         <Download className="text-blue-400" size={20} />
                                     </div>
@@ -96,7 +96,7 @@ export const DocksInboundView: React.FC<DocksInboundViewProps> = ({
                                                 'bg-orange-500'
                                             } `} />
 
-                                        <span className="absolute top-4 left-5 font-black text-white/20 text-xl tracking-tighter">{dock}</span>
+                                        <span className="absolute top-4 left-5 font-black text-slate-900/10 dark:text-white/20 text-xl tracking-tighter">{dock}</span>
 
                                         <div className="relative">
                                             {status === 'Occupied' ? (
@@ -122,7 +122,7 @@ export const DocksInboundView: React.FC<DocksInboundViewProps> = ({
                                             </span>
                                             {status === 'Occupied' && data.vesselName && (
                                                 <div className="flex flex-col items-center gap-2 mt-2">
-                                                    <p className="text-[8px] text-gray-500 font-bold uppercase tracking-tighter max-w-[80px] truncate">{data.vesselName}</p>
+                                                    <p className="text-[8px] text-gray-500 font-bold uppercase tracking-tighter break-words leading-tight">{data.vesselName}</p>
                                                     {/* [NEW] Quick Confirm Unload - One-click, stays on DOCKS */}
                                                     <button
                                                         onClick={(e) => {
@@ -140,7 +140,7 @@ export const DocksInboundView: React.FC<DocksInboundViewProps> = ({
                                                             e.stopPropagation();
                                                             handleOpenManifest(dock);
                                                         }}
-                                                        className="px-3 py-1 bg-white/5 hover:bg-white/10 text-gray-400 text-[7px] font-bold uppercase tracking-widest rounded-lg border border-white/10 transition-all active:scale-95 whitespace-nowrap"
+                                                        className="px-3 py-1 bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-500 dark:text-gray-400 text-[7px] font-bold uppercase tracking-widest rounded-lg border border-slate-200 dark:border-white/10 transition-all active:scale-95 whitespace-nowrap"
                                                     >
                                                         View Manifest
                                                     </button>
@@ -151,7 +151,7 @@ export const DocksInboundView: React.FC<DocksInboundViewProps> = ({
                                 );
                             })}
 
-                            <button className="aspect-square rounded-3xl border-2 border-dashed border-white/5 bg-white/2 flex flex-col items-center justify-center gap-3 group hover:border-blue-500/30 hover:bg-blue-600/5 transition-all">
+                            <button className="aspect-square rounded-3xl border-2 border-dashed border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-white/2 flex flex-col items-center justify-center gap-3 group hover:border-blue-500/30 hover:bg-blue-600/5 transition-all">
                                 <div className="p-3 bg-white/5 rounded-2xl group-hover:bg-blue-600/20 transition-all">
                                     <Plus size={24} className="text-gray-600 group-hover:text-blue-400" />
                                 </div>
@@ -173,24 +173,24 @@ export const DocksInboundView: React.FC<DocksInboundViewProps> = ({
                                     <p className="text-xs text-gray-600">Please confirm the unload manifest.</p>
                                 </div>
                                 <div className="text-right">
-                                    <p className="text-xl font-black text-white">{selectedManifestPO?.lineItems?.length || 0}</p>
+                                    <p className="text-xl font-black text-slate-900 dark:text-white">{selectedManifestPO?.lineItems?.length || 0}</p>
                                     <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Line Items</p>
                                 </div>
                             </div>
 
-                            <div className="bg-black/40 rounded-xl border border-white/10 overflow-hidden mb-8 max-h-[300px] overflow-y-auto custom-scrollbar">
+                            <div className="bg-slate-50 dark:bg-black/40 rounded-xl border border-slate-200 dark:border-white/10 overflow-hidden mb-8 max-h-[300px] overflow-y-auto custom-scrollbar">
                                 <table className="w-full text-left">
-                                    <thead className="bg-white/5">
+                                    <thead className="bg-slate-100 dark:bg-white/5">
                                         <tr>
                                             <th className="px-4 py-2 text-[10px] text-gray-500 font-black uppercase tracking-widest">Item / SKU</th>
                                             <th className="px-4 py-2 text-[10px] text-gray-500 font-black uppercase tracking-widest text-right">Qty</th>
                                         </tr>
                                     </thead>
-                                    <tbody className="divide-y divide-white/5">
+                                    <tbody className="divide-y divide-slate-100 dark:divide-white/5">
                                         {selectedManifestPO?.lineItems?.map((item: any, idx: number) => (
                                             <tr key={idx} className="hover:bg-white/5 transition-colors">
                                                 <td className="px-4 py-2">
-                                                    <p className="text-xs font-bold text-white">{item.productName}</p>
+                                                    <p className="text-xs font-bold text-slate-900 dark:text-white">{item.productName}</p>
                                                     <p className="text-[10px] text-gray-500 font-mono">{item.sku || 'NO SKU'}</p>
                                                 </td>
                                                 <td className="px-4 py-2 text-right text-xs font-mono font-bold text-blue-400">
@@ -205,7 +205,7 @@ export const DocksInboundView: React.FC<DocksInboundViewProps> = ({
                             <div className="flex gap-3">
                                 <button
                                     onClick={() => setManifestModalOpen(false)}
-                                    className="flex-1 py-3 rounded-xl border border-white/10 text-gray-400 text-xs font-bold uppercase tracking-widest hover:bg-white/5 transition-all"
+                                    className="flex-1 py-3 rounded-xl border border-slate-200 dark:border-white/10 text-slate-500 dark:text-gray-400 text-xs font-bold uppercase tracking-widest hover:bg-slate-100 dark:hover:bg-white/5 transition-all"
                                 >
                                     Cancel
                                 </button>
@@ -221,11 +221,11 @@ export const DocksInboundView: React.FC<DocksInboundViewProps> = ({
                     </Modal>
 
                     {/* INBOUND LOGISTICS QUEUE */}
-                    <div className="w-full lg:w-80 xl:w-96 shrink-0 bg-white/5 backdrop-blur-xl border border-white/10 rounded-[2rem] p-6 flex flex-col shadow-2xl relative overflow-hidden lg:h-full">
+                    <div className="w-full lg:w-80 xl:w-96 shrink-0 bg-white dark:bg-white/5 backdrop-blur-xl border border-slate-200 dark:border-white/10 rounded-[2rem] p-6 flex flex-col shadow-sm dark:shadow-2xl relative overflow-hidden lg:h-full">
                         <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-blue-600/5 blur-[80px] rounded-full" />
 
                         <div className="flex justify-between items-center mb-6 relative z-10 shrink-0">
-                            <h3 className="text-sm font-black text-white tracking-widest uppercase flex items-center gap-2">
+                            <h3 className="text-sm font-black text-slate-900 dark:text-white tracking-widest uppercase flex items-center gap-2">
                                 {t('warehouse.docks.inboundQueue')}
                                 <span className="h-1 w-1 rounded-full bg-gray-600" />
                                 <span className="text-blue-400 font-mono">{inboundQueue.length.toString().padStart(2, '0')}</span>
@@ -237,13 +237,13 @@ export const DocksInboundView: React.FC<DocksInboundViewProps> = ({
 
                         <div className="flex-1 overflow-y-auto space-y-4 relative z-10 custom-scrollbar pr-2">
                             {inboundQueue.map(vessel => (
-                                <div key={vessel.id} className={`group p-5 bg-black/40 rounded-3xl border transition-all duration-500 relative overflow-hidden shadow-lg ${selectedQueueVessel?.id === vessel.id ? 'border-blue-500 shadow-blue-500/20 bg-blue-500/5' : 'border-white/5 hover:border-blue-500/30'} `}>
+                                <div key={vessel.id} className={`group p-5 bg-slate-50 dark:bg-black/40 rounded-3xl border transition-all duration-500 relative overflow-hidden shadow-sm dark:shadow-lg ${selectedQueueVessel?.id === vessel.id ? 'border-blue-500 shadow-blue-500/20 bg-blue-500/5' : 'border-slate-100 dark:border-white/5 hover:border-blue-500/30'} `}>
                                     <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/5 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
 
                                     <div className="flex justify-between items-start mb-4">
                                         <div>
                                             <div className="flex items-center gap-2">
-                                                <p className="text-xs font-black text-white uppercase tracking-widest">{vessel.vesselName}</p>
+                                                <p className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-widest">{vessel.vesselName}</p>
                                                 {vessel.priority === 'High' && <div className="px-1.5 py-0.5 bg-yellow-500/20 text-yellow-500 text-[8px] font-black rounded border border-yellow-500/20">{t('warehouse.priority')}</div>}
                                             </div>
                                         </div>

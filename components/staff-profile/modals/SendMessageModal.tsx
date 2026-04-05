@@ -1,5 +1,5 @@
 import React from 'react';
-import Modal from '../../ui/Modal';
+import Modal from '../../Modal';
 import { Employee } from '../../../types';
 
 interface SendMessageModalProps {

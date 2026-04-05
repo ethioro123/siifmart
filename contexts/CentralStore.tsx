@@ -93,12 +93,17 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       if (profile) {
         console.log('CentralStore: Profile found in DB, syncing state...');
         const rawRole = profile.role;
-        const normalizedRole = rawRole.toLowerCase().trim().replace(/[\s-]/g, '_');
+        const rawNormalized = rawRole.toLowerCase().trim().replace(/[\s-]/g, '_');
+        
+        // Map common aliases to internal role keys used in ACTION_PERMISSIONS
+        let mappedRole = rawNormalized;
+        if (rawNormalized === 'ceo') mappedRole = 'super_admin';
+        else if (rawNormalized === 'procurement') mappedRole = 'procurement_manager';
 
         setUser({
           id: profile.id,
           name: profile.name,
-          role: normalizedRole as UserRole,
+          role: mappedRole as UserRole,
           avatar: profile.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.name)}&background=0D8ABC&color=fff`,
           title: rawRole.charAt(0).toUpperCase() + rawRole.slice(1),
           siteId: profile.siteId,

@@ -36,15 +36,19 @@ export const generateBarcodeCanvas = (
 
     const canvas = document.createElement('canvas');
 
+    // Use CODE128B for alphanumeric values with special chars (hyphens, etc.)
+    const safeFormat = format === 'CODE128' ? 'CODE128B' : format;
+    const safeWidth = Math.max(width, 2);
+
     try {
         JsBarcode(canvas, value, {
-            format: format as any,
-            width,
+            format: safeFormat as any,
+            width: safeWidth,
             height,
             displayValue,
             fontSize,
             textMargin,
-            margin,
+            margin: Math.max(margin, 4),
             background: '#ffffff',
             lineColor: '#000000'
         });
@@ -435,6 +439,13 @@ export const generateBarcodeSVG = (
         format = 'CODE128'
     } = options || {};
 
+    // Use CODE128B for alphanumeric SKUs with special chars (hyphens, slashes, etc.)
+    // CODE128 auto-mode can switch charsets mid-barcode causing scan misreads
+    // e.g. "GN-019" scanned as "N/019" due to charset switching artifacts
+    const safeFormat = format === 'CODE128' ? 'CODE128B' : format;
+    // Ensure minimum bar width for reliable scanning (too thin = scanner misread)
+    const safeWidth = Math.max(width, 2);
+
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
 
     // IMPORTANT: JsBarcode needs the element to be in the DOM for text measurement
@@ -447,13 +458,13 @@ export const generateBarcodeSVG = (
 
     try {
         JsBarcode(svg, value, {
-            format: format as any,
-            width,
+            format: safeFormat as any,
+            width: safeWidth,
             height,
             displayValue,
             fontSize,
             textMargin,
-            margin,
+            margin: Math.max(margin, 4),
             background: '#ffffff',
             lineColor: '#000000',
             valid: function (valid) {
@@ -475,11 +486,11 @@ export const generateBarcodeSVG = (
             }
 
             JsBarcode(svg, value, {
-                format: format as any,
-                width,
+                format: safeFormat as any,
+                width: safeWidth,
                 height,
                 displayValue: false, // <-- Disable text on retry
-                margin,
+                margin: Math.max(margin, 4),
                 background: '#ffffff',
                 lineColor: '#000000'
             });

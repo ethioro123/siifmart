@@ -1,9 +1,11 @@
 import React from 'react';
-import { Package, AlertTriangle, MapPin, Clock, List, ArrowRight, ChevronRight } from 'lucide-react';
+import { Package, AlertTriangle, MapPin, Clock, List, ArrowRight, ChevronRight, Trash2 } from 'lucide-react';
 import Pagination from '../../shared/Pagination';
 import { SortDropdown, isUUID } from '../FulfillmentShared';
 import { WMSJob, Employee, Site } from '../../../types';
 import { formatJobId } from '../../../utils/jobIdFormatter';
+import { useFulfillment } from '../FulfillmentContext';
+import { useStore } from '../../../contexts/CentralStore';
 
 interface PickListProps {
     filteredPickJobs: WMSJob[];
@@ -38,6 +40,16 @@ export const PickList: React.FC<PickListProps> = ({
     employees,
     t
 }) => {
+    const { deleteJob } = useFulfillment();
+    const { user } = useStore();
+
+    const handleDelete = async (e: React.MouseEvent, jobId: string) => {
+        e.stopPropagation();
+        if (window.confirm('Are you sure you want to permanently delete this job?')) {
+            await deleteJob(jobId);
+        }
+    };
+
     return (
         <>
             {/* Sort Controls */}
@@ -88,7 +100,7 @@ export const PickList: React.FC<PickListProps> = ({
                                     <React.Fragment key={job.id}>
                                         {/* ── MOBILE: Compact tappable row ── */}
                                         <div
-                                            className={`md:hidden flex items-center gap-3 bg-white/5 border rounded-xl p-3 active:bg-white/10 transition-all cursor-pointer ${job.priority === 'Critical' ? 'border-red-500/30' : 'border-zinc-200 dark:border-white/10'}`}
+                                            className={`md:hidden flex items-center gap-3 bg-white dark:bg-black/40 border rounded-xl p-3 active:bg-slate-50 dark:active:bg-white/10 transition-all cursor-pointer ${job.priority === 'Critical' ? 'border-red-500/30' : 'border-slate-200 dark:border-white/10'}`}
                                             onClick={() => handleStartJob(job)}
                                         >
                                             <div className={`w-10 h-10 rounded-full flex items-center justify-center text-xs font-black flex-shrink-0 border ${
@@ -111,7 +123,7 @@ export const PickList: React.FC<PickListProps> = ({
                                         {/* ── DESKTOP: Full card ── */}
                                         <div
                                             onClick={() => handleStartJob(job)}
-                                            className={`hidden md:block group bg-white border border-zinc-200 dark:bg-white/5 dark:backdrop-blur-sm dark:border-white/10 rounded-3xl p-5 hover:bg-zinc-50 dark:hover:bg-white/10 transition-all duration-500 relative overflow-hidden cursor-pointer shadow-sm hover:shadow-lg hover:shadow-purple-500/10 ${job.priority === 'Critical' ? 'dark:border-red-500/20 border-red-500/30' : 'hover:border-purple-500/30 dark:hover:border-purple-500/30'} ${job.status === 'In-Progress' ? 'border-purple-500/50 shadow-md shadow-purple-500/10' : ''}`}
+                                            className={`hidden md:block group bg-white dark:bg-black/40 backdrop-blur-sm border-2 rounded-[2.5rem] p-6 hover:shadow-xl transition-all duration-500 relative overflow-hidden cursor-pointer active:scale-[0.99] ${job.priority === 'Critical' ? 'border-red-500/30 dark:border-red-500/20 shadow-red-500/5' : 'border-slate-200 dark:border-white/10 hover:border-purple-500/30 dark:hover:border-purple-400/30 shadow-purple-500/5'} ${job.status === 'In-Progress' ? 'border-purple-500/50 shadow-md shadow-purple-500/10' : ''}`}
                                         >
                                         {job.priority === 'Critical' && <div className="absolute top-0 right-0 w-24 h-24 bg-red-500/5 blur-2xl rounded-full pointer-events-none" />}
 
@@ -126,10 +138,13 @@ export const PickList: React.FC<PickListProps> = ({
                                                         </div>
                                                     )}
                                                 </div>
-                                                <div className="flex flex-wrap items-center gap-2 mt-1">
-                                                    <span className="text-[10px] text-zinc-500 dark:text-gray-400 font-bold uppercase tracking-widest">
-                                                        {totalItems} Items
-                                                    </span>
+                                                <div className="flex flex-wrap items-center gap-2 mt-2 font-mono">
+                                                    <div className="flex items-center gap-1.5 px-2.5 py-1 bg-slate-50 dark:bg-white/5 rounded-lg border border-slate-100 dark:border-white/5">
+                                                        <div className="w-1.5 h-1.5 rounded-full bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.4)]" />
+                                                        <span className="text-[9px] text-slate-500 dark:text-zinc-400 font-black uppercase tracking-widest">
+                                                            {totalItems} Items
+                                                        </span>
+                                                    </div>
                                                     <span className="w-1 h-1 rounded-full bg-zinc-300 dark:bg-gray-600" />
                                                     <span className="text-[10px] text-zinc-500 dark:text-gray-400 font-bold uppercase tracking-widest truncate max-w-[80px]">
                                                         {lineItems[0]?.sku || 'No SKU'}
@@ -145,14 +160,23 @@ export const PickList: React.FC<PickListProps> = ({
                                                     </span>
                                                 </div>
                                             </div>
-                                            <span className={`text-[10px] px-2.5 py-1 rounded-full font-bold whitespace-nowrap shrink-0 border uppercase tracking-widest ${job.status === 'In-Progress'
-                                                ? 'bg-purple-100/50 dark:bg-purple-500/20 text-purple-700 dark:text-purple-400 border-purple-200 dark:border-purple-500/30 md:animate-pulse'
+                                            <span className={`text-[10px] px-2.5 py-1 rounded-xl font-black whitespace-nowrap shrink-0 border uppercase tracking-widest shadow-sm ${job.status === 'In-Progress'
+                                                ? 'bg-purple-50 dark:bg-purple-500/20 text-purple-600 dark:text-purple-400 border-purple-100 dark:border-purple-500/30 md:animate-pulse'
                                                 : job.priority === 'High'
-                                                    ? 'bg-orange-100 dark:bg-orange-500/20 text-orange-700 dark:text-orange-400 border-orange-200 dark:border-orange-500/30'
-                                                    : 'bg-zinc-100 dark:bg-gray-500/20 text-zinc-600 dark:text-gray-400 border-zinc-200 dark:border-gray-500/30'
+                                                    ? 'bg-orange-50 dark:bg-orange-500/20 text-orange-600 dark:text-orange-400 border-orange-100 dark:border-orange-500/30'
+                                                    : 'bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-gray-400 border-slate-200 dark:border-white/10'
                                                 } `}>
                                                 {job.status === 'In-Progress' ? '● Active' : job.priority}
                                             </span>
+                                            {['super_admin', 'warehouse_manager'].includes(user?.role as string) && (
+                                                <button
+                                                    onClick={(e) => handleDelete(e, job.id)}
+                                                    className="w-8 h-6 ml-2 rounded border bg-white/5 border-white/10 text-red-500 hover:text-white hover:bg-red-500 hover:border-red-500 transition-all flex items-center justify-center shrink-0"
+                                                    title="Delete Job"
+                                                >
+                                                    <Trash2 size={12} />
+                                                </button>
+                                            )}
                                         </div>
 
                                         <div className="space-y-4 relative z-10">
@@ -216,14 +240,16 @@ export const PickList: React.FC<PickListProps> = ({
                     </>
                 ) : (
                     /* Empty State */
-                    <div className="flex-1 flex flex-col items-center justify-center py-20">
-                        <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center mb-6 border border-white/5">
-                            <Package size={32} className="text-gray-600" />
+                    <div className="flex-1 flex flex-col items-center justify-center py-20 space-y-4 bg-white dark:bg-black rounded-3xl border-2 border-dashed border-slate-200 dark:border-white/10 shadow-sm transition-all m-4">
+                        <div className="p-6 md:p-8 bg-slate-50 dark:bg-white/[0.05] rounded-full border border-slate-100 dark:border-white/5 shadow-inner">
+                            <Package size={48} className="text-slate-300 dark:text-zinc-700" />
                         </div>
-                        <h4 className="text-white font-bold text-lg mb-2">{t('warehouse.noPendingJobs')}</h4>
-                        <p className="text-gray-500 text-sm text-center max-w-sm">
-                            {t('warehouse.jobsAppearAfterReceive')}
-                        </p>
+                        <div className="text-center">
+                            <p className="text-slate-900 dark:text-white font-black uppercase tracking-[0.2em] text-sm">{t('warehouse.noPendingJobs')}</p>
+                            <p className="text-slate-500 dark:text-zinc-500 font-black uppercase tracking-widest text-[9px] mt-2">
+                                {t('warehouse.jobsAppearAfterReceive')}
+                            </p>
+                        </div>
                     </div>
                 )}
             </div>

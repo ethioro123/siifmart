@@ -70,7 +70,7 @@ export const wmsJobsService = {
         return job;
     },
 
-    async getAll(siteId?: string, limit: number = 500) {
+    async getAll(siteId?: string, limit: number = 500, employeeId?: string) {
         // 1. Fetch ALL Active Jobs (Pending/In-Progress) for the site
         // We don't limit these because they represent the operational backlog that MUST be visible
         let activeQuery = supabase
@@ -79,8 +79,12 @@ export const wmsJobsService = {
             .not('status', 'in', '("Completed","Cancelled")')
             .order('created_at', { ascending: true }); // Oldest first for FIFO
 
-        if (siteId) {
+        if (siteId && employeeId) {
+            activeQuery = activeQuery.or(`site_id.eq.${siteId},dest_site_id.eq.${siteId},assigned_to.eq.${employeeId}`);
+        } else if (siteId) {
             activeQuery = activeQuery.or(`site_id.eq.${siteId},dest_site_id.eq.${siteId}`);
+        } else if (employeeId) {
+            activeQuery = activeQuery.eq('assigned_to', employeeId);
         }
 
         // 2. Fetch Recent Historical Jobs (Completed/Cancelled)
@@ -93,8 +97,12 @@ export const wmsJobsService = {
             .order('updated_at', { ascending: false })
             .limit(limit);
 
-        if (siteId) {
+        if (siteId && employeeId) {
+            historyQuery = historyQuery.or(`site_id.eq.${siteId},dest_site_id.eq.${siteId},assigned_to.eq.${employeeId}`);
+        } else if (siteId) {
             historyQuery = historyQuery.or(`site_id.eq.${siteId},dest_site_id.eq.${siteId}`);
+        } else if (employeeId) {
+            historyQuery = historyQuery.eq('assigned_to', employeeId);
         }
 
         // Execute parallel queries

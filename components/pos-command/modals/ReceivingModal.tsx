@@ -41,6 +41,14 @@ export const ReceivingModal: React.FC = () => {
         if (!isReceivingModalOpen) setActiveTab2('pending');
     }, [isReceivingModalOpen]);
 
+    // Auto-switch to history after a successful receipt is confirmed
+    useEffect(() => {
+        if (receivingSummary && !(receivingSummary as any).isHistory) {
+            // When summary is dismissed, the next view should be history
+            setActiveTab2('history');
+        }
+    }, [receivingSummary]);
+
     return (
         <Modal isOpen={isReceivingModalOpen} onClose={handleCloseReceivingModal} title={t('posCommand.receivingModalTitle')} size="xl">
             <div className="space-y-4 p-1">
@@ -350,9 +358,14 @@ export const ReceivingModal: React.FC = () => {
 
                                 {(() => {
                                     const wmsTransferJobs = jobs
-                                        .filter(j => j.type === 'TRANSFER')
+                                        .filter(j => j.type === 'TRANSFER' || j.type === 'DISPATCH')
+                                        .filter(j => {
+                                            if (j.type === 'TRANSFER') return true;
+                                            return !jobs.some(p => p.type === 'TRANSFER' && (p.id === j.orderRef || p.jobNumber === j.orderRef));
+                                        })
                                         .map(j => ({
                                             id: j.id,
+                                            type: j.type, // Preserved for logic
                                             sourceSiteId: (j as any).sourceSiteId || (j as any).source_site_id || j.siteId,
                                             destSiteId: (j as any).destSiteId || (j as any).dest_site_id,
                                             status: j.status,
@@ -374,13 +387,14 @@ export const ReceivingModal: React.FC = () => {
 
                                     const historyItems = allTransferSources.filter(t => {
                                         if (String(t.destSiteId) !== String(activeSite?.id)) return false;
-                                        const status = ((t as any).transferStatus || t.status || '').toLowerCase();
-                                        return status === 'received' || status === 'completed';
+                                        const transferStatus = ((t as any).transferStatus || '').toLowerCase();
+                                        const jobStatus = ((t as any).status || '').toLowerCase();
+                                        return ['received', 'completed'].includes(transferStatus) || ['completed'].includes(jobStatus);
                                     }).sort((a, b) => {
                                         const dateA = new Date((a as any).receivedAt || (a as any).updatedAt || 0).getTime();
                                         const dateB = new Date((b as any).receivedAt || (b as any).updatedAt || 0).getTime();
                                         return dateB - dateA;
-                                    }).slice(0, 10);
+                                    }).slice(0, 20);
 
                                     if (historyItems.length === 0) {
                                         return (
@@ -475,9 +489,14 @@ export const ReceivingModal: React.FC = () => {
 
                                 {(() => {
                                     const wmsTransferJobs = jobs
-                                        .filter(j => j.type === 'TRANSFER')
+                                        .filter(j => j.type === 'TRANSFER' || j.type === 'DISPATCH')
+                                        .filter(j => {
+                                            if (j.type === 'TRANSFER') return true;
+                                            return !jobs.some(p => p.type === 'TRANSFER' && (p.id === j.orderRef || p.jobNumber === j.orderRef));
+                                        })
                                         .map(j => ({
                                             id: j.id,
+                                            type: j.type, // Preserved for logic
                                             sourceSiteId: (j as any).sourceSiteId || (j as any).source_site_id || j.siteId,
                                             destSiteId: (j as any).destSiteId || (j as any).dest_site_id,
                                             status: j.status,
@@ -500,17 +519,22 @@ export const ReceivingModal: React.FC = () => {
                                     const pendingTransfers = allTransferSources.filter(t => {
                                         if (String(t.destSiteId) !== String(activeSite?.id)) return false;
 
-                                        const status = ((t as any).transferStatus || t.status || '').toLowerCase();
+                                        const transferStatus = ((t as any).transferStatus || '').toLowerCase();
+                                        const jobStatus = ((t as any).status || '').toLowerCase();
+
+                                        // Exclude anything already completed/received/cancelled at EITHER status level
+                                        if (['received', 'completed', 'cancelled'].includes(transferStatus)) return false;
+                                        if (['completed', 'cancelled', 'deleted'].includes(jobStatus)) return false;
+
                                         const validStatuses = [
                                             'requested', 'pending', 'approved',
                                             'packed', 'ready', 'staging',
                                             'shipped', 'in-transit', 'dispatched',
-                                            'delivered', 'arrived', 'picking', 'packing'
+                                            'delivered', 'arrived', 'picking', 'packing',
+                                            'in-progress'
                                         ];
 
-                                        const isValidStatus = validStatuses.includes(status);
-                                        const isNotCompleted = status !== 'received' && status !== 'completed' && status !== 'cancelled';
-                                        return isValidStatus && isNotCompleted;
+                                        return validStatuses.includes(transferStatus) || validStatuses.includes(jobStatus);
                                     });
 
                                     // Simple fallback - wait a moment for context data 

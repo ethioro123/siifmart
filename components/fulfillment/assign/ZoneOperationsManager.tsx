@@ -143,17 +143,17 @@ export const ZoneOperationsManager: React.FC<ZoneOperationsManagerProps> = ({
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-            <div className="bg-[#121212] w-full max-w-6xl max-h-[90vh] rounded-3xl border border-white/10 shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 dark:bg-black/80 backdrop-blur-md p-4 transition-colors duration-300">
+            <div className="bg-white dark:bg-[#121212] w-full max-w-6xl max-h-[90vh] rounded-3xl border border-slate-200 dark:border-white/10 shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200 transition-colors duration-300">
 
                 {/* HEADER */}
-                <div className="p-6 border-b border-white/10 flex items-center justify-between bg-white/5">
+                <div className="p-6 border-b border-slate-100 dark:border-white/10 flex items-center justify-between bg-slate-50 dark:bg-white/5 transition-colors">
                     <div>
-                        <h2 className="text-2xl font-black text-white flex items-center gap-3">
+                        <h2 className="text-2xl font-black text-slate-900 dark:text-white flex items-center gap-3 transition-colors">
                             <Layers className="text-cyber-primary" />
                             ZONE OPERATIONS
                         </h2>
-                        <p className="text-gray-400 text-sm mt-1">Manage capacity, locks, and movement rules</p>
+                        <p className="text-slate-500 dark:text-gray-400 text-sm mt-1 transition-colors">Manage capacity, locks, and movement rules</p>
                     </div>
                     <div className="flex items-center gap-3">
                         <Button
@@ -167,7 +167,7 @@ export const ZoneOperationsManager: React.FC<ZoneOperationsManagerProps> = ({
                             onClick={onClose}
                             aria-label="Close Zone Operations"
                             title="Close"
-                            className="p-2 hover:bg-white/10 rounded-full transition-colors text-gray-400 hover:text-white"
+                            className="p-2 bg-slate-200 dark:bg-white/10 hover:bg-slate-300 dark:hover:bg-white/20 rounded-full transition-all text-slate-500 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white"
                         >
                             <XCircle size={24} />
                         </button>
@@ -178,7 +178,7 @@ export const ZoneOperationsManager: React.FC<ZoneOperationsManagerProps> = ({
                 <div className="flex-1 overflow-auto p-6">
                     <div className="grid grid-cols-1 gap-4">
                         {/* TABLE HEADER */}
-                        <div className="grid grid-cols-12 gap-4 px-4 py-3 bg-white/5 rounded-t-xl border-x border-t border-white/10 text-xs font-black text-gray-400 uppercase tracking-widest">
+                        <div className="grid grid-cols-12 gap-4 px-4 py-3 bg-slate-100 dark:bg-white/5 rounded-t-xl border-x border-t border-slate-200 dark:border-white/10 text-xs font-black text-slate-500 dark:text-gray-400 uppercase tracking-widest transition-colors">
                             <div className="col-span-3">Zone Name & Type</div>
                             <div className="col-span-3">Capacity</div>
                             <div className="col-span-2 text-center">Active Jobs</div>
@@ -197,21 +197,21 @@ export const ZoneOperationsManager: React.FC<ZoneOperationsManagerProps> = ({
                                     <div
                                         key={zone.id}
                                         className={`grid grid-cols-12 gap-4 items-center px-4 py-4 rounded-xl border transition-all duration-200 ${isZoneLocked
-                                            ? 'bg-red-500/5 border-red-500/20'
-                                            : 'bg-black/40 border-white/5 hover:border-white/20'
+                                            ? 'bg-red-50 dark:bg-red-500/5 border-red-200 dark:border-red-500/20 shadow-sm dark:shadow-none'
+                                            : 'bg-white dark:bg-black/40 border-slate-200 dark:border-white/5 hover:border-cyber-primary/30 dark:hover:border-white/20 shadow-sm dark:shadow-none'
                                             }`}
                                     >
                                         {/* NAME & TYPE */}
                                         <div className="col-span-3">
                                             <div className="flex items-center gap-3">
-                                                <div className={`p-2 rounded-lg ${isZoneLocked ? 'bg-red-500/10 text-red-400' : 'bg-blue-500/10 text-blue-400'}`}>
+                                                <div className={`p-2 rounded-lg transition-colors ${isZoneLocked ? 'bg-red-100 dark:bg-red-500/10 text-red-600 dark:text-red-400' : 'bg-blue-100 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400'}`}>
                                                     <Layers size={20} />
                                                 </div>
                                                 <div>
-                                                    <h3 className={`text-base font-black ${isZoneLocked ? 'text-red-400' : 'text-white'}`}>
+                                                    <h3 className={`text-base font-black transition-colors ${isZoneLocked ? 'text-red-600 dark:text-red-400' : 'text-slate-900 dark:text-white'}`}>
                                                         {zone.name}
                                                     </h3>
-                                                    <span className="text-[10px] font-bold px-1.5 py-0.5 bg-white/10 text-gray-300 rounded uppercase mt-0.5 inline-block">
+                                                    <span className="text-[10px] font-bold px-1.5 py-0.5 bg-slate-100 dark:bg-white/10 text-slate-500 dark:text-gray-300 rounded uppercase mt-0.5 inline-block border border-slate-200 dark:border-white/5 transition-colors">
                                                         {zone.type}
                                                     </span>
                                                 </div>
@@ -220,11 +220,11 @@ export const ZoneOperationsManager: React.FC<ZoneOperationsManagerProps> = ({
 
                                         {/* CAPACITY */}
                                         <div className="col-span-3">
-                                            <div className="flex justify-between text-xs mb-1.5">
-                                                <span className="text-gray-400 font-medium">{zone.occupied} / {zone.capacity}</span>
-                                                <span className={`font-bold ${capacityPct > 90 ? 'text-red-400' : 'text-cyber-primary'}`}>{capacityPct}%</span>
+                                            <div className="flex justify-between text-xs mb-1.5 transition-colors">
+                                                <span className="text-slate-500 dark:text-gray-400 font-medium">{zone.occupied} / {zone.capacity}</span>
+                                                <span className={`font-bold transition-colors ${capacityPct > 90 ? 'text-red-600 dark:text-red-400' : 'text-cyber-primary'}`}>{capacityPct}%</span>
                                             </div>
-                                            <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
+                                            <div className="h-1.5 w-full bg-slate-100 dark:bg-white/10 rounded-full overflow-hidden transition-colors">
                                                 <div
                                                     className={`h-full rounded-full transition-all duration-500 ${capacityPct > 90 ? 'bg-red-500' : 'bg-cyber-primary'}`}
                                                     ref={el => { if (el) el.style.setProperty('width', `${capacityPct}%`); }}
@@ -235,11 +235,11 @@ export const ZoneOperationsManager: React.FC<ZoneOperationsManagerProps> = ({
                                         {/* ACTIVE JOBS */}
                                         <div className="col-span-2 flex justify-center">
                                             {activeJobs > 0 ? (
-                                                <span className="px-2 py-1 bg-cyber-primary/10 text-cyber-primary border border-cyber-primary/20 rounded-md text-xs font-bold">
+                                                <span className="px-2 py-1 bg-cyber-primary/10 text-cyber-primary border border-cyber-primary/20 rounded-md text-xs font-bold transition-colors">
                                                     {activeJobs}
                                                 </span>
                                             ) : (
-                                                <span className="text-gray-600 text-xs font-medium">-</span>
+                                                <span className="text-slate-300 dark:text-gray-600 text-xs font-medium transition-colors">-</span>
                                             )}
                                         </div>
 
@@ -249,8 +249,8 @@ export const ZoneOperationsManager: React.FC<ZoneOperationsManagerProps> = ({
                                                 onClick={() => handleToggleLock(zone)}
                                                 disabled={!!isProcessing}
                                                 className={`w-32 py-1.5 rounded-lg flex items-center justify-center gap-2 text-xs font-bold border transition-all ${isZoneLocked
-                                                    ? 'bg-red-500 text-black border-red-500 shadow-[0_0_10px_rgba(239,68,68,0.4)]'
-                                                    : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20'
+                                                    ? 'bg-red-500 text-black border-red-500 shadow-lg shadow-red-500/20 dark:shadow-[0_0_10px_rgba(239,68,68,0.4)] hover:scale-[1.02]'
+                                                    : 'bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20 hover:bg-emerald-200 dark:hover:bg-emerald-500/20'
                                                     }`}
                                             >
                                                 {isZoneLocked ? (
@@ -267,7 +267,7 @@ export const ZoneOperationsManager: React.FC<ZoneOperationsManagerProps> = ({
                                                 onClick={() => handleDeleteZone(zone)}
                                                 disabled={!!isProcessing}
                                                 aria-label="Delete Zone"
-                                                className="p-2 bg-white/5 text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors border border-transparent hover:border-red-500/20"
+                                                className="p-2 bg-slate-100 dark:bg-white/5 text-slate-400 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-all border border-slate-200 dark:border-transparent hover:border-red-300 dark:hover:border-red-500/20"
                                                 title="Delete Zone"
                                             >
                                                 <Trash2 size={16} />
@@ -289,7 +289,7 @@ export const ZoneOperationsManager: React.FC<ZoneOperationsManagerProps> = ({
             >
                 <form onSubmit={handleCreateZone} className="space-y-6">
                     <div>
-                        <label htmlFor="newZoneName" className="block text-xs font-bold text-gray-400 uppercase tracking-wide mb-2">Zone Name</label>
+                        <label htmlFor="newZoneName" className="block text-xs font-bold text-slate-500 dark:text-gray-400 uppercase tracking-wide mb-2 transition-colors">Zone Name</label>
                         <input
                             id="newZoneName"
                             type="text"
@@ -297,13 +297,13 @@ export const ZoneOperationsManager: React.FC<ZoneOperationsManagerProps> = ({
                             value={newZoneName}
                             onChange={e => setNewZoneName(e.target.value)}
                             placeholder="e.g. A-WING"
-                            className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-cyber-primary transition-all font-mono"
+                            className="w-full bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 text-slate-900 dark:text-white outline-none focus:border-cyber-primary transition-all font-mono placeholder:text-slate-400 dark:placeholder:text-gray-600"
                         />
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-xs font-bold text-gray-400 uppercase tracking-wide mb-2">Type</label>
+                            <label className="block text-xs font-bold text-slate-500 dark:text-gray-400 uppercase tracking-wide mb-2 transition-colors">Type</label>
                             <div className="grid grid-cols-1 gap-2">
                                 {['Bulk', 'Forward', 'Staging', 'Damaged', 'Dry', 'Cold', 'Secure'].map((type) => (
                                     <button
@@ -311,8 +311,8 @@ export const ZoneOperationsManager: React.FC<ZoneOperationsManagerProps> = ({
                                         type="button"
                                         onClick={() => setNewZoneType(type as any)}
                                         className={`p-3 rounded-xl border text-left transition-all text-xs font-bold ${newZoneType === type
-                                            ? 'bg-cyber-primary/10 border-cyber-primary text-white'
-                                            : 'bg-black/40 border-white/10 text-gray-400 hover:bg-white/5'
+                                            ? 'bg-cyber-primary/10 border-cyber-primary text-slate-900 dark:text-white shadow-sm'
+                                            : 'bg-slate-50 dark:bg-black/40 border-slate-200 dark:border-white/10 text-slate-500 dark:text-gray-400 hover:bg-slate-100 dark:hover:bg-white/5'
                                             }`}
                                     >
                                         {type}
@@ -321,7 +321,7 @@ export const ZoneOperationsManager: React.FC<ZoneOperationsManagerProps> = ({
                             </div>
                         </div>
                         <div>
-                            <label htmlFor="newZoneCapacity" className="block text-xs font-bold text-gray-400 uppercase tracking-wide mb-2">Capacity (Slots)</label>
+                            <label htmlFor="newZoneCapacity" className="block text-xs font-bold text-slate-500 dark:text-gray-400 uppercase tracking-wide mb-2 transition-colors">Capacity (Slots)</label>
                             <input
                                 id="newZoneCapacity"
                                 type="number"
@@ -329,20 +329,20 @@ export const ZoneOperationsManager: React.FC<ZoneOperationsManagerProps> = ({
                                 required
                                 value={newZoneCapacity}
                                 onChange={e => setNewZoneCapacity(parseInt(e.target.value))}
-                                className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-cyber-primary transition-all font-mono"
+                                className="w-full bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 text-slate-900 dark:text-white outline-none focus:border-cyber-primary transition-all font-mono"
                             />
                         </div>
                     </div>
 
                     <div>
-                        <label className="block text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">Default Rules</label>
+                        <label className="block text-xs font-bold text-slate-500 dark:text-gray-400 uppercase tracking-wide mb-3 transition-colors">Default Rules</label>
                         <div className="flex gap-4">
                             <button
                                 type="button"
                                 onClick={() => setNewZoneAllowPicking(!newZoneAllowPicking)}
                                 className={`flex-1 p-3 rounded-xl border flex items-center justify-center gap-2 transition-all ${newZoneAllowPicking
-                                    ? 'bg-emerald-500/10 border-emerald-500 text-emerald-400'
-                                    : 'bg-black/40 border-white/10 text-gray-500'
+                                    ? 'bg-emerald-50 dark:bg-emerald-500/10 border-emerald-500 text-emerald-700 dark:text-emerald-400 shadow-sm'
+                                    : 'bg-slate-50 dark:bg-black/40 border-slate-200 dark:border-white/10 text-slate-400 dark:text-gray-500'
                                     }`}
                             >
                                 <ArrowUpRight size={16} /> Allow Picking
@@ -351,8 +351,8 @@ export const ZoneOperationsManager: React.FC<ZoneOperationsManagerProps> = ({
                                 type="button"
                                 onClick={() => setNewZoneAllowPutaway(!newZoneAllowPutaway)}
                                 className={`flex-1 p-3 rounded-xl border flex items-center justify-center gap-2 transition-all ${newZoneAllowPutaway
-                                    ? 'bg-blue-500/10 border-blue-500 text-blue-400'
-                                    : 'bg-black/40 border-white/10 text-gray-500'
+                                    ? 'bg-blue-50 dark:bg-blue-500/10 border-blue-500 text-blue-700 dark:text-blue-400 shadow-sm'
+                                    : 'bg-slate-50 dark:bg-black/40 border-slate-200 dark:border-white/10 text-slate-400 dark:text-gray-500'
                                     }`}
                             >
                                 <ArrowDownLeft size={16} /> Allow Putaway
@@ -360,18 +360,19 @@ export const ZoneOperationsManager: React.FC<ZoneOperationsManagerProps> = ({
                         </div>
                     </div>
 
-                    <div className="pt-4 border-t border-white/10 flex justify-end gap-3">
+                    <div className="pt-4 border-t border-slate-200 dark:border-white/10 flex justify-end gap-3 transition-colors">
                         <Button
                             type="button"
                             variant="secondary"
                             onClick={() => setIsAddModalOpen(false)}
+                            className="transition-colors"
                         >
                             Cancel
                         </Button>
                         <Button
                             type="submit"
                             loading={isProcessing === 'new'}
-                            className="bg-cyber-primary text-black hover:bg-cyber-primary/90 font-bold px-8"
+                            className="bg-cyber-primary text-black hover:bg-cyber-primary/90 font-bold px-8 shadow-lg shadow-cyber-primary/20"
                         >
                             Create Zone
                         </Button>

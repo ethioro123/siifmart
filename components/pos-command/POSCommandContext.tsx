@@ -98,7 +98,7 @@ export const POSCommandProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         allProducts, adjustStock, addProduct, refreshData, closeShift,
         storePoints
     } = useData();
-    const { jobs, transfers, updateJob } = useFulfillmentData();
+    const { jobs, transfers, updateJob, refreshJobs } = useFulfillmentData();
     const { workerPoints } = useGamification();
 
     // --- DATE FILTER ---
@@ -503,6 +503,7 @@ export const POSCommandProvider: React.FC<{ children: React.ReactNode }> = ({ ch
             });
 
             await refreshData();
+            refreshJobs(); // Force FulfillmentDataProvider to re-fetch so pending→history updates instantly
             addNotification('success', t('posCommand.shipmentReceivedSuccess'));
             setSelectedTransferForReceiving(null);
         } catch (err: any) {

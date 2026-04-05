@@ -158,6 +158,8 @@ export const AssignTask: React.FC<AssignTaskProps> = ({
                 employees={employees}
                 jobAssignments={jobAssignments}
                 filteredJobs={filteredJobs}
+                selectedJob={selectedJob}
+                setSelectedJob={setSelectedJob}
             />
 
             {/* LABEL PRINTING HUB */}

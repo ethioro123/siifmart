@@ -68,17 +68,6 @@ export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
         'employees.view', 'employees.create', 'employees.edit'
     ],
 
-    manager: [
-        // Store operations manager
-        'dashboard.view',
-        'pos.view', 'pos.create_sale', 'pos.refund', 'pos.hold_order',
-        'inventory.view', 'inventory.count',
-        'sales.view', 'sales.view_reports', 'sales.create',
-        'customers.view', 'customers.create', 'customers.edit', 'customers.view_history', 'customers.manage_loyalty',
-        'pricing.view', 'pricing.edit',
-        'employees.view', 'employees.manage_attendance'
-    ],
-
     warehouse_manager: [
         // Warehouse operations manager
         'dashboard.view',
@@ -108,7 +97,7 @@ export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
     procurement_manager: [
         // Procurement/purchasing manager
         'dashboard.view',
-        'procurement.view', 'procurement.create_po', 'procurement.edit_po', 'procurement.approve_po', 'procurement.receive',
+        'procurement.view', 'procurement.create_po', 'procurement.edit_po', 'procurement.approve_po', 'procurement.delete_po', 'procurement.receive',
         'inventory.view', 'inventory.transfer',
         'warehouse.view', 'warehouse.receive',
         'finance.view'
@@ -157,7 +146,7 @@ export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
     picker: [
         // Warehouse picker
         'dashboard.view',
-        'warehouse.view', 'warehouse.pick',
+        'warehouse.view', 'warehouse.pick', 'warehouse.receive', 'warehouse.pack', 'warehouse.putaway',
         'inventory.view'
     ],
 
@@ -181,13 +170,13 @@ export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
     driver: [
         // Delivery driver
         'dashboard.view',
-        'warehouse.view', 'warehouse.dispatch'
+        'warehouse.view', 'warehouse.dispatch', 'warehouse.receive', 'warehouse.pick', 'warehouse.pack', 'warehouse.putaway'
     ],
 
     packer: [
         // Warehouse packer
         'dashboard.view',
-        'warehouse.view', 'warehouse.pack',
+        'warehouse.view', 'warehouse.pack', 'warehouse.receive', 'warehouse.pick', 'warehouse.putaway',
         'inventory.view'
     ],
 
@@ -198,7 +187,7 @@ export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
     receiver: [
         // Inbound receiving specialist
         'dashboard.view',
-        'warehouse.view', 'warehouse.receive',
+        'warehouse.view', 'warehouse.receive', 'warehouse.pick', 'warehouse.pack', 'warehouse.putaway',
         'inventory.view',
         'procurement.view', 'procurement.receive'
     ],
@@ -344,8 +333,7 @@ export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
         'inventory.view', 'inventory.edit', 'inventory.count',
         'sales.view', 'sales.view_reports', 'sales.create', 'sales.refund',
         'customers.view', 'customers.create', 'customers.edit', 'customers.view_history', 'customers.manage_loyalty',
-        'employees.view', 'employees.edit', 'employees.manage_attendance',
-        'pricing.view', 'pricing.edit', 'pricing.create_promo'
+        'employees.view', 'employees.edit', 'employees.manage_attendance'
     ],
 
     assistant_manager: [
@@ -354,8 +342,7 @@ export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
         'inventory.view', 'inventory.count',
         'sales.view', 'sales.view_reports',
         'customers.view', 'customers.create', 'customers.edit', 'customers.view_history',
-        'employees.view', 'employees.manage_attendance',
-        'pricing.view'
+        'employees.view', 'employees.manage_attendance'
     ],
 
     // ============================================================================
@@ -498,7 +485,7 @@ export const APPROVAL_WORKFLOWS: Record<string, ApprovalWorkflow> = {
     expense: {
         name: 'Expense Approval',
         levels: [
-            { roles: ['manager'], threshold: 1000 },
+            { roles: ['store_manager', 'warehouse_manager', 'regional_manager', 'operations_manager'], threshold: 1000 },
             { roles: ['finance_manager'], threshold: 5000 },
             { roles: ['finance_manager', 'super_admin'], threshold: Infinity }
         ]
@@ -506,7 +493,7 @@ export const APPROVAL_WORKFLOWS: Record<string, ApprovalWorkflow> = {
     employee_hire: {
         name: 'Employee Hiring Approval',
         levels: [
-            { roles: ['hr', 'manager', 'super_admin'] }
+            { roles: ['hr', 'hr_manager', 'super_admin'] }
         ]
     },
     inventory_adjustment: {
@@ -519,15 +506,15 @@ export const APPROVAL_WORKFLOWS: Record<string, ApprovalWorkflow> = {
     price_change: {
         name: 'Price Change Approval',
         levels: [
-            { roles: ['manager'], threshold: 10 }, // 10% change
-            { roles: ['manager', 'super_admin'], threshold: Infinity }
+            { roles: ['store_manager', 'regional_manager'], threshold: 10 }, // 10% change
+            { roles: ['regional_manager', 'super_admin'], threshold: Infinity }
         ]
     },
     refund: {
         name: 'Refund Approval',
         levels: [
-            { roles: ['manager', 'cs_manager'], threshold: 500 },
-            { roles: ['manager', 'cs_manager', 'super_admin'], threshold: Infinity }
+            { roles: ['store_manager', 'cs_manager'], threshold: 500 },
+            { roles: ['store_manager', 'cs_manager', 'super_admin'], threshold: Infinity }
         ]
     }
 };
@@ -541,6 +528,10 @@ export const APPROVAL_WORKFLOWS: Record<string, ApprovalWorkflow> = {
  */
 export function hasPermission(userRole: UserRole, permission: Permission): boolean {
     const rolePermissions = ACTION_PERMISSIONS[userRole];
+    if (!rolePermissions) {
+        console.warn(`User role "${userRole}" not found in permissions matrix.`);
+        return false;
+    }
     return rolePermissions.includes(permission);
 }
 

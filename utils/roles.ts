@@ -41,7 +41,6 @@ export const SYSTEM_ROLES: {
 
    // ═══ LEGACY ROLES (backwards compatibility) ═══
    { id: 'admin', label: 'Assistant CEO', desc: 'System Admin', level: 2, styles: { text: 'text-purple-600 dark:text-purple-400', bg: 'bg-purple-100 dark:bg-purple-400/10', border: 'border-purple-200 dark:border-purple-400/20', badge: 'bg-purple-100 dark:bg-purple-400/20 text-purple-700 dark:text-purple-400' } },
-   { id: 'manager', label: 'Manager (Legacy)', desc: 'Department Manager', level: 3, styles: { text: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-100 dark:bg-blue-400/10', border: 'border-blue-200 dark:border-blue-400/20', badge: 'bg-blue-100 dark:bg-blue-400/20 text-blue-700 dark:text-blue-400' } },
    { id: 'hr', label: 'HR Admin', desc: 'Human Resources', level: 2, styles: { text: 'text-pink-600 dark:text-pink-400', bg: 'bg-pink-100 dark:bg-pink-400/10', border: 'border-pink-200 dark:border-pink-400/20', badge: 'bg-pink-100 dark:bg-pink-400/20 text-pink-700 dark:text-pink-400' } },
    { id: 'pos', label: 'POS Staff (Legacy)', desc: 'Point of Sale', level: 4, styles: { text: 'text-green-600 dark:text-green-400', bg: 'bg-green-100 dark:bg-green-400/10', border: 'border-green-200 dark:border-green-400/20', badge: 'bg-green-100 dark:bg-green-400/20 text-green-700 dark:text-green-400' } },
    { id: 'cs_manager', label: 'CS Manager', desc: 'Customer Service Lead', level: 3, styles: { text: 'text-sky-600 dark:text-sky-400', bg: 'bg-sky-100 dark:bg-sky-400/10', border: 'border-sky-200 dark:border-sky-400/20', badge: 'bg-sky-100 dark:bg-sky-400/20 text-sky-700 dark:text-sky-400' } },
@@ -74,7 +73,6 @@ export const getRoleHierarchy = (role: UserRole | string): number => {
         'store_manager': 70,
         'warehouse_manager': 68,
         'dispatch_manager': 65,
-        'manager': 65, // Legacy generic manager
         'cs_manager': 60,
         'assistant_manager': 60,
         'store_supervisor': 55,

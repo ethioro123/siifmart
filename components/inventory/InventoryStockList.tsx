@@ -226,8 +226,8 @@ export const InventoryStockList: React.FC<InventoryStockListProps> = ({
     // BETTER: Pass it as prop. I will update interface.
 
     return (
-        <div className="flex flex-col h-[calc(100vh-280px)]">
-            <div className="flex-1 glass-panel flex flex-col rounded-2xl overflow-hidden">
+        <div className="flex flex-col">
+            <div className="flex-1 glass-panel flex flex-col rounded-2xl">
                 {/* Toolbar */}
                 <div className="p-6 border-b border-gray-100 dark:border-white/5 space-y-4 bg-gray-50/50 dark:bg-white/2">
                     <div className="flex items-center gap-3">
@@ -330,7 +330,7 @@ export const InventoryStockList: React.FC<InventoryStockListProps> = ({
                     </div>
                 )}
 
-                <div className="flex-1 overflow-auto custom-scrollbar">
+                <div className="flex-1 overflow-x-auto">
                     <table className="w-full text-left border-collapse">
                         <thead className="sticky top-0 bg-gray-50/95 dark:bg-black/80 backdrop-blur-md z-10 border-b border-gray-200 dark:border-white/10 shadow-sm">
                             <tr className="bg-gray-50 dark:bg-white/[0.02]">

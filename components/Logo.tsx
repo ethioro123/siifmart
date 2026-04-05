@@ -1,4 +1,5 @@
 import React from 'react';
+import { LayoutDashboard } from 'lucide-react';
 
 interface LogoProps {
   className?: string;
@@ -7,66 +8,37 @@ interface LogoProps {
 }
 
 export default function Logo({ className = "", size = 32, showText = true }: LogoProps) {
+  // Scaling factors based on standard 32px size
+  const scale = size / 32;
+  const iconSize = Math.round(18 * scale);
+  const fontSize = `${Math.round(1.125 * scale * 16)}px`; // 1.125rem * 16px = 18px
+
   return (
-    <div
-      className={`flex items-center justify-center select-none text-black dark:text-white transition-colors duration-300 ${className}`}
-      ref={(el) => { if (el) el.style.height = `${size}px`; }}
-    >
-      <svg
-        height="100%"
-        viewBox={showText ? "0 0 200 55" : "0 0 35 55"}
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        className="overflow-visible"
-        preserveAspectRatio="xMidYMid meet"
-        shapeRendering="geometricPrecision"
+    <div className={`flex items-center gap-2 select-none ${className}`}>
+      {/* Icon Container */}
+      <div 
+        ref={(el) => {
+          if (el) {
+            el.style.width = `${size}px`;
+            el.style.height = `${size}px`;
+          }
+        }}
+        className="rounded-lg bg-cyber-primary flex items-center justify-center shadow-[0_0_15px_rgba(0,255,157,0.3)] transition-transform duration-300 hover:scale-110"
       >
-        <defs>
-          <g id="sign-icon">
-            {/* Right Turn Arrow 
-                 Bounds: approx x=5 to x=29, y=12 to y=38
-             */}
-            <path
-              d="M 5 38 L 5 26 Q 5 17 16 17 L 19 17 L 19 12 L 29 21.5 L 19 31 L 19 26 L 16 26 Q 11 26 11 38 Z"
-              fill="white"
-              stroke="#00cc7d"
-              strokeWidth="4"
-              strokeLinejoin="round"
-              className="transition-colors duration-300 [paint-order:stroke]"
-            />
-          </g>
-        </defs>
+        <LayoutDashboard size={iconSize} className="text-black" />
+      </div>
 
-        {showText ? (
-          <g transform="translate(0, 0)">
-            <use href="#sign-icon" />
-
-            {/* Main Text - Always white as requested */}
-            {/* Main Text - Rounded Font with Grey Border & Tight Spacing */}
-            <text
-              x="34"
-              y="42"
-              textAnchor="start"
-              fontFamily="'Fredoka', 'Arial Rounded MT Bold', 'Nunito', 'Quicksand', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
-              fontWeight="700"
-              fontSize="46"
-              fill="white"
-              stroke="#00cc7d"
-              strokeWidth="4"
-              strokeLinejoin="round"
-              letterSpacing="0.5"
-              className="transition-colors duration-300 [paint-order:stroke]"
-            >
-              SiifMart
-            </text>
-          </g>
-        ) : (
-          <g>
-            {/* Used in avatars/settings - arrow only */}
-            <use href="#sign-icon" />
-          </g>
-        )}
-      </svg>
+      {/* Text Branding */}
+      {showText && (
+        <span 
+          ref={(el) => {
+            if (el) el.style.fontSize = fontSize;
+          }}
+          className="font-black text-white tracking-tighter"
+        >
+          SIIF<span className="text-cyber-primary">MART</span>
+        </span>
+      )}
     </div>
   );
 }

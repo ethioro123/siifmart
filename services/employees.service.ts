@@ -91,7 +91,6 @@ export const employeesService = {
             'maintenance': 20,
             'cleaner': 10,
             'admin': 90, // Legacy
-            'manager': 65, // Legacy
             'hr': 85 // Legacy
         };
 
@@ -157,7 +156,7 @@ export const employeesService = {
         const { data, error } = await supabase
             .from('employees')
             .select('*')
-            .eq('email', email)
+            .ilike('email', email)
             .single();
 
         if (error) throw error;
@@ -177,7 +176,7 @@ export const employeesService = {
             site_id: employee.siteId,
             name: employee.name,
             role: employee.role,
-            email: employee.email,
+            email: employee.email.toLowerCase(),
             phone: employee.phone,
             status: employee.status,
             join_date: employee.joinDate,

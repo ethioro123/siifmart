@@ -28,6 +28,7 @@ interface PutawayTabProps {
     setIsDetailsOpen: (open: boolean) => void;
     isDetailsOpen: boolean;
     resolveOrderRef: (ref?: string) => string;
+    sites: any[];
 }
 
 const PUTAWAY_ITEMS_PER_PAGE = 10;
@@ -35,7 +36,7 @@ const PUTAWAY_ITEMS_PER_PAGE = 10;
 export const PutawayTab: React.FC<PutawayTabProps> = ({
     filteredJobs, historicalJobs, employees, user, orders,
     isSubmitting, setIsSubmitting, refreshData, handleStartJob,
-    selectedJob, setSelectedJob, setIsDetailsOpen, resolveOrderRef, isDetailsOpen
+    selectedJob, setSelectedJob, setIsDetailsOpen, resolveOrderRef, isDetailsOpen, sites: tabSites
 }) => {
     // --- PUTAWAY-SPECIFIC STATE ---
     const [putawaySearch, setPutawaySearch] = useState('');
@@ -77,7 +78,7 @@ export const PutawayTab: React.FC<PutawayTabProps> = ({
             if (status === 'completed' || status === 'cancelled') return false;
             if (j.lineItems && j.lineItems.length > 0) {
                 const allDone = j.lineItems.every(i =>
-                    i.status === 'Picked' || i.status === 'Short' || i.status === 'Discontinued'
+                    !i || i.status === 'Picked' || i.status === 'Short' || i.status === 'Discontinued'
                 );
                 if (allDone) return false;
             }
@@ -250,10 +251,17 @@ export const PutawayTab: React.FC<PutawayTabProps> = ({
         const normalized = barcode.toUpperCase().trim();
         const product = currentProduct;
 
+        // Normalize SKU for matching: strip hyphens, slashes, and whitespace
+        // Handles barcode labels that encode "GN019" matching DB SKU "GN-019"
+        const normSku = (s: string) => s.replace(/[-\/\s]/g, '').toUpperCase();
+        const normalizedInput = normSku(normalized);
+
         const isValid =
             normalized === currentItem.sku?.toUpperCase() ||
             normalized === product?.barcode?.toUpperCase() ||
-            (product?.barcodes && product.barcodes.includes(normalized));
+            (product?.barcodes && product.barcodes.includes(normalized)) ||
+            normalizedInput === normSku(currentItem.sku || '') ||
+            normalizedInput === normSku(product?.barcode || '');
 
         if (!isValid) {
             addNotification('alert', 'Wrong item scanned!');
@@ -311,8 +319,8 @@ export const PutawayTab: React.FC<PutawayTabProps> = ({
             nextItems[itemIndex] = { ...currentItem, status: 'Picked', pickedQty: currentItem.expectedQty, location: scannedLocation };
 
             // 4. Auto-Complete: If all items are done, complete the job automatically
-            const allDone = nextItems.every(i => i.status === 'Picked' || i.status === 'Short' || i.status === 'Completed');
-            console.log('📍 [PUTAWAY] allDone:', allDone, 'statuses:', nextItems.map(i => i.status));
+            const allDone = nextItems.every(i => !i || i.status === 'Picked' || i.status === 'Short' || i.status === 'Completed');
+            console.log('📍 [PUTAWAY] allDone:', allDone, 'statuses:', nextItems.map(i => i?.status));
 
             if (allDone) {
                 console.log('🏁 [PUTAWAY] Auto-completing job', selectedJob.id);
@@ -488,6 +496,7 @@ export const PutawayTab: React.FC<PutawayTabProps> = ({
                     isSubmitting={isSubmitting}
                     currentItem={currentItem}
                     resolveOrderRef={resolveOrderRef}
+                    employees={employees}
                 />
             )}
 
