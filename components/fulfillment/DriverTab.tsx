@@ -12,6 +12,7 @@ import { inventoryRequestsService } from '../../services/supabase.service';
 import { DriversHistory } from './drivers/DriversHistory';
 import { DriverHeader } from './drivers/DriverHeader';
 import { isWeightBased, isVolumeBased } from '../../utils/units';
+import { formatJobId } from '../../utils/jobIdFormatter';
 import { DriverActiveMission } from './drivers/DriverActiveMission';
 import { DriverTools } from './drivers/DriverTools';
 import { DriverMetrics } from './drivers/DriverMetrics';
