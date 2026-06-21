@@ -3,6 +3,7 @@ import { MapPin, Navigation, RefreshCw, Truck, CheckCircle, Shield } from 'lucid
 import { WMSJob, Site, User, Product } from '../../../types';
 import { formatJobId } from '../../../utils/jobIdFormatter';
 import Pagination from '../../shared/Pagination';
+import { isWeightBased, isVolumeBased } from '../../../utils/units';
 
 interface DriverActiveMissionProps {
     t: (key: string) => string; filteredJobs: WMSJob[]; employees: any[];
@@ -94,9 +95,15 @@ export const DriverActiveMission: React.FC<DriverActiveMissionProps> = ({
                                                         for (const item of lineItems) {
                                                             const qty = item.receivedQty || item.quantity || item.expectedQty || item.pickedQty || 0;
                                                             if (qty > 0 && destSiteId) {
+                                                                const templateProduct = products.find(p => p.sku === item.sku || p.id === item.productId);
+                                                                const unit = templateProduct?.unit || item.unit;
+                                                                const isWeightVol = isWeightBased(unit) || isVolumeBased(unit);
+                                                                const sizeNum = templateProduct?.size ? parseFloat(templateProduct.size as string) : 0;
+                                                                const finalQty = (isWeightVol && sizeNum > 0) ? (qty * sizeNum) : qty;
+
                                                                 const destProduct = products.find(p => (p.sku === item.sku || p.id === item.productId || p.productId === item.productId) && (p.siteId === destSiteId || p.site_id === destSiteId));
-                                                                if (destProduct) await adjustStockMutation.mutateAsync({ productId: destProduct.id, productName: destProduct.name || item.name || 'Product', productSku: destProduct.sku || item.sku || '', siteId: destSiteId, quantity: qty, type: 'IN', reason: `Delivery: ${formatJobId(job)}`, canApprove: true });
-                                                                else { const templateProduct = products.find(p => p.sku === item.sku || p.id === item.productId); if (templateProduct) await addProduct({ name: item.name || templateProduct?.name || 'Product', sku: item.sku || templateProduct?.sku, price: templateProduct?.price || 0, costPrice: (templateProduct as any)?.costPrice || 0, stock: qty, unit: templateProduct?.unit || 'pcs', siteId: destSiteId, category: templateProduct?.category || 'Uncategorized', productId: templateProduct?.productId || templateProduct?.id } as any); }
+                                                                if (destProduct) await adjustStockMutation.mutateAsync({ productId: destProduct.id, productName: destProduct.name || item.name || 'Product', productSku: destProduct.sku || item.sku || '', siteId: destSiteId, quantity: finalQty, type: 'IN', reason: `Delivery: ${formatJobId(job)}`, canApprove: true });
+                                                                else if (templateProduct) await addProduct({ name: item.name || templateProduct?.name || 'Product', sku: item.sku || templateProduct?.sku, price: templateProduct?.price || 0, costPrice: (templateProduct as any)?.costPrice || 0, stock: finalQty, unit: templateProduct?.unit || 'pcs', siteId: destSiteId, category: templateProduct?.category || 'Uncategorized', productId: templateProduct?.productId || templateProduct?.id } as any);
                                                             }
                                                         }
                                                         await refreshData(); addNotification('success', 'Safe arrival! Delivery logged.');

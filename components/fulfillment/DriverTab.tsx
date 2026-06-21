@@ -11,6 +11,7 @@ import { useAdjustStockMutation } from '../../hooks/useAdjustStockMutation';
 import { inventoryRequestsService } from '../../services/supabase.service';
 import { DriversHistory } from './drivers/DriversHistory';
 import { DriverHeader } from './drivers/DriverHeader';
+import { isWeightBased, isVolumeBased } from '../../utils/units';
 import { DriverActiveMission } from './drivers/DriverActiveMission';
 import { DriverTools } from './drivers/DriverTools';
 import { DriverMetrics } from './drivers/DriverMetrics';
@@ -78,9 +79,73 @@ export const DriverTab: React.FC<DriverTabProps> = ({
     const handleUpdateJob = async (id: string, updates: Partial<WMSJob>) => {
         try {
             await wmsJobsService.update(id, updates);
+
+            // Side-effects for DELIVERY completion
+            if (updates.transferStatus === 'Delivered') {
+                const job = jobs.find(j => j.id === id) || filteredJobs.find(j => j.id === id);
+                if (job) {
+                    // 1. Complete parent job
+                    if (job.orderRef) {
+                        const parentJob = jobs.find(j => j.id === job.orderRef);
+                        if (parentJob) {
+                            await wmsJobsService.update(parentJob.id, {
+                                status: 'Completed',
+                                transferStatus: 'Delivered'
+                            } as any);
+                        }
+                    }
+
+                    // 2. Adjust target store stock
+                    const destSiteId = job.destSiteId || (job as any).dest_site_id;
+                    const lineItems = job.lineItems || (job as any).line_items || [];
+                    for (const item of lineItems) {
+                        const qty = item.receivedQty || item.quantity || item.expectedQty || item.pickedQty || 0;
+                        if (qty > 0 && destSiteId) {
+                            // Find template product (usually at warehouse or catalog) to determine units/size
+                            const templateProduct = products.find(p => p.sku === item.sku || p.id === item.productId);
+                            const unit = templateProduct?.unit || item.unit;
+                            const isWeightVol = isWeightBased(unit) || isVolumeBased(unit);
+                            const sizeNum = templateProduct?.size ? parseFloat(templateProduct.size as string) : 0;
+                            const finalQty = (isWeightVol && sizeNum > 0) ? (qty * sizeNum) : qty;
+
+                            const destProduct = products.find(p =>
+                                (p.sku === item.sku || p.id === item.productId || p.productId === item.productId) &&
+                                (p.siteId === destSiteId || p.site_id === destSiteId)
+                            );
+
+                            if (destProduct) {
+                                await adjustStockMutation.mutateAsync({
+                                    productId: destProduct.id,
+                                    productName: destProduct.name || item.name || 'Product',
+                                    productSku: destProduct.sku || item.sku || '',
+                                    siteId: destSiteId,
+                                    quantity: finalQty,
+                                    type: 'IN',
+                                    reason: `Delivery: ${formatJobId(job)}`,
+                                    canApprove: true
+                                });
+                            } else if (templateProduct) {
+                                await addProduct({
+                                    name: item.name || templateProduct.name || 'Product',
+                                    sku: item.sku || templateProduct.sku,
+                                    price: templateProduct.price || 0,
+                                    costPrice: (templateProduct as any)?.costPrice || 0,
+                                    stock: finalQty,
+                                    unit: templateProduct.unit || 'pcs',
+                                    siteId: destSiteId,
+                                    category: templateProduct.category || 'Uncategorized',
+                                    productId: templateProduct.productId || templateProduct.id
+                                } as any);
+                            }
+                        }
+                    }
+                }
+            }
+
             await refreshData();
             addNotification('success', 'Shipment updated.');
         } catch (err) {
+            console.error(err);
             addNotification('alert', 'Update failed.');
         }
     };
