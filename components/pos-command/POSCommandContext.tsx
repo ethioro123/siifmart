@@ -7,6 +7,7 @@ import { useDateFilter, DateRangeOption } from '../../hooks/useDateFilter';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { formatJobId } from '../../utils/jobIdFormatter';
+import { isWeightBased, isVolumeBased } from '../../utils/units';
 
 // Define the shape of the Context
 interface POSCommandContextType {
@@ -329,7 +330,14 @@ export const POSCommandProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         });
 
         if (itemIndex !== -1) {
-            handleUpdateTransferItem(itemIndex, 'receivedQty', transferReceivingItems[itemIndex].receivedQty + 1);
+            const item = transferReceivingItems[itemIndex];
+            const product = allProducts.find(p => p.sku?.trim()?.toUpperCase() === item.sku?.trim()?.toUpperCase());
+            const unit = product?.unit || item.unit || '';
+            const isWeightVol = isWeightBased(unit) || isVolumeBased(unit);
+            const sizeNum = product?.size ? parseFloat(product.size as string) : 0;
+            const incrementVal = (isWeightVol && sizeNum > 0) ? sizeNum : 1;
+
+            handleUpdateTransferItem(itemIndex, 'receivedQty', item.receivedQty + incrementVal);
             setTransferScanBarcode('');
             addNotification('success', `${t('posCommand.itemIncremented')} ${transferReceivingItems[itemIndex].name}`);
         } else {
