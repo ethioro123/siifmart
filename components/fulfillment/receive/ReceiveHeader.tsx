@@ -42,14 +42,14 @@ export const ReceiveHeader: React.FC<ReceiveHeaderProps> = ({
     return (
         <>
             {/* Global Scan Input for Active Receive */}
-            <div className="p-3 md:p-6 bg-white dark:bg-black/40 rounded-2xl border border-slate-200 dark:border-white/5 shrink-0 backdrop-blur-xl shadow-sm relative overflow-hidden group/header">
+            <div className="p-3 md:p-6 glass-panel shrink-0 relative overflow-hidden group/header">
                 {/* 🌟 Futuristic Ambient Glow — hidden on mobile */}
-                <div className="hidden md:block absolute top-0 right-0 w-[400px] h-[400px] bg-cyan-500/5 dark:bg-cyan-500/10 blur-[100px] rounded-full -mr-20 -mt-20 pointer-events-none opacity-0 group-hover/header:opacity-100 transition-opacity duration-1000" />
-                <div className="hidden md:block absolute bottom-0 left-0 w-[300px] h-[300px] bg-violet-500/5 dark:bg-violet-500/10 blur-[80px] rounded-full -ml-10 -mb-10 pointer-events-none opacity-0 group-hover/header:opacity-100 transition-opacity duration-1000" />
+                <div className="hidden md:block absolute top-0 right-0 w-[400px] h-[400px] bg-[#2C5E3B]/10 dark:bg-[#1E3F27]/5 blur-[100px] rounded-full -mr-20 -mt-20 pointer-events-none opacity-0 group-hover/header:opacity-100 transition-opacity duration-1000" />
+                <div className="hidden md:block absolute bottom-0 left-0 w-[300px] h-[300px] bg-amber-600/10 dark:bg-amber-700/3 blur-[80px] rounded-full -ml-10 -mb-10 pointer-events-none opacity-0 group-hover/header:opacity-100 transition-opacity duration-1000" />
 
                 <div className="relative z-10 flex flex-col sm:flex-row gap-3">
                     <div className="flex-1 relative group">
-                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 dark:text-gray-400 group-focus-within:text-slate-900 dark:group-focus-within:text-white transition-colors">
+                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#4D6E56] dark:text-[#7A9E83] group-focus-within:text-[#2C5E3B] dark:group-focus-within:text-[#A9CBA2] transition-colors">
                             <Scan size={20} />
                         </div>
                         <input
@@ -57,7 +57,7 @@ export const ReceiveHeader: React.FC<ReceiveHeaderProps> = ({
                             autoFocus
                             type="text"
                             placeholder="Scan barcode or enter SKU..."
-                            className="w-full h-12 pl-12 pr-4 bg-slate-50 dark:bg-black border-2 border-slate-200 dark:border-white/10 rounded-xl text-slate-900 dark:text-white font-mono text-sm focus:border-cyan-500/50 dark:focus:border-cyan-400/50 focus:ring-4 focus:ring-cyan-500/10 dark:focus:ring-cyan-400/5 focus:outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-gray-700 shadow-sm"
+                            className="w-full h-12 pl-12 pr-4 bg-white/90 dark:bg-black/25 border border-[#E2DCCE] dark:border-emerald-950/20 hover:border-[#CFC6B4] dark:hover:border-emerald-900/15 rounded-xl text-[#1E3F27] dark:text-[#EAE5D9] font-mono text-sm focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:ring-4 focus:ring-[#2C5E3B]/10 dark:focus:ring-[#A9CBA2]/10 focus:outline-none transition-all placeholder:text-stone-400 dark:placeholder:text-stone-500 shadow-sm"
                             onKeyDown={(e) => {
                                 if (e.key === 'Enter') {
                                     const val = e.currentTarget.value.trim();
@@ -77,7 +77,7 @@ export const ReceiveHeader: React.FC<ReceiveHeaderProps> = ({
                             }
                         }}
                         disabled={isSubmitting}
-                        className="h-12 px-8 bg-cyan-500 dark:bg-cyan-500 hover:bg-cyan-600 dark:hover:bg-cyan-400 text-white dark:text-black font-black uppercase tracking-widest text-[10px] rounded-xl transition-all shadow-md dark:shadow-cyan-500/20 active:scale-[0.98] border border-cyan-400 dark:border-cyan-400/30 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                        className="h-12 px-8 bg-[#224429] dark:bg-[#EAE5D9] hover:bg-[#1B3520] dark:hover:bg-[#DFD9CA] text-[#FAF8F5] dark:text-[#1E3B24] font-black uppercase tracking-widest text-[10px] rounded-xl transition-all shadow-sm active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 border border-transparent dark:border-[#EAE5D9]/20">
                         {isSubmitting ? (
                             <Loader2 size={16} className="animate-spin" />
                         ) : (
@@ -118,7 +118,7 @@ export const ReceiveHeader: React.FC<ReceiveHeaderProps> = ({
                             {unresolvedScans.map((scan, idx) => (
                                 <div
                                     key={idx}
-                                    className="bg-white dark:bg-black border border-slate-200 dark:border-white/10 rounded-xl px-4 py-2.5 flex items-center gap-3 group hover:border-slate-900 dark:hover:border-cyan-400/50 hover:bg-slate-50 dark:hover:bg-white/5 cursor-pointer transition-all shadow-sm"
+                                    className="glass-panel-pushed px-4 py-2.5 flex items-center gap-3 group hover:border-[#2C5E3B]/40 dark:hover:border-[#A9CBA2]/30 hover:bg-[#FAF8F5]/80 dark:hover:bg-[#1C2620]/40 cursor-pointer transition-all shadow-sm"
                                     onClick={() => {
                                         if (filteredReceiveOrders.length === 1) {
                                             setReceivingPO(filteredReceiveOrders[0]);
@@ -180,35 +180,35 @@ export const ReceiveHeader: React.FC<ReceiveHeaderProps> = ({
             }
 
             {/* RECEIVE INTELLIGENCE HEADER */}
-            <div className="bg-white dark:bg-black/40 backdrop-blur-xl border border-slate-200 dark:border-white/5 rounded-xl md:rounded-2xl p-3 md:p-6 relative overflow-hidden shadow-sm group/intel">
+            <div className="glass-panel p-3 md:p-6 relative overflow-hidden group/intel">
                 {/* 🌈 Futuristic Mesh Accent — hidden on mobile */}
-                <div className="hidden md:block absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_0%,rgba(139,92,246,0.03),transparent_50%)] dark:bg-[radial-gradient(circle_at_50%_0%,rgba(139,92,246,0.1),transparent_50%)] pointer-events-none opacity-50 group-hover/intel:opacity-100 transition-opacity duration-1000" />
+                <div className="hidden md:block absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_0%,rgba(44,94,59,0.04),transparent_50%)] dark:bg-[radial-gradient(circle_at_50%_0%,rgba(169,203,162,0.1),transparent_50%)] pointer-events-none opacity-50 group-hover/intel:opacity-100 transition-opacity duration-1000" />
                 <div className="hidden md:block absolute inset-0 bg-gradient-to-br from-slate-200/5 to-transparent dark:from-white/5 to-transparent pointer-events-none" />
                 <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3 lg:gap-6 relative z-10">
                     <div className="hidden md:flex items-center gap-4">
-                        <div className="p-3 bg-slate-50 dark:bg-white/5 rounded-xl border border-slate-100 dark:border-zinc-800 shadow-sm">
-                            <Truck className="text-slate-900 dark:text-zinc-300" size={22} />
+                        <div className="p-3 bg-white/80 dark:bg-[#18201B]/50 rounded-xl border border-[#E2DCCE]/60 dark:border-[#A9CBA2]/10 shadow-sm">
+                            <Truck className="text-[#2C5E3B] dark:text-[#A9CBA2]" size={22} />
                         </div>
                         <div>
-                            <h3 className="text-lg md:text-xl font-black text-slate-900 dark:text-white uppercase tracking-tight">{t('warehouse.receivingQueue')}</h3>
+                            <h3 className="text-lg md:text-xl font-black text-[#1E3F27] dark:text-[#EAE5D9] uppercase tracking-tight">{t('warehouse.receivingQueue')}</h3>
                             <div className="flex items-center gap-2 mt-1">
-                                <span className="flex h-1.5 w-1.5 rounded-full bg-cyan-500 dark:bg-cyan-400 animate-pulse shadow-[0_0_8px_rgba(34,211,238,0.5)]" />
-                                <p className="text-[10px] text-slate-500 dark:text-zinc-500 font-black uppercase tracking-widest">{t('warehouse.approvedPOsWillAppear')}</p>
+                                <span className="flex h-1.5 w-1.5 rounded-full bg-[#2C5E3B] dark:bg-[#A9CBA2] animate-pulse shadow-[0_0_8px_rgba(44,94,59,0.4)] dark:shadow-[0_0_8px_rgba(169,203,162,0.4)]" />
+                                <p className="text-[10px] text-stone-500 dark:text-stone-400 font-black uppercase tracking-widest">{t('warehouse.approvedPOsWillAppear')}</p>
                             </div>
                         </div>
                     </div>
                     <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto items-stretch sm:items-center">
                         {/* VIEW MODE TOGGLE */}
-                        <div className="bg-slate-50 dark:bg-black/30 p-1 rounded-xl border border-slate-200 dark:border-zinc-800 flex">
+                        <div className="glass-panel-pushed p-1 flex">
                             <button
                                 onClick={() => setViewMode('Process')}
-                                className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${viewMode === 'Process' ? 'bg-white dark:bg-cyan-500 text-slate-900 dark:text-black shadow-md dark:shadow-cyan-500/20' : 'text-slate-500 dark:text-zinc-600 hover:text-slate-900 dark:hover:text-cyan-400'}`}
+                                className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${viewMode === 'Process' ? 'bg-[#2C5E3B] dark:bg-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24] shadow-md' : 'text-stone-500 dark:text-stone-400 hover:text-[#2C5E3B] dark:hover:text-[#A9CBA2]'}`}
                             >
                                 Process
                             </button>
                             <button
                                 onClick={() => setViewMode('History')}
-                                className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${viewMode === 'History' ? 'bg-white dark:bg-violet-500 text-slate-900 dark:text-black shadow-md dark:shadow-violet-500/20' : 'text-slate-500 dark:text-zinc-600 hover:text-slate-900 dark:hover:text-violet-400'}`}
+                                className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${viewMode === 'History' ? 'bg-[#2C5E3B] dark:bg-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24] shadow-md' : 'text-stone-500 dark:text-stone-400 hover:text-[#2C5E3B] dark:hover:text-[#A9CBA2]'}`}
                             >
                                 History
                             </button>
@@ -217,7 +217,7 @@ export const ReceiveHeader: React.FC<ReceiveHeaderProps> = ({
                         {viewMode === 'Process' && (
                             <>
                                 <div className="relative group flex-1 sm:flex-none">
-                                    <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-slate-500 dark:text-zinc-400 group-focus-within:text-slate-900 dark:group-focus-within:text-white transition-colors">
+                                    <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-[#4D6E56] dark:text-[#7A9E83] group-focus-within:text-[#2C5E3B] dark:group-focus-within:text-[#A9CBA2] transition-colors">
                                         <Search size={16} />
                                     </div>
                                     <input
@@ -225,18 +225,18 @@ export const ReceiveHeader: React.FC<ReceiveHeaderProps> = ({
                                         placeholder="Search Manifest / Supplier..."
                                         value={receiveSearch}
                                         onChange={(e) => setReceiveSearch(e.target.value)}
-                                        className="w-full sm:w-64 bg-slate-50 dark:bg-black/30 border border-slate-200 dark:border-white/10 rounded-xl py-2.5 pl-10 pr-10 text-xs font-black uppercase tracking-widest text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder:text-zinc-700 focus:outline-none focus:border-cyan-500/50 dark:focus:border-cyan-400/50 focus:ring-4 focus:ring-cyan-500/5 transition-all shadow-sm"
+                                        className="w-full sm:w-64 bg-white/90 dark:bg-black/25 border border-[#E2DCCE] dark:border-emerald-950/20 hover:border-[#CFC6B4] dark:hover:border-emerald-900/15 rounded-xl py-2.5 pl-10 pr-10 text-xs font-black uppercase tracking-widest text-[#1E3F27] dark:text-[#EAE5D9] placeholder-stone-400 dark:placeholder-stone-500 focus:outline-none focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:ring-4 focus:ring-[#2C5E3B]/10 dark:focus:ring-[#A9CBA2]/10 transition-all shadow-sm"
                                     />
                                     {receiveSearch && (
-                                        <button onClick={() => setReceiveSearch('')} className="absolute inset-y-0 right-3 flex items-center text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors" title="Clear search">
+                                        <button onClick={() => setReceiveSearch('')} className="absolute inset-y-0 right-3 flex items-center text-stone-400 hover:text-[#1E3F27] dark:hover:text-white transition-colors" title="Clear search">
                                             <X size={16} />
                                         </button>
                                     )}
                                 </div>
                                 <div className="hidden md:flex gap-3">
-                                    <div className="flex-1 sm:flex-none px-4 py-2.5 bg-slate-50 dark:bg-black/30 border border-slate-200 dark:border-zinc-800 rounded-xl">
-                                        <p className="text-[9px] font-black text-slate-400 dark:text-zinc-600 uppercase tracking-widest mb-0.5">Pending Manifests</p>
-                                        <p className="text-xl font-black text-slate-900 dark:text-white tabular-nums drop-shadow-sm font-mono leading-none">
+                                    <div className="flex-1 sm:flex-none px-4 py-2 bg-stone-100/40 dark:bg-black/20 border border-[#E2DCCE]/30 dark:border-[#A9CBA2]/[0.04] rounded-xl flex flex-col justify-center">
+                                        <p className="text-[9px] font-black text-stone-500 dark:text-stone-400 uppercase tracking-widest mb-0.5">Pending Manifests</p>
+                                        <p className="text-xl font-black text-[#1E3F27] dark:text-[#EAE5D9] tabular-nums drop-shadow-sm font-mono leading-none">
                                             {orders.filter(o => o.status === 'Approved').reduce((sum, o) => sum + (o.lineItems?.length || 0), 0)}
                                         </p>
                                     </div>

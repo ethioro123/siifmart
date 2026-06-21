@@ -221,7 +221,7 @@ export const TransferRequestModal: React.FC<TransferRequestModalProps> = ({
                                             <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-1">Priority</p>
                                             <span className={`text-xs px-2 py-1 rounded font-bold uppercase ${transferPriority === 'Critical' ? 'bg-red-500/20 text-red-400' :
                                                 transferPriority === 'High' ? 'bg-orange-500/20 text-orange-400' :
-                                                    'bg-blue-500/20 text-blue-400'
+                                                    'bg-[#2C5E3B]/20 text-[#A9CBA2]'
                                                 }`}>{transferPriority}</span>
                                         </div>
                                         {transferNote && (

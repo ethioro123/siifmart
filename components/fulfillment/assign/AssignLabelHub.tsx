@@ -106,30 +106,30 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
     };    return (
         <div className="pb-12">
             {/* LEFT PANEL: PRINTING HUB */}
-            <div className="bg-white dark:bg-cyber-gray border border-slate-200 dark:border-white/10 rounded-3xl overflow-hidden shadow-xl dark:shadow-2xl relative group transition-colors duration-300">
-                <div className="absolute inset-0 bg-gradient-to-br from-cyber-primary/5 via-transparent to-transparent opacity-50 pointer-events-none" />
+            <div className="glass-panel overflow-hidden relative group">
+                <div className="absolute inset-0 bg-gradient-to-br from-[#2C5E3B]/5 via-transparent to-transparent opacity-50 pointer-events-none" />
 
                 <div className="p-8">
                     <div className="flex items-center justify-between mb-8">
                         <div>
-                            <h3 className="text-xl font-black text-slate-900 dark:text-white flex items-center gap-3 transition-colors">
-                                <div className="p-2 bg-cyber-primary/20 rounded-lg">
-                                    <Printer size={24} className="text-cyber-primary" />
+                            <h3 className="text-xl font-black text-stone-900 dark:text-white flex items-center gap-3 transition-colors">
+                                <div className="p-2 bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/20 rounded-lg">
+                                    <Printer size={24} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
                                 </div>
                                 Label Printing Hub
                             </h3>
-                            <p className="text-xs text-slate-500 dark:text-gray-500 mt-1 ml-11 transition-colors">Management & Identity Systems</p>
+                            <p className="text-xs text-stone-500 dark:text-stone-500 mt-1 ml-11 transition-colors">Management & Identity Systems</p>
                         </div>
-                        <div className="flex bg-slate-100 dark:bg-black/40 p-1 rounded-xl border border-slate-200 dark:border-white/5 transition-colors">
+                        <div className="flex bg-stone-100 dark:bg-black/40 p-1 rounded-xl border border-[#E2DCCE]/30 dark:border-[#A9CBA2]/[0.04] transition-colors">
                             <button
                                 onClick={() => setLabelMode('PRODUCT')}
-                                className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${labelMode === 'PRODUCT' ? 'bg-cyber-primary text-black shadow-lg shadow-cyber-primary/20' : 'text-slate-500 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white'}`}
+                                className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${labelMode === 'PRODUCT' ? 'bg-[#2C5E3B] dark:bg-[#A9CBA2] text-white dark:text-[#18201B] shadow-sm' : 'text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white'}`}
                             >
                                 <Package size={14} className="inline mr-2" /> Products
                             </button>
                             <button
                                 onClick={() => setLabelMode('BAY')}
-                                className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${labelMode === 'BAY' ? 'bg-cyber-primary text-black shadow-lg shadow-cyber-primary/20' : 'text-slate-500 dark:text-gray-400 hover:text-white'}`}
+                                className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${labelMode === 'BAY' ? 'bg-[#2C5E3B] dark:bg-[#A9CBA2] text-white dark:text-[#18201B] shadow-sm' : 'text-stone-500 dark:text-stone-400 hover:text-white'}`}
                             >
                                 <Layout size={14} className="inline mr-2" /> Bays
                             </button>
@@ -140,36 +140,36 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
                         {/* Format & Size Selection */}
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <label className="text-[10px] uppercase tracking-widest font-black text-slate-500 dark:text-gray-500 flex items-center gap-2 transition-colors">
-                                    <Layers size={12} className="text-cyber-primary" /> Format
+                                <label className="text-[10px] uppercase tracking-widest font-black text-stone-500 dark:text-stone-500 flex items-center gap-2 transition-colors">
+                                    <Layers size={12} className="text-[#2C5E3B] dark:text-[#A9CBA2]" /> Format
                                 </label>
-                                <div className="flex bg-slate-100 dark:bg-black/30 p-1 rounded-xl border border-slate-200 dark:border-white/5 transition-colors">
+                                <div className="flex bg-stone-100 dark:bg-black/30 p-1 rounded-xl border border-[#E2DCCE]/30 dark:border-[#A9CBA2]/[0.04] transition-colors">
                                     <button
                                         onClick={() => setLabelFormat('BARCODE')}
-                                        className={`flex-1 py-2 rounded-lg text-[10px] font-black tracking-tighter transition-all ${labelFormat === 'BARCODE' ? 'bg-white dark:bg-white/10 text-slate-900 dark:text-white border border-slate-200 dark:border-white/10 shadow-sm' : 'text-slate-500 dark:text-gray-600 hover:text-slate-900 dark:hover:text-gray-400'}`}
+                                        className={`flex-1 py-2 rounded-lg text-[10px] font-black tracking-tighter transition-all ${labelFormat === 'BARCODE' ? 'bg-white dark:bg-white/10 text-stone-900 dark:text-white border border-[#E2DCCE]/30 dark:border-[#A9CBA2]/20 shadow-sm' : 'text-stone-550 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-300'}`}
                                     >
                                         BARCODE
                                     </button>
                                     <button
                                         onClick={() => setLabelFormat('QR')}
-                                        className={`flex-1 py-2 rounded-lg text-[10px] font-black tracking-tighter transition-all ${labelFormat === 'QR' ? 'bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20' : 'text-slate-500 dark:text-gray-600 hover:text-slate-900 dark:hover:text-gray-400'}`}
+                                        className={`flex-1 py-2 rounded-lg text-[10px] font-black tracking-tighter transition-all ${labelFormat === 'QR' ? 'bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/20 text-[#2C5E3B] dark:text-[#A9CBA2] border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20' : 'text-stone-550 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-300'}`}
                                     >
                                         QR CODE
                                     </button>
                                 </div>
                             </div>
                             <div className="space-y-2">
-                                <label className="text-[10px] uppercase tracking-widest font-black text-slate-500 dark:text-gray-500 flex items-center gap-2 transition-colors">
-                                    <Layout size={12} className="text-cyber-primary" /> Size
+                                <label className="text-[10px] uppercase tracking-widest font-black text-stone-500 dark:text-stone-500 flex items-center gap-2 transition-colors">
+                                    <Layout size={12} className="text-[#2C5E3B] dark:text-[#A9CBA2]" /> Size
                                 </label>
                                 <select
                                     title="Label Size"
-                                    className="w-full bg-slate-100 dark:bg-black/30 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-slate-900 dark:text-white text-xs font-bold outline-none focus:border-cyber-primary transition-all appearance-none cursor-pointer"
+                                    className="w-full bg-stone-50/50 dark:bg-[#1C2620]/30 border border-[#E2DCCE]/30 dark:border-[#A9CBA2]/[0.04] rounded-xl px-4 py-2.5 text-stone-900 dark:text-white text-xs font-bold outline-none focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] transition-all appearance-none cursor-pointer"
                                     value={labelSize}
                                     onChange={(e) => setLabelSize(e.target.value as any)}
                                 >
                                     {Object.entries(LABEL_SIZES).map(([key, val]) => (
-                                        <option key={key} value={key} className="bg-white dark:bg-cyber-gray">{val.label} ({key})</option>
+                                        <option key={key} value={key} className="bg-white dark:bg-stone-900 text-stone-900 dark:text-white">{val.label} ({key})</option>
                                     ))}
                                 </select>
                             </div>
@@ -181,10 +181,10 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
                                 {/* Zone / Aisle / Bay selectors */}
                                 <div className="grid grid-cols-3 gap-3">
                                     <div>
-                                        <label className="text-[9px] uppercase font-bold text-slate-500 dark:text-gray-500 mb-1.5 block transition-colors">Zone ({zoneLetters[0]}–{zoneLetters[zoneLetters.length - 1]})</label>
+                                        <label className="text-[9px] uppercase font-bold text-stone-500 dark:text-stone-500 mb-1.5 block transition-colors">Zone ({zoneLetters[0]}–{zoneLetters[zoneLetters.length - 1]})</label>
                                         <select
                                             title="Zone"
-                                            className="w-full bg-slate-50 dark:bg-black/50 border border-slate-200 dark:border-white/10 rounded-xl p-3 text-slate-900 dark:text-white text-sm font-black outline-none focus:border-cyber-primary transition-all transition-colors"
+                                            className="w-full bg-stone-50/50 dark:bg-[#1C2620]/30 border border-[#E2DCCE]/30 dark:border-[#A9CBA2]/[0.04] rounded-xl p-3 text-stone-900 dark:text-white text-sm font-black outline-none focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] transition-all"
                                             value={bayConfig.zone}
                                             onChange={(e) => setBayConfig({ ...bayConfig, zone: e.target.value })}
                                         >
@@ -192,10 +192,10 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
                                         </select>
                                     </div>
                                     <div>
-                                        <label className="text-[9px] uppercase font-bold text-slate-500 dark:text-gray-500 mb-1.5 block transition-colors">Aisle (1–{maxAisles})</label>
+                                        <label className="text-[9px] uppercase font-bold text-stone-500 dark:text-stone-500 mb-1.5 block transition-colors">Aisle (1–{maxAisles})</label>
                                         <select
                                             title="Aisle"
-                                            className="w-full bg-slate-50 dark:bg-black/50 border border-slate-200 dark:border-white/10 rounded-xl p-3 text-slate-900 dark:text-white text-sm font-black outline-none focus:border-cyber-primary transition-all transition-colors"
+                                            className="w-full bg-stone-50/50 dark:bg-[#1C2620]/30 border border-[#E2DCCE]/30 dark:border-[#A9CBA2]/[0.04] rounded-xl p-3 text-stone-900 dark:text-white text-sm font-black outline-none focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] transition-all animate-none"
                                             value={bayConfig.aisle}
                                             onChange={(e) => setBayConfig({ ...bayConfig, aisle: e.target.value })}
                                         >
@@ -206,10 +206,10 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
                                         </select>
                                     </div>
                                     <div>
-                                        <label className="text-[9px] uppercase font-bold text-slate-500 dark:text-gray-500 mb-1.5 block transition-colors">Bay (1–{maxBays})</label>
+                                        <label className="text-[9px] uppercase font-bold text-stone-500 dark:text-stone-500 mb-1.5 block transition-colors">Bay (1–{maxBays})</label>
                                         <select
                                             title="Bay"
-                                            className="w-full bg-slate-50 dark:bg-black/50 border border-slate-200 dark:border-white/10 rounded-xl p-3 text-slate-900 dark:text-white text-sm font-black outline-none focus:border-cyber-primary transition-all transition-colors"
+                                            className="w-full bg-stone-50/50 dark:bg-[#1C2620]/30 border border-[#E2DCCE]/30 dark:border-[#A9CBA2]/[0.04] rounded-xl p-3 text-stone-900 dark:text-white text-sm font-black outline-none focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] transition-all"
                                             value={bayConfig.bay}
                                             onChange={(e) => setBayConfig({ ...bayConfig, bay: e.target.value })}
                                         >
@@ -222,30 +222,30 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
                                 </div>
 
                                 {/* LIVE PREVIEW */}
-                                <div className="bg-slate-900 dark:bg-black rounded-2xl border border-slate-800 dark:border-white/5 p-5 relative overflow-hidden group/preview hover:border-cyber-primary/20 transition-all">
+                                <div className="bg-stone-950 dark:bg-black/40 rounded-2xl border border-[#E2DCCE]/25 dark:border-[#A9CBA2]/[0.04] p-5 relative overflow-hidden group/preview hover:border-[#2C5E3B]/30 dark:hover:border-[#A9CBA2]/20 transition-all">
                                     <div className="absolute top-0 right-0 p-3 flex gap-2">
-                                        <div className="text-[8px] bg-cyber-primary/10 text-cyber-primary px-2 py-0.5 rounded border border-cyber-primary/20 font-black tracking-widest uppercase">15-DIGIT PROTOCOL</div>
+                                        <div className="text-[8px] bg-[#2C5E3B]/10 text-[#2C5E3B] dark:text-[#A9CBA2] px-2 py-0.5 rounded border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20 font-black tracking-widest uppercase">15-DIGIT PROTOCOL</div>
                                     </div>
-                                    <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-cyber-primary/30 to-transparent" />
+                                    <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[#2C5E3B]/30 dark:via-[#A9CBA2]/30 to-transparent" />
 
                                     <div className="flex items-center gap-6">
                                         <div className="flex-1">
-                                            <div className="text-[10px] text-slate-400 dark:text-gray-500 uppercase font-black mb-2 flex items-center gap-2 transition-colors">
+                                            <div className="text-[10px] text-stone-400 dark:text-stone-500 uppercase font-black mb-2 flex items-center gap-2 transition-colors">
                                                 Live Preview
-                                                <div className="text-[8px] text-cyber-primary animate-pulse">● LIVE</div>
+                                                <div className="text-[8px] text-[#2C5E3B] dark:text-[#A9CBA2] animate-pulse">● LIVE</div>
                                             </div>
                                             {/* Large Location Label Preview */}
-                                            <div className="text-3xl font-black text-cyber-primary tracking-[6px] mb-2 glow-cyber-primary">
+                                            <div className="text-3xl font-black text-[#2C5E3B] dark:text-[#A9CBA2] tracking-[6px] mb-2">
                                                 {bayConfig.zone}-{bayConfig.aisle.padStart(2, '0')}-{bayConfig.bay.padStart(2, '0')}
                                             </div>
                                             <div className="flex items-center gap-3 text-[10px]">
-                                                <span className="text-slate-500 dark:text-gray-600 transition-colors">ZONE <span className="text-slate-300 dark:text-gray-400 font-black transition-colors">{bayConfig.zone}</span></span>
-                                                <span className="text-slate-700 transition-colors">|</span>
-                                                <span className="text-slate-500 dark:text-gray-600 transition-colors">AISLE <span className="text-slate-300 dark:text-gray-400 font-black transition-colors">{bayConfig.aisle.padStart(2, '0')}</span></span>
-                                                <span className="text-slate-700 transition-colors">|</span>
-                                                <span className="text-slate-500 dark:text-gray-600 transition-colors">BAY <span className="text-slate-300 dark:text-gray-400 font-black transition-colors">{bayConfig.bay.padStart(2, '0')}</span></span>
+                                                <span className="text-stone-500 dark:text-stone-400 transition-colors">ZONE <span className="text-stone-300 dark:text-stone-450 font-black transition-colors">{bayConfig.zone}</span></span>
+                                                <span className="text-stone-700 transition-colors">|</span>
+                                                <span className="text-stone-500 dark:text-stone-400 transition-colors">AISLE <span className="text-stone-300 dark:text-stone-450 font-black transition-colors">{bayConfig.aisle.padStart(2, '0')}</span></span>
+                                                <span className="text-stone-700 transition-colors">|</span>
+                                                <span className="text-stone-500 dark:text-stone-400 transition-colors">BAY <span className="text-stone-300 dark:text-stone-450 font-black transition-colors">{bayConfig.bay.padStart(2, '0')}</span></span>
                                             </div>
-                                            <div className="mt-2 text-xs font-mono text-slate-400 dark:text-gray-500 tracking-widest transition-colors">
+                                            <div className="mt-2 text-xs font-mono text-stone-400 dark:text-stone-500 tracking-widest transition-colors">
                                                 {getBarcode(bayConfig.zone, bayConfig.aisle, bayConfig.bay)}
                                             </div>
                                         </div>
@@ -255,7 +255,7 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
                                 {/* GENERATE BUTTON */}
                                 <button
                                     onClick={handlePrintLocation}
-                                    className="w-full py-4 font-black text-sm rounded-2xl border transition-all flex items-center justify-center gap-3 active:scale-[0.98] bg-cyber-primary/10 hover:bg-cyber-primary/20 text-cyber-primary border-cyber-primary/30 hover:border-cyber-primary/50"
+                                    className="woody-btn-primary w-full py-4 text-white dark:text-[#18201B] font-black text-sm rounded-2xl flex items-center justify-center gap-3 active:scale-[0.98]"
                                 >
                                     <Printer size={18} />
                                     GENERATE LOCATION LABEL
@@ -267,14 +267,14 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
                                 <div className="relative">
                                     <input
                                         title="Product SKU"
-                                        className="w-full bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-2xl p-4 text-slate-900 dark:text-white text-sm font-bold pl-12 outline-none focus:border-cyber-primary transition-all placeholder:text-slate-400 dark:placeholder:text-gray-500"
+                                        className="woody-input w-full rounded-2xl p-4 pl-12 text-sm focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2]"
                                         placeholder="Search Product Name or Scan SKU..."
                                         value={searchSku}
                                         onChange={(e) => setSearchSku(e.target.value)}
                                     />
-                                    <Package className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-gray-600 transition-colors" size={20} />
+                                    <Package className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400 dark:text-stone-600 transition-colors" size={20} />
                                     {matchedProduct && (
-                                        <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2 text-green-600 dark:text-green-400">
+                                        <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2 text-[#2C5E3B] dark:text-[#A9CBA2]">
                                             <CheckCircle size={16} />
                                             <span className="text-[10px] font-black uppercase tracking-widest hidden sm:inline">Matched</span>
                                         </div>
@@ -283,21 +283,21 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
 
                                 {/* Matched Product Summary */}
                                 {searchSku.trim() && (
-                                    <div className={`p-4 rounded-2xl border transition-all ${matchedProduct ? 'bg-green-5 dark:bg-green-500/10 border-green-200 dark:border-green-500/20 shadow-sm dark:shadow-[0_0_20px_rgba(34,197,94,0.05)]' : 'bg-amber-50 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/20'}`}>
+                                    <div className={`p-4 rounded-2xl border transition-all ${matchedProduct ? 'bg-[#2C5E3B]/5 dark:bg-[#A9CBA2]/10 border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20 shadow-sm' : 'bg-amber-50 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/20'}`}>
                                         <div className="flex justify-between items-start">
                                             <div>
-                                                <h4 className={`text-sm font-black mb-1 transition-colors ${matchedProduct ? 'text-slate-900 dark:text-white' : 'text-amber-700 dark:text-amber-400'}`}>
+                                                <h4 className={`text-sm font-black mb-1 transition-colors ${matchedProduct ? 'text-stone-900 dark:text-white' : 'text-amber-700 dark:text-amber-400'}`}>
                                                     {matchedProduct ? matchedProduct.name : 'Unknown Product / Manual Entry'}
                                                 </h4>
                                                 <div className="flex gap-3 text-[10px] font-mono tracking-wider transition-colors">
-                                                    <span className="text-slate-500 dark:text-gray-400">SKU: <span className="text-slate-900 dark:text-white font-bold transition-colors">{matchedProduct ? matchedProduct.sku : searchSku}</span></span>
+                                                    <span className="text-stone-500 dark:text-stone-400">SKU: <span className="text-stone-900 dark:text-white font-bold transition-colors">{matchedProduct ? matchedProduct.sku : searchSku}</span></span>
                                                     {matchedProduct?.price && (
-                                                        <span className="text-slate-500 dark:text-gray-400">Price: <span className="text-green-600 dark:text-green-400 font-bold transition-colors">${matchedProduct.price.toFixed(2)}</span></span>
+                                                        <span className="text-stone-500 dark:text-stone-400">Price: <span className="text-[#2C5E3B] dark:text-[#A9CBA2] font-bold transition-colors">${matchedProduct.price.toFixed(2)}</span></span>
                                                     )}
                                                 </div>
                                             </div>
                                             {matchedProduct?.category && (
-                                                <span className="px-2 py-1 bg-slate-100 dark:bg-black/40 rounded border border-slate-200 dark:border-white/5 text-[9px] text-slate-500 dark:text-gray-400 font-black uppercase tracking-widest transition-colors">
+                                                <span className="px-2 py-1 bg-stone-100 dark:bg-black/30 rounded border border-[#E2DCCE]/30 dark:border-[#A9CBA2]/[0.04] text-[9px] text-stone-500 dark:text-stone-455 font-black uppercase tracking-widest transition-colors">
                                                     {matchedProduct.category}
                                                 </span>
                                             )}
@@ -306,22 +306,22 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
                                 )}
 
                                 <div className="flex gap-4">
-                                    <div className="w-1/3 flex flex-col justify-center bg-slate-50 dark:bg-black/40 rounded-2xl border border-slate-200 dark:border-white/10 relative overflow-hidden group transition-colors">
-                                        <div className="absolute top-2 left-0 right-0 text-center text-[9px] text-slate-400 dark:text-gray-500 font-black uppercase tracking-widest transition-colors">PRINT QTY</div>
+                                    <div className="w-1/3 flex flex-col justify-center bg-stone-50/50 dark:bg-[#1C2620]/30 rounded-2xl border border-[#E2DCCE]/30 dark:border-[#A9CBA2]/[0.04] relative overflow-hidden group transition-colors">
+                                        <div className="absolute top-2 left-0 right-0 text-center text-[9px] text-stone-400 dark:text-stone-500 font-black uppercase tracking-widest transition-colors">PRINT QTY</div>
                                         <div className="flex items-center justify-between px-2 pt-6 pb-2">
                                             <button
                                                 onClick={() => setPrintQty(Math.max(1, printQty - 1))}
-                                                className="w-10 h-10 flex items-center justify-center text-slate-400 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/50 dark:hover:bg-white/10 rounded-xl transition-all font-black text-xl"
+                                                className="w-10 h-10 flex items-center justify-center text-stone-400 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white hover:bg-stone-200/50 dark:hover:bg-[#EAE5D9]/10 rounded-xl transition-all font-black text-xl"
                                             >-</button>
                                             <input
                                                 title="Quantity"
-                                                className="w-16 bg-transparent text-center text-slate-900 dark:text-white text-2xl font-black outline-none font-mono transition-colors"
+                                                className="w-16 bg-transparent text-center text-stone-900 dark:text-white text-2xl font-black outline-none font-mono transition-colors"
                                                 value={printQty}
                                                 onChange={(e) => setPrintQty(Math.max(1, parseInt(e.target.value) || 1))}
                                             />
                                             <button
                                                 onClick={() => setPrintQty(printQty + 1)}
-                                                className="w-10 h-10 flex items-center justify-center text-slate-400 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/50 dark:hover:bg-white/10 rounded-xl transition-all font-black text-xl"
+                                                className="w-10 h-10 flex items-center justify-center text-stone-400 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white hover:bg-stone-200/50 dark:hover:bg-[#EAE5D9]/10 rounded-xl transition-all font-black text-xl"
                                             >+</button>
                                         </div>
                                     </div>
@@ -350,8 +350,8 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
                                             }
                                         }}
                                         className={`flex-1 py-4 font-black rounded-2xl transition-all flex items-center justify-center gap-3 ${searchSku.trim()
-                                            ? 'bg-cyber-primary text-black shadow-xl shadow-cyber-primary/20 hover:scale-[1.02] active:scale-[0.98]'
-                                            : 'bg-slate-100 dark:bg-white/5 text-slate-400 dark:text-gray-600 cursor-not-allowed border border-slate-200 dark:border-white/5'
+                                            ? 'woody-btn-primary text-white dark:text-[#18201B] hover:scale-[1.02] active:scale-[0.98]'
+                                            : 'bg-stone-100 dark:bg-[#1C2620]/30 text-stone-400 dark:text-stone-600 cursor-not-allowed border border-[#E2DCCE]/30 dark:border-[#A9CBA2]/[0.04]'
                                             }`}
                                     >
                                         <Printer size={20} />
@@ -359,12 +359,12 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
                                     </button>
                                 </div>
 
-                                <div className="p-4 bg-slate-50 dark:bg-white/5 rounded-2xl border border-dashed border-slate-300 dark:border-white/10 flex items-center gap-4 transition-colors">
-                                    <div className="p-2 bg-blue-100 dark:bg-blue-500/10 rounded-lg transition-colors">
-                                        <Info size={16} className="text-blue-600 dark:text-blue-400" />
+                                <div className="p-4 bg-stone-50/30 dark:bg-[#1C2620]/20 rounded-2xl border border-dashed border-[#E2DCCE]/50 dark:border-[#A9CBA2]/20 flex items-center gap-4 transition-colors">
+                                    <div className="p-2 bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 rounded-lg transition-colors">
+                                        <Info size={16} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
                                     </div>
-                                    <p className="text-[10px] text-slate-500 dark:text-gray-500 leading-relaxed transition-colors">
-                                        <span className="text-blue-600 dark:text-blue-400 font-bold uppercase mr-1">TIPS:</span>
+                                    <p className="text-[10px] text-stone-500 dark:text-stone-500 leading-relaxed transition-colors">
+                                        <span className="text-[#2C5E3B] dark:text-[#A9CBA2] font-bold uppercase mr-1">TIPS:</span>
                                         Labels include price and category by default. For inventory tracking, use barcodes for faster scanning.
                                     </p>
                                 </div>
@@ -375,25 +375,25 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
             </div>
 
             {/* ZONE OPERATIONS MANAGER — COMING SOON */}
-            <div className="mt-6 bg-white dark:bg-cyber-gray border border-dashed border-slate-300 dark:border-white/10 rounded-3xl overflow-hidden relative group hover:border-cyber-primary/20 transition-all duration-300">
-                <div className="absolute inset-0 bg-gradient-to-r from-cyber-primary/3 via-transparent to-blue-500/3 opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="mt-6 glass-panel border-dashed border-[#E2DCCE]/50 dark:border-[#A9CBA2]/20 overflow-hidden relative group hover:border-[#2C5E3B]/40 dark:hover:border-[#A9CBA2]/40 transition-all duration-300">
+                <div className="absolute inset-0 bg-gradient-to-r from-[#2C5E3B]/3 via-transparent to-[#A9CBA2]/3 opacity-0 group-hover:opacity-100 transition-opacity" />
 
                 <div className="relative p-8">
                     {/* Header */}
                     <div className="flex items-center justify-between mb-6">
                         <div className="flex items-center gap-4">
-                            <div className="p-3 bg-cyber-primary/10 dark:bg-cyber-primary/10 rounded-2xl relative transition-colors">
-                                <div className="absolute inset-0 bg-cyber-primary/5 dark:bg-cyber-primary/10 blur-xl rounded-2xl" />
-                                <Shield size={28} className="text-cyber-primary relative" />
+                            <div className="p-3 bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/20 rounded-2xl relative transition-colors">
+                                <div className="absolute inset-0 bg-[#2C5E3B]/5 dark:bg-[#A9CBA2]/10 blur-xl rounded-2xl" />
+                                <Shield size={28} className="text-[#2C5E3B] dark:text-[#A9CBA2] relative" />
                             </div>
                             <div>
-                                <h3 className="text-lg font-black text-slate-900 dark:text-white tracking-tight uppercase flex items-center gap-3 transition-colors">
+                                <h3 className="text-lg font-black text-stone-900 dark:text-white tracking-tight uppercase flex items-center gap-3 transition-colors">
                                     Zone Operations Manager
                                     <span className="text-[9px] bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400 px-2.5 py-1 rounded-full border border-amber-200 dark:border-amber-500/30 font-black uppercase tracking-widest animate-pulse transition-colors">
                                         Coming Soon
                                     </span>
                                 </h3>
-                                <p className="text-[11px] text-slate-500 dark:text-gray-500 mt-0.5 transition-colors">Advanced warehouse zone control & optimization — launching mid-2026</p>
+                                <p className="text-[11px] text-stone-500 dark:text-stone-500 mt-0.5 transition-colors">Advanced warehouse zone control & optimization — launching mid-2026</p>
                             </div>
                         </div>
                     </div>
@@ -428,33 +428,33 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
                         ].map((feature, i) => (
                             <div
                                 key={feature.title}
-                                className={`p-5 rounded-2xl border border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-black/30 hover:bg-white dark:hover:bg-black/40 transition-all group/card shadow-sm hover:shadow-md dark:shadow-none transition-colors duration-300`}
+                                className="p-5 rounded-2xl border border-[#E2DCCE]/30 dark:border-[#A9CBA2]/[0.04] bg-[#1C2620]/10 dark:bg-black/20 hover:bg-stone-100/50 dark:hover:bg-[#EAE5D9]/10 transition-all group/card shadow-sm hover:shadow-md dark:shadow-none transition-colors duration-300"
                             >
                                 <div className={`p-2.5 rounded-xl w-fit mb-3 transition-colors ${feature.color === 'red' ? 'bg-red-100 dark:bg-red-500/10 text-red-600 dark:text-red-400' :
-                                    feature.color === 'blue' ? 'bg-blue-100 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400' :
-                                        feature.color === 'purple' ? 'bg-purple-100 dark:bg-purple-500/10 text-purple-600 dark:text-purple-400' :
+                                    feature.color === 'blue' ? 'bg-[#2C5E3B]/10 dark:bg-[#2C5E3B]/20 text-[#2C5E3B] dark:text-[#A9CBA2]' :
+                                        feature.color === 'purple' ? 'bg-[#EAE5D9] dark:bg-[#A9CBA2]/10 text-[#2C5E3B] dark:text-[#A9CBA2]' :
                                             'bg-green-100 dark:bg-green-500/10 text-green-600 dark:text-green-400'
                                     }`}>
                                     {feature.icon}
                                 </div>
-                                <h4 className="text-sm font-black text-slate-900 dark:text-white mb-2 uppercase tracking-tight transition-colors">{feature.title}</h4>
-                                <p className="text-[10px] text-slate-500 dark:text-gray-500 leading-relaxed transition-colors">{feature.desc}</p>
+                                <h4 className="text-sm font-black text-stone-900 dark:text-white mb-2 uppercase tracking-tight transition-colors">{feature.title}</h4>
+                                <p className="text-[10px] text-stone-500 dark:text-stone-500 leading-relaxed transition-colors">{feature.desc}</p>
                             </div>
                         ))}
                     </div>
 
                     {/* Bottom Bar */}
-                    <div className="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-white/5 transition-colors">
+                    <div className="flex items-center justify-between pt-4 border-t border-[#E2DCCE]/30 dark:border-[#A9CBA2]/[0.04] transition-colors">
                         <div className="flex items-center gap-3">
                             <div className="flex -space-x-1">
-                                <div className="w-2 h-2 rounded-full bg-cyber-primary/40 animate-pulse" />
+                                <div className="w-2 h-2 rounded-full bg-[#2C5E3B]/40 dark:bg-[#A9CBA2]/40 animate-pulse" />
                                 <div className="w-2 h-2 rounded-full bg-amber-400/40 animate-pulse animation-delay-300" />
-                                <div className="w-2 h-2 rounded-full bg-blue-400/40 animate-pulse animation-delay-600" />
+                                <div className="w-2 h-2 rounded-full bg-[#A9CBA2]/40 animate-pulse animation-delay-600" />
                             </div>
-                            <span className="text-[9px] text-slate-400 dark:text-gray-600 font-bold uppercase tracking-widest transition-colors">Under Active Development</span>
+                            <span className="text-[9px] text-stone-400 dark:text-stone-600 font-bold uppercase tracking-widest transition-colors">Under Active Development</span>
                         </div>
                         <div className="flex gap-2">
-                            <div className="px-3 py-1 bg-slate-100 dark:bg-black/40 rounded-full border border-slate-200 dark:border-white/5 text-[9px] text-slate-500 dark:text-gray-500 font-bold uppercase tracking-widest transition-colors">
+                            <div className="px-3 py-1 bg-stone-100/50 dark:bg-black/20 rounded-full border border-[#E2DCCE]/30 dark:border-[#A9CBA2]/[0.04] text-[9px] text-stone-500 dark:text-stone-500 font-bold uppercase tracking-widest transition-colors">
                                 {zones.length} Zone{zones.length !== 1 ? 's' : ''} Configured
                             </div>
                             <div className="px-3 py-1 bg-amber-100 dark:bg-amber-500/10 rounded-full border border-amber-200 dark:border-amber-500/20 text-[9px] text-amber-700 dark:text-amber-400 font-bold uppercase tracking-widest transition-colors">

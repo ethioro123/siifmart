@@ -14,8 +14,8 @@ interface DirectoryListProps {
 
 export default function DirectoryList({ displayedEmployees, isLoadingEmployees, sites, setSelectedEmployee, canViewAll }: DirectoryListProps) {
    return (
-      <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl overflow-hidden">
-         <div className="divide-y divide-white/[0.04]">
+      <div className="bg-white/80 dark:bg-[#18201B]/40 border border-[#E2DCCE] dark:border-emerald-950/20 backdrop-blur-md rounded-2xl overflow-hidden shadow-sm">
+         <div className="divide-y divide-[#E2DCCE]/60 dark:divide-white/5">
             {isLoadingEmployees && (
                <div className="flex justify-center py-12">
                   <Loader2 className="animate-spin text-white/50" size={24} />

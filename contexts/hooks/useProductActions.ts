@@ -142,9 +142,9 @@ export function useProductActions(deps: UseProductActionsDeps) {
             addNotification('success', `Product ${product.name || updated.name} updated`);
             logSystemEvent('Product Updated', `Product "${product.name || updated.name}" updated`, updatedBy || user?.name || 'System', 'Inventory');
             return updated;
-        } catch (error) {
+        } catch (error: any) {
             console.error(error);
-            addNotification('alert', 'Failed to update product');
+            addNotification('alert', error.message || 'Failed to update product');
             throw error;
         }
     }, [addNotification, logSystemEvent, user, sites]);
@@ -166,9 +166,9 @@ export function useProductActions(deps: UseProductActionsDeps) {
 
             addNotification('success', `Synchronized prices for SKU ${sku} across ${updatedProducts.length} locations`);
             logSystemEvent('Global Price Sync', `SKU ${sku} prices updated network-wide`, user?.name || 'System', 'Inventory');
-        } catch (error) {
+        } catch (error: any) {
             console.error('Global Price Sync Error:', error);
-            addNotification('alert', 'Failed to synchronize prices globally');
+            addNotification('alert', error.message || 'Failed to synchronize prices globally');
             throw error;
         }
     }, [addNotification, logSystemEvent, user]);

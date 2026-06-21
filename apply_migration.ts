@@ -32,7 +32,7 @@ async function runMigration() {
         await client.connect();
         console.log('✅ Connected to Database.');
 
-        const sqlPath = path.join(process.cwd(), 'migrations', '20260116_add_price_updated_at.sql');
+        const sqlPath = path.join(process.cwd(), 'migrations', '20260622_create_site_replenishment_sources.sql');
         const sql = fs.readFileSync(sqlPath, 'utf8');
 
         await client.query(sql);

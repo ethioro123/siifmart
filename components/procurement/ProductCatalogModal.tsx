@@ -71,12 +71,12 @@ export const ProductCatalogModal: React.FC<ProductCatalogModalProps> = ({ isOpen
         <Modal isOpen={isOpen} onClose={onClose} title={`Products from ${supplier.name || 'Supplier'}`} size="xl">
             <div className="space-y-4">
                 {/* Header Banner */}
-                <div className="bg-blue-500/10 border border-blue-500/30 rounded-xl p-4">
+                <div className="bg-[#2C5E3B]/10 border border-[#2C5E3B]/20 rounded-xl p-4">
                     <div className="flex items-center gap-3 mb-2">
-                        <Package className="text-blue-400" size={20} />
-                        <h3 className="text-white font-bold">Supplier Product Catalog</h3>
+                        <Package className="text-[#2C5E3B] dark:text-[#A9CBA2]" size={20} />
+                        <h3 className="text-gray-900 dark:text-white font-bold">Supplier Product Catalog</h3>
                     </div>
-                    <p className="text-xs text-gray-400">
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
                         Products available from {supplier.name}.
                     </p>
                 </div>
@@ -91,7 +91,7 @@ export const ProductCatalogModal: React.FC<ProductCatalogModalProps> = ({ isOpen
                             placeholder="Search products by name or SKU..."
                             value={catalogSearch}
                             onChange={(e) => setCatalogSearch(e.target.value)}
-                            className="w-full bg-black/40 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-sm text-white focus:outline-none focus:border-cyber-primary/50 transition-colors"
+                            className="w-full bg-gray-50 dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-lg pl-10 pr-4 py-3 text-sm text-gray-900 dark:text-white focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:ring-2 focus:ring-[#2C5E3B]/10 dark:focus:ring-[#A9CBA2]/10 outline-none transition-all placeholder-gray-400 dark:placeholder-gray-700 font-bold"
                         />
                     </div>
 
@@ -105,8 +105,8 @@ export const ProductCatalogModal: React.FC<ProductCatalogModalProps> = ({ isOpen
                                         key={cat}
                                         onClick={() => setCatalogCategory(cat)}
                                         className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-colors ${catalogCategory === cat
-                                            ? 'bg-cyber-primary text-black'
-                                            : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white'
+                                            ? 'bg-[#224429] dark:bg-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24]'
+                                            : 'glass-panel-pushed text-gray-500 dark:text-gray-400 hover:bg-stone-100 dark:hover:bg-white/10 hover:text-gray-900 dark:hover:text-white'
                                             }`}
                                     >
                                         {cat}
@@ -122,16 +122,16 @@ export const ProductCatalogModal: React.FC<ProductCatalogModalProps> = ({ isOpen
                                 aria-label="Sort by"
                                 value={catalogSort}
                                 onChange={(e) => setCatalogSort(e.target.value as any)}
-                                className="bg-black/40 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-cyber-primary/50"
+                                className="bg-gray-50 dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-lg px-3 py-1.5 text-xs text-gray-900 dark:text-white focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] outline-none font-bold cursor-pointer"
                             >
-                                <option value="name">Name (A-Z)</option>
-                                <option value="priceAsc">Price (Low-High)</option>
-                                <option value="priceDesc">Price (High-Low)</option>
-                                <option value="stockAsc">Stock (Low-High)</option>
+                                <option value="name" className="bg-white dark:bg-[#18201B] text-gray-900 dark:text-white">Name (A-Z)</option>
+                                <option value="priceAsc" className="bg-white dark:bg-[#18201B] text-gray-900 dark:text-white">Price (Low-High)</option>
+                                <option value="priceDesc" className="bg-white dark:bg-[#18201B] text-gray-900 dark:text-white">Price (High-Low)</option>
+                                <option value="stockAsc" className="bg-white dark:bg-[#18201B] text-gray-900 dark:text-white">Stock (Low-High)</option>
                             </select>
 
                             {/* Stock Filter */}
-                            <div className="flex bg-black/40 rounded-lg p-1 border border-white/10">
+                            <div className="flex glass-panel-pushed rounded-lg p-1 gap-1">
                                 {[
                                     { id: 'all', label: 'All' },
                                     { id: 'low', label: 'Low' },
@@ -141,8 +141,8 @@ export const ProductCatalogModal: React.FC<ProductCatalogModalProps> = ({ isOpen
                                         key={opt.id}
                                         onClick={() => setCatalogStockFilter(opt.id as any)}
                                         className={`px-3 py-1 rounded-md text-xs font-bold transition-all ${catalogStockFilter === opt.id
-                                            ? 'bg-cyber-primary/20 text-cyber-primary shadow-sm'
-                                            : 'text-gray-500 hover:text-gray-300'
+                                            ? 'bg-[#2C5E3B]/20 text-[#2C5E3B] dark:text-[#A9CBA2] shadow-sm'
+                                            : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 font-medium'
                                             }`}
                                     >
                                         {opt.label}
@@ -156,7 +156,7 @@ export const ProductCatalogModal: React.FC<ProductCatalogModalProps> = ({ isOpen
                 {/* Products List */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[500px] overflow-y-auto pr-1 custom-scrollbar">
                     {filteredCatalogProducts.map(product => (
-                        <div key={product.id} className="bg-white/5 border border-white/10 rounded-xl p-4 hover:border-cyber-primary/50 transition-colors group">
+                        <div key={product.id} className="glass-panel p-4 hover:border-[#2C5E3B]/50 dark:hover:border-[#A9CBA2]/50 transition-colors group">
                             <div className="flex items-start gap-3">
                                 {product.image && !product.image.includes('placeholder.com') ? (
                                     <img
@@ -175,7 +175,7 @@ export const ProductCatalogModal: React.FC<ProductCatalogModalProps> = ({ isOpen
                                 )}
                                 <div className="flex-1 min-w-0">
                                     <div className="flex justify-between items-start">
-                                        <h4 className="text-white font-bold text-sm truncate pr-2 group-hover:text-cyber-primary transition-colors">{product.name}</h4>
+                                        <h4 className="text-gray-900 dark:text-white font-black text-sm truncate pr-2 group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] transition-colors">{product.name}</h4>
                                         {/* Stock Badge */}
                                         {(product.stock || 0) <= (product.minStock || 10) && (
                                             <span className={`text-[10px] px-1.5 py-0.5 rounded font-bold uppercase ${(product.stock || 0) === 0 ? 'bg-red-500/20 text-red-400' : 'bg-yellow-500/20 text-yellow-400'
@@ -188,15 +188,15 @@ export const ProductCatalogModal: React.FC<ProductCatalogModalProps> = ({ isOpen
                                     <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2">
                                         <div className="flex items-center gap-1.5">
                                             <span className="text-[10px] text-gray-500 uppercase font-bold">Retail</span>
-                                            <span className="text-white font-bold text-sm">{CURRENCY_SYMBOL} {product.price.toLocaleString()}</span>
+                                            <span className="text-gray-900 dark:text-white font-bold text-sm">{CURRENCY_SYMBOL} {product.price.toLocaleString()}</span>
                                         </div>
                                         <div className="flex items-center gap-1.5">
-                                            <span className="text-[10px] text-gray-500 uppercase font-bold border-l border-white/10 pl-4">Base Cost</span>
-                                            <span className="text-cyber-primary font-bold text-sm">
+                                            <span className="text-[10px] text-gray-500 uppercase font-bold border-l border-stone-200 dark:border-white/10 pl-4">Base Cost</span>
+                                            <span className="text-[#2C5E3B] dark:text-[#A9CBA2] font-bold text-sm">
                                                 {CURRENCY_SYMBOL} {(product.costPrice || (product.price * 0.7)).toLocaleString()}
                                             </span>
                                         </div>
-                                        <div className="text-[10px] text-gray-500 border-l border-white/10 pl-4">
+                                        <div className="text-[10px] text-gray-500 border-l border-stone-200 dark:border-white/10 pl-4">
                                             Stock: {product.stock || 0}
                                         </div>
                                     </div>
@@ -207,7 +207,7 @@ export const ProductCatalogModal: React.FC<ProductCatalogModalProps> = ({ isOpen
                                     onAddToPO(product);
                                     showToast(`Add "${product.name}" to your purchase order`, 'info');
                                 }}
-                                className="w-full mt-3 py-2 bg-cyber-primary/10 hover:bg-cyber-primary text-cyber-primary hover:text-black text-xs font-bold rounded-lg transition-colors flex items-center justify-center gap-2"
+                                className="w-full mt-3 py-2 bg-[#2C5E3B]/10 hover:bg-[#2C5E3B] dark:bg-[#A9CBA2]/10 dark:hover:bg-[#A9CBA2] text-[#2C5E3B] hover:text-white dark:text-[#A9CBA2] dark:hover:text-black text-xs font-bold rounded-lg transition-colors flex items-center justify-center gap-2"
                             >
                                 <Plus size={14} />
                                 Add to PO
@@ -217,7 +217,7 @@ export const ProductCatalogModal: React.FC<ProductCatalogModalProps> = ({ isOpen
                 </div>
 
                 {filteredCatalogProducts.length === 0 && (
-                    <div className="text-center py-12 text-gray-500 bg-white/5 rounded-xl border border-dashed border-white/10">
+                    <div className="text-center py-12 text-gray-500 glass-panel border-dashed">
                         <Package size={48} className="mx-auto mb-4 opacity-50 text-gray-600" />
                         <p className="text-sm font-bold text-gray-400">No products found</p>
                         <p className="text-xs mt-1">Try adjusting your filters or search terms</p>
@@ -227,7 +227,7 @@ export const ProductCatalogModal: React.FC<ProductCatalogModalProps> = ({ isOpen
                                 setCatalogCategory('All');
                                 setCatalogStockFilter('all');
                             }}
-                            className="mt-4 px-4 py-2 bg-white/5 hover:bg-white/10 rounded-lg text-xs text-white border border-white/10 transition-colors"
+                            className="mt-4 px-4 py-2 glass-panel-pushed hover:bg-stone-100 dark:hover:bg-white/10 rounded-lg text-xs text-gray-900 dark:text-white transition-colors"
                         >
                             Clear Filters
                         </button>

@@ -172,18 +172,47 @@ export const TransferTab: React.FC<TransferTabProps> = ({
                 // I will include the core logic from the original file I read.
 
                 const scanJobTypes: string[] = ['PICK', 'PACK', 'PUTAWAY'];
-
                 if (scanJobTypes.includes(selectedJob.type) && scannedItem && scannedItem.trim()) {
                     const scannedValue = scannedItem.trim().toUpperCase();
-                    const product = allProducts.find(p => p.id === item.productId);
+                    const product = allProducts.find(p => p.id === item.productId || p.sku === item.sku);
                     const expectedSku = (item.sku || product?.sku || '').trim().toUpperCase();
                     const expectedBarcode = (product?.barcode || '').trim().toUpperCase();
-                    const barcodeAliases = (product?.barcodes || []).map((b: string) => b.trim().toUpperCase());
+
+                    const normSku = (s: string) => s.replace(/[-\/\s]/g, '').toUpperCase();
+                    const normalizedInput = normSku(scannedValue);
+
+                    const getBarcodesArray = (barcodes: any): string[] => {
+                        if (!barcodes) return [];
+                        if (Array.isArray(barcodes)) return barcodes.filter(b => typeof b === 'string');
+                        if (typeof barcodes === 'string') {
+                            let clean = barcodes.trim();
+                            if (clean.startsWith('{') && clean.endsWith('}')) {
+                                return clean.substring(1, clean.length - 1).split(',').map(s => s.trim().replace(/^"|"$/g, ''));
+                            }
+                            if (clean.startsWith('[') && clean.endsWith(']')) {
+                                try {
+                                    return JSON.parse(clean);
+                                } catch (e) {
+                                    return clean.substring(1, clean.length - 1).split(',').map(s => s.trim().replace(/^"|"$/g, ''));
+                                }
+                            }
+                            return [clean];
+                        }
+                        return [];
+                    };
+
+                    const aliasList = getBarcodesArray(product?.barcodes);
+                    const hasAliasMatch = aliasList.some(b => {
+                        const cleanB = b.toUpperCase().trim();
+                        return scannedValue === cleanB || normalizedInput === normSku(cleanB);
+                    });
 
                     const isValidScan =
                         (expectedSku && scannedValue === expectedSku) ||
                         (expectedBarcode && scannedValue === expectedBarcode) ||
-                        barcodeAliases.includes(scannedValue);
+                        hasAliasMatch ||
+                        normalizedInput === normSku(expectedSku) ||
+                        normalizedInput === normSku(expectedBarcode);
 
                     if (!isValidScan) {
                         addNotification('alert', `❌ Wrong item! Expected: ${item.name}`);
@@ -247,7 +276,7 @@ export const TransferTab: React.FC<TransferTabProps> = ({
             {(activeSite?.type === 'HQ' || activeSite?.type === 'Administration' || activeSite?.type === 'Warehouse' || activeSite?.type === 'Distribution Center' || ['super_admin', 'admin'].includes(user?.role || '')) && (
                 <button
                     onClick={() => setTransferCenterTab('bulk')}
-                    className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-bold transition-all ${transferCenterTab === 'bulk' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
+                    className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-bold transition-all ${transferCenterTab === 'bulk' ? 'bg-[#2C5E3B]/20 text-[#A9CBA2] border border-[#2C5E3B]/30' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
                 >
                     <Layers size={14} />
                     Bulk Push

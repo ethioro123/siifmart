@@ -44,20 +44,20 @@ export const StockListModal: React.FC = () => {
             size="xl"
         >
             <div className="space-y-4">
-                <div className="flex items-center gap-2 bg-black/20 p-2 rounded-lg border border-white/10">
+                <div className="flex items-center gap-2 bg-white dark:bg-black/20 p-2.5 rounded-xl border border-[#E2DCCE] dark:border-white/10 focus-within:border-[#2C5E3B] dark:focus-within:border-[#A9CBA2] transition-colors">
                     <input
                         type="text"
                         value={stockSearch}
                         onChange={(e) => setStockSearch(e.target.value)}
                         placeholder={t('posCommand.searchStockPlaceholder')}
-                        className="flex-1 bg-transparent border-none outline-none text-white px-2 py-1 placeholder:text-gray-500"
+                        className="flex-1 bg-transparent border-none outline-none text-[#1E3F27] dark:text-white px-2 py-1 placeholder:text-stone-400 dark:placeholder:text-gray-500"
                         autoFocus
                     />
                 </div>
 
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm">
-                        <thead className="text-gray-400 border-b border-white/10">
+                        <thead className="text-stone-500 dark:text-gray-400 border-b border-[#E2DCCE] dark:border-white/10">
                             <tr>
                                 <th className="text-left p-3 font-medium uppercase tracking-wider">{t('inventory.product')}</th>
                                 <th className="text-left p-3 font-medium uppercase tracking-wider">{t('inventory.category')}</th>
@@ -69,44 +69,75 @@ export const StockListModal: React.FC = () => {
                                 <th className="text-right p-3 font-medium uppercase tracking-wider">Added By</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-white/5">
+                        <tbody className="divide-y divide-[#E2DCCE] dark:divide-white/5">
                             {paginatedProducts.map(product => {
                                 const unit = getSellUnit(product.unit);
                                 return (
                                     <tr
                                         key={product.id}
                                         onClick={() => setSelectedProduct(product)}
-                                        className="hover:bg-white/5 transition-colors cursor-pointer"
+                                        className="hover:bg-stone-50 dark:hover:bg-white/5 transition-colors cursor-pointer"
                                     >
                                         <td className="p-3">
-                                            <p className="font-medium text-white">{product.name}</p>
-                                            <p className="text-xs text-gray-500 font-mono">{product.sku}</p>
+                                            <p className="font-medium text-[#1E3F27] dark:text-white">{product.name}</p>
+                                            <p className="text-xs text-stone-400 dark:text-gray-500 font-mono">{product.sku}</p>
                                         </td>
-                                        <td className="p-3 text-gray-400">
+                                        <td className="p-3 text-stone-600 dark:text-gray-400">
                                             {product.category || t('posCommand.uncategorized')}
                                         </td>
-                                        <td className="p-3 text-right font-medium text-white">
+                                        <td className="p-3 text-right font-medium text-[#1E3F27] dark:text-white">
                                             {CURRENCY_SYMBOL}{product.price.toLocaleString()}
                                         </td>
                                         <td className="p-3 text-right">
-                                            <div className={`font-medium ${product.stock <= 5 ? 'text-red-400' : 'text-green-400'}`}>
-                                                {product.stock}
-                                            </div>
+                                            {(() => {
+                                                const threshold = product.minStock !== undefined && product.minStock !== null && product.minStock > 0 ? product.minStock : 10;
+                                                const isOutOfStock = product.stock <= 0;
+                                                const isLowStock = product.stock < threshold;
+                                                
+                                                let colorClass = 'text-[#2C5E3B] dark:text-[#A9CBA2]'; // Green
+                                                if (isOutOfStock) {
+                                                    colorClass = 'text-red-650 dark:text-red-400';
+                                                } else if (isLowStock) {
+                                                    colorClass = 'text-amber-600 dark:text-amber-400'; // Yellow/Amber
+                                                }
+                                                return (
+                                                    <div className={`font-medium ${colorClass}`}>
+                                                        {product.stock}
+                                                    </div>
+                                                );
+                                            })()}
                                         </td>
-                                        <td className="p-3 text-center text-gray-400 uppercase text-[10px] font-bold">
+                                        <td className="p-3 text-center text-stone-500 dark:text-gray-400 uppercase text-[10px] font-bold">
                                             {unit.shortLabel}
                                         </td>
                                         <td className="p-3 text-center">
-                                            <span className={`px-2 py-0.5 rounded-full text-[10px] uppercase font-bold ${product.stock > 10 ? 'bg-green-500/10 text-green-500' :
-                                                product.stock > 0 ? 'bg-amber-500/10 text-amber-500' :
-                                                    'bg-red-50/10 text-red-500'
-                                                }`}>
-                                                {product.stock > 10 ? t('common.active') :
-                                                    product.stock > 0 ? t('common.low') :
-                                                        t('common.outOfStock')}
-                                            </span>
+                                            {(() => {
+                                                const threshold = product.minStock !== undefined && product.minStock !== null && product.minStock > 0 ? product.minStock : 10;
+                                                const isOutOfStock = product.stock <= 0;
+                                                const isLowStock = product.stock < threshold;
+
+                                                if (isOutOfStock) {
+                                                    return (
+                                                        <span className="px-2 py-0.5 rounded-full text-[10px] uppercase font-bold border bg-rose-50 dark:bg-red-500/10 text-rose-700 dark:text-red-400 border-rose-100 dark:border-transparent">
+                                                            {t('common.outOfStock')}
+                                                        </span>
+                                                    );
+                                                } else if (isLowStock) {
+                                                    return (
+                                                        <span className="px-2 py-0.5 rounded-full text-[10px] uppercase font-bold border bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-100 dark:border-transparent">
+                                                            {t('common.low')}
+                                                        </span>
+                                                    );
+                                                } else {
+                                                    return (
+                                                        <span className="px-2 py-0.5 rounded-full text-[10px] uppercase font-bold border bg-emerald-50 dark:bg-green-500/10 text-emerald-700 dark:text-green-400 border-emerald-100 dark:border-transparent">
+                                                            {t('common.active')}
+                                                        </span>
+                                                    );
+                                                }
+                                            })()}
                                         </td>
-                                        <td className="p-3 text-right text-gray-400 text-xs whitespace-nowrap font-mono">
+                                        <td className="p-3 text-right text-stone-500 dark:text-gray-400 text-xs whitespace-nowrap font-mono">
                                             {(() => {
                                                 const dateStr = product.posReceivedAt || product.pos_received_at || product.createdAt || product.created_at;
                                                 if (!dateStr) return '—';
@@ -119,7 +150,7 @@ export const StockListModal: React.FC = () => {
                                                 }
                                             })()}
                                         </td>
-                                        <td className="p-3 text-right text-gray-400 text-[11px] whitespace-nowrap font-medium tracking-wide">
+                                        <td className="p-3 text-right text-stone-500 dark:text-gray-400 text-[11px] whitespace-nowrap font-medium tracking-wide">
                                             {product.posReceivedBy || product.pos_received_by || product.createdBy || product.created_by || '—'}
                                         </td>
                                     </tr>
@@ -127,7 +158,7 @@ export const StockListModal: React.FC = () => {
                             })}
                             {filteredProducts.length === 0 && (
                                 <tr>
-                                    <td colSpan={8} className="p-8 text-center text-gray-500">
+                                    <td colSpan={8} className="p-8 text-center text-stone-400 dark:text-gray-500">
                                         {t('posCommand.noProductsLocation')}
                                     </td>
                                 </tr>
@@ -137,8 +168,8 @@ export const StockListModal: React.FC = () => {
                 </div>
 
                 {totalPages > 1 && (
-                    <div className="flex items-center justify-between border-t border-white/10 pt-4 bg-transparent mt-4">
-                        <div className="text-xs text-gray-500 flex items-center gap-2">
+                    <div className="flex items-center justify-between border-t border-[#E2DCCE] dark:border-white/10 pt-4 bg-transparent mt-4">
+                        <div className="text-xs text-stone-500 dark:text-gray-450 flex items-center gap-2">
                             <span>{t('common.page')} {currentPage} / {totalPages}</span>
                             <span className="opacity-50">|</span>
                             <span>{filteredProducts.length} {t('inventory.products')}</span>
@@ -147,14 +178,14 @@ export const StockListModal: React.FC = () => {
                             <button
                                 onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                                 disabled={currentPage === 1}
-                                className="px-3 py-1.5 text-xs font-bold uppercase tracking-widest text-white bg-white/5 border border-white/10 rounded hover:bg-white/10 disabled:opacity-20 transition-all outline-none active:scale-95"
+                                className="px-3.5 py-1.5 bg-white/80 dark:bg-white/5 hover:bg-[#2C5E3B]/10 text-stone-500 dark:text-white text-[10px] font-bold rounded-xl border border-[#E2DCCE] dark:border-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition-all active:scale-95"
                             >
                                 {t('common.previous')}
                             </button>
                             <button
                                 onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                                 disabled={currentPage === totalPages}
-                                className="px-3 py-1.5 text-xs font-bold uppercase tracking-widest text-white bg-white/5 border border-white/10 rounded hover:bg-white/10 disabled:opacity-20 transition-all outline-none active:scale-95"
+                                className="px-3.5 py-1.5 bg-[#224429] dark:bg-[#2C5E3B] hover:bg-[#1B3520] dark:hover:bg-[#3a7a4d] text-white text-[10px] font-bold rounded-xl border border-transparent disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-sm active:scale-95"
                             >
                                 {t('common.next')}
                             </button>

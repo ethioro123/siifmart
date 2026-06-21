@@ -104,7 +104,9 @@ export const FulfillmentDataProvider = ({ children }: { children: ReactNode }) =
         logSystemEvent,
         addNotification,
         refreshData: refreshInfo,
-        adjustStock
+        adjustStock,
+        setProducts,
+        setAllProducts
     } = useData(); // Dependency on DataContext
 
     const { user } = useStore();
@@ -344,8 +346,8 @@ export const FulfillmentDataProvider = ({ children }: { children: ReactNode }) =
 
     // Job Completion: completeJob (with job chaining, putaway, gamification)
     const { completeJob } = useJobCompletion({
-        jobs, sales, employees, user, allOrders, allProducts,
-        setJobs, setTransfers, setOrders, setAllOrders, setSales,
+        jobs, sales, employees, user, allOrders, allProducts, jobAssignments,
+        setJobs, setTransfers, setOrders, setAllOrders, setSales, setJobAssignments,
         addNotification, adjustStock, queryClient
     });
 
@@ -358,7 +360,8 @@ export const FulfillmentDataProvider = ({ children }: { children: ReactNode }) =
     // Receiving: receivePO, receivePOSplit, finalizePO
     const { receivePO, receivePOSplit, finalizePO } = useReceiving({
         orders, allOrders, jobs, products, allProducts,
-        activeSite, setJobs, setOrders, setAllOrders, addNotification
+        activeSite, setJobs, setOrders, setAllOrders, addNotification,
+        setProducts, setAllProducts
     });
 
     // Transfers: requestTransfer, shipTransfer, receiveTransfer, updateTransfer

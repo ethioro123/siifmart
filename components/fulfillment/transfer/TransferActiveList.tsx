@@ -94,13 +94,13 @@ export const TransferActiveList: React.FC<TransferActiveListProps> = ({
 
         const statusColors: Record<string, string> = {
             'Requested': 'bg-yellow-500/20 text-yellow-400',
-            'Approved': 'bg-blue-500/20 text-blue-400',
+            'Approved': 'bg-[#2C5E3B]/20 text-[#A9CBA2]',
             'Picking': 'bg-orange-500/20 text-orange-400',
             'Picked': 'bg-amber-500/20 text-amber-400',
-            'Packed': 'bg-indigo-500/20 text-indigo-400',
-            'Shipped': 'bg-purple-500/20 text-purple-400',
-            'In-Transit': 'bg-purple-500/20 text-purple-400',
-            'Delivered': 'bg-cyan-500/20 text-cyan-400',
+            'Packed': 'bg-[#2C5E3B]/30 text-[#A9CBA2]',
+            'Shipped': 'bg-amber-500/20 text-amber-400',
+            'In-Transit': 'bg-amber-500/20 text-amber-400',
+            'Delivered': 'bg-[#A9CBA2]/20 text-[#A9CBA2]',
             'Received': 'bg-green-500/20 text-green-400',
         };
         return (

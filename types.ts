@@ -72,7 +72,7 @@ export interface SystemLog {
   ip_address?: string;
 }
 
-export type SiteType = 'Administration' | 'Administrative' | 'Central Operations' | 'Warehouse' | 'Store' | 'Distribution Center' | 'Dark Store' | 'HQ' | 'Headquarters';
+export type SiteType = 'Administration' | 'Administrative' | 'Central Operations' | 'Warehouse' | 'Store' | 'Distribution Center' | 'Dark Store' | 'Online Store' | 'HQ' | 'Headquarters';
 
 export interface TaxRule {
   name: string;
@@ -122,6 +122,8 @@ export interface Site {
 
   // Barcode Configuration
   barcodePrefix?: string; // 4-digit unique prefix for location barcodes (e.g. "1001")
+  replenishmentSourceId?: string; // ID of the warehouse/DC feeding this store (legacy single-source, kept for compatibility)
+  replenishmentSourceIds?: string[]; // IDs of all warehouses/DCs feeding this store (many-to-many)
 }
 
 export type FulfillmentStrategy = 'LOCAL_ONLY' | 'NEAREST' | 'SPLIT' | 'MANUAL';
@@ -749,7 +751,7 @@ export interface WMSJob {
   jobNumber?: string; // Friendly ID (e.g., JOB-0001)
   poNumber?: string; // Human-readable PO number enriched from DataContext
   // Transfer-specific fields
-  transferStatus?: 'Requested' | 'Approved' | 'Picking' | 'Picked' | 'Packed' | 'Shipped' | 'In-Transit' | 'Delivered' | 'Received' | 'Completed' | 'Cancelled' | 'Rejected';
+  transferStatus?: 'Draft' | 'Requested' | 'Approved' | 'Picking' | 'Picked' | 'Packed' | 'Shipped' | 'In-Transit' | 'Delivered' | 'Received' | 'Completed' | 'Cancelled' | 'Rejected';
   requestedBy?: string; // Who requested the transfer
   approvedBy?: string; // Who approved the transfer
   shippedAt?: string; // When items were shipped

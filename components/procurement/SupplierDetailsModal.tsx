@@ -19,18 +19,18 @@ export const SupplierDetailsModal: React.FC<SupplierDetailsModalProps> = ({ isOp
         <Modal isOpen={isOpen} onClose={onClose} title={`Supplier Details: ${supplier.name || ''}`} size="lg">
             <div className="space-y-6">
                 {/* Status & Overview */}
-                <div className="flex items-center gap-4 bg-white/5 p-4 rounded-xl border border-white/10">
+                <div className="flex items-center gap-4 glass-panel p-4">
                     <div className="flex-1">
-                        <p className="text-xs text-gray-500 uppercase font-bold">Category</p>
-                        <p className="text-white font-bold">{supplier.category}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 uppercase font-bold">Category</p>
+                        <p className="text-gray-900 dark:text-white font-black">{supplier.category}</p>
                     </div>
                     <div className="flex-1">
-                        <p className="text-xs text-gray-500 uppercase font-bold">Type</p>
-                        <p className="text-white font-bold">{supplier.type}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 uppercase font-bold">Type</p>
+                        <p className="text-gray-900 dark:text-white font-black">{supplier.type}</p>
                     </div>
                     <div className="flex-1">
-                        <p className="text-xs text-gray-500 uppercase font-bold">Status</p>
-                        <div className={`inline-flex px-2 py-0.5 rounded text-[10px] font-bold border uppercase ${supplier.status === 'Active' ? 'text-green-400 border-green-500/20 bg-green-500/5' : 'text-red-400 border-red-500/20 bg-red-500/5'
+                        <p className="text-xs text-gray-500 dark:text-gray-400 uppercase font-bold">Status</p>
+                        <div className={`inline-flex px-2 py-0.5 rounded text-[10px] font-bold border uppercase ${supplier.status === 'Active' ? 'text-green-600 dark:text-green-400 border-green-500/20 bg-green-500/5' : 'text-red-600 dark:text-red-400 border-red-500/20 bg-red-500/5'
                             }`}>
                             {supplier.status}
                         </div>
@@ -39,25 +39,25 @@ export const SupplierDetailsModal: React.FC<SupplierDetailsModalProps> = ({ isOp
 
                 {/* Performance Stats */}
                 <div className="grid grid-cols-3 gap-3">
-                    <div className="bg-black/20 p-3 rounded-xl border border-white/5 text-center">
-                        <p className="text-[10px] text-gray-500 uppercase font-bold mb-1">Performance</p>
-                        <div className="flex items-center justify-center gap-1 text-yellow-400 font-bold">
+                    <div className="glass-panel p-3 text-center">
+                        <p className="text-[10px] text-gray-500 dark:text-gray-400 uppercase font-bold mb-1">Performance</p>
+                        <div className="flex items-center justify-center gap-1 text-yellow-500 font-bold">
                             <Star size={14} fill="currentColor" /> {supplier.rating}
                         </div>
                     </div>
-                    <div className="bg-black/20 p-3 rounded-xl border border-white/5 text-center">
-                        <p className="text-[10px] text-gray-500 uppercase font-bold mb-1">Lead Time</p>
-                        <p className="text-white font-bold">{supplier.leadTime} Days</p>
+                    <div className="glass-panel p-3 text-center">
+                        <p className="text-[10px] text-gray-500 dark:text-gray-400 uppercase font-bold mb-1">Lead Time</p>
+                        <p className="text-gray-900 dark:text-white font-bold">{supplier.leadTime} Days</p>
                     </div>
-                    <div className="bg-black/20 p-3 rounded-xl border border-white/5 text-center">
-                        <p className="text-[10px] text-gray-500 uppercase font-bold mb-1">Payment Terms</p>
-                        <p className="text-white font-bold">{supplier.paymentTerms || 'Net 30'}</p>
+                    <div className="glass-panel p-3 text-center">
+                        <p className="text-[10px] text-gray-500 dark:text-gray-400 uppercase font-bold mb-1">Payment Terms</p>
+                        <p className="text-gray-900 dark:text-white font-bold">{supplier.paymentTerms || 'Net 30'}</p>
                     </div>
                 </div>
 
                 {/* Contact Information */}
                 <div className="space-y-3">
-                    <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider">Contact Information</h3>
+                    <h3 className="text-sm font-bold text-[#4D6E56] dark:text-[#7A9E83] uppercase tracking-widest text-xs">Contact Information</h3>
 
                     {supplier.phone && (
                         <button
@@ -65,14 +65,14 @@ export const SupplierDetailsModal: React.FC<SupplierDetailsModalProps> = ({ isOp
                                 window.location.href = `tel:${supplier.phone}`;
                                 showToast(`Calling ${supplier.name}...`, 'success');
                             }}
-                            className="w-full flex items-center gap-3 p-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-colors group"
+                            className="w-full flex items-center gap-3 p-3 glass-panel glass-panel-hover transition-colors group"
                         >
-                            <div className="w-10 h-10 rounded-lg bg-green-500/20 flex items-center justify-center group-hover:bg-green-500/30">
-                                <Phone className="text-green-400" size={18} />
+                            <div className="w-10 h-10 rounded-lg bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 flex items-center justify-center group-hover:scale-105 transition-transform">
+                                <Phone className="text-[#2C5E3B] dark:text-[#A9CBA2]" size={18} />
                             </div>
                             <div className="flex-1 text-left">
-                                <p className="text-white font-bold text-sm">Call</p>
-                                <p className="text-xs text-gray-400">{supplier.phone}</p>
+                                <p className="text-gray-900 dark:text-white font-bold text-sm">Call</p>
+                                <p className="text-xs text-gray-400 dark:text-gray-500">{supplier.phone}</p>
                             </div>
                             <ExternalLink size={14} className="text-gray-500" />
                         </button>
@@ -84,27 +84,27 @@ export const SupplierDetailsModal: React.FC<SupplierDetailsModalProps> = ({ isOp
                                 window.location.href = `mailto:${supplier.email}?subject=Inquiry&body=Hello...`;
                                 showToast(`Opening email...`, 'success');
                             }}
-                            className="w-full flex items-center gap-3 p-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-colors group"
+                            className="w-full flex items-center gap-3 p-3 glass-panel glass-panel-hover transition-colors group"
                         >
-                            <div className="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center group-hover:bg-blue-500/30">
-                                <Mail className="text-blue-400" size={18} />
+                            <div className="w-10 h-10 rounded-lg bg-[#8C6239]/10 dark:bg-[#E2C899]/10 flex items-center justify-center group-hover:scale-105 transition-transform">
+                                <Mail className="text-[#8C6239] dark:text-[#E2C899]" size={18} />
                             </div>
                             <div className="flex-1 text-left">
-                                <p className="text-white font-bold text-sm">Email</p>
-                                <p className="text-xs text-gray-400">{supplier.email}</p>
+                                <p className="text-gray-900 dark:text-white font-bold text-sm">Email</p>
+                                <p className="text-xs text-gray-400 dark:text-gray-500">{supplier.email}</p>
                             </div>
                             <ExternalLink size={14} className="text-gray-500" />
                         </button>
                     )}
 
                     {supplier.location && (
-                        <div className="flex items-center gap-3 p-3 bg-white/5 border border-white/10 rounded-xl">
-                            <div className="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
-                                <MapPin className="text-purple-400" size={18} />
+                        <div className="w-full flex items-center gap-3 p-3 glass-panel transition-colors">
+                            <div className="w-10 h-10 rounded-lg bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 flex items-center justify-center">
+                                <MapPin className="text-[#2C5E3B] dark:text-[#A9CBA2]" size={18} />
                             </div>
-                            <div>
-                                <p className="text-white font-bold text-sm">Location</p>
-                                <p className="text-xs text-gray-400">{supplier.location}</p>
+                            <div className="flex-1 text-left">
+                                <p className="text-gray-900 dark:text-white font-bold text-sm">Location</p>
+                                <p className="text-xs text-gray-400 dark:text-gray-500">{supplier.location}</p>
                             </div>
                         </div>
                     )}

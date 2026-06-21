@@ -428,7 +428,12 @@ export const purchaseOrdersService = {
                     size: item.size || null,
                     unit: item.unit || null,
                     category: item.category || null,
-                    identity_type: item.identityType || 'known'
+                    identity_type: item.identityType || 'known',
+                    pack_quantity: item.packQuantity || 1,
+                    description: item.description || null,
+                    min_stock: item.minStock || 0,
+                    max_stock: item.maxStock || 0,
+                    custom_attributes: item.customAttributes || null
                 };
             });
 
@@ -616,7 +621,18 @@ export const purchaseOrdersService = {
                     expectedQty: item.quantity,
                     pickedQty: 0,
                     status: 'Pending',
-                    receivedQty: 0
+                    receivedQty: 0,
+                    cost: item.unitCost,
+                    retailPrice: item.retailPrice,
+                    unit: item.unit,
+                    size: item.size,
+                    brand: item.brand,
+                    packQuantity: item.packQuantity,
+                    category: item.category,
+                    customAttributes: item.customAttributes,
+                    description: item.description,
+                    minStock: item.minStock,
+                    maxStock: item.maxStock
                 })),
                 requestedBy: 'System (PO Receipt)',
                 notes: `Auto-generated Putaway for PO ${po.poNumber || po.id}`

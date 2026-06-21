@@ -7,11 +7,12 @@ import Button from './shared/Button';
 import {
     Box, Package, RefreshCw, Barcode, CheckCircle, Plus, Scan, Info,
     MapPin, Calendar, Tag, DollarSign, Layers, Scale, Archive, AlertTriangle,
-    Truck, Image as ImageIcon
+    Truck, Image as ImageIcon, TrendingDown, TrendingUp, Lock
 } from 'lucide-react';
 import ImageUpload from './ImageUpload';
 import { CURRENCY_SYMBOL, COMMON_UNITS, GROCERY_CATEGORIES } from '../constants';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useStore } from '../contexts/CentralStore';
 
 interface ProductFormProps {
     initialData?: Partial<Product>;
@@ -22,6 +23,9 @@ interface ProductFormProps {
 }
 
 export function ProductForm({ initialData, onSubmit, onCancel, isSubmitting, isReadOnly = false }: ProductFormProps) {
+    const { user } = useStore();
+    const canEditThresholds = user?.role === 'super_admin' || user?.role === 'store_manager';
+
     const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm({
         resolver: zodResolver(ProductSchema),
         defaultValues: {
@@ -30,7 +34,9 @@ export function ProductForm({ initialData, onSubmit, onCancel, isSubmitting, isR
             packQuantity: initialData?.packQuantity || 1, price: initialData?.price || 0, costPrice: initialData?.costPrice || 0,
             stock: initialData?.stock || 0, sku: initialData?.sku || '', barcode: initialData?.barcode || '',
             barcodes: initialData?.barcodes || [], location: initialData?.location || '', expiryDate: initialData?.expiryDate || '',
-            image: initialData?.image || '', status: (initialData?.status as any) || 'active', ...initialData
+            image: initialData?.image || '', status: (initialData?.status as any) || 'active',
+            minStock: initialData?.minStock ?? null, maxStock: initialData?.maxStock ?? null,
+            ...initialData
         }
     });
 
@@ -109,7 +115,7 @@ export function ProductForm({ initialData, onSubmit, onCancel, isSubmitting, isR
                     )}
                     {activeSection === 'inventory' && (
                         <motion.div key="inventory" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }} className="grid grid-cols-2 gap-8">
-                            <FinancialCard register={register} /> <QuantitativeCard register={register} />
+                            <FinancialCard register={register} /> <QuantitativeCard register={register} watch={watch} thresholdsDisabled={isReadOnly || !canEditThresholds} />
                         </motion.div>
                     )}
                     {activeSection === 'logistics' && (
@@ -148,15 +154,112 @@ const FinancialCard = ({ register }: any) => (
     </div>
 );
 
-const QuantitativeCard = ({ register }: any) => (
-    <div className="col-span-2 md:col-span-1 bg-gray-50 dark:bg-white/[0.02] border border-gray-200 dark:border-white/5 rounded-[2rem] p-6 space-y-6">
-        <h3 className="text-xs font-black text-blue-600 dark:text-blue-400 uppercase tracking-[0.2em] flex items-center gap-2"><Box size={14} /> Quantitative</h3>
-        <div className="space-y-4">
-            <FormGroup label="Stock Level"><div className="relative"><RefreshCw className="absolute left-4 top-1/2 -translate-y-1/2 text-blue-500" size={16} /><input {...register('stock', { valueAsNumber: true })} type="number" className="form-input pl-12 text-lg font-mono font-black placeholder:opacity-30" placeholder="0" /></div><p className="text-[9px] text-gray-500 mt-2 font-bold uppercase tracking-wider flex items-center gap-1"><Info size={10} /> Auto-triggers putaway job</p></FormGroup>
-            <FormGroup label="Pack Qty"><div className="relative"><Archive className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-600" size={16} /><input {...register('packQuantity', { valueAsNumber: true })} type="number" className="form-input pl-12 text-sm font-mono text-gray-500" placeholder="1" /></div></FormGroup>
+const QuantitativeCard = ({ register, watch, thresholdsDisabled }: any) => {
+    const stock = watch('stock') || 0;
+    const minStock = watch('minStock') || 0;
+    const maxStock = watch('maxStock') || 0;
+    const stockPct = maxStock > 0 ? Math.min(100, (stock / maxStock) * 100) : null;
+    const isLow = minStock > 0 && stock < minStock;
+    const isOptimal = minStock > 0 && maxStock > 0 && stock >= minStock && stock <= maxStock;
+
+    return (
+        <div className="col-span-2 md:col-span-1 bg-gray-50 dark:bg-white/[0.02] border border-gray-200 dark:border-white/5 rounded-[2rem] p-6 space-y-6">
+            <h3 className="text-xs font-black text-blue-600 dark:text-blue-400 uppercase tracking-[0.2em] flex items-center gap-2"><Box size={14} /> Quantitative</h3>
+            <div className="space-y-4">
+                <FormGroup label="Current Stock Level">
+                    <div className="relative">
+                        <RefreshCw className="absolute left-4 top-1/2 -translate-y-1/2 text-blue-500" size={16} />
+                        <input {...register('stock', { valueAsNumber: true })} type="number" className="form-input pl-12 text-lg font-mono font-black placeholder:opacity-30" placeholder="0" />
+                    </div>
+                    <p className="text-[9px] text-gray-500 mt-2 font-bold uppercase tracking-wider flex items-center gap-1"><Info size={10} /> Auto-triggers putaway job</p>
+                </FormGroup>
+                <FormGroup label="Pack Qty">
+                    <div className="relative">
+                        <Archive className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-600" size={16} />
+                        <input {...register('packQuantity', { valueAsNumber: true })} type="number" className="form-input pl-12 text-sm font-mono text-gray-500" placeholder="1" />
+                    </div>
+                </FormGroup>
+
+                {/* ── Stock Thresholds ── */}
+                <div className="pt-2 border-t border-gray-200 dark:border-white/5">
+                    <div className="flex items-center justify-between mb-3">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-orange-500 flex items-center gap-2">
+                            <TrendingDown size={12} /> Stock Thresholds
+                        </p>
+                        {thresholdsDisabled && (
+                            <span className="text-[9px] text-amber-500 dark:text-amber-400 font-bold uppercase tracking-wider flex items-center gap-1 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
+                                <Lock size={10} /> Manager & CEO Only
+                            </span>
+                        )}
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                        <FormGroup label="Min Stock (Reorder Point)">
+                            <div className="relative">
+                                <TrendingDown className="absolute left-4 top-1/2 -translate-y-1/2 text-amber-500" size={14} />
+                                <input
+                                    {...register('minStock', { valueAsNumber: true })}
+                                    type="number"
+                                    min="0"
+                                    className={`form-input pl-10 text-sm font-mono font-bold text-amber-600 dark:text-amber-400 placeholder:text-gray-400 ${
+                                        thresholdsDisabled ? 'opacity-50 cursor-not-allowed bg-gray-100 dark:bg-black/20' : ''
+                                    }`}
+                                    placeholder="e.g. 10"
+                                    aria-label="Minimum stock reorder point"
+                                    readOnly={thresholdsDisabled}
+                                />
+                            </div>
+                            <p className="text-[9px] text-gray-400 mt-1">Triggers replenishment alert</p>
+                        </FormGroup>
+                        <FormGroup label="Max Stock (Capacity)">
+                            <div className="relative">
+                                <TrendingUp className="absolute left-4 top-1/2 -translate-y-1/2 text-green-500" size={14} />
+                                <input
+                                    {...register('maxStock', { valueAsNumber: true })}
+                                    type="number"
+                                    min="0"
+                                    className={`form-input pl-10 text-sm font-mono font-bold text-green-600 dark:text-green-400 placeholder:text-gray-400 ${
+                                        thresholdsDisabled ? 'opacity-50 cursor-not-allowed bg-gray-100 dark:bg-black/20' : ''
+                                    }`}
+                                    placeholder="e.g. 100"
+                                    aria-label="Maximum stock capacity"
+                                    readOnly={thresholdsDisabled}
+                                />
+                            </div>
+                            <p className="text-[9px] text-gray-400 mt-1">Replenishment target ceiling</p>
+                        </FormGroup>
+                    </div>
+
+                    {/* Live Stock Health Bar */}
+                    {(minStock > 0 || maxStock > 0) && (
+                        <div className="mt-3 p-3 bg-black/20 rounded-xl border border-white/5 space-y-2">
+                            <div className="flex items-center justify-between text-[9px] font-black uppercase tracking-wider">
+                                <span className={isLow ? 'text-red-400' : isOptimal ? 'text-green-400' : 'text-gray-400'}>
+                                    {isLow ? '⚠ Below Min — Will Trigger Replenishment' : isOptimal ? '✓ Optimal Range' : 'Stock Policy Active'}
+                                </span>
+                                {stockPct !== null && <span className="text-gray-500">{Math.round(stockPct)}% of max</span>}
+                            </div>
+                            {stockPct !== null && (
+                                <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
+                                    <div
+                                        className={`h-full rounded-full transition-all duration-500 ${
+                                            isLow ? 'bg-red-500' : stockPct > 80 ? 'bg-green-500' : 'bg-amber-500'
+                                        }`}
+                                        ref={(el) => { if (el) el.style.width = `${stockPct}%`; }}
+                                    />
+                                </div>
+                            )}
+                            <div className="flex items-center justify-between text-[9px] text-gray-600 font-mono">
+                                <span>Min: {minStock || '—'}</span>
+                                <span>Now: <strong className="text-white">{stock}</strong></span>
+                                <span>Max: {maxStock || '—'}</span>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </div>
         </div>
-    </div>
-);
+    );
+};
 
 const LogisticsSection = ({ register }: any) => (
     <div className="p-6 bg-gray-50 dark:bg-white/[0.02] border border-gray-200 dark:border-white/5 rounded-[2rem] space-y-6">

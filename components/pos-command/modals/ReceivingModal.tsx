@@ -51,21 +51,27 @@ export const ReceivingModal: React.FC = () => {
 
     return (
         <Modal isOpen={isReceivingModalOpen} onClose={handleCloseReceivingModal} title={t('posCommand.receivingModalTitle')} size="xl">
-            <div className="space-y-4 p-1">
+            <div className="space-y-4 p-1 bg-transparent">
                 {/* Tabs */}
                 {!receivingSummary && !selectedTransferForReceiving && (
-                    <div className="flex p-1 bg-black/40 rounded-xl mb-4">
+                    <div className="flex p-1 bg-[#F4F0E6] dark:bg-black/30 rounded-2xl mb-4 border border-[#E2DCCE] dark:border-white/5">
                         <button
                             onClick={() => setActiveTab2('pending')}
-                            className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${activeTab === 'pending' ? 'bg-cyber-primary text-black shadow-lg shadow-cyber-primary/20' : 'text-gray-400 hover:text-white'
-                                }`}
+                            className={`flex-1 py-2.5 text-sm font-bold rounded-xl transition-all ${
+                                activeTab === 'pending'
+                                    ? 'bg-[#224429] dark:bg-[#2C5E3B] text-white shadow-sm'
+                                    : 'text-[#4D6E56] dark:text-gray-400 hover:text-[#2C5E3B] dark:hover:text-white'
+                            }`}
                         >
                             {t('posCommand.pendingTab')} ({activeSite?.name})
                         </button>
                         <button
                             onClick={() => setActiveTab2('history')}
-                            className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${activeTab === 'history' ? 'bg-cyber-primary text-black shadow-lg shadow-cyber-primary/20' : 'text-gray-400 hover:text-white'
-                                }`}
+                            className={`flex-1 py-2.5 text-sm font-bold rounded-xl transition-all ${
+                                activeTab === 'history'
+                                    ? 'bg-[#224429] dark:bg-[#2C5E3B] text-white shadow-sm'
+                                    : 'text-[#4D6E56] dark:text-gray-400 hover:text-[#2C5E3B] dark:hover:text-white'
+                            }`}
                         >
                             {t('posCommand.historyTab')}
                         </button>
@@ -75,14 +81,14 @@ export const ReceivingModal: React.FC = () => {
                 {/* Receiving Summary View */}
                 {receivingSummary && (
                     <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                        <div className="bg-green-500/10 border border-green-500/30 rounded-2xl p-6 text-center">
-                            <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <CheckCircle size={40} className="text-green-400" />
+                        <div className="bg-emerald-50 dark:bg-green-500/10 border border-emerald-150 dark:border-green-500/30 rounded-2xl p-6 text-center">
+                            <div className="w-16 h-16 bg-emerald-100 dark:bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <CheckCircle size={40} className="text-emerald-700 dark:text-green-400" />
                             </div>
-                            <h3 className="text-xl font-bold text-white mb-1">
+                            <h3 className="text-xl font-bold text-[#1E3F27] dark:text-white mb-1">
                                 {(receivingSummary as any).isHistory ? t('posCommand.shipmentDetails') : t('posCommand.receivingCompleted')}
                             </h3>
-                            <p className="text-gray-400 text-sm">
+                            <p className="text-stone-500 dark:text-gray-400 text-sm">
                                 {(receivingSummary as any).isHistory
                                     ? `${t('posCommand.detailsForShipment')} ${formatJobId({ jobNumber: (receivingSummary as any).jobNumber, orderRef: receivingSummary.orderRef, type: 'TRANSFER' })}`
                                     : `${t('posCommand.shipmentAddedInventory')} ${formatJobId({ jobNumber: (receivingSummary as any).jobNumber, orderRef: receivingSummary.orderRef, type: 'TRANSFER' })}`
@@ -90,35 +96,37 @@ export const ReceivingModal: React.FC = () => {
                             </p>
                         </div>
 
-                        <div className="border border-white/10 rounded-xl overflow-hidden">
-                            <div className="bg-black/20 p-3 flex items-center justify-between text-xs font-bold text-gray-400 uppercase border-b border-white/10">
+                        <div className="border border-[#E2DCCE] dark:border-white/10 rounded-2xl overflow-hidden bg-transparent">
+                            <div className="bg-[#FAF8F5] dark:bg-black/20 p-3 flex items-center justify-between text-xs font-black text-[#4D6E56] dark:text-gray-400 uppercase tracking-wider border-b border-[#E2DCCE] dark:border-white/10">
                                 <span>{t('posCommand.shipmentDetails')}</span>
                                 <span>{formatDateTime(receivingSummary.timestamp, { showTime: true })}</span>
                             </div>
-                            <div className="max-h-[300px] overflow-y-auto custom-scrollbar">
+                            <div className="max-h-[300px] overflow-y-auto custom-scrollbar divide-y divide-[#E2DCCE]/60 dark:divide-white/5 bg-transparent">
                                 {receivingSummary.items.map((item: any, idx: number) => {
-                                    // Resolve unit from the item OR from products catalog as fallback
                                     const resolvedUnit = item.unit || (() => {
                                         const prod = allProducts.find((p: any) => p.sku?.trim()?.toUpperCase() === item.sku?.trim()?.toUpperCase());
                                         return prod?.unit || '';
                                     })();
                                     const displayExpected = item.displayExpectedQty || item.expectedQty;
                                     return (
-                                        <div key={idx} className="p-3 flex items-center justify-between border-b border-white/5 last:border-0 hover:bg-white/5 transition-colors">
+                                        <div key={idx} className="p-3 flex items-center justify-between hover:bg-stone-50 dark:hover:bg-white/5 transition-colors">
                                             <div className="flex-1 min-w-0">
-                                                <p className="text-sm font-bold text-white truncate">{item.name}</p>
-                                                <p className="text-xs text-gray-500">SKU: {item.sku}</p>
+                                                <p className="text-sm font-bold text-[#1E3F27] dark:text-white truncate">{item.name}</p>
+                                                <p className="text-xs text-stone-400 dark:text-gray-500">SKU: {item.sku}</p>
                                             </div>
                                             <div className="flex flex-col items-end">
                                                 <div className="flex items-center gap-2">
-                                                    <span className={`text-xs font-bold ${item.receivedQty < displayExpected ? 'text-red-400' : 'text-green-400'}`}>
+                                                    <span className={`text-xs font-bold ${item.receivedQty < displayExpected ? 'text-rose-600 dark:text-red-400' : 'text-emerald-700 dark:text-green-400'}`}>
                                                         {t('posCommand.received')} {item.receivedQty}{resolvedUnit ? ` ${resolvedUnit}` : ''} {t('pos.outOf')} {displayExpected}{resolvedUnit ? ` ${resolvedUnit}` : ''}
                                                     </span>
                                                 </div>
-                                                <span className={`text-[10px] font-bold uppercase px-1.5 py-0.5 rounded mt-1 border ${item.condition === 'Good' ? 'bg-green-500/10 text-green-400 border-green-500/20' :
-                                                    item.condition === 'Damaged' ? 'bg-red-500/10 text-red-400 border-red-500/20' :
-                                                        'bg-yellow-500/10 text-yellow-400 border-yellow-500/20'
-                                                    } `}>
+                                                <span className={`text-[10px] font-bold uppercase px-1.5 py-0.5 rounded mt-1 border ${
+                                                    item.condition === 'Good'
+                                                        ? 'bg-emerald-50 dark:bg-green-500/10 text-emerald-700 dark:text-green-400 border-emerald-100 dark:border-transparent'
+                                                        : item.condition === 'Damaged'
+                                                            ? 'bg-rose-50 dark:bg-red-500/10 text-rose-700 dark:text-red-400 border-rose-100 dark:border-transparent'
+                                                            : 'bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-100 dark:border-transparent'
+                                                }`}>
                                                     {item.condition === 'Good' ? t('posCommand.conditionGood') :
                                                         item.condition === 'Damaged' ? t('posCommand.conditionDamaged') :
                                                             t('posCommand.conditionExpired')}
@@ -131,18 +139,18 @@ export const ReceivingModal: React.FC = () => {
                         </div>
 
                         {receivingSummary.hasDiscrepancies && (
-                            <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-4 flex items-start gap-3">
-                                <AlertTriangle className="text-yellow-400 flex-shrink-0" size={20} />
+                            <div className="bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 rounded-xl p-4 flex items-start gap-3">
+                                <AlertTriangle className="text-amber-600 dark:text-amber-400 flex-shrink-0" size={20} />
                                 <div>
-                                    <p className="text-sm font-bold text-yellow-400">{t('posCommand.discrepanciesReported')}</p>
-                                    <p className="text-xs text-yellow-200/70">{t('posCommand.notifiedAlert')}</p>
+                                    <p className="text-sm font-bold text-amber-800 dark:text-amber-400">{t('posCommand.discrepanciesReported')}</p>
+                                    <p className="text-xs text-amber-600/80 dark:text-amber-200/70">{t('posCommand.notifiedAlert')}</p>
                                 </div>
                             </div>
                         )}
 
                         <button
                             onClick={handleCloseReceivingModal}
-                            className="w-full py-4 bg-cyber-primary hover:bg-cyber-accent text-black font-bold rounded-xl shadow-lg transition-all transform hover:scale-[1.02] flex items-center justify-center gap-2"
+                            className="w-full py-4 text-white font-bold rounded-2xl shadow-[0_4px_20px_rgba(44,94,59,0.25)] transition-all hover:opacity-90 active:scale-[0.98] flex items-center justify-center gap-2 bg-gradient-to-br from-[#224429] to-[#2C5E3B]"
                         >
                             {t('posCommand.closeSummary')}
                         </button>
@@ -157,35 +165,36 @@ export const ReceivingModal: React.FC = () => {
                         {selectedTransferForReceiving ? (
                             <div className="space-y-4 animate-in slide-in-from-right-4 duration-300">
                                 {/* Back button and title */}
-                                <div className="flex items-center gap-3 border-b border-white/10 pb-4">
+                                <div className="flex items-center gap-3 border-b border-[#E2DCCE]/60 dark:border-white/10 pb-4">
                                     <button
                                         onClick={() => handleCloseReceivingModal()}
-                                        className="p-2 bg-white/5 hover:bg-white/10 rounded-lg text-gray-400 hover:text-white transition-all active:scale-95"
+                                        title={t('common.back') || 'Back'}
+                                        aria-label={t('common.back') || 'Back'}
+                                        className="p-2 bg-[#F4F0E6]/60 dark:bg-white/5 hover:bg-[#2C5E3B]/10 dark:hover:bg-white/10 rounded-lg text-stone-600 dark:text-gray-400 hover:text-[#2C5E3B] dark:hover:text-white transition-all active:scale-95 border border-[#E2DCCE]/50 dark:border-white/5"
                                     >
-                                        <Clock size={16} /> {/* Placeholder for back icon to avoid duplicate imports, Clock signifies history/back context here subtly or just rely on Close modal */}
+                                        <Clock size={16} />
                                     </button>
                                     <div>
-                                        <h3 className="text-lg font-bold text-white tracking-wide">{t('posCommand.receivingShipment')}</h3>
-                                        <p className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">
+                                        <h3 className="text-lg font-bold text-[#1E3F27] dark:text-white tracking-wide">{t('posCommand.receivingShipment')}</h3>
+                                        <p className="text-[10px] text-stone-400 dark:text-gray-500 uppercase tracking-widest font-bold">
                                             {t('posCommand.ref')}: {(() => {
                                                 const matchedJob = jobs.find(j => j.id === selectedTransferForReceiving || j.orderRef === selectedTransferForReceiving);
                                                 return matchedJob ? formatJobId(matchedJob) : selectedTransferForReceiving.substring(0, 8);
-                                            })()} |
-                                            {t('posCommand.items')}: {transferReceivingItems.length}
+                                            })()} | {t('posCommand.items')}: {transferReceivingItems.length}
                                         </p>
                                     </div>
                                     <div className="ml-auto">
-                                        <span className="px-3 py-1 bg-blue-500/10 text-blue-400 border border-blue-500/30 rounded-full text-xs font-bold flex items-center gap-2 shadow-[0_0_10px_rgba(59,130,246,0.2)]">
-                                            <div className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" />
+                                        <span className="px-3 py-1 bg-emerald-50 dark:bg-[#2C5E3B]/10 text-emerald-700 dark:text-[#A9CBA2] border border-emerald-250 dark:border-[#2C5E3B]/30 rounded-full text-xs font-bold flex items-center gap-2">
+                                            <div className="w-2 h-2 rounded-full bg-emerald-500 dark:bg-[#A9CBA2] animate-pulse" />
                                             {t('posCommand.inProgress')}
                                         </span>
                                     </div>
                                 </div>
 
                                 {/* Quick Scan Input */}
-                                <div className="bg-black/40 border border-white/10 rounded-xl p-4">
-                                    <label className="text-xs font-bold text-gray-400 uppercase block mb-2 tracking-wider flex items-center gap-2">
-                                        <Scan size={14} className="text-cyber-primary" />
+                                <div className="bg-[#FAF8F5] dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-2xl p-4">
+                                    <label className="text-xs font-black text-[#4D6E56] dark:text-[#7A9E83] uppercase block mb-2 tracking-wider flex items-center gap-2">
+                                        <Scan size={14} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
                                         {t('posCommand.scanNextItem')}
                                     </label>
                                     <div className="flex gap-2 relative">
@@ -198,11 +207,11 @@ export const ReceivingModal: React.FC = () => {
                                                 if (e.key === 'Enter') handleScanTransferItem(transferScanBarcode);
                                             }}
                                             placeholder={t('posCommand.scanBarcodePlaceholder')}
-                                            className="w-full bg-black/60 border border-white/10 rounded-lg px-4 py-3 text-white font-mono focus:border-cyber-primary outline-none transition-all placeholder:text-gray-600 focus:shadow-[0_0_15px_rgba(0,255,157,0.15)] focus:bg-cyber-primary/5"
+                                            className="w-full bg-white dark:bg-black/40 border border-[#E2DCCE] dark:border-white/10 rounded-xl px-4 py-3 text-[#1E3F27] dark:text-white font-mono outline-none transition-all placeholder:text-[#4D6E56]/40 dark:placeholder:text-gray-600 focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:ring-1 focus:ring-[#2C5E3B] dark:focus:ring-[#A9CBA2]"
                                         />
                                         <button
                                             onClick={() => handleScanTransferItem(transferScanBarcode)}
-                                            className="px-6 py-3 bg-white/5 hover:bg-white/10 text-white font-bold rounded-lg transition-all active:scale-95 border border-white/10"
+                                            className="px-6 py-3 bg-[#224429] dark:bg-[#2C5E3B] hover:bg-[#1B3520] dark:hover:bg-[#3a7a4d] text-white font-bold rounded-xl transition-all active:scale-95 border border-transparent shadow-sm"
                                         >
                                             {t('common.add')}
                                         </button>
@@ -210,36 +219,36 @@ export const ReceivingModal: React.FC = () => {
                                 </div>
 
                                 {/* Items List */}
-                                <div className="bg-black/20 border border-white/10 rounded-xl overflow-hidden shadow-inner">
+                                <div className="bg-[#FAF8F5] dark:bg-black/20 border border-[#E2DCCE] dark:border-white/10 rounded-2xl overflow-hidden">
                                     <div className="max-h-[400px] overflow-y-auto custom-scrollbar">
                                         <table className="w-full text-left">
-                                            <thead className="bg-white/5 sticky top-0 backdrop-blur-md z-10 border-b border-white/10">
+                                            <thead className="bg-[#F4F0E6] dark:bg-white/5 sticky top-0 backdrop-blur-md z-10 border-b border-[#E2DCCE] dark:border-white/10">
                                                 <tr>
-                                                    <th className="p-3 text-[10px] text-gray-500 uppercase font-black tracking-widest">{t('posCommand.itemDetails')}</th>
-                                                    <th className="p-3 text-[10px] text-gray-500 uppercase font-black tracking-widest text-center">{t('posCommand.expected')}</th>
-                                                    <th className="p-3 text-[10px] text-gray-500 uppercase font-black tracking-widest text-center">{t('posCommand.received')}</th>
-                                                    <th className="p-3 text-[10px] text-gray-500 uppercase font-black tracking-widest">{t('posCommand.condition')}</th>
+                                                    <th className="p-3 text-[10px] text-stone-500 dark:text-gray-400 uppercase font-black tracking-widest">{t('posCommand.itemDetails')}</th>
+                                                    <th className="p-3 text-[10px] text-stone-500 dark:text-gray-400 uppercase font-black tracking-widest text-center">{t('posCommand.expected')}</th>
+                                                    <th className="p-3 text-[10px] text-stone-500 dark:text-gray-400 uppercase font-black tracking-widest text-center">{t('posCommand.received')}</th>
+                                                    <th className="p-3 text-[10px] text-stone-500 dark:text-gray-400 uppercase font-black tracking-widest">{t('posCommand.condition')}</th>
                                                 </tr>
                                             </thead>
-                                            <tbody className="divide-y divide-white/5">
+                                            <tbody className="divide-y divide-[#E2DCCE]/60 dark:divide-white/5 bg-transparent">
                                                 {transferReceivingItems.map((item, index) => {
                                                     const isFullyReceived = item.receivedQty >= (item.displayExpectedQty || item.expectedQty);
                                                     const isOverReceived = item.receivedQty > (item.displayExpectedQty || item.expectedQty);
 
                                                     return (
-                                                        <tr key={index} className={`transition-colors ${isFullyReceived ? 'bg-green-500/[0.02]' : 'hover:bg-white/[0.02]'}`}>
+                                                        <tr key={index} className={`transition-colors ${isFullyReceived ? 'bg-emerald-500/[0.02]' : 'hover:bg-stone-50 dark:hover:bg-white/[0.02]'}`}>
                                                             <td className="p-3">
-                                                                <p className="text-sm font-bold text-white mb-0.5">{item.name}</p>
-                                                                <p className="text-xs font-mono text-gray-500 bg-black/40 inline-block px-1.5 py-0.5 rounded border border-white/5">SKU: {item.sku}</p>
+                                                                <p className="text-sm font-bold text-[#1E3F27] dark:text-white mb-0.5">{item.name}</p>
+                                                                <p className="text-xs font-mono text-stone-600 dark:text-gray-455 bg-[#FAF8F5] dark:bg-black/40 px-1.5 py-0.5 rounded border border-[#E2DCCE] dark:border-white/5">SKU: {item.sku}</p>
                                                             </td>
                                                             <td className="p-3 text-center">
-                                                                <span className="text-sm font-mono text-gray-400">{item.displayExpectedQty || item.expectedQty} {item.unit ? <span className="text-[10px] text-gray-500 uppercase">{item.unit}</span> : ''}</span>
+                                                                <span className="text-sm font-mono text-stone-700 dark:text-gray-300">{item.displayExpectedQty || item.expectedQty} {item.unit ? <span className="text-[10px] text-stone-500 dark:text-gray-500 uppercase">{item.unit}</span> : ''}</span>
                                                             </td>
                                                             <td className="p-3">
                                                                 <div className="flex items-center justify-center gap-2">
                                                                     <button
                                                                         onClick={() => handleUpdateTransferItem(index, 'receivedQty', Math.max(0, item.receivedQty - 1))}
-                                                                        className="w-7 h-7 bg-white/5 hover:bg-red-500/20 text-gray-400 hover:text-red-400 rounded flex items-center justify-center transition-all active:scale-90 border border-transparent hover:border-red-500/30"
+                                                                        className="w-7 h-7 bg-stone-100 dark:bg-white/5 hover:bg-rose-500/20 text-stone-600 dark:text-gray-400 hover:text-rose-600 dark:hover:text-red-400 rounded flex items-center justify-center transition-all active:scale-90 border border-[#E2DCCE] dark:border-transparent hover:border-rose-500/30"
                                                                     >-</button>
                                                                     <input
                                                                         title={t('posCommand.receivedQty') || "Received Quantity"}
@@ -248,19 +257,22 @@ export const ReceivingModal: React.FC = () => {
                                                                         min="0"
                                                                         value={item.receivedQty}
                                                                         onChange={(e) => handleUpdateTransferItem(index, 'receivedQty', parseInt(e.target.value) || 0)}
-                                                                        className={`w-14 bg-black/50 border rounded text-center font-mono py-1 focus:outline-none transition-all ${isOverReceived ? 'border-yellow-500/50 text-yellow-400 bg-yellow-500/10' :
-                                                                            isFullyReceived ? 'border-green-500/50 text-green-400 bg-green-500/10' :
-                                                                                'border-white/10 text-white focus:border-cyber-primary'
-                                                                            }`}
+                                                                        className={`w-14 bg-white dark:bg-black/50 border rounded text-center font-mono py-1 focus:outline-none transition-all ${
+                                                                            isOverReceived
+                                                                                ? 'border-amber-500/50 text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10'
+                                                                                : isFullyReceived
+                                                                                    ? 'border-emerald-500/50 text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10'
+                                                                                    : 'border-[#E2DCCE] dark:border-white/10 text-[#1E3F27] dark:text-white focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2]'
+                                                                        }`}
                                                                     />
                                                                     <button
                                                                         onClick={() => handleUpdateTransferItem(index, 'receivedQty', item.receivedQty + 1)}
-                                                                        className="w-7 h-7 bg-white/5 hover:bg-green-500/20 text-gray-400 hover:text-green-400 rounded flex items-center justify-center transition-all active:scale-90 border border-transparent hover:border-green-500/30"
+                                                                        className="w-7 h-7 bg-stone-100 dark:bg-white/5 hover:bg-emerald-500/20 text-stone-600 dark:text-gray-400 hover:text-emerald-700 dark:hover:text-emerald-450 rounded flex items-center justify-center transition-all active:scale-90 border border-[#E2DCCE] dark:border-transparent hover:border-emerald-500/30"
                                                                     >+</button>
-                                                                    {item.unit && <span className="text-[10px] text-gray-500 uppercase font-bold ml-1">{item.unit}</span>}
+                                                                    {item.unit && <span className="text-[10px] text-stone-500 dark:text-gray-500 uppercase font-bold ml-1">{item.unit}</span>}
                                                                 </div>
                                                                 {isOverReceived && (
-                                                                    <p className="text-[9px] text-yellow-400 text-center mt-1 font-bold uppercase tracking-wider">{t('posCommand.overageDetected')}</p>
+                                                                    <p className="text-[9px] text-amber-600 dark:text-amber-400 text-center mt-1 font-bold uppercase tracking-wider">{t('posCommand.overageDetected')}</p>
                                                                 )}
                                                             </td>
                                                             <td className="p-3">
@@ -269,22 +281,17 @@ export const ReceivingModal: React.FC = () => {
                                                                     aria-label={t('posCommand.condition') || "Condition"}
                                                                     value={item.condition}
                                                                     onChange={(e) => handleUpdateTransferItem(index, 'condition', e.target.value)}
-                                                                    className={`bg-black/50 border rounded-lg text-xs p-2 outline-none w-full appearance-none cursor-pointer transition-all ${item.condition === 'Good' ? 'text-green-400 border-green-500/30 font-bold' :
-                                                                        item.condition === 'Damaged' ? 'text-red-400 border-red-500/50 font-bold bg-red-500/5' :
-                                                                            'text-yellow-400 border-yellow-500/50 font-bold bg-yellow-500/5'
-                                                                        }`}
-                                                                    ref={(el) => {
-                                                                        if (el) {
-                                                                            el.style.backgroundImage = `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`;
-                                                                            el.style.backgroundRepeat = 'no-repeat';
-                                                                            el.style.backgroundPosition = 'right 0.5rem center';
-                                                                            el.style.backgroundSize = '1em';
-                                                                        }
-                                                                    }}
+                                                                    className={`bg-white dark:bg-black/50 border rounded-lg text-xs p-2 outline-none w-full cursor-pointer transition-all ${
+                                                                        item.condition === 'Good'
+                                                                            ? 'text-emerald-700 dark:text-emerald-400 border-emerald-500/30 font-bold'
+                                                                            : item.condition === 'Damaged'
+                                                                                ? 'text-rose-700 dark:text-red-400 border-rose-500/30 font-bold bg-rose-50 dark:bg-rose-500/5'
+                                                                                : 'text-amber-700 dark:text-amber-400 border-amber-500/30 font-bold bg-amber-50 dark:bg-amber-500/5'
+                                                                    }`}
                                                                 >
-                                                                    <option value="Good">{t('posCommand.conditionGood')}</option>
-                                                                    <option value="Damaged">{t('posCommand.conditionDamaged')}</option>
-                                                                    <option value="Expired">{t('posCommand.conditionExpired')}</option>
+                                                                    <option value="Good" className="bg-[#FAF8F5] dark:bg-[#18201B] text-[#1E3F27] dark:text-white">{t('posCommand.conditionGood')}</option>
+                                                                    <option value="Damaged" className="bg-[#FAF8F5] dark:bg-[#18201B] text-[#1E3F27] dark:text-white">{t('posCommand.conditionDamaged')}</option>
+                                                                    <option value="Expired" className="bg-[#FAF8F5] dark:bg-[#18201B] text-[#1E3F27] dark:text-white">{t('posCommand.conditionExpired')}</option>
                                                                 </select>
                                                             </td>
                                                         </tr>
@@ -295,11 +302,11 @@ export const ReceivingModal: React.FC = () => {
                                     </div>
 
                                     {/* Summary Footer */}
-                                    <div className="bg-black/40 p-4 border-t border-white/10 flex items-center justify-between">
+                                    <div className="bg-[#FAF8F5] dark:bg-black/30 p-4 border-t border-[#E2DCCE] dark:border-white/10 flex items-center justify-between">
                                         <div className="flex gap-6 flex-wrap">
                                             <div>
-                                                <p className="text-[10px] text-gray-500 uppercase font-black tracking-widest">{t('posCommand.totalExpected')}</p>
-                                                <div className="text-lg font-mono text-white">
+                                                <p className="text-[10px] text-stone-500 dark:text-gray-450 uppercase font-black tracking-widest">{t('posCommand.totalExpected')}</p>
+                                                <div className="text-lg font-mono text-[#1E3F27] dark:text-white font-bold">
                                                     {(() => {
                                                         const grouped: Record<string, number> = {};
                                                         transferReceivingItems.forEach(item => {
@@ -307,14 +314,14 @@ export const ReceivingModal: React.FC = () => {
                                                             grouped[u] = (grouped[u] || 0) + (item.displayExpectedQty || item.expectedQty);
                                                         });
                                                         return Object.entries(grouped).map(([u, qty], i) => (
-                                                            <span key={u}>{i > 0 && <span className="text-gray-600 mx-1">·</span>}{qty} <span className="text-[10px] text-gray-500">{u}</span></span>
+                                                            <span key={u}>{i > 0 && <span className="text-stone-400 dark:text-gray-600 mx-1">·</span>}{qty} <span className="text-[10px] text-stone-500 dark:text-gray-500">{u}</span></span>
                                                         ));
                                                     })()}
                                                 </div>
                                             </div>
                                             <div>
-                                                <p className="text-[10px] text-gray-500 uppercase font-black tracking-widest">{t('posCommand.totalScanned')}</p>
-                                                <div className={`text-lg font-mono font-bold ${transferReceivingItems.reduce((sum, item) => sum + item.receivedQty, 0) >= transferReceivingItems.reduce((sum, item) => sum + (item.displayExpectedQty || item.expectedQty), 0) ? 'text-green-400' : 'text-cyber-primary'}`}>
+                                                <p className="text-[10px] text-stone-500 dark:text-gray-455 uppercase font-black tracking-widest">{t('posCommand.totalScanned')}</p>
+                                                <div className={`text-lg font-mono font-bold ${transferReceivingItems.reduce((sum, item) => sum + item.receivedQty, 0) >= transferReceivingItems.reduce((sum, item) => sum + (item.displayExpectedQty || item.expectedQty), 0) ? 'text-emerald-700 dark:text-green-400' : 'text-[#2C5E3B] dark:text-[#A9CBA2]'}`}>
                                                     {(() => {
                                                         const grouped: Record<string, number> = {};
                                                         transferReceivingItems.forEach(item => {
@@ -322,7 +329,7 @@ export const ReceivingModal: React.FC = () => {
                                                             grouped[u] = (grouped[u] || 0) + item.receivedQty;
                                                         });
                                                         return Object.entries(grouped).map(([u, qty], i) => (
-                                                            <span key={u}>{i > 0 && <span className="text-gray-600 mx-1">·</span>}{qty} <span className="text-[10px] text-gray-500">{u}</span></span>
+                                                            <span key={u}>{i > 0 && <span className="text-stone-400 dark:text-gray-600 mx-1">·</span>}{qty} <span className="text-[10px] text-stone-500 dark:text-gray-500">{u}</span></span>
                                                         ));
                                                     })()}
                                                 </div>
@@ -331,10 +338,10 @@ export const ReceivingModal: React.FC = () => {
                                         <button
                                             onClick={handleConfirmTransferReceiving}
                                             disabled={isConfirmingReceive || transferReceivingItems.reduce((sum, item) => sum + item.receivedQty, 0) === 0}
-                                            className="px-8 py-3 bg-cyber-primary hover:bg-cyber-accent text-black font-bold flex items-center gap-2 rounded-xl transition-all shadow-[0_0_15px_rgba(0,255,157,0.3)] disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed active:scale-95"
+                                            className="px-8 py-3 text-white font-bold flex items-center gap-2 rounded-2xl transition-all disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed active:scale-95 hover:opacity-90 bg-gradient-to-br from-[#224429] to-[#2C5E3B] shadow-[0_4px_16px_rgba(44,94,59,0.25)]"
                                         >
                                             {isConfirmingReceive ? (
-                                                <span className="flex items-center gap-2"><div className="w-4 h-4 border-2 border-black/20 border-t-black rounded-full animate-spin" /> {t('common.processing')}...</span>
+                                                <span className="flex items-center gap-2"><div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" /> {t('common.processing')}...</span>
                                             ) : (
                                                 <span className="flex items-center gap-2"><CheckCircle size={18} /> {t('posCommand.finalizeReceipt')}</span>
                                             )}
@@ -343,16 +350,16 @@ export const ReceivingModal: React.FC = () => {
                                 </div>
                             </div>
                         ) : activeTab === 'history' ? (
-
+                            
                             /* HISTORY VIEW */
                             <div className="space-y-4">
-                                <div className="bg-purple-500/10 border border-purple-500/30 rounded-xl p-4">
+                                <div className="bg-emerald-50 dark:bg-[#2C5E3B]/10 border border-emerald-150 dark:border-[#2C5E3B]/30 rounded-xl p-4">
                                     <div className="flex items-center gap-3">
-                                        <Clock className="text-purple-400" size={20} />
-                                        <h3 className="text-white font-bold">{t('posCommand.recentTransactions')}</h3>
+                                        <Clock className="text-emerald-700 dark:text-[#A9CBA2]" size={20} />
+                                        <h3 className="text-[#1E3F27] dark:text-white font-bold">{t('posCommand.recentTransactions')}</h3>
                                     </div>
-                                    <p className="text-xs text-gray-400 mt-1">
-                                        {t('posCommand.showingHistory')} <span className="text-white font-bold">{activeSite?.name}</span>.
+                                    <p className="text-xs text-stone-500 dark:text-gray-400 mt-1">
+                                        {t('posCommand.showingHistory')} <span className="text-[#1E3F27] dark:text-white font-bold">{activeSite?.name}</span>.
                                     </p>
                                 </div>
 
@@ -365,7 +372,7 @@ export const ReceivingModal: React.FC = () => {
                                         })
                                         .map(j => ({
                                             id: j.id,
-                                            type: j.type, // Preserved for logic
+                                            type: j.type,
                                             sourceSiteId: (j as any).sourceSiteId || (j as any).source_site_id || j.siteId,
                                             destSiteId: (j as any).destSiteId || (j as any).dest_site_id,
                                             status: j.status,
@@ -398,8 +405,8 @@ export const ReceivingModal: React.FC = () => {
 
                                     if (historyItems.length === 0) {
                                         return (
-                                            <div className="text-center py-12 text-gray-500">
-                                                <Clock size={40} className="mx-auto mb-4 opacity-50" />
+                                            <div className="text-center py-12 text-stone-400 dark:text-gray-500">
+                                                <Clock size={40} className="mx-auto mb-4 opacity-50 text-stone-300 dark:text-gray-600" />
                                                 <p>{t('posCommand.noHistory')}</p>
                                             </div>
                                         );
@@ -416,7 +423,6 @@ export const ReceivingModal: React.FC = () => {
                                                             jobNumber: (item as any).jobNumber || (item as any).job_number,
                                                             items: ((item as any).items || (item as any).lineItems || (item as any).line_items || []).map((i: any) => {
                                                                 const expected = i.requestedMeasureQty || i.requested_measure_qty || i.expectedQty || i.expected_qty || i.quantity || 0;
-                                                                // Resolve unit from the product catalog since DB line items don't store unit
                                                                 const prod = allProducts.find((p: any) => p.sku?.trim()?.toUpperCase() === (i.sku || '').trim().toUpperCase());
                                                                 const resolvedUnit = i.unit || prod?.unit || '';
 
@@ -434,16 +440,16 @@ export const ReceivingModal: React.FC = () => {
                                                             isHistory: true
                                                         });
                                                     }}
-                                                    className="bg-white/5 border border-white/10 rounded-xl p-4 flex items-center justify-between cursor-pointer hover:bg-white/10 transition-colors"
+                                                    className="bg-[#FAF8F5]/80 dark:bg-white/5 border border-[#E2DCCE] dark:border-white/10 rounded-2xl p-4 flex items-center justify-between cursor-pointer hover:bg-[#2C5E3B]/5 dark:hover:bg-white/10 hover:border-[#2C5E3B]/20 transition-all shadow-sm"
                                                 >
                                                     <div>
-                                                        <p className="font-mono font-bold text-white">{formatJobId({ ...item, type: 'TRANSFER' } as any)}</p>
-                                                        <p className="text-xs text-gray-400">
+                                                        <p className="font-mono font-bold text-[#1E3F27] dark:text-[#EAE5D9]">{formatJobId({ ...item, type: 'TRANSFER' } as any)}</p>
+                                                        <p className="text-xs text-stone-500 dark:text-gray-400">
                                                             {(item as any).items?.length || 0} {t('posCommand.productsLabel')} • {formatDateTime((item as any).receivedAt || (item as any).updatedAt)}
                                                         </p>
                                                     </div>
                                                     <div className="text-right">
-                                                        <span className="px-2 py-1 bg-green-500/20 text-green-400 border border-green-500/30 rounded text-[10px] font-bold uppercase">
+                                                        <span className="px-2.5 py-1 bg-emerald-50 dark:bg-green-500/20 text-emerald-700 dark:text-green-400 border border-emerald-100 dark:border-green-500/30 rounded text-[10px] font-bold uppercase">
                                                             {t('posCommand.received').toUpperCase()}
                                                         </span>
                                                     </div>
@@ -458,13 +464,13 @@ export const ReceivingModal: React.FC = () => {
                             /* PENDING VIEW (Default) */
                             <>
                                 {/* Order Ref Scanner */}
-                                <div className="bg-cyber-primary/5 border border-cyber-primary/30 rounded-xl p-4 mb-2">
+                                <div className="bg-[#FAF8F5] dark:bg-[#2C5E3B]/5 border border-[#E2DCCE] dark:border-[#2C5E3B]/30 rounded-2xl p-4 mb-2 shadow-sm">
                                     <div className="flex items-center justify-between mb-3">
-                                        <label className="text-xs font-bold text-cyber-primary uppercase flex items-center gap-2">
+                                        <label className="text-xs font-bold text-[#2C5E3B] dark:text-[#A9CBA2] uppercase flex items-center gap-2">
                                             <Scan size={14} />
                                             {t('posCommand.quickScanHandover')}
                                         </label>
-                                        <span className="text-[10px] text-gray-500 italic">{t('posCommand.scanPackingLabel')}</span>
+                                        <span className="text-[10px] text-stone-500 dark:text-gray-550 italic">{t('posCommand.scanPackingLabel')}</span>
                                     </div>
                                     <div className="relative">
                                         <input
@@ -478,11 +484,11 @@ export const ReceivingModal: React.FC = () => {
                                                 }
                                             }}
                                             placeholder={t('posCommand.scanOrderRefPlaceholder')}
-                                            className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-white font-mono focus:border-cyber-primary outline-none transition-all placeholder:text-gray-600"
+                                            className="w-full bg-[#FAF8F5] dark:bg-black/40 border border-[#E2DCCE] dark:border-white/10 rounded-xl px-4 py-3 text-[#1E3F27] dark:text-white font-mono outline-none transition-all placeholder:text-[#4D6E56]/40 dark:placeholder:text-gray-600 focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:ring-1 focus:ring-[#2C5E3B] dark:focus:ring-[#A9CBA2]"
                                         />
                                         <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
-                                            <div className="w-2 h-2 rounded-full bg-cyber-primary animate-pulse" />
-                                            <span className="text-[10px] text-cyber-primary font-bold uppercase tracking-widest">{t('posCommand.awaitingScan')}</span>
+                                            <div className="w-2 h-2 rounded-full bg-[#2C5E3B] dark:bg-[#A9CBA2] animate-pulse" />
+                                            <span className="text-[10px] text-[#2C5E3B] dark:text-[#A9CBA2] font-bold uppercase tracking-widest">{t('posCommand.awaitingScan')}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -496,7 +502,7 @@ export const ReceivingModal: React.FC = () => {
                                         })
                                         .map(j => ({
                                             id: j.id,
-                                            type: j.type, // Preserved for logic
+                                            type: j.type,
                                             sourceSiteId: (j as any).sourceSiteId || (j as any).source_site_id || j.siteId,
                                             destSiteId: (j as any).destSiteId || (j as any).dest_site_id,
                                             status: j.status,
@@ -522,7 +528,6 @@ export const ReceivingModal: React.FC = () => {
                                         const transferStatus = ((t as any).transferStatus || '').toLowerCase();
                                         const jobStatus = ((t as any).status || '').toLowerCase();
 
-                                        // Exclude anything already completed/received/cancelled at EITHER status level
                                         if (['received', 'completed', 'cancelled'].includes(transferStatus)) return false;
                                         if (['completed', 'cancelled', 'deleted'].includes(jobStatus)) return false;
 
@@ -537,22 +542,20 @@ export const ReceivingModal: React.FC = () => {
                                         return validStatuses.includes(transferStatus) || validStatuses.includes(jobStatus);
                                     });
 
-                                    // Simple fallback - wait a moment for context data 
                                     return (
                                         <div className="space-y-3">
-                                            <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center justify-between border-b border-white/5 pb-2">
+                                            <h4 className="text-xs font-bold text-stone-500 dark:text-gray-455 uppercase tracking-widest flex items-center justify-between border-b border-[#E2DCCE]/60 dark:border-white/5 pb-2">
                                                 {t('posCommand.incomingShipments')}
-                                                <span className="bg-white/10 px-2 py-0.5 rounded-full text-white">{pendingTransfers.length}</span>
+                                                <span className="bg-[#FAF8F5] dark:bg-white/10 border border-[#E2DCCE]/60 dark:border-transparent px-2.5 py-0.5 rounded-full text-stone-600 dark:text-white font-mono font-bold">{pendingTransfers.length}</span>
                                             </h4>
                                             {pendingTransfers.length === 0 ? (
-                                                <div className="text-center py-10 bg-black/20 rounded-xl border border-white/5 border-dashed">
-                                                    <Package size={32} className="mx-auto text-gray-600 mb-3" />
-                                                    <p className="text-gray-400 font-bold">{t('posCommand.noIncomingShipments')}</p>
-                                                    <p className="text-xs text-gray-500 mt-1">{t('posCommand.allCaughtUp')}</p>
+                                                <div className="text-center py-10 bg-[#FAF8F5]/50 dark:bg-black/20 rounded-xl border border-[#E2DCCE]/60 dark:border-white/5 border-dashed">
+                                                    <Package size={32} className="mx-auto text-stone-400 dark:text-gray-600 mb-3" />
+                                                    <p className="text-stone-700 dark:text-gray-400 font-bold">{t('posCommand.noIncomingShipments')}</p>
+                                                    <p className="text-xs text-stone-400 dark:text-gray-550 mt-1">{t('posCommand.allCaughtUp')}</p>
                                                 </div>
                                             ) : (
                                                 pendingTransfers.map(transfer => {
-                                                    // Compute effective status once for both display and gating
                                                     let effStatus = (transfer as any).transferStatus || transfer.status || 'Pending';
                                                     const childDispatch = jobs.find(j => j.type === 'DISPATCH' && (j.orderRef === transfer.id || j.orderRef === (transfer as any).jobNumber) && j.status !== 'Cancelled');
                                                     if (childDispatch) {
@@ -561,13 +564,9 @@ export const ReceivingModal: React.FC = () => {
                                                     }
 
                                                     const effLower = effStatus.toLowerCase();
-                                                    // deliveryMethod is set on the DISPATCH child job by the dispatcher, NOT on the parent TRANSFER
                                                     const resolvedDeliveryMethod = childDispatch?.deliveryMethod || (transfer as any).deliveryMethod;
                                                     const isExternal = resolvedDeliveryMethod === 'External';
-                                                    const isInternal = !isExternal; // Default to internal if not set
 
-                                                    // External: receivable once dispatcher marks Shipped (or beyond)
-                                                    // Internal: receivable only once driver confirms Delivered (or beyond)
                                                     const SHIPPED_PLUS = ['shipped', 'in-transit', 'dispatched', 'delivered', 'arrived'];
                                                     const DELIVERED_PLUS = ['delivered', 'arrived'];
 
@@ -595,45 +594,45 @@ export const ReceivingModal: React.FC = () => {
                                                             }
                                                         }}
                                                         className={`border rounded-xl p-4 flex items-center justify-between transition-all cursor-pointer ${isReceivable
-                                                            ? 'bg-white/5 hover:bg-cyber-primary/10 border-white/10 hover:border-cyber-primary/30 group'
-                                                            : isExpanded ? 'bg-white/5 border-white/15 rounded-b-none' : 'bg-white/[0.02] border-white/5 opacity-60 hover:opacity-80'
+                                                            ? 'bg-white dark:bg-white/5 hover:bg-emerald-50/50 dark:hover:bg-[#2C5E3B]/10 border-[#E2DCCE] dark:border-white/10 hover:border-[#2C5E3B]/30 dark:hover:border-[#2C5E3B]/30 group'
+                                                            : isExpanded ? 'bg-[#FAF8F5] dark:bg-white/5 border-[#E2DCCE] dark:border-white/15 rounded-b-none' : 'bg-stone-50/50 dark:bg-white/[0.02] border-[#E2DCCE]/60 dark:border-white/5 opacity-70 hover:opacity-85'
                                                         }`}
                                                     >
                                                         <div className="flex items-center gap-4">
-                                                            <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-transform ${isReceivable ? 'bg-blue-500/10 text-blue-400 group-hover:scale-110' : 'bg-gray-500/10 text-gray-500'}`}>
+                                                            <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-transform ${isReceivable ? 'bg-emerald-50 dark:bg-[#2C5E3B]/10 text-emerald-700 dark:text-[#A9CBA2] group-hover:scale-110' : 'bg-stone-200/50 dark:bg-gray-500/10 text-stone-500 dark:text-gray-550'}`}>
                                                                 <Truck size={20} />
                                                             </div>
                                                             <div>
-                                                                <p className="font-mono font-bold text-white tracking-wide text-sm">{formatJobId({ ...transfer, type: 'TRANSFER' } as any)}</p>
+                                                                <p className="font-mono font-bold text-[#1E3F27] dark:text-white tracking-wide text-sm">{formatJobId({ ...transfer, type: 'TRANSFER' } as any)}</p>
                                                                 {(() => {
                                                                     const sourceSite = sites.find(s => s.id === (transfer as any).sourceSiteId);
                                                                     return sourceSite ? (
-                                                                        <div className="flex items-center gap-1.5 mt-1 bg-white/5 border border-white/10 rounded-lg px-2 py-1 w-fit">
-                                                                            <MapPin size={10} className="text-gray-400" />
-                                                                            <span className="text-[10px] text-gray-400 uppercase tracking-widest font-black">
-                                                                                From: <span className="text-white">{sourceSite.name}</span>
+                                                                        <div className="flex items-center gap-1.5 mt-1 bg-[#FAF8F5] dark:bg-white/5 border border-[#E2DCCE] dark:border-white/10 rounded-lg px-2 py-1 w-fit">
+                                                                            <MapPin size={10} className="text-stone-500 dark:text-gray-400" />
+                                                                            <span className="text-[10px] text-stone-500 dark:text-gray-455 uppercase tracking-widest font-black">
+                                                                                From: <span className="text-[#1E3F27] dark:text-white font-bold">{sourceSite.name}</span>
                                                                             </span>
                                                                         </div>
                                                                     ) : null;
                                                                 })()}
                                                                 <div className="flex flex-wrap items-center gap-2 mt-2">
                                                                     {resolvedDeliveryMethod && (
-                                                                        <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">
+                                                                        <span className="text-[10px] text-stone-400 dark:text-gray-500 font-bold uppercase tracking-wider">
                                                                             {isExternal ? 'External Driver' : 'Internal Driver'}
                                                                         </span>
                                                                     )}
-                                                                    <span className="text-[10px] text-gray-500 border border-white/10 rounded px-1.5 py-0.5">
+                                                                    <span className="text-[10px] text-[#4D6E56] dark:text-gray-500 border border-[#E2DCCE] dark:border-white/10 rounded px-1.5 py-0.5">
                                                                         {transferItems.length} {t('posCommand.productsLabel')}
                                                                     </span>
-                                                                    <span className="text-[10px] text-gray-400 flex items-center gap-1">
+                                                                    <span className="text-[10px] text-stone-400 dark:text-gray-455 flex items-center gap-1">
                                                                         <Clock size={10} />
                                                                         {formatDateTime(transfer.createdAt)}
                                                                     </span>
                                                                 </div>
                                                                 {!isReceivable && !isExpanded && (
-                                                                    <div className="mt-2 flex items-center gap-1.5 bg-yellow-500/10 border border-yellow-500/20 rounded-lg px-2 py-1 w-fit">
-                                                                        <AlertTriangle size={10} className="text-yellow-400" />
-                                                                        <span className="text-[10px] text-yellow-400 font-bold uppercase tracking-wider">{lockReason}</span>
+                                                                    <div className="mt-2 flex items-center gap-1.5 bg-amber-50 dark:bg-yellow-500/10 border border-amber-200 dark:border-yellow-500/20 rounded-lg px-2 py-1 w-fit">
+                                                                        <AlertTriangle size={10} className="text-amber-800 dark:text-yellow-400" />
+                                                                        <span className="text-[10px] text-amber-800 dark:text-yellow-400 font-bold uppercase tracking-wider">{lockReason}</span>
                                                                     </div>
                                                                 )}
                                                             </div>
@@ -643,17 +642,17 @@ export const ReceivingModal: React.FC = () => {
                                                                 const isShipped = effLower.includes('transit') || effLower.includes('shipped') || effLower.includes('dispatched');
                                                                 const isDelivered = effLower.includes('delivered') || effLower.includes('arrived');
                                                                 return (
-                                                                    <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase border ${isDelivered ? 'bg-green-500/20 text-green-400 border-green-500/30' : isShipped ? 'bg-amber-500/20 text-amber-400 border-amber-500/30' : 'bg-blue-500/20 text-blue-400 border-blue-500/30'}`}>
+                                                                    <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase border ${isDelivered ? 'bg-emerald-50 dark:bg-green-500/20 text-emerald-700 dark:text-green-400 border-emerald-255 dark:border-green-500/30' : isShipped ? 'bg-amber-50 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400 border-amber-255 dark:border-amber-500/30' : 'bg-emerald-50 dark:bg-[#2C5E3B]/20 text-emerald-700 dark:text-[#A9CBA2] border-emerald-255 dark:border-[#2C5E3B]/30'}`}>
                                                                         {effStatus}
                                                                     </span>
                                                                 );
                                                             })()}
                                                             {isReceivable ? (
-                                                                <div className="text-xs text-cyber-primary opacity-0 group-hover:opacity-100 transition-opacity mt-2 font-bold flex items-center gap-1 justify-end">
+                                                                <div className="text-xs text-emerald-700 dark:text-[#A9CBA2] opacity-0 group-hover:opacity-100 transition-opacity mt-2 font-bold flex items-center gap-1 justify-end">
                                                                     {t('posCommand.startReceiving')} <ChevronRight size={14} />
                                                                 </div>
                                                             ) : (
-                                                                <div className="text-[9px] text-gray-500 mt-2 font-bold uppercase tracking-widest text-right">
+                                                                <div className="text-[9px] text-stone-500 dark:text-gray-550 mt-2 font-bold uppercase tracking-widest text-right">
                                                                     {isExpanded ? '▲ Hide Details' : '▼ View Contents'}
                                                                 </div>
                                                             )}
@@ -662,39 +661,39 @@ export const ReceivingModal: React.FC = () => {
 
                                                     {/* Expanded Product Details */}
                                                     {isExpanded && (
-                                                        <div className="bg-black/40 border border-white/10 border-t-0 rounded-b-xl overflow-hidden">
-                                                            <div className="px-4 py-2 bg-white/5 border-b border-white/5 flex items-center justify-between">
-                                                                <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Incoming Items</span>
-                                                                <div className="flex items-center gap-1.5 bg-yellow-500/10 border border-yellow-500/20 rounded px-2 py-0.5">
-                                                                    <AlertTriangle size={9} className="text-yellow-400" />
-                                                                    <span className="text-[9px] text-yellow-400 font-bold uppercase tracking-wider">{lockReason}</span>
-                                                                </div>
-                                                            </div>
-                                                            {transferItems.length > 0 ? (
-                                                                <div className="divide-y divide-white/5">
-                                                                    {transferItems.map((item: any, idx: number) => {
-                                                                        const prod = allProducts.find((p: any) => p.sku?.trim()?.toUpperCase() === (item.sku || '').trim().toUpperCase() || p.id === item.productId);
-                                                                        const displayName = item.name || prod?.name || 'Unknown Product';
-                                                                        const expectedQty = item.requestedMeasureQty || item.requested_measure_qty || item.expectedQty || item.expected_qty || item.quantity || 0;
-                                                                        const unitDef = getSellUnit(item.unit || prod?.unit || '');
-                                                                        return (
-                                                                            <div key={idx} className="px-4 py-2.5 flex items-center justify-between hover:bg-white/[0.02] transition-colors">
-                                                                                <div className="min-w-0 flex-1">
-                                                                                    <p className="text-xs font-bold text-white truncate">{displayName}</p>
-                                                                                    {item.sku && <p className="text-[10px] text-gray-600 font-mono">{item.sku}</p>}
-                                                                                </div>
-                                                                                <div className="text-right shrink-0 ml-4">
-                                                                                    <span className="text-sm font-mono font-bold text-gray-300">{expectedQty}</span>
-                                                                                    {unitDef.code !== 'UNIT' && <span className="text-[10px] text-gray-500 ml-1 uppercase">{unitDef.shortLabel}</span>}
-                                                                                </div>
-                                                                            </div>
-                                                                        );
-                                                                    })}
-                                                                </div>
-                                                            ) : (
-                                                                <div className="px-4 py-6 text-center text-gray-600 text-xs">No item details available</div>
-                                                            )}
-                                                        </div>
+                                                         <div className="bg-stone-50/50 dark:bg-black/40 border border-[#E2DCCE] dark:border-white/10 border-t-0 rounded-b-xl overflow-hidden">
+                                                             <div className="px-4 py-2 bg-[#F4F0E6]/50 dark:bg-white/5 border-b border-[#E2DCCE] dark:border-white/5 flex items-center justify-between">
+                                                                 <span className="text-[10px] text-stone-500 dark:text-gray-400 font-bold uppercase tracking-widest">Incoming Items</span>
+                                                                 <div className="flex items-center gap-1.5 bg-amber-50 dark:bg-yellow-500/10 border border-amber-200 dark:border-yellow-500/20 rounded px-2 py-0.5">
+                                                                     <AlertTriangle size={9} className="text-amber-800 dark:text-yellow-400" />
+                                                                     <span className="text-[9px] text-amber-800 dark:text-yellow-400 font-bold uppercase tracking-wider">{lockReason}</span>
+                                                                 </div>
+                                                             </div>
+                                                             {transferItems.length > 0 ? (
+                                                                 <div className="divide-y divide-[#E2DCCE]/60 dark:divide-white/5">
+                                                                     {transferItems.map((item: any, idx: number) => {
+                                                                         const prod = allProducts.find((p: any) => p.sku?.trim()?.toUpperCase() === (item.sku || '').trim().toUpperCase() || p.id === item.productId);
+                                                                         const displayName = item.name || prod?.name || 'Unknown Product';
+                                                                         const expectedQty = item.requestedMeasureQty || item.requested_measure_qty || item.expectedQty || item.expected_qty || item.quantity || 0;
+                                                                         const unitDef = getSellUnit(item.unit || prod?.unit || '');
+                                                                         return (
+                                                                             <div key={idx} className="px-4 py-2.5 flex items-center justify-between hover:bg-stone-100/50 dark:hover:bg-white/[0.02] transition-colors">
+                                                                                 <div className="min-w-0 flex-1">
+                                                                                     <p className="text-xs font-bold text-[#1E3F27] dark:text-white truncate">{displayName}</p>
+                                                                                     {item.sku && <p className="text-[10px] text-stone-400 dark:text-gray-600 font-mono">{item.sku}</p>}
+                                                                                 </div>
+                                                                                 <div className="text-right shrink-0 ml-4">
+                                                                                     <span className="text-sm font-mono font-bold text-[#1E3F27] dark:text-gray-300">{expectedQty}</span>
+                                                                                     {unitDef.code !== 'UNIT' && <span className="text-[10px] text-stone-500 ml-1 uppercase">{unitDef.shortLabel}</span>}
+                                                                                 </div>
+                                                                             </div>
+                                                                         );
+                                                                     })}
+                                                                 </div>
+                                                             ) : (
+                                                                 <div className="px-4 py-6 text-center text-stone-500 dark:text-gray-500 text-xs">No item details available</div>
+                                                             )}
+                                                         </div>
                                                     )}
                                                     </div>
                                                     );
@@ -712,7 +711,6 @@ export const ReceivingModal: React.FC = () => {
     );
 };
 
-// Simple placeholder due to omission from lucid-react import in this snippet context
 const Package = ({ size, className }: any) => (
     <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`lucide lucide-package ${className}`}><path d="m7.5 4.27 9 5.15" /><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" /><path d="m3.3 7 8.7 5 8.7-5" /><path d="M12 22V12" /></svg>
 );

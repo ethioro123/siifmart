@@ -62,17 +62,17 @@ export const DiscountModal: React.FC = () => {
                 {!appliedDiscountCodeDetails && (
                     <>
                         <div className="text-center">
-                            <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-cyber-primary/20 to-purple-500/20 rounded-2xl flex items-center justify-center">
-                                <Tag className="w-8 h-8 text-cyber-primary" />
+                            <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-[#2C5E3B]/20 to-amber-600/20 rounded-2xl flex items-center justify-center border border-[#2C5E3B]/20">
+                                <Tag className="w-8 h-8 text-[#2C5E3B] dark:text-[#A9CBA2]" />
                             </div>
-                            <p className="text-gray-400 text-sm">
+                            <p className="text-[#4D6E56] dark:text-[#7A9E83] text-sm">
                                 Enter the discount code provided to the customer
                             </p>
                         </div>
 
                         <div className="space-y-3">
                             <div>
-                                <label className="text-xs text-gray-500 uppercase font-bold mb-2 block">
+                                <label className="text-xs text-[#4D6E56] dark:text-[#7A9E83] uppercase font-bold mb-2 block">
                                     Discount Code
                                 </label>
                                 <input
@@ -86,7 +86,7 @@ export const DiscountModal: React.FC = () => {
                                         if (e.key === 'Enter') handleValidateDiscountCode();
                                     }}
                                     placeholder="Enter code (e.g., SAVE10)"
-                                    className={`w-full bg-black/30 border ${discountCodeError ? 'border-red-500' : 'border-white/10'} rounded-xl px-4 py-3 text-white text-center text-lg font-mono tracking-wider uppercase focus:border-cyber-primary focus:ring-2 focus:ring-cyber-primary/20 transition-all`}
+                                    className={`w-full bg-white dark:bg-black/30 border ${discountCodeError ? 'border-red-500' : 'border-[#E2DCCE] dark:border-white/10'} rounded-xl px-4 py-3 text-[#1E3F27] dark:text-white text-center text-lg font-mono tracking-wider uppercase focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:ring-4 focus:ring-[#2C5E3B]/10 transition-all`}
                                     autoFocus
                                 />
                                 {discountCodeError && (
@@ -100,7 +100,7 @@ export const DiscountModal: React.FC = () => {
                             <button
                                 onClick={handleValidateDiscountCode}
                                 disabled={!discountCodeInput.trim() || isValidatingCode}
-                                className="w-full bg-gradient-to-r from-cyber-primary to-cyan-400 text-black py-3 rounded-xl font-bold flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg hover:shadow-cyber-primary/30 transition-all"
+                                className="w-full bg-gradient-to-r from-[#224429] to-[#2C5E3B] text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer shadow-sm"
                             >
                                 {isValidatingCode ? (
                                     <>
@@ -117,17 +117,17 @@ export const DiscountModal: React.FC = () => {
                         </div>
 
                         {/* Info Section */}
-                        <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-                            <p className="text-xs text-gray-400 leading-relaxed">
-                                <strong className="text-white">Note:</strong> Discount codes must be obtained from management or marketing campaigns.
+                        <div className="bg-[#FAF8F5] dark:bg-black/30 rounded-xl p-4 border border-[#E2DCCE] dark:border-white/10">
+                            <p className="text-xs text-[#4D6E56] dark:text-[#7A9E83] leading-relaxed">
+                                <strong className="text-[#1E3F27] dark:text-[#EAE5D9]">Note:</strong> Discount codes must be obtained from management or marketing campaigns.
                                 Ask the customer for their discount code or promotional number.
                             </p>
                         </div>
 
                         {/* Cart Summary */}
-                        <div className="flex justify-between text-sm text-gray-400 pt-2 border-t border-white/5">
+                        <div className="flex justify-between text-sm text-[#4D6E56] dark:text-[#7A9E83] pt-2 border-t border-[#E2DCCE]/40 dark:border-white/5">
                             <span>Cart Subtotal:</span>
-                            <span className="text-white font-semibold">{formatCompactNumber(subtotal, { currency: CURRENCY_SYMBOL })}</span>
+                            <span className="text-[#1E3F27] dark:text-[#EAE5D9] font-semibold">{formatCompactNumber(subtotal, { currency: CURRENCY_SYMBOL })}</span>
                         </div>
                     </>
                 )}

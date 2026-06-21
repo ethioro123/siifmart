@@ -10,7 +10,7 @@ import Button from '../shared/Button';
 import { Protected } from '../Protected';
 import ProductLocationDisplay, { CompactLocationDisplay } from '../ProductLocationDisplay';
 import { useData } from '../../contexts/DataContext'; // For allProducts access if needed, or pass as prop
-import { getSellUnit } from '../../utils/units';
+import { getSellUnit, formatProductSize } from '../../utils/units';
 import { ProductDetailsModal } from './ProductDetailsModal';
 
 // --- TYPES ---
@@ -73,8 +73,8 @@ const LocationDropdown: React.FC<LocationDropdownProps> = ({ count, details, sit
             {isOpen && (
                 <>
                     <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
-                    <div className="absolute left-0 top-full mt-1 z-50 min-w-[200px] bg-cyber-gray border border-white/10 rounded-xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
-                        <div className="px-3 py-2 bg-black/40 border-b border-white/10">
+                    <div className="absolute left-0 top-full mt-1 z-50 min-w-[200px] bg-white dark:bg-[#1E2822] border border-[#E2DCCE] dark:border-emerald-950/20 rounded-xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                        <div className="px-3 py-2 bg-gray-50 dark:bg-black/40 border-b border-[#E2DCCE] dark:border-white/10">
                             <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Also stocked at</span>
                         </div>
                         <div className="max-h-[180px] overflow-y-auto custom-scrollbar">
@@ -231,8 +231,8 @@ export const InventoryStockList: React.FC<InventoryStockListProps> = ({
                 {/* Toolbar */}
                 <div className="p-6 border-b border-gray-100 dark:border-white/5 space-y-4 bg-gray-50/50 dark:bg-white/2">
                     <div className="flex items-center gap-3">
-                        <div className="flex items-center bg-white dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-2xl px-5 py-2.5 flex-1 focus-within:border-cyber-primary/50 transition-all shadow-inner group">
-                            <Search className="w-5 h-5 text-gray-400 dark:text-gray-500 group-focus-within:text-cyber-primary transition-colors" />
+                        <div className="flex items-center bg-white dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-2xl px-5 py-2.5 flex-1 focus-within:border-[#2C5E3B]/50 dark:focus-within:border-[#A9CBA2]/50 focus-within:ring-4 focus-within:ring-[#2C5E3B]/10 dark:focus-within:ring-[#A9CBA2]/10 transition-all shadow-inner group">
+                            <Search className="w-5 h-5 text-gray-400 dark:text-gray-500 group-focus-within:text-[#2C5E3B] dark:group-focus-within:text-[#A9CBA2] transition-colors" />
                             <input
                                 type="text"
                                 aria-label="Search"
@@ -249,7 +249,7 @@ export const InventoryStockList: React.FC<InventoryStockListProps> = ({
 
                     <div className="flex items-center gap-4 flex-wrap">
                         <div className="flex items-center gap-2 pr-4 border-r border-white/5">
-                            <SlidersHorizontal size={14} className="text-cyber-primary" />
+                            <SlidersHorizontal size={14} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
                             <span className="text-[11px] text-white font-black uppercase tracking-[0.15em]">Filters</span>
                         </div>
 
@@ -275,20 +275,20 @@ export const InventoryStockList: React.FC<InventoryStockListProps> = ({
 
                         <div className="relative group">
                             <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
-                                <Package size={12} className="text-cyber-primary opacity-60 group-hover:opacity-100 transition-opacity" />
+                                <Package size={12} className="text-[#2C5E3B] dark:text-[#A9CBA2] opacity-60 group-hover:opacity-100 transition-opacity" />
                             </div>
                             <select
                                 value={filters.category}
                                 aria-label="Filter by Category"
                                 onChange={(e) => setFilters({ ...filters, category: e.target.value })}
-                                className="appearance-none bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl pl-8 pr-10 py-2 text-xs font-bold text-gray-700 dark:text-gray-300 outline-none cursor-pointer hover:bg-gray-50 dark:hover:bg-white/10 hover:border-cyber-primary/30 hover:text-gray-900 dark:hover:text-white transition-all min-w-[160px]"
+                                className="appearance-none bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl pl-8 pr-10 py-2 text-xs font-bold text-gray-700 dark:text-gray-300 outline-none cursor-pointer hover:bg-gray-50 dark:hover:bg-white/10 hover:border-[#2C5E3B]/30 dark:hover:border-[#A9CBA2]/30 hover:text-gray-900 dark:hover:text-white transition-all min-w-[160px]"
                             >
                                 <option value="All">All Categories</option>
                                 {Array.from(new Set(products.map(p => p.category))).map(c => (
                                     <option key={c} value={c}>{c}</option>
                                 ))}
                             </select>
-                            <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 group-hover:text-cyber-primary transition-colors pointer-events-none" />
+                            <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] transition-colors pointer-events-none" />
                         </div>
 
                         <div className="relative group">
@@ -321,9 +321,9 @@ export const InventoryStockList: React.FC<InventoryStockListProps> = ({
                 </div>
 
                 {selectedIds.size > 0 && (
-                    <div className="bg-cyber-primary/10 border-b border-cyber-primary/20 p-2 flex items-center justify-between px-4 animate-in slide-in-from-top-2">
+                    <div className="bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 border-b border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20 p-2 flex items-center justify-between px-4 animate-in slide-in-from-top-2">
                         <div className="flex items-center gap-2">
-                            <span className="text-[10px] text-cyber-primary font-bold uppercase tracking-wider">{selectedIds.size} Selected</span>
+                            <span className="text-[10px] text-[#2C5E3B] dark:text-[#A9CBA2] font-bold uppercase tracking-wider">{selectedIds.size} Selected</span>
                             <Button onClick={() => handleBulkAction('Print Labels')} size="sm" variant="secondary" className="px-3 py-1.5 bg-black/20 hover:bg-black/40 rounded text-[10px] font-bold text-white">Print Labels</Button>
                             <Button onClick={() => setSelectedIds(new Set())} size="sm" variant="ghost" className="px-3 py-1.5 text-[10px] text-gray-400 hover:text-white">Clear</Button>
                         </div>
@@ -339,7 +339,7 @@ export const InventoryStockList: React.FC<InventoryStockListProps> = ({
                                         <input
                                             type="checkbox"
                                             aria-label="Select All"
-                                            className="peer appearance-none w-4 h-4 border border-white/20 rounded bg-white/5 checked:bg-cyber-primary checked:border-cyber-primary transition-all cursor-pointer"
+                                            className="peer appearance-none w-4 h-4 border border-white/20 dark:border-white/20 rounded bg-white/5 checked:bg-[#2C5E3B] checked:border-[#2C5E3B] dark:checked:bg-[#A9CBA2] dark:checked:border-[#A9CBA2] transition-all cursor-pointer"
                                             onChange={() => {
                                                 if (selectedIds.size === products.length) setSelectedIds(new Set());
                                                 else setSelectedIds(new Set(products.map(i => i.id)));
@@ -353,7 +353,7 @@ export const InventoryStockList: React.FC<InventoryStockListProps> = ({
                                 <th className="p-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] cursor-pointer hover:text-white transition-colors group select-none" onClick={() => handleSort('name')}>
                                     <div className="flex items-center gap-2">
                                         Product
-                                        <div className={`p-1 rounded transition-colors ${sortConfig?.key === 'name' ? 'bg-cyber-primary/20 text-cyber-primary' : 'text-gray-600 group-hover:text-gray-400'}`}>
+                                        <div className={`p-1 rounded transition-colors ${sortConfig?.key === 'name' ? 'bg-[#2C5E3B]/20 text-[#2C5E3B] dark:bg-[#A9CBA2]/20 dark:text-[#A9CBA2]' : 'text-gray-600 group-hover:text-gray-400'}`}>
                                             <ArrowUpDown size={10} className={sortConfig?.key === 'name' && sortConfig.direction === 'asc' ? 'rotate-180' : ''} />
                                         </div>
                                     </div>
@@ -361,7 +361,7 @@ export const InventoryStockList: React.FC<InventoryStockListProps> = ({
                                 <th className="p-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] cursor-pointer hover:text-white transition-colors group select-none" onClick={() => handleSort('location')}>
                                     <div className="flex items-center gap-2">
                                         Location
-                                        <div className={`p-1 rounded transition-colors ${sortConfig?.key === 'location' ? 'bg-cyber-primary/20 text-cyber-primary' : 'text-gray-600 group-hover:text-gray-400'}`}>
+                                        <div className={`p-1 rounded transition-colors ${sortConfig?.key === 'location' ? 'bg-[#2C5E3B]/20 text-[#2C5E3B] dark:bg-[#A9CBA2]/20 dark:text-[#A9CBA2]' : 'text-gray-600 group-hover:text-gray-400'}`}>
                                             <ArrowUpDown size={10} className={sortConfig?.key === 'location' && sortConfig.direction === 'asc' ? 'rotate-180' : ''} />
                                         </div>
                                     </div>
@@ -369,7 +369,7 @@ export const InventoryStockList: React.FC<InventoryStockListProps> = ({
                                 <th className="p-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-center cursor-pointer hover:text-white transition-colors group select-none" onClick={() => handleSort('stock')}>
                                     <div className="flex items-center justify-center gap-2">
                                         Stock Level
-                                        <div className={`p-1 rounded transition-colors ${sortConfig?.key === 'stock' ? 'bg-cyber-primary/20 text-cyber-primary' : 'text-gray-600 group-hover:text-gray-400'}`}>
+                                        <div className={`p-1 rounded transition-colors ${sortConfig?.key === 'stock' ? 'bg-[#2C5E3B]/20 text-[#2C5E3B] dark:bg-[#A9CBA2]/20 dark:text-[#A9CBA2]' : 'text-gray-600 group-hover:text-gray-400'}`}>
                                             <ArrowUpDown size={10} className={sortConfig?.key === 'stock' && sortConfig.direction === 'asc' ? 'rotate-180' : ''} />
                                         </div>
                                     </div>
@@ -377,7 +377,7 @@ export const InventoryStockList: React.FC<InventoryStockListProps> = ({
                                 <th className="p-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-center cursor-pointer hover:text-white transition-colors group select-none" onClick={() => handleSort('unit')}>
                                     <div className="flex items-center justify-center gap-2">
                                         Unit
-                                        <div className={`p-1 rounded transition-colors ${sortConfig?.key === 'unit' ? 'bg-cyber-primary/20 text-cyber-primary' : 'text-gray-600 group-hover:text-gray-400'}`}>
+                                        <div className={`p-1 rounded transition-colors ${sortConfig?.key === 'unit' ? 'bg-[#2C5E3B]/20 text-[#2C5E3B] dark:bg-[#A9CBA2]/20 dark:text-[#A9CBA2]' : 'text-gray-600 group-hover:text-gray-400'}`}>
                                             <ArrowUpDown size={10} className={sortConfig?.key === 'unit' && sortConfig.direction === 'asc' ? 'rotate-180' : ''} />
                                         </div>
                                     </div>
@@ -386,7 +386,7 @@ export const InventoryStockList: React.FC<InventoryStockListProps> = ({
                                 <th className="p-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-right cursor-pointer hover:text-white transition-colors group select-none" onClick={() => handleSort('price')}>
                                     <div className="flex items-center justify-end gap-2">
                                         Price
-                                        <div className={`p-1 rounded transition-colors ${sortConfig?.key === 'price' ? 'bg-cyber-primary/20 text-cyber-primary' : 'text-gray-600 group-hover:text-gray-400'}`}>
+                                        <div className={`p-1 rounded transition-colors ${sortConfig?.key === 'price' ? 'bg-[#2C5E3B]/20 text-[#2C5E3B] dark:bg-[#A9CBA2]/20 dark:text-[#A9CBA2]' : 'text-gray-600 group-hover:text-gray-400'}`}>
                                             <ArrowUpDown size={10} className={sortConfig?.key === 'price' && sortConfig.direction === 'asc' ? 'rotate-180' : ''} />
                                         </div>
                                     </div>
@@ -394,7 +394,7 @@ export const InventoryStockList: React.FC<InventoryStockListProps> = ({
                                 <th className="p-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-right cursor-pointer hover:text-white transition-colors group select-none" onClick={() => handleSort('assetValue')}>
                                     <div className="flex items-center justify-end gap-2">
                                         Value
-                                        <div className={`p-1 rounded transition-colors ${sortConfig?.key === 'assetValue' ? 'bg-cyber-primary/20 text-cyber-primary' : 'text-gray-600 group-hover:text-gray-400'}`}>
+                                        <div className={`p-1 rounded transition-colors ${sortConfig?.key === 'assetValue' ? 'bg-[#2C5E3B]/20 text-[#2C5E3B] dark:bg-[#A9CBA2]/20 dark:text-[#A9CBA2]' : 'text-gray-600 group-hover:text-gray-400'}`}>
                                             <ArrowUpDown size={10} className={sortConfig?.key === 'assetValue' && sortConfig.direction === 'asc' ? 'rotate-180' : ''} />
                                         </div>
                                     </div>
@@ -402,7 +402,7 @@ export const InventoryStockList: React.FC<InventoryStockListProps> = ({
                                 <th className="p-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-center cursor-pointer hover:text-white transition-colors group select-none" onClick={() => handleSort('abc')}>
                                     <div className="flex items-center justify-center gap-2">
                                         Class
-                                        <div className={`p-1 rounded transition-colors ${sortConfig?.key === 'abc' ? 'bg-cyber-primary/20 text-cyber-primary' : 'text-gray-600 group-hover:text-gray-400'}`}>
+                                        <div className={`p-1 rounded transition-colors ${sortConfig?.key === 'abc' ? 'bg-[#2C5E3B]/20 text-[#2C5E3B] dark:bg-[#A9CBA2]/20 dark:text-[#A9CBA2]' : 'text-gray-600 group-hover:text-gray-400'}`}>
                                             <ArrowUpDown size={10} className={sortConfig?.key === 'abc' && sortConfig.direction === 'asc' ? 'rotate-180' : ''} />
                                         </div>
                                     </div>
@@ -410,7 +410,7 @@ export const InventoryStockList: React.FC<InventoryStockListProps> = ({
                                 <th className="p-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-right cursor-pointer hover:text-white transition-colors group select-none" onClick={() => handleSort('createdAt')}>
                                     <div className="flex items-center justify-end gap-2">
                                         Date
-                                        <div className={`p-1 rounded transition-colors ${sortConfig?.key === 'createdAt' ? 'bg-cyber-primary/20 text-cyber-primary' : 'text-gray-600 group-hover:text-gray-400'}`}>
+                                        <div className={`p-1 rounded transition-colors ${sortConfig?.key === 'createdAt' ? 'bg-[#2C5E3B]/20 text-[#2C5E3B] dark:bg-[#A9CBA2]/20 dark:text-[#A9CBA2]' : 'text-gray-600 group-hover:text-gray-400'}`}>
                                             <ArrowUpDown size={10} className={sortConfig?.key === 'createdAt' && sortConfig.direction === 'asc' ? 'rotate-180' : ''} />
                                         </div>
                                     </div>
@@ -428,23 +428,23 @@ export const InventoryStockList: React.FC<InventoryStockListProps> = ({
                                     <tr
                                         key={product.id}
                                         onClick={() => setSelectedViewProduct(product)}
-                                        className={`group hover:bg-gray-50 dark:hover:bg-white/[0.03] transition-all duration-300 cursor-pointer ${isSelected ? 'bg-cyber-primary/[0.08]' : ''}`}
+                                        className={`group hover:bg-gray-50 dark:hover:bg-white/[0.03] transition-all duration-300 cursor-pointer ${isSelected ? 'bg-[#2C5E3B]/[0.08] dark:bg-[#A9CBA2]/[0.08]' : ''}`}
                                     >
                                         <td className="p-5" onClick={(e) => e.stopPropagation()}>
                                             <div className="relative flex items-center justify-center">
                                                 <input
                                                     type="checkbox"
                                                     aria-label="Select row"
-                                                    className="peer appearance-none w-4 h-4 border border-white/10 rounded bg-white/5 checked:bg-cyber-primary checked:border-cyber-primary transition-all cursor-pointer"
+                                                    className="peer appearance-none w-4 h-4 border border-white/10 rounded bg-white/5 checked:bg-[#2C5E3B] checked:border-[#2C5E3B] dark:checked:bg-[#A9CBA2] dark:checked:border-[#A9CBA2] transition-all cursor-pointer"
                                                     checked={isSelected}
                                                     onChange={() => toggleSelection(product.id)}
                                                 />
-                                                <CheckCircle size={10} className="absolute text-black opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none" />
+                                                <CheckCircle size={10} className="absolute text-black dark:text-[#18201B] opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none" />
                                             </div>
                                         </td>
                                         <td className="p-5">
                                             <div className="flex items-center space-x-4">
-                                                <div className="w-14 h-14 rounded-2xl bg-gray-200 dark:bg-black/40 border border-gray-200 dark:border-white/10 flex items-center justify-center flex-shrink-0 overflow-hidden shadow-inner group-hover:border-cyber-primary/30 transition-colors">
+                                                <div className="w-14 h-14 rounded-2xl bg-gray-200 dark:bg-black/40 border border-gray-200 dark:border-white/10 flex items-center justify-center flex-shrink-0 overflow-hidden shadow-inner group-hover:border-[#2C5E3B]/30 dark:group-hover:border-[#A9CBA2]/30 transition-colors">
                                                     {product.image && !product.image.includes('placeholder.com') ? (
                                                         <img
                                                             src={product.image}
@@ -456,16 +456,29 @@ export const InventoryStockList: React.FC<InventoryStockListProps> = ({
                                                             }}
                                                         />
                                                     ) : (
-                                                        <Package size={24} className="text-gray-700 group-hover:text-cyber-primary/40 transition-colors" />
+                                                        <Package size={24} className="text-gray-700 group-hover:text-[#2C5E3B]/40 dark:group-hover:text-[#A9CBA2]/40 transition-colors" />
                                                     )}
                                                 </div>
                                                 <div>
-                                                    <p className="text-[13px] font-black text-gray-900 dark:text-white tracking-tight group-hover:text-cyber-primary transition-colors">{product.name}</p>
-                                                    <div className="flex items-center gap-2 mt-1.5">
-                                                        <span className="text-[9px] font-black font-mono text-gray-500 bg-gray-100 dark:bg-black/40 px-2 py-0.5 rounded-md border border-gray-200 dark:border-white/5 uppercase tracking-tighter">{product.sku}</span>
-                                                        <span className="text-[9px] font-black bg-gray-100 dark:bg-white/5 px-2 py-0.5 rounded-md text-gray-400 uppercase tracking-tighter">{product.category}</span>
+                                                    <p className="text-[14px] font-black text-[#1E3F27] dark:text-[#EAE5D9] tracking-tight group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] transition-colors duration-200 uppercase">
+                                                        {product.name}
+                                                    </p>
+                                                    <div className="flex flex-wrap items-center gap-1.5 mt-1.5 max-w-md">
+                                                        {product.brand && !product.name.toLowerCase().startsWith(product.brand.toLowerCase()) && (
+                                                            <span className="text-[9px] font-bold text-amber-600 bg-amber-500/5 dark:text-amber-400 dark:bg-amber-500/5 px-2 py-0.5 rounded border border-amber-500/10 dark:border-amber-500/10 uppercase tracking-wider">
+                                                                {product.brand}
+                                                            </span>
+                                                        )}
+                                                        <span className="text-[9px] font-extrabold font-mono text-[#2C5E3B] bg-[#2C5E3B]/10 dark:text-[#A9CBA2] dark:bg-[#A9CBA2]/10 px-2 py-0.5 rounded border border-[#2C5E3B]/25 dark:border-[#A9CBA2]/25 uppercase tracking-tighter shadow-sm">
+                                                            {product.sku}
+                                                        </span>
+                                                        <span className="text-[9px] font-extrabold text-stone-600 bg-stone-100 dark:text-stone-300 dark:bg-white/5 px-2 py-0.5 rounded border border-stone-200 dark:border-white/5 uppercase tracking-wider">
+                                                            {product.category}
+                                                        </span>
                                                         {product.approvalStatus === 'pending' && (
-                                                            <span className="text-[9px] font-black bg-amber-500/10 text-amber-500 px-2 py-0.5 rounded-md border border-amber-500/20 uppercase tracking-tighter">⏳ Review</span>
+                                                            <span className="text-[9px] font-extrabold bg-amber-500/10 text-amber-600 dark:text-amber-400 px-2 py-0.5 rounded border border-amber-500/20 uppercase tracking-wider shadow-sm animate-pulse">
+                                                                ⏳ Review
+                                                            </span>
                                                         )}
                                                     </div>
                                                 </div>
@@ -528,8 +541,16 @@ export const InventoryStockList: React.FC<InventoryStockListProps> = ({
                                                 const sizeNum = parseFloat(product.size || '0');
                                                 const isWeightVol = (unitDef.category === 'weight' || unitDef.category === 'volume') && sizeNum > 0;
                                                 const stockVal = product.stock || 0;
+                                                const threshold = product.minStock !== undefined && product.minStock !== null && product.minStock > 0 ? product.minStock : 10;
+                                                const isOutOfStock = stockVal === 0;
+                                                const isLowStock = stockVal < threshold;
+                                                const colorClasses = isOutOfStock
+                                                    ? 'bg-red-500/10 text-red-500 border border-red-500/30'
+                                                    : isLowStock
+                                                    ? 'bg-yellow-500/10 text-yellow-500 border border-yellow-500/30 shadow-yellow-500/5'
+                                                    : 'bg-green-500/10 text-green-500 border border-green-500/30';
                                                 return (
-                                                    <div className={`inline-flex items-center justify-center min-w-[50px] px-3 py-1.5 rounded-2xl text-[12px] font-black font-mono shadow-sm transition-all ${stockVal === 0 ? 'bg-red-500/10 text-red-500 border border-red-500/30' : stockVal < 10 ? 'bg-yellow-500/10 text-yellow-500 border border-yellow-500/30 shadow-yellow-500/5' : 'bg-green-500/10 text-green-500 border border-green-500/30'}`}>
+                                                    <div className={`inline-flex items-center justify-center min-w-[50px] px-3 py-1.5 rounded-2xl text-[12px] font-black font-mono shadow-sm transition-all ${colorClasses}`}>
                                                         {stockVal.toLocaleString()}
                                                         {isWeightVol ? (
                                                             <span className="text-[9px] font-bold ml-1 opacity-60">× {sizeNum}{unitDef.shortLabel.toLowerCase()}</span>
@@ -548,7 +569,7 @@ export const InventoryStockList: React.FC<InventoryStockListProps> = ({
 
                                         <td className="p-5 text-right">
                                             <div className="flex flex-col items-end">
-                                                <span className="text-[13px] font-black text-gray-900 dark:text-white font-mono tracking-tighter group-hover:text-cyber-primary transition-colors">
+                                                <span className="text-[13px] font-black text-gray-900 dark:text-white font-mono tracking-tighter group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] transition-colors">
                                                     {product.price && product.price > 0 ? formatCompactNumber(product.price, { currency: CURRENCY_SYMBOL }) : '—'}
                                                     {product.unit && product.price > 0 && getSellUnit(product.unit).code !== 'UNIT' && (
                                                         <span className="text-[9px] text-gray-500 font-bold">/{getSellUnit(product.unit).shortLabel}</span>
@@ -559,7 +580,7 @@ export const InventoryStockList: React.FC<InventoryStockListProps> = ({
                                         </td>
                                         <td className="p-5 text-right">
                                             <div className="inline-flex flex-col items-end bg-gray-100 dark:bg-black/20 p-2 rounded-xl border border-gray-100 dark:border-white/[0.03]">
-                                                <span className="text-[12px] font-black text-cyber-primary font-mono tracking-tighter">
+                                                <span className="text-[12px] font-black text-[#2C5E3B] dark:text-[#A9CBA2] font-mono tracking-tighter">
                                                     {product.price && product.price > 0 ? formatCompactNumber(getInventoryValue(product), { currency: CURRENCY_SYMBOL }) : '—'}
                                                 </span>
                                                 <span className="text-[9px] text-gray-600 font-bold uppercase tracking-widest">Inventory Value</span>
@@ -594,7 +615,7 @@ export const InventoryStockList: React.FC<InventoryStockListProps> = ({
                                                             <Protected permission="ADJUST_STOCK">
                                                                 <button
                                                                     onClick={() => handleOpenAdjust(product)}
-                                                                    className="p-2 hover:bg-cyber-primary/10 hover:text-cyber-primary text-gray-500 rounded-xl transition-all"
+                                                                    className="p-2 hover:bg-[#2C5E3B]/10 dark:hover:bg-[#A9CBA2]/10 hover:text-[#2C5E3B] dark:hover:text-[#A9CBA2] text-gray-500 rounded-xl transition-all"
                                                                     title="Adjust Stock"
                                                                 >
                                                                     <RefreshCw size={14} />
@@ -636,14 +657,14 @@ export const InventoryStockList: React.FC<InventoryStockListProps> = ({
                 {/* Product Pagination Controls */}
                 <div className="flex justify-between items-center p-6 border-t border-gray-100 dark:border-white/5 bg-gray-50 dark:bg-black/40 backdrop-blur-md rounded-b-3xl">
                     <div className="text-[11px] font-black text-gray-500 uppercase tracking-widest flex items-center gap-3">
-                        <span className="w-1.5 h-1.5 rounded-full bg-cyber-primary animate-pulse" />
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#2C5E3B] dark:bg-[#A9CBA2] animate-pulse" />
                         Displays: <span className="text-white">{products.length}</span> <span className="text-gray-700">/</span> <span className="text-gray-400">{formatCompactNumber(totalCount)}</span> Records
                     </div>
                     <div className="flex items-center gap-4">
                         <button
                             onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                             disabled={currentPage === 1 || isLoading}
-                            className="px-4 py-2 bg-white/5 hover:bg-cyber-primary/10 disabled:opacity-30 disabled:hover:bg-white/5 rounded-xl text-[11px] font-black text-white transition-all border border-white/10 hover:border-cyber-primary/40 flex items-center gap-2 group"
+                            className="px-4 py-2 bg-white/5 hover:bg-[#2C5E3B]/10 dark:hover:bg-[#A9CBA2]/10 disabled:opacity-30 disabled:hover:bg-white/5 rounded-xl text-[11px] font-black text-white transition-all border border-white/10 hover:border-[#2C5E3B]/40 dark:hover:border-[#A9CBA2]/40 flex items-center gap-2 group"
                         >
                             <ChevronLeft size={14} className="group-hover:-translate-x-0.5 transition-transform" />
                             Prev
@@ -651,7 +672,7 @@ export const InventoryStockList: React.FC<InventoryStockListProps> = ({
 
                         <div className="flex items-center gap-2 bg-gray-100 dark:bg-black/40 px-3 py-1.5 rounded-xl border border-gray-200 dark:border-white/5">
                             <span className="text-[10px] font-black text-gray-600 uppercase tracking-tighter">Page</span>
-                            <span className="text-[12px] font-black text-cyber-primary font-mono">{currentPage}</span>
+                            <span className="text-[12px] font-black text-[#2C5E3B] dark:text-[#A9CBA2] font-mono">{currentPage}</span>
                             <span className="text-gray-700 mx-1 text-[10px]">/</span>
                             <span className="text-[12px] font-black text-gray-500 font-mono">{Math.max(1, Math.ceil(totalCount / itemsPerPage))}</span>
                         </div>
@@ -659,7 +680,7 @@ export const InventoryStockList: React.FC<InventoryStockListProps> = ({
                         <button
                             onClick={() => setCurrentPage(prev => Math.min(prev + 1, Math.max(1, Math.ceil(totalCount / itemsPerPage))))}
                             disabled={currentPage >= Math.ceil(totalCount / itemsPerPage) || isLoading}
-                            className="px-4 py-2 bg-white/5 hover:bg-cyber-primary/10 disabled:opacity-30 disabled:hover:bg-white/5 rounded-xl text-[11px] font-black text-white transition-all border border-white/10 hover:border-cyber-primary/40 flex items-center gap-2 group"
+                            className="px-4 py-2 bg-white/5 hover:bg-[#2C5E3B]/10 dark:hover:bg-[#A9CBA2]/10 disabled:opacity-30 disabled:hover:bg-white/5 rounded-xl text-[11px] font-black text-white transition-all border border-white/10 hover:border-[#2C5E3B]/40 dark:hover:border-[#A9CBA2]/40 flex items-center gap-2 group"
                         >
                             Next
                             <ChevronRight size={14} className="group-hover:translate-x-0.5 transition-transform" />

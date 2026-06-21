@@ -48,18 +48,24 @@ export const wmsJobsService = {
             sourceSiteId: data.source_site_id,
             items: data.items_count,
             lineItems: (data.line_items || []).map((item: any) => ({
+                ...item,
                 id: item.id,
-                jobId: item.job_id,
-                productId: item.product_id,
+                jobId: item.job_id || item.jobId,
+                productId: item.product_id || item.productId,
                 name: item.name,
                 sku: item.sku,
-                expectedQty: item.expected_qty,
-                pickedQty: item.picked_qty,
+                expectedQty: item.expected_qty !== undefined ? item.expected_qty : item.expectedQty,
+                pickedQty: item.picked_qty !== undefined ? item.picked_qty : item.pickedQty,
                 status: item.status,
                 location: item.location,
-                expiryDate: item.expiryDate,
-                batchNumber: item.batchNumber,
-                condition: item.condition
+                expiryDate: item.expiryDate || item.expiry_date,
+                batchNumber: item.batchNumber || item.batch_number,
+                condition: item.condition,
+                packQuantity: item.packQuantity || item.pack_quantity,
+                customAttributes: item.customAttributes || item.custom_attributes,
+                minStock: item.minStock || item.min_stock,
+                maxStock: item.maxStock || item.max_stock,
+                retailPrice: item.retailPrice || item.retail_price
             })),
             completedBy: data.completed_by, // [FIX] Map completed_by
             completedAt: data.completed_at,  // [FIX] Map completed_at

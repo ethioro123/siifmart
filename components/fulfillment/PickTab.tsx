@@ -11,6 +11,7 @@ import { PickDetailsModal } from './pick/PickDetailsModal';
 import { ReturnToWarehouseModal } from './returns/ReturnToWarehouseModal';
 import { inventoryRequestsService } from '../../services/supabase.service';
 import { FulfillmentSuccessScreen } from './FulfillmentSuccessScreen';
+import { isWeightBased, isVolumeBased } from '../../utils/units';
 
 const PICK_ITEMS_PER_PAGE = 12;
 
@@ -40,7 +41,7 @@ export const PickTab: React.FC = () => {
     // Derived state for the scanner
     const currentScannerItem = useMemo(() => {
         if (!selectedJob || selectedJob.type !== 'PICK') return null;
-        return selectedJob.lineItems?.find((i: any) => i.status !== 'Completed' && i.status !== 'Picked');
+        return selectedJob.lineItems?.find((i: any) => (i.status || '').toLowerCase() !== 'completed' && (i.status || '').toLowerCase() !== 'picked');
     }, [selectedJob]);
 
     const currentScannerProduct = useMemo(() => {
@@ -100,9 +101,21 @@ export const PickTab: React.FC = () => {
         const expected = currentScannerItem.expectedQty || (currentScannerItem as any).quantity || 1;
         const alreadyPicked = currentScannerItem.pickedQty || 0;
         const remaining = expected - alreadyPicked;
-        const scanQty = quantity || remaining || 1;
-        const nextPicked = alreadyPicked + scanQty;
 
+        let scanQty = quantity;
+        const unit = product.unit;
+        const isWeightVol = isWeightBased(unit) || isVolumeBased(unit);
+        const sizeNum = product.size ? parseFloat(product.size as string) : 0;
+
+        if (scanQty !== undefined) {
+            if (isWeightVol && sizeNum > 0) {
+                scanQty = scanQty / sizeNum;
+            }
+        } else {
+            scanQty = remaining || 1;
+        }
+
+        const nextPicked = alreadyPicked + scanQty;
         const newStatus = nextPicked >= expected ? 'Picked' : currentScannerItem.status;
 
         const itemIndex = selectedJob.lineItems?.findIndex((i: any) => i === currentScannerItem) ?? -1;
@@ -134,10 +147,12 @@ export const PickTab: React.FC = () => {
 
         const APPROVED_STATUSES = ['Approved', 'Picking', 'Picked', 'Packed', 'Shipped', 'In-Transit', 'Delivered', 'Received'];
 
+        const employeeId = employees.find((e: any) => e.email === user?.email || e.name === user?.name || e.id === user?.id)?.id;
+
         return filteredJobs.filter(j => {
             if (j.type !== 'PICK') return false;
-            if (j.status === 'Completed') return false;
-            if (j.assignedTo && j.assignedTo !== user?.name && !['admin', 'warehouse_manager', 'super_admin'].includes(user?.role || '')) return false;
+            if ((j.status || '').toLowerCase() === 'completed') return false;
+            if (j.assignedTo && j.assignedTo !== employeeId && !['admin', 'warehouse_manager', 'super_admin'].includes(user?.role || '')) return false;
 
             if (pickSearch) {
                 const searchLower = pickSearch.toLowerCase();
@@ -177,7 +192,7 @@ export const PickTab: React.FC = () => {
             <PickHeader
                 pendingCount={filteredJobs.filter(j => j.type === 'PICK' && j.status === 'Pending').length}
                 inProgressCount={filteredJobs.filter(j => j.type === 'PICK' && j.status === 'In-Progress').length}
-                completedCount={filteredJobs.filter(j => j.type === 'PICK' && j.status === 'Completed').length}
+                completedCount={filteredJobs.filter(j => j.type === 'PICK' && (j.status || '').toLowerCase() === 'completed').length}
                 viewMode={viewMode}
                 setViewMode={setViewMode}
                 t={t}
@@ -243,6 +258,7 @@ export const PickTab: React.FC = () => {
                             job={selectedJob}
                             currentItem={currentScannerItem}
                             currentProduct={currentScannerProduct}
+                            products={products}
                             onClose={() => setIsScannerOpen(false)}
                             onScanLocation={handleScanLocation}
                             onScanItem={handleScanItem}
@@ -253,7 +269,7 @@ export const PickTab: React.FC = () => {
                     )}
 
                     {/* HISTORY DETAILS MODAL */}
-                    {isDetailsOpen && (selectedJob.status === 'Completed' || selectedJob.status === 'Cancelled') && (
+                    {isDetailsOpen && ((selectedJob.status || '').toLowerCase() === 'completed' || (selectedJob.status || '').toLowerCase() === 'cancelled') && (
                         <PickDetailsModal
                             selectedItem={selectedJob}
                             onClose={() => {

@@ -27,15 +27,15 @@ const PinPad: React.FC<PinPadProps> = ({ pin, setPin, onEnter, onCancel }) => {
     };
 
     return (
-        <div className="w-full max-w-[320px] mx-auto bg-black/40 p-6 rounded-3xl border border-white/10 shadow-2xl backdrop-blur-md">
+        <div className="w-full max-w-[320px] mx-auto bg-white/85 dark:bg-[#18201B]/60 p-6 rounded-[32px] border border-[#E2DCCE] dark:border-emerald-950/20 shadow-[0_24px_80px_-12px_rgba(34,50,38,0.06)] dark:shadow-[0_32px_96px_-12px_rgba(5,8,6,0.65)] backdrop-blur-2xl transition-all duration-300">
             {/* PIN Display */}
             <div className="flex gap-4 justify-center mb-8">
                 {[0, 1, 2, 3].map((index) => (
                     <div
                         key={index}
                         className={`w-12 h-14 rounded-2xl flex items-center justify-center text-3xl font-mono transition-all duration-300 ${pin.length > index
-                            ? 'bg-cyber-primary/20 border-cyber-primary shadow-[0_0_15px_rgba(0,255,157,0.3)] text-white font-bold border-2'
-                            : 'bg-black/50 border-white/5 border text-gray-700'
+                            ? 'bg-[#2C5E3B]/10 border-[#2C5E3B] dark:border-[#A9CBA2] text-[#2C5E3B] dark:text-white font-bold border-2 shadow-[0_2px_12px_rgba(44,94,59,0.1)]'
+                            : 'bg-[#FAF8F5] dark:bg-black/35 border-[#E2DCCE] dark:border-white/5 border text-stone-400'
                             }`}
                     >
                         {pin.length > index ? '•' : ''}
@@ -49,7 +49,7 @@ const PinPad: React.FC<PinPadProps> = ({ pin, setPin, onEnter, onCancel }) => {
                     <button
                         key={num}
                         onClick={() => handleKeyPress(num.toString())}
-                        className="h-16 rounded-2xl bg-white/5 hover:bg-white/10 active:bg-cyber-primary/20 text-white text-2xl font-mono transition-all border border-white/5 hover:border-white/20 active:border-cyber-primary active:scale-95"
+                        className="h-16 rounded-2xl bg-white/80 dark:bg-[#18201B]/40 hover:bg-white dark:hover:bg-[#18201B]/80 active:bg-[#2C5E3B]/10 text-[#1E3F27] dark:text-[#EAE5D9] text-2xl font-mono transition-all border border-[#E2DCCE] dark:border-white/10 active:border-[#2C5E3B] dark:active:border-[#A9CBA2] active:scale-95 shadow-sm"
                     >
                         {num}
                     </button>
@@ -65,7 +65,7 @@ const PinPad: React.FC<PinPadProps> = ({ pin, setPin, onEnter, onCancel }) => {
                 <button
                     key={0}
                     onClick={() => handleKeyPress('0')}
-                    className="h-16 rounded-2xl bg-white/5 hover:bg-white/10 active:bg-cyber-primary/20 text-white text-2xl font-mono transition-all border border-white/5 hover:border-white/20 active:border-cyber-primary active:scale-95"
+                    className="h-16 rounded-2xl bg-white/80 dark:bg-[#18201B]/40 hover:bg-white dark:hover:bg-[#18201B]/80 active:bg-[#2C5E3B]/10 text-[#1E3F27] dark:text-[#EAE5D9] text-2xl font-mono transition-all border border-[#E2DCCE] dark:border-white/10 active:border-[#2C5E3B] dark:active:border-[#A9CBA2] active:scale-95 shadow-sm"
                 >
                     0
                 </button>
@@ -74,7 +74,7 @@ const PinPad: React.FC<PinPadProps> = ({ pin, setPin, onEnter, onCancel }) => {
                     title={t('common.delete') || "Delete"}
                     aria-label={t('common.delete') || "Delete"}
                     onClick={() => handleKeyPress('delete')}
-                    className="h-16 rounded-2xl bg-white/5 hover:bg-white/10 active:bg-white/20 text-gray-400 hover:text-white transition-all border border-transparent hover:border-white/10 active:scale-95 flex items-center justify-center"
+                    className="h-16 rounded-2xl bg-white/80 dark:bg-[#18201B]/40 hover:bg-white dark:hover:bg-[#18201B]/80 text-stone-500 hover:text-[#1E3F27] dark:hover:text-white transition-all border border-[#E2DCCE] dark:border-white/10 active:scale-95 flex items-center justify-center shadow-sm"
                 >
                     <Delete size={24} />
                 </button>
@@ -84,7 +84,7 @@ const PinPad: React.FC<PinPadProps> = ({ pin, setPin, onEnter, onCancel }) => {
                 {onCancel && (
                     <button
                         onClick={onCancel}
-                        className="flex-1 py-4 bg-white/5 hover:bg-white/10 active:bg-white/20 text-gray-400 hover:text-white font-bold uppercase tracking-wider text-sm rounded-2xl transition-all border border-transparent hover:border-white/10 flex items-center justify-center gap-2"
+                        className="flex-1 py-4 bg-white/90 dark:bg-black/35 text-stone-500 hover:text-[#1E3F27] dark:hover:text-white font-bold uppercase tracking-wider text-sm rounded-2xl transition-all border border-[#E2DCCE] dark:border-white/10 flex items-center justify-center gap-2 hover:scale-105 active:scale-95 shadow-sm"
                     >
                         <ArrowLeft size={18} />
                         {t('common.cancel')}
@@ -93,7 +93,7 @@ const PinPad: React.FC<PinPadProps> = ({ pin, setPin, onEnter, onCancel }) => {
                 <button
                     onClick={() => handleKeyPress('enter')}
                     disabled={pin.length < 4}
-                    className="flex-1 py-4 bg-cyber-primary hover:bg-cyber-accent text-black font-black uppercase tracking-widest text-sm rounded-2xl transition-all shadow-[0_0_20px_rgba(0,255,157,0.2)] hover:shadow-[0_0_30px_rgba(0,255,157,0.4)] hover:scale-105 active:scale-95 disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-2"
+                    className="flex-1 py-4 bg-gradient-to-r from-[#224429] to-[#2C5E3B] hover:opacity-90 text-white font-black uppercase tracking-widest text-sm rounded-2xl transition-all shadow-md hover:scale-105 active:scale-95 disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-2"
                 >
                     {t('common.enter')}
                     <KeyRound size={18} />

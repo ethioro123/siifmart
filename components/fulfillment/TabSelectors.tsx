@@ -31,20 +31,20 @@ export const MobileTabSelector: React.FC<TabSelectorProps> = ({
         <div className="md:hidden relative z-[60] mb-2">
             <button
                 onClick={() => setIsMobileTabMenuOpen(!isMobileTabMenuOpen)}
-                className="w-full bg-white dark:bg-black/60 backdrop-blur-xl border border-gray-200 dark:border-white/10 rounded-2xl p-3.5 flex items-center justify-between shadow-xl active:scale-[0.98] transition-all group"
+                className="w-full glass-panel p-3.5 flex items-center justify-between active:scale-[0.98] transition-all group"
             >
                 <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white shadow-[0_0_15px_rgba(6,182,212,0.3)] shrink-0">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#2C5E3B] to-[#1E3F27] dark:from-[#A9CBA2]/20 dark:to-[#A9CBA2]/5 flex items-center justify-center text-white dark:text-[#A9CBA2] border border-[#E2DCCE]/30 dark:border-[#A9CBA2]/10 shrink-0">
                         <Layout size={20} />
                     </div>
                     <div className="text-left min-w-0">
-                        <p className="text-[9px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-[0.2em]">Current Section</p>
-                        <p className="text-lg font-black text-gray-900 dark:text-white uppercase tracking-tighter truncate">
+                        <p className="text-[9px] text-stone-400 dark:text-stone-500 font-bold uppercase tracking-[0.2em]">Current Section</p>
+                        <p className="text-lg font-black text-stone-900 dark:text-[#EAE5D9] uppercase tracking-tighter truncate">
                             {activeTab === 'ASSIGN' ? 'ASSIGN TASK' : t(`warehouse.tabs.${activeTab.toLowerCase()}`)}
                         </p>
                     </div>
                 </div>
-                <div className={`w-8 h-8 rounded-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 flex items-center justify-center transition-transform duration-300 shrink-0 ${isMobileTabMenuOpen ? 'rotate-180 bg-cyan-500/20 text-cyan-500 dark:text-cyan-400 border-cyan-500/30' : 'text-gray-400'}`}>
+                <div className={`w-8 h-8 rounded-full bg-stone-100/60 dark:bg-[#1C2620]/30 border border-[#E2DCCE]/30 dark:border-[#A9CBA2]/10 flex items-center justify-center transition-transform duration-300 shrink-0 ${isMobileTabMenuOpen ? 'rotate-180 bg-[#2C5E3B]/20 text-[#2C5E3B] dark:text-[#A9CBA2] border-[#2C5E3B]/30' : 'text-stone-400'}`}>
                     <ChevronDown size={16} />
                 </div>
             </button>
@@ -53,7 +53,7 @@ export const MobileTabSelector: React.FC<TabSelectorProps> = ({
             {isMobileTabMenuOpen && (
                 <>
                     <div className="fixed inset-0 bg-black/40 dark:bg-black/80 backdrop-blur-sm z-[65]" onClick={() => setIsMobileTabMenuOpen(false)} />
-                    <div className="absolute top-full left-0 right-0 mt-3 bg-white dark:bg-[#121212] border border-gray-200 dark:border-white/10 rounded-3xl p-4 grid grid-cols-2 gap-3 shadow-2xl z-[70] animate-in fade-in zoom-in-95 duration-200 ring-1 ring-black/5 dark:ring-white/10 max-h-[70vh] overflow-y-auto custom-scrollbar">
+                    <div className="absolute top-full left-0 right-0 mt-3 glass-panel p-4 grid grid-cols-2 gap-3 z-[70] animate-in fade-in zoom-in-95 duration-200 max-h-[70vh] overflow-y-auto custom-scrollbar">
                         {visibleTabs.map((tab) => {
                             const isActive = activeTab === tab;
                             // Discrepancy Logic
@@ -73,8 +73,8 @@ export const MobileTabSelector: React.FC<TabSelectorProps> = ({
                                         setIsMobileTabMenuOpen(false);
                                     }}
                                     className={`p-4 rounded-2xl flex flex-col items-center justify-center gap-2 transition-all border relative ${isActive
-                                        ? 'bg-cyan-500 text-black border-cyan-400 shadow-[0_0_20px_rgba(6,182,212,0.4)]'
-                                        : 'bg-gray-50 dark:bg-white/5 text-gray-700 dark:text-gray-400 border-gray-100 dark:border-white/5 hover:bg-gray-100 dark:hover:bg-white/10 hover:text-gray-900 dark:hover:text-white'
+                                        ? 'bg-[#2C5E3B] dark:bg-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24] border-[#2C5E3B] dark:border-[#EAE5D9] shadow-sm'
+                                        : 'bg-stone-50/50 dark:bg-[#18201B]/50 text-stone-700 dark:text-stone-400 border-[#E2DCCE]/50 dark:border-[#A9CBA2]/[0.04] hover:bg-stone-100/50 dark:hover:bg-[#EAE5D9]/10 hover:text-[#1E3F27] dark:hover:text-white'
                                         }`}
                                 >
                                     <span className="text-[10px] font-black uppercase tracking-widest leading-tight text-center">{tab === 'ASSIGN' ? 'ASSIGN TASK' : t(`warehouse.tabs.${tab.toLowerCase()}`)}</span>
@@ -126,11 +126,11 @@ export const DesktopTabSelector: React.FC<DesktopTabSelectorProps> = ({
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab as OpTab)}
-                            className={`px-4 py-3 md:py-2 rounded-lg text-sm md:text-xs font-bold transition-all whitespace-nowrap min-h-[44px] md:min-h-0 select-none relative ${activeTab === tab
-                                ? 'bg-cyber-primary text-black shadow-[0_0_10px_rgba(0,255,157,0.3)]'
+                            className={`px-4 py-2.5 rounded-2xl text-xs font-semibold transition-all whitespace-nowrap min-h-[40px] md:min-h-0 select-none relative ${activeTab === tab
+                                ? 'bg-[#2C5E3B] dark:bg-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24] shadow-sm'
                                 : hasTransferDiscrepancies
                                     ? 'bg-red-600 text-white animate-pulse shadow-[0_0_15px_rgba(239,68,68,0.5)] border border-red-400'
-                                    : 'text-gray-400 hover:bg-white/5'
+                                    : 'text-stone-500 dark:text-stone-400 hover:bg-[#2C5E3B]/10 dark:hover:bg-[#EAE5D9]/10 hover:text-[#2C5E3B] dark:hover:text-[#EAE5D9]'
                                 } `}
                         >
                             {tab === 'ASSIGN' ? 'ASSIGN TASK' : t(`warehouse.tabs.${tab.toLowerCase()}`)}

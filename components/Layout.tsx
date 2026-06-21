@@ -8,7 +8,7 @@ import { GhostModeBanner } from './GhostModeBanner';
 
 export default function Layout({ children }: { children?: React.ReactNode }) {
   return (
-    <div className="flex h-screen bg-cyber-black text-gray-300 font-sans overflow-hidden transition-colors duration-300">
+    <div className="flex h-screen text-gray-700 dark:text-gray-300 font-sans overflow-hidden transition-colors duration-300" style={{ backgroundColor: 'var(--bg-app)' }}>
       <NetworkStatusIndicator />
       <Sidebar />
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">

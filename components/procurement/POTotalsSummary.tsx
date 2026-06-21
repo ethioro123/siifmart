@@ -41,10 +41,10 @@ export const POTotalsSummary: React.FC<POTotalsSummaryProps> = ({
             <div className="space-y-6">
                 <div className="space-y-2">
                     <label className="text-[10px] text-gray-500 uppercase font-bold ml-1 flex items-center gap-2">
-                        <FileText size={12} className="text-cyber-primary" /> Transaction Notes
+                        <FileText size={12} className="text-[#2C5E3B] dark:text-[#A9CBA2]" /> Transaction Notes
                     </label>
                     <textarea
-                        className="w-full bg-gray-50 dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-4 text-sm text-gray-900 dark:text-white focus:border-blue-500/50 dark:focus:border-cyber-primary/50 outline-none transition-all resize-none h-32 placeholder-gray-400 dark:placeholder-gray-700 shadow-inner font-bold"
+                        className="w-full bg-gray-50 dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-4 text-sm text-gray-900 dark:text-white focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:ring-2 focus:ring-[#2C5E3B]/10 dark:focus:ring-[#A9CBA2]/10 outline-none transition-all resize-none h-32 placeholder-gray-400 dark:placeholder-gray-700 shadow-inner font-bold"
                         placeholder="Specify internal directives or supplier instructions..."
                         value={poNotes}
                         onChange={(e) => setPoNotes(e.target.value)}
@@ -56,7 +56,7 @@ export const POTotalsSummary: React.FC<POTotalsSummaryProps> = ({
                         <input
                             type="text"
                             placeholder="e.g. Net 30"
-                            className="w-full bg-gray-50 dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-lg px-4 py-3 text-sm text-gray-900 dark:text-white focus:border-blue-500/50 dark:focus:border-cyber-primary/50 outline-none transition-all placeholder-gray-400 dark:placeholder-gray-700 font-bold"
+                            className="w-full bg-gray-50 dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-lg px-4 py-3 text-sm text-gray-900 dark:text-white focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:ring-2 focus:ring-[#2C5E3B]/10 dark:focus:ring-[#A9CBA2]/10 outline-none transition-all placeholder-gray-400 dark:placeholder-gray-700 font-bold"
                             value={paymentTerms}
                             onChange={(e) => setPaymentTerms(e.target.value)}
                         />
@@ -66,7 +66,7 @@ export const POTotalsSummary: React.FC<POTotalsSummaryProps> = ({
                         <input
                             type="text"
                             placeholder="e.g. EXW"
-                            className="w-full bg-gray-50 dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-lg px-4 py-3 text-sm text-gray-900 dark:text-white focus:border-blue-500/50 dark:focus:border-cyber-primary/50 outline-none transition-all placeholder-gray-400 dark:placeholder-gray-700 font-bold"
+                            className="w-full bg-gray-50 dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-lg px-4 py-3 text-sm text-gray-900 dark:text-white focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:ring-2 focus:ring-[#2C5E3B]/10 dark:focus:ring-[#A9CBA2]/10 outline-none transition-all placeholder-gray-400 dark:placeholder-gray-700 font-bold"
                             value={incoterms}
                             onChange={(e) => setIncoterms(e.target.value)}
                         />
@@ -76,12 +76,12 @@ export const POTotalsSummary: React.FC<POTotalsSummaryProps> = ({
 
             {/* Right: Financial Totals */}
             <div className="relative overflow-hidden rounded-2xl p-[1px]">
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-transparent to-purple-500/10 dark:from-cyber-primary/30 dark:via-transparent dark:to-purple-500/20 opacity-40"></div>
+                <div className="absolute inset-0 bg-gradient-to-br from-[#2C5E3B]/10 via-transparent to-amber-500/5 dark:from-[#2C5E3B]/20 dark:via-transparent dark:to-amber-500/5 opacity-40"></div>
                 <div className="relative bg-white dark:bg-black/60 backdrop-blur-2xl rounded-2xl p-8 space-y-6 border border-gray-200 dark:border-white/5 shadow-xl dark:shadow-2xl">
 
                     {/* Header */}
                     <div className="flex items-center gap-3 mb-2 pb-2 border-b border-gray-100 dark:border-white/10">
-                        <div className="w-2 h-2 rounded-full bg-blue-600 dark:bg-cyber-primary shadow-[0_0_10px_rgba(37,99,235,0.4)] dark:shadow-[0_0_10px_rgba(0,255,157,0.8)]"></div>
+                        <div className="w-2 h-2 rounded-full bg-[#2C5E3B] dark:bg-[#A9CBA2] shadow-[0_0_10px_rgba(44,94,59,0.3)] dark:shadow-[0_0_10px_rgba(169,203,162,0.4)]"></div>
                         <h3 className="text-xs font-black text-gray-900 dark:text-white uppercase tracking-widest">Financial Overview</h3>
                     </div>
 
@@ -95,9 +95,9 @@ export const POTotalsSummary: React.FC<POTotalsSummaryProps> = ({
                     <div className="group space-y-2">
                         <div className="flex justify-between items-center">
                             <span className="text-gray-400 text-sm flex items-center gap-2 group-hover:text-white transition-colors">
-                                <Percent size={14} className="text-cyber-primary/70" /> Applied Discount
+                                <Percent size={14} className="text-[#2C5E3B]/70 dark:text-[#A9CBA2]/70" /> Applied Discount
                             </span>
-                             <div className="flex items-center bg-gray-50 dark:bg-black/60 rounded-lg border border-gray-200 dark:border-white/10 px-3 py-1.5 focus-within:border-blue-500/50 dark:focus-within:border-cyber-primary/50 transition-all shadow-sm">
+                             <div className="flex items-center bg-gray-50 dark:bg-black/60 rounded-lg border border-gray-200 dark:border-white/10 px-3 py-1.5 focus-within:border-[#2C5E3B] dark:focus-within:border-[#A9CBA2] focus-within:ring-2 focus-within:ring-[#2C5E3B]/10 dark:focus-within:ring-[#A9CBA2]/10 transition-all shadow-sm">
                                 <input
                                     type="number"
                                     min="0" max="100"
@@ -122,9 +122,9 @@ export const POTotalsSummary: React.FC<POTotalsSummaryProps> = ({
                     <div className="group space-y-2">
                         <div className="flex justify-between items-center">
                             <span className="text-gray-400 text-sm flex items-center gap-2 group-hover:text-white transition-colors">
-                                <Percent size={14} className="text-purple-400/70" /> Regulatory Tax
+                                <Percent size={14} className="text-amber-600 dark:text-amber-400" /> Regulatory Tax
                             </span>
-                             <div className="flex items-center bg-gray-50 dark:bg-black/60 rounded-lg border border-gray-200 dark:border-white/10 px-3 py-1.5 focus-within:border-purple-500/50 transition-all shadow-sm">
+                             <div className="flex items-center bg-gray-50 dark:bg-black/60 rounded-lg border border-gray-200 dark:border-white/10 px-3 py-1.5 focus-within:border-amber-500 focus-within:ring-2 focus-within:ring-amber-500/10 transition-all shadow-sm">
                                 <input
                                     type="number"
                                     min="0" max="100"
@@ -148,9 +148,9 @@ export const POTotalsSummary: React.FC<POTotalsSummaryProps> = ({
                     {/* Shipping */}
                     <div className="flex justify-between items-center group">
                         <span className="text-gray-400 text-sm flex items-center gap-2 group-hover:text-white transition-colors">
-                            <DollarSign size={14} className="text-blue-400/70" /> Freight / Shipping
+                            <DollarSign size={14} className="text-amber-600 dark:text-amber-400" /> Freight / Shipping
                         </span>
-                         <div className="flex items-center bg-gray-50 dark:bg-black/60 rounded-lg border border-gray-200 dark:border-white/10 px-3 py-1.5 focus-within:border-blue-500/50 transition-all shadow-sm">
+                         <div className="flex items-center bg-gray-50 dark:bg-black/60 rounded-lg border border-gray-200 dark:border-white/10 px-3 py-1.5 focus-within:border-[#2C5E3B] dark:focus-within:border-[#A9CBA2] focus-within:ring-2 focus-within:ring-[#2C5E3B]/10 dark:focus-within:ring-[#A9CBA2]/10 transition-all shadow-sm">
                             <span className="text-gray-400 dark:text-gray-600 text-xs mr-2 font-bold">{CURRENCY_SYMBOL}</span>
                             <input
                                 type="number"
@@ -182,7 +182,7 @@ export const POTotalsSummary: React.FC<POTotalsSummaryProps> = ({
                             </div>
                         </div>
                         <div className="text-right">
-                            <div className="text-3xl font-black text-blue-600 dark:text-white font-mono tracking-tighter dark:drop-shadow-[0_0_15px_rgba(0,255,157,0.6)]">
+                            <div className="text-3xl font-black text-[#2C5E3B] dark:text-[#A9CBA2] font-mono tracking-tighter">
                                 {formatCompactNumber(poTotal, { currency: CURRENCY_SYMBOL })}
                             </div>
                         </div>

@@ -21,12 +21,19 @@ interface InventoryOverviewProps {
     abcData: any[];
 }
 
-const COLORS = ['#00ff9d', '#3b82f6', '#f59e0b', '#ef4444'];
+import { useStore } from '../../contexts/CentralStore';
+
+const getCOLORS = (theme: string) => [
+    theme === 'dark' ? '#A9CBA2' : '#2C5E3B', // Class A (Forest / Soft Sage)
+    theme === 'dark' ? '#7A9E83' : '#4D6E56', // Class B (Muted Green / Slate)
+    '#d97706',                               // Class C (Amber)
+    '#ef4444'                                // Fallback
+];
 
 const MetricCard = ({ title, value, sub, icon: Icon, trend }: any) => (
     <div className="glass-panel overflow-hidden group rounded-2xl p-5 relative transition-all">
         <div className="flex justify-between items-start mb-4">
-            <div className="p-3 rounded-xl bg-gray-50 dark:bg-white/5 group-hover:bg-cyber-primary/10 transition-colors text-cyber-primary">
+            <div className="p-3 rounded-xl bg-gray-50 dark:bg-white/5 group-hover:bg-[#2C5E3B]/10 dark:group-hover:bg-[#A9CBA2]/10 transition-colors text-[#2C5E3B] dark:text-[#A9CBA2]">
                 <Icon size={20} />
             </div>
             {trend && (
@@ -51,6 +58,9 @@ export const InventoryOverview: React.FC<InventoryOverviewProps> = ({
     categoryData,
     abcData
 }) => {
+    const { theme } = useStore();
+    const colors = getCOLORS(theme);
+
     return (
         <div className="space-y-6 animate-in fade-in">
             {/* KPI Cards */}
@@ -84,28 +94,53 @@ export const InventoryOverview: React.FC<InventoryOverviewProps> = ({
             {/* Charts Row */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Value by Category */}
-                <div className="lg:col-span-2 bg-cyber-gray border border-white/5 rounded-2xl p-6">
-                    <h3 className="font-bold text-white mb-6">Valuation by Category</h3>
+                <div className="lg:col-span-2 glass-panel p-6">
+                    <h3 className="text-xs font-black text-[#4D6E56] dark:text-[#7A9E83] uppercase tracking-widest mb-6 select-none">
+                        Valuation by Category
+                    </h3>
                     <div className="h-[300px]">
                         <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                             <BarChart data={categoryData}>
-                                <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
-                                <XAxis dataKey="name" stroke="#666" fontSize={12} tickLine={false} axisLine={false} />
-                                <YAxis stroke="#666" fontSize={12} tickLine={false} axisLine={false} />
-                                <Tooltip
-                                    contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #333' }}
-                                    itemStyle={{ color: '#fff' }}
-                                    cursor={{ fill: 'rgba(255,255,255,0.05)' }}
+                                <defs>
+                                    <linearGradient id="barGradientWoody" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="0%" stopColor={theme === 'dark' ? '#A9CBA2' : '#2C5E3B'} stopOpacity={0.9} />
+                                        <stop offset="100%" stopColor={theme === 'dark' ? '#A9CBA2' : '#2C5E3B'} stopOpacity={0.4} />
+                                    </linearGradient>
+                                </defs>
+                                <CartesianGrid strokeDasharray="3 3" stroke={theme === 'dark' ? 'rgba(169, 203, 162, 0.06)' : 'rgba(44, 94, 59, 0.06)'} vertical={false} />
+                                <XAxis
+                                    dataKey="name"
+                                    axisLine={false}
+                                    tickLine={false}
+                                    tick={{ fill: theme === 'dark' ? '#7A9E83' : '#4D6E56', fontSize: 10, fontWeight: 700 }}
                                 />
-                                <Bar dataKey="value" fill="#00ff9d" radius={[4, 4, 0, 0]} barSize={40} />
+                                <YAxis
+                                    axisLine={false}
+                                    tickLine={false}
+                                    tick={{ fill: theme === 'dark' ? '#7A9E83' : '#4D6E56', fontSize: 10, fontWeight: 700 }}
+                                />
+                                <Tooltip
+                                    contentStyle={{
+                                        backgroundColor: theme === 'dark' ? '#18201B' : '#ffffff',
+                                        border: `1px solid ${theme === 'dark' ? '#2c5e3b' : '#E2DCCE'}`,
+                                        borderRadius: '16px',
+                                        fontSize: '12px',
+                                        color: theme === 'dark' ? '#EAE5D9' : '#1E3F27',
+                                        boxShadow: '0 4px 16px rgba(34,50,38,0.08)'
+                                    }}
+                                    cursor={{ fill: theme === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(44,94,59,0.03)' }}
+                                />
+                                <Bar dataKey="value" fill="url(#barGradientWoody)" radius={[6, 6, 0, 0]} barSize={40} />
                             </BarChart>
                         </ResponsiveContainer>
                     </div>
                 </div>
 
                 {/* ABC Analysis */}
-                <div className="bg-cyber-gray border border-white/5 rounded-2xl p-6">
-                    <h3 className="font-bold text-white mb-6">ABC Classification</h3>
+                <div className="glass-panel p-6">
+                    <h3 className="text-xs font-black text-[#4D6E56] dark:text-[#7A9E83] uppercase tracking-widest mb-6 select-none">
+                        ABC Classification
+                    </h3>
                     <div className="h-[200px]">
                         <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                             <PieChart>
@@ -118,27 +153,42 @@ export const InventoryOverview: React.FC<InventoryOverviewProps> = ({
                                     paddingAngle={5}
                                     dataKey="value"
                                 >
-                                    {abcData.map((entry: any, index: number) => (
-                                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke="none" />
-                                    ))}
+                                    {abcData.map((entry: any, index: number) => {
+                                        const segmentColor = index === 0 && entry.color ? entry.color : colors[index % colors.length];
+                                        return (
+                                            <Cell key={`cell-${index}`} fill={segmentColor} stroke="none" />
+                                        );
+                                    })}
                                 </Pie>
-                                <Tooltip contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #333' }} />
+                                <Tooltip
+                                    contentStyle={{
+                                        backgroundColor: theme === 'dark' ? '#18201B' : '#ffffff',
+                                        border: `1px solid ${theme === 'dark' ? '#2c5e3b' : '#E2DCCE'}`,
+                                        borderRadius: '16px',
+                                        fontSize: '12px',
+                                        color: theme === 'dark' ? '#EAE5D9' : '#1E3F27',
+                                        boxShadow: '0 4px 16px rgba(34,50,38,0.08)'
+                                    }}
+                                />
                             </PieChart>
                         </ResponsiveContainer>
                     </div>
                     <div className="space-y-3 mt-4">
-                        {abcData.map((item: any, i: number) => (
-                            <div key={i} className="flex justify-between items-center text-sm">
-                                <div className="flex items-center gap-2">
-                                    <motion.div
-                                        animate={{ backgroundColor: COLORS[i % COLORS.length] }}
-                                        className="w-2 h-2 rounded-full"
-                                    />
-                                    <span className="text-gray-300">{item.name}</span>
+                        {abcData.map((item: any, i: number) => {
+                            const markerColor = i === 0 && item.color ? item.color : colors[i % colors.length];
+                            return (
+                                <div key={i} className="flex justify-between items-center text-sm">
+                                    <div className="flex items-center gap-2">
+                                        <motion.div
+                                            animate={{ backgroundColor: markerColor }}
+                                            className="w-2.5 h-2.5 rounded-full"
+                                        />
+                                        <span className="text-secondary text-xs font-semibold">{item.name}</span>
+                                    </div>
+                                    <span className="font-mono text-gray-900 dark:text-white font-bold text-xs">{item.value} SKUs</span>
                                 </div>
-                                <span className="font-mono text-white font-bold">{item.value} SKUs</span>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 </div>
             </div>

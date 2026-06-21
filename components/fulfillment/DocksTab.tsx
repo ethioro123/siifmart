@@ -58,9 +58,9 @@ export const DocksTab: React.FC<DocksTabProps> = ({
         <div className="flex flex-col h-full gap-6">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mx-4 md:mx-0">
                 {/* TERMINAL CONTROL TITLE */}
-                <div className="flex bg-white dark:bg-white/5 backdrop-blur-xl p-1.5 rounded-2xl w-fit border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-xl overflow-hidden relative group">
-                    <div className="absolute inset-0 bg-blue-500/5 blur-xl group-hover:bg-blue-500/10 transition-all opacity-50" />
-                    <div className="relative z-10 px-8 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] bg-blue-600 text-white shadow-[0_0_20px_rgba(37,99,235,0.4)]">
+                <div className="flex bg-white/80 dark:bg-[#18201B]/50 backdrop-blur-xl p-1.5 rounded-2xl w-fit border border-[#E2DCCE]/60 dark:border-[#A9CBA2]/10 shadow-sm overflow-hidden relative group">
+                    <div className="absolute inset-0 bg-[#2C5E3B]/5 blur-xl group-hover:bg-[#2C5E3B]/10 transition-all opacity-50" />
+                    <div className="relative z-10 px-8 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] bg-[#2C5E3B] dark:bg-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24] shadow-sm">
                         <div className="flex items-center gap-3">
                             <Upload size={14} />
                             <span>{t('warehouse.docks.outgoing')}</span>
@@ -72,13 +72,13 @@ export const DocksTab: React.FC<DocksTabProps> = ({
                 <div className="bg-slate-100 dark:bg-white/5 backdrop-blur-xl p-1 rounded-xl border border-slate-200 dark:border-white/10 flex">
                     <button
                         onClick={() => setViewMode('Process')}
-                        className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${viewMode === 'Process' ? 'bg-green-500 text-white shadow-lg shadow-green-500/20' : 'text-slate-500 hover:text-slate-900 dark:text-gray-400 dark:hover:text-white'}`}
+                        className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${viewMode === 'Process' ? 'bg-[#2C5E3B] dark:bg-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24] shadow-sm' : 'text-slate-500 hover:text-slate-900 dark:text-gray-400 dark:hover:text-white'}`}
                     >
                         Process
                     </button>
                     <button
                         onClick={() => setViewMode('History')}
-                        className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${viewMode === 'History' ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/20' : 'text-slate-500 hover:text-slate-900 dark:text-gray-400 dark:hover:text-white'}`}
+                        className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${viewMode === 'History' ? 'bg-[#2C5E3B] dark:bg-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24] shadow-sm' : 'text-slate-500 hover:text-slate-900 dark:text-gray-400 dark:hover:text-white'}`}
                     >
                         History
                     </button>

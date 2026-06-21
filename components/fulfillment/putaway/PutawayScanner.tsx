@@ -50,6 +50,7 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
     const [awaitingMismatchConfirmation, setAwaitingMismatchConfirmation] = useState(false);
     const [lastCheckedLocation, setLastCheckedLocation] = useState<string | null>(null);
     const inputRef = useRef<HTMLInputElement>(null);
+    const scanLockRef = useRef(false);
 
     const scanOnlyHandlers = useScanOnly(setInputVal, {
         onReject: (reason) => {
@@ -135,7 +136,7 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
     const handleScan = async (e: React.FormEvent) => {
         e.preventDefault();
         const rawVal = inputVal.trim();
-        if (!rawVal || isProcessing) return;
+        if (!rawVal || isProcessing || scanLockRef.current) return;
         const val = rawVal.toUpperCase();
 
         if (step === 'LOCATION') {
@@ -157,6 +158,7 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
             }
         }
 
+        scanLockRef.current = true;
         try {
             if (step === 'LOCATION') {
                 const decoded = decodeLocation(val);
@@ -215,24 +217,26 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
             console.error("Scan failed:", err);
             setInputVal('');
             setAwaitingOccupancyConfirmation(false);
+        } finally {
+            scanLockRef.current = false;
         }
     };
 
     return (
         <div className="fixed inset-0 z-[200] bg-white dark:bg-black flex flex-col transition-colors duration-500">
             {/* Top Bar */}
-            <div className="p-4 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-white/10 flex justify-between items-center">
+            <div className="p-4 bg-[#FAF8F5] dark:bg-[#1C2620]/80 border-b border-[#E2DCCE]/60 dark:border-white/10 flex justify-between items-center">
                 <div className="flex items-center gap-3">
                     <button onClick={onClose} className="p-2 -ml-2 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-all shadow-sm active:scale-95" aria-label="Close Scanner">
                         <X size={24} />
                     </button>
                     <div>
                         <h3 className="font-black text-gray-900 dark:text-white text-lg uppercase tracking-tight">{step === 'LOCATION' ? 'Scan Location' : 'Confirm Item'}</h3>
-                        <p className="text-[10px] text-blue-600 dark:text-blue-400 font-black uppercase tracking-widest mt-0.5">JOB: {formatJobId(job)}</p>
+                        <p className="text-[10px] text-[#2C5E3B] dark:text-[#A9CBA2] font-black uppercase tracking-widest mt-0.5">JOB: {formatJobId(job)}</p>
                     </div>
                 </div>
                 <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-black uppercase tracking-widest bg-gray-200 dark:bg-white/10 px-3 py-1.5 rounded-full text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-white/10">
+                    <span className="text-[10px] font-black uppercase tracking-widest bg-[#E2DCCE]/30 dark:bg-white/10 px-3 py-1.5 rounded-full text-slate-750 dark:text-gray-300 border border-[#E2DCCE]/60 dark:border-white/10">
                         STEP {step === 'LOCATION' ? '1' : '2'}
                     </span>
                 </div>
@@ -240,7 +244,7 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
 
             {/* Main View */}
             <div className="flex-1 relative w-full overflow-hidden flex flex-col">
-                <div className={`absolute inset-0 opacity-10 blur-[100px] transition-colors duration-1000 pointer-events-none ${step === 'LOCATION' ? 'bg-blue-600' : 'bg-emerald-600'} `} />
+                <div className={`absolute inset-0 opacity-10 blur-[100px] transition-colors duration-1000 pointer-events-none ${step === 'LOCATION' ? 'bg-[#2C5E3B]' : 'bg-emerald-600'} `} />
 
                 <div className="absolute inset-0 overflow-y-auto flex flex-col items-center p-6 pb-32 transition-all">
                     {/* Status Orb */}
@@ -249,7 +253,7 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
                         : showError
                             ? 'border-rose-500 bg-rose-500/20 shadow-rose-500/40 scale-110 animate-shake'
                             : step === 'LOCATION'
-                                ? 'border-blue-500 bg-blue-500/10 shadow-blue-500/20'
+                                ? 'border-[#2C5E3B] bg-[#2C5E3B]/10 shadow-[#2C5E3B]/20'
                                 : 'border-emerald-500 bg-emerald-500/10 shadow-emerald-500/20'
                         }`}>
                         {showSuccess ? (
@@ -257,13 +261,13 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
                         ) : showError ? (
                             <AlertTriangle size={64} className="text-rose-500" />
                         ) : step === 'LOCATION' ? (
-                            <MapIcon size={64} className="text-blue-500 drop-shadow-[0_0_15px_rgba(59,130,246,0.5)]" />
+                            <MapIcon size={64} className="text-[#2C5E3B] dark:text-[#A9CBA2] drop-shadow-[0_0_15px_rgba(44,94,59,0.5)]" />
                         ) : (
                             <Box size={64} className="text-emerald-500 drop-shadow-[0_0_15px_rgba(16,185,129,0.5)]" />
                         )}
                     </div>
 
-                    <h1 className={`text-4xl md:text-5xl font-black text-gray-900 dark:text-white text-center uppercase tracking-tight mb-4 z-10 transition-all duration-700 ${isStrictlyValid ? 'text-blue-600 dark:text-blue-400 scale-105' : showError ? 'text-rose-500' : ''}`}>
+                    <h1 className={`text-4xl md:text-5xl font-black text-gray-900 dark:text-white text-center uppercase tracking-tight mb-4 z-10 transition-all duration-700 ${isStrictlyValid ? 'text-[#2C5E3B] dark:text-[#A9CBA2] scale-105' : showError ? 'text-rose-500' : ''}`}>
                         {showSuccess ? 'Success!' : showError ? 'Error' : step === 'LOCATION' ? (isStrictlyValid ? 'Location Found' : 'Scan Location') : 'Verify Item'}
                     </h1>
 
@@ -285,18 +289,18 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
                                 <div className={`relative inline-block px-10 py-6 rounded-3xl border-2 transition-all duration-700 ${recommendation?.type === 'ASSIGNED'
                                     ? 'bg-amber-50 dark:bg-amber-500/10 border-amber-400 text-amber-700 dark:text-amber-400 shadow-xl shadow-amber-500/10'
                                     : recommendation?.type === 'SUGGESTED'
-                                        ? 'bg-blue-50 dark:bg-blue-500/5 border-blue-200 dark:border-blue-400/50 text-blue-700 dark:text-blue-300 shadow-xl shadow-blue-500/10'
-                                        : 'bg-gray-50 dark:bg-white/5 border-gray-100 dark:border-white/10 text-gray-900 dark:text-white'
+                                        ? 'bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/5 border-[#2C5E3B]/30 dark:border-[#A9CBA2]/50 text-[#2C5E3B] dark:text-[#A9CBA2] shadow-xl shadow-[#2C5E3B]/10'
+                                        : 'bg-[#FAF8F5] dark:bg-white/5 border-[#E2DCCE]/60 dark:border-white/10 text-gray-900 dark:text-white'
                                     }`}>
-                                    <p className={`font-mono font-black tracking-[0.1em] leading-none ${isStrictlyValid ? 'text-6xl md:text-7xl text-blue-600 dark:text-blue-400' : (recommendation?.location?.length || 0) > 10 ? 'text-2xl' : 'text-5xl'}`}>
+                                    <p className={`font-mono font-black tracking-[0.1em] leading-none ${isStrictlyValid ? 'text-6xl md:text-7xl text-[#2C5E3B] dark:text-[#A9CBA2]' : (recommendation?.location?.length || 0) > 10 ? 'text-2xl' : 'text-5xl'}`}>
                                         {isStrictlyValid
                                             ? decodeLocation(inputVal.trim().toUpperCase())
                                             : (normalizeLocation(inputVal) || recommendation?.location || currentProduct?.location || '—')}
                                     </p>
 
                                     {recommendation?.type === 'SUGGESTED' && !normalizeLocation(inputVal) && (
-                                        <div className="mt-4 border-t-2 border-blue-100 dark:border-white/5 pt-3">
-                                            <p className="text-[10px] text-blue-600 dark:text-blue-300 font-black uppercase tracking-widest mb-1">
+                                        <div className="mt-4 border-t-2 border-[#E2DCCE]/60 dark:border-white/5 pt-3">
+                                            <p className="text-[10px] text-[#2C5E3B] dark:text-[#A9CBA2] font-black uppercase tracking-widest mb-1">
                                                 {currentProduct?.category || 'General Inventory'}
                                             </p>
                                         </div>
@@ -358,7 +362,7 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
 
                     {/* Input Area */}
                     <form onSubmit={handleScan} className="w-full max-w-md relative z-20 group">
-                        <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-3xl blur-[20px] opacity-10 group-focus-within:opacity-30 transition-opacity" />
+                        <div className="absolute inset-0 bg-gradient-to-r from-[#2C5E3B] to-[#1E3B24] rounded-3xl blur-[20px] opacity-10 group-focus-within:opacity-30 transition-opacity" />
                         <input
                             ref={inputRef}
                             type="text"
@@ -366,7 +370,7 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
                             onChange={(e) => setInputVal(e.target.value)}
                             onKeyDown={step === 'ITEM' ? scanOnlyHandlers.onKeyDown : undefined}
                             onPaste={scanOnlyHandlers.onPaste}
-                            className={`w-full bg-white dark:bg-gray-900/90 border-4 rounded-3xl py-8 px-6 text-center text-4xl font-black font-mono text-gray-900 dark:text-white placeholder:text-gray-200 dark:placeholder:text-gray-800 focus:outline-none relative z-10 shadow-2xl transition-all duration-300 ${awaitingOccupancyConfirmation || awaitingMismatchConfirmation ? 'border-amber-400 shadow-amber-500/30' : 'border-gray-100 dark:border-white/10 focus:border-blue-500 dark:focus:border-blue-500/50'}`}
+                            className={`w-full bg-white dark:bg-gray-900/90 border-4 rounded-3xl py-8 px-6 text-center text-4xl font-black font-mono text-gray-900 dark:text-white placeholder:text-gray-200 dark:placeholder:text-gray-800 focus:outline-none relative z-10 shadow-2xl transition-all duration-300 ${awaitingOccupancyConfirmation || awaitingMismatchConfirmation ? 'border-amber-400 shadow-amber-500/30' : 'border-[#E2DCCE]/60 dark:border-white/10 focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2]/50'}`}
                             placeholder={step === 'LOCATION' ? 'SCAN BAY' : 'SCAN SKU'}
                             autoFocus
                             disabled={isProcessing}
@@ -374,7 +378,7 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
 
                         {step === 'LOCATION' && inputVal.trim() && (
                             <div className="mt-4 text-center animate-in fade-in slide-in-from-bottom-2 duration-300">
-                                <p className="text-[10px] font-black uppercase tracking-[0.4em] text-blue-500 flex items-center justify-center gap-3">
+                                <p className="text-[10px] font-black uppercase tracking-[0.4em] text-[#2C5E3B] dark:text-[#A9CBA2] flex items-center justify-center gap-3">
                                     {isStrictlyValid ? `DETECTED: ${decodeLocation(inputVal.trim().toUpperCase())}` : 'Scan a location barcode'}
                                 </p>
                             </div>
@@ -422,7 +426,7 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
                                         ? 'bg-gray-900 border-transparent text-white'
                                         : awaitingOccupancyConfirmation || awaitingMismatchConfirmation
                                             ? 'bg-amber-500 border-amber-300 text-white font-black uppercase tracking-[0.2em] shadow-amber-500/40 animate-pulse'
-                                            : 'bg-gradient-to-r from-blue-600 to-indigo-600 border-blue-400/50 text-white font-black uppercase tracking-[0.2em] shadow-blue-500/30'
+                                            : 'bg-[#2C5E3B] hover:bg-[#1E3B24] border-[#2C5E3B] text-white font-black uppercase tracking-[0.2em] shadow-md'
                                 }`}
                         >
                             {isProcessing ? (

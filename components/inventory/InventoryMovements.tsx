@@ -95,13 +95,13 @@ export const InventoryMovements: React.FC<InventoryMovementsProps> = ({
             {/* Controls */}
             <div className="p-4 glass-panel rounded-2xl flex flex-wrap items-center gap-4">
                 <div className="flex-1 min-w-[300px] relative group">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-cyber-primary transition-colors" size={16} />
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-[#2C5E3B] dark:group-focus-within:text-[#A9CBA2] transition-colors" size={16} />
                     <input
                         type="text"
                         value={movementsSearch}
                         onChange={(e) => setMovementsSearch(e.target.value)}
                         placeholder="Search by Product name or Reference ID..."
-                        className="w-full bg-white dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-xl py-3 pl-12 pr-4 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-cyber-primary/50 focus:ring-1 focus:ring-cyber-primary/20 transition-all"
+                        className="w-full bg-white dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-xl py-3 pl-12 pr-4 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-[#2C5E3B]/50 dark:focus:border-[#A9CBA2]/50 focus:ring-4 focus:ring-[#2C5E3B]/10 dark:focus:ring-[#A9CBA2]/10 transition-all"
                     />
                 </div>
 
@@ -112,7 +112,7 @@ export const InventoryMovements: React.FC<InventoryMovementsProps> = ({
                             aria-label="Filter Movement Site"
                             value={movementsSiteFilter}
                             onChange={(e) => setMovementsSiteFilter(e.target.value)}
-                            className="bg-white dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm text-gray-700 dark:text-white focus:outline-none focus:border-cyber-primary/50 border-cyber-primary/30"
+                            className="bg-white dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm text-gray-700 dark:text-white focus:outline-none focus:border-[#2C5E3B]/50 dark:focus:border-[#A9CBA2]/50 focus:ring-4 focus:ring-[#2C5E3B]/10 dark:focus:ring-[#A9CBA2]/10"
                         >
                             <option value="All">All Sites</option>
                             {sites.filter(s => s.type !== 'Store' && s.type !== 'Administration').map(s => (
@@ -122,7 +122,7 @@ export const InventoryMovements: React.FC<InventoryMovementsProps> = ({
                     ) : (
                         // Show current site as read-only badge if in warehouse view
                         !isHQView && (
-                            <div className="bg-cyber-primary/10 border border-cyber-primary/20 rounded-xl px-4 py-3 text-sm text-cyber-primary font-bold">
+                            <div className="bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20 rounded-xl px-4 py-3 text-sm text-[#2C5E3B] dark:text-[#A9CBA2] font-bold">
                                 {activeSite?.name || 'Current Site'}
                             </div>
                         )
@@ -133,7 +133,7 @@ export const InventoryMovements: React.FC<InventoryMovementsProps> = ({
                         aria-label="Filter Movement Type"
                         value={movementsTypeFilter}
                         onChange={(e) => setMovementsTypeFilter(e.target.value)}
-                        className="bg-white dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm text-gray-700 dark:text-white focus:outline-none focus:border-cyber-primary/50"
+                        className="bg-white dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm text-gray-700 dark:text-white focus:outline-none focus:border-[#2C5E3B]/50 dark:focus:border-[#A9CBA2]/50 focus:ring-4 focus:ring-[#2C5E3B]/10 dark:focus:ring-[#A9CBA2]/10"
                     >
                         <option value="All">All Types</option>
                         <option value="IN">Inbound (Stock In)</option>
@@ -150,7 +150,7 @@ export const InventoryMovements: React.FC<InventoryMovementsProps> = ({
                             const [key, direction] = e.target.value.split('-');
                             setMovementsSort({ key, direction: direction as 'asc' | 'desc' });
                         }}
-                        className="bg-white dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm text-gray-700 dark:text-white focus:outline-none focus:border-cyber-primary/50"
+                        className="bg-white dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm text-gray-700 dark:text-white focus:outline-none focus:border-[#2C5E3B]/50 dark:focus:border-[#A9CBA2]/50 focus:ring-4 focus:ring-[#2C5E3B]/10 dark:focus:ring-[#A9CBA2]/10"
                     >
                         <option value="date-desc">Newest First</option>
                         <option value="date-asc">Oldest First</option>
@@ -179,7 +179,7 @@ export const InventoryMovements: React.FC<InventoryMovementsProps> = ({
                 <div className="overflow-x-auto relative min-h-[400px]">
                     {movementsLoading && (
                         <div className="absolute inset-0 bg-black/20 backdrop-blur-[1px] flex items-center justify-center z-10 transition-all">
-                            <div className="w-10 h-10 border-4 border-cyber-primary/20 border-t-cyber-primary rounded-full animate-spin" />
+                            <div className="w-10 h-10 border-4 border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20 border-t-[#2C5E3B] dark:border-t-[#A9CBA2] rounded-full animate-spin" />
                         </div>
                     )}
                     <table className="w-full text-left">

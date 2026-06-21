@@ -195,6 +195,14 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
             showToast("Select a destination site.", 'warning');
             return;
         }
+        if (!isManualVendor && !newPOSupplier) {
+            showToast("Please select a supplier.", 'warning');
+            return;
+        }
+        if (isManualVendor && !manualVendorName.trim()) {
+            showToast("Please enter the supplier name.", 'warning');
+            return;
+        }
 
         setIsSubmitting(true);
         try {
@@ -325,7 +333,7 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
                 <div className="h-8 w-[1px] bg-gray-200 dark:bg-white/10 hidden md:block"></div>
                 <div className="flex flex-col">
                     <span className="text-[10px] text-gray-500 dark:text-gray-500 uppercase font-black tracking-widest leading-none">Total Value</span>
-                    <span className="text-lg font-mono text-blue-600 dark:text-cyber-primary tracking-tight font-black">
+                    <span className="text-lg font-mono text-[#2C5E3B] dark:text-[#A9CBA2] tracking-tight font-black">
                         {CURRENCY_SYMBOL} {formatCompactNumber(poTotal)}
                     </span>
                 </div>
@@ -340,7 +348,7 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
                 <button
                     onClick={handleCreatePO}
                     disabled={isSubmitting || newPOItems.length === 0}
-                    className="relative group px-10 py-2.5 bg-blue-600 dark:bg-cyber-primary hover:bg-blue-700 dark:hover:bg-cyber-primary/90 text-white dark:text-black font-black rounded-xl text-xs transition-all shadow-md dark:shadow-[0_0_25px_rgba(0,255,157,0.3)] hover:shadow-lg dark:hover:shadow-[0_0_40px_rgba(0,255,157,0.5)] transform hover:scale-[1.02] disabled:opacity-30 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none flex items-center gap-3 uppercase tracking-widest overflow-hidden"
+                    className="relative group px-10 py-2.5 bg-[#2C5E3B] hover:bg-[#1E3B24] dark:bg-[#A9CBA2] dark:hover:bg-[#A9CBA2]/90 text-white dark:text-black font-black rounded-xl text-xs transition-all shadow-md dark:shadow-[0_4px_12px_rgba(169,203,162,0.15)] hover:shadow-lg transform hover:scale-[1.02] disabled:opacity-30 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none flex items-center gap-3 uppercase tracking-widest overflow-hidden"
                 >
                     <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
                     {isSubmitting ? (
@@ -365,7 +373,7 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
             <div className="relative space-y-8 pb-4">
                 {/* Decorative background accent */}
                 <div className="absolute -top-20 -right-20 w-64 h-64 bg-purpose-aurora/5 blur-[100px] rounded-full pointer-events-none"></div>
-                <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-cyber-primary/5 blur-[100px] rounded-full pointer-events-none"></div>
+                <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-[#2C5E3B]/5 blur-[100px] rounded-full pointer-events-none"></div>
 
                 {/* 1. Supplier & Logistics */}
                 <POSupplierLogistics

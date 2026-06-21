@@ -46,70 +46,70 @@ export const CountHistory: React.FC<CountHistoryProps> = ({
         <div className="space-y-6">
             {/* KPI Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-white/5 p-6 rounded-xl border border-white/10">
+                <div className="glass-panel p-6 rounded-2xl">
                     <div className="flex items-center gap-3 mb-2">
-                        <div className="p-2 bg-green-500/20 rounded-lg text-green-400">
+                        <div className="p-2 bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 rounded-xl text-[#2C5E3B] dark:text-[#A9CBA2]">
                             <CheckCircle size={20} />
                         </div>
-                        <h4 className="text-gray-400 text-sm font-bold uppercase">Inventory Accuracy</h4>
+                        <h4 className="text-stone-500 dark:text-stone-400 text-sm font-bold uppercase">Inventory Accuracy</h4>
                     </div>
-                    <p className="text-3xl font-bold text-white">98.5%</p>
-                    <p className="text-xs text-green-400 mt-1">↑ 1.2% from last month</p>
+                    <p className="text-3xl font-bold text-stone-900 dark:text-stone-100">98.5%</p>
+                    <p className="text-xs text-green-600 dark:text-green-400 mt-1">↑ 1.2% from last month</p>
                 </div>
 
-                <div className="bg-white/5 p-6 rounded-xl border border-white/10">
+                <div className="glass-panel p-6 rounded-2xl">
                     <div className="flex items-center gap-3 mb-2">
-                        <div className="p-2 bg-red-500/20 rounded-lg text-red-400">
+                        <div className="p-2 bg-red-500/10 rounded-xl text-red-600 dark:text-red-400">
                             <AlertTriangle size={20} />
                         </div>
-                        <h4 className="text-gray-400 text-sm font-bold uppercase">Net Variance Value</h4>
+                        <h4 className="text-stone-500 dark:text-stone-400 text-sm font-bold uppercase">Net Variance Value</h4>
                     </div>
-                    <p className="text-3xl font-bold text-white">
+                    <p className="text-3xl font-bold text-stone-900 dark:text-stone-100">
                         {formatCompactNumber(movements
-                            .filter(m => m.reason.includes('Cycle Count') || m.reason.includes('Adjustment'))
-                            .reduce((sum, m) => {
-                                const product = products.find(p => p.id === m.productId);
-                                const value = m.quantity * (product?.price || 0);
-                                return sum + (m.type === 'IN' ? value : -value);
-                            }, 0), { currency: CURRENCY_SYMBOL })}
+                             .filter(m => m.reason.includes('Cycle Count') || m.reason.includes('Adjustment'))
+                             .reduce((sum, m) => {
+                                 const product = products.find(p => p.id === m.productId);
+                                 const value = m.quantity * (product?.price || 0);
+                                 return sum + (m.type === 'IN' ? value : -value);
+                             }, 0), { currency: CURRENCY_SYMBOL })}
                     </p>
-                    <p className="text-xs text-gray-400 mt-1">Total value of adjustments</p>
+                    <p className="text-xs text-stone-500 dark:text-stone-400 mt-1">Total value of adjustments</p>
                 </div>
 
-                <div className="bg-white/5 p-6 rounded-xl border border-white/10">
+                <div className="glass-panel p-6 rounded-2xl">
                     <div className="flex items-center gap-3 mb-2">
-                        <div className="p-2 bg-blue-500/20 rounded-lg text-blue-400">
+                        <div className="p-2 bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 rounded-xl text-[#2C5E3B] dark:text-[#A9CBA2]">
                             <RotateCcw size={20} />
                         </div>
-                        <h4 className="text-gray-400 text-sm font-bold uppercase">Cycle Counts YTD</h4>
+                        <h4 className="text-stone-500 dark:text-stone-400 text-sm font-bold uppercase">Cycle Counts YTD</h4>
                     </div>
-                    <p className="text-3xl font-bold text-white">
+                    <p className="text-3xl font-bold text-stone-900 dark:text-stone-100">
                         {movements.filter(m => m.reason.includes('Cycle Count')).length}
                     </p>
-                    <p className="text-xs text-gray-400 mt-1">Items counted this year</p>
+                    <p className="text-xs text-stone-500 dark:text-stone-400 mt-1">Items counted this year</p>
                 </div>
             </div>
 
             {/* COUNT History Section */}
-            <div className="border-t border-white/10 mt-10 pt-8 pb-10">
+            <div className="border-t border-[#E2DCCE]/30 dark:border-[#A9CBA2]/[0.04] mt-10 pt-8 pb-10">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
                     <div>
-                        <h4 className="text-sm font-bold text-white flex items-center gap-2 uppercase tracking-wide">
-                            <HistoryIcon size={18} className="text-gray-400" />
+                        <h4 className="text-sm font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2 uppercase tracking-wide">
+                            <HistoryIcon size={18} className="text-stone-500 dark:text-stone-400" />
                             Count History
                         </h4>
-                        <p className="text-gray-500 text-[10px]">Recent variance and cycle count adjustments</p>
+                        <p className="text-stone-500 dark:text-stone-400 text-[10px]">Recent variance and cycle count adjustments</p>
                     </div>
 
                     {/* History Search */}
                     <div className="relative w-full md:w-72">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={14} />
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-500" size={14} />
                         <input
                             type="text"
                             placeholder="Search history..."
                             value={countHistorySearch}
                             onChange={(e) => setCountHistorySearch(e.target.value)}
-                            className="w-full bg-black/40 border border-white/10 rounded-xl pl-9 pr-4 py-2 text-xs text-white focus:outline-none focus:border-cyber-primary/50 transition-all"
+                            className="woody-input pl-9 text-xs py-2"
                         />
                     </div>
                 </div>
@@ -126,21 +126,21 @@ export const CountHistory: React.FC<CountHistoryProps> = ({
                                             setSelectedJob(m);
                                             setIsDetailsOpen(true);
                                         }}
-                                        className="bg-white/[0.02] border border-white/5 rounded-xl p-3 hover:bg-white/[0.04] transition-all group cursor-pointer"
+                                        className="glass-panel rounded-2xl p-3 hover:bg-stone-100/50 dark:hover:bg-[#EAE5D9]/10 transition-all group cursor-pointer"
                                     >
                                         <div className="flex justify-between items-start mb-2">
-                                            <span className="text-[10px] font-mono text-cyber-primary font-bold">{m.id.slice(0, 8)}</span>
-                                            <span className={`text-[9px] px-1.5 py-0.5 rounded uppercase font-black ${m.type === 'IN' ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'}`}>
+                                            <span className="text-[10px] font-mono text-[#2C5E3B] dark:text-[#A9CBA2] font-bold">{m.id.slice(0, 8)}</span>
+                                            <span className={`text-[9px] px-1.5 py-0.5 rounded uppercase font-black ${m.type === 'IN' ? 'bg-[#2C5E3B]/10 text-[#2C5E3B] dark:bg-[#A9CBA2]/10 dark:text-[#A9CBA2]' : 'bg-red-500/10 text-red-600 dark:text-red-400'}`}>
                                                 {m.type}
                                             </span>
                                         </div>
                                         <div className="flex justify-between items-end">
                                             <div>
-                                                <p className="text-[10px] text-gray-500 truncate max-w-[100px]">{product?.name || 'Unknown Item'}</p>
-                                                <p className="text-[9px] text-gray-600 mt-0.5">{formatDateTime(m.date)}</p>
+                                                <p className="text-[10px] text-stone-500 dark:text-stone-400 truncate max-w-[100px]">{product?.name || 'Unknown Item'}</p>
+                                                <p className="text-[9px] text-stone-400 dark:text-stone-500 mt-0.5">{formatDateTime(m.date)}</p>
                                             </div>
-                                            <div className="text-right text-white font-bold text-xs">
-                                                {m.quantity} <span className="text-[9px] text-gray-500 font-normal">units</span>
+                                            <div className="text-right text-stone-900 dark:text-stone-100 font-bold text-xs">
+                                                {m.quantity} <span className="text-[9px] text-stone-500 dark:text-stone-400 font-normal">units</span>
                                             </div>
                                         </div>
                                     </div>
@@ -157,8 +157,8 @@ export const CountHistory: React.FC<CountHistoryProps> = ({
                         />
                     </>
                 ) : (
-                    <div className="text-center py-10 bg-white/[0.01] rounded-2xl border border-dashed border-white/5">
-                        <p className="text-gray-500 text-xs">No matching history found</p>
+                    <div className="text-center py-10 bg-stone-50/10 dark:bg-[#1C2620]/10 rounded-2xl border border-dashed border-[#E2DCCE]/30 dark:border-[#A9CBA2]/[0.04]">
+                        <p className="text-stone-500 dark:text-stone-400 text-xs">No matching history found</p>
                     </div>
                 )}
             </div>

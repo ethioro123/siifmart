@@ -43,17 +43,22 @@ export const ItemPreviewCard: React.FC<ItemPreviewCardProps> = ({
     };
 
     return (
-        <div className="bg-gray-50 dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-lg p-3 h-auto flex flex-col gap-3 shadow-sm dark:shadow-none">
+        <div className="glass-panel p-3 h-auto flex flex-col gap-3 shadow-sm dark:shadow-none">
             {/* Header */}
             <div className="flex justify-between items-start gap-2 border-b border-gray-100 dark:border-white/5 pb-2">
                 <div>
                     <h3 className="text-sm font-black text-gray-900 dark:text-white leading-tight">
-                        {brand && <span className="text-blue-600 dark:text-cyber-primary">{brand} </span>}
+                        {brand && <span className="text-[#2C5E3B] dark:text-[#A9CBA2] font-black">{brand} </span>}
                         {name || "Item Name"}
                     </h3>
                     <p className="text-[10px] text-gray-500 dark:text-gray-500 mt-0.5 font-mono font-bold uppercase">
                         {customAttributes?.identity?.variant ? `${customAttributes.identity.variant} • ` : ''}
-                        {size ? `${size}${unit}` : "Size"} • {category || "Category"}
+                        {(() => {
+                            const physicalWeight = customAttributes?.physical?.netWeight || size;
+                            const physicalType = customAttributes?.physical?.sizeType || customAttributes?.physical?.unit || 
+                                                 (unit && !['UNIT', 'PACK', 'DOZEN'].includes(unit.toUpperCase().trim()) ? unit : '');
+                            return physicalWeight ? `${physicalWeight}${physicalType}` : "Size";
+                        })()} • {category || "Category"}
                         {customAttributes?.identity?.subcategory ? ` • ${customAttributes.identity.subcategory}` : ''}
                     </p>
                 </div>
@@ -103,10 +108,10 @@ export const ItemPreviewCard: React.FC<ItemPreviewCardProps> = ({
             </div>
 
             {/* Generated Description Preview */}
-            <div className="bg-white dark:bg-white/5 rounded px-2 py-2 mt-1 border border-gray-100 dark:border-white/5 shadow-inner">
+            <div className="glass-panel-pushed px-2 py-2 mt-1 shadow-inner">
                 <div className="flex items-center gap-1.5 mb-1.5">
-                    <Info size={12} className="text-blue-600 dark:text-cyber-primary" />
-                    <span className="text-[10px] text-blue-600 dark:text-cyber-primary uppercase font-black tracking-widest leading-none">System Description</span>
+                    <Info size={12} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
+                    <span className="text-[10px] text-[#2C5E3B] dark:text-[#A9CBA2] uppercase font-black tracking-widest leading-none">System Description</span>
                 </div>
                 <p className="text-[11px] text-gray-900 dark:text-gray-300 font-mono leading-relaxed font-bold">
                     {[
@@ -114,9 +119,12 @@ export const ItemPreviewCard: React.FC<ItemPreviewCardProps> = ({
                         name,
                         customAttributes?.identity?.variant,
                         // Weight/Size Logic
-                        (customAttributes?.physical?.netWeight)
-                            ? `${customAttributes.physical.netWeight}${customAttributes?.physical?.sizeType || unit || ''}`
-                            : (size && unit ? `${size}${unit}` : ''),
+                        (() => {
+                            const physicalWeight = customAttributes?.physical?.netWeight || size;
+                            const physicalType = customAttributes?.physical?.sizeType || customAttributes?.physical?.unit || 
+                                                 (unit && !['UNIT', 'PACK', 'DOZEN'].includes(unit.toUpperCase().trim()) ? unit : '');
+                            return physicalWeight ? `${physicalWeight}${physicalType}` : '';
+                        })(),
                     ].filter(Boolean).join(' ') + (
                             // Packaging Logic - Explicit "Pack of X" format
                             (customAttributes?.packaging?.packQty && parseInt(customAttributes.packaging.packQty) > 1)

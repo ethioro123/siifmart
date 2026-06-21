@@ -18,27 +18,25 @@
 }
 
 :root {
-  /* Default Dark (Cyberpunk) */
-  --bg-app: #050505;
-  --bg-panel: #111111;
-  --bg-card: #1a1a1a;
-  --color-primary: #00ff9d;
-  --color-accent: #00cc7d;
+  /* Default Dark (Woody Forest) */
+  --bg-app: #18201B;
+  --bg-panel: #1E2822;
+  --bg-card: #232E27;
+  --color-primary: #A9CBA2;
+  --color-accent: #2C5E3B;
   --text-base: #e5e5e5;
-  --border-color: rgba(255, 255, 255, 0.1);
+  --border-color: rgba(169, 203, 162, 0.1);
 }
 
 [data-theme="light"] {
-  /* Corporate Light */
-  --bg-app: #f3f4f6;
+  /* Warm Birch / Woody Light */
+  --bg-app: #F7F3ED;
   --bg-panel: #ffffff;
   --bg-card: #ffffff;
-  --color-primary: #059669;
-  /* Emerald 600 */
-  --color-accent: #10b981;
-  /* Emerald 500 */
+  --color-primary: #2C5E3B;
+  --color-accent: #4D6E56;
   --text-base: #111827;
-  --border-color: #e5e7eb;
+  --border-color: #E2DCCE;
 }
 
 html,
@@ -328,36 +326,54 @@ input {
 
 /* 
    .glass-panel: 
-   - Light Mode: White background, subtle shadow, light gray border
-   - Dark Mode: Dark transparent background (bg-black/40), white/10 border
+   - Premium organic glass card — soft, rounded, no hard edges
 */
 .glass-panel {
-  @apply bg-white dark:bg-black/40 border border-gray-200 dark:border-white/10 shadow-sm dark:shadow-none backdrop-blur-xl transition-all;
+  @apply bg-white/80 dark:bg-[#1C2620]/60 border border-[#E2DCCE]/60 dark:border-[#A9CBA2]/[0.06] rounded-3xl shadow-[0_8px_40px_-8px_rgba(34,50,38,0.06)] dark:shadow-[0_12px_48px_-8px_rgba(5,8,6,0.4)] backdrop-blur-xl transition-all duration-500;
 }
 
 /* 
    .glass-panel-pushed:
-   - For darker/inset panels inside a main panel
+   - Inset panels — barely there, like a dip in the surface
 */
 .glass-panel-pushed {
-  @apply bg-gray-50 dark:bg-black/20 border border-gray-100 dark:border-white/5;
+  @apply bg-stone-100/40 dark:bg-black/20 border border-[#E2DCCE]/30 dark:border-[#A9CBA2]/[0.04] rounded-2xl;
 }
 
 /*
    .glass-panel-hover:
-   - Adds hover effects consistent with the theme
+   - Organic hover: gentle lift + glow, not just border change
 */
 .glass-panel-hover {
-  @apply hover:border-gray-300 dark:hover:border-white/20 hover:shadow-md dark:hover:bg-white/[0.03] transition-all duration-300;
+  @apply hover:border-[#CFC6B4]/60 dark:hover:border-[#A9CBA2]/10 hover:shadow-[0_12px_48px_-6px_rgba(34,50,38,0.1)] dark:hover:shadow-[0_16px_56px_-6px_rgba(5,8,6,0.5)] hover:scale-[1.01] dark:hover:bg-white/[0.03] transition-all duration-500 cursor-pointer;
 }
 
 /*
   .text-secondary:
-  - Muted text for labels/subtitles
+  - Mmuted text for labels/subtitles
 */
 .text-secondary {
-  @apply text-gray-500 dark:text-gray-400;
+  @apply text-stone-500 dark:text-stone-400;
 }
+
+/* 
+  Woody Premium Input Fields 
+*/
+.woody-input {
+  @apply w-full bg-white/90 dark:bg-black/25 border border-[#E2DCCE] dark:border-emerald-950/20 hover:border-[#CFC6B4] dark:hover:border-emerald-900/15 rounded-2xl px-4 py-2.5 text-[#1E3F27] dark:text-[#EAE5D9] placeholder-stone-400 dark:placeholder-stone-500 text-sm focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:ring-4 focus:ring-[#2C5E3B]/10 dark:focus:ring-[#A9CBA2]/10 focus:outline-none transition-all duration-300;
+}
+
+/* 
+  Woody Premium Buttons
+*/
+.woody-btn-primary {
+  @apply bg-[#224429] dark:bg-[#EAE5D9] hover:bg-[#1B3520] dark:hover:bg-[#DFD9CA] active:scale-[0.98] text-[#FAF8F5] dark:text-[#1E3B24] font-semibold px-4 py-2.5 rounded-2xl transition-all duration-300 shadow-sm hover:shadow-md dark:shadow-none disabled:opacity-50 disabled:cursor-not-allowed;
+}
+
+.woody-btn-secondary {
+  @apply bg-white/80 dark:bg-[#18201B]/70 border border-[#E2DCCE] dark:border-emerald-950/20 text-[#2C4D35] dark:text-[#A9CBA2] hover:text-[#1E3F27] dark:hover:text-white hover:scale-105 active:scale-95 transition-all duration-300 shadow-sm dark:shadow-none backdrop-blur-md px-4 py-2.5 rounded-2xl;
+}
+
 
 /* =========================================
    FUTURISTIC PRINT STYLES

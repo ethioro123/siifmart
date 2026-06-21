@@ -47,19 +47,19 @@ export const ReplenishHeader: React.FC<ReplenishHeaderProps> = ({
     activeSite
 }) => {
     return (
-        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 shadow-2xl relative overflow-hidden group">
-            <div className="absolute -top-24 -right-24 w-64 h-64 bg-cyber-primary/10 blur-[120px] rounded-full pointer-events-none" />
+        <div className="glass-panel p-6 shadow-2xl relative overflow-hidden group">
+            <div className="absolute -top-24 -right-24 w-64 h-64 bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 blur-[120px] rounded-full pointer-events-none" />
 
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative z-10">
                 <div className="flex items-center gap-4">
-                    <div className="p-3 bg-cyber-primary/20 rounded-2xl shadow-[0_0_15px_rgba(0,255,157,0.2)]">
-                        <RefreshCw className="text-cyber-primary animate-spin [animation-duration:3s]" size={24} />
+                    <div className="p-3 bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 rounded-2xl">
+                        <RefreshCw className="text-[#2C5E3B] dark:text-[#A9CBA2] animate-spin [animation-duration:3s]" size={24} />
                     </div>
                     <div>
-                        <h3 className="text-xl font-black text-white tracking-tight uppercase">Replenishment Matrix</h3>
-                        <p className="text-xs text-gray-400 font-bold uppercase tracking-widest flex items-center gap-2">
+                        <h3 className="text-xl font-black text-stone-900 dark:text-stone-100 tracking-tight uppercase">Replenishment Matrix</h3>
+                        <p className="text-xs text-stone-500 dark:text-stone-400 font-bold uppercase tracking-widest flex items-center gap-2">
                             Forward Pick Optimization Hub
-                            <span className="w-1 h-1 rounded-full bg-cyber-primary"></span>
+                            <span className="w-1 h-1 rounded-full bg-[#2C5E3B] dark:bg-[#A9CBA2]"></span>
                             {filteredProducts.filter(p => p.stock < (p.minStock || 10)).length} Alerts
                         </p>
                     </div>
@@ -70,9 +70,9 @@ export const ReplenishHeader: React.FC<ReplenishHeaderProps> = ({
                     <div className="relative">
                         <button
                             onClick={() => setIsReplenishFilterDropdownOpen(!isReplenishFilterDropdownOpen)}
-                            className="flex items-center gap-2 px-4 py-2 bg-black/40 backdrop-blur-md rounded-xl border border-white/10 text-[10px] font-black text-gray-400 hover:text-white transition-all whitespace-nowrap uppercase tracking-widest"
+                            className="woody-btn-secondary px-4 py-2 text-[10px] font-black tracking-widest uppercase flex items-center gap-2 whitespace-nowrap"
                         >
-                            <Filter size={14} className={replenishFilter !== 'all' ? 'text-cyber-primary' : ''} />
+                            <Filter size={14} className={replenishFilter !== 'all' ? 'text-[#2C5E3B] dark:text-[#A9CBA2]' : ''} />
                             <span>STATUS: {replenishFilter === 'all' ? 'ALL STOCK LEVELS' : replenishFilter.toUpperCase()}</span>
                             <ChevronDown size={14} className={`transition-transform duration-300 ${isReplenishFilterDropdownOpen ? 'rotate-180' : ''}`} />
                         </button>
@@ -80,7 +80,7 @@ export const ReplenishHeader: React.FC<ReplenishHeaderProps> = ({
                         {isReplenishFilterDropdownOpen && (
                             <>
                                 <div className="fixed inset-0 z-[50]" onClick={() => setIsReplenishFilterDropdownOpen(false)} />
-                                <div className="absolute top-full left-0 mt-2 w-56 bg-[#0a0a0b]/90 backdrop-blur-xl border border-white/10 rounded-2xl p-2 shadow-2xl z-[51] animate-in fade-in slide-in-from-top-2 duration-200">
+                                <div className="absolute top-full left-0 mt-2 w-56 glass-panel rounded-2xl p-2 shadow-2xl z-[51] animate-in fade-in slide-in-from-top-2 duration-200">
                                     {['all', 'critical', 'low', 'optimal'].map(filter => (
                                         <button
                                             key={filter}
@@ -89,8 +89,8 @@ export const ReplenishHeader: React.FC<ReplenishHeaderProps> = ({
                                                 setIsReplenishFilterDropdownOpen(false);
                                             }}
                                             className={`w-full text-left px-4 py-2.5 rounded-xl text-[10px] font-black transition-all flex items-center justify-between group uppercase tracking-widest ${replenishFilter === filter
-                                                ? 'bg-cyber-primary text-black'
-                                                : 'text-gray-400 hover:bg-white/5 hover:text-white'
+                                                ? 'bg-[#2C5E3B] text-white dark:bg-[#A9CBA2] dark:text-stone-900'
+                                                : 'text-stone-500 dark:text-stone-400 hover:bg-stone-100/50 dark:hover:bg-[#EAE5D9]/10 hover:text-stone-900 dark:hover:text-stone-100'
                                                 }`}
                                         >
                                             {filter === 'all' ? 'ALL ARCHIVES' : filter.toUpperCase()}
@@ -124,7 +124,7 @@ export const ReplenishHeader: React.FC<ReplenishHeaderProps> = ({
                                 setSelectedReplenishItems(new Set(lowStock.map(p => p.id)));
                                 addNotification('info', `Selected ${lowStock.length} items for optimization`);
                             }}
-                            className="px-4 py-2 bg-white/5 hover:bg-white/10 text-white text-[10px] font-black uppercase tracking-widest rounded-xl border border-white/10 transition-all active:scale-95"
+                            className="woody-btn-secondary px-4 py-2 text-[10px] font-black tracking-widest uppercase transition-all active:scale-95"
                         >
                             Select Low Stock
                         </button>
@@ -175,10 +175,7 @@ export const ReplenishHeader: React.FC<ReplenishHeaderProps> = ({
                                     setIsSubmitting(false);
                                 }
                             }}
-                            className={`px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 flex items-center gap-2 ${selectedReplenishItems.size > 0
-                                ? 'bg-cyber-primary text-black shadow-[0_0_20px_rgba(0,255,157,0.3)]'
-                                : 'bg-white/5 text-gray-500 cursor-not-allowed'
-                                }`}
+                            className={`woody-btn-primary px-6 py-2 text-[10px] font-black tracking-widest uppercase transition-all active:scale-95 flex items-center gap-2 disabled:bg-stone-100 dark:disabled:bg-stone-800 disabled:text-stone-400 dark:disabled:text-stone-500 disabled:cursor-not-allowed disabled:border-[#E2DCCE]/30 dark:disabled:border-[#A9CBA2]/[0.04]`}
                         >
                             {isSubmitting ? <Loader2 size={12} className="animate-spin" /> : <Zap size={12} />}
                             {isSubmitting ? 'Processing...' : `Execute ${selectedReplenishItems.size} Tasks`}
@@ -190,14 +187,14 @@ export const ReplenishHeader: React.FC<ReplenishHeaderProps> = ({
             {/* Search Hub */}
             <div className="mt-6 flex-1 relative group">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <Search size={14} className="text-gray-500 group-focus-within:text-cyber-primary transition-colors" />
+                    <Search size={14} className="text-stone-500 group-focus-within:text-[#2C5E3B] dark:group-focus-within:text-[#A9CBA2] transition-colors" />
                 </div>
                 <input
                     type="text"
                     placeholder="Scan Product Barcode or Search Inventory Matrix..."
                     value={replenishSearch}
                     onChange={(e) => setReplenishSearch(e.target.value)}
-                    className="w-full bg-black/40 border border-white/10 rounded-2xl pl-11 pr-4 py-3 text-white text-[11px] font-black tracking-widest uppercase focus:border-cyber-primary/50 focus:bg-black/60 outline-none transition-all placeholder:text-gray-700"
+                    className="woody-input pl-11 text-[11px]"
                 />
             </div>
         </div>

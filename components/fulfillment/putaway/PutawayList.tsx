@@ -53,8 +53,8 @@ export const PutawayList: React.FC<PutawayListProps> = ({
 
     if (sortedPutawayJobs.length === 0) {
         return (
-            <div className="col-span-full flex flex-col items-center justify-center py-20 text-center space-y-4 bg-white dark:bg-black rounded-3xl border-2 border-dashed border-gray-200 dark:border-white/10 shadow-sm transition-all">
-                <div className="p-6 md:p-8 bg-gray-50 dark:bg-white/[0.05] rounded-full border border-gray-100 dark:border-white/5 shadow-inner">
+            <div className="col-span-full flex flex-col items-center justify-center py-20 text-center space-y-4 glass-panel-pushed rounded-3xl border border-dashed border-[#E2DCCE]/60 dark:border-[#A9CBA2]/10 shadow-sm transition-all">
+                <div className="p-6 md:p-8 bg-[#FAF8F5]/30 dark:bg-white/[0.05] rounded-full border border-gray-100 dark:border-white/5 shadow-inner">
                     <Box size={48} className="text-gray-300 dark:text-gray-600" />
                 </div>
                 <div>
@@ -77,12 +77,12 @@ export const PutawayList: React.FC<PutawayListProps> = ({
                         <React.Fragment key={job.id}>
                             {/* ── MOBILE: Compact tappable row ── */}
                             <div
-                                className={`md:hidden flex items-center gap-3 bg-white dark:bg-black/40 border rounded-xl p-4 active:bg-slate-50 dark:active:bg-white/10 transition-all cursor-pointer shadow-sm ${isCritical ? 'border-red-500/50' : 'border-slate-200 dark:border-white/10'}`}
+                                className={`md:hidden flex items-center gap-3 bg-[#FAF8F5]/80 dark:bg-[#1C2620]/60 border rounded-xl p-4 active:bg-stone-50 dark:active:bg-white/5 transition-all cursor-pointer shadow-sm ${isCritical ? 'border-red-500/50' : 'border-[#E2DCCE]/60 dark:border-[#A9CBA2]/10'}`}
                                 onClick={() => onShowDetails(job)}
                             >
                                 {/* Progress circle */}
                                 <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-[10px] font-black flex-shrink-0 border transition-all ${
-                                    progress >= 100 ? 'bg-emerald-50 dark:bg-emerald-500/20 border-emerald-100 dark:border-emerald-500/30 text-emerald-600 dark:text-emerald-400' : 'bg-blue-50 dark:bg-blue-500/15 border-blue-100 dark:border-blue-500/30 text-blue-600 dark:text-blue-400'
+                                    progress >= 100 ? 'bg-emerald-50 dark:bg-emerald-500/20 border-emerald-100 dark:border-emerald-500/30 text-emerald-600 dark:text-emerald-400' : 'bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20 text-[#2C5E3B] dark:text-[#A9CBA2]'
                                 } shadow-sm`}>
                                     {Math.round(progress)}%
                                 </div>
@@ -96,36 +96,36 @@ export const PutawayList: React.FC<PutawayListProps> = ({
                                     </div>
                                     <p className="text-[10px] text-slate-500 dark:text-zinc-500 font-black uppercase tracking-widest mt-1">{job.items} Inventory Items</p>
                                 </div>
-                                <div className="p-2 bg-slate-50 dark:bg-white/5 rounded-lg border border-slate-100 dark:border-white/5">
+                                <div className="p-2 bg-stone-50 dark:bg-white/5 rounded-lg border border-[#E2DCCE]/30 dark:border-white/5">
                                     <ChevronRight size={18} className="text-slate-400 dark:text-zinc-600 flex-shrink-0" />
                                 </div>
                             </div>
 
                             {/* ── DESKTOP: Full card ── */}
-                            <div className={`hidden md:block group bg-white dark:bg-black/40 backdrop-blur-sm border-2 rounded-[2.5rem] p-6 hover:shadow-xl transition-all duration-500 relative overflow-hidden active:scale-[0.99] ${isCritical ? 'border-red-500/30 dark:border-red-500/20 shadow-red-500/5' : 'border-gray-100 dark:border-white/10 hover:border-blue-500/30 dark:hover:border-blue-400/30 shadow-blue-500/5'}`}>
+                            <div className={`hidden md:block group glass-panel hover:border-[#2C5E3B]/30 dark:hover:border-[#A9CBA2]/30 p-6 relative overflow-hidden active:scale-[0.99] ${isCritical ? 'border-red-500/30 dark:border-red-500/20' : ''}`}>
                                 {isCritical && <div className="absolute top-0 right-0 w-32 h-32 bg-red-500/5 dark:bg-red-500/10 blur-[60px] rounded-full pointer-events-none" />}
-                                <div className="absolute -bottom-16 -left-16 w-32 h-32 bg-blue-500/5 dark:bg-blue-500/10 blur-[80px] rounded-full pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
+                                <div className="absolute -bottom-16 -left-16 w-32 h-32 bg-[#2C5E3B]/5 dark:bg-[#2C5E3B]/10 blur-[80px] rounded-full pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
 
                                 <div className="flex justify-between items-start mb-8 relative z-10">
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-center gap-3 flex-wrap">
                                             <span className="text-base font-black text-gray-900 dark:text-white tracking-widest uppercase drop-shadow-sm">{formatJobId(job)}</span>
                                             {job.orderRef && (
-                                                <span className="text-[10px] text-gray-400 dark:text-gray-500 font-black border-l border-gray-200 dark:border-white/10 pl-3 uppercase tracking-widest font-mono">
+                                                <span className="text-[10px] text-gray-400 dark:text-gray-500 font-black border-l border-[#E2DCCE]/60 dark:border-white/10 pl-3 uppercase tracking-widest font-mono">
                                                     Ref: {resolveOrderRef(job.orderRef)}
                                                 </span>
                                             )}
                                         </div>
                                         <div className="flex items-center gap-2 mt-2 font-mono">
-                                            <div className="flex items-center gap-1.5 px-2.5 py-1 bg-gray-50 dark:bg-white/5 rounded-lg border border-gray-100 dark:border-white/5">
-                                                <div className="w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.4)]" />
-                                                <span className="text-[9px] text-gray-500 dark:text-gray-400 font-black uppercase tracking-widest">
+                                            <div className="flex items-center gap-1.5 px-2.5 py-1 bg-stone-50 dark:bg-white/5 rounded-lg border border-stone-100 dark:border-white/5">
+                                                <div className="w-1.5 h-1.5 rounded-full bg-[#2C5E3B] dark:bg-[#A9CBA2] shadow-[0_0_8px_rgba(44,94,59,0.4)]" />
+                                                <span className="text-[9px] text-gray-550 dark:text-gray-450 font-black uppercase tracking-widest">
                                                     {job.items} Items
                                                 </span>
                                             </div>
-                                            <div className="flex items-center gap-1.5 px-2.5 py-1 bg-gray-50 dark:bg-white/5 rounded-lg border border-gray-100 dark:border-white/5">
+                                            <div className="flex items-center gap-1.5 px-2.5 py-1 bg-stone-50 dark:bg-white/5 rounded-lg border border-stone-100 dark:border-white/5">
                                                 <MapPin size={10} className="text-gray-400 dark:text-gray-500" />
-                                                <span className="text-[9px] text-gray-500 dark:text-gray-400 font-black uppercase tracking-widest truncate max-w-[120px]">
+                                                <span className="text-[9px] text-gray-550 dark:text-gray-450 font-black uppercase tracking-widest truncate max-w-[120px]">
                                                     {(() => {
                                                         const loc = (job as any).zone || job.location;
                                                         if (!loc) return 'UNASSIGNED';
@@ -146,9 +146,9 @@ export const PutawayList: React.FC<PutawayListProps> = ({
                                         <Protected permission="ASSIGN_TASKS">
                                             <button
                                                 onClick={() => setSelectedJob(selectedJob?.id === job.id ? null : job)}
-                                                className={`w-10 h-10 rounded-xl border-2 flex items-center justify-center transition-all shadow-md ${selectedJob?.id === job.id
-                                                    ? 'bg-slate-900 dark:bg-blue-600 border-slate-900 dark:border-blue-400 text-white scale-110'
-                                                    : 'bg-white dark:bg-white/5 border-slate-100 dark:border-white/10 text-slate-400 dark:text-zinc-500 hover:text-slate-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-white/30'
+                                                className={`w-10 h-10 rounded-xl border flex items-center justify-center transition-all shadow-md ${selectedJob?.id === job.id
+                                                    ? 'bg-[#2C5E3B] dark:bg-[#EAE5D9] border-[#2C5E3B] dark:border-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24] scale-110'
+                                                    : 'bg-white/80 dark:bg-[#18201B]/70 border border-[#E2DCCE] dark:border-emerald-950/20 text-[#2C4D35] dark:text-[#A9CBA2] hover:text-[#1E3F27] dark:hover:text-white'
                                                     }`}
                                                 aria-label="Assign User"
                                             >
@@ -159,7 +159,7 @@ export const PutawayList: React.FC<PutawayListProps> = ({
                                             <button
                                                 onClick={(e) => handleDelete(e, job.id)}
                                                 disabled={isSubmitting}
-                                                className="w-10 h-10 rounded-xl border-2 bg-white dark:bg-white/5 border-slate-100 dark:border-white/10 text-rose-500 hover:text-white hover:bg-rose-500 hover:border-rose-500 transition-all flex items-center justify-center disabled:opacity-50 shadow-md"
+                                                className="w-10 h-10 rounded-xl border bg-white/80 dark:bg-[#18201B]/70 border-[#E2DCCE] dark:border-emerald-950/20 text-rose-500 hover:text-white hover:bg-rose-500 hover:border-rose-500 transition-all flex items-center justify-center disabled:opacity-50 shadow-md"
                                                 title="Delete Job"
                                             >
                                                 <Trash2 size={16} />
@@ -171,17 +171,17 @@ export const PutawayList: React.FC<PutawayListProps> = ({
                                 <div className="space-y-5 relative z-10">
                                     <div className="flex justify-between items-center px-1">
                                         <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 dark:text-gray-500">Processing Status</p>
-                                        <p className={`text-[10px] font-black uppercase tracking-[0.2em] ${progress === 100 ? 'text-emerald-600 dark:text-emerald-400' : 'text-blue-600 dark:text-blue-400'}`}>{Math.round(progress)}% COMPLETED</p>
+                                        <p className={`text-[10px] font-black uppercase tracking-[0.2em] ${progress === 100 ? 'text-emerald-600 dark:text-emerald-400' : 'text-[#2C5E3B] dark:text-[#A9CBA2]'}`}>{Math.round(progress)}% COMPLETED</p>
                                     </div>
 
-                                    <div className="w-full h-2 bg-gray-100 dark:bg-white/5 rounded-full overflow-hidden shadow-inner border border-gray-200/50 dark:border-white/5">
+                                    <div className="w-full h-2 bg-stone-100 dark:bg-white/5 rounded-full overflow-hidden shadow-inner border border-stone-200/50 dark:border-white/5">
                                         <div
-                                            className={`h-full transition-all duration-1000 ease-out relative ${progress >= 100 ? 'bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.4)]' : 'bg-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.4)]'}`}
+                                            className={`h-full transition-all duration-1000 ease-out relative ${progress >= 100 ? 'bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.4)]' : 'bg-[#2C5E3B] dark:bg-[#A9CBA2] shadow-[0_0_15px_rgba(44,94,59,0.4)]'}`}
                                             ref={(el) => { if (el) el.style.width = `${Math.round(progress)}%`; }}
                                         />
                                     </div>
 
-                                    <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-white/[0.03] rounded-2xl border border-gray-100 dark:border-white/5 shadow-inner">
+                                    <div className="flex items-center justify-between p-4 glass-panel-pushed shadow-inner">
                                         <div className="flex items-center gap-3">
                                             {job.assignedTo ? (
                                                 (() => {
@@ -191,8 +191,8 @@ export const PutawayList: React.FC<PutawayListProps> = ({
 
                                                     return (
                                                         <>
-                                                            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg border border-white/20">
-                                                                <span className="text-xs font-black text-white">{displayInitial}</span>
+                                                            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#2C5E3B] to-[#1E3B24] dark:from-[#A9CBA2] dark:to-[#FAF8F5] flex items-center justify-center shadow-lg border border-white/20">
+                                                                <span className="text-xs font-black text-white dark:text-[#1E3B24]">{displayInitial}</span>
                                                             </div>
                                                             <div>
                                                                 <p className="text-[8px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-0.5">Assigned To</p>
@@ -203,12 +203,12 @@ export const PutawayList: React.FC<PutawayListProps> = ({
                                                 })()
                                             ) : (
                                                 <div className="flex items-center gap-3">
-                                                    <div className="w-9 h-9 rounded-xl bg-gray-200 dark:bg-white/5 flex items-center justify-center border border-gray-300 dark:border-white/10">
+                                                    <div className="w-9 h-9 rounded-xl bg-stone-200 dark:bg-white/5 flex items-center justify-center border border-stone-300 dark:border-white/10">
                                                         <User size={18} className="text-gray-400 dark:text-gray-600" />
                                                     </div>
                                                     <div>
                                                         <p className="text-[8px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-0.5">Assigned To</p>
-                                                        <p className="text-[10px] font-black text-gray-300 dark:text-gray-800 uppercase italic">Unassigned</p>
+                                                        <p className="text-[10px] font-black text-stone-400 dark:text-gray-800 uppercase italic">Unassigned</p>
                                                     </div>
                                                 </div>
                                             )}
@@ -216,7 +216,7 @@ export const PutawayList: React.FC<PutawayListProps> = ({
                                         <div className="flex flex-col items-end">
                                             <p className="text-[8px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-0.5">Registered</p>
                                             <div className="flex items-center gap-1.5 text-gray-900 dark:text-white">
-                                                <Clock size={12} className="text-blue-500 dark:text-blue-400" />
+                                                <Clock size={12} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
                                                 <span className="text-[10px] font-black font-mono">
                                                     {(() => {
                                                         const date = new Date(job.createdAt || '');
@@ -236,7 +236,7 @@ export const PutawayList: React.FC<PutawayListProps> = ({
                                     <button
                                         onClick={() => onShowDetails(job)}
                                         disabled={isSubmitting}
-                                        className="w-full h-14 bg-slate-900 dark:bg-white text-white dark:text-black hover:bg-slate-800 dark:hover:bg-gray-100 font-black rounded-2xl text-[10px] transition-all flex items-center justify-center gap-3 uppercase tracking-[0.25em] shadow-xl dark:shadow-white/5 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed group border border-slate-800 dark:border-white/10"
+                                        className="woody-btn-primary w-full h-14 text-[10px] uppercase tracking-[0.25em] flex items-center justify-center gap-3 active:scale-[0.98] group"
                                     >
                                         {isSubmitting ? (
                                             <Loader2 size={20} className="animate-spin" />
@@ -254,7 +254,7 @@ export const PutawayList: React.FC<PutawayListProps> = ({
                 })}
             </div>
 
-            <div className="col-span-full pt-8 border-t border-slate-100 dark:border-white/5">
+            <div className="col-span-full pt-8 border-t border-[#E2DCCE]/60 dark:border-white/5">
                 <Pagination
                     currentPage={putawayCurrentPage}
                     totalPages={putawayTotalPages}
@@ -266,6 +266,5 @@ export const PutawayList: React.FC<PutawayListProps> = ({
                 />
             </div>
         </>
-
     );
 };

@@ -115,30 +115,30 @@ export default function Customers() {
                </h2>
                <p className="text-gray-400 text-sm">Manage loyalty, view history, and track customer tiers.</p>
             </div>
-            <Protected permission="ADD_CUSTOMER">
-               <button
-                  onClick={() => { setNewCustomer({}); setIsAddModalOpen(true); }}
-                  className="bg-cyber-primary text-black px-4 py-2 rounded-lg font-bold text-sm hover:bg-cyber-accent transition-colors flex items-center shadow-[0_0_15px_rgba(0,255,157,0.2)]"
-               >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Customer
-               </button>
-            </Protected>
+             <Protected permission="ADD_CUSTOMER">
+                <button
+                   onClick={() => { setNewCustomer({}); setIsAddModalOpen(true); }}
+                   className="woody-btn-primary flex items-center"
+                >
+                   <Plus className="w-4 h-4 mr-2" />
+                   Add Customer
+                </button>
+             </Protected>
          </div>
 
          {/* Search Bar */}
-         <div className="bg-cyber-gray border border-white/5 rounded-2xl p-4">
-            <div className="flex items-center bg-black/30 border border-white/10 rounded-xl px-4 py-2 focus-within:border-cyber-primary/50 transition-colors">
-               <Search className="w-4 h-4 text-gray-400" />
-               <input
-                  type="text"
-                  placeholder="Search by name, email, or phone..."
-                  className="bg-transparent border-none ml-3 flex-1 text-white text-sm outline-none placeholder-gray-500"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-               />
-            </div>
-         </div>
+          <div className="glass-panel p-4">
+             <div className="flex items-center bg-white/90 dark:bg-black/25 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-2xl px-4 py-2 focus-within:border-[#2C5E3B] dark:focus-within:border-[#A9CBA2] transition-colors">
+                <Search className="w-4 h-4 text-gray-400" />
+                <input
+                   type="text"
+                   placeholder="Search by name, email, or phone..."
+                   className="bg-transparent border-none ml-3 flex-1 text-[#1E3F27] dark:text-[#EAE5D9] text-sm outline-none placeholder-stone-400 dark:placeholder-stone-500"
+                   value={searchTerm}
+                   onChange={(e) => setSearchTerm(e.target.value)}
+                />
+             </div>
+          </div>
 
          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Customer List */}
@@ -147,7 +147,7 @@ export default function Customers() {
                   <div
                      key={customer.id}
                      onClick={() => setSelectedCustomer(customer)}
-                     className={`bg-cyber-gray border rounded-2xl p-5 cursor-pointer transition-all hover:border-cyber-primary/30 group ${selectedCustomer?.id === customer.id ? 'border-cyber-primary bg-cyber-primary/5' : 'border-white/5'}`}
+                     className={`glass-panel p-5 cursor-pointer transition-all group ${selectedCustomer?.id === customer.id ? 'border-[#2C5E3B] dark:border-[#A9CBA2] bg-[#2C5E3B]/5 dark:bg-[#A9CBA2]/5 shadow-sm' : ''}`}
                   >
                      <div className="flex justify-between items-start mb-4">
                         <div className="flex items-center gap-3">
@@ -187,7 +187,7 @@ export default function Customers() {
             </div>
 
             {/* Detail Panel */}
-            <div className="bg-cyber-gray border border-white/5 rounded-2xl p-6 h-fit sticky top-6">
+             <div className="glass-panel p-6 h-fit sticky top-6">
                {selectedCustomer ? (
                   <div className="space-y-6 animate-in fade-in">
                      <div className="text-center">
@@ -252,20 +252,20 @@ export default function Customers() {
             <div className="space-y-4">
                <div className="grid grid-cols-2 gap-4">
                   <div>
-                     <label htmlFor="c-name" className="text-xs text-gray-400 uppercase font-bold mb-1 block">Full Name</label>
+                     <label htmlFor="c-name" className="text-xs text-[#2C4D35] dark:text-[#A9CBA2] uppercase font-bold mb-1 block">Full Name</label>
                      <input
                         id="c-name"
-                        className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white outline-none focus:border-cyber-primary"
+                        className="woody-input"
                         value={newCustomer.name || ''}
                         onChange={e => setNewCustomer({ ...newCustomer, name: e.target.value })}
                         disabled={isSubmitting}
                      />
                   </div>
                   <div>
-                     <label htmlFor="c-phone" className="text-xs text-gray-400 uppercase font-bold mb-1 block">Phone Number</label>
+                     <label htmlFor="c-phone" className="text-xs text-[#2C4D35] dark:text-[#A9CBA2] uppercase font-bold mb-1 block">Phone Number</label>
                      <input
                         id="c-phone"
-                        className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white outline-none focus:border-cyber-primary"
+                        className="woody-input"
                         value={newCustomer.phone || ''}
                         onChange={e => setNewCustomer({ ...newCustomer, phone: e.target.value })}
                         disabled={isSubmitting}
@@ -273,10 +273,10 @@ export default function Customers() {
                   </div>
                </div>
                <div>
-                  <label htmlFor="c-email" className="text-xs text-gray-400 uppercase font-bold mb-1 block">Email Address</label>
+                  <label htmlFor="c-email" className="text-xs text-[#2C4D35] dark:text-[#A9CBA2] uppercase font-bold mb-1 block">Email Address</label>
                   <input
                      id="c-email"
-                     className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white outline-none focus:border-cyber-primary"
+                     className="woody-input"
                      value={newCustomer.email || ''}
                      onChange={e => setNewCustomer({ ...newCustomer, email: e.target.value })}
                      disabled={isSubmitting}
@@ -284,10 +284,10 @@ export default function Customers() {
                </div>
                <div className="grid grid-cols-2 gap-4">
                   <div>
-                     <label htmlFor="c-tier" className="text-xs text-gray-400 uppercase font-bold mb-1 block">Tier</label>
+                     <label htmlFor="c-tier" className="text-xs text-[#2C4D35] dark:text-[#A9CBA2] uppercase font-bold mb-1 block">Tier</label>
                      <select
                         id="c-tier"
-                        className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white outline-none"
+                        className="w-full bg-white/90 dark:bg-black/25 border border-[#E2DCCE] dark:border-emerald-950/20 hover:border-[#CFC6B4] dark:hover:border-emerald-900/15 rounded-2xl px-3 py-2 text-[#1E3F27] dark:text-[#EAE5D9] outline-none"
                         value={newCustomer.tier || 'Bronze'}
                         onChange={e => setNewCustomer({ ...newCustomer, tier: e.target.value as any })}
                         disabled={isSubmitting}
@@ -296,14 +296,14 @@ export default function Customers() {
                         <option>Silver</option>
                         <option>Gold</option>
                         <option>Platinum</option>
-                     </select>
+                      </select>
                   </div>
                   <div>
-                     <label htmlFor="c-points" className="text-xs text-gray-400 uppercase font-bold mb-1 block">Loyalty Points</label>
+                     <label htmlFor="c-points" className="text-xs text-[#2C4D35] dark:text-[#A9CBA2] uppercase font-bold mb-1 block">Loyalty Points</label>
                      <input
                         id="c-points"
                         type="number"
-                        className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white outline-none"
+                        className="woody-input animate-none"
                         value={newCustomer.loyaltyPoints || 0}
                         onChange={e => setNewCustomer({ ...newCustomer, loyaltyPoints: parseInt(e.target.value) })}
                         disabled={isSubmitting}
@@ -311,28 +311,28 @@ export default function Customers() {
                   </div>
                </div>
                <div>
-                  <label htmlFor="c-notes" className="text-xs text-gray-400 uppercase font-bold mb-1 block">Notes</label>
+                  <label htmlFor="c-notes" className="text-xs text-[#2C4D35] dark:text-[#A9CBA2] uppercase font-bold mb-1 block">Notes</label>
                   <textarea
                      id="c-notes"
-                     className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white outline-none h-24 resize-none focus:border-cyber-primary"
+                     className="w-full bg-white/90 dark:bg-black/25 border border-[#E2DCCE] dark:border-emerald-950/20 hover:border-[#CFC6B4] dark:hover:border-emerald-900/15 rounded-2xl px-3 py-2 text-[#1E3F27] dark:text-[#EAE5D9] outline-none h-24 resize-none focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:ring-4 focus:ring-[#2C5E3B]/10 dark:focus:ring-[#A9CBA2]/10 transition-all duration-300"
                      value={newCustomer.notes || ''}
                      onChange={e => setNewCustomer({ ...newCustomer, notes: e.target.value })}
                      disabled={isSubmitting}
                   />
                </div>
-               <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-white/10">
+               <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-[#E2DCCE] dark:border-emerald-950/20">
                   <button
                      type="button"
                      onClick={() => setIsAddModalOpen(false)}
                      disabled={isSubmitting}
-                     className="px-4 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-colors"
+                     className="px-4 py-2 rounded-lg text-stone-500 hover:text-[#1E3F27] dark:hover:text-white transition-colors"
                   >
                      Cancel
                   </button>
                   <button
                      onClick={handleSaveCustomer}
                      disabled={isSubmitting}
-                     className={`px-4 py-2 rounded-lg bg-cyber-primary text-black font-bold hover:bg-cyber-accent transition-colors flex items-center gap-2 ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
+                     className="woody-btn-primary flex items-center gap-2"
                   >
                      {isSubmitting ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />}
                      {isSubmitting ? (newCustomer.id ? 'Saving...' : 'Adding...') : (newCustomer.id ? 'Save Customer' : 'Add Customer')}

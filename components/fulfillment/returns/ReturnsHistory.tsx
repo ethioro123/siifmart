@@ -87,7 +87,7 @@ export const ReturnsHistory: React.FC<ReturnsHistoryProps> = ({ sales }) => {
                                         <td className="p-4 font-bold text-white">{sale.id}</td>
                                         <td className="p-4 text-gray-400">{sale.customerName || sale.customer_name || 'Walk-in Customer'}</td>
                                         <td className="p-4 text-gray-400">{sale.items?.length || 0} Products</td>
-                                        <td className="p-4 text-blue-400 font-mono font-bold">
+                                        <td className="p-4 text-[#A9CBA2] font-mono font-bold">
                                             {formatCompactNumber(sale.total, { currency: CURRENCY_SYMBOL })}
                                         </td>
                                         <td className="p-4 text-center">

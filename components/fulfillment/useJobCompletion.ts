@@ -6,7 +6,8 @@ import {
 import {
     wmsJobsService,
     purchaseOrdersService,
-    salesService
+    salesService,
+    jobAssignmentsService
 } from '../../services/supabase.service';
 import { QueryClient } from '@tanstack/react-query';
 
@@ -33,11 +34,13 @@ interface UseJobCompletionDeps {
     user: any;
     allOrders: PurchaseOrder[];
     allProducts: Product[];
+    jobAssignments: any[];
     setJobs: React.Dispatch<React.SetStateAction<WMSJob[]>>;
     setTransfers: React.Dispatch<React.SetStateAction<TransferRecord[]>>;
     setOrders: (updater: (prev: PurchaseOrder[]) => PurchaseOrder[]) => void;
     setAllOrders: (updater: (prev: PurchaseOrder[]) => PurchaseOrder[]) => void;
     setSales: (updater: (prev: SaleRecord[]) => SaleRecord[]) => void;
+    setJobAssignments: React.Dispatch<React.SetStateAction<any[]>>;
     addNotification: (type: 'alert' | 'success' | 'info', message: string) => void;
     adjustStock: (productId: string, quantity: number, type: 'IN' | 'OUT', reason: string, user: string) => void;
     queryClient: QueryClient;
@@ -47,8 +50,8 @@ interface UseJobCompletionDeps {
 
 export const useJobCompletion = (deps: UseJobCompletionDeps) => {
     const {
-        jobs, sales, employees, user, allOrders, allProducts,
-        setJobs, setTransfers, setOrders, setAllOrders, setSales,
+        jobs, sales, employees, user, allOrders, allProducts, jobAssignments,
+        setJobs, setTransfers, setOrders, setAllOrders, setSales, setJobAssignments,
         addNotification, adjustStock, queryClient
     } = deps;
 
@@ -133,6 +136,36 @@ export const useJobCompletion = (deps: UseJobCompletionDeps) => {
                 });
             }
             console.log(`💾 Database updated for job ${jobId}`);
+
+            // CLEANUP: Update assignment record to 'Completed' so it drops from active workload matrix
+            try {
+                const completedByEmployee = employees.find(e => 
+                    e.name === completedByValue || e.email === completedByValue
+                );
+                const employeeIdToMatch = completedByEmployee?.id || user?.id; // Try to resolve current worker
+                const assignment = jobAssignments.find(a => 
+                    a.jobId === jobId && ['Assigned', 'Accepted', 'In-Progress'].includes(a.status) &&
+                    (a.employeeId === employeeIdToMatch || !employeeIdToMatch) // best effort match if possible, otherwise any active
+                );
+
+                if (assignment) {
+                    await jobAssignmentsService.update(assignment.id, { 
+                        status: 'Completed',
+                        completedAt: timestamp || new Date().toISOString()
+                    });
+                    
+                    setJobAssignments(prev => prev.map(a => 
+                        a.id === assignment.id ? { 
+                            ...a, 
+                            status: 'Completed',
+                            completedAt: timestamp || new Date().toISOString()
+                        } : a
+                    ));
+                    console.log(`✅ Job assignment ${assignment.id} marked Completed`);
+                }
+            } catch (assignError) {
+                console.error(`⚠️ Failed to complete job assignment for job ${jobId}:`, assignError);
+            }
 
             stage('Local State Update');
             const completionTime = timestamp || new Date().toISOString();

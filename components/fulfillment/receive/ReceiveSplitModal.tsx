@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Trash2, Plus, History, Box, AlertCircle, Check, ScanBarcode, ArrowRight, ChevronRight } from 'lucide-react';
-import { Product, PurchaseOrder } from '../../../types';
+import { Product, PurchaseOrder, WMSJob } from '../../../types';
 import Badge from '../../shared/Badge';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useStore } from '../../../contexts/CentralStore';
@@ -33,6 +33,7 @@ interface ReceiveSplitModalProps {
     setReprintItem: (item: any) => void;
     isSubmitting: boolean;
     setIsSubmitting: (val: boolean) => void;
+    jobs: WMSJob[];
 }
 
 export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
@@ -47,7 +48,8 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
     handlePrintBatch,
     setReprintItem,
     isSubmitting,
-    setIsSubmitting
+    setIsSubmitting,
+    jobs
 }) => {
     const { user } = useStore(); // Get current user
     const [showHistory, setShowHistory] = useState(false);
@@ -77,31 +79,45 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
         }));
     };
 
+    const previouslyReceived = React.useMemo(() => {
+        if (!splitReceivingPO || !splitReceivingItem) return 0;
+        const poJobs = jobs.filter(j => j.orderRef === splitReceivingPO.id && j.type === 'PUTAWAY');
+        let count = 0;
+        poJobs.forEach(job => {
+            job.lineItems.forEach(item => {
+                if (item.productId === splitReceivingItem.productId || item.sku === splitReceivingItem.sku) {
+                    count += (item.expectedQty || 0);
+                }
+            });
+        });
+        return count;
+    }, [splitReceivingPO, splitReceivingItem, jobs]);
+
     const totalScanned = splitVariants.reduce((acc, v) => acc + (v.quantity || 0), 0);
-    const remaining = splitReceivingItem.quantity - totalScanned;
-    const progress = Math.min(100, (totalScanned / splitReceivingItem.quantity) * 100);
+    const remaining = Math.max(0, splitReceivingItem.quantity - previouslyReceived - totalScanned);
+    const progress = Math.min(100, ((previouslyReceived + totalScanned) / splitReceivingItem.quantity) * 100);
 
     return (
         <div className="fixed inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-2xl flex items-center justify-center z-[200] animate-in fade-in duration-300">
-            <div className="w-full h-full md:h-[95vh] md:w-[95vw] md:max-w-6xl md:rounded-[2rem] bg-white dark:bg-black border border-slate-200 dark:border-white/10 shadow-2xl relative overflow-hidden flex flex-col">
+            <div className="w-full h-full md:h-[95vh] md:w-[95vw] md:max-w-6xl md:rounded-[2rem] glass-panel relative overflow-hidden flex flex-col">
 
                 {/* 🌟 Background Effects — hidden on mobile */}
-                <div className="hidden md:block absolute top-0 right-0 w-[500px] h-[500px] bg-cyan-500/5 dark:bg-cyan-500/10 blur-[120px] rounded-full pointer-events-none" />
-                <div className="hidden md:block absolute bottom-0 left-0 w-[500px] h-[500px] bg-violet-500/5 dark:bg-violet-500/10 blur-[100px] rounded-full pointer-events-none" />
+                <div className="hidden md:block absolute top-0 right-0 w-[500px] h-[500px] bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/5 blur-[120px] rounded-full pointer-events-none" />
+                <div className="hidden md:block absolute bottom-0 left-0 w-[500px] h-[500px] bg-amber-600/10 dark:bg-amber-700/5 blur-[100px] rounded-full pointer-events-none" />
 
                 {/* Header (HUD Style) */}
-                <div className="p-4 md:p-8 border-b border-slate-200 dark:border-white/5 relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-3 md:gap-6 bg-slate-50 dark:bg-zinc-950/50 backdrop-blur-md">
+                <div className="p-4 md:p-8 border-b border-[#E2DCCE]/60 dark:border-[#A9CBA2]/[0.06] relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-3 md:gap-6 bg-[#FAF8F5]/30 dark:bg-[#1C2620]/30 backdrop-blur-md">
                     <div className="flex items-center gap-3 md:gap-6">
                         <div className="relative group hidden md:block">
-                            <div className="absolute -inset-1 bg-cyan-500 dark:bg-cyan-400 rounded-2xl blur opacity-0 group-hover:opacity-10 dark:group-hover:opacity-20 transition duration-1000"></div>
-                            <div className="relative p-4 bg-cyan-50 dark:bg-cyan-500 rounded-2xl border border-cyan-100 dark:border-cyan-400 shadow-md dark:shadow-cyan-500/20 group-hover:bg-cyan-100 transition-colors">
-                                <Box size={32} className="text-cyan-600 dark:text-black" />
+                            <div className="absolute -inset-1 bg-[#2C5E3B] dark:bg-[#A9CBA2] rounded-2xl blur opacity-0 group-hover:opacity-10 dark:group-hover:opacity-20 transition duration-1000"></div>
+                            <div className="relative p-4 bg-[#2C5E3B]/15 dark:bg-[#A9CBA2]/15 rounded-2xl border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20 shadow-sm transition-colors">
+                                <Box size={32} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
                             </div>
                         </div>
                         <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-2 md:gap-3 flex-wrap">
                                 <h3 className="text-lg md:text-3xl font-black text-slate-900 dark:text-white tracking-tight truncate">{splitReceivingItem.productName}</h3>
-                                <Badge variant="neutral" className="bg-slate-100 dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-600 dark:text-gray-400 font-mono text-[9px] md:text-xs">PO #{splitReceivingPO.poNumber}</Badge>
+                                <Badge variant="neutral" className="bg-[#FAF8F5]/80 dark:bg-[#1C2620]/60 border-[#E2DCCE]/60 dark:border-[#A9CBA2]/[0.06] text-stone-600 dark:text-gray-400 font-mono text-[9px] md:text-xs">PO #{splitReceivingPO.poNumber}</Badge>
                             </div>
                             <div className="hidden md:flex items-center gap-4 mt-2">
                                 <p className="text-sm font-black text-slate-500 dark:text-gray-400 font-mono tracking-wide uppercase">
@@ -125,13 +141,13 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
                 </div>
 
                 {/* 📊 Progress Dashboard */}
-                <div className="px-4 md:px-8 py-4 md:py-6 bg-white dark:bg-white/[0.02] border-b border-slate-200 dark:border-white/5 flex flex-wrap gap-4 md:gap-8 items-center relative overflow-hidden">
+                <div className="px-4 md:px-8 py-4 md:py-6 bg-white/40 dark:bg-[#1C2620]/20 border-b border-[#E2DCCE]/40 dark:border-[#A9CBA2]/[0.04] flex flex-wrap gap-4 md:gap-8 items-center relative overflow-hidden">
                     {/* Progress Bar Background */}
                     <div className="absolute bottom-0 left-0 h-1 bg-slate-100 dark:bg-gray-800 w-full">
                         <motion.div
                             initial={{ width: 0 }}
                             animate={{ width: `${progress}%` }}
-                            className={`h-full ${remaining === 0 ? 'bg-cyan-500 dark:bg-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.5)]' : 'bg-violet-500 dark:bg-violet-400 shadow-[0_0_15px_rgba(139,92,246,0.3)]'}`}
+                            className={`h-full ${remaining === 0 ? 'bg-[#2C5E3B] dark:bg-[#A9CBA2] shadow-[0_0_15px_rgba(44,94,59,0.35)] dark:shadow-[0_0_15px_rgba(169,203,162,0.35)]' : 'bg-[#2C5E3B]/70 dark:bg-[#A9CBA2]/70 shadow-[0_0_15px_rgba(44,94,59,0.2)] dark:shadow-[0_0_15px_rgba(169,203,162,0.2)]'}`}
                         />
                     </div>
 
@@ -140,26 +156,33 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
                         <span className="text-2xl md:text-4xl font-black text-slate-900 dark:text-white tabular-nums drop-shadow-sm font-mono">{splitReceivingItem.quantity}</span>
                     </div>
 
-                    <div className="h-8 md:h-10 w-px bg-slate-100 dark:bg-white/10" />
+                    <div className="h-8 md:h-10 w-px bg-[#E2DCCE]/60 dark:bg-white/10" />
 
                     <div className="flex flex-col">
                         <span className="text-[10px] uppercase tracking-[0.2em] font-black mb-1 text-slate-500 dark:text-zinc-500">
-                            Scanned
+                            Received
                         </span>
-                        <span className={`text-2xl md:text-4xl font-black tabular-nums drop-shadow-sm font-mono ${remaining === 0 ? 'text-cyan-600 dark:text-cyan-400' : 'text-slate-300 dark:text-zinc-700'}`}>
-                            {totalScanned}
-                        </span>
+                        <div className="flex items-baseline gap-1.5">
+                            <span className={`text-2xl md:text-4xl font-black tabular-nums drop-shadow-sm font-mono ${remaining === 0 ? 'text-[#2C5E3B] dark:text-[#A9CBA2]' : 'text-stone-400 dark:text-stone-600'}`}>
+                                {previouslyReceived + totalScanned}
+                            </span>
+                            {previouslyReceived > 0 && (
+                                <span className="text-[9px] font-black text-slate-400 dark:text-zinc-500 font-mono">
+                                    ({previouslyReceived} prev + {totalScanned} new)
+                                </span>
+                            )}
+                        </div>
                     </div>
 
                     <div className="flex-1" />
 
-                    <div className={`px-4 md:px-6 py-2 md:py-3 rounded-xl border backdrop-blur-md flex items-center gap-2 md:gap-3 shadow-lg transition-all ${remaining === 0 ? 'bg-cyan-50 dark:bg-cyan-500 border-cyan-200 dark:border-cyan-400 shadow-cyan-500/10 dark:shadow-cyan-500/20' : 'bg-slate-50 dark:bg-black/40 border-slate-200 dark:border-white/10'}`}>
+                    <div className={`px-4 md:px-6 py-2 md:py-3 rounded-xl border backdrop-blur-md flex items-center gap-2 md:gap-3 shadow-lg transition-all ${remaining === 0 ? 'bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 border-[#2C5E3B]/30 dark:border-[#A9CBA2]/30 text-[#2C5E3B] dark:text-[#A9CBA2]' : 'bg-[#FAF8F5]/50 dark:bg-[#1C2620]/30 border-[#E2DCCE]/60 dark:border-[#A9CBA2]/[0.06] text-stone-700 dark:text-[#EAE5D9]'}`}>
                         {remaining === 0 ? (
-                            <Check className="text-cyan-600 dark:text-black" size={16} />
+                            <Check className="text-[#2C5E3B] dark:text-[#A9CBA2]" size={16} />
                         ) : (
                             <div className="w-4 h-4 md:w-5 md:h-5 rounded-full border-2 border-slate-200 dark:border-gray-500 border-t-slate-900 dark:border-t-white animate-spin" />
                         )}
-                        <p className={`text-sm md:text-lg font-black tabular-nums font-mono ${remaining === 0 ? 'text-cyan-700 dark:text-black' : 'text-slate-700 dark:text-white'}`}>
+                        <p className={`text-sm md:text-lg font-black tabular-nums font-mono ${remaining === 0 ? 'text-[#2C5E3B] dark:text-[#A9CBA2]' : 'text-slate-700 dark:text-white'}`}>
                             {remaining === 0 ? 'Matched' : remaining > 0 ? `${remaining} Left` : `${Math.abs(remaining)} Over`}
                         </p>
                     </div>
@@ -175,9 +198,9 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     exit={{ opacity: 0, scale: 0.95 }}
-                                    className="group relative bg-white dark:bg-black border border-zinc-100 dark:border-white/5 hover:border-zinc-900 dark:hover:border-zinc-700 rounded-xl md:rounded-2xl p-4 md:p-6 transition-all duration-300 shadow-sm hover:shadow-xl"
+                                    className="group relative glass-panel-pushed hover:border-[#2C5E3B]/40 dark:hover:border-[#A9CBA2]/20 hover:bg-[#FAF8F5]/80 dark:hover:bg-[#1C2620]/40 rounded-xl md:rounded-2xl p-4 md:p-6 transition-all duration-300 shadow-sm hover:shadow-md"
                                 >
-                                    <div className="hidden md:block absolute top-0 left-0 w-1 h-full bg-cyan-500 dark:bg-cyan-400 rounded-l-2xl opacity-10 group-hover:opacity-100 transition-opacity shadow-[2px_0_10px_rgba(34,211,238,0.3)]" />
+                                    <div className="hidden md:block absolute top-0 left-0 w-1 h-full bg-[#2C5E3B] dark:bg-[#A9CBA2] rounded-l-2xl opacity-10 group-hover:opacity-100 transition-opacity shadow-[2px_0_10px_rgba(44,94,59,0.3)]" />
 
                                     <div className="flex flex-col gap-4 md:gap-8">
                                         {/* Qty & Condition */}
@@ -190,7 +213,7 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
                                                         min="0"
                                                         value={variant.quantity === 0 ? '' : variant.quantity}
                                                         onChange={(e) => setSplitVariants(prev => prev.map(v => v.id === variant.id ? { ...v, quantity: Math.max(0, parseInt(e.target.value) || 0) } : v))}
-                                                        className="w-full bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 group-hover/input:border-cyan-500/50 dark:group-hover/input:border-cyan-400/50 rounded-xl px-3 md:px-4 py-3 md:py-4 text-xl md:text-2xl font-black text-slate-900 dark:text-white tabular-nums focus:ring-4 focus:ring-cyan-500/10 outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-gray-700"
+                                                        className="woody-input text-xl md:text-2xl font-black tabular-nums py-3 md:py-4 placeholder:text-slate-400 dark:placeholder:text-gray-750"
                                                         aria-label="Quantity"
                                                         placeholder="0"
                                                     />
@@ -202,7 +225,7 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
                                                     <select
                                                         value={variant.condition || 'Good'}
                                                         onChange={(e) => setSplitVariants(prev => prev.map(v => v.id === variant.id ? { ...v, condition: e.target.value } : v))}
-                                                        className="w-full h-full bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 group-hover/select:border-slate-900 dark:group-hover/select:border-zinc-600 rounded-xl px-3 md:px-4 py-3 md:py-4 text-xs md:text-sm font-black text-slate-900 dark:text-white uppercase tracking-widest outline-none focus:ring-2 focus:ring-slate-900/20 transition-all appearance-none cursor-pointer"
+                                                        className="woody-input text-xs md:text-sm font-black uppercase tracking-widest cursor-pointer py-3.5 md:py-4.5 pr-8 appearance-none"
                                                         aria-label="Condition"
                                                     >
                                                         <option value="Good">Good Condition</option>
@@ -225,7 +248,7 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
                                                     type="date"
                                                     value={variant.expiryDate || ''}
                                                     onChange={(e) => setSplitVariants(prev => prev.map(v => v.id === variant.id ? { ...v, expiryDate: e.target.value } : v))}
-                                                    className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 focus:border-slate-900 dark:focus:border-zinc-400 rounded-lg px-3 py-3 text-sm text-slate-900 dark:text-gray-300 focus:text-slate-950 dark:focus:text-white outline-none transition-colors"
+                                                    className="woody-input py-2 text-sm"
                                                     aria-label="Expiry Date"
                                                 />
                                             </div>
@@ -235,7 +258,7 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
                                                     type="text"
                                                     value={variant.batchNumber || ''}
                                                     readOnly
-                                                    className="w-full bg-slate-100 dark:bg-black/40 border border-slate-200 dark:border-white/5 rounded-lg px-3 py-3 text-sm text-slate-400 dark:text-zinc-500 outline-none cursor-not-allowed font-mono tracking-wider"
+                                                    className="w-full bg-slate-100/40 dark:bg-black/10 border border-[#E2DCCE]/50 dark:border-emerald-950/10 rounded-lg px-3 py-2.5 text-sm text-stone-400 dark:text-stone-600 outline-none cursor-not-allowed font-mono tracking-wider"
                                                     aria-label="Batch Number"
                                                 />
                                             </div>
@@ -260,14 +283,14 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
                                                             }
                                                         }}
                                                         placeholder="Scan barcode..."
-                                                        className="w-full bg-white dark:bg-black/40 border border-zinc-300 dark:border-white/10 rounded-lg pl-10 pr-3 py-2 text-sm text-zinc-950 dark:text-white font-mono focus:ring-4 focus:ring-cyan-500/10 focus:border-cyan-500/50 outline-none transition-all"
+                                                        className="woody-input pl-10 font-mono py-2"
                                                         aria-label="New Barcode Input"
                                                     />
                                                     <ScanBarcode className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-gray-600" size={14} />
                                                 </div>
                                                 <button
                                                     onClick={() => handleAddBarcode(variant.id)}
-                                                    className="px-3 py-2 bg-slate-50 dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-zinc-800 border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white transition-all shadow-sm"
+                                                    className="woody-btn-secondary px-3 py-2 text-xs rounded-lg flex items-center justify-center"
                                                     aria-label="Add barcode"
                                                 >
                                                     <Plus size={16} />
@@ -276,7 +299,7 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
 
                                             <div className="flex flex-wrap gap-2 min-h-[32px]">
                                                 {variant.barcode && (
-                                                    <Badge variant="neutral" className="bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-400 dark:text-zinc-400 font-mono text-[10px] pl-2 pr-3 py-1">
+                                                    <Badge variant="neutral" className="bg-[#FAF8F5]/85 dark:bg-[#1C2620]/30 border-[#E2DCCE]/60 dark:border-[#A9CBA2]/[0.06] text-stone-400 dark:text-[#A9CBA2]/60 font-mono text-[10px] pl-2 pr-3 py-1">
                                                         {variant.barcode} <span className="opacity-50 ml-2 text-[8px] uppercase tracking-wider">Primary</span>
                                                     </Badge>
                                                 )}
@@ -285,7 +308,7 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
                                                         initial={{ scale: 0.8, opacity: 0 }}
                                                         animate={{ scale: 1, opacity: 1 }}
                                                         key={code}
-                                                        className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-50 dark:bg-cyan-500/10 border border-slate-200 dark:border-cyan-500/20 text-xs text-slate-900 dark:text-cyan-400 font-mono group/badge hover:bg-slate-100 dark:hover:bg-cyan-500/20 transition-colors cursor-default shadow-sm"
+                                                        className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20 text-xs text-[#2C5E3B] dark:text-[#A9CBA2] font-mono group/badge hover:bg-[#2C5E3B]/20 dark:hover:bg-[#A9CBA2]/20 transition-colors cursor-default shadow-sm"
                                                     >
                                                         {code}
                                                         <button
@@ -305,7 +328,7 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
                                             <div className="pt-2">
                                                 <button
                                                     onClick={() => setSplitVariants(prev => prev.filter(v => v.id !== variant.id))}
-                                                    className="p-3 bg-zinc-100 dark:bg-zinc-800/40 text-zinc-600 dark:text-zinc-500 hover:text-zinc-950 dark:hover:text-zinc-300 rounded-xl transition-all border border-zinc-300 dark:border-white/10 hover:border-zinc-400 dark:hover:border-zinc-600 shadow-sm"
+                                                    className="p-3 bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-500/20 rounded-xl transition-all border border-red-200 dark:border-red-500/20 shadow-sm"
                                                     title="Remove Variant"
                                                     aria-label="Remove split"
                                                 >
@@ -335,10 +358,10 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
                                     batchNumber: newBatch // Auto-generate on add
                                 }]);
                             }}
-                            className="w-full py-6 border-2 border-dashed border-zinc-300 dark:border-white/10 hover:border-zinc-950 dark:hover:border-white/30 rounded-2xl text-zinc-500 hover:text-zinc-950 dark:hover:text-white transition-all flex items-center justify-center gap-3 group hover:bg-zinc-50 dark:hover:bg-white/5"
+                            className="w-full py-6 border-2 border-dashed border-[#E2DCCE] dark:border-emerald-950/30 hover:border-[#2C5E3B] dark:hover:border-[#A9CBA2] rounded-2xl text-[#2C4D35]/60 dark:text-[#A9CBA2]/60 hover:text-[#1E3F27] dark:hover:text-white transition-all flex items-center justify-center gap-3 group hover:bg-[#FAF8F5]/40 dark:hover:bg-[#1C2620]/20"
                         >
-                            <div className="p-2 bg-zinc-100 dark:bg-white/5 rounded-full group-hover:bg-cyan-500 dark:group-hover:bg-cyan-400 group-hover:scale-110 transition-all shadow-lg group-hover:shadow-cyan-500/30">
-                                <Plus size={20} className="group-hover:text-white dark:group-hover:text-black" />
+                            <div className="p-2 bg-white/80 dark:bg-[#1C2620]/30 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-full group-hover:bg-[#2C5E3B] dark:hover:bg-[#A9CBA2] group-hover:scale-110 transition-all shadow-sm group-hover:shadow-[#2C5E3B]/30">
+                                <Plus size={20} className="group-hover:text-white dark:group-hover:text-[#1E3B24]" />
                             </div>
                             <span className="font-black uppercase tracking-[0.2em] text-[10px]">Add Another Split (Condition / Batch)</span>
                         </button>
@@ -346,10 +369,10 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
                 </div>
 
                 {/* 🦶 Footer */}
-                <div className="p-4 md:p-8 border-t border-slate-200 dark:border-white/10 relative z-10 flex gap-3 md:gap-4 bg-slate-50 dark:bg-black/40 backdrop-blur-md">
+                <div className="p-4 md:p-8 border-t border-[#E2DCCE]/50 dark:border-emerald-950/20 relative z-10 flex gap-3 md:gap-4 bg-white/20 dark:bg-[#1C2620]/20 backdrop-blur-md">
                     <button
                         onClick={() => { setIsSplitReceiving(false); setSplitReceivingItem(null); setSplitReceivingPO(null); setSplitVariants([]); }}
-                        className="px-4 md:px-8 py-3 md:py-4 bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-zinc-400 font-black uppercase tracking-widest text-[10px] rounded-xl md:rounded-2xl hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white transition-colors border border-slate-200 dark:border-white/5 shadow-sm"
+                        className="woody-btn-secondary px-4 md:px-8 py-3 md:py-4 text-[10px] uppercase tracking-widest font-black"
                     >
                         Cancel
                     </button>
@@ -360,17 +383,36 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
 
                             // Filter out variants with 0 quantity and ensure at least one is valid
                             const processedVariants = splitVariants.filter(v => (v.quantity || 0) > 0).map(v => {
-                                if (!v.batchNumber) {
+                                let updatedVariant = { ...v };
+                                const pendingBarcode = (barcodeInput[v.id] || '').trim();
+                                if (pendingBarcode) {
+                                    if (!updatedVariant.barcode) {
+                                        updatedVariant.barcode = pendingBarcode;
+                                    } else {
+                                        const current = updatedVariant.barcodes || [];
+                                        if (!current.includes(pendingBarcode)) {
+                                            updatedVariant.barcodes = [...current, pendingBarcode];
+                                        }
+                                    }
+                                }
+
+                                if (!updatedVariant.batchNumber) {
                                     const now = new Date();
                                     const dateStr = now.toISOString().split('T')[0].replace(/-/g, '');
                                     const randomStr = Math.random().toString(36).substring(2, 6).toUpperCase();
-                                    return { ...v, batchNumber: `BN-${dateStr}-${randomStr}` };
+                                    updatedVariant.batchNumber = `BN-${dateStr}-${randomStr}`;
                                 }
-                                return v;
+                                return updatedVariant;
                             });
 
                             if (processedVariants.length === 0) {
                                 alert("Please enter a quantity of at least 1 unit to receive.");
+                                return;
+                            }
+
+                            const maxToReceive = splitReceivingItem.quantity - previouslyReceived;
+                            if (totalScanned > maxToReceive) {
+                                alert(`Cannot receive ${totalScanned} units. Only ${maxToReceive} units are remaining for this PO item.`);
                                 return;
                             }
 
@@ -402,15 +444,16 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
                                 setSplitReceivingItem(null);
                                 setSplitReceivingPO(null);
                                 setSplitVariants([]);
-                            } catch (error) {
+                            } catch (error: any) {
                                 console.error('Split error:', error);
+                                alert(error.message || 'Failed to receive split: an unexpected error occurred.');
                             } finally {
                                 setIsSubmitting(false);
                             }
                         }}
                         className={`flex-1 py-3 md:py-4 font-black uppercase tracking-widest text-[10px] rounded-xl md:rounded-2xl shadow-md active:scale-[0.98] transition-all border flex items-center justify-center gap-2 md:gap-3 ${isSubmitting || totalScanned < 1
-                            ? 'bg-slate-50 dark:bg-zinc-800 text-slate-400 border-slate-200 dark:border-white/5 cursor-not-allowed opacity-60'
-                            : 'bg-cyan-500 dark:bg-cyan-500 hover:bg-cyan-600 dark:hover:bg-cyan-400 text-white dark:text-black border-cyan-400 dark:border-cyan-400/30 shadow-lg shadow-cyan-500/20'
+                            ? 'bg-slate-100/50 dark:bg-black/25 text-stone-400 border-[#E2DCCE]/40 dark:border-emerald-950/10 cursor-not-allowed opacity-50'
+                            : 'woody-btn-primary'
                             }`}
                     >
                         {isSubmitting ? (

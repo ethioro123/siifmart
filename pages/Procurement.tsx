@@ -160,17 +160,18 @@ export default function Procurement() {
     };
 
     return (
-        <div className="p-6 max-w-[1600px] mx-auto space-y-8 pb-32">
+        <div className="flex flex-col min-h-screen bg-transparent text-gray-900 dark:text-white transition-colors duration-300">
+            <div className="flex-none p-6 md:p-8 space-y-8 pb-32">
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div>
                     <div className="flex items-center gap-3 mb-2">
-                        <div className="p-3 bg-cyber-primary text-black rounded-xl shadow-[0_0_20px_rgba(0,255,157,0.2)]">
+                        <div className="p-3 bg-[#2C5E3B]/15 dark:bg-[#A9CBA2]/10 text-[#2C5E3B] dark:text-[#A9CBA2] rounded-2xl">
                             <Truck size={28} />
                         </div>
-                        <h1 className="text-3xl font-black text-white tracking-tight">Procurement</h1>
+                        <h1 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[#2C5E3B] to-amber-600 dark:from-[#A9CBA2] dark:to-[#DFD5C6] tracking-tight flex-1">Procurement</h1>
                     </div>
-                    <p className="text-gray-400 font-mono text-sm max-w-xl">
+                    <p className="text-stone-500 dark:text-stone-400 font-mono text-sm max-w-xl">
                         Manage supply chain, purchase orders, and vendor relationships.
                     </p>
                 </div>
@@ -179,7 +180,7 @@ export default function Procurement() {
                     <Protected permission="CREATE_PO">
                         <button
                             onClick={() => handleCreatePOOpen()}
-                            className="px-6 py-3 bg-cyber-primary text-black rounded-xl font-bold shadow-[0_0_20px_rgba(0,255,157,0.3)] hover:shadow-[0_0_30px_rgba(0,255,157,0.5)] transform hover:scale-[1.02] transition-all flex items-center gap-2"
+                            className="woody-btn-primary flex items-center gap-2"
                         >
                             <Plus size={20} strokeWidth={3} />
                             Create Order
@@ -189,14 +190,14 @@ export default function Procurement() {
             </div>
 
             {/* Navigation Tabs */}
-            <div className="flex gap-2 p-1.5 bg-black/60 backdrop-blur-2xl rounded-2xl w-fit border border-white/10">
+            <div className="flex gap-2 p-1.5 glass-panel-pushed rounded-full w-fit">
                 {(['overview', 'orders', 'suppliers'] as const).map(tab => (
                     <button
                         key={tab}
                         onClick={() => setActiveTab(tab)}
-                        className={`px-6 py-2.5 rounded-lg text-sm font-bold transition-all ${activeTab === tab
-                            ? 'bg-white/10 text-white shadow-lg'
-                            : 'text-gray-500 hover:text-white hover:bg-white/5'
+                        className={`px-6 py-2.5 rounded-full text-sm font-bold transition-all duration-300 ${activeTab === tab
+                            ? 'bg-[#224429] dark:bg-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24] shadow-sm'
+                            : 'text-stone-500 dark:text-[#7A9E83] hover:text-[#1E3F27] dark:hover:text-white hover:bg-stone-200/20 dark:hover:bg-white/5'
                             }`}
                     >
                         {tab.charAt(0).toUpperCase() + tab.slice(1)}
@@ -206,7 +207,7 @@ export default function Procurement() {
 
             {/* Content Area */}
             <div className="min-h-[600px]">
-                {loading && <div className="flex justify-center p-12"><RefreshCw className="animate-spin text-cyber-primary" /></div>}
+                {loading && <div className="flex justify-center p-12"><RefreshCw className="animate-spin text-[#2C5E3B] dark:text-[#A9CBA2]" /></div>}
 
                 {!loading && activeTab === 'overview' && (
                     <ProcurementDashboard
@@ -262,6 +263,7 @@ export default function Procurement() {
                     setIsCreatePOOpen(false);
                 }}
             />
+            </div>
         </div>
     );
 }

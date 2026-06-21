@@ -45,7 +45,7 @@ const getABCClass = (product: Product, totalValue: number) => {
 };
 
 export default function Inventory() {
-    const { user } = useStore();
+    const { user, theme } = useStore();
     const { products, allProducts, sites, employees, activeSite, addNotification, refreshData } = useData();
     const { createPutawayJob, barcodeApprovals } = useFulfillmentData();
 
@@ -56,6 +56,7 @@ export default function Inventory() {
     const approveRequestMutation = useApproveInventoryRequestMutation(createPutawayJob);
     const rejectRequestMutation = useRejectInventoryRequestMutation();
     const bulkCleanupMutation = useBulkCleanupRequestsMutation();
+    const saveProductMutation = useSaveProductMutation();
 
     // --- TAB STATE ---
     const isNativeApp = native.isNative();
@@ -193,12 +194,13 @@ export default function Inventory() {
             const grade = getABCClass(p, totalInventoryValueCost);
             if (grade) data[grade]++;
         });
+        const accent = theme === 'dark' ? '#A9CBA2' : '#2C5E3B';
         return [
-            { name: 'Class A (High Value)', value: data.A, color: '#00ff9d' },
+            { name: 'Class A (High Value)', value: data.A, color: accent },
             { name: 'Class B (Medium Value)', value: data.B, color: '#3b82f6' },
             { name: 'Class C (Low Value)', value: data.C, color: '#f59e0b' },
         ];
-    }, [filteredProducts, totalInventoryValueCost]);
+    }, [filteredProducts, totalInventoryValueCost, theme]);
 
 
     // --- MODAL STATE ---
@@ -327,12 +329,12 @@ export default function Inventory() {
     };
 
     return (
-        <div className="flex flex-col min-h-screen bg-gray-50 dark:bg-black/20 text-gray-900 dark:text-white transition-colors duration-300">
+        <div className="flex flex-col min-h-screen bg-transparent text-gray-900 dark:text-white transition-colors duration-300">
             {/* --- HEADER --- */}
             <div className="flex-none p-6 md:p-8 space-y-6">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
-                        <h1 className="text-3xl font-black uppercase tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-cyber-primary via-blue-500 to-purple-600 animate-gradient-x drop-shadow-sm">
+                        <h1 className="text-3xl font-black uppercase tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-[#2C5E3B] to-amber-600 dark:from-[#A9CBA2] dark:to-[#DFD5C6] drop-shadow-sm">
                             Inventory Command
                         </h1>
                         <p className="text-gray-500 dark:text-gray-400 font-medium mt-1 flex items-center gap-2 text-sm">
@@ -346,7 +348,7 @@ export default function Inventory() {
                             permission="ADD_PRODUCT"
                             onClick={handleOpenAddProduct}
                             disabled={isReadOnly}
-                            className="flex items-center gap-2 bg-cyber-primary hover:bg-cyber-primary/80 text-black font-black uppercase tracking-wider shadow-[0_0_20px_rgba(0,255,157,0.3)] hover:shadow-[0_0_30px_rgba(0,255,157,0.5)] transition-all px-4 py-2 rounded-lg"
+                            className="woody-btn-primary flex items-center gap-2"
                         >
                             <Plus size={18} />
                             Add Product
@@ -355,7 +357,7 @@ export default function Inventory() {
                             onClick={() => { setLabelsToPrint([]); setIsPrintHubOpen(true); }}
                             variant="secondary"
                             icon={<Printer size={18} />}
-                            className="bg-white dark:bg-white/5 hover:bg-gray-50 dark:hover:bg-white/10 text-gray-700 dark:text-white border border-gray-200 dark:border-white/10 font-bold"
+                            className="woody-btn-secondary flex items-center gap-2"
                         >
                             Print Hub
                         </Button>
@@ -376,15 +378,15 @@ export default function Inventory() {
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id as Tab)}
                             className={`flex items-center gap-2 px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all relative ${activeTab === tab.id
-                                ? 'bg-cyber-primary text-black shadow-[0_0_20px_rgba(0,255,157,0.3)] scale-105'
-                                : 'bg-white dark:bg-white/[0.02] text-gray-500 hover:bg-gray-50 dark:hover:bg-white/[0.05] hover:text-cyber-primary border border-transparent hover:border-cyber-primary/20'
+                                ? 'bg-[#224429] dark:bg-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24] scale-105'
+                                : 'bg-white/90 dark:bg-black/25 text-stone-500 dark:text-[#7A9E83] hover:text-[#1E3F27] dark:hover:text-white border border-[#E2DCCE] dark:border-emerald-950/20'
                                 }`}
                         >
                             <tab.icon size={14} />
                             {tab.label}
                             {tab.count !== undefined && tab.count > 0 && (
                                 <span className={`absolute -top-1 -right-1 flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[9px] font-bold border ${activeTab === tab.id
-                                    ? 'bg-black text-cyber-primary border-black'
+                                    ? (theme === 'dark' ? 'bg-black text-[#A9CBA2] border-black' : 'bg-white text-[#2C5E3B] border-white')
                                     : 'bg-red-500 text-white border-red-600'
                                     }`}>
                                     {tab.count}
@@ -439,13 +441,36 @@ export default function Inventory() {
                 <div className="max-h-[85vh] overflow-y-auto custom-scrollbar p-1">
                     <ProductForm
                         initialData={editingProduct || undefined}
-                        onSubmit={async () => {
-                            if (editingProduct && isReadOnly) addNotification('info', `Request submitted for ${editingProduct.name}`);
-                            else addNotification('success', editingProduct ? 'Product updated' : 'Product created');
-                            setIsProductModalOpen(false); fetchProducts(); refreshData();
+                        onSubmit={async (data) => {
+                            try {
+                                const isNew = !editingProduct;
+                                await saveProductMutation.mutateAsync({
+                                    product: {
+                                        ...(editingProduct || {}),
+                                        ...data,
+                                        siteId: activeSite?.id || editingProduct?.siteId || ''
+                                    },
+                                    isNew,
+                                    activeSite: activeSite as any,
+                                    user,
+                                    canApprove: !isReadOnly,
+                                    stockToAdjust: data.stock || 0
+                                });
+                                if (editingProduct && isReadOnly) {
+                                    addNotification('info', `Request submitted for ${editingProduct.name}`);
+                                } else {
+                                    addNotification('success', editingProduct ? 'Product updated' : 'Product created');
+                                }
+                                setIsProductModalOpen(false);
+                                fetchProducts();
+                                refreshData();
+                            } catch (error: any) {
+                                console.error('Failed to save product:', error);
+                                addNotification('alert', error.message || 'Failed to save product');
+                            }
                         }}
                         onCancel={() => setIsProductModalOpen(false)}
-                        isSubmitting={false}
+                        isSubmitting={saveProductMutation.isPending}
                         isReadOnly={isReadOnly}
                     />
                 </div>
@@ -459,27 +484,27 @@ export default function Inventory() {
                         </div>
                         <div>
                             <h4 className="font-bold text-gray-900 dark:text-white">{editingProduct?.name}</h4>
-                            <p className="text-xs text-gray-500 dark:text-gray-400 font-mono mt-1">{editingProduct?.sku}</p>
-                            <div className="mt-2 text-xs font-bold text-cyber-primary bg-cyber-primary/10 px-2 py-0.5 rounded inline-block">Current Stock: {editingProduct?.stock}</div>
+                            <p className="text-xs text-secondary font-mono mt-1">{editingProduct?.sku}</p>
+                            <div className="mt-2 text-xs font-bold text-[#2C5E3B] dark:text-[#A9CBA2] bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 px-2 py-0.5 rounded inline-block">Current Stock: {editingProduct?.stock}</div>
                         </div>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
-                        <button onClick={() => setAdjustType('IN')} className={`p-4 rounded-xl border flex flex-col items-center gap-2 transition-all ${adjustType === 'IN' ? 'bg-green-500/10 border-green-500 text-green-500' : 'border-gray-200 dark:border-white/10 text-gray-500'}`}>
+                        <button onClick={() => setAdjustType('IN')} className={`p-4 rounded-xl border flex flex-col items-center gap-2 transition-all ${adjustType === 'IN' ? 'bg-[#2C5E3B]/10 border-[#2C5E3B] text-[#2C5E3B] dark:bg-[#A9CBA2]/10 dark:border-[#A9CBA2] dark:text-[#A9CBA2]' : 'border-gray-200 dark:border-white/10 text-stone-500'}`}>
                             <div className="p-2 rounded-full bg-current bg-opacity-10"><Plus size={20} /></div>
                             <span className="font-bold text-sm">Stock In (+)</span>
                         </button>
-                        <button onClick={() => setAdjustType('OUT')} className={`p-4 rounded-xl border flex flex-col items-center gap-2 transition-all ${adjustType === 'OUT' ? 'bg-red-500/10 border-red-500 text-red-500' : 'border-gray-200 dark:border-white/10 text-gray-500'}`}>
+                        <button onClick={() => setAdjustType('OUT')} className={`p-4 rounded-xl border flex flex-col items-center gap-2 transition-all ${adjustType === 'OUT' ? 'bg-amber-500/10 border-amber-500 text-amber-600 dark:text-amber-400' : 'border-gray-200 dark:border-white/10 text-stone-500'}`}>
                             <div className="p-2 rounded-full bg-current bg-opacity-10"><Minus size={20} /></div>
                             <span className="font-bold text-sm">Stock Out (-)</span>
                         </button>
                     </div>
                     <div>
-                        <label className="block text-xs font-bold uppercase text-gray-500 mb-1">Quantity</label>
-                        <input type="number" value={adjustQty} onChange={(e) => setAdjustQty(e.target.value)} className="w-full bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 text-lg font-bold outline-none focus:border-cyber-primary/50" placeholder="0" min="1" autoFocus />
+                        <label className="block text-xs font-bold uppercase text-stone-500 mb-1">Quantity</label>
+                        <input type="number" value={adjustQty} onChange={(e) => setAdjustQty(e.target.value)} className="w-full bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 text-lg font-bold outline-none focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:ring-4 focus:ring-[#2C5E3B]/10 dark:focus:ring-[#A9CBA2]/10 transition-all" placeholder="0" min="1" autoFocus />
                     </div>
                     <div>
-                        <label className="block text-xs font-bold uppercase text-gray-500 mb-1">Reason</label>
-                        <select aria-label="Adjustment Reason" value={adjustReason} onChange={(e) => setAdjustReason(e.target.value)} className="w-full bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm font-medium outline-none focus:border-cyber-primary/50">
+                        <label className="block text-xs font-bold uppercase text-stone-500 mb-1">Reason</label>
+                        <select aria-label="Adjustment Reason" value={adjustReason} onChange={(e) => setAdjustReason(e.target.value)} className="w-full bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm font-medium outline-none focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:ring-4 focus:ring-[#2C5E3B]/10 dark:focus:ring-[#A9CBA2]/10 transition-all">
                             <option>Stock Correction</option><option>Damaged Goods</option><option>Received Shipment</option><option>Return</option><option>Other</option>
                         </select>
                     </div>
@@ -496,8 +521,8 @@ export default function Inventory() {
                         <AlertTriangle size={24} />
                         <div><h4 className="font-bold">Permanent Deletion</h4><p className="text-sm mt-1">This cannot be undone.</p></div>
                     </div>
-                    <p className="text-sm text-gray-400">Type <span className="text-white font-mono font-bold">DELETE</span> to confirm:</p>
-                    <input type="text" value={deleteInput} onChange={(e) => setDeleteInput(e.target.value)} className="w-full bg-black/20 border border-white/10 rounded-xl p-3 text-white font-mono focus:border-red-500/50 outline-none" placeholder="Type DELETE" />
+                    <p className="text-sm text-secondary">Type <span className="text-gray-900 dark:text-white font-mono font-bold">DELETE</span> to confirm:</p>
+                    <input type="text" value={deleteInput} onChange={(e) => setDeleteInput(e.target.value)} className="w-full bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl p-3 text-gray-900 dark:text-white font-mono focus:border-red-500/50 focus:ring-4 focus:ring-red-500/10 outline-none transition-all" placeholder="Type DELETE" />
                     <div className="flex justify-end gap-3 mt-4">
                         <Button variant="ghost" onClick={() => setIsDeleteModalOpen(false)}>Cancel</Button>
                         <Button variant="danger" disabled={deleteInput !== 'DELETE' || deleteMutation.isPending} loading={deleteMutation.isPending} onClick={confirmDeleteProduct}>Delete Product</Button>

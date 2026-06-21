@@ -13,13 +13,13 @@ interface AssignActiveMatrixProps {
 }
 
 const TYPE_STYLES: Record<string, { bg: string; text: string; border: string; dot: string }> = {
-    PICK:     { bg: 'bg-blue-100 dark:bg-blue-500/10',   text: 'text-blue-700 dark:text-blue-400',   border: 'border-blue-200 dark:border-blue-500/20',   dot: 'bg-blue-600 dark:bg-blue-400' },
-    PACK:     { bg: 'bg-green-100 dark:bg-green-500/10',  text: 'text-green-700 dark:text-green-400',  border: 'border-green-200 dark:border-green-500/20',  dot: 'bg-green-600 dark:bg-green-400' },
-    RECEIVE:  { bg: 'bg-amber-100 dark:bg-amber-500/10',  text: 'text-amber-700 dark:text-amber-400',  border: 'border-amber-200 dark:border-amber-500/20',  dot: 'bg-amber-600 dark:bg-amber-400' },
-    PUTAWAY:  { bg: 'bg-indigo-100 dark:bg-indigo-500/10', text: 'text-indigo-700 dark:text-indigo-400', border: 'border-indigo-200 dark:border-indigo-500/20', dot: 'bg-indigo-600 dark:bg-indigo-400' },
-    DISPATCH: { bg: 'bg-cyan-100 dark:bg-cyan-500/10',   text: 'text-cyan-700 dark:text-cyan-400',   border: 'border-cyan-200 dark:border-cyan-500/20',   dot: 'bg-cyan-600 dark:bg-cyan-400' },
-    DRIVER:   { bg: 'bg-cyan-100 dark:bg-cyan-500/10',   text: 'text-cyan-700 dark:text-cyan-400',   border: 'border-cyan-200 dark:border-cyan-500/20',   dot: 'bg-cyan-600 dark:bg-cyan-400' },
-    DEFAULT:  { bg: 'bg-purple-100 dark:bg-purple-500/10', text: 'text-purple-700 dark:text-purple-400', border: 'border-purple-200 dark:border-purple-500/20', dot: 'bg-purple-600 dark:bg-purple-400' },
+    PICK:     { bg: 'bg-[#2C5E3B]/10 dark:bg-[#2C5E3B]/20',   text: 'text-[#2C5E3B] dark:text-[#A9CBA2]',        border: 'border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20',   dot: 'bg-[#2C5E3B] dark:bg-[#A9CBA2]' },
+    PACK:     { bg: 'bg-green-100 dark:bg-green-500/10',        text: 'text-green-700 dark:text-green-400',          border: 'border-green-200 dark:border-green-500/20',       dot: 'bg-green-600 dark:bg-green-400' },
+    RECEIVE:  { bg: 'bg-amber-100 dark:bg-amber-500/10',        text: 'text-amber-700 dark:text-amber-400',          border: 'border-amber-200 dark:border-amber-500/20',       dot: 'bg-amber-600 dark:bg-amber-400' },
+    PUTAWAY:  { bg: 'bg-[#EAE5D9] dark:bg-[#A9CBA2]/10',       text: 'text-[#2C5E3B] dark:text-[#A9CBA2]',        border: 'border-[#E2DCCE] dark:border-[#A9CBA2]/20',       dot: 'bg-[#2C5E3B]/70 dark:bg-[#A9CBA2]/70' },
+    DISPATCH: { bg: 'bg-[#2C5E3B]/5 dark:bg-[#A9CBA2]/5',      text: 'text-[#2C5E3B]/80 dark:text-[#A9CBA2]/80',  border: 'border-[#2C5E3B]/10 dark:border-[#A9CBA2]/10',   dot: 'bg-[#2C5E3B]/60 dark:bg-[#A9CBA2]/60' },
+    DRIVER:   { bg: 'bg-[#2C5E3B]/5 dark:bg-[#A9CBA2]/5',      text: 'text-[#2C5E3B]/80 dark:text-[#A9CBA2]/80',  border: 'border-[#2C5E3B]/10 dark:border-[#A9CBA2]/10',   dot: 'bg-[#2C5E3B]/60 dark:bg-[#A9CBA2]/60' },
+    DEFAULT:  { bg: 'bg-[#FAF8F5] dark:bg-[#1C2620]/40',       text: 'text-[#2C5E3B] dark:text-[#A9CBA2]',        border: 'border-[#E2DCCE] dark:border-[#A9CBA2]/10',       dot: 'bg-[#2C5E3B]/50 dark:bg-[#A9CBA2]/50' },
 };
 
 const getTypeStyle = (type: string) => TYPE_STYLES[type] || TYPE_STYLES.DEFAULT;
@@ -45,7 +45,8 @@ export const AssignActiveMatrix: React.FC<AssignActiveMatrixProps> = ({
                 a => a.employeeId === employee.id && ['Assigned', 'Accepted', 'In-Progress'].includes(a.status)
             );
             const employeeJobs = filteredJobs.filter(j =>
-                employeeAssignments.some(a => a.jobId === j.id)
+                employeeAssignments.some(a => a.jobId === j.id) &&
+                !['Completed', 'Cancelled'].includes(j.status || '')
             );
             if (employeeJobs.length === 0) return null;
 
@@ -62,16 +63,16 @@ export const AssignActiveMatrix: React.FC<AssignActiveMatrixProps> = ({
         .filter(Boolean) as { employee: Employee; employeeJobs: WMSJob[]; jobsByType: Record<string, WMSJob[]>; totalJobs: number }[];
 
     return (
-        <div className="bg-white dark:bg-white/5 backdrop-blur-xl border border-slate-200 dark:border-white/10 rounded-3xl p-6 shadow-xl dark:shadow-2xl relative overflow-hidden group transition-colors duration-300">
-            <div className="absolute top-0 right-0 w-48 h-48 bg-green-500/5 blur-[80px] rounded-full pointer-events-none" />
+        <div className="glass-panel p-6 relative overflow-hidden group">
+            <div className="absolute top-0 right-0 w-48 h-48 bg-[#2C5E3B]/5 dark:bg-[#A9CBA2]/5 blur-[80px] rounded-full pointer-events-none" />
 
-            <h3 className="font-extrabold text-slate-900 dark:text-white mb-5 flex items-center gap-3 text-xl tracking-tight">
-                <div className="p-2 bg-green-100 dark:bg-green-500/20 rounded-xl transition-colors">
-                    <ClipboardCheck className="text-green-600 dark:text-green-400" size={24} />
+            <h3 className="font-extrabold text-stone-900 dark:text-white mb-5 flex items-center gap-3 text-xl tracking-tight">
+                <div className="p-2 bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/20 rounded-xl transition-colors">
+                    <ClipboardCheck className="text-[#2C5E3B] dark:text-[#A9CBA2]" size={24} />
                 </div>
                 Live Operations Matrix
                 {activeWorkers.length > 0 && (
-                    <span className="text-xs font-mono text-slate-400 dark:text-gray-500 ml-auto">{activeWorkers.length} active</span>
+                    <span className="text-xs font-mono text-stone-400 dark:text-stone-500 ml-auto">{activeWorkers.length} active</span>
                 )}
             </h3>
 
@@ -84,8 +85,8 @@ export const AssignActiveMatrix: React.FC<AssignActiveMatrixProps> = ({
                             key={employee.id}
                             className={`rounded-2xl border transition-all duration-300 overflow-hidden ${
                                 isExpanded
-                                    ? 'col-span-2 sm:col-span-3 md:col-span-4 lg:col-span-5 xl:col-span-6 bg-slate-50 dark:bg-white/[0.06] border-slate-300 dark:border-white/15'
-                                    : 'bg-slate-50/50 dark:bg-white/5 border-slate-100 dark:border-white/5 hover:border-slate-300 dark:hover:border-white/10 hover:bg-slate-100 dark:hover:bg-white/[0.08]'
+                                    ? 'col-span-2 sm:col-span-3 md:col-span-4 lg:col-span-5 xl:col-span-6 bg-stone-50 dark:bg-black/20 border-[#E2DCCE]/50 dark:border-[#A9CBA2]/20'
+                                    : 'bg-stone-50/50 dark:bg-[#1C2620]/30 border-[#E2DCCE]/30 dark:border-[#A9CBA2]/[0.04] hover:border-[#CFC6B4]/60 dark:hover:border-[#A9CBA2]/10 hover:bg-stone-100/50 dark:hover:bg-[#EAE5D9]/10'
                             }`}
                         >
                             {/* Compact Header — always visible */}
@@ -95,24 +96,24 @@ export const AssignActiveMatrix: React.FC<AssignActiveMatrixProps> = ({
                             >
                                 {/* Avatar */}
                                 <div className="relative flex-shrink-0">
-                                    <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-slate-100 via-slate-50 to-slate-200 dark:from-cyber-primary/20 dark:via-white/5 dark:to-white/10 border border-slate-200 dark:border-white/10 flex items-center justify-center text-sm font-black text-slate-600 dark:text-cyber-primary shadow-sm transition-colors">
+                                    <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-stone-100 via-stone-50 to-stone-200 dark:from-[#A9CBA2]/10 dark:via-black/20 dark:to-black/30 border border-[#E2DCCE]/30 dark:border-[#A9CBA2]/20 flex items-center justify-center text-sm font-black text-stone-600 dark:text-[#A9CBA2] shadow-sm transition-colors">
                                         {employee.name?.charAt(0) || '?'}
                                     </div>
-                                    <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-white dark:border-[#0d0e12]" />
+                                    <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-[#2C5E3B] dark:bg-[#A9CBA2] rounded-full border-2 border-white dark:border-[#18201B]" />
                                 </div>
 
                                 {/* Name + Role */}
                                 <div className="min-w-0 flex-1">
-                                    <p className="text-xs font-bold text-slate-900 dark:text-white truncate leading-tight transition-colors">{employee.name}</p>
-                                    <p className="text-[8px] text-slate-400 dark:text-gray-500 font-bold uppercase tracking-widest mt-0.5 transition-colors">{employee.role}</p>
+                                    <p className="text-xs font-bold text-stone-900 dark:text-white truncate leading-tight transition-colors">{employee.name}</p>
+                                    <p className="text-[8px] text-stone-400 dark:text-stone-500 font-bold uppercase tracking-widest mt-0.5 transition-colors">{employee.role}</p>
                                 </div>
 
                                 {/* Job count badge */}
                                 <div className="flex-shrink-0 flex items-center gap-1">
-                                    <span className="text-xs font-black text-cyan-700 dark:text-cyber-primary bg-cyan-100 dark:bg-cyber-primary/10 px-2 py-0.5 rounded-lg border border-cyan-200 dark:border-cyber-primary/20 transition-colors">
+                                    <span className="text-xs font-black text-[#2C5E3B] dark:text-[#A9CBA2] bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 px-2 py-0.5 rounded-lg border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20 transition-colors">
                                         {totalJobs}
                                     </span>
-                                    {isExpanded ? <ChevronUp size={12} className="text-slate-400 dark:text-gray-500" /> : <ChevronDown size={12} className="text-slate-400 dark:text-gray-500" />}
+                                    {isExpanded ? <ChevronUp size={12} className="text-stone-400 dark:text-stone-500" /> : <ChevronDown size={12} className="text-stone-400 dark:text-stone-500" />}
                                 </div>
                             </button>
 
@@ -138,7 +139,7 @@ export const AssignActiveMatrix: React.FC<AssignActiveMatrixProps> = ({
                             {isExpanded && (
                                 <div className="px-3 pb-4">
                                     {/* Type summary row */}
-                                    <div className="flex flex-wrap gap-2 mb-4 pb-3 border-b border-slate-100 dark:border-white/5 transition-colors">
+                                    <div className="flex flex-wrap gap-2 mb-4 pb-3 border-b border-[#E2DCCE]/30 dark:border-[#A9CBA2]/[0.04] transition-colors">
                                         {Object.entries(jobsByType).map(([type, jobs]) => {
                                             const style = getTypeStyle(type);
                                             return (
@@ -164,10 +165,10 @@ export const AssignActiveMatrix: React.FC<AssignActiveMatrixProps> = ({
                                             return (
                                                 <div
                                                     key={job.id}
-                                                    className={`p-2.5 bg-slate-100/50 dark:bg-black/20 rounded-xl border transition-all cursor-pointer ${
+                                                    className={`p-2.5 bg-stone-50/50 dark:bg-black/20 rounded-xl border transition-all cursor-pointer ${
                                                         isSelected
-                                                            ? 'border-cyan-500 dark:border-cyan-400/60 ring-1 ring-cyan-500/30 dark:ring-cyan-400/30 bg-cyan-50 dark:bg-cyan-500/5'
-                                                            : 'border-slate-200 dark:border-white/5 hover:border-slate-300 dark:hover:border-white/10'
+                                                            ? 'border-[#2C5E3B] dark:border-[#A9CBA2] ring-1 ring-[#2C5E3B]/30 dark:ring-[#A9CBA2]/30 bg-[#2C5E3B]/5 dark:bg-[#A9CBA2]/5'
+                                                            : 'border-[#E2DCCE]/30 dark:border-[#A9CBA2]/[0.04] hover:border-[#CFC6B4]/60 dark:hover:border-[#A9CBA2]/10'
                                                     }`}
                                                     onClick={() => setSelectedJob(isSelected ? null : job)}
                                                 >
@@ -179,7 +180,7 @@ export const AssignActiveMatrix: React.FC<AssignActiveMatrixProps> = ({
                                                             {canReassign && (
                                                                 <button
                                                                     onClick={(e) => { e.stopPropagation(); setSelectedJob(job); }}
-                                                                    className="p-1 hover:bg-cyan-100 dark:hover:bg-cyan-500/20 text-slate-400 hover:text-cyan-600 dark:hover:text-cyan-400 rounded transition-all transition-colors"
+                                                                    className="p-1 hover:bg-[#2C5E3B]/10 dark:hover:bg-[#A9CBA2]/20 text-stone-400 hover:text-[#2C5E3B] dark:hover:text-[#A9CBA2] rounded transition-all transition-colors"
                                                                     title="Reassign"
                                                                 >
                                                                     <RefreshCw size={10} />
@@ -187,20 +188,20 @@ export const AssignActiveMatrix: React.FC<AssignActiveMatrixProps> = ({
                                                             )}
                                                             <button
                                                                 onClick={(e) => { e.stopPropagation(); unassignJob(job.id); }}
-                                                                className="p-1 hover:bg-red-100 dark:hover:bg-red-500/20 text-slate-400 hover:text-red-500 dark:hover:text-red-400 rounded transition-all transition-colors"
+                                                                className="p-1 hover:bg-red-500/10 dark:hover:bg-red-500/20 text-stone-400 hover:text-red-500 dark:hover:text-red-400 rounded transition-all transition-colors"
                                                                 title="Unassign"
                                                             >
                                                                 <X size={10} />
                                                             </button>
                                                         </div>
                                                     </div>
-                                                    <p className="text-[9px] text-slate-500 dark:text-gray-400 font-mono font-bold tracking-tighter transition-colors">{formatJobId(job)}</p>
-                                                    <p className="text-[8px] text-slate-400 dark:text-gray-500 font-bold flex items-center gap-1 mt-1 transition-colors">
-                                                        <Layers size={8} className="text-slate-300 dark:text-gray-600 transition-colors" />
+                                                    <p className="text-[9px] text-stone-550 dark:text-stone-400 font-mono font-bold tracking-tighter transition-colors">{formatJobId(job)}</p>
+                                                    <p className="text-[8px] text-stone-400 dark:text-stone-500 font-bold flex items-center gap-1 mt-1 transition-colors">
+                                                        <Layers size={8} className="text-stone-300 dark:text-stone-600 transition-colors" />
                                                         {job.items} items
                                                     </p>
                                                     {isSelected && (
-                                                        <span className="text-[7px] text-cyan-600 dark:text-cyan-400 font-black uppercase tracking-widest mt-1 block animate-pulse">Select Worker →</span>
+                                                        <span className="text-[7px] text-[#2C5E3B] dark:text-[#A9CBA2] font-black uppercase tracking-widest mt-1 block animate-pulse">Select Worker →</span>
                                                     )}
                                                 </div>
                                             );
@@ -214,7 +215,7 @@ export const AssignActiveMatrix: React.FC<AssignActiveMatrixProps> = ({
             </div>
 
             {activeWorkers.length === 0 && (
-                <div className="text-center py-8 text-slate-400 dark:text-gray-500 text-sm transition-colors">
+                <div className="text-center py-8 text-stone-450 dark:text-stone-500 text-sm transition-colors">
                     No active assignments
                 </div>
             )}

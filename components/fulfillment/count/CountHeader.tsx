@@ -17,14 +17,14 @@ export const CountHeader: React.FC<CountHeaderProps> = ({
     setCountSessionItems
 }) => {
     return (
-        <div className="bg-cyber-gray border border-white/5 rounded-2xl p-6">
+        <div className="glass-panel rounded-2xl p-6">
             <div className="flex justify-between items-center mb-6">
                 <div>
-                    <h3 className="font-bold text-white flex items-center gap-2 text-lg">
-                        <ClipboardCheck className="text-cyber-primary" size={24} />
+                    <h3 className="font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2 text-lg">
+                        <ClipboardCheck className="text-[#2C5E3B] dark:text-[#A9CBA2]" size={24} />
                         Inventory Audit & Cycle Counting
                     </h3>
-                    <p className="text-xs text-gray-400 mt-1">
+                    <p className="text-xs text-stone-500 dark:text-stone-400 mt-1">
                         {countViewMode === 'Operations'
                             ? (countSessionStatus === 'Idle' ? 'Start a new count session' : countSessionStatus === 'Active' ? 'BLIND COUNT IN PROGRESS' : 'Review & Approve Variances')
                             : 'Historical accuracy and variance reports'}
@@ -33,16 +33,16 @@ export const CountHeader: React.FC<CountHeaderProps> = ({
 
                 <div className="flex items-center gap-4">
                     {/* View Toggle */}
-                    <div className="flex bg-black/30 rounded-lg p-1 border border-white/10">
+                    <div className="flex bg-stone-50/50 dark:bg-[#1C2620]/30 rounded-xl p-1 border border-[#E2DCCE]/30 dark:border-[#A9CBA2]/[0.04]">
                         <button
                             onClick={() => setCountViewMode('Operations')}
-                            className={`px-4 py-2 rounded-md text-xs font-bold transition-all ${countViewMode === 'Operations' ? 'bg-cyber-primary text-black shadow-lg shadow-cyber-primary/20' : 'text-gray-400 hover:text-white'} `}
+                            className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${countViewMode === 'Operations' ? 'bg-[#2C5E3B] text-white dark:bg-[#A9CBA2] dark:text-stone-900 shadow-sm' : 'text-stone-500 dark:text-stone-400 hover:text-stone-950 dark:hover:text-stone-100'} `}
                         >
                             Operations
                         </button>
                         <button
                             onClick={() => setCountViewMode('Reports')}
-                            className={`px-4 py-2 rounded-md text-xs font-bold transition-all ${countViewMode === 'Reports' ? 'bg-cyber-primary text-black shadow-lg shadow-cyber-primary/20' : 'text-gray-400 hover:text-white'} `}
+                            className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${countViewMode === 'Reports' ? 'bg-[#2C5E3B] text-white dark:bg-[#A9CBA2] dark:text-stone-900 shadow-sm' : 'text-stone-500 dark:text-stone-400 hover:text-stone-950 dark:hover:text-stone-100'} `}
                         >
                             Reports
                         </button>
@@ -56,7 +56,7 @@ export const CountHeader: React.FC<CountHeaderProps> = ({
                                     setCountSessionItems([]);
                                 }
                             }}
-                            className="text-red-400 hover:text-red-300 text-xs font-bold border border-red-500/20 px-3 py-2 rounded-lg hover:bg-red-500/10"
+                            className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 text-xs font-bold border border-red-500/20 px-3 py-2 rounded-lg hover:bg-red-500/10"
                         >
                             Cancel Session
                         </button>

@@ -36,7 +36,7 @@ export const IncidentReportModal: React.FC<IncidentReportModalProps> = ({
     const issueTypes = [
         { label: 'Traffic / Delay', icon: Clock, color: 'text-amber-400', bg: 'bg-amber-500/10' },
         { label: 'Vehicle Issue', icon: Truck, color: 'text-orange-400', bg: 'bg-orange-500/10' },
-        { label: 'Customer Not Found', icon: Navigation, color: 'text-blue-400', bg: 'bg-blue-500/10' },
+        { label: 'Customer Not Found', icon: Navigation, color: 'text-[#A9CBA2]', bg: 'bg-[#2C5E3B]/10' },
         { label: 'Security / Access', icon: ShieldAlert, color: 'text-red-400', bg: 'bg-red-500/10' },
         { label: 'Package Damage', icon: AlertTriangle, color: 'text-red-500', bg: 'bg-red-600/10' },
         { label: 'Other', icon: MessageSquare, color: 'text-gray-400', bg: 'bg-white/5' }

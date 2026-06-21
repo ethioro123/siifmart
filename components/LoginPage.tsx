@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
-import { Lock, Mail, Sun, Moon, AlertCircle, Loader, Eye, EyeOff, UserPlus, ArrowLeft, CheckCircle } from 'lucide-react';
+import { Lock, Mail, Sun, Moon, AlertCircle, Loader, Eye, EyeOff, ArrowLeft, CheckCircle, LayoutDashboard } from 'lucide-react';
 import { useStore } from '../contexts/CentralStore';
 import { authService } from '../services/auth.service';
-import { supabase } from '../lib/supabase';
-import Logo from './Logo';
 
 type Mode = 'login' | 'forgot';
 
@@ -16,7 +14,6 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,76 +46,105 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-cyber-black flex items-center justify-center p-4 relative overflow-hidden">
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#333_1px,transparent_1px),linear-gradient(to_bottom,#333_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none opacity-20" />
+    <div className="min-h-screen w-full flex items-center justify-center p-4 relative overflow-hidden bg-gradient-to-br from-[#FAF8F5] via-[#F4F0E6] to-[#FAF8F5] dark:from-[#0B0F0D] dark:via-[#131915] dark:to-[#0B0F0D] transition-colors duration-500">
+      
+      {/* Premium Decorative Ambient Glows (Forest Woody Greens & Soft Amber) */}
+      <div className="absolute top-[-10%] left-[10%] w-[45vw] h-[45vw] rounded-full bg-[#2C5E3B]/10 dark:bg-[#1E3F27]/5 blur-[120px] pointer-events-none animate-pulse-slow" />
+      <div className="absolute bottom-[-10%] right-[10%] w-[50vw] h-[50vw] rounded-full bg-amber-600/10 dark:bg-amber-700/3 blur-[140px] pointer-events-none animate-pulse-slow" />
 
-      <button onClick={toggleTheme} className="absolute top-6 right-6 p-3 rounded-full bg-cyber-gray border border-white/10 text-gray-400 hover:text-cyber-primary hover:border-cyber-primary transition-all z-20">
-        {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+      {/* Grid Pattern with high transparency for clean organic texture */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(44,94,59,0.02)_1px,transparent_1px),linear-gradient(to_bottom,rgba(44,94,59,0.02)_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,rgba(169,203,162,0.012)_1px,transparent_1px),linear-gradient(to_bottom,rgba(169,203,162,0.012)_1px,transparent_1px)] bg-[size:32px_32px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] pointer-events-none" />
+
+      {/* Premium Theme Switcher */}
+      <button 
+        onClick={toggleTheme} 
+        aria-label="Toggle Theme"
+        className="absolute top-6 right-6 p-3 rounded-2xl bg-white/80 dark:bg-[#18201B]/70 border border-[#E2DCCE] dark:border-emerald-950/20 text-[#2C4D35] dark:text-[#A9CBA2] hover:text-[#1E3F27] dark:hover:text-white hover:scale-105 active:scale-95 transition-all shadow-[0_2px_12px_rgba(44,94,59,0.03)] dark:shadow-none backdrop-blur-md z-20 cursor-pointer"
+      >
+        {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
       </button>
 
-      <div className="max-w-md w-full bg-cyber-dark border border-white/10 rounded-2xl p-8 relative z-10 shadow-[0_0_50px_rgba(0,255,157,0.1)]">
-        <div className="flex flex-col items-center justify-center mb-10">
-          <div className="mb-6 transform hover:scale-105 transition-transform duration-500">
-            <Logo size={64} className="drop-shadow-[0_0_15px_rgba(0,255,157,0.2)]" />
+      {/* Login Card */}
+      <div className="max-w-[440px] w-full bg-white/85 dark:bg-[#18201B]/60 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-[32px] p-8 sm:p-10 relative z-10 shadow-[0_24px_80px_-12px_rgba(34,50,38,0.06)] dark:shadow-[0_32px_96px_-12px_rgba(5,8,6,0.65)] backdrop-blur-2xl transition-all duration-300">
+        
+        {/* Header Branding section */}
+        <div className="flex flex-col items-center justify-center mb-8">
+          <div className="relative group mb-4 select-none">
+            {/* Elegant logo back-glow */}
+            <div className="absolute inset-0 bg-gradient-to-tr from-[#2C5E3B] via-[#4A855A] to-amber-600 rounded-2xl blur-lg opacity-40 group-hover:opacity-60 transition-opacity duration-500" />
+            <div className="relative w-16 h-16 rounded-2xl bg-gradient-to-tr from-[#1E3F27] via-[#2C5E3B] to-amber-700 flex items-center justify-center shadow-[0_8px_20px_rgba(44,94,59,0.25)] transform group-hover:scale-105 group-hover:rotate-3 transition-all duration-500">
+              <LayoutDashboard size={30} className="text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.15)]" />
+            </div>
           </div>
-          <div className="h-px w-12 bg-gradient-to-r from-transparent via-cyber-primary/30 to-transparent mb-4" />
-          <p className="text-cyber-primary tracking-[0.3em] uppercase text-[10px] font-black opacity-60">
-            {mode === 'login' ? 'System Access' : 'Security Recovery'}
+          
+          <h1 className="text-2xl font-extrabold tracking-tight text-[#1E3F27] dark:text-[#EAE5D9] flex items-center gap-1.5 select-none">
+            SIIF<span className="bg-clip-text text-transparent bg-gradient-to-r from-[#2C5E3B] to-amber-600 dark:from-[#A9CBA2] dark:to-[#DFD5C6] font-black">MART</span>
+          </h1>
+          <p className="text-[10px] text-[#4D6E56] dark:text-[#7A9E83] uppercase tracking-[0.25em] font-bold mt-2 select-none">
+            {mode === 'login' ? 'Operations Access Portal' : 'Security Recovery'}
           </p>
         </div>
 
         {error && (
-          <div className="mb-6 p-3 bg-red-500/10 border border-red-500/20 rounded-lg flex items-center gap-2 text-red-400 text-sm">
-            <AlertCircle size={16} />
-            {error}
+          <div className="mb-6 p-4 bg-red-500/10 dark:bg-red-500/5 border border-red-500/20 rounded-2xl flex items-start gap-3 text-red-600 dark:text-red-400 text-xs leading-relaxed animate-fade-in">
+            <AlertCircle size={16} className="shrink-0 mt-0.5" />
+            <span>{error}</span>
           </div>
         )}
 
         {success && (
-          <div className="mb-6 p-3 bg-green-500/10 border border-green-500/20 rounded-lg flex items-center gap-2 text-green-400 text-sm">
-            <CheckCircle size={16} />
-            {success}
+          <div className="mb-6 p-4 bg-emerald-500/10 dark:bg-emerald-500/5 border border-emerald-500/20 rounded-2xl flex items-start gap-3 text-emerald-600 dark:text-emerald-400 text-xs leading-relaxed animate-fade-in">
+            <CheckCircle size={16} className="shrink-0 mt-0.5" />
+            <span>{success}</span>
           </div>
         )}
 
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-
-
+        <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label className="block text-xs text-gray-400 uppercase font-bold mb-1">
+            <label className="block text-xs font-semibold text-[#2C4D35] dark:text-[#A9CBA2] uppercase tracking-wider mb-2 select-none">
               Email Address
             </label>
             <div className="relative">
               <input
-                type="text"
+                type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-black/30 border border-white/10 rounded-lg px-4 py-3 pl-10 text-white focus:border-cyber-primary focus:outline-none transition-colors"
+                className="w-full bg-white/90 dark:bg-black/25 border border-[#E2DCCE] dark:border-emerald-950/20 hover:border-[#CFC6B4] dark:hover:border-emerald-900/15 rounded-2xl px-4 py-3.5 pl-11 text-[#1E3F27] dark:text-[#EAE5D9] placeholder-stone-400 dark:placeholder-stone-500 focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:ring-4 focus:ring-[#2C5E3B]/10 dark:focus:ring-[#A9CBA2]/10 focus:outline-none transition-all duration-300 text-sm"
                 placeholder="name@company.com"
                 required
               />
-              <Mail className="absolute left-3 top-3.5 text-gray-500" size={16} />
+              <Mail className="absolute left-4 top-4 text-[#4D6E56] dark:text-[#7A9E83]" size={16} />
             </div>
           </div>
 
           {mode !== 'forgot' && (
             <div>
-              <label className="block text-xs text-gray-400 uppercase font-bold mb-1">Password</label>
+              <div className="flex justify-between items-center mb-2 select-none">
+                <label className="block text-xs font-semibold text-[#2C4D35] dark:text-[#A9CBA2] uppercase tracking-wider">
+                  Password
+                </label>
+                <button
+                  type="button"
+                  onClick={() => { setMode('forgot'); resetForm(); }}
+                  className="text-xs font-semibold text-[#4D6E56] dark:text-[#A9CBA2] hover:text-[#2C5E3B] dark:hover:text-[#EAE5D9] transition-colors cursor-pointer"
+                >
+                  Forgot?
+                </button>
+              </div>
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-black/30 border border-white/10 rounded-lg px-4 py-3 pl-10 pr-10 text-white focus:border-cyber-primary focus:outline-none transition-colors"
+                  className="w-full bg-white/90 dark:bg-black/25 border border-[#E2DCCE] dark:border-emerald-950/20 hover:border-[#CFC6B4] dark:hover:border-emerald-900/15 rounded-2xl px-4 py-3.5 pl-11 pr-11 text-[#1E3F27] dark:text-[#EAE5D9] placeholder-stone-400 dark:placeholder-stone-500 focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:ring-4 focus:ring-[#2C5E3B]/10 dark:focus:ring-[#A9CBA2]/10 focus:outline-none transition-all duration-300 text-sm"
                   placeholder="••••••••"
                   required
                 />
-                <Lock className="absolute left-3 top-3.5 text-gray-500" size={16} />
+                <Lock className="absolute left-4 top-4 text-[#4D6E56] dark:text-[#7A9E83]" size={16} />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-3.5 text-gray-500 hover:text-cyber-primary transition-colors"
+                  className="absolute right-4 top-4 text-[#4D6E56] dark:text-[#7A9E83] hover:text-[#2C5E3B] dark:hover:text-[#EAE5D9] transition-colors cursor-pointer"
                 >
                   {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
@@ -126,56 +152,43 @@ export default function LoginPage() {
             </div>
           )}
 
-
-
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-cyber-primary text-black font-bold py-3 rounded-xl hover:bg-cyber-primary/90 transition-all transform hover:scale-[1.02] active:scale-[0.98] mt-6 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-[#224429] dark:bg-[#EAE5D9] hover:bg-[#1B3520] dark:hover:bg-[#DFD9CA] active:scale-[0.98] text-[#FAF8F5] dark:text-[#1E3B24] font-semibold py-3.5 rounded-2xl transition-all duration-300 flex items-center justify-center gap-2 mt-8 shadow-sm hover:shadow-md dark:shadow-none disabled:opacity-50 disabled:cursor-not-allowed select-none cursor-pointer"
           >
             {loading ? (
               <>
-                <Loader className="animate-spin" size={20} />
-                <span>{mode === 'forgot' ? 'Sending...' : 'Logging in...'}</span>
+                <Loader className="animate-spin" size={18} />
+                <span>{mode === 'forgot' ? 'Sending...' : 'Authenticating...'}</span>
               </>
             ) : (
-              mode === 'login' ? 'Log In' : 'Send Reset Link'
+              <span>{mode === 'login' ? 'Sign In' : 'Send Reset Link'}</span>
             )}
           </button>
 
           {/* Mode switching links */}
-          <div className="flex flex-col gap-2 mt-4">
+          <div className="flex flex-col gap-3 mt-6 text-center select-none">
             {mode === 'login' && (
-              <>
-                <div className="text-sm text-center text-gray-400 mb-2">
-                  Need access? Contact your HR Manager.
-                </div>
-                <button
-                  type="button"
-                  onClick={() => { setMode('forgot'); resetForm(); }}
-                  className="text-sm text-gray-500 hover:text-gray-300 transition-colors"
-                >
-                  Forgot password?
-                </button>
-              </>
+              <div className="text-xs text-[#4D6E56] dark:text-[#7A9E83] leading-normal">
+                Need access? Contact your systems manager.
+              </div>
             )}
             {mode === 'forgot' && (
               <button
                 type="button"
                 onClick={() => { setMode('login'); resetForm(); }}
-                className="text-sm text-gray-400 hover:text-white transition-colors flex items-center justify-center gap-1"
+                className="text-xs font-semibold text-[#4D6E56] dark:text-[#A9CBA2] hover:text-[#224429] dark:hover:text-white transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
               >
                 <ArrowLeft size={14} />
-                Back to Login
+                Back to Sign In
               </button>
             )}
           </div>
-
         </form>
 
-
-        <div className="mt-8 text-center">
-          <p className="text-[10px] text-gray-600 font-mono">SiifMart Operations v2.5</p>
+        <div className="mt-8 pt-6 border-t border-[#E2DCCE]/40 dark:border-white/[0.04] text-center select-none">
+          <p className="text-[10px] text-[#4D6E56] dark:text-[#7A9E83] font-semibold tracking-wider uppercase">SiifMart Operations v2.5</p>
         </div>
       </div>
     </div>

@@ -68,23 +68,23 @@ interface MobileScannerToolbarProps {
 
 // --- COLOR MAP ---
 const colorMap: Record<string, { bg: string; border: string; text: string; glow: string }> = {
-    cyan: { bg: 'from-cyan-500/20 to-cyan-600/10', border: 'border-cyan-500/30', text: 'text-cyan-400', glow: 'shadow-cyan-500/20' },
-    blue: { bg: 'from-blue-500/20 to-blue-600/10', border: 'border-blue-500/30', text: 'text-blue-400', glow: 'shadow-blue-500/20' },
-    green: { bg: 'from-green-500/20 to-green-600/10', border: 'border-green-500/30', text: 'text-green-400', glow: 'shadow-green-500/20' },
-    yellow: { bg: 'from-yellow-500/20 to-yellow-600/10', border: 'border-yellow-500/30', text: 'text-yellow-400', glow: 'shadow-yellow-500/20' },
-    red: { bg: 'from-red-500/20 to-red-600/10', border: 'border-red-500/30', text: 'text-red-400', glow: 'shadow-red-500/20' },
-    purple: { bg: 'from-purple-500/20 to-purple-600/10', border: 'border-purple-500/30', text: 'text-purple-400', glow: 'shadow-purple-500/20' },
-    orange: { bg: 'from-orange-500/20 to-orange-600/10', border: 'border-orange-500/30', text: 'text-orange-400', glow: 'shadow-orange-500/20' },
+    cyan: { bg: 'from-[#2C5E3B]/20 to-[#1E3F27]/10', border: 'border-[#2C5E3B]/30', text: 'text-[#2C5E3B] dark:text-[#A9CBA2]', glow: 'shadow-[#2C5E3B]/5' },
+    blue: { bg: 'from-emerald-800/20 to-emerald-950/10', border: 'border-emerald-600/30', text: 'text-[#2C5E3B] dark:text-[#A9CBA2]', glow: 'shadow-emerald-900/5' },
+    green: { bg: 'from-emerald-700/20 to-emerald-900/10', border: 'border-emerald-500/30', text: 'text-emerald-700 dark:text-[#A9CBA2]', glow: 'shadow-emerald-800/5' },
+    yellow: { bg: 'from-amber-600/20 to-amber-800/10', border: 'border-amber-500/30', text: 'text-amber-700 dark:text-amber-400', glow: 'shadow-amber-800/5' },
+    red: { bg: 'from-red-600/20 to-red-800/10', border: 'border-red-500/30', text: 'text-red-700 dark:text-red-400', glow: 'shadow-red-850/5' },
+    purple: { bg: 'from-stone-600/20 to-stone-800/10', border: 'border-stone-500/30', text: 'text-stone-700 dark:text-stone-300', glow: 'shadow-stone-800/5' },
+    orange: { bg: 'from-orange-600/20 to-orange-850/10', border: 'border-orange-500/30', text: 'text-orange-700 dark:text-orange-400', glow: 'shadow-orange-850/5' },
 };
 
 const statColorMap: Record<string, string> = {
-    cyan: 'text-cyan-400',
-    blue: 'text-blue-400',
-    green: 'text-green-400',
-    yellow: 'text-yellow-400',
-    red: 'text-red-400',
-    purple: 'text-purple-400',
-    orange: 'text-orange-400',
+    cyan: 'text-[#2C5E3B] dark:text-[#A9CBA2]',
+    blue: 'text-[#2C5E3B] dark:text-[#A9CBA2]',
+    green: 'text-emerald-600 dark:text-[#A9CBA2]',
+    yellow: 'text-amber-600 dark:text-amber-400',
+    red: 'text-red-600 dark:text-red-400',
+    purple: 'text-stone-600 dark:text-stone-300',
+    orange: 'text-orange-600 dark:text-orange-400',
 };
 
 // --- MAIN COMPONENT ---
@@ -137,16 +137,16 @@ export default function MobileScannerToolbar({
             {/* ═══════════════════════════════════════════════ */}
             {/* ROW 1: Compact Header Bar                       */}
             {/* ═══════════════════════════════════════════════ */}
-            <div className="flex items-center justify-between bg-[#0d0d0d]/95 backdrop-blur-2xl border border-white/[0.06] rounded-2xl px-2.5 py-2 shadow-2xl overflow-hidden">
+            <div className="flex items-center justify-between glass-panel px-3 py-2 shadow-md overflow-hidden">
                 {/* Left: Icon + Name */}
                 <div className="flex items-center gap-2.5 min-w-0 flex-shrink">
-                    <div className={`w-8 h-8 min-w-[32px] rounded-xl bg-gradient-to-br ${colors.bg} ${colors.border} border flex items-center justify-center shadow-lg ${colors.glow}`}>
+                    <div className={`w-8 h-8 min-w-[32px] rounded-xl bg-gradient-to-br ${colors.bg} ${colors.border} border flex items-center justify-center shadow-sm`}>
                         {tabIcon}
                     </div>
                     <div>
-                        <p className="text-[12px] font-black text-white uppercase tracking-tight leading-none truncate">{tabName}</p>
+                        <p className="text-[12px] font-black text-stone-850 dark:text-[#EAE5D9] uppercase tracking-tight leading-none truncate">{tabName}</p>
                         {jobCount !== undefined && (
-                            <p className="text-[9px] text-gray-500 font-bold uppercase tracking-widest mt-0.5">
+                            <p className="text-[9px] text-stone-400 dark:text-stone-500 font-bold uppercase tracking-widest mt-0.5">
                                 {jobCount} {jobCount === 1 ? 'item' : 'items'}
                             </p>
                         )}
@@ -157,21 +157,21 @@ export default function MobileScannerToolbar({
                 <div className="flex items-center gap-1.5">
                     {/* Sub-view toggle (compact pill) */}
                     {subViews && subViews.length > 0 && (
-                        <div className="flex bg-white/[0.04] rounded-xl p-0.5 border border-white/[0.06]">
+                        <div className="flex bg-stone-100/50 dark:bg-black/20 rounded-xl p-0.5 border border-[#E2DCCE]/30 dark:border-[#A9CBA2]/[0.04]">
                             {subViews.map(sv => (
                                 <button
                                     key={sv.id}
                                     type="button"
                                     onClick={() => onSubViewChange?.(sv.id)}
                                     className={`px-2 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all flex items-center gap-1 whitespace-nowrap ${activeSubView === sv.id
-                                        ? `bg-gradient-to-r ${colors.bg} ${colors.text} shadow-lg ${colors.glow}`
-                                        : 'text-gray-500 active:bg-white/5'
+                                        ? `bg-[#2C5E3B] dark:bg-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24] shadow-sm`
+                                        : 'text-stone-400 dark:text-stone-500 active:bg-stone-200/50 dark:active:bg-white/5'
                                         }`}
                                 >
                                     {sv.icon}
                                     {sv.label}
                                     {sv.count !== undefined && sv.count > 0 && (
-                                        <span className={`ml-0.5 px-1.5 py-0.5 rounded-full text-[8px] font-black ${activeSubView === sv.id ? 'bg-white/20' : 'bg-white/[0.06]'
+                                        <span className={`ml-0.5 px-1.5 py-0.5 rounded-full text-[8px] font-black ${activeSubView === sv.id ? 'bg-white/20' : 'bg-stone-200/50 dark:bg-white/[0.06]'
                                             }`}>
                                             {sv.count}
                                         </span>
@@ -188,14 +188,14 @@ export default function MobileScannerToolbar({
                             onClick={() => setIsMenuOpen(!isMenuOpen)}
                             title="Toggle controls menu"
                             className={`relative w-9 h-9 rounded-xl flex items-center justify-center transition-all active:scale-90 ${isMenuOpen
-                                ? `bg-gradient-to-br ${colors.bg} ${colors.border} border ${colors.text}`
-                                : 'bg-white/[0.04] border border-white/[0.06] text-gray-400'
+                                ? `bg-[#2C5E3B] dark:bg-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24] border border-[#2C5E3B] dark:border-[#EAE5D9]`
+                                : 'bg-stone-100/40 dark:bg-black/20 border border-[#E2DCCE]/30 dark:border-[#A9CBA2]/[0.04] text-stone-400 dark:text-stone-550'
                                 }`}
                         >
                             {isMenuOpen ? <X size={16} /> : <SlidersHorizontal size={16} />}
                             {/* Badge for active filters */}
                             {activeFilterCount > 0 && !isMenuOpen && (
-                                <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-cyan-500 text-[8px] font-black text-black flex items-center justify-center">
+                                <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-[#2C5E3B] dark:bg-[#A9CBA2] text-[8px] font-black text-white dark:text-black flex items-center justify-center">
                                     {activeFilterCount}
                                 </span>
                             )}
@@ -218,7 +218,7 @@ export default function MobileScannerToolbar({
                         value={searchValue}
                         onChange={(e) => onSearchChange(e.target.value)}
                         placeholder={searchPlaceholder}
-                        className={`w-full h-11 pl-10 pr-10 bg-[#0d0d0d]/95 backdrop-blur-2xl border border-white/[0.06] rounded-xl text-white font-mono text-sm focus:${colors.border} focus:outline-none focus:ring-1 focus:ring-cyan-500/20 transition-all placeholder:text-gray-600`}
+                        className="w-full h-11 pl-10 pr-10 woody-input font-mono"
                         onKeyDown={(e) => {
                             if (e.key === 'Enter') {
                                 const val = e.currentTarget.value.trim();
@@ -235,7 +235,7 @@ export default function MobileScannerToolbar({
                             type="button"
                             onClick={() => onSearchChange('')}
                             title="Clear search"
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 active:text-white transition-colors"
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 dark:text-stone-550 active:text-stone-800 dark:active:text-white transition-colors"
                         >
                             <X size={16} />
                         </button>
@@ -250,32 +250,32 @@ export default function MobileScannerToolbar({
                 <>
                     {/* Backdrop */}
                     <div
-                        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
+                        className="fixed inset-0 bg-black/40 dark:bg-black/80 backdrop-blur-sm z-40"
                         onClick={() => setIsMenuOpen(false)}
                     />
 
                     {/* Panel */}
                     <div
                         ref={menuRef}
-                        className="absolute top-full left-0 right-0 mt-2 bg-[#111111]/98 backdrop-blur-3xl border border-white/[0.08] rounded-3xl p-4 shadow-2xl z-50 animate-in fade-in slide-in-from-top-2 duration-200"
+                        className="absolute top-full left-0 right-0 mt-2 glass-panel p-4 z-50 animate-in fade-in slide-in-from-top-2 duration-200"
                     >
                         {/* Stats Row */}
                         {stats && stats.length > 0 && (
                             <div className="mb-4">
                                 <div className="flex items-center gap-2 mb-2.5">
-                                    <BarChart3 size={12} className="text-gray-500" />
-                                    <span className="text-[9px] font-black text-gray-500 uppercase tracking-[0.2em]">Quick Stats</span>
+                                    <BarChart3 size={12} className="text-stone-400 dark:text-stone-500" />
+                                    <span className="text-[9px] font-black text-stone-400 dark:text-stone-550 uppercase tracking-[0.2em]">Quick Stats</span>
                                 </div>
                                 <div className="grid grid-cols-3 gap-2">
                                     {stats.slice(0, 6).map((stat, i) => (
                                         <div
                                             key={i}
-                                            className="bg-white/[0.03] border border-white/[0.06] rounded-xl px-3 py-2 text-center"
+                                            className="bg-stone-100/30 dark:bg-white/[0.02] border border-[#E2DCCE]/30 dark:border-[#A9CBA2]/[0.04] rounded-xl px-3 py-2 text-center"
                                         >
-                                            <p className={`text-lg font-mono font-black ${statColorMap[stat.color] || 'text-white'}`}>
+                                            <p className={`text-lg font-mono font-black ${statColorMap[stat.color] || 'text-[#1E3F27] dark:text-[#EAE5D9]'}`}>
                                                 {stat.value}
                                             </p>
-                                            <p className="text-[8px] font-bold text-gray-500 uppercase tracking-widest mt-0.5">
+                                            <p className="text-[8px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-widest mt-0.5">
                                                 {stat.label}
                                             </p>
                                         </div>
@@ -287,7 +287,7 @@ export default function MobileScannerToolbar({
                         {/* Filter Chips */}
                         {filters && filters.length > 0 && (
                             <div className="mb-4">
-                                <span className="text-[9px] font-black text-gray-500 uppercase tracking-[0.2em] mb-2 block">Filter</span>
+                                <span className="text-[9px] font-black text-stone-400 dark:text-stone-550 uppercase tracking-[0.2em] mb-2 block">Filter</span>
                                 <div className="flex flex-wrap gap-1.5">
                                     {filters.map((f, i) => (
                                         <button
@@ -297,8 +297,8 @@ export default function MobileScannerToolbar({
                                                 f.onClick();
                                             }}
                                             className={`px-4 py-2 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all active:scale-95 ${f.isActive
-                                                ? `bg-gradient-to-r ${colors.bg} ${colors.text} border ${colors.border} shadow-lg`
-                                                : 'bg-white/[0.04] text-gray-400 border border-white/[0.06] active:bg-white/[0.08]'
+                                                ? `bg-[#2C5E3B] dark:bg-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24] border border-[#2C5E3B] dark:border-[#EAE5D9] shadow-sm`
+                                                : 'bg-stone-50/50 dark:bg-[#18201B]/50 text-stone-500 dark:text-stone-400 border border-[#E2DCCE]/30 dark:border-[#A9CBA2]/[0.04] active:bg-stone-100/50 dark:active:bg-[#EAE5D9]/10'
                                                 }`}
                                         >
                                             {f.label}
@@ -311,7 +311,7 @@ export default function MobileScannerToolbar({
                         {/* Sort Options */}
                         {sortOptions && sortOptions.length > 0 && (
                             <div className="mb-3">
-                                <span className="text-[9px] font-black text-gray-500 uppercase tracking-[0.2em] mb-2 block">Sort By</span>
+                                <span className="text-[9px] font-black text-stone-400 dark:text-stone-550 uppercase tracking-[0.2em] mb-2 block">Sort By</span>
                                 <div className="flex flex-wrap gap-1.5">
                                     {sortOptions.map(opt => (
                                         <button
@@ -321,8 +321,8 @@ export default function MobileScannerToolbar({
                                                 onSortChange?.(opt.id);
                                             }}
                                             className={`px-4 py-2 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all active:scale-95 flex items-center gap-1.5 ${sortValue === opt.id
-                                                ? 'bg-white/10 text-white border border-white/20'
-                                                : 'bg-white/[0.04] text-gray-400 border border-white/[0.06]'
+                                                ? 'bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 text-[#2C5E3B] dark:text-[#A9CBA2] border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20'
+                                                : 'bg-stone-50/50 dark:bg-[#18201B]/50 text-stone-500 dark:text-stone-400 border border-[#E2DCCE]/30 dark:border-[#A9CBA2]/[0.04]'
                                                 }`}
                                         >
                                             {opt.icon}
@@ -335,7 +335,7 @@ export default function MobileScannerToolbar({
 
                         {/* Extra Actions */}
                         {extraActions && (
-                            <div className="pt-3 border-t border-white/[0.06]">
+                            <div className="pt-3 border-t border-[#E2DCCE]/30 dark:border-[#A9CBA2]/[0.04]">
                                 {extraActions}
                             </div>
                         )}
@@ -344,7 +344,7 @@ export default function MobileScannerToolbar({
                         <button
                             type="button"
                             onClick={() => setIsMenuOpen(false)}
-                            className="w-full mt-3 py-2.5 rounded-xl bg-white/[0.03] border border-white/[0.06] text-gray-500 text-[10px] font-bold uppercase tracking-widest active:bg-white/[0.06] transition-all"
+                            className="w-full mt-3 woody-btn-secondary py-2 text-[10px] uppercase font-bold"
                         >
                             Done
                         </button>

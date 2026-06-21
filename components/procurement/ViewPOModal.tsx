@@ -114,20 +114,21 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
                         <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                             {po.supplierName}
                             {po.supplierId?.startsWith('MANUAL') && (
-                                <span className="ml-2 text-[10px] bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded">MANUAL</span>
+                                <span className="ml-2 text-[10px] bg-[#2C5E3B]/15 text-[#2C5E3B] dark:text-[#A9CBA2] border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20 px-1.5 py-0.5 rounded">MANUAL</span>
                             )}
                         </p>
                     </div>
                     <div className="flex flex-col items-end gap-2">
                         <div className={`px-4 py-2 rounded-full text-sm font-bold ${po.status === 'Received' ? 'bg-green-500/20 text-green-400' :
-                            po.status === 'Approved' || po.status === 'Pending' ? 'bg-blue-500/20 text-blue-400' :
-                                po.status === 'Draft' ? 'bg-yellow-500/20 text-yellow-400' :
-                                    'bg-red-500/20 text-red-400'
+                            po.status === 'Approved' ? 'bg-[#2C5E3B]/20 text-[#2C5E3B] dark:text-[#A9CBA2]' :
+                                po.status === 'Pending' ? 'bg-[#8C6239]/20 text-[#8C6239] dark:text-[#E2C899]' :
+                                    po.status === 'Draft' ? 'bg-yellow-500/20 text-yellow-400' :
+                                        'bg-red-500/20 text-red-400'
                             }`}>
                             {po.status}
                         </div>
                         <div className={`px-3 py-1 rounded-full text-[10px] font-bold border uppercase ${po.priority === 'High' || po.priority === 'Urgent' ? 'text-red-400 border-red-500/20 bg-red-500/10' :
-                            po.priority === 'Low' ? 'text-blue-400 border-blue-500/20 bg-blue-500/10' :
+                            po.priority === 'Low' ? 'text-[#8C6239] border-[#8C6239]/20 bg-[#8C6239]/10' :
                                 'text-gray-400 border-gray-500/20 bg-gray-500/10'
                             }`}>
                             Priority: {po.priority || 'Normal'}
@@ -137,24 +138,24 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
 
                 {/* Key Info - Dark Dashboard Grid */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                    <div className="bg-gray-50 dark:bg-white/5 rounded-xl p-4 border border-gray-100 dark:border-white/5 shadow-sm dark:shadow-none">
+                    <div className="glass-panel rounded-xl p-4 border border-gray-100 dark:border-white/5 shadow-sm dark:shadow-none">
                         <p className="text-[10px] text-gray-500 dark:text-secondary uppercase tracking-widest font-bold mb-1">Date</p>
                         <p className="text-gray-900 dark:text-white font-bold">{po.date || (po.created_at ? formatDateTime(po.created_at, { showTime: true }) : 'N/A')}</p>
                     </div>
-                    <div className="bg-gray-50 dark:bg-white/5 rounded-xl p-4 border border-gray-100 dark:border-white/5 shadow-sm dark:shadow-none">
+                    <div className="glass-panel rounded-xl p-4 border border-gray-100 dark:border-white/5 shadow-sm dark:shadow-none">
                         <p className="text-[10px] text-gray-500 dark:text-secondary uppercase tracking-widest font-bold mb-1">Requested By</p>
-                        <p className="text-gray-900 dark:text-white font-bold truncate">{po.requestedBy || po.createdBy || 'Unknown'}</p>
+                        <p className="text-gray-900 dark:text-white font-bold text-[clamp(11px,1.5vw,14px)] break-words leading-tight">{po.requestedBy || po.createdBy || 'Unknown'}</p>
                     </div>
-                    <div className="bg-gray-50 dark:bg-white/5 rounded-xl p-4 border border-gray-100 dark:border-white/5 shadow-sm dark:shadow-none">
+                    <div className="glass-panel rounded-xl p-4 border border-gray-100 dark:border-white/5 shadow-sm dark:shadow-none">
                         <p className="text-[10px] text-gray-500 dark:text-secondary uppercase tracking-widest font-bold mb-1">Destination</p>
                         <div className="flex items-center gap-1">
-                            <MapPin size={12} className="text-gray-400 dark:text-gray-500" />
-                            <p className="text-gray-900 dark:text-white font-bold truncate">
+                            <MapPin size={12} className="text-gray-400 dark:text-gray-500 shrink-0" />
+                            <p className="text-gray-900 dark:text-white font-bold text-[clamp(11px,1.5vw,14px)] break-words leading-tight">
                                 {sites?.find(s => s.id === po.siteId)?.name || po.destination || 'N/A'}
                             </p>
                         </div>
                     </div>
-                    <div className="bg-gray-50 dark:bg-white/5 rounded-xl p-4 border border-gray-100 dark:border-white/5 shadow-sm dark:shadow-none">
+                    <div className="glass-panel rounded-xl p-4 border border-gray-100 dark:border-white/5 shadow-sm dark:shadow-none">
                         <p className="text-[10px] text-gray-500 dark:text-secondary uppercase tracking-widest font-bold mb-1">Expected</p>
                         <p className="text-gray-900 dark:text-white font-bold">{po.expectedDelivery || 'N/A'}</p>
                     </div>
@@ -187,11 +188,11 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
                         <h3 className="text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest">
                             Order Payload
                         </h3>
-                        <span className="text-[10px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest">
+                        <span className="text-[10px] font-black text-[#8C6239] dark:text-[#E2C899] uppercase tracking-widest">
                             {po.lineItems?.reduce((sum, item) => sum + item.quantity, 0) || 0} Total Manifest Units
                         </span>
                     </div>
-                    <div className="bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-200 dark:border-white/5 overflow-hidden shadow-sm dark:shadow-none">
+                    <div className="glass-panel rounded-2xl overflow-hidden shadow-sm dark:shadow-none">
                         <table className="w-full">
                             <thead>
                                 <tr className="bg-gray-100/50 dark:bg-black/20 border-b border-gray-200 dark:border-white/5">
@@ -208,20 +209,20 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
                                 {po.lineItems?.map((item, i) => (
                                     <React.Fragment key={i}>
                                         <tr
-                                            className={`hover:bg-blue-50 dark:hover:bg-white/5 transition-colors cursor-pointer ${expandedItems[i] ? 'bg-blue-50 dark:bg-black/20' : ''}`}
+                                            className={`hover:bg-stone-100/50 dark:hover:bg-white/5 transition-colors cursor-pointer ${expandedItems[i] ? 'bg-stone-200/50 dark:bg-black/20' : ''}`}
                                             onClick={() => toggleItem(i)}
                                         >
                                             <td className="p-4 text-gray-400 dark:text-gray-500 text-[10px] font-black">{(i + 1).toString().padStart(2, '0')}</td>
                                             <td className="p-4 text-gray-600 dark:text-gray-400 text-xs font-mono font-bold">{item.sku || allProducts?.find(p => p.id === item.productId)?.sku || allProducts?.find(p => p.name === item.productName)?.sku || '—'}</td>
                                             <td className="p-4">
-                                                <div className="text-gray-900 dark:text-white font-black text-sm tracking-tight truncate max-w-xs">{formatPOItemDescription(item)}</div>
+                                                <div className="text-gray-900 dark:text-white font-black tracking-tight text-[clamp(11px,1.5vw,14px)] break-words leading-tight max-w-[400px]">{formatPOItemDescription(item)}</div>
                                                 {item.productId?.startsWith('CUSTOM') && (
                                                     <span className="inline-block mt-1 text-[10px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-1.5 py-0.5 rounded font-black tracking-widest uppercase italic">Custom Resource</span>
                                                 )}
                                             </td>
                                             <td className="p-4 text-gray-900 dark:text-white text-right font-black tabular-nums">{item.quantity}</td>
                                             <td className="p-4 text-gray-500 dark:text-gray-500 text-right font-black font-mono tabular-nums">{formatCompactNumber(item.unitCost, { currency: CURRENCY_SYMBOL })}</td>
-                                            <td className="p-4 text-blue-600 dark:text-cyber-primary text-right font-black font-mono tabular-nums">{formatCompactNumber(item.totalCost, { currency: CURRENCY_SYMBOL })}</td>
+                                            <td className="p-4 text-[#2C5E3B] dark:text-[#A9CBA2] text-right font-black font-mono tabular-nums">{formatCompactNumber(item.totalCost, { currency: CURRENCY_SYMBOL })}</td>
                                             <td className="p-4 text-gray-400 dark:text-gray-500">
                                                 {expandedItems[i] ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                                             </td>
@@ -262,38 +263,36 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
                     </div>
                 </div>
 
-                {/* Summary */}
-                <div className="flex justify-end pt-2">
-                    <div className="bg-blue-50 dark:bg-cyber-primary/10 border border-blue-200 dark:border-cyber-primary/30 rounded-2xl p-6 min-w-[300px] shadow-sm dark:shadow-none">
-                        <div className="space-y-4 text-sm font-black">
-                            <div className="flex justify-between text-gray-500 dark:text-gray-400">
-                                <span className="uppercase tracking-[0.2em] text-[9px]">Base Payload</span>
-                                <span className="font-mono text-gray-900 dark:text-white tabular-nums">{CURRENCY_SYMBOL} {(po.totalAmount - (po.taxAmount || 0)).toLocaleString()}</span>
+                {/* Minimalist Summary */}
+                <div className="flex justify-end pt-8">
+                    <div className="w-full md:w-80 space-y-6 text-sm">
+                        <div className="flex justify-between items-end border-b border-gray-100 dark:border-white/5 pb-2">
+                            <span className="uppercase tracking-widest text-[10px] font-bold text-gray-500">Base Payload</span>
+                            <span className="font-mono text-gray-900 dark:text-white font-black tabular-nums">{CURRENCY_SYMBOL} {(po.totalAmount - ((po.taxAmount || 0) + (po.shippingCost || 0))).toLocaleString()}</span>
+                        </div>
+                        {po.shippingCost && po.shippingCost > 0 ? (
+                            <div className="flex justify-between items-end border-b border-gray-100 dark:border-white/5 pb-2">
+                                <span className="uppercase tracking-widest text-[10px] font-bold text-gray-400">Logistics</span>
+                                <span className="font-mono text-gray-600 dark:text-gray-300 font-bold tabular-nums">{CURRENCY_SYMBOL} {po.shippingCost.toLocaleString()}</span>
                             </div>
-                            {po.shippingCost && po.shippingCost > 0 ? (
-                                <div className="flex justify-between text-gray-500 dark:text-gray-400">
-                                    <span className="uppercase tracking-[0.2em] text-[9px]">Logistics Filter</span>
-                                    <span className="font-mono text-gray-900 dark:text-white tabular-nums">{CURRENCY_SYMBOL} {po.shippingCost.toLocaleString()}</span>
-                                </div>
-                            ) : null}
-                            {po.taxAmount && po.taxAmount > 0 ? (
-                                <div className="flex justify-between text-gray-500 dark:text-gray-400">
-                                    <span className="uppercase tracking-[0.2em] text-[9px]">Territory Levy</span>
-                                    <span className="font-mono text-gray-900 dark:text-white tabular-nums">{CURRENCY_SYMBOL} {po.taxAmount.toLocaleString()}</span>
-                                </div>
-                            ) : null}
-                            <div className="flex justify-between pt-5 mt-2 border-t-2 border-blue-100 dark:border-cyber-primary/30 items-center">
-                                <span className="text-gray-600 dark:text-gray-400 uppercase tracking-[0.3em] text-[10px]">Total Authority</span>
-                                <span className="text-3xl font-black text-blue-600 dark:text-cyber-primary font-mono tabular-nums leading-none tracking-tighter">{CURRENCY_SYMBOL}{po.totalAmount.toLocaleString()}</span>
+                        ) : null}
+                        {po.taxAmount && po.taxAmount > 0 ? (
+                            <div className="flex justify-between items-end border-b border-gray-100 dark:border-white/5 pb-2">
+                                <span className="uppercase tracking-widest text-[10px] font-bold text-gray-400">Tax</span>
+                                <span className="font-mono text-gray-600 dark:text-gray-300 font-bold tabular-nums">{CURRENCY_SYMBOL} {po.taxAmount.toLocaleString()}</span>
                             </div>
+                        ) : null}
+                        <div className="flex justify-between items-end pt-2">
+                            <span className="uppercase tracking-widest text-xs font-black text-gray-900 dark:text-white">Total Authority</span>
+                            <span className="font-mono text-3xl font-black text-gray-900 dark:text-[#A9CBA2] tabular-nums tracking-tighter leading-none">{CURRENCY_SYMBOL} {po.totalAmount.toLocaleString()}</span>
                         </div>
                     </div>
                 </div>
 
                 {/* Notes */}
                 {po.notes && !po.notes.includes('Order received and processed') && (
-                    <div className="bg-gray-50 dark:bg-white/5 rounded-2xl p-6 border border-gray-100 dark:border-white/5">
-                        <p className="text-[10px] text-gray-500 dark:text-gray-500 uppercase tracking-widest font-black mb-3">Protocol Notes & Instructions</p>
+                    <div className="bg-gray-50 dark:bg-white/5 rounded-2xl p-6 border border-gray-100 dark:border-white/5 mt-8">
+                        <p className="text-[10px] text-gray-500 dark:text-gray-500 uppercase tracking-widest font-black mb-4">Protocol Notes & Instructions</p>
                         <p className="text-sm text-gray-700 dark:text-gray-400 whitespace-pre-wrap leading-relaxed italic">
                             {po.notes.replace(/\[APPROVED_BY:.*?\]/g, '').replace(/\[SITES:.*?\]/g, '').replace(/\[Multi-Site Order.*?\]/g, '').trim()}
                         </p>
@@ -308,7 +307,7 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
                             <button
                                 onClick={handleApprovePO}
                                 disabled={isSubmitting}
-                                className={`py-3 bg-green-500 hover:bg-green-600 text-white font-bold rounded-xl transition-colors flex items-center justify-center gap-2 ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                className={`py-3 bg-[#2C5E3B] hover:bg-[#224429] dark:bg-[#A9CBA2] dark:hover:bg-[#8dae86] text-[#FAF8F5] dark:text-[#1E3B24] font-bold rounded-xl transition-colors flex items-center justify-center gap-2 ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
                             >
                                 {isSubmitting ? <Loader2 size={18} className="animate-spin" /> : <CheckCircle size={18} />}
                                 {isSubmitting ? 'Approving...' : 'Approve'}
@@ -333,7 +332,7 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
                     )}
 
                     {(po.status === 'Approved' || po.status === 'Pending') && (
-                        <div className="py-3 px-4 bg-blue-500/10 border border-blue-500/20 rounded-xl flex items-center gap-3 text-blue-400">
+                        <div className="py-3 px-4 bg-[#8C6239]/10 border border-[#8C6239]/20 rounded-xl flex items-center gap-3 text-[#8C6239] dark:text-[#E2C899]">
                             <Package size={18} />
                             <span className="text-sm">Receive in WMS → Operations → Receiving</span>
                         </div>
@@ -360,7 +359,7 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
                                         onEdit(po);
                                         onClose();
                                     }}
-                                    className="py-3 bg-white/5 hover:bg-blue-500/10 text-gray-300 hover:text-blue-400 rounded-xl transition-colors flex items-center justify-center gap-2 font-medium border border-transparent hover:border-blue-500/20"
+                                    className="py-3 bg-white/5 hover:bg-[#2C5E3B]/10 text-gray-300 hover:text-[#2C5E3B] dark:hover:text-[#A9CBA2] rounded-xl transition-colors flex items-center justify-center gap-2 font-medium border border-transparent hover:border-[#2C5E3B]/20 dark:hover:border-[#A9CBA2]/20"
                                 >
                                     <Edit3 size={16} /> Edit
                                 </button>

@@ -62,7 +62,7 @@ export default function Employees() {
    if (!isPrivileged) {
       const self = employees.find(e => e.id === user?.id || (user?.email && e.email === user.email));
       return self ? <div className="p-6 max-w-7xl mx-auto"><StaffProfileView employee={self} isOwnProfile={true} onRequestPhotoChange={() => fileInputRef.current?.click()} /></div> : 
-      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center p-6"><Shield size={64} className="text-gray-600 mb-4" /><h2 className="text-2xl font-bold text-white mb-2">Access Restricted</h2></div>;
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center p-6"><Shield size={64} className="text-stone-400 dark:text-gray-600 mb-4" /><h2 className="text-2xl font-bold text-[#1E3F27] dark:text-[#EAE5D9] mb-2">Access Restricted</h2></div>;
    }
 
    return (
@@ -77,19 +77,22 @@ export default function Employees() {
          
          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-               <h2 className="text-2xl font-bold text-white flex items-center gap-2"><Briefcase className="text-cyber-primary" />Human Capital Management</h2>
-               <p className="text-gray-400 text-sm">Orchestrate your workforce, track performance, and manage shifts.</p>
+               <h2 className="text-2xl font-bold text-[#1E3F27] dark:text-[#EAE5D9] flex items-center gap-2.5">
+                  <Briefcase className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
+                  Human Capital Management
+               </h2>
+               <p className="text-[#4D6E56] dark:text-gray-400 text-sm font-medium">Orchestrate your workforce, track performance, and manage shifts.</p>
             </div>
-            <div className="flex items-center gap-3">
-               <div className="flex bg-cyber-gray rounded-xl p-1 border border-white/5 mr-4">
-                  {[ { id: 'directory', icon: User, label: 'Directory' }, { id: 'org', icon: Network, label: 'Org Chart' }, { id: 'shifts', icon: Calendar, label: 'Shift Planner' } ].map(v => (
-                     <button key={v.id} onClick={() => setViewMode(v.id as ViewMode)} className={`px-4 py-2 rounded-lg transition-all flex items-center gap-2 text-sm font-bold ${viewMode === v.id ? 'bg-cyber-primary text-black' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}><v.icon size={16} />{v.label}</button>
-                  ))}
-               </div>
-               {wizard.getCreatableRoles().length > 0 ? (
-                  <Protected permission="ADD_EMPLOYEE"><button onClick={wizard.handleOpenWizard} className="bg-cyber-primary text-black px-4 py-2 rounded-lg font-bold text-sm hover:bg-cyber-accent transition-colors flex items-center shadow-[0_0_15px_rgba(0,255,157,0.2)]"><UserPlus className="w-4 h-4 mr-2" />Onboard Talent</button></Protected>
-               ) : <div className="px-4 py-2 rounded-lg bg-white/5 border border-white/5 text-gray-400 text-sm flex items-center gap-2"><Lock size={14} /><span>{canViewAll ? 'Hiring Restricted' : 'My HR Profile'}</span></div>}
-            </div>
+             <div className="flex items-center gap-3">
+                <div className="flex bg-white/90 dark:bg-black/25 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-xl p-1 mr-4">
+                   {[ { id: 'directory', icon: User, label: 'Directory' }, { id: 'org', icon: Network, label: 'Org Chart' }, { id: 'shifts', icon: Calendar, label: 'Shift Planner' } ].map(v => (
+                      <button key={v.id} onClick={() => setViewMode(v.id as ViewMode)} className={`px-4 py-2 rounded-lg transition-all flex items-center gap-2 text-sm font-bold cursor-pointer ${viewMode === v.id ? 'bg-[#224429] dark:bg-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24]' : 'text-stone-500 dark:text-[#7A9E83] hover:text-[#1E3F27] dark:hover:text-white hover:bg-stone-200/20 dark:hover:bg-white/5'}`}><v.icon size={16} />{v.label}</button>
+                   ))}
+                </div>
+                {wizard.getCreatableRoles().length > 0 ? (
+                   <Protected permission="ADD_EMPLOYEE"><button onClick={wizard.handleOpenWizard} className="woody-btn-primary flex items-center cursor-pointer"><UserPlus className="w-4 h-4 mr-2" />Onboard Talent</button></Protected>
+                ) : <div className="px-4 py-2 rounded-lg bg-[#FAF8F5] dark:bg-white/5 border border-[#E2DCCE] dark:border-white/5 text-[#2C5E3B] dark:text-gray-400 text-sm flex items-center gap-2"><Lock size={14} /><span>{canViewAll ? 'Hiring Restricted' : 'My HR Profile'}</span></div>}
+             </div>
          </div>
 
          <PhotoApprovalList photoRequests={actions.photoRequests} onApprove={actions.handleApprovePhoto} onReject={actions.handleRejectPhoto} />

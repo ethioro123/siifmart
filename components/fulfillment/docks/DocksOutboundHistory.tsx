@@ -50,26 +50,26 @@ export const DocksOutboundHistory: React.FC<DocksOutboundHistoryProps> = ({
     }, [filteredHistory, currentPage]);
 
     return (
-        <div className="bg-white dark:bg-white/5 backdrop-blur-xl border border-slate-200 dark:border-white/10 rounded-[2rem] p-8 relative overflow-hidden group shadow-sm dark:shadow-2xl">
-            <div className="absolute -top-24 -right-24 w-64 h-64 bg-purple-600/10 blur-[100px] rounded-full pointer-events-none" />
+        <div className="glass-panel p-8 relative overflow-hidden group">
+            <div className="absolute -top-24 -right-24 w-64 h-64 bg-[#2C5E3B]/10 blur-[100px] rounded-full pointer-events-none" />
 
             <div className="flex justify-between items-center mb-8 relative z-10">
                 <h3 className="text-xl font-black text-slate-900 dark:text-white tracking-tight uppercase flex items-center gap-3">
-                    <div className="p-2 bg-purple-600/20 rounded-xl">
-                        <HistoryIcon className="text-purple-400" size={20} />
+                    <div className="p-2 bg-[#2C5E3B]/20 rounded-xl">
+                        <HistoryIcon className="text-[#2C5E3B] dark:text-[#A9CBA2]" size={20} />
                     </div>
                     Outbound History
                 </h3>
 
                 <div className="flex items-center gap-4">
                     <div className="relative group">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-purple-400 transition-colors" size={16} />
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-500 group-focus-within:text-[#2C5E3B] dark:group-focus-within:text-[#A9CBA2] transition-colors" size={16} />
                         <input
                             type="text"
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                             placeholder="Search Shipment, Site..."
-                            className="w-64 bg-slate-100 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-xl py-2.5 pl-10 pr-4 text-xs font-bold text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-gray-600 focus:outline-none focus:border-purple-500/50 focus:bg-purple-500/5 transition-all"
+                            className="woody-input w-64 pl-10 pr-4 text-xs"
                         />
                     </div>
                 </div>
@@ -78,7 +78,7 @@ export const DocksOutboundHistory: React.FC<DocksOutboundHistoryProps> = ({
             <div className="overflow-x-auto">
                 <table className="w-full">
                     <thead>
-                        <tr className="border-b border-slate-200 dark:border-white/5">
+                        <tr className="border-b border-[#E2DCCE]/60 dark:border-white/5">
                             <th className="px-6 py-4 text-left text-[10px] font-black text-gray-500 uppercase tracking-widest">Shipped At</th>
                             <th className="px-6 py-4 text-left text-[10px] font-black text-gray-500 uppercase tracking-widest">Job ID</th>
                             <th className="px-6 py-4 text-left text-[10px] font-black text-gray-500 uppercase tracking-widest">Destination</th>
@@ -88,7 +88,7 @@ export const DocksOutboundHistory: React.FC<DocksOutboundHistoryProps> = ({
                             <th className="px-6 py-4 text-right text-[10px] font-black text-gray-500 uppercase tracking-widest">Status</th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100 dark:divide-white/5">
+                    <tbody className="divide-y divide-[#E2DCCE]/30 dark:divide-white/5">
                         {paginatedHistory.length === 0 ? (
                             <tr>
                                 <td colSpan={6} className="px-6 py-8 text-center text-gray-500 text-xs font-bold">
@@ -103,7 +103,7 @@ export const DocksOutboundHistory: React.FC<DocksOutboundHistoryProps> = ({
                                 return (
                                     <tr
                                         key={job.id}
-                                        className="hover:bg-slate-50 dark:hover:bg-white/5 transition-colors group cursor-pointer"
+                                        className="hover:bg-[#FAF8F5]/50 dark:hover:bg-white/5 transition-colors group cursor-pointer"
                                         onClick={() => {
                                             setSelectedJob(job);
                                             setIsDetailsOpen(true);
@@ -134,7 +134,7 @@ export const DocksOutboundHistory: React.FC<DocksOutboundHistoryProps> = ({
                                         </td>
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-2">
-                                                <span className="text-xs font-bold text-gray-500 uppercase tracking-tight">
+                                                <span className="text-xs font-bold text-[#2C5E3B] dark:text-[#A9CBA2] uppercase tracking-tight">
                                                     {job.assignedBy || 'System'}
                                                 </span>
                                             </div>
@@ -143,7 +143,7 @@ export const DocksOutboundHistory: React.FC<DocksOutboundHistoryProps> = ({
                                             <span className="text-xs font-mono font-bold text-gray-400">{job.items || job.lineItems?.length || 0} items</span>
                                         </td>
                                         <td className="px-6 py-4 text-right">
-                                            <span className={`inline-flex px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest ${job.status === 'Completed' || job.transferStatus === 'Shipped' ? 'bg-green-500/10 text-green-400 border border-green-500/20' :
+                                            <span className={`inline-flex px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest ${job.status === 'Completed' || job.transferStatus === 'Shipped' ? 'bg-[#2C5E3B]/10 text-[#2C5E3B] dark:text-[#A9CBA2] border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20' :
                                                 job.status === 'Cancelled' ? 'bg-red-500/10 text-red-400 border border-red-500/20' :
                                                     'bg-gray-500/10 text-gray-400 border border-gray-500/20'
                                                 }`}>

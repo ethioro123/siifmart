@@ -49,8 +49,8 @@ export const DriverMetrics: React.FC<DriverMetricsProps> = ({
                     <p className="text-sm md:text-lg font-black text-green-600 dark:text-green-400 leading-none">{stats.completed}</p>
                 </div>
                 <div className="text-center px-1">
-                    <p className="text-[7px] md:text-[8px] text-cyan-600 dark:text-cyan-500 font-black uppercase tracking-widest leading-none mb-1.5 italic">Units</p>
-                    <p className="text-sm md:text-lg font-black text-cyan-600 dark:text-cyan-400 leading-none">{stats.items}</p>
+                    <p className="text-[7px] md:text-[8px] text-[#2C5E3B] dark:text-[#A9CBA2] font-black uppercase tracking-widest leading-none mb-1.5 italic">Units</p>
+                    <p className="text-sm md:text-lg font-black text-[#2C5E3B] dark:text-[#A9CBA2] leading-none">{stats.items}</p>
                 </div>
             </div>
             
@@ -58,7 +58,7 @@ export const DriverMetrics: React.FC<DriverMetricsProps> = ({
                 <div className="text-left sm:text-right">
                     <p className="text-[7px] md:text-[8px] text-gray-500 dark:text-gray-500 font-black uppercase tracking-widest leading-none mb-1 italic">Shift Progress</p>
                     <div className="h-1.5 bg-gray-100 dark:bg-white/10 rounded-full w-24 md:w-16 overflow-hidden">
-                        <div className="h-full bg-cyan-500 rounded-full w-3/4 shadow-[0_0_8px_rgba(6,182,212,0.4)] transition-all" />
+                        <div className="h-full bg-[#2C5E3B] rounded-full w-3/4 shadow-[0_0_8px_rgba(44,94,59,0.4)] transition-all" />
                     </div>
                 </div>
             </div>

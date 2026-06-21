@@ -69,8 +69,8 @@ export const ReturnsProcess: React.FC<ReturnsProcessProps> = ({
             {/* Step 1: Search */}
             {returnStep === 'Search' && (
                 <div className="flex-1 flex flex-col items-center justify-center space-y-8 py-12">
-                    <div className="w-24 h-24 bg-blue-500/10 rounded-full flex items-center justify-center border border-blue-500/20 shadow-[0_0_30px_rgba(59,130,246,0.2)]">
-                        <Search className="text-blue-400" size={40} />
+                    <div className="w-24 h-24 bg-[#2C5E3B]/10 rounded-full flex items-center justify-center border border-[#2C5E3B]/20 shadow-[0_0_30px_rgba(44,94,59,0.2)]">
+                        <Search className="text-[#A9CBA2]" size={40} />
                     </div>
                     <div className="text-center space-y-2">
                         <h2 className="text-2xl font-bold text-white">Scan Order Receipt</h2>
@@ -78,7 +78,7 @@ export const ReturnsProcess: React.FC<ReturnsProcessProps> = ({
                     </div>
                     <div className="flex gap-2 w-full max-w-md">
                         <input
-                            className="flex-1 bg-black/30 border border-white/10 rounded-xl p-4 text-white text-lg focus:border-blue-500 outline-none transition-all"
+                            className="flex-1 bg-black/30 border border-white/10 rounded-xl p-4 text-white text-lg focus:border-[#2C5E3B] outline-none transition-all"
                             placeholder="Order ID (e.g. ORD-12345)"
                             value={returnSearch}
                             onChange={e => setReturnSearch(e.target.value)}
@@ -88,7 +88,7 @@ export const ReturnsProcess: React.FC<ReturnsProcessProps> = ({
                         />
                         <button
                             onClick={handleFindOrder}
-                            className="px-8 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-xl shadow-lg shadow-blue-500/20 transition-all"
+                            className="px-8 bg-[#2C5E3B] hover:bg-[#3a7a4d] text-white font-bold rounded-xl shadow-lg shadow-[#2C5E3B]/20 transition-all"
                         >
                             Find
                         </button>
@@ -117,12 +117,12 @@ export const ReturnsProcess: React.FC<ReturnsProcessProps> = ({
                             const returnItem = returnItems.find(ri => ri.productId === item.id);
 
                             return (
-                                <div key={idx} className={`p-4 rounded-xl border transition-all ${isSelected ? 'bg-blue-500/10 border-blue-500/50' : 'bg-white/5 border-white/5'} `}>
+                                <div key={idx} className={`p-4 rounded-xl border transition-all ${isSelected ? 'bg-[#2C5E3B]/10 border-[#2C5E3B]/50' : 'bg-white/5 border-white/5'} `}>
                                     <div className="flex items-start gap-4">
                                         <input
                                             type="checkbox"
                                             aria-label="Select Item"
-                                            className="mt-1 w-5 h-5 accent-blue-500 cursor-pointer"
+                                            className="mt-1 w-5 h-5 accent-[#2C5E3B] cursor-pointer"
                                             checked={isSelected}
                                             onChange={(e) => {
                                                 if (e.target.checked) {
@@ -236,7 +236,7 @@ export const ReturnsProcess: React.FC<ReturnsProcessProps> = ({
                         <button
                             disabled={returnItems.length === 0}
                             onClick={() => setReturnStep('Review')}
-                            className={`px-8 py-3 rounded-xl font-bold flex items-center gap-2 ${returnItems.length > 0 ? 'bg-blue-500 hover:bg-blue-600 text-white shadow-lg shadow-blue-500/20' : 'bg-gray-600 text-gray-400 cursor-not-allowed'}`}
+                            className={`px-8 py-3 rounded-xl font-bold flex items-center gap-2 ${returnItems.length > 0 ? 'bg-[#2C5E3B] hover:bg-[#3a7a4d] text-white shadow-lg shadow-[#2C5E3B]/20' : 'bg-gray-600 text-gray-400 cursor-not-allowed'}`}
                         >
                             Review Return <ArrowRight size={18} />
                         </button>
@@ -354,7 +354,7 @@ export const ReturnsProcess: React.FC<ReturnsProcessProps> = ({
                                             setReturnStep('Complete');
                                             addNotification('success', 'Return processed successfully');
                                         }}
-                                        className="w-full py-4 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-xl shadow-lg shadow-blue-500/20 transition-all"
+                                        className="w-full py-4 bg-[#2C5E3B] hover:bg-[#3a7a4d] text-white font-bold rounded-xl shadow-lg shadow-[#2C5E3B]/20 transition-all"
                                     >
                                         Process Refund
                                     </button>
@@ -399,7 +399,7 @@ export const ReturnsProcess: React.FC<ReturnsProcessProps> = ({
                                 setReturnSearch('');
                                 setReturnStep('Search');
                             }}
-                            className="px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-xl shadow-lg shadow-blue-500/20"
+                            className="px-6 py-3 bg-[#2C5E3B] hover:bg-[#3a7a4d] text-white font-bold rounded-xl shadow-lg shadow-[#2C5E3B]/20"
                         >
                             New Return
                         </button>

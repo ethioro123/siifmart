@@ -28,7 +28,7 @@ export interface PackLabelData {
     lineItems?: Array<{
         name: string;
         sku: string;
-        quantity: number;
+        quantity: number | string;
         unit?: string;
     }>;
 }

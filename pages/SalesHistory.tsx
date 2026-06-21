@@ -424,18 +424,22 @@ export default function SalesHistory() {
       <div className="space-y-6">{/* Header */}
          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-               <h2 className="text-2xl font-bold text-white flex items-center gap-2">
-                  <FileText className="text-cyber-primary" />
-                  Audit Console (Server-Side)
+               <h2 className="text-2xl font-bold text-[#1E3F27] dark:text-[#EAE5D9] flex items-center gap-2.5">
+                  <FileText className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
+                  Audit Console
                </h2>
-               <p className="text-gray-400 text-sm">Search, audit, and report on full transaction history.</p>
+               <p className="text-[#4D6E56] dark:text-gray-400 text-sm font-medium">Search, audit, and report on full transaction history.</p>
             </div>
             <div className="flex items-center gap-3">
                {/* Sync Status Badge */}
-               <div className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold border transition-colors duration-300 ${posSyncStatus === 'offline' ? 'bg-red-500/10 border-red-500/20 text-red-500' :
-                  posSyncStatus === 'syncing' ? 'bg-blue-500/10 border-blue-500/20 text-blue-500' :
-                     (posPendingSyncCount || 0) > 0 ? 'bg-yellow-500/10 border-yellow-500/20 text-yellow-500' :
-                        'bg-green-500/10 border-green-500/20 text-green-500'
+               <div className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold border transition-colors duration-300 ${
+                  posSyncStatus === 'offline' 
+                     ? 'bg-rose-50 dark:bg-rose-950/20 text-rose-700 dark:text-rose-455 border-rose-200/50 dark:border-rose-900/20' 
+                     : posSyncStatus === 'syncing' 
+                        ? 'bg-sky-50 dark:bg-sky-950/20 text-sky-700 dark:text-sky-400 border-sky-200/50 dark:border-sky-900/20' 
+                        : (posPendingSyncCount || 0) > 0 
+                           ? 'bg-amber-50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-400 border-amber-200/50 dark:border-amber-900/20' 
+                           : 'bg-emerald-50 dark:bg-[#2C5E3B]/10 text-emerald-700 dark:text-[#A9CBA2] border border-emerald-250/50 dark:border-[#2C5E3B]/25'
                   }`}>
                   {posSyncStatus === 'syncing' ? (
                      <RefreshCw size={14} className="animate-spin" />
@@ -458,7 +462,7 @@ export default function SalesHistory() {
                <Protected permission="EXPORT_SALES_DATA">
                   <button
                      onClick={handleExportCSV}
-                     className="bg-cyber-primary/10 text-cyber-primary border border-cyber-primary/20 px-4 py-2 rounded-lg text-sm hover:bg-cyber-primary/20 flex items-center transition-colors font-bold"
+                     className="bg-[#2C5E3B]/10 dark:bg-[#2C5E3B]/20 text-[#2C5E3B] dark:text-[#A9CBA2] border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/25 px-4 py-2 rounded-xl text-sm hover:bg-[#2C5E3B]/20 dark:hover:bg-[#2C5E3B]/30 flex items-center transition-all font-bold active:scale-98 shadow-sm"
                   >
                      <Download className="w-4 h-4 mr-2" />
                      Export Page Data
@@ -469,34 +473,34 @@ export default function SalesHistory() {
 
          {/* --- ANALYTICS RIBBON (PAGE LEVEL) --- */}
          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-cyber-gray border border-white/5 p-4 rounded-xl">
-               <p className="text-[10px] text-gray-500 uppercase font-bold">Page Revenue</p>
-               <p className="text-xl font-mono font-bold text-white mt-1">{CURRENCY_SYMBOL} {metrics.totalRev.toLocaleString()}</p>
+            <div className="bg-white/80 dark:bg-[#18201B]/60 border border-[#E2DCCE] dark:border-emerald-950/20 backdrop-blur-md p-4 rounded-2xl shadow-sm transition-colors">
+               <p className="text-[10px] text-[#4D6E56] dark:text-[#7A9E83] uppercase font-black tracking-wider">Page Revenue</p>
+               <p className="text-xl font-mono font-black text-[#1E3F27] dark:text-[#EAE5D9] mt-1">{CURRENCY_SYMBOL} {metrics.totalRev.toLocaleString()}</p>
             </div>
-            <div className="bg-cyber-gray border border-white/5 p-4 rounded-xl">
-               <p className="text-[10px] text-gray-500 uppercase font-bold">Page Transactions</p>
-               <p className="text-xl font-mono font-bold text-blue-400 mt-1">{metrics.txCount}</p>
+            <div className="bg-white/80 dark:bg-[#18201B]/60 border border-[#E2DCCE] dark:border-emerald-950/20 backdrop-blur-md p-4 rounded-2xl shadow-sm transition-colors">
+               <p className="text-[10px] text-[#4D6E56] dark:text-[#7A9E83] uppercase font-black tracking-wider">Page Transactions</p>
+               <p className="text-xl font-mono font-black text-[#2C5E3B] dark:text-[#A9CBA2] mt-1">{metrics.txCount}</p>
             </div>
-            <div className="bg-cyber-gray border border-white/5 p-4 rounded-xl">
-               <p className="text-[10px] text-gray-500 uppercase font-bold">Avg Basket (Page)</p>
-               <p className="text-xl font-mono font-bold text-yellow-400 mt-1">{CURRENCY_SYMBOL} {metrics.avgTicket.toFixed(0)}</p>
+            <div className="bg-white/80 dark:bg-[#18201B]/60 border border-[#E2DCCE] dark:border-emerald-950/20 backdrop-blur-md p-4 rounded-2xl shadow-sm transition-colors">
+               <p className="text-[10px] text-[#4D6E56] dark:text-[#7A9E83] uppercase font-black tracking-wider">Avg Basket (Page)</p>
+               <p className="text-xl font-mono font-black text-amber-700 dark:text-amber-455 mt-1">{CURRENCY_SYMBOL} {metrics.avgTicket.toFixed(0)}</p>
             </div>
-            <div className="bg-cyber-gray border border-white/5 p-4 rounded-xl">
-               <p className="text-[10px] text-gray-500 uppercase font-bold">Total History Size</p>
-               <p className="text-xl font-mono font-bold text-green-400 mt-1">{totalCount.toLocaleString()}</p>
+            <div className="bg-white/80 dark:bg-[#18201B]/60 border border-[#E2DCCE] dark:border-emerald-950/20 backdrop-blur-md p-4 rounded-2xl shadow-sm transition-colors">
+               <p className="text-[10px] text-[#4D6E56] dark:text-[#7A9E83] uppercase font-black tracking-wider">Total History Size</p>
+               <p className="text-xl font-mono font-black text-[#2C5E3B] dark:text-[#A9CBA2] mt-1">{totalCount.toLocaleString()}</p>
             </div>
          </div>
 
          {/* --- SMART TOOLBAR --- */}
-         <div className="bg-cyber-gray border border-white/5 rounded-2xl p-4 space-y-4">
+         <div className="bg-white/80 dark:bg-[#18201B]/60 border border-[#E2DCCE] dark:border-emerald-950/20 backdrop-blur-md rounded-2xl p-4 space-y-4 shadow-sm">
             <div className="flex flex-col md:flex-row gap-4">
                {/* Search */}
-               <div className="flex items-center bg-black/30 border border-white/10 rounded-xl px-4 py-2 flex-1 focus-within:border-cyber-primary/50 transition-colors">
-                  <Search className="w-4 h-4 text-gray-400" />
+               <div className="flex items-center bg-white dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-xl px-4 py-2 flex-1 focus-within:border-[#2C5E3B] dark:focus-within:border-[#A9CBA2] focus-within:ring-1 focus-within:ring-[#2C5E3B] dark:focus-within:ring-[#A9CBA2] transition-all">
+                  <Search className="w-4 h-4 text-stone-400 dark:text-gray-400" />
                   <input
                      type="text"
                      placeholder="Search Receipt ID, Cashier Name..."
-                     className="bg-transparent border-none ml-3 flex-1 text-white text-sm outline-none placeholder-gray-500"
+                     className="bg-transparent border-none ml-3 flex-1 text-[#1E3F27] dark:text-white text-sm outline-none placeholder-stone-400 dark:placeholder-gray-500"
                      value={searchTerm}
                      onChange={(e) => handleFilterChange(setSearchTerm, e.target.value)}
                      aria-label="Search transactions"
@@ -504,19 +508,19 @@ export default function SalesHistory() {
                </div>
 
                {/* Date Range */}
-               <div className="flex items-center gap-2 bg-black/30 border border-white/10 rounded-xl px-3 py-2">
-                  <Calendar size={16} className="text-gray-400" />
+               <div className="flex items-center gap-2 bg-white dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-xl px-3 py-2 text-[#1E3F27] dark:text-white">
+                  <Calendar size={16} className="text-stone-400 dark:text-gray-400" />
                   <input
                      type="date"
-                     className="bg-transparent border-none text-white text-xs outline-none focus:ring-0"
+                     className="bg-transparent border-none text-[#1E3F27] dark:text-white text-xs outline-none focus:ring-0 cursor-pointer"
                      value={dateRange.start}
                      onChange={e => handleFilterChange(setDateRange, { ...dateRange, start: e.target.value })}
                      aria-label="Start Date"
                   />
-                  <span className="text-gray-500 text-xs">to</span>
+                  <span className="text-stone-400 dark:text-gray-500 text-xs">to</span>
                   <input
                      type="date"
-                     className="bg-transparent border-none text-white text-xs outline-none focus:ring-0"
+                     className="bg-transparent border-none text-[#1E3F27] dark:text-white text-xs outline-none focus:ring-0 cursor-pointer"
                      value={dateRange.end}
                      onChange={e => handleFilterChange(setDateRange, { ...dateRange, end: e.target.value })}
                      aria-label="End Date"
@@ -524,70 +528,70 @@ export default function SalesHistory() {
                </div>
             </div>
 
-            <div className="flex gap-3 overflow-x-auto pb-1">
+            <div className="flex gap-3 overflow-x-auto pb-1 select-none">
                {/* Method Filter */}
                <div className="relative">
                   <select
-                     className="appearance-none bg-white/5 border border-white/10 rounded-lg pl-3 pr-8 py-2 text-xs font-bold text-white outline-none cursor-pointer hover:bg-white/10"
+                     className="appearance-none bg-white dark:bg-[#18201B]/60 border border-[#E2DCCE] dark:border-white/10 rounded-xl pl-3 pr-8 py-2 text-xs font-bold text-[#1E3F27] dark:text-white outline-none cursor-pointer hover:bg-stone-50 dark:hover:bg-white/5 transition-all"
                      value={methodFilter}
                      onChange={(e) => handleFilterChange(setMethodFilter, e.target.value)}
                      aria-label="Filter by Payment Method"
                   >
-                     <option value="All">All Methods</option>
-                     <option value="Cash">Cash</option>
-                     <option value="Card">Card</option>
-                     <option value="Mobile Money">Mobile Money</option>
+                     <option value="All" className="bg-[#FAF8F5] dark:bg-[#18201B] text-[#1E3F27] dark:text-white">All Methods</option>
+                     <option value="Cash" className="bg-[#FAF8F5] dark:bg-[#18201B] text-[#1E3F27] dark:text-white">Cash</option>
+                     <option value="Card" className="bg-[#FAF8F5] dark:bg-[#18201B] text-[#1E3F27] dark:text-white">Card</option>
+                     <option value="Mobile Money" className="bg-[#FAF8F5] dark:bg-[#18201B] text-[#1E3F27] dark:text-white">Mobile Money</option>
                   </select>
-                  <ChevronDown size={12} className="absolute right-2 top-2.5 text-gray-400 pointer-events-none" />
+                  <ChevronDown size={12} className="absolute right-2.5 top-3 text-stone-400 dark:text-gray-400 pointer-events-none" />
                </div>
 
                {/* Status Filter */}
                <div className="relative">
                   <select
-                     className="appearance-none bg-white/5 border border-white/10 rounded-lg pl-3 pr-8 py-2 text-xs font-bold text-white outline-none cursor-pointer hover:bg-white/10"
+                     className="appearance-none bg-white dark:bg-[#18201B]/60 border border-[#E2DCCE] dark:border-white/10 rounded-xl pl-3 pr-8 py-2 text-xs font-bold text-[#1E3F27] dark:text-white outline-none cursor-pointer hover:bg-stone-50 dark:hover:bg-white/5 transition-all"
                      value={statusFilter}
                      onChange={(e) => handleFilterChange(setStatusFilter, e.target.value)}
                      aria-label="Filter by Status"
                   >
-                     <option value="All">All Statuses</option>
-                     <option value="Completed">Completed</option>
-                     <option value="Pending">Pending</option>
-                     <option value="Refunded">Refunded</option>
+                     <option value="All" className="bg-[#FAF8F5] dark:bg-[#18201B] text-[#1E3F27] dark:text-white">All Statuses</option>
+                     <option value="Completed" className="bg-[#FAF8F5] dark:bg-[#18201B] text-[#1E3F27] dark:text-white">Completed</option>
+                     <option value="Pending" className="bg-[#FAF8F5] dark:bg-[#18201B] text-[#1E3F27] dark:text-white">Pending</option>
+                     <option value="Refunded" className="bg-[#FAF8F5] dark:bg-[#18201B] text-[#1E3F27] dark:text-white">Refunded</option>
                   </select>
-                  <ChevronDown size={12} className="absolute right-2 top-2.5 text-gray-400 pointer-events-none" />
+                  <ChevronDown size={12} className="absolute right-2.5 top-3 text-stone-400 dark:text-gray-400 pointer-events-none" />
                </div>
 
                {/* Store Filter - Only show if not restricted */}
                {!restricted && (
                   <div className="relative">
                      <select
-                        className="appearance-none bg-white/5 border border-white/10 rounded-lg pl-3 pr-8 py-2 text-xs font-bold text-white outline-none cursor-pointer hover:bg-white/10"
+                        className="appearance-none bg-white dark:bg-[#18201B]/60 border border-[#E2DCCE] dark:border-white/10 rounded-xl pl-3 pr-8 py-2 text-xs font-bold text-[#1E3F27] dark:text-white outline-none cursor-pointer hover:bg-stone-50 dark:hover:bg-white/5 transition-all"
                         value={storeFilter}
                         onChange={(e) => handleFilterChange(setStoreFilter, e.target.value)}
                         aria-label="Filter by Store"
                      >
-                        <option value="All">All Stores</option>
+                        <option value="All" className="bg-[#FAF8F5] dark:bg-[#18201B] text-[#1E3F27] dark:text-white">All Stores</option>
                         {sites.map(site => (
-                           <option key={site.id} value={site.id}>{site.name}</option>
+                           <option key={site.id} value={site.id} className="bg-[#FAF8F5] dark:bg-[#18201B] text-[#1E3F27] dark:text-white">{site.name}</option>
                         ))}
                      </select>
-                     <ChevronDown size={12} className="absolute right-2 top-2.5 text-gray-400 pointer-events-none" />
+                     <ChevronDown size={12} className="absolute right-2.5 top-3 text-stone-400 dark:text-gray-400 pointer-events-none" />
                   </div>
                )}
             </div>
          </div>
 
          {/* --- DATA GRID --- */}
-         <div className="bg-cyber-gray border border-white/5 rounded-2xl overflow-hidden flex flex-col min-h-[500px]">
+         <div className="bg-white/80 dark:bg-[#18201B]/40 border border-[#E2DCCE] dark:border-emerald-950/20 backdrop-blur-md rounded-2xl overflow-hidden flex flex-col min-h-[500px] shadow-sm">
             <div className="overflow-x-auto flex-1 relative">
                {loading && (
-                  <div className="absolute inset-0 bg-black/50 backdrop-blur-sm z-10 flex items-center justify-center">
-                     <Loader className="w-8 h-8 text-cyber-primary animate-spin" />
+                  <div className="absolute inset-0 bg-[#FAF8F5]/40 dark:bg-black/40 backdrop-blur-sm z-10 flex items-center justify-center">
+                     <Loader className="w-8 h-8 text-[#2C5E3B] dark:text-[#A9CBA2] animate-spin" />
                   </div>
                )}
                <table className="w-full text-left">
                   <thead>
-                     <tr className="bg-black/20 border-b border-white/5 text-[10px] uppercase tracking-wider font-bold text-gray-500">
+                     <tr className="bg-[#F4F0E6] dark:bg-black/20 border-b border-[#E2DCCE] dark:border-white/10 text-[10px] uppercase tracking-widest font-black text-stone-500 dark:text-gray-400">
                         <th className="p-4">Receipt ID</th>
                         <th className="p-4">Date & Time</th>
                         <th className="p-4">Store</th>
@@ -599,74 +603,77 @@ export default function SalesHistory() {
                         <th className="p-4"></th>
                      </tr>
                   </thead>
-                  <tbody className="divide-y divide-white/5">
+                  <tbody className="divide-y divide-[#E2DCCE]/60 dark:divide-white/5">
                      {sales.map((sale) => (
                         <tr
                            key={sale.id}
                            onClick={() => { setSelectedSale(sale); setDetailTab('receipt'); }}
-                           className="hover:bg-white/5 transition-colors cursor-pointer group"
+                           className="hover:bg-[#2C5E3B]/5 dark:hover:bg-white/5 transition-colors cursor-pointer group text-[#1E3F27] dark:text-white"
                         >
                            <td className="p-4">
                               <div className="flex items-center gap-2">
-                                 <FileText size={14} className="text-gray-500" />
-                                 <span className="text-sm font-mono text-white group-hover:text-cyber-primary transition-colors">{sale.receiptNumber || `S${sale.id.substring(0, 8).replace(/-/g, '').toUpperCase()}`}</span>
+                                 <FileText size={14} className="text-stone-400 dark:text-gray-500" />
+                                 <span className="text-sm font-mono text-[#1E3F27] dark:text-[#EAE5D9] font-bold group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] transition-colors">{sale.receiptNumber || `S${sale.id.substring(0, 8).replace(/-/g, '').toUpperCase()}`}</span>
                               </div>
                            </td>
                            <td className="p-4">
-                              <div className="text-xs text-white font-medium">{formatDateTime(sale.date, { useRelative: true })}</div>
+                              <div className="text-xs text-stone-600 dark:text-gray-300 font-semibold">{formatDateTime(sale.date, { useRelative: true })}</div>
                            </td>
                            <td className="p-4">
-                              <span className="text-xs text-gray-300">
+                              <span className="text-xs text-stone-600 dark:text-gray-300 font-medium">
                                  {sites.find(s => s.id === sale.siteId)?.name || 'Unknown'}
                               </span>
                            </td>
                            <td className="p-4">
                               <div className="flex items-center gap-2">
-                                 <div className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-[10px] font-bold text-gray-300">
+                                 <div className="w-6 h-6 rounded-full bg-[#FAF8F5] dark:bg-white/10 border border-[#E2DCCE] dark:border-white/10 flex items-center justify-center text-[10px] font-black text-[#2C5E3B] dark:text-[#A9CBA2]">
                                     {sale.cashierName?.charAt(0) || '?'}
                                  </div>
-                                 <span className="text-xs text-gray-300">{sale.cashierName || 'Unknown'}</span>
+                                 <span className="text-xs text-stone-650 dark:text-gray-300 font-medium">{sale.cashierName || 'Unknown'}</span>
                               </div>
                            </td>
                            <td className="p-4">
-                              <span className="text-xs text-gray-400 flex items-center gap-1">
-                                 <CreditCard size={12} /> {sale.method}
+                              <span className="text-xs text-stone-500 dark:text-gray-400 flex items-center gap-1.5 font-medium">
+                                 <CreditCard size={12} className="text-stone-400 dark:text-gray-500" /> {sale.method}
                               </span>
                            </td>
-                           <td className="p-4 text-xs text-gray-400 text-right">{sale.items.length}</td>
-                           <td className="p-4 text-sm font-mono text-white font-bold text-right">
+                           <td className="p-4 text-xs text-stone-650 dark:text-gray-400 text-right font-mono font-bold">{sale.items.length}</td>
+                           <td className="p-4 text-sm font-mono text-[#1E3F27] dark:text-white font-bold text-right">
                               {CURRENCY_SYMBOL} {sale.total.toLocaleString()}
                            </td>
                            <td className="p-4 text-center">
-                              <span className={`inline-flex items-center px-2 py-1 rounded-[4px] text-[10px] font-bold uppercase border ${sale.status === 'Completed' ? 'text-green-400 bg-green-900/20 border-green-500/30' :
-                                 sale.status === 'Pending' ? 'text-yellow-400 bg-yellow-900/20 border-yellow-500/30' :
-                                    'text-red-400 bg-red-900/20 border-red-500/30'
+                              <span className={`inline-flex items-center px-2.5 py-1 rounded-[4px] text-[10px] font-black uppercase border ${
+                                 sale.status === 'Completed' 
+                                    ? 'text-emerald-700 dark:text-emerald-450 bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/20' 
+                                    : sale.status === 'Pending' 
+                                       ? 'text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/20' 
+                                       : 'text-rose-700 dark:text-red-400 bg-rose-50 dark:bg-red-500/10 border-rose-200 dark:border-red-500/20'
                                  }`}>
                                  {sale.status}
                               </span>
                            </td>
                            <td className="p-4 text-right">
-                              <ChevronRight size={16} className="text-gray-600 group-hover:text-white" />
+                              <ChevronRight size={16} className="text-stone-450 dark:text-gray-600 group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] transition-colors" />
                            </td>
                         </tr>
                      ))}
                      {!loading && sales.length === 0 && (
-                        <tr><td colSpan={9} className="p-12 text-center text-gray-500">No transactions found matching criteria.</td></tr>
+                        <tr><td colSpan={9} className="p-12 text-center text-stone-400 dark:text-gray-500 font-medium bg-transparent">No transactions found matching criteria.</td></tr>
                      )}
                   </tbody>
                </table>
             </div>
 
             {/* Pagination Footer */}
-            <div className="p-4 border-t border-white/5 flex justify-between items-center bg-black/20">
-               <p className="text-xs text-gray-500">
-                  Showing <span className="text-white font-bold">{totalCount > 0 ? (currentPage - 1) * ITEMS_PER_PAGE + 1 : 0}</span> to <span className="text-white font-bold">{Math.min(currentPage * ITEMS_PER_PAGE, totalCount)}</span> of {totalCount} entries
+            <div className="p-4 border-t border-[#E2DCCE] dark:border-white/10 flex justify-between items-center bg-[#FAF8F5]/80 dark:bg-black/25">
+               <p className="text-xs text-stone-500 dark:text-gray-500">
+                  Showing <span className="text-[#1E3F27] dark:text-white font-bold">{totalCount > 0 ? (currentPage - 1) * ITEMS_PER_PAGE + 1 : 0}</span> to <span className="text-[#1E3F27] dark:text-white font-bold">{Math.min(currentPage * ITEMS_PER_PAGE, totalCount)}</span> of {totalCount} entries
                </p>
                <div className="flex gap-2">
                   <button
                      onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                      disabled={currentPage === 1 || loading}
-                     className="p-2 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 disabled:opacity-30 text-white"
+                     className="p-2 rounded-xl bg-white dark:bg-white/5 border border-[#E2DCCE] dark:border-white/10 hover:bg-stone-50 dark:hover:bg-white/10 disabled:opacity-30 text-stone-700 dark:text-white transition-all active:scale-95 cursor-pointer"
                      aria-label="Previous Page"
                   >
                      <ChevronLeft size={16} />
@@ -674,7 +681,7 @@ export default function SalesHistory() {
                   <button
                      onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                      disabled={currentPage >= totalPages || totalPages === 0 || loading}
-                     className="p-2 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 disabled:opacity-30 text-white"
+                     className="p-2 rounded-xl bg-white dark:bg-white/5 border border-[#E2DCCE] dark:border-white/10 hover:bg-stone-50 dark:hover:bg-white/10 disabled:opacity-30 text-stone-700 dark:text-white transition-all active:scale-95 cursor-pointer"
                      aria-label="Next Page"
                   >
                      <ChevronRight size={16} />
@@ -691,37 +698,37 @@ export default function SalesHistory() {
             size="lg"
          >
             {selectedSale && (
-               <div className="flex flex-col h-[600px]">
+               <div className="flex flex-col h-[600px] text-[#1E3F27] dark:text-white">
                   {/* Modal Header Info */}
-                  <div className="flex items-center justify-between mb-6 bg-white/5 p-4 rounded-xl border border-white/5">
+                  <div className="flex items-center justify-between mb-6 bg-[#FAF8F5] dark:bg-[#18201B]/50 p-4 rounded-2xl border border-[#E2DCCE]/60 dark:border-white/10">
                      <div>
-                        <h3 className="text-xl font-bold text-white font-mono">{selectedSale.receiptNumber || `S${selectedSale.id.substring(0, 8).replace(/-/g, '').toUpperCase()}`}</h3>
-                        <p className="text-xs text-gray-400 mt-1">{formatDateTime(selectedSale.date, { showTime: true })}</p>
+                        <h3 className="text-xl font-bold text-[#1E3F27] dark:text-white font-mono">{selectedSale.receiptNumber || `S${selectedSale.id.substring(0, 8).replace(/-/g, '').toUpperCase()}`}</h3>
+                        <p className="text-xs text-stone-400 dark:text-gray-500 mt-1">{formatDateTime(selectedSale.date, { showTime: true })}</p>
                      </div>
                      <div className="text-right">
-                        <p className="text-xs text-gray-500 uppercase font-bold">Total Amount</p>
-                        <p className="text-2xl font-mono text-cyber-primary font-bold">{CURRENCY_SYMBOL} {selectedSale.total.toLocaleString()}</p>
+                        <p className="text-xs text-stone-500 dark:text-gray-550 uppercase font-black tracking-widest">Total Amount</p>
+                        <p className="text-2xl font-mono text-[#2C5E3B] dark:text-[#A9CBA2] font-black">{CURRENCY_SYMBOL} {selectedSale.total.toLocaleString()}</p>
                      </div>
                   </div>
 
                   {/* Tabs */}
-                  <div className="flex border-b border-white/10 mb-4">
+                  <div className="flex border-b border-[#E2DCCE]/60 dark:border-white/10 mb-4 select-none">
                      <button
                         onClick={() => setDetailTab('receipt')}
-                        className={`px-4 py-2 text-sm font-bold border-b-2 transition-colors ${detailTab === 'receipt' ? 'border-cyber-primary text-white' : 'border-transparent text-gray-500 hover:text-gray-300'}`}
+                        className={`px-4 py-2 text-sm font-bold border-b-2 transition-colors ${detailTab === 'receipt' ? 'border-[#2C5E3B] dark:border-[#A9CBA2] text-[#1E3F27] dark:text-white' : 'border-transparent text-stone-500 dark:text-gray-400 hover:text-[#2C5E3B] dark:hover:text-white'}`}
                      >
                         Digital Receipt
                      </button>
                      <button
                         onClick={() => setDetailTab('audit')}
-                        className={`px-4 py-2 text-sm font-bold border-b-2 transition-colors ${detailTab === 'audit' ? 'border-cyber-primary text-white' : 'border-transparent text-gray-500 hover:text-gray-300'}`}
+                        className={`px-4 py-2 text-sm font-bold border-b-2 transition-colors ${detailTab === 'audit' ? 'border-[#2C5E3B] dark:border-[#A9CBA2] text-[#1E3F27] dark:text-white' : 'border-transparent text-stone-500 dark:text-gray-400 hover:text-[#2C5E3B] dark:hover:text-white'}`}
                      >
                         Audit Log
                      </button>
                   </div>
 
                   {/* Content Area */}
-                  <div className="flex-1 overflow-y-auto custom-scrollbar bg-black/20 rounded-xl border border-white/5 p-6">
+                  <div className="flex-1 overflow-y-auto custom-scrollbar bg-[#FAF8F5]/80 dark:bg-black/20 rounded-2xl border border-[#E2DCCE]/60 dark:border-white/10 p-6">
 
                      {/* TAB 1: RECEIPT VIEW */}
                      {detailTab === 'receipt' && (
@@ -792,16 +799,16 @@ export default function SalesHistory() {
 
                      {/* TAB 2: REAL AUDIT LOG (Filtered from StockMovements) */}
                      {detailTab === 'audit' && (
-                        <div className="space-y-6 relative">
-                           <div className="absolute left-3 top-2 bottom-2 w-px bg-white/10"></div>
+                        <div className="space-y-6 relative text-[#1E3F27] dark:text-white">
+                           <div className="absolute left-3 top-2 bottom-2 w-px bg-[#E2DCCE] dark:bg-white/10"></div>
 
                            {/* Header Event */}
                            <div className="flex gap-4 relative">
-                              <div className="w-6 h-6 rounded-full bg-green-500/20 text-green-400 border border-green-500/50 flex items-center justify-center z-10 shrink-0"><CheckCircle size={14} /></div>
+                              <div className="w-6 h-6 rounded-full bg-emerald-50 dark:bg-[#2C5E3B]/20 text-emerald-700 dark:text-[#A9CBA2] border border-emerald-250/50 dark:border-[#2C5E3B]/30 flex items-center justify-center z-10 shrink-0"><CheckCircle size={14} /></div>
                               <div>
-                                 <p className="text-sm text-white font-bold">Transaction Completed</p>
-                                 <p className="text-xs text-gray-500">{formatDateTime(selectedSale.date, { showTime: true })}</p>
-                                 <p className="text-xs text-gray-400 mt-1">Payment verified via {selectedSale.method} gateway.</p>
+                                 <p className="text-sm font-bold text-[#1E3F27] dark:text-[#EAE5D9]">Transaction Completed</p>
+                                 <p className="text-xs text-stone-400 dark:text-gray-550">{formatDateTime(selectedSale.date, { showTime: true })}</p>
+                                 <p className="text-xs text-stone-500 dark:text-gray-450 mt-1">Payment verified via {selectedSale.method} gateway.</p>
                               </div>
                            </div>
 
@@ -809,11 +816,11 @@ export default function SalesHistory() {
                            {auditLogs.length > 0 ? (
                               auditLogs.map(log => (
                                  <div key={log.id} className="flex gap-4 relative">
-                                    <div className="w-6 h-6 rounded-full bg-blue-500/20 text-blue-400 border border-blue-500/50 flex items-center justify-center z-10 shrink-0"><Shield size={14} /></div>
+                                    <div className="w-6 h-6 rounded-full bg-sky-55 dark:bg-sky-500/10 text-sky-700 dark:text-sky-400 border border-sky-200/50 dark:border-sky-500/20 flex items-center justify-center z-10 shrink-0"><Shield size={14} /></div>
                                     <div>
-                                       <p className="text-sm text-white font-bold">{log.type === 'OUT' ? 'Stock Deducted' : 'Stock Return'}</p>
-                                       <p className="text-xs text-gray-500">{formatDateTime(log.date, { showTime: true })}</p>
-                                       <div className="mt-2 bg-white/5 p-2 rounded text-[10px] font-mono text-gray-300">
+                                       <p className="text-sm font-bold text-[#1E3F27] dark:text-[#EAE5D9]">{log.type === 'OUT' ? 'Stock Deducted' : 'Stock Return'}</p>
+                                       <p className="text-xs text-stone-400 dark:text-gray-550">{formatDateTime(log.date, { showTime: true })}</p>
+                                       <div className="mt-2 bg-[#FAF8F5] dark:bg-black/35 border border-[#E2DCCE]/60 dark:border-white/5 p-2.5 rounded-xl text-[10px] font-mono text-stone-750 dark:text-gray-300">
                                           {log.type === 'OUT' ? '-' : '+'} {log.quantity} {log.productName} (ID: {log.productId})
                                        </div>
                                     </div>
@@ -821,21 +828,21 @@ export default function SalesHistory() {
                               ))
                            ) : (
                               <div className="flex gap-4 relative">
-                                 <div className="w-6 h-6 rounded-full bg-gray-500/20 text-gray-400 border border-gray-500/50 flex items-center justify-center z-10 shrink-0"><User size={14} /></div>
+                                 <div className="w-6 h-6 rounded-full bg-stone-100 dark:bg-white/5 text-stone-600 dark:text-gray-400 border border-stone-250 dark:border-white/10 flex items-center justify-center z-10 shrink-0"><User size={14} /></div>
                                  <div>
-                                    <p className="text-sm text-white font-bold">System Log</p>
-                                    <p className="text-xs text-gray-500">No detailed movement logs found for this legacy transaction.</p>
+                                    <p className="text-sm font-bold text-[#1E3F27] dark:text-[#EAE5D9]">System Log</p>
+                                    <p className="text-xs text-stone-400 dark:text-gray-550">No detailed movement logs found for this legacy transaction.</p>
                                  </div>
                               </div>
                            )}
 
                            {/* Footer Event */}
                            <div className="flex gap-4 relative">
-                              <div className="w-6 h-6 rounded-full bg-gray-500/20 text-gray-400 border border-gray-500/50 flex items-center justify-center z-10 shrink-0"><User size={14} /></div>
+                              <div className="w-6 h-6 rounded-full bg-stone-100 dark:bg-white/5 text-stone-600 dark:text-gray-400 border border-stone-250 dark:border-white/10 flex items-center justify-center z-10 shrink-0"><User size={14} /></div>
                               <div>
-                                 <p className="text-sm text-white font-bold">Session Active</p>
-                                 <p className="text-xs text-gray-500">Cashier: {selectedSale.cashierName}</p>
-                                 <p className="text-xs text-gray-400 mt-1">Terminal ID: POS-01</p>
+                                 <p className="text-sm font-bold text-[#1E3F27] dark:text-[#EAE5D9]">Session Active</p>
+                                 <p className="text-xs text-stone-400 dark:text-gray-550">Cashier: {selectedSale.cashierName}</p>
+                                 <p className="text-xs text-stone-500 dark:text-gray-450 mt-1">Terminal ID: POS-01</p>
                               </div>
                            </div>
                         </div>
@@ -843,10 +850,10 @@ export default function SalesHistory() {
                   </div>
 
                   {/* Footer Actions */}
-                  <div className="flex gap-3 mt-6 pt-4 border-t border-white/10">
+                  <div className="flex gap-3 mt-6 pt-4 border-t border-[#E2DCCE]/60 dark:border-white/10">
                      <button
                         onClick={handleReprint}
-                        className="flex-1 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-white font-bold flex items-center justify-center gap-2 transition-colors"
+                        className="flex-1 py-3 bg-stone-100 dark:bg-white/5 hover:bg-[#2C5E3B]/10 dark:hover:bg-white/10 border border-[#E2DCCE] dark:border-white/10 rounded-2xl text-[#1E3F27] dark:text-white font-bold flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
                      >
                         <Printer size={18} /> Reprint
                      </button>
@@ -856,7 +863,7 @@ export default function SalesHistory() {
                               addNotification('info', `Initiating Return Workflow for ${selectedSale.receiptNumber || selectedSale.id.substring(0, 12)}...`);
                               setSelectedSale(null);
                            }}
-                           className="flex-1 py-3 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 rounded-xl text-red-400 font-bold flex items-center justify-center gap-2 transition-colors"
+                           className="flex-1 py-3 bg-rose-50 dark:bg-rose-500/10 hover:bg-rose-100 dark:hover:bg-rose-500/20 border border-rose-200 dark:border-rose-500/30 rounded-2xl text-rose-700 dark:text-rose-455 font-bold flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
                         >
                            <RotateCcw size={18} /> Issue Return
                         </button>

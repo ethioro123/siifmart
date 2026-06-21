@@ -88,14 +88,16 @@ export const STORAGE_CONDITIONS = [
     'Ambient (Dry)', 'Chilled (Refrigerated)', 'Frozen', 'Heated', 'Hazardous'
 ];
 export const formatPOItemDescription = (item: any) => {
+    const physicalWeight = item.customAttributes?.physical?.netWeight || item.size;
+    const physicalType = item.customAttributes?.physical?.sizeType || item.customAttributes?.physical?.unit || 
+                         (item.unit && !['UNIT', 'PACK', 'DOZEN'].includes(item.unit.toUpperCase().trim()) ? item.unit : '');
+
     return [
         // Only show brand if it's not already in the product name
         (item.brand && !item.productName.toLowerCase().startsWith(item.brand.toLowerCase())) ? item.brand : null,
         item.productName,
         item.customAttributes?.identity?.variant,
-        (item.customAttributes?.physical?.netWeight && item.customAttributes?.physical?.unit)
-            ? `${item.customAttributes.physical.netWeight}${item.customAttributes.physical.unit}`
-            : (item.size && item.unit ? `${item.size}${item.unit}` : ''),
+        physicalWeight ? `${physicalWeight}${physicalType}` : '',
     ].filter(Boolean).join(' ') + (
             (item.packQuantity && item.packQuantity > 1)
                 ? ` – Pack of ${item.packQuantity}`
@@ -111,7 +113,7 @@ export const formatPOItemDescription = (item: any) => {
  * Format a Product name for display (Inventory, POS, etc.)
  * Mirrors formatPOItemDescription but works with Product objects that use `name` instead of `productName`.
  */
-export const formatProductDisplayName = (product: { name: string; brand?: string; size?: string; unit?: string; packQuantity?: number }) => {
+export const formatProductDisplayName = (product: { name: string; brand?: string; size?: string; unit?: string; packQuantity?: number; customAttributes?: any }) => {
     const parts: string[] = [];
 
     // Only show brand if it's not already in the product name
@@ -122,8 +124,12 @@ export const formatProductDisplayName = (product: { name: string; brand?: string
     parts.push(product.name);
 
     // Append size+unit if present and not already in the name
-    if (product.size && product.unit) {
-        const sizeUnit = `${product.size}${product.unit}`;
+    const physicalWeight = product.customAttributes?.physical?.netWeight || product.size;
+    const physicalType = product.customAttributes?.physical?.sizeType || product.customAttributes?.physical?.unit || 
+                         (product.unit && !['UNIT', 'PACK', 'DOZEN'].includes(product.unit.toUpperCase().trim()) ? product.unit : '');
+
+    if (physicalWeight) {
+        const sizeUnit = `${physicalWeight}${physicalType}`;
         const normalizedName = product.name.replace(/\s+/g, '').toLowerCase();
         const normalizedSizeUnit = sizeUnit.replace(/\s+/g, '').toLowerCase();
         if (!normalizedName.includes(normalizedSizeUnit)) {

@@ -27,22 +27,22 @@ export default function DirectoryGrid({ displayedEmployees, isLoadingEmployees, 
                <div
                   key={employee.id}
                   onClick={() => setSelectedEmployee(employee)}
-                  className="bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.06] hover:border-white/10 rounded-xl p-5 cursor-pointer transition-all duration-200"
+                  className="bg-white/80 dark:bg-[#18201B]/40 hover:bg-[#2C5E3B]/5 dark:hover:bg-white/5 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-2xl p-5 cursor-pointer transition-all duration-200 shadow-sm active:scale-[0.98]"
                >
                   <div className="flex items-start gap-4">
-                     <div className="relative flex-shrink-0">
+                     <div className="relative flex-shrink-0 select-none">
                         <img
-                           src={employee.avatar || `https://ui-avatars.com/api/?name=${employee.name}&background=1a1a1a&color=ffffff&bold=true`}
-                           className="w-12 h-12 rounded-full object-cover"
+                           src={employee.avatar || `https://ui-avatars.com/api/?name=${employee.name}&background=2C5E3B&color=ffffff&bold=true`}
+                           className="w-12 h-12 rounded-full object-cover border border-[#E2DCCE] dark:border-white/10"
                            alt={employee.name}
                         />
-                        <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-[#0a0a0a] ${employee.status === 'Active' ? 'bg-emerald-400' : 'bg-gray-500'}`} />
+                        <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white dark:border-[#131915] ${employee.status === 'Active' ? 'bg-emerald-500' : 'bg-gray-400'}`} />
                      </div>
 
                      <div className="flex-1 min-w-0">
-                        <h3 className="text-sm font-semibold text-white truncate">{employee.name}</h3>
-                        <p className={`text-xs mt-0.5 ${roleConfig.styles.text}`}>{roleConfig.label}</p>
-                        <p className="text-[11px] text-gray-500 mt-1 truncate">
+                        <h3 className="text-sm font-bold text-[#1E3F27] dark:text-white truncate">{employee.name}</h3>
+                        <p className={`text-xs mt-0.5 font-semibold ${roleConfig.styles.text}`}>{roleConfig.label}</p>
+                        <p className="text-[11px] text-stone-500 dark:text-gray-400 mt-1.5 truncate font-medium">
                            {sites.find(s => s.id === employee.siteId)?.name || 'Unassigned'}
                         </p>
                      </div>

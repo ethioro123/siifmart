@@ -65,7 +65,7 @@ export const ReceiveDetailsModal: React.FC<ReceiveDetailsModalProps> = ({
     const destSite = isPO(selectedItem) ? sites.find(s => s.id === selectedItem.siteId) : sites.find(s => s.id === (selectedItem as any).siteId);
     const destDisplay = destSite ? (
         <>
-            {destSite.name} <span className="text-blue-600/50 dark:text-blue-400/50 font-normal lowercase">({destSite.code || destSite.id})</span>
+            {destSite.name} <span className="text-[#2C5E3B]/50 dark:text-[#A9CBA2]/50 font-normal lowercase">({destSite.code || destSite.id})</span>
         </>
     ) : 'Unknown Site';
 
@@ -81,21 +81,21 @@ export const ReceiveDetailsModal: React.FC<ReceiveDetailsModalProps> = ({
 
     return (
         <div className="fixed inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-sm flex items-stretch md:items-center justify-center z-[200] p-0 md:p-4 animate-in fade-in duration-200">
-            <div className="bg-white dark:bg-black md:border-2 border-slate-200 dark:border-white/10 md:rounded-3xl w-full md:max-w-2xl shadow-2xl flex flex-col h-full md:h-auto md:max-h-[90vh] overflow-hidden relative">
+            <div className="glass-panel md:rounded-3xl w-full md:max-w-2xl flex flex-col h-full md:h-auto md:max-h-[90vh] overflow-hidden relative">
                 {/* 🌟 Modal Ambient Glow — hidden on mobile */}
-                <div className="hidden md:block absolute -top-24 -right-24 w-64 h-64 bg-cyan-500/5 dark:bg-cyan-500/10 blur-[100px] rounded-full pointer-events-none" />
-                <div className="hidden md:block absolute -bottom-24 -left-24 w-64 h-64 bg-violet-500/5 dark:bg-violet-500/10 blur-[100px] rounded-full pointer-events-none" />
+                <div className="hidden md:block absolute -top-24 -right-24 w-64 h-64 bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/5 blur-[100px] rounded-full pointer-events-none" />
+                <div className="hidden md:block absolute -bottom-24 -left-24 w-64 h-64 bg-amber-600/10 dark:bg-amber-700/5 blur-[100px] rounded-full pointer-events-none" />
 
                 {/* Header */}
-                <div className="p-4 md:p-6 border-b border-slate-200 dark:border-white/10 flex justify-between items-start bg-slate-50/80 dark:bg-zinc-950/50 backdrop-blur-sm">
+                <div className="p-4 md:p-6 border-b border-[#E2DCCE]/60 dark:border-[#A9CBA2]/[0.06] flex justify-between items-start bg-[#FAF8F5]/30 dark:bg-[#1C2620]/30 backdrop-blur-sm">
                     <div className="flex gap-3 md:gap-4 relative z-10">
-                        <div className={`hidden md:flex p-3 rounded-xl border border-slate-200 dark:border-white/10 transition-all duration-500 ${data.type === 'PO' ? 'bg-cyan-50 dark:bg-cyan-500 text-cyan-600 dark:text-black shadow-md dark:shadow-cyan-500/20' : 'bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-100'}`}>
+                        <div className={`hidden md:flex p-3 rounded-xl border border-[#E2DCCE]/20 dark:border-[#A9CBA2]/20 transition-all duration-500 ${data.type === 'PO' ? 'bg-[#2C5E3B]/15 dark:bg-[#A9CBA2]/15 text-[#2C5E3B] dark:text-[#A9CBA2] shadow-sm' : 'bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-100'}`}>
                             {data.type === 'PO' ? <FileText size={24} /> : <Box size={24} />}
                         </div>
                         <div>
                             <div className="flex items-center gap-2 mb-1">
                                 <h3 className="text-base md:text-xl font-black text-slate-900 dark:text-white uppercase tracking-tight font-mono">{data.reference}</h3>
-                                <Badge variant="neutral" className="border-slate-200 dark:border-zinc-700 bg-slate-100 dark:bg-white/5 text-[9px] font-mono text-slate-600 dark:text-gray-400">
+                                <Badge variant="neutral" className="border-[#E2DCCE]/60 dark:border-[#A9CBA2]/[0.06] bg-[#FAF8F5]/80 dark:bg-[#1C2620]/60 text-[9px] font-mono text-slate-600 dark:text-gray-400">
                                     {data.status}
                                 </Badge>
                             </div>
@@ -111,54 +111,54 @@ export const ReceiveDetailsModal: React.FC<ReceiveDetailsModalProps> = ({
                 </div>
 
                 {/* Metadata Grid */}
-                <div className="grid grid-cols-2 gap-px bg-slate-200 dark:bg-zinc-900 border-b border-slate-200 dark:border-white/10">
-                    <div className="bg-white dark:bg-black p-3 md:p-4 flex items-center gap-2 md:gap-3">
-                        <div className="hidden md:flex p-2 bg-slate-50 dark:bg-white/5 rounded-lg text-slate-600 dark:text-zinc-400 border border-slate-100 dark:border-white/5">
+                <div className="grid grid-cols-2 gap-px bg-[#E2DCCE]/50 dark:bg-emerald-950/20 border-b border-[#E2DCCE]/50 dark:border-emerald-950/20">
+                    <div className="bg-white/40 dark:bg-[#1C2620]/40 p-3 md:p-4 flex items-center gap-2 md:gap-3">
+                        <div className="hidden md:flex p-2 bg-[#FAF8F5]/80 dark:bg-[#1C2620]/30 rounded-lg text-[#2C5E3B] dark:text-[#A9CBA2] border border-[#E2DCCE]/30 dark:border-white/5">
                             <Calendar size={18} />
                         </div>
                         <div>
-                            <p className="text-[10px] text-slate-400 dark:text-zinc-600 uppercase font-black tracking-widest leading-none mb-1.5">Date</p>
+                            <p className="text-[10px] text-stone-400 dark:text-stone-500 uppercase font-black tracking-widest leading-none mb-1.5">Date</p>
                             <p className="text-xs text-slate-900 dark:text-zinc-200 font-mono tracking-tighter font-black">{formatDateTime(data.date, { showTime: true })}</p>
                         </div>
                     </div>
-                    <div className="bg-white dark:bg-black p-3 md:p-4 flex items-center gap-2 md:gap-3">
-                        <div className="hidden md:flex p-2 bg-slate-50 dark:bg-white/5 rounded-lg text-slate-600 dark:text-zinc-400 border border-slate-100 dark:border-white/5">
+                    <div className="bg-white/40 dark:bg-[#1C2620]/40 p-3 md:p-4 flex items-center gap-2 md:gap-3">
+                        <div className="hidden md:flex p-2 bg-[#FAF8F5]/80 dark:bg-[#1C2620]/30 rounded-lg text-[#2C5E3B] dark:text-[#A9CBA2] border border-[#E2DCCE]/30 dark:border-white/5">
                             <User size={18} />
                         </div>
                         <div>
-                            <p className="text-[10px] text-slate-400 dark:text-zinc-600 uppercase font-black tracking-widest leading-none mb-1.5">Processed By</p>
+                            <p className="text-[10px] text-stone-400 dark:text-stone-500 uppercase font-black tracking-widest leading-none mb-1.5">Processed By</p>
                             <p className="text-xs text-slate-900 dark:text-zinc-200 font-black uppercase break-words leading-tight">
-                                {data.user.name} {data.user.displayId && <span className="text-slate-400 dark:text-zinc-600 font-normal lowercase">({data.user.displayId})</span>}
+                                {data.user.name} {data.user.displayId && <span className="text-slate-400 dark:text-[#A9CBA2]/60 font-normal lowercase">({data.user.displayId})</span>}
                             </p>
                         </div>
                     </div>
-                    <div className="bg-white dark:bg-black p-3 md:p-4 flex items-center gap-2 md:gap-3 col-span-2">
-                        <div className="hidden md:flex p-2 bg-blue-50 dark:bg-blue-500/10 rounded-lg text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-500/20">
+                    <div className="bg-white/40 dark:bg-[#1C2620]/40 p-3 md:p-4 flex items-center gap-2 md:gap-3 col-span-2">
+                        <div className="hidden md:flex p-2 bg-[#2C5E3B]/15 dark:bg-[#A9CBA2]/15 rounded-lg text-[#2C5E3B] dark:text-[#A9CBA2] border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20">
                             <ArrowRight size={18} />
                         </div>
                         <div>
-                            <p className="text-[10px] text-slate-400 dark:text-zinc-600 uppercase font-black tracking-widest leading-none mb-1.5">Destination Site</p>
-                            <p className="text-xs text-blue-600 dark:text-blue-400 font-black uppercase break-words leading-tight">{destDisplay}</p>
+                            <p className="text-[10px] text-[#2C5E3B]/60 dark:text-[#A9CBA2]/60 uppercase font-black tracking-widest leading-none mb-1.5">Destination Site</p>
+                            <p className="text-xs text-[#2C5E3B] dark:text-[#A9CBA2] font-black uppercase break-words leading-tight">{destDisplay}</p>
                         </div>
                     </div>
                 </div>
 
                 {/* Line Items */}
-                <div className="flex-1 overflow-y-auto p-4 md:p-6 custom-scrollbar bg-slate-50/30 dark:bg-black/50">
+                <div className="flex-1 overflow-y-auto p-4 md:p-6 custom-scrollbar bg-[#FAF8F5]/30 dark:bg-[#18201B]/30">
                     <h4 className="text-[10px] font-black text-slate-500 dark:text-gray-500 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
                         <Package size={12} className="text-slate-400" /> Items Received
                     </h4>
                     <div className="space-y-3">
                         {data.items.map((item: any, idx: number) => (
-                            <div key={idx} className="bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl p-3 md:p-4 flex items-center justify-between group hover:border-cyan-500/30 dark:hover:border-cyan-400/30 transition-all shadow-sm">
+                            <div key={idx} className="group glass-panel-pushed hover:border-[#2C5E3B]/30 dark:hover:border-[#A9CBA2]/30 p-3 md:p-4 flex items-center justify-between transition-all shadow-sm">
                                 <div className="flex items-center gap-3 md:gap-4 flex-1 min-w-0">
-                                    <div className="hidden md:flex w-10 h-10 bg-slate-50 dark:bg-black/40 rounded-lg border border-slate-100 dark:border-white/10 items-center justify-center text-slate-400 dark:text-zinc-600 font-black text-xs font-mono">
+                                    <div className="hidden md:flex w-10 h-10 bg-[#FAF8F5]/80 dark:bg-[#1C2620]/30 rounded-lg border border-[#E2DCCE]/60 dark:border-[#A9CBA2]/[0.06] items-center justify-center text-[#2C5E3B]/60 dark:text-[#A9CBA2]/60 font-black text-xs font-mono">
                                         {String(idx + 1).padStart(2, '0')}
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <p className="text-slate-900 dark:text-white font-black uppercase tracking-tight text-xs md:text-sm truncate">{item.name || item.productName || 'Unknown Item'}</p>
                                         <div className="flex flex-wrap items-center gap-3 mt-1.5">
-                                            <span className="text-[9px] text-slate-500 dark:text-gray-400 font-black font-mono tracking-widest bg-slate-100 dark:bg-white/5 px-1.5 py-0.5 rounded uppercase border border-slate-200 dark:border-white/5">
+                                            <span className="text-[9px] text-[#2C5E3B] dark:text-[#A9CBA2] font-black font-mono tracking-widest bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 px-1.5 py-0.5 rounded uppercase border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20">
                                                 {item.sku}
                                             </span>
                                             {item.barcode && (
@@ -203,7 +203,7 @@ export const ReceiveDetailsModal: React.FC<ReceiveDetailsModalProps> = ({
                                 <div className="flex items-center gap-3 md:gap-6 flex-shrink-0 ml-2">
                                     <div className="text-right">
                                         <p className="text-[9px] text-slate-400 dark:text-zinc-600 uppercase font-black tracking-widest mb-1.5">Quantity</p>
-                                        <p className="text-lg font-black text-slate-900 dark:text-cyan-400 tabular-nums font-mono leading-none">
+                                        <p className="text-lg font-black text-[#2C5E3B] dark:text-[#A9CBA2] tabular-nums font-mono leading-none">
                                             {(() => {
                                                 const baseQty = item.receivedQty || item.quantity || item.expectedQty || 0;
                                                 const itemUnit = getSellUnit(item.unit);
@@ -214,7 +214,7 @@ export const ReceiveDetailsModal: React.FC<ReceiveDetailsModalProps> = ({
                                                     return (
                                                         <>
                                                             {baseQty}
-                                                            <span className="text-[10px] text-slate-400 dark:text-zinc-500 font-bold ml-1 uppercase">× {sizeNum}{itemUnit.shortLabel.toLowerCase()}</span>
+                                                            <span className="text-[10px] text-[#2C5E3B]/70 dark:text-[#A9CBA2]/70 font-bold ml-1 uppercase">× {sizeNum}{itemUnit.shortLabel.toLowerCase()}</span>
                                                         </>
                                                     );
                                                 }
@@ -222,7 +222,7 @@ export const ReceiveDetailsModal: React.FC<ReceiveDetailsModalProps> = ({
                                                     <>
                                                         {baseQty}
                                                         {itemUnit.code !== 'UNIT' && (
-                                                            <span className="text-[10px] text-slate-400 dark:text-zinc-500 font-bold ml-1 uppercase">{itemUnit.shortLabel}</span>
+                                                            <span className="text-[10px] text-[#2C5E3B]/70 dark:text-[#A9CBA2]/70 font-bold ml-1 uppercase">{itemUnit.shortLabel}</span>
                                                         )}
                                                     </>
                                                 );
@@ -234,7 +234,7 @@ export const ReceiveDetailsModal: React.FC<ReceiveDetailsModalProps> = ({
 
                                     <button
                                         onClick={() => handleOpenReprint(item)}
-                                        className="p-2.5 md:p-3 bg-cyan-50 dark:bg-cyan-500 text-cyan-600 dark:text-black rounded-lg hover:bg-cyan-100 dark:hover:bg-cyan-400 transition-all shadow-md dark:shadow-cyan-500/20 active:scale-95 border border-cyan-100 dark:border-cyan-400/30"
+                                        className="woody-btn-primary rounded-lg p-2.5 md:p-3 active:scale-95 text-[#FAF8F5] dark:text-[#1E3B24] flex items-center justify-center"
                                         title="Print Label"
                                     >
                                         <Printer size={18} />
@@ -246,10 +246,10 @@ export const ReceiveDetailsModal: React.FC<ReceiveDetailsModalProps> = ({
                 </div>
 
                 {/* Footer */}
-                <div className="p-4 md:p-6 border-t border-slate-200 dark:border-zinc-900 bg-slate-50/50 dark:bg-zinc-950/40 flex justify-end gap-3 shrink-0">
+                <div className="p-4 md:p-6 border-t border-[#E2DCCE]/50 dark:border-emerald-950/20 bg-white/20 dark:bg-[#1C2620]/20 flex justify-end gap-3 shrink-0">
                     <button
                         onClick={onClose}
-                        className="w-full md:w-auto px-10 py-3.5 bg-slate-100 dark:bg-white text-slate-900 dark:text-black hover:bg-slate-200 dark:hover:bg-gray-100 font-black uppercase tracking-widest text-[10px] rounded-xl transition-all shadow-md border border-slate-200 dark:border-white/10 active:scale-[0.98]"
+                        className="woody-btn-secondary w-full md:w-auto px-10 py-3.5 text-[10px] uppercase tracking-widest font-black"
                     >
                         Dismiss Manifest
                     </button>

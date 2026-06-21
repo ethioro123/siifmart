@@ -306,22 +306,22 @@ export default function UnknownBarcodeModal({
     return (
         <Modal isOpen={isOpen} onClose={onClose} title="Unknown Barcode Detected" size="md">
             <div className="space-y-6">
-                <div className="bg-yellow-500/10 border border-yellow-500/20 p-4 rounded-xl">
+                <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/30 p-4 rounded-xl">
                     <div className="flex items-center gap-3 mb-3">
-                        <AlertTriangle className="text-yellow-500 flex-shrink-0" size={24} />
-                        <h3 className="font-bold text-white">Barcode Not Found</h3>
+                        <AlertTriangle className="text-amber-600 dark:text-amber-400 flex-shrink-0" size={24} />
+                        <h3 className="font-bold text-[#1E3F27] dark:text-[#EAE5D9]">Barcode Not Found</h3>
                     </div>
-                    <div className="bg-black/30 border border-yellow-500/30 rounded-lg p-3 text-center">
-                        <p className="text-xs text-yellow-400 mb-1">Scanned Barcode</p>
-                        <p className="text-2xl text-yellow-300 font-mono font-bold tracking-wider">{barcode || 'N/A'}</p>
+                    <div className="bg-white dark:bg-black/30 border border-amber-200 dark:border-amber-900/30 rounded-lg p-3 text-center shadow-inner">
+                        <p className="text-xs text-amber-600 dark:text-amber-400 mb-1">Scanned Barcode</p>
+                        <p className="text-2xl text-amber-700 dark:text-amber-300 font-mono font-bold tracking-wider">{barcode || 'N/A'}</p>
                     </div>
                 </div>
 
                 {step === 'evidence' ? (
                     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
                         <div className="space-y-2">
-                            <h4 className="text-sm font-black text-white uppercase tracking-widest">Capture Evidence</h4>
-                            <p className="text-gray-400 text-xs leading-relaxed">
+                            <h4 className="text-sm font-black text-[#1E3F27] dark:text-[#EAE5D9] uppercase tracking-widest">Capture Evidence</h4>
+                            <p className="text-[#4D6E56] dark:text-gray-400 text-xs leading-relaxed">
                                 Please provide a clear photo of the product tag or physical item.
                                 This helps managers verify the mapping.
                             </p>
@@ -335,14 +335,14 @@ export default function UnknownBarcodeModal({
                                         setCaptureMode('camera');
                                         startCamera();
                                     }}
-                                    className="group relative flex flex-col items-center justify-center gap-4 p-8 rounded-3xl bg-blue-500/5 border border-blue-500/10 hover:border-blue-500/40 hover:bg-blue-500/10 transition-all duration-300"
+                                    className="group relative flex flex-col items-center justify-center gap-4 p-8 rounded-3xl bg-white dark:bg-black/25 border border-[#E2DCCE] dark:border-white/10 hover:border-[#2C5E3B]/40 hover:bg-[#2C5E3B]/5 transition-all duration-300 shadow-sm"
                                 >
-                                    <div className="w-16 h-16 rounded-2xl bg-blue-500/20 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                                        <Camera size={32} className="text-blue-400" />
+                                    <div className="w-16 h-16 rounded-2xl bg-[#2C5E3B]/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                                        <Camera size={32} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
                                     </div>
                                     <div className="text-center">
-                                        <span className="block text-sm font-black text-white uppercase tracking-wider mb-1">Take Photo</span>
-                                        <span className="block text-[10px] text-blue-400 font-bold uppercase opacity-60">Use Camera</span>
+                                        <span className="block text-sm font-black text-[#1E3F27] dark:text-white uppercase tracking-wider mb-1">Take Photo</span>
+                                        <span className="block text-[10px] text-[#2C5E3B] dark:text-[#A9CBA2] font-bold uppercase opacity-60">Use Camera</span>
                                     </div>
                                 </button>
 
@@ -355,14 +355,14 @@ export default function UnknownBarcodeModal({
                                             fileInputRef.current.click();
                                         }
                                     }}
-                                    className="group relative flex flex-col items-center justify-center gap-4 p-8 rounded-3xl bg-cyan-500/5 border border-cyan-500/10 hover:border-cyan-500/40 hover:bg-cyan-500/10 transition-all duration-300"
+                                    className="group relative flex flex-col items-center justify-center gap-4 p-8 rounded-3xl bg-white dark:bg-black/25 border border-[#E2DCCE] dark:border-white/10 hover:border-amber-500/40 hover:bg-amber-500/5 transition-all duration-300 shadow-sm"
                                 >
-                                    <div className="w-16 h-16 rounded-2xl bg-cyan-500/20 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                                        <ImageIcon size={32} className="text-cyan-400" />
+                                    <div className="w-16 h-16 rounded-2xl bg-amber-500/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                                        <ImageIcon size={32} className="text-amber-600 dark:text-amber-400" />
                                     </div>
                                     <div className="text-center">
-                                        <span className="block text-sm font-black text-white uppercase tracking-wider mb-1">Library</span>
-                                        <span className="block text-[10px] text-cyan-400 font-bold uppercase opacity-60">Existing Media</span>
+                                        <span className="block text-sm font-black text-[#1E3F27] dark:text-white uppercase tracking-wider mb-1">Library</span>
+                                        <span className="block text-[10px] text-amber-600 dark:text-amber-400 font-bold uppercase opacity-60">Existing Media</span>
                                     </div>
                                 </button>
                             </div>
@@ -382,9 +382,9 @@ export default function UnknownBarcodeModal({
                                 {/* Camera Controls Layer */}
                                 <div className="absolute inset-0 flex flex-col justify-between p-6 pointer-events-none">
                                     <div className="flex justify-between items-start">
-                                        <div className="px-3 py-1 bg-black/60 backdrop-blur-md rounded-full border border-cyber-primary/30 flex items-center gap-2">
-                                            <div className="w-2 h-2 rounded-full bg-cyber-primary animate-pulse" />
-                                            <span className="text-[10px] font-black text-cyber-primary uppercase tracking-widest">Live Stream</span>
+                                        <div className="px-3 py-1 bg-black/60 backdrop-blur-md rounded-full border border-[#2C5E3B]/30 flex items-center gap-2">
+                                            <div className="w-2 h-2 rounded-full bg-[#2C5E3B] dark:bg-[#A9CBA2] animate-pulse" />
+                                            <span className="text-[10px] font-black text-[#2C5E3B] dark:text-[#A9CBA2] uppercase tracking-widest">Live Stream</span>
                                         </div>
                                         <button
                                             onClick={() => {
@@ -406,7 +406,7 @@ export default function UnknownBarcodeModal({
                                             title="Capture Photo"
                                             className="group w-16 h-16 rounded-full border-4 border-white flex items-center justify-center p-1 pointer-events-auto hover:scale-110 transition-transform active:scale-95"
                                         >
-                                            <div className="w-full h-full rounded-full bg-white group-hover:bg-cyber-primary transition-colors" />
+                                            <div className="w-full h-full rounded-full bg-white group-hover:bg-[#2C5E3B] dark:group-hover:bg-[#A9CBA2] transition-colors" />
                                         </button>
                                     </div>
                                 </div>
@@ -414,11 +414,11 @@ export default function UnknownBarcodeModal({
                         )}
 
                         {imagePreview && (
-                            <div className="relative rounded-3xl overflow-hidden bg-black/40 border border-white/10 aspect-video flex items-center justify-center group">
+                            <div className="relative rounded-3xl overflow-hidden bg-black/40 border border-[#E2DCCE] dark:border-white/10 aspect-video flex items-center justify-center group">
                                 {isCompressing ? (
                                     <div className="flex flex-col items-center gap-4">
-                                        <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
-                                        <span className="text-blue-400 font-black text-[10px] uppercase tracking-[0.2em] animate-pulse">OPTIMIZING ASSET...</span>
+                                        <div className="w-12 h-12 border-4 border-[#2C5E3B] border-t-transparent rounded-full animate-spin" />
+                                        <span className="text-[#2C5E3B] dark:text-[#A9CBA2] font-black text-[10px] uppercase tracking-[0.2em] animate-pulse">OPTIMIZING ASSET...</span>
                                     </div>
                                 ) : (
                                     <>
@@ -451,14 +451,14 @@ export default function UnknownBarcodeModal({
                             onChange={handleFileChange}
                         />
 
-                        <div className="flex items-center justify-between pt-4 border-t border-white/5">
-                            <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">
+                        <div className="flex items-center justify-between pt-4 border-t border-[#E2DCCE] dark:border-white/5">
+                            <span className="text-[10px] font-black text-stone-400 dark:text-gray-500 uppercase tracking-widest">
                                 {imageFile ? 'Ready to proceed' : 'Selection Required'}
                             </span>
                             <button
                                 onClick={() => setStep('search')}
                                 disabled={!imageFile || isCompressing || captureMode === 'camera'}
-                                className="group px-6 py-3 bg-blue-500 hover:bg-blue-400 text-white font-black rounded-2xl disabled:opacity-30 disabled:grayscale transition-all flex items-center gap-3 text-xs uppercase tracking-[0.2em] shadow-xl shadow-blue-500/20"
+                                className="group px-6 py-3 bg-gradient-to-br from-[#224429] to-[#2C5E3B] hover:opacity-90 text-white font-black rounded-2xl disabled:opacity-30 disabled:grayscale transition-all flex items-center gap-3 text-xs uppercase tracking-[0.2em] shadow-md"
                             >
                                 Continue To Mapping
                                 <ChevronRight size={16} className="group-hover:translate-x-1 transition-transform" />
@@ -467,16 +467,16 @@ export default function UnknownBarcodeModal({
                     </div>
                 ) : (
                     <div className="space-y-4">
-                        <p className="text-gray-300 text-sm">Search for the existing product ID/SKU to map this barcode to.</p>
+                        <p className="text-[#1E3F27] dark:text-gray-300 text-sm">Search for the existing product ID/SKU to map this barcode to.</p>
 
                         <div className="relative">
-                            <Search className="absolute left-3 top-3 text-gray-500" size={18} />
+                            <Search className="absolute left-3 top-3 text-[#4D6E56] dark:text-gray-500" size={18} />
                             <input
                                 ref={searchInputRef}
                                 type="text"
                                 placeholder="Search product name or SKU..."
                                 aria-label="Search products"
-                                className="w-full bg-black/50 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-white focus:border-cyber-primary focus:outline-none"
+                                className="w-full bg-white dark:bg-black/50 border border-[#E2DCCE] dark:border-white/10 rounded-xl pl-10 pr-4 py-3 text-[#1E3F27] dark:text-white focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:outline-none transition-colors"
                                 value={searchTerm || ''}
                                 onChange={e => setSearchTerm(e.target.value)}
                                 onKeyDown={handleSearchKeyDown}
@@ -492,18 +492,18 @@ export default function UnknownBarcodeModal({
                                         key={product.id}
                                         onClick={() => setSelectedProduct(product)}
                                         className={`w-full text-left p-3 rounded-xl border transition-all ${selectedProduct?.id === product.id
-                                            ? 'bg-cyber-primary/20 border-cyber-primary'
-                                            : 'bg-white/5 border-transparent hover:bg-white/10'
+                                            ? 'bg-[#2C5E3B]/10 border-[#2C5E3B] dark:border-[#A9CBA2] text-[#2C5E3B] dark:text-[#A9CBA2]'
+                                            : 'bg-white dark:bg-black/25 border border-[#E2DCCE] dark:border-white/5 text-stone-700 dark:text-gray-300 hover:bg-white dark:hover:bg-[#18201B]/40 hover:border-[#2C5E3B]/30'
                                             }`}
                                     >
-                                        <div className="font-bold text-white">{product.name}</div>
-                                        <div className="text-xs text-gray-400 flex justify-between items-center">
+                                        <div className="font-bold text-[#1E3F27] dark:text-[#EAE5D9]">{product.name}</div>
+                                        <div className="text-xs text-[#4D6E56] dark:text-gray-400 flex justify-between items-center">
                                             <span className="font-mono">{product.sku}</span>
                                             <div className="flex items-center gap-2">
                                                 {isLocalStock ? (
-                                                    <span className="px-2 py-0.5 bg-green-500/20 text-green-400 rounded text-[10px] font-bold">Store: {product.stock}</span>
+                                                    <span className="px-2 py-0.5 bg-[#2C5E3B]/10 text-[#2C5E3B] dark:text-[#A9CBA2] rounded text-[10px] font-bold">Store: {product.stock}</span>
                                                 ) : (
-                                                    <span className="px-2 py-0.5 bg-blue-500/20 text-blue-400 rounded text-[10px] font-bold">Global: {product.stock}</span>
+                                                    <span className="px-2 py-0.5 bg-sky-500/10 text-sky-600 dark:text-sky-400 rounded text-[10px] font-bold">Global: {product.stock}</span>
                                                 )}
                                             </div>
                                         </div>
@@ -511,19 +511,19 @@ export default function UnknownBarcodeModal({
                                 );
                             })}
                             {searchTerm && filteredProducts.length === 0 && (
-                                <div className="text-center text-gray-500 py-4">No products found</div>
+                                <div className="text-center text-[#4D6E56] dark:text-gray-500 py-4">No products found</div>
                             )}
                         </div>
 
-                        <div className="flex justify-end gap-3 pt-4 border-t border-white/10">
+                        <div className="flex justify-end gap-3 pt-4 border-t border-[#E2DCCE] dark:border-white/10">
                             {selectedProduct && (
-                                <div className="mr-auto text-sm text-cyber-primary self-center">
+                                <div className="mr-auto text-sm text-[#2C5E3B] dark:text-[#A9CBA2] font-semibold self-center">
                                     Linking to: <b>{selectedProduct.name}</b>
                                 </div>
                             )}
                             <button
                                 onClick={() => setStep('evidence')}
-                                className="px-4 py-2 text-gray-400 hover:text-white"
+                                className="px-4 py-2 text-stone-500 hover:text-[#2C5E3B] dark:text-gray-400 dark:hover:text-white transition-colors"
                             >
                                 Back
                             </button>
@@ -532,7 +532,7 @@ export default function UnknownBarcodeModal({
                                     handleMap();
                                 }}
                                 disabled={!selectedProduct || isUploading}
-                                className="px-6 py-2 bg-cyber-primary text-black font-bold rounded-lg disabled:opacity-50 flex items-center gap-2"
+                                className="px-6 py-2 bg-gradient-to-br from-[#224429] to-[#2C5E3B] text-white hover:opacity-90 font-bold rounded-lg disabled:opacity-50 flex items-center gap-2 transition-all shadow-md"
                             >
                                 {isUploading ? <Loader2 className="animate-spin" size={18} /> : <LinkIcon size={18} />}
                                 Map Barcode

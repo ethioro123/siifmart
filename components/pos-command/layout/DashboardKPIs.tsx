@@ -6,12 +6,7 @@ import { CURRENCY_SYMBOL } from '../../../constants';
 
 export const DashboardKPIs: React.FC = () => {
     const { t } = useLanguage();
-    const {
-        cashInDrawer,
-        personalSales,
-        txCount,
-        returnCount
-    } = usePOSCommand();
+    const { cashInDrawer, personalSales, txCount, returnCount } = usePOSCommand();
 
     return (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
@@ -21,22 +16,22 @@ export const DashboardKPIs: React.FC = () => {
                 trend="+12%"
                 trendUp={true}
                 color="green"
-                icon={<DollarSign size={24} className="text-green-400 group-hover:drop-shadow-[0_0_8px_rgba(34,197,94,0.8)] transition-all" />}
+                icon={<DollarSign size={22} className="text-emerald-600 dark:text-emerald-400 group-hover:scale-110 transition-transform" />}
             />
             <KPICard
                 title={t('pos.personalSales')}
                 value={`${CURRENCY_SYMBOL} ${personalSales.toLocaleString()}`}
                 subtitle={t('pos.todayShift')}
-                color="blue"
-                icon={<UserCheck size={24} className="text-blue-400 group-hover:drop-shadow-[0_0_8px_rgba(59,130,246,0.8)] transition-all" />}
+                color="forest"
+                icon={<UserCheck size={22} className="text-[#2C5E3B] dark:text-[#A9CBA2] group-hover:scale-110 transition-transform" />}
             />
             <KPICard
                 title={t('pos.transactions')}
                 value={txCount.toString()}
                 trend="+18%"
                 trendUp={true}
-                color="purple"
-                icon={<Activity size={24} className="text-purple-400 group-hover:drop-shadow-[0_0_8px_rgba(168,85,247,0.8)] transition-all" />}
+                color="sage"
+                icon={<Activity size={22} className="text-[#2C5E3B] dark:text-[#A9CBA2] group-hover:scale-110 transition-transform" />}
             />
             <KPICard
                 title={t('pos.returns')}
@@ -44,7 +39,7 @@ export const DashboardKPIs: React.FC = () => {
                 trend="-5%"
                 trendUp={false}
                 color="red"
-                icon={<RefreshCw size={24} className="text-red-400 group-hover:drop-shadow-[0_0_8px_rgba(239,68,68,0.8)] transition-all" />}
+                icon={<RefreshCw size={22} className="text-red-500 dark:text-red-400 group-hover:scale-110 transition-transform" />}
             />
         </div>
     );
@@ -52,36 +47,41 @@ export const DashboardKPIs: React.FC = () => {
 
 const getColorClasses = (color: string) => {
     switch (color) {
-        case 'green': return { container: 'hover:shadow-[0_0_30px_rgba(34,197,94,0.15)] hover:border-green-500/30', bgGlow: 'from-green-500/10', iconBg: 'border-green-500/20 bg-green-500/5', trendBg: 'bg-green-500/10 text-green-400 border-green-500/20' };
-        case 'blue': return { container: 'hover:shadow-[0_0_30px_rgba(59,130,246,0.15)] hover:border-blue-500/30', bgGlow: 'from-blue-500/10', iconBg: 'border-blue-500/20 bg-blue-500/5', trendBg: 'bg-blue-500/10 text-blue-400 border-blue-500/20' };
-        case 'purple': return { container: 'hover:shadow-[0_0_30px_rgba(168,85,247,0.15)] hover:border-purple-500/30', bgGlow: 'from-purple-500/10', iconBg: 'border-purple-500/20 bg-purple-500/5', trendBg: 'bg-purple-500/10 text-purple-400 border-purple-500/20' };
-        case 'red': return { container: 'hover:shadow-[0_0_30px_rgba(239,68,68,0.15)] hover:border-red-500/30', bgGlow: 'from-red-500/10', iconBg: 'border-red-500/20 bg-red-500/5', trendBg: 'bg-red-500/10 text-red-400 border-red-500/20' };
-        default: return { container: 'hover:shadow-[0_0_30px_rgba(0,255,157,0.15)] hover:border-cyber-primary/30', bgGlow: 'from-cyber-primary/10', iconBg: 'border-cyber-primary/20 bg-cyber-primary/5', trendBg: 'bg-cyber-primary/10 text-cyber-primary border-cyber-primary/20' };
+        case 'green':  return { glow: 'bg-emerald-400/15 dark:bg-emerald-500/5',  iconBg: 'bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/20',  badge: 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20' };
+        case 'forest': return { glow: 'bg-[#2C5E3B]/15 dark:bg-[#2C5E3B]/8',      iconBg: 'bg-[#2C5E3B]/8 dark:bg-[#2C5E3B]/10 border-[#2C5E3B]/20 dark:border-[#2C5E3B]/20', badge: 'bg-[#2C5E3B]/8 dark:bg-[#2C5E3B]/10 text-[#2C5E3B] dark:text-[#A9CBA2] border-[#2C5E3B]/20 dark:border-[#2C5E3B]/20' };
+        case 'sage':   return { glow: 'bg-[#A9CBA2]/20 dark:bg-[#A9CBA2]/5',      iconBg: 'bg-[#A9CBA2]/20 dark:bg-[#A9CBA2]/10 border-[#A9CBA2]/30 dark:border-[#A9CBA2]/20', badge: 'bg-[#A9CBA2]/20 dark:bg-[#A9CBA2]/10 text-[#2C5E3B] dark:text-[#A9CBA2] border-[#A9CBA2]/30 dark:border-[#A9CBA2]/20' };
+        case 'red':    return { glow: 'bg-red-400/10 dark:bg-red-500/5',           iconBg: 'bg-red-50 dark:bg-red-500/10 border-red-200 dark:border-red-500/20',                badge: 'bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 border-red-200 dark:border-red-500/20' };
+        default:       return { glow: 'bg-[#2C5E3B]/10',                           iconBg: 'bg-[#2C5E3B]/10 border-[#2C5E3B]/20',                                              badge: 'bg-[#2C5E3B]/10 text-[#2C5E3B] border-[#2C5E3B]/20' };
     }
-}
+};
 
-const KPICard = ({ title, value, subtitle, trend, trendUp, icon, color = "green" }: any) => {
+const KPICard = ({ title, value, subtitle, trend, trendUp, icon, color = 'forest' }: any) => {
     const theme = getColorClasses(color);
 
     return (
-        <div className={`bg-black/40 backdrop-blur-xl border border-white/5 rounded-3xl p-6 relative overflow-hidden group transition-all duration-300 ${theme.container}`}>
-            {/* Holographic Gradient */}
-            <div className={`absolute -top-10 -right-10 w-40 h-40 bg-gradient-to-br ${theme.bgGlow} to-transparent rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500`} />
+        <div className="group relative bg-white/85 dark:bg-[#18201B]/60 backdrop-blur-2xl border border-[#E2DCCE] dark:border-emerald-950/20 rounded-[28px] p-6 overflow-hidden transition-all duration-300 shadow-[0_4px_24px_-4px_rgba(34,50,38,0.04)] dark:shadow-[0_8px_32px_-4px_rgba(5,8,6,0.5)] hover:shadow-[0_12px_40px_-8px_rgba(34,50,38,0.1)] dark:hover:shadow-[0_16px_48px_-8px_rgba(5,8,6,0.7)] hover:-translate-y-0.5">
 
-            <div className="flex justify-between items-start mb-6 relative z-10">
-                <div className={`p-3 rounded-2xl border ${theme.iconBg} backdrop-blur-sm group-hover:-translate-y-1 transition-transform duration-300`}>
+            {/* Ambient corner glow */}
+            <div className={`absolute -top-8 -right-8 w-32 h-32 ${theme.glow} rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500`} />
+
+            {/* Top edge accent */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/2 h-[1px] bg-gradient-to-r from-transparent via-[#2C5E3B]/20 to-transparent" />
+
+            <div className="relative z-10 flex justify-between items-start mb-5">
+                <div className={`p-2.5 rounded-2xl border ${theme.iconBg} group-hover:-translate-y-0.5 transition-transform duration-300`}>
                     {icon}
                 </div>
                 {trend && (
-                    <span className={`text-[10px] font-black px-2.5 py-1 rounded-xl border ${theme.trendBg} tracking-wider shadow-sm`}>
+                    <span className={`text-[10px] font-black px-2.5 py-1 rounded-xl border ${theme.badge} tracking-wider shadow-sm`}>
                         {trend}
                     </span>
                 )}
             </div>
+
             <div className="relative z-10">
-                <h3 className="text-gray-500 text-[11px] font-black uppercase tracking-[0.2em] mb-1.5">{title}</h3>
-                <p className="text-3xl font-mono text-white font-black tracking-tighter drop-shadow-md group-hover:scale-[1.02] origin-left transition-transform duration-300">{value}</p>
-                {subtitle && <p className="text-[10px] text-gray-500 mt-2 uppercase font-bold tracking-wider">{subtitle}</p>}
+                <h3 className="text-[#4D6E56] dark:text-[#7A9E83] text-[10px] font-black uppercase tracking-[0.2em] mb-1.5 select-none">{title}</h3>
+                <p className="text-2xl font-mono font-black tracking-tighter text-[#1E3F27] dark:text-[#EAE5D9] group-hover:scale-[1.01] origin-left transition-transform duration-300">{value}</p>
+                {subtitle && <p className="text-[10px] text-[#4D6E56]/60 dark:text-[#7A9E83] mt-2 uppercase font-bold tracking-wider">{subtitle}</p>}
             </div>
         </div>
     );

@@ -211,3 +211,30 @@ export const getGroupedUnits = () => ({
     weight: SELL_UNITS.filter(u => u.category === 'weight'),
     volume: SELL_UNITS.filter(u => u.category === 'volume'),
 });
+
+/**
+ * Formats a product's size with its correct physical unit.
+ * Priority: customAttributes.physical.sizeType → customAttributes.physical.unit → sell unit label (only for weight/volume).
+ * Count-based units (UNIT, PACK, DOZEN) never show "ea"/"pk"/"dz" as a size suffix — those are meaningless for physical sizes.
+ * e.g., size: "200", unit: "UNIT", customAttributes.physical.sizeType: "g" → "200 g"
+ * e.g., size: "200", unit: "UNIT", no physical sizeType → "200"
+ * e.g., size: "500", unit: "ML" → "500 ml"
+ */
+export const formatProductSize = (product?: { size?: string | number; unit?: string; customAttributes?: any; custom_attributes?: any } | null): string => {
+    if (!product || product.size === undefined || product.size === null || product.size === '') return '';
+    const customAttrs = product.customAttributes || product.custom_attributes;
+    // First: use the physical sizeType from custom attributes (e.g. "g", "ml", "kg")
+    const physicalType = customAttrs?.physical?.sizeType || customAttrs?.physical?.unit || '';
+    if (physicalType) {
+        return `${product.size} ${physicalType}`.trim();
+    }
+    // Fallback: for weight/volume sell units, use the sell unit label; for count-based units, show size alone
+    if (product.unit) {
+        const unitDef = getSellUnit(product.unit);
+        if (unitDef.category !== 'count') {
+            return `${product.size} ${unitDef.shortLabel}`.trim();
+        }
+    }
+    return `${product.size}`;
+};
+

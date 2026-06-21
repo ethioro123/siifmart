@@ -55,7 +55,7 @@ export const POItemsTable: React.FC<POItemsTableProps> = ({
 
     return (
         <div className="relative overflow-hidden rounded-xl p-[1px] group mt-6 transition-all duration-500">
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-transparent to-cyber-primary/10 opacity-30"></div>
+            <div className="absolute inset-0 bg-gradient-to-br from-[#2C5E3B]/10 via-transparent to-amber-500/5 opacity-30"></div>
             <div className="relative bg-white dark:bg-black/40 backdrop-blur-xl rounded-xl overflow-hidden border border-gray-200 dark:border-white/10 shadow-xl dark:shadow-2xl">
                 <table className="w-full text-left border-collapse">
                     <thead>
@@ -72,17 +72,17 @@ export const POItemsTable: React.FC<POItemsTableProps> = ({
                             <tr key={i} className="hover:bg-blue-50/50 dark:hover:bg-white/[0.03] transition-all group/row">
                                 <td className="p-4 pl-6">
                                     <div className="flex items-center gap-4">
-                                        <div className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-black/40 flex items-center justify-center border border-gray-200 dark:border-white/5 group-hover/row:border-blue-500/30 dark:group-hover/row:border-cyber-primary/30 group-hover/row:shadow-sm dark:group-hover/row:shadow-[0_0_10px_rgba(0,255,157,0.1)] transition-all">
-                                            <Package size={16} className="text-gray-400 dark:text-gray-500 group-hover/row:text-blue-600 dark:group-hover/row:text-cyber-primary transition-colors" />
+                                        <div className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-black/40 flex items-center justify-center border border-gray-200 dark:border-white/5 group-hover/row:border-[#2C5E3B]/30 dark:group-hover/row:border-[#A9CBA2]/30 group-hover/row:shadow-sm dark:group-hover/row:shadow-[0_0_10px_rgba(44,94,59,0.05)] transition-all">
+                                            <Package size={16} className="text-gray-400 dark:text-gray-500 group-hover/row:text-[#2C5E3B] dark:group-hover/row:text-[#A9CBA2] transition-colors" />
                                         </div>
                                         <div>
-                                            <div className="text-gray-900 dark:text-white text-sm font-black tracking-tight group-hover/row:text-blue-600 dark:group-hover/row:text-cyber-primary transition-colors">
+                                            <div className="text-gray-900 dark:text-white text-sm font-black tracking-tight group-hover/row:text-[#2C5E3B] dark:group-hover/row:text-[#A9CBA2] transition-colors">
                                                 {formatPOItemDescription(item)}
                                             </div>
                                             <div className="text-xs text-gray-500 dark:text-gray-500 font-mono mt-0.5 flex items-center gap-2">
                                                 <span className="bg-gray-100 dark:bg-white/5 px-2 py-0.5 rounded text-[10px] border border-gray-200 dark:border-white/5 font-bold">{item.sku}</span>
                                                 {item.identityType === 'new' && (
-                                                    <span className="text-[10px] px-1.5 py-0.5 border border-cyber-primary/30 rounded bg-cyber-primary/10 text-cyber-primary font-bold tracking-tighter shadow-[0_0_5px_rgba(0,255,157,0.1)]">
+                                                    <span className="text-[9px] px-2 py-0.5 border border-[#2C5E3B]/30 rounded-md bg-[#2C5E3B]/10 text-[#2C5E3B] dark:border-[#A9CBA2]/30 dark:bg-[#A9CBA2]/10 dark:text-[#A9CBA2] font-extrabold tracking-widest shadow-sm">
                                                         NEW
                                                     </span>
                                                 )}
@@ -96,7 +96,7 @@ export const POItemsTable: React.FC<POItemsTableProps> = ({
                                             <input
                                                 type="number"
                                                 aria-label="Edit Quantity"
-                                                className="w-20 bg-gray-50 dark:bg-black/60 border border-blue-500/50 dark:border-cyber-primary/50 text-blue-600 dark:text-cyber-primary rounded-lg px-3 py-1.5 text-right text-xs outline-none focus:shadow-[0_0_10px_rgba(0,255,157,0.2)] transition-all font-black"
+                                                className="w-20 bg-white dark:bg-black/40 border border-gray-200 dark:border-white/10 text-stone-900 dark:text-white rounded-lg px-3 py-1.5 text-right text-xs outline-none focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:ring-2 focus:ring-[#2C5E3B]/10 dark:focus:ring-[#A9CBA2]/10 transition-all font-black font-mono"
                                                 autoFocus
                                                 value={editValues.qty}
                                                 onChange={e => setEditValues({ ...editValues, qty: parseInt(e.target.value) || 0 })}
@@ -110,7 +110,7 @@ export const POItemsTable: React.FC<POItemsTableProps> = ({
                                             <input
                                                 type="number"
                                                 aria-label="Edit Price"
-                                                className="w-24 bg-gray-50 dark:bg-black/60 border border-blue-500/50 dark:border-cyber-primary/50 text-blue-600 dark:text-cyber-primary rounded-lg px-3 py-1.5 text-right text-xs outline-none focus:shadow-[0_0_10px_rgba(0,255,157,0.2)] transition-all font-black"
+                                                className="w-24 bg-white dark:bg-black/40 border border-gray-200 dark:border-white/10 text-stone-900 dark:text-white rounded-lg px-3 py-1.5 text-right text-xs outline-none focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:ring-2 focus:ring-[#2C5E3B]/10 dark:focus:ring-[#A9CBA2]/10 transition-all font-black font-mono"
                                                 value={editValues.price}
                                                 onChange={e => setEditValues({ ...editValues, price: parseFloat(e.target.value) || 0 })}
                                             />
@@ -122,7 +122,7 @@ export const POItemsTable: React.FC<POItemsTableProps> = ({
                                     )}
                                 </td>
                                 <td className="p-4 text-right font-mono">
-                                    <div className="text-blue-600 dark:text-cyber-primary font-black tabular-nums">
+                                    <div className="text-[#2C5E3B] dark:text-[#A9CBA2] font-black tabular-nums">
                                         {formatCompactNumber(editingIndex === i && editValues ? editValues.qty * editValues.price : item.totalCost, { currency: CURRENCY_SYMBOL })}
                                     </div>
                                 </td>
@@ -146,8 +146,8 @@ export const POItemsTable: React.FC<POItemsTableProps> = ({
                                         </div>
                                     ) : (
                                         <div className="flex justify-end gap-1.5 opacity-0 group-hover/row:opacity-100 transition-all scale-95 group-hover/row:scale-100">
-                                            <button onClick={() => onFullEdit(i)} className="p-2 hover:bg-gray-200 dark:hover:bg-white/10 rounded-lg text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-white border border-transparent hover:border-gray-300 dark:hover:border-white/10 transition-all shadow-sm" title="Full Redesign"><Edit3 size={14} /></button>
-                                            <button onClick={() => startInlineEdit(i)} className="p-2 hover:bg-blue-100 dark:hover:bg-blue-500/10 rounded-lg text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 border border-transparent hover:border-blue-200 dark:hover:border-blue-500/20 transition-all shadow-sm" title="Quick Adjust"><FileText size={14} /></button>
+                                            <button onClick={() => onFullEdit(i)} className="p-2 hover:bg-gray-200 dark:hover:bg-white/10 rounded-lg text-gray-400 dark:text-gray-500 hover:text-[#2C5E3B] dark:hover:text-[#A9CBA2] border border-transparent hover:border-gray-300 dark:hover:border-white/10 transition-all shadow-sm" title="Full Redesign"><Edit3 size={14} /></button>
+                                            <button onClick={() => startInlineEdit(i)} className="p-2 hover:bg-[#2C5E3B]/10 dark:hover:bg-[#A9CBA2]/10 rounded-lg text-gray-400 dark:text-gray-500 hover:text-[#2C5E3B] dark:hover:text-[#A9CBA2] border border-transparent hover:border-[#2C5E3B]/20 dark:hover:border-[#A9CBA2]/20 transition-all shadow-sm" title="Quick Adjust"><FileText size={14} /></button>
                                             <button onClick={() => onRemoveItem(i)} className="p-2 hover:bg-red-100 dark:hover:bg-red-500/10 rounded-lg text-gray-400 dark:text-gray-500 hover:text-red-600 dark:hover:text-red-400 border border-transparent hover:border-red-200 dark:hover:border-red-500/20 transition-all shadow-sm" title="Purge Record"><Trash2 size={14} /></button>
                                         </div>
                                     )}
@@ -159,7 +159,7 @@ export const POItemsTable: React.FC<POItemsTableProps> = ({
                                 <td colSpan={5} className="p-20 text-center">
                                     <div className="flex flex-col items-center justify-center">
                                         <div className="relative mb-6">
-                                            <div className="absolute inset-0 bg-blue-100 dark:bg-cyber-primary/20 blur-2xl rounded-full"></div>
+                                            <div className="absolute inset-0 bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/20 blur-2xl rounded-full"></div>
                                             <div className="relative w-20 h-20 rounded-2xl bg-white dark:bg-black border border-gray-100 dark:border-white/5 flex items-center justify-center shadow-lg dark:shadow-2xl">
                                                 <Package size={32} className="text-gray-300 dark:text-gray-700 animate-pulse" />
                                             </div>

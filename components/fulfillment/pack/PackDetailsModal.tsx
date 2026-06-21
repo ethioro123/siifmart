@@ -4,6 +4,7 @@ import { WMSJob, Product } from '../../../types';
 import { useFulfillment } from '../FulfillmentContext';
 import { formatDateTime } from '../../../utils/formatting';
 import { formatJobId } from '../../../utils/jobIdFormatter';
+import { formatProductSize, isWeightBased, isVolumeBased } from '../../../utils/units';
 
 interface PackDetailsModalProps {
     selectedItem: WMSJob;
@@ -41,6 +42,22 @@ export const PackDetailsModal: React.FC<PackDetailsModalProps> = ({
 
     const [isPrintMenuOpen, setIsPrintMenuOpen] = React.useState(false);
 
+    const getItemMeasureQty = (item: any, productInfo?: any) => {
+        if ((item as any).requestedMeasureQty !== undefined && (item as any).requestedMeasureQty !== null) {
+            return (item as any).requestedMeasureQty;
+        }
+        if (productInfo) {
+            const unit = productInfo.unit;
+            const isWeightVol = isWeightBased(unit) || isVolumeBased(unit);
+            const sizeNum = productInfo.size ? parseFloat(productInfo.size as string) : 0;
+            if (isWeightVol && sizeNum > 0) {
+                const expected = item.expectedQty || (item as any).quantity || 0;
+                return expected * sizeNum;
+            }
+        }
+        return null;
+    };
+
     // Prioritize array fields. If selectedItem.items is a number, ignore it for the array.
     let rawItems = selectedItem.lineItems || (selectedItem as any).line_items ||
         (Array.isArray(selectedItem.items) ? selectedItem.items : null) || [];
@@ -72,13 +89,13 @@ export const PackDetailsModal: React.FC<PackDetailsModalProps> = ({
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[200] p-0 md:p-4 animate-in fade-in duration-200">
             <div className="bg-white dark:bg-black border-0 md:border-2 border-zinc-900 dark:border-white/10 w-full max-w-4xl h-[100dvh] md:h-auto md:max-h-[90vh] md:rounded-3xl shadow-2xl flex flex-col overflow-hidden relative">
                 {/* 🌟 Modal Ambient Glow - Cyan Theme for Pack */}
-                <div className="absolute -top-24 -right-24 w-64 h-64 bg-cyan-500/5 dark:bg-cyan-500/10 blur-[100px] rounded-full pointer-events-none" />
+                <div className="absolute -top-24 -right-24 w-64 h-64 bg-[#2C5E3B]/5 dark:bg-[#2C5E3B]/10 blur-[100px] rounded-full pointer-events-none" />
                 <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-teal-500/5 dark:bg-teal-500/10 blur-[100px] rounded-full pointer-events-none" />
 
                 {/* Header */}
                 <div className="p-3 md:p-6 border-b border-zinc-200 dark:border-white/10 flex justify-between items-start bg-zinc-50/80 dark:bg-zinc-950/50 backdrop-blur-sm shrink-0">
                     <div className="flex gap-3 md:gap-4 relative z-10">
-                        <div className="p-2 md:p-3 rounded-lg md:rounded-xl border border-zinc-300 dark:border-cyan-500/20 bg-zinc-100 dark:bg-cyan-500/10 text-zinc-950 dark:text-cyan-400 shadow-md dark:shadow-cyan-500/20 transition-all duration-500">
+                        <div className="p-2 md:p-3 rounded-lg md:rounded-xl border border-zinc-300 dark:border-[#A9CBA2]/20 bg-zinc-100 dark:bg-[#2C5E3B]/10 text-zinc-950 dark:text-[#A9CBA2] shadow-md dark:shadow-[#2C5E3B]/20 transition-all duration-500">
                             <Archive size={20} className="md:w-6 md:h-6" />
                         </div>
                         <div>
@@ -119,8 +136,8 @@ export const PackDetailsModal: React.FC<PackDetailsModalProps> = ({
                     </div>
                     
                     <div className="bg-white dark:bg-black p-3 md:p-4 flex items-center gap-2 md:gap-3 border-l border-zinc-100 dark:border-white/5 lg:col-span-1">
-                        <div className="w-6 h-6 md:w-8 md:h-8 shrink-0 rounded-full bg-zinc-100 dark:bg-cyan-950 flex items-center justify-center border border-zinc-300 dark:border-cyan-500/30 shadow-inner">
-                            <span className="text-[8px] md:text-[10px] font-black text-zinc-950 dark:text-cyan-400">{(data.userName || 'S').charAt(0).toUpperCase()}</span>
+                            <div className="w-6 h-6 md:w-8 md:h-8 shrink-0 rounded-full bg-zinc-100 dark:bg-[#2C5E3B]/20 flex items-center justify-center border border-zinc-300 dark:border-[#A9CBA2]/30 shadow-inner">
+                                <span className="text-[8px] md:text-[10px] font-black text-zinc-950 dark:text-[#A9CBA2]">{(data.userName || 'S').charAt(0).toUpperCase()}</span>
                         </div>
                         <div className="min-w-0">
                             <p className="text-[8px] md:text-[10px] text-zinc-400 dark:text-zinc-500 uppercase font-black tracking-widest leading-none mb-0.5 md:mb-1 truncate">User</p>
@@ -131,12 +148,12 @@ export const PackDetailsModal: React.FC<PackDetailsModalProps> = ({
                     </div>
 
                     <div className="bg-white dark:bg-black p-3 md:p-4 flex items-center gap-2 md:gap-3 col-span-2 lg:col-span-1 border-t lg:border-t-0 border-zinc-100 dark:border-white/5 lg:border-l">
-                        <div className="p-1.5 md:p-2 bg-zinc-50 dark:bg-white/5 rounded-lg text-cyan-600 dark:text-cyan-400 shrink-0">
+                        <div className="p-1.5 md:p-2 bg-zinc-50 dark:bg-white/5 rounded-lg text-[#2C5E3B] dark:text-[#A9CBA2] shrink-0">
                             <Printer size={14} className="md:w-[18px] md:h-[18px]" />
                         </div>
                         <div className="min-w-0">
                             <p className="text-[8px] md:text-[10px] text-zinc-400 dark:text-zinc-500 uppercase font-black tracking-widest leading-none mb-0.5 md:mb-1 truncate">Tracking</p>
-                            <p className="text-[10px] md:text-xs text-cyan-600 dark:text-cyan-400 font-mono tracking-tight font-black truncate">{data.trackingNumber}</p>
+                            <p className="text-[10px] md:text-xs text-[#2C5E3B] dark:text-[#A9CBA2] font-mono tracking-tight font-black truncate">{data.trackingNumber}</p>
                         </div>
                     </div>
 
@@ -206,14 +223,14 @@ export const PackDetailsModal: React.FC<PackDetailsModalProps> = ({
                                                 )}
 
                                                 {(productInfo?.category || item.category) && (
-                                                    <span className="text-[8px] md:text-[10px] text-cyan-600 dark:text-cyan-500 font-black uppercase tracking-widest border border-cyan-500/20 bg-cyan-500/5 px-1.5 md:px-2 py-0.5 rounded shadow-sm shrink-0">
+                                                    <span className="text-[8px] md:text-[10px] text-[#2C5E3B] dark:text-[#A9CBA2] font-black uppercase tracking-widest border border-[#2C5E3B]/20 bg-[#2C5E3B]/5 px-1.5 md:px-2 py-0.5 rounded shadow-sm shrink-0">
                                                         {productInfo?.category || item.category}
                                                     </span>
                                                 )}
 
-                                                {(productInfo?.size || productInfo?.unit) && (
+                                                {productInfo?.size && (
                                                     <span className="text-[8px] md:text-[10px] text-zinc-600 dark:text-zinc-400 font-black uppercase tracking-widest bg-zinc-100 dark:bg-white/5 px-1.5 md:px-2 py-0.5 rounded border border-zinc-200 dark:border-white/10 shrink-0">
-                                                        {productInfo?.size} {productInfo?.unit}
+                                                        {formatProductSize(productInfo)}
                                                     </span>
                                                 )}
 
@@ -236,14 +253,16 @@ export const PackDetailsModal: React.FC<PackDetailsModalProps> = ({
                                                 {isShortPicked && (
                                                     <span className="text-[10px] md:text-xs font-mono font-bold text-red-500 line-through opacity-80 leading-none" title="Short Picked">{item.orderedQty}</span>
                                                 )}
-                                                <p className="text-sm md:text-lg font-black text-zinc-950 dark:text-cyan-400 tabular-nums font-mono leading-none">
+                                                <p className="text-sm md:text-lg font-black text-zinc-950 dark:text-[#A9CBA2] tabular-nums font-mono leading-none">
                                                     {(() => {
                                                         const expected = item.expectedQty || (item as any).quantity || 0;
                                                         const picked = item.pickedQty !== undefined && item.pickedQty !== null ? item.pickedQty : 0;
-
-                                                        if ((item as any).requestedMeasureQty) {
+                                                        const measureQty = getItemMeasureQty(item, productInfo);
+                                                        if (measureQty) {
                                                             const unitDef = productInfo?.unit ? productInfo.unit : '';
-                                                            return <span className="text-sm md:text-lg font-mono font-black text-teal-400">{picked} / {(item as any).requestedMeasureQty} <span className="text-[8px] md:text-[10px] text-teal-500/60 font-bold uppercase tracking-widest leading-none">{unitDef}</span></span>;
+                                                            const sizeNum = productInfo?.size ? parseFloat(productInfo.size as string) : 0;
+                                                            const displayPickedCases = picked <= expected ? picked : (sizeNum > 0 ? picked / sizeNum : picked);
+                                                            return <span className="text-sm md:text-lg font-mono font-black text-teal-400">{displayPickedCases} x {sizeNum} / {expected} x {sizeNum} <span className="text-[8px] md:text-[10px] text-teal-500/60 font-bold uppercase tracking-widest leading-none">{unitDef}</span></span>;
                                                         }
                                                         return <span className="text-sm md:text-lg font-mono font-black text-teal-400">{picked} / {expected}</span>;
                                                     })()}
@@ -275,7 +294,7 @@ export const PackDetailsModal: React.FC<PackDetailsModalProps> = ({
                         <div className="relative">
                             <button
                                 onClick={() => setIsPrintMenuOpen(!isPrintMenuOpen)}
-                                className="flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-600 dark:text-cyan-400 border border-cyan-500/20 rounded-xl font-black uppercase tracking-widest text-[9px] md:text-[10px] transition-all"
+                                className="flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 bg-[#2C5E3B]/10 hover:bg-[#2C5E3B]/20 text-[#2C5E3B] dark:text-[#A9CBA2] border border-[#2C5E3B]/20 rounded-xl font-black uppercase tracking-widest text-[9px] md:text-[10px] transition-all"
                             >
                                 <Printer size={12} className="md:w-3.5 md:h-3.5" />
                                 <span className="hidden sm:inline">Reprint Label</span><span className="sm:hidden">Label</span>
@@ -290,7 +309,7 @@ export const PackDetailsModal: React.FC<PackDetailsModalProps> = ({
                                                 onReprintLabel?.(selectedItem, size);
                                                 setIsPrintMenuOpen(false);
                                             }}
-                                            className="w-full text-left px-3 md:px-4 py-2 text-[10px] font-black uppercase tracking-widest text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-white/5 hover:text-cyan-500 transition-colors"
+                                            className="w-full text-left px-3 md:px-4 py-2 text-[10px] font-black uppercase tracking-widest text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-white/5 hover:text-[#2C5E3B] transition-colors"
                                         >
                                             {size}
                                         </button>

@@ -87,20 +87,20 @@ export function DiscrepancyResolutionModal({
     // Config
     const DISCREPANCY_TYPES: { id: DiscrepancyType, label: string, icon: any, color: string }[] = [
         { id: 'shortage', label: 'Shortage (Received Less)', icon: ArrowDown, color: 'text-orange-400' },
-        { id: 'overage', label: 'Overage (Received More)', icon: ArrowLeft, color: 'text-blue-400' },
+        { id: 'overage', label: 'Overage (Received More)', icon: ArrowLeft, color: 'text-[#A9CBA2]' },
         { id: 'damaged', label: 'Damaged Items', icon: AlertTriangle, color: 'text-red-400' },
-        { id: 'wrong_item', label: 'Wrong Item Sent', icon: AlertOctagon, color: 'text-purple-400' },
+        { id: 'wrong_item', label: 'Wrong Item Sent', icon: AlertOctagon, color: 'text-amber-400' },
         { id: 'missing', label: 'Completely Missing', icon: X, color: 'text-gray-400' },
     ];
 
     const RESOLUTION_ACTIONS: { id: ResolutionType, label: string, desc: string, icon: any, color: string, reqAuth: boolean }[] = [
         { id: 'accept', label: 'Accept As-Is', desc: 'Update inventory to match received qty.', icon: CheckCircle, color: 'text-green-400', reqAuth: false },
         { id: 'investigate', label: 'Request Investigation', desc: 'Flag for warehouse team to check.', icon: Search, color: 'text-yellow-400', reqAuth: false },
-        { id: 'replace', label: 'Resend Missing Items', desc: 'Generate a new transfer from warehouse.', icon: FileText, color: 'text-blue-400', reqAuth: true },
-        { id: 'adjust', label: 'Adjust Inventory', desc: 'Accept with manual adjustment record.', icon: RefreshCw, color: 'text-cyan-400', reqAuth: false },
+        { id: 'replace', label: 'Resend Missing Items', desc: 'Generate a new transfer from warehouse.', icon: FileText, color: 'text-[#A9CBA2]', reqAuth: true },
+        { id: 'adjust', label: 'Adjust Inventory', desc: 'Accept with manual adjustment record.', icon: RefreshCw, color: 'text-[#2C5E3B]', reqAuth: false },
         { id: 'reject', label: 'Reject & Return', desc: 'Send items back to source.', icon: RotateCcw, color: 'text-red-400', reqAuth: true },
         { id: 'dispose', label: 'Dispose / Destroy', desc: 'Remove from inventory (Waste).', icon: Trash2, color: 'text-red-500', reqAuth: true },
-        { id: 'recount', label: 'Request Recount', desc: 'Ask source to count again.', icon: Hash, color: 'text-indigo-400', reqAuth: false },
+        { id: 'recount', label: 'Request Recount', desc: 'Ask source to count again.', icon: Hash, color: 'text-[#A9CBA2]', reqAuth: false },
     ];
 
     // Helper to check permissions (placeholder)
@@ -253,20 +253,20 @@ export function DiscrepancyResolutionModal({
             <div className="space-y-6">
 
                 {/* Header Info */}
-                <div className="bg-white/5 p-4 rounded-lg flex items-center justify-between border border-white/10 relative overflow-hidden">
-                    <div className="absolute top-0 left-0 w-1 h-full bg-red-500" />
+                <div className="bg-stone-100/30 dark:bg-black/20 p-4 rounded-2xl flex items-center justify-between border border-[#E2DCCE]/30 dark:border-[#A9CBA2]/[0.04] relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-1 h-full bg-[#2C5E3B] dark:bg-[#A9CBA2]" />
                     <div>
-                        <h4 className="text-lg font-bold text-white mb-1">{productName}</h4>
-                        <div className="text-sm text-gray-400 font-mono">
-                            Expected: <span className="text-white">{item.item.expectedQty}</span> &nbsp;|&nbsp;
-                            Received: <span className="text-yellow-400">{item.item.receivedQty || 0}</span>
+                        <h4 className="text-lg font-bold text-stone-850 dark:text-[#EAE5D9] mb-1">{productName}</h4>
+                        <div className="text-sm text-stone-500 dark:text-stone-400 font-mono">
+                            Expected: <span className="text-stone-800 dark:text-[#EAE5D9]">{item.item.expectedQty}</span> &nbsp;|&nbsp;
+                            Received: <span className="text-yellow-600 dark:text-yellow-400">{item.item.receivedQty || 0}</span>
                         </div>
                     </div>
                     <div className="text-right">
                         <div className="text-3xl font-black text-red-500 font-mono tracking-tighter">
                             {diff > 0 ? '+' : ''}{diff}
                         </div>
-                        <div className="text-[10px] uppercase tracking-widest text-red-400 opacity-70 font-bold">Variance</div>
+                        <div className="text-[10px] uppercase tracking-widest text-red-500 opacity-70 font-bold">Variance</div>
                     </div>
                 </div>
 
@@ -277,8 +277,8 @@ export function DiscrepancyResolutionModal({
                         const isPast = ['TYPE', 'ACTION', 'DETAILS', 'REVIEW'].indexOf(step) > i;
                         return (
                             <div key={s} className="flex-1 flex flex-col items-center gap-2">
-                                <div className={`w-full h-1 rounded-full ${isPast ? 'bg-green-500' : isCurrent ? 'bg-blue-500' : 'bg-white/10'}`} />
-                                <span className={`text-[10px] font-bold uppercase ${isCurrent ? 'text-blue-400' : 'text-gray-600'}`}>{s}</span>
+                                <div className={`w-full h-1 rounded-full ${isPast ? 'bg-[#2C5E3B] dark:bg-[#A9CBA2]' : isCurrent ? 'bg-[#2C5E3B] dark:bg-[#A9CBA2]' : 'bg-stone-200 dark:bg-white/10'}`} />
+                                <span className={`text-[10px] font-bold uppercase ${isCurrent ? 'text-[#2C5E3B] dark:text-[#A9CBA2]' : 'text-stone-400 dark:text-stone-600'}`}>{s}</span>
                             </div>
                         );
                     })}
@@ -297,17 +297,17 @@ export function DiscrepancyResolutionModal({
                                     }}
                                     className={`p-4 rounded-xl border flex items-center gap-4 transition-all group text-left
                                         ${discrepancyType === t.id
-                                            ? 'bg-blue-500/20 border-blue-500/50'
-                                            : 'bg-white/5 border-white/5 hover:bg-white/10 hover:border-white/20'}`}
+                                            ? 'bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 border-[#2C5E3B]/50 dark:border-[#A9CBA2]/50'
+                                            : 'bg-stone-50/50 dark:bg-[#1C2620]/30 border-[#E2DCCE]/30 dark:border-[#A9CBA2]/[0.04] hover:bg-stone-100/50 dark:hover:bg-[#EAE5D9]/10 hover:border-[#CFC6B4]/60 dark:hover:border-[#A9CBA2]/10'}`}
                                 >
-                                    <div className={`p-3 rounded-full bg-black/40 ${t.color}`}>
+                                    <div className={`p-3 rounded-full bg-stone-100 dark:bg-black/40 ${t.color}`}>
                                         <t.icon size={24} />
                                     </div>
                                     <div>
-                                        <div className="font-bold text-white text-lg">{t.label}</div>
-                                        <div className="text-gray-400 text-sm">Select if this best describes the issue.</div>
+                                        <div className="font-bold text-stone-850 dark:text-white text-lg">{t.label}</div>
+                                        <div className="text-stone-500 dark:text-stone-400 text-sm">Select if this best describes the issue.</div>
                                     </div>
-                                    <ChevronRight className={`ml-auto opacity-0 group-hover:opacity-100 transition-opacity ${discrepancyType === t.id ? 'opacity-100 text-blue-400' : 'text-gray-500'}`} />
+                                    <ChevronRight className={`ml-auto opacity-0 group-hover:opacity-100 transition-opacity ${discrepancyType === t.id ? 'opacity-100 text-[#2C5E3B] dark:text-[#A9CBA2]' : 'text-stone-500'}`} />
                                 </button>
                             ))}
                         </div>
@@ -328,18 +328,18 @@ export function DiscrepancyResolutionModal({
                                         className={`p-4 rounded-xl border flex flex-col gap-3 transition-all text-left relative overflow-hidden
                                             ${!allowed ? 'opacity-50 cursor-not-allowed grayscale' : 'hover:scale-[1.02]'}
                                             ${resolutionAction === a.id
-                                                ? 'bg-blue-500/20 border-blue-500/50'
-                                                : 'bg-white/5 border-white/5 hover:bg-white/10 hover:border-white/20'}`}
+                                                ? 'bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 border-[#2C5E3B]/50 dark:border-[#A9CBA2]/50'
+                                                : 'bg-stone-50/50 dark:bg-[#1C2620]/30 border-[#E2DCCE]/30 dark:border-[#A9CBA2]/[0.04] hover:bg-stone-100/50 dark:hover:bg-[#EAE5D9]/10 hover:border-[#CFC6B4]/60 dark:hover:border-[#A9CBA2]/10'}`}
                                     >
                                         <div className="flex justify-between items-start">
-                                            <div className={`p-2 rounded-lg bg-black/40 ${a.color}`}>
+                                            <div className={`p-2 rounded-lg bg-stone-100 dark:bg-black/40 ${a.color}`}>
                                                 <a.icon size={20} />
                                             </div>
-                                            {a.id === resolutionAction && <div className="bg-blue-500 text-white text-[10px] font-bold px-2 py-1 rounded">SELECTED</div>}
+                                            {a.id === resolutionAction && <div className="bg-[#2C5E3B] dark:bg-[#A9CBA2] text-white dark:text-black text-[10px] font-bold px-2 py-1 rounded">SELECTED</div>}
                                         </div>
                                         <div>
-                                            <div className="font-bold text-white">{a.label}</div>
-                                            <div className="text-gray-400 text-xs mt-1 leading-relaxed">{a.desc}</div>
+                                            <div className="font-bold text-stone-850 dark:text-white">{a.label}</div>
+                                            <div className="text-stone-500 dark:text-[#EAE5D9]/70 text-xs mt-1 leading-relaxed">{a.desc}</div>
                                         </div>
                                         {!allowed && <div className="absolute inset-0 bg-black/60 flex items-center justify-center backdrop-blur-[1px]">
                                             <span className="bg-red-500/20 text-red-500 border border-red-500/50 px-2 py-1 rounded text-xs font-bold uppercase flex items-center gap-1">
@@ -355,33 +355,33 @@ export function DiscrepancyResolutionModal({
                     {step === 'DETAILS' && (
                         <div className="space-y-4 animate-in fade-in slide-in-from-right-4">
                             <div>
-                                <label className="block text-sm font-bold text-gray-400 mb-2">Quantity to Resolve</label>
+                                <label className="block text-sm font-bold text-stone-500 dark:text-stone-400 mb-2">Quantity to Resolve</label>
                                 <input
                                     type="number"
                                     value={resolveQty}
                                     onChange={e => setResolveQty(e.target.value)}
-                                    className="w-full bg-black/40 border border-white/10 rounded-lg p-3 text-white text-sm outline-none font-mono"
+                                    className="woody-input font-mono"
                                     placeholder="Enter quantity..."
                                 />
                             </div>
-                            <div>
-                                <label className="block text-sm font-bold text-gray-400 mb-2">Resolution Notes / Explanation</label>
+                             <div>
+                                <label className="block text-sm font-bold text-stone-500 dark:text-stone-400 mb-2">Resolution Notes / Explanation</label>
                                 <textarea
                                     value={notes}
                                     onChange={e => setNotes(e.target.value)}
                                     placeholder="Please describe why this resolution was chosen..."
-                                    className="w-full bg-black/40 border border-white/10 rounded-lg p-4 text-white text-sm focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 outline-none h-32 resize-none"
+                                    className="woody-input h-32 resize-none"
                                 />
-                            </div>
+                             </div>
 
-                            {['claim', 'adjust', 'reject'].includes(resolutionAction || '') && (
+                             {['claim', 'adjust', 'reject'].includes(resolutionAction || '') && (
                                 <div>
-                                    <label className="block text-sm font-bold text-gray-400 mb-2">Internal Reason Code</label>
+                                    <label className="block text-sm font-bold text-stone-500 dark:text-stone-400 mb-2">Internal Reason Code</label>
                                     <select
                                         value={reasonCode}
                                         onChange={e => setReasonCode(e.target.value)}
                                         title="Reason Code"
-                                        className="w-full bg-black/40 border border-white/10 rounded-lg p-3 text-white text-sm outline-none"
+                                        className="woody-input appearance-none"
                                     >
                                         <option value="">Select a reason code...</option>
                                         <option value="DAMAGED_TRANSIT">Damaged in Transit</option>
@@ -391,40 +391,40 @@ export function DiscrepancyResolutionModal({
                                         <option value="THEFT">Suspected Theft</option>
                                     </select>
                                 </div>
-                            )}
+                             )}
 
-                            {resolutionAction === 'claim' && (
+                             {resolutionAction === 'claim' && (
                                 <div>
-                                    <label className="block text-sm font-bold text-gray-400 mb-2">Estimated Claim Amount</label>
+                                    <label className="block text-sm font-bold text-stone-500 dark:text-stone-400 mb-2">Estimated Claim Amount</label>
                                     <div className="relative">
-                                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">$</span>
+                                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400 font-bold">$</span>
                                         <input
                                             type="number"
                                             value={claimAmount}
                                             onChange={e => setClaimAmount(e.target.value)}
                                             placeholder="0.00"
-                                            className="w-full bg-black/40 border border-white/10 rounded-lg py-3 pl-8 pr-4 text-white text-sm outline-none"
+                                            className="woody-input pl-8 pr-4"
                                         />
                                     </div>
                                 </div>
-                            )}
+                             )}
 
-                            <div className="pt-4 flex justify-end">
+                             <div className="pt-4 flex justify-end">
                                 <Button
                                     onClick={() => setStep('REVIEW')}
                                     disabled={!notes || (['claim', 'adjust', 'reject'].includes(resolutionAction || '') && !reasonCode)}
                                 >
                                     Review Resolution <ArrowRight size={16} className="ml-2" />
                                 </Button>
-                            </div>
+                             </div>
                         </div>
                     )}
 
                     {step === 'REVIEW' && (
                         <div className="space-y-6 animate-in fade-in slide-in-from-right-4">
-                            <div className="bg-blue-500/10 border border-blue-500/30 p-6 rounded-xl space-y-4">
-                                <h3 className="text-white font-bold flex items-center gap-2">
-                                    <Shield className="text-blue-400" /> Confirm Resolution
+                            <div className="bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20 p-6 rounded-2xl space-y-4">
+                                <h3 className="text-stone-850 dark:text-white font-bold flex items-center gap-2">
+                                    <Shield className="text-[#2C5E3B] dark:text-[#A9CBA2]" /> Confirm Resolution
                                 </h3>
 
                                 <div className="grid grid-cols-2 gap-4 text-sm">
@@ -437,13 +437,13 @@ export function DiscrepancyResolutionModal({
                                         <div className="text-white font-bold capitalize">{RESOLUTION_ACTIONS.find(a => a.id === resolutionAction)?.label}</div>
                                     </div>
                                     <div className="col-span-2">
-                                        <div className="text-gray-400 mb-1">Notes</div>
-                                        <div className="text-white italic bg-black/20 p-2 rounded border border-white/5">{notes}</div>
+                                        <div className="text-stone-500 dark:text-stone-400 mb-1">Notes</div>
+                                        <div className="text-stone-800 dark:text-[#EAE5D9] italic bg-stone-100/30 dark:bg-black/20 p-2 rounded-xl border border-[#E2DCCE]/30 dark:border-[#A9CBA2]/[0.04]">{notes}</div>
                                     </div>
                                     {claimAmount && (
                                         <div>
-                                            <div className="text-gray-400 mb-1">Claim Value</div>
-                                            <div className="text-green-400 font-mono font-bold">${claimAmount}</div>
+                                            <div className="text-stone-500 dark:text-stone-400 mb-1">Claim Value</div>
+                                            <div className="text-emerald-600 dark:text-emerald-400 font-mono font-bold">${claimAmount}</div>
                                         </div>
                                     )}
                                 </div>
@@ -451,14 +451,13 @@ export function DiscrepancyResolutionModal({
 
                             <div className="flex gap-3">
                                 <Button variant="secondary" onClick={() => setStep('DETAILS')} className="flex-1">Back</Button>
-                                <Button
-                                    variant="primary"
+                                <button
                                     onClick={handleSubmit}
-                                    className="flex-[2] bg-gradient-to-r from-blue-600 to-indigo-600 border-none hover:shadow-[0_0_20px_rgba(59,130,246,0.3)] text-white font-bold"
-                                    loading={isSubmitting}
+                                    className="flex-[2] woody-btn-primary flex items-center justify-center gap-2"
+                                    disabled={isSubmitting}
                                 >
-                                    <CheckCircle size={18} className="mr-2" /> Confirm & Submit
-                                </Button>
+                                    <CheckCircle size={18} /> Confirm & Submit
+                                </button>
                             </div>
                         </div>
                     )}
@@ -466,13 +465,13 @@ export function DiscrepancyResolutionModal({
 
                 {/* Footer Nav (Back) */}
                 {step !== 'TYPE' && step !== 'REVIEW' && (
-                    <div className="pt-6 border-t border-white/5 flex justify-between">
+                    <div className="pt-6 border-t border-[#E2DCCE]/30 dark:border-[#A9CBA2]/[0.04] flex justify-between">
                         <button
                             onClick={() => {
                                 if (step === 'ACTION') setStep('TYPE');
                                 if (step === 'DETAILS') setStep('ACTION');
                             }}
-                            className="text-gray-500 hover:text-white flex items-center gap-2 text-sm font-bold transition-colors"
+                            className="text-stone-500 hover:text-stone-850 dark:hover:text-white flex items-center gap-2 text-sm font-bold transition-colors"
                         >
                             <ArrowLeft size={14} /> Back
                         </button>

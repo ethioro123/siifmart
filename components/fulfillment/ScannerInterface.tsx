@@ -134,8 +134,12 @@ export const ScannerInterface: React.FC = () => {
 
     const currentProduct = useMemo(() => {
         if (!currentItem) return null;
-        return filteredProducts.find(p => p.id === currentItem.productId);
-    }, [currentItem, filteredProducts]);
+        let prod = filteredProducts.find(p => p.id === currentItem.productId || p.sku === currentItem.sku);
+        if (!prod) {
+            prod = allProducts.find(p => p.id === currentItem.productId || p.sku === currentItem.sku);
+        }
+        return prod;
+    }, [currentItem, filteredProducts, allProducts]);
 
     const isCrossWarehouse = useMemo(() => {
         if (!selectedJob) return false;
@@ -236,10 +240,36 @@ export const ScannerInterface: React.FC = () => {
         const normSku = (s: string) => s.replace(/[-\/\s]/g, '').toUpperCase();
         const normalizedInput = normSku(normalized);
 
+        const getBarcodesArray = (barcodes: any): string[] => {
+            if (!barcodes) return [];
+            if (Array.isArray(barcodes)) return barcodes.filter(b => typeof b === 'string');
+            if (typeof barcodes === 'string') {
+                let clean = barcodes.trim();
+                if (clean.startsWith('{') && clean.endsWith('}')) {
+                    return clean.substring(1, clean.length - 1).split(',').map(s => s.trim().replace(/^"|"$/g, ''));
+                }
+                if (clean.startsWith('[') && clean.endsWith(']')) {
+                    try {
+                        return JSON.parse(clean);
+                    } catch (e) {
+                        return clean.substring(1, clean.length - 1).split(',').map(s => s.trim().replace(/^"|"$/g, ''));
+                    }
+                }
+                return [clean];
+            }
+            return [];
+        };
+
+        const aliasList = getBarcodesArray(product?.barcodes);
+        const hasAliasMatch = aliasList.some(b => {
+            const cleanB = b.toUpperCase().trim();
+            return normalized === cleanB || normalizedInput === normSku(cleanB);
+        });
+
         const isValid =
             normalized === currentItem.sku?.toUpperCase() ||
             normalized === product?.barcode?.toUpperCase() ||
-            (product?.barcodes && product.barcodes.includes(normalized)) ||
+            hasAliasMatch ||
             normalizedInput === normSku(currentItem.sku || '') ||
             normalizedInput === normSku(product?.barcode || '');
 
@@ -329,52 +359,52 @@ export const ScannerInterface: React.FC = () => {
     // 1. Job Selection List (if no job selected)
     if (!selectedJob || showScannerList) {
         return (
-            <div className="fixed inset-0 z-50 bg-black flex flex-col">
-                <div className="p-4 bg-gray-900 border-b border-gray-800 flex justify-between items-center">
-                    <h2 className="text-xl font-bold text-white uppercase tracking-wider">{t('warehouse.selectJob')}</h2>
-                    <Button onClick={() => setIsScannerMode(false)} variant="ghost" className="text-gray-400 hover:text-white">
+            <div className="fixed inset-0 z-50 bg-[#18201B] flex flex-col">
+                <div className="p-4 bg-[#1E2822] border-b border-[#E2DCCE]/10 dark:border-emerald-950/20 flex justify-between items-center">
+                    <h2 className="text-xl font-bold text-[#EAE5D9] uppercase tracking-wider">{t('warehouse.selectJob')}</h2>
+                    <button onClick={() => setIsScannerMode(false)} aria-label="Close Scanner" className="text-stone-400 hover:text-white transition-colors">
                         <X size={24} />
-                    </Button>
+                    </button>
                 </div>
                 <div className="flex-1 overflow-y-auto p-4 space-y-4">
                     {/* Render Filtered Jobs */}
                     {myScannerJobs.length === 0 ? (
-                        <div className="text-center text-gray-500 mt-20">
-                            <Package size={48} className="mx-auto mb-4 opacity-50" />
+                        <div className="text-center text-stone-500 mt-20">
+                            <Package size={48} className="mx-auto mb-4 opacity-50 text-[#A9CBA2]" />
                             <p>{t('warehouse.noJobsAvailable')}</p>
                         </div>
                     ) : (
-                        myScannerJobs.map((job: any) => ( // Changed from `jobs.map` to `myScannerJobs.map` to maintain filtering logic
+                        myScannerJobs.map((job: any) => (
                             <div
                                 key={job.id}
                                 onClick={() => {
                                     setSelectedJob(job);
                                     setScannerStep('NAV');
                                 }}
-                                className="bg-gray-800/50 border border-gray-700 rounded-xl p-4 hover:bg-gray-800 hover:border-blue-500/50 transition-all cursor-pointer group"
+                                className="glass-panel p-4 hover:border-[#CFC6B4] dark:hover:border-[#A9CBA2]/25 cursor-pointer group"
                             >
                                 <div className="flex justify-between items-start mb-2">
                                     <div>
                                         <div className="flex items-center gap-2">
-                                            <Badge variant="info" className="bg-blue-500/10 text-blue-400 border-blue-500/30">
+                                            <span className="px-2 py-0.5 rounded bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 text-[#2C5E3B] dark:text-[#A9CBA2] border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20 font-bold text-xs uppercase">
                                                 {job.type}
-                                            </Badge>
-                                            <span className="text-white font-mono font-bold text-lg">{formatJobId(job)}</span>
+                                            </span>
+                                            <span className="text-stone-850 dark:text-[#EAE5D9] font-mono font-bold text-lg">{formatJobId(job)}</span>
                                         </div>
-                                        <p className="text-xs text-gray-400 mt-1">To: {job.assignedTo || 'Unassigned'}</p>
+                                        <p className="text-xs text-stone-400 dark:text-stone-500 mt-1">To: {job.assignedTo || 'Unassigned'}</p>
                                     </div>
                                     <div className="text-right">
-                                        <span className={`text-xs font-bold px-2 py-1 rounded ${job.priority === 'High' || job.priority === 'Critical' ? 'bg-red-500/20 text-red-400' : 'bg-green-500/10 text-green-400'} `}>
+                                        <span className={`text-xs font-bold px-2 py-1 rounded ${job.priority === 'High' || job.priority === 'Critical' ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 'bg-[#2C5E3B]/20 text-[#2C5E3B] dark:bg-[#A9CBA2]/20 dark:text-[#A9CBA2] border border-[#2C5E3B]/30 dark:border-[#A9CBA2]/30'} `}>
                                             {job.priority}
                                         </span>
-                                        <div className="mt-2 text-gray-500 text-xs">
+                                        <div className="mt-2 text-stone-550 text-xs">
                                             {job.items || job.lineItems?.length} items
                                         </div>
                                     </div>
                                 </div>
-                                <div className="mt-2 pt-2 border-t border-gray-700/50 flex justify-between items-center">
-                                    <span className="text-xs text-gray-500">{job.sourceSiteId ? `From: ${sites.find(s => s.id === job.sourceSiteId)?.name} ` : ''}</span>
-                                    <ChevronRight size={16} className="text-gray-600 group-hover:text-blue-400 transition-colors" />
+                                <div className="mt-2 pt-2 border-t border-[#E2DCCE]/30 dark:border-emerald-950/20 flex justify-between items-center">
+                                    <span className="text-xs text-stone-500">{job.sourceSiteId ? `From: ${sites.find(s => s.id === job.sourceSiteId)?.name} ` : ''}</span>
+                                    <ChevronRight size={16} className="text-stone-400 dark:text-stone-500 group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] transition-colors" />
                                 </div>
                             </div>
                         ))
@@ -390,10 +420,10 @@ export const ScannerInterface: React.FC = () => {
     // If no pending items, but job not null -> All Done Screen
     if (!currentItem) {
         return (
-            <div className="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center text-white p-6">
-                <CheckCircle size={64} className="text-green-500 mb-4" />
+            <div className="fixed inset-0 z-50 bg-[#18201B] flex flex-col items-center justify-center text-white p-6">
+                <CheckCircle size={64} className="text-[#A9CBA2] mb-4" />
                 <h2 className="text-2xl font-bold mb-2">{t('warehouse.jobComplete')}</h2>
-                <button onClick={() => setSelectedJob(null)} className="px-6 py-3 bg-gray-800 rounded-xl border border-gray-700 hover:bg-gray-700 transition-colors mt-6">
+                <button onClick={() => setSelectedJob(null)} className="woody-btn-secondary px-6 py-3 mt-6">
                     {t('warehouse.backToJobs')}
                 </button>
             </div>
@@ -401,22 +431,22 @@ export const ScannerInterface: React.FC = () => {
     }
 
     return (
-        <div className="fixed inset-0 z-50 bg-black flex flex-col">
+        <div className="fixed inset-0 z-50 bg-[#18201B] flex flex-col">
             {/* Header */}
-            <div className="p-4 pt-[calc(1rem+env(safe-area-inset-top))] bg-gray-900 flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4 border-b border-gray-800">
+            <div className="p-4 pt-[calc(1rem+env(safe-area-inset-top))] bg-[#1E2822] flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4 border-b border-[#E2DCCE]/10 dark:border-emerald-950/20">
                 <div className="text-white w-full md:w-auto">
                     <div className="flex justify-between items-start">
                         <div>
-                            <h2 className="font-bold text-lg">{selectedJob.type} {formatJobId(selectedJob)}</h2>
-                            <p className="text-xs text-gray-400">{selectedJob.lineItems.length} {t('warehouse.items')} • {selectedJob.lineItems.filter(i => i.status === 'Pending').length} {t('warehouse.remaining')}</p>
+                            <h2 className="font-bold text-lg text-[#EAE5D9]">{selectedJob.type} {formatJobId(selectedJob)}</h2>
+                            <p className="text-xs text-stone-400">{selectedJob.lineItems.length} {t('warehouse.items')} • {selectedJob.lineItems.filter(i => i.status === 'Pending').length} {t('warehouse.remaining')}</p>
                         </div>
-                        <button onClick={() => setSelectedJob(null)} aria-label="Back to Jobs" className="md:hidden text-gray-400 p-2">
+                        <button onClick={() => setSelectedJob(null)} aria-label="Back to Jobs" className="md:hidden text-stone-450 p-2">
                             <ArrowLeft size={20} />
                         </button>
                     </div>
                 </div>
                 <div className="flex gap-2">
-                    <button onClick={() => setSelectedJob(null)} className="hidden md:block text-gray-400 hover:text-white text-sm font-bold">
+                    <button onClick={() => setSelectedJob(null)} className="hidden md:block text-stone-400 hover:text-white text-sm font-bold">
                         {t('warehouse.backToJobs')}
                     </button>
                 </div>
@@ -429,11 +459,11 @@ export const ScannerInterface: React.FC = () => {
                 {lastCompletedItem && (
                     <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/80 backdrop-blur-sm animate-in fade-in duration-300">
                         <div className="text-center animate-in zoom-in-95 duration-300">
-                            <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center animate-pulse">
-                                <CheckCircle size={48} className="text-white" />
+                            <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-gradient-to-br from-[#2C5E3B] to-[#1E3F27] flex items-center justify-center animate-pulse border border-[#A9CBA2]/30">
+                                <CheckCircle size={48} className="text-[#A9CBA2]" />
                             </div>
                             <h3 className="text-2xl font-bold mb-2 text-white">Picked</h3>
-                            <p className="text-green-400 font-bold text-lg mb-1">{lastCompletedItem.qty}x {lastCompletedItem.name}</p>
+                            <p className="text-[#A9CBA2] font-bold text-lg mb-1">{lastCompletedItem.qty}x {lastCompletedItem.name}</p>
                         </div>
                     </div>
                 )}
@@ -442,14 +472,14 @@ export const ScannerInterface: React.FC = () => {
                 {scannerStep === 'NAV' && (
                     <div className="w-full max-w-2xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
                         <div className="text-center space-y-4">
-                            <div className="w-20 h-20 bg-blue-500/10 rounded-full flex items-center justify-center mx-auto border border-blue-500/20 shadow-lg shadow-blue-500/10">
-                                <MapIcon size={40} className="text-blue-400" />
+                            <div className="w-20 h-20 bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 rounded-full flex items-center justify-center mx-auto border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20">
+                                <MapIcon size={40} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
                             </div>
-                            <h1 className="text-4xl font-black text-white tracking-tight uppercase italic">
+                            <h1 className="text-4xl font-black text-[#EAE5D9] tracking-tight uppercase italic">
                                 {selectedJob.type === 'PUTAWAY' ? t('warehouse.selectStorage') : t('warehouse.locateItem')}
                             </h1>
-                            <p className="text-gray-400 text-lg">
-                                {t('warehouse.goToLocation')}: <span className="text-blue-400 font-mono font-bold text-2xl">{currentProduct?.location || 'Unknown'}</span>
+                            <p className="text-stone-400 text-lg">
+                                {t('warehouse.goToLocation')}: <span className="text-[#2C5E3B] dark:text-[#A9CBA2] font-mono font-bold text-2xl">{currentProduct?.location || 'Unknown'}</span>
                             </p>
                         </div>
 
@@ -467,12 +497,12 @@ export const ScannerInterface: React.FC = () => {
                                     if (e.key === 'Enter') handleLocationScan(locationSearch);
                                 }}
                                 onPaste={scanOnlyHandlers.onPaste}
-                                className="w-full bg-black/40 border-2 border-white/10 rounded-2xl py-6 px-8 text-3xl font-mono text-center text-white focus:border-blue-500/50 focus:outline-none focus:ring-4 focus:ring-blue-500/10 transition-all uppercase"
+                                className="woody-input py-6 px-8 text-3xl font-mono text-center uppercase"
                                 autoFocus
                             />
                             <button
                                 onClick={() => handleLocationScan(locationSearch)}
-                                className="mt-4 w-full py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition-all shadow-lg"
+                                className="mt-4 woody-btn-primary w-full py-4 text-lg font-bold"
                             >
                                 {t('warehouse.confirmLocation')}
                             </button>
@@ -484,29 +514,29 @@ export const ScannerInterface: React.FC = () => {
                 {scannerStep === 'SCAN' && (
                     <div className="w-full max-w-md mx-auto space-y-6 pb-24 md:pb-0 px-4 md:px-0">
                         <div className="flex flex-col items-center justify-center space-y-4">
-                            <div className="relative inline-block shrink-0 w-32 h-32 md:w-48 md:h-48 rounded-xl border-4 border-gray-800 bg-black/40 overflow-hidden flex items-center justify-center">
+                            <div className="relative inline-block shrink-0 w-32 h-32 md:w-48 md:h-48 rounded-3xl border border-[#E2DCCE]/30 dark:border-[#A9CBA2]/10 bg-[#1C2620]/60 overflow-hidden flex items-center justify-center">
                                 {currentItem.image && !currentItem.image.includes('placeholder') ? (
                                     <img src={currentItem.image} className="w-full h-full object-cover" alt={currentItem.name} />
                                 ) : (
-                                    <Package size={48} className="text-gray-600" />
+                                    <Package size={48} className="text-stone-500" />
                                 )}
                             </div>
                             <div>
-                                <h2 className="text-xl md:text-2xl font-bold text-white text-center">{currentItem.name}</h2>
-                                <p className="text-center text-gray-400 font-mono mt-1">{currentItem.sku}</p>
+                                <h2 className="text-xl md:text-2xl font-bold text-[#EAE5D9] text-center">{currentItem.name}</h2>
+                                <p className="text-center text-stone-400 font-mono mt-1">{currentItem.sku}</p>
                             </div>
                         </div>
 
                         <div className="flex justify-center gap-4">
-                            <MetricBadge label="Qty" value={currentItem.expectedQty} color="border-blue-500 text-blue-400 bg-blue-500/10" />
-                            <MetricBadge label="Stock" value={currentProduct?.stock || 0} color="border-gray-500 text-gray-400 bg-gray-500/10" />
+                            <MetricBadge label="Qty" value={currentItem.expectedQty} color="border-[#2C5E3B]/30 text-[#2C5E3B] dark:text-[#A9CBA2] bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10" />
+                            <MetricBadge label="Stock" value={currentProduct?.stock || 0} color="border-stone-500 text-stone-450 bg-stone-100/10 dark:bg-white/5" />
                         </div>
 
                         {/* Scanner Input */}
-                        <div className="bg-gray-900 rounded-xl border-2 border-cyber-primary/50 p-4">
+                        <div className="glass-panel p-4">
                             <div className="flex items-center gap-2 mb-2">
-                                <Scan className="text-cyber-primary" size={20} />
-                                <p className="text-xs text-cyber-primary uppercase font-bold">{t('warehouse.scanProductBarcode')}</p>
+                                <Scan className="text-[#2C5E3B] dark:text-[#A9CBA2]" size={20} />
+                                <p className="text-xs text-[#2C5E3B] dark:text-[#A9CBA2] uppercase font-bold">{t('warehouse.scanProductBarcode')}</p>
                             </div>
                             <input
                                 ref={itemInputRef}
@@ -519,13 +549,13 @@ export const ScannerInterface: React.FC = () => {
                                     if (e.key === 'Enter') handleItemScan();
                                 }}
                                 onPaste={scanOnlyItemHandlers.onPaste}
-                                className="w-full bg-black/50 border-2 border-cyber-primary/30 rounded-lg p-4 text-white font-mono text-lg text-center focus:border-cyber-primary focus:outline-none"
+                                className="woody-input font-mono text-lg text-center"
                                 autoFocus
                             />
                             <button
                                 disabled={isProcessingScan}
                                 onClick={() => handleItemScan()}
-                                className="w-full mt-4 py-4 bg-green-500 text-black font-bold text-xl rounded-xl shadow-lg flex items-center justify-center gap-2 hover:bg-green-400 transition-colors"
+                                className="w-full mt-4 woody-btn-primary py-4 text-xl flex items-center justify-center gap-2"
                             >
                                 {isProcessingScan ? <RefreshCw className="animate-spin" /> : <CheckCircle />}
                                 {t('warehouse.confirm')}

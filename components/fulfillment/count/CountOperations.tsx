@@ -49,15 +49,15 @@ export const CountOperations: React.FC<CountOperationsProps> = ({
                             setCountSessionType('Cycle');
                             setCountSessionStatus('Active');
                         }}
-                        className="bg-white/5 border border-white/10 p-6 rounded-xl hover:bg-white/10 transition-colors text-left group"
+                        className="glass-panel p-6 rounded-2xl hover:bg-stone-100/50 dark:hover:bg-[#EAE5D9]/10 transition-colors text-left group"
                     >
                         <div className="flex items-center gap-3 mb-2">
-                            <div className="p-3 rounded-full bg-blue-500/20 text-blue-400 group-hover:bg-blue-500/30">
+                            <div className="p-3 rounded-full bg-[#2C5E3B]/10 text-[#2C5E3B] dark:text-[#A9CBA2]">
                                 <RotateCcw size={24} />
                             </div>
                             <div>
-                                <h4 className="font-bold text-white">Daily Cycle Count</h4>
-                                <p className="text-xs text-gray-400">Routine count of Aisle A</p>
+                                <h4 className="font-bold text-stone-900 dark:text-stone-100">Daily Cycle Count</h4>
+                                <p className="text-xs text-stone-500 dark:text-stone-400">Routine count of Aisle A</p>
                             </div>
                         </div>
                     </button>
@@ -77,15 +77,15 @@ export const CountOperations: React.FC<CountOperationsProps> = ({
                             setCountSessionType('Spot');
                             setCountSessionStatus('Active');
                         }}
-                        className="bg-white/5 border border-white/10 p-6 rounded-xl hover:bg-white/10 transition-colors text-left group"
+                        className="glass-panel p-6 rounded-2xl hover:bg-stone-100/50 dark:hover:bg-[#EAE5D9]/10 transition-colors text-left group"
                     >
                         <div className="flex items-center gap-3 mb-2">
-                            <div className="p-3 rounded-full bg-purple-500/20 text-purple-400 group-hover:bg-purple-500/30">
+                            <div className="p-3 rounded-full bg-[#A9CBA2]/20 dark:bg-[#A9CBA2]/10 text-[#2C5E3B] dark:text-[#A9CBA2]">
                                 <Search size={24} />
                             </div>
                             <div>
-                                <h4 className="font-bold text-white">Spot Check</h4>
-                                <p className="text-xs text-gray-400">Random audit of 5 items</p>
+                                <h4 className="font-bold text-stone-900 dark:text-stone-100">Spot Check</h4>
+                                <p className="text-xs text-stone-500 dark:text-stone-400">Random audit of 5 items</p>
                             </div>
                         </div>
                     </button>
@@ -95,9 +95,9 @@ export const CountOperations: React.FC<CountOperationsProps> = ({
             {/* ACTIVE STATE: Blind Counting */}
             {countSessionStatus === 'Active' && (
                 <div className="space-y-4">
-                    <div className="bg-yellow-500/10 border border-yellow-500/20 p-3 rounded-lg flex items-center gap-3">
-                        <AlertTriangle className="text-yellow-500" size={20} />
-                        <p className="text-sm text-yellow-200">
+                    <div className="bg-amber-500/10 border border-amber-500/20 p-3 rounded-xl flex items-center gap-3">
+                        <AlertTriangle className="text-amber-600 dark:text-amber-400" size={20} />
+                        <p className="text-sm text-stone-800 dark:text-amber-200">
                             <strong>Blind Count Mode:</strong> System quantities are hidden to ensure accuracy.
                         </p>
                     </div>
@@ -106,9 +106,9 @@ export const CountOperations: React.FC<CountOperationsProps> = ({
                         {countSessionItems.map((item, idx) => {
                             const product = products.find(p => p.id === item.productId);
                             return (
-                                <div key={item.productId} className={`p-4 rounded-xl border ${item.status === 'Counted' ? 'bg-green-500/10 border-green-500/30' : 'bg-white/5 border-white/10'} flex items-center justify-between`}>
+                                <div key={item.productId} className={`p-4 rounded-2xl border ${item.status === 'Counted' ? 'bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 border-[#2C5E3B]/30 dark:border-[#A9CBA2]/30' : 'glass-panel'} flex items-center justify-between`}>
                                     <div className="flex items-center gap-4">
-                                        <div className="w-12 h-12 rounded bg-black flex items-center justify-center overflow-hidden">
+                                        <div className="w-12 h-12 rounded-xl bg-stone-50/50 dark:bg-[#1C2620]/30 border border-[#E2DCCE]/30 dark:border-[#A9CBA2]/[0.04] flex items-center justify-center overflow-hidden">
                                             {product?.image && !product.image.includes('placeholder.com') ? (
                                                 <img
                                                     src={product.image}
@@ -116,16 +116,16 @@ export const CountOperations: React.FC<CountOperationsProps> = ({
                                                     className="w-full h-full object-cover"
                                                     onError={(e) => {
                                                         e.currentTarget.style.display = 'none';
-                                                        (e.currentTarget.parentElement as HTMLElement).innerHTML = '<div class="w-full h-full flex items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-package text-gray-700"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg></div>';
+                                                        (e.currentTarget.parentElement as HTMLElement).innerHTML = '<div class="w-full h-full flex items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-package text-stone-500"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg></div>';
                                                     }}
                                                 />
                                             ) : (
-                                                <Package size={20} className="text-gray-700" />
+                                                <Package size={20} className="text-stone-500" />
                                             )}
                                         </div>
                                         <div>
-                                            <p className="font-bold text-white">{product?.name}</p>
-                                            <p className="text-xs text-gray-400">Loc: {product?.location || 'N/A'} • SKU: {product?.sku}</p>
+                                            <p className="font-bold text-stone-900 dark:text-stone-100">{product?.name}</p>
+                                            <p className="text-xs text-stone-500 dark:text-stone-400">Loc: {product?.location || 'N/A'} • SKU: {product?.sku}</p>
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-3">
@@ -133,7 +133,7 @@ export const CountOperations: React.FC<CountOperationsProps> = ({
                                             type="number"
                                             min="0"
                                             placeholder="Qty"
-                                            className="w-24 bg-black border border-white/20 rounded-lg p-2 text-center text-white font-mono text-lg"
+                                            className="woody-input w-24 text-center font-mono text-lg"
                                             value={item.countedQty === undefined ? '' : item.countedQty}
                                             onChange={(e) => {
                                                 const val = parseInt(e.target.value);
@@ -143,14 +143,14 @@ export const CountOperations: React.FC<CountOperationsProps> = ({
                                                 setCountSessionItems(newItems);
                                             }}
                                         />
-                                        {item.status === 'Counted' && <CheckCircle className="text-green-500" size={20} />}
+                                        {item.status === 'Counted' && <CheckCircle className="text-[#2C5E3B] dark:text-[#A9CBA2]" size={20} />}
                                     </div>
                                 </div>
                             );
                         })}
                     </div>
 
-                    <div className="pt-4 border-t border-white/10 flex justify-end">
+                    <div className="pt-4 border-t border-[#E2DCCE]/30 dark:border-[#A9CBA2]/[0.04] flex justify-end">
                         <button
                             onClick={() => {
                                 if (countSessionItems.some(i => i.status === 'Pending')) {
@@ -165,7 +165,7 @@ export const CountOperations: React.FC<CountOperationsProps> = ({
                                 setCountSessionItems(reviewedItems);
                                 setCountSessionStatus('Review');
                             }}
-                            className="px-6 py-3 bg-cyber-primary text-black font-bold rounded-xl hover:bg-cyber-accent transition-colors flex items-center gap-2"
+                            className="woody-btn-primary px-6 py-3 flex items-center gap-2"
                         >
                             Finish & Review <ArrowRight size={18} />
                         </button>
@@ -177,17 +177,17 @@ export const CountOperations: React.FC<CountOperationsProps> = ({
             {countSessionStatus === 'Review' && (
                 <div className="space-y-4">
                     <div className="grid grid-cols-3 gap-4 mb-4">
-                        <div className="bg-white/5 p-3 rounded-lg text-center">
-                            <p className="text-xs text-gray-400 uppercase">Total Items</p>
-                            <p className="text-xl font-bold text-white">{countSessionItems.length}</p>
+                        <div className="glass-panel p-3 rounded-xl text-center">
+                            <p className="text-xs text-stone-500 dark:text-stone-400 uppercase">Total Items</p>
+                            <p className="text-xl font-bold text-stone-900 dark:text-stone-100">{countSessionItems.length}</p>
                         </div>
-                        <div className="bg-green-500/10 p-3 rounded-lg text-center border border-green-500/20">
-                            <p className="text-xs text-green-400 uppercase">Accurate</p>
-                            <p className="text-xl font-bold text-green-400">{countSessionItems.filter(i => i.variance === 0).length}</p>
+                        <div className="bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 p-3 rounded-xl text-center border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20">
+                            <p className="text-xs text-[#2C5E3B] dark:text-[#A9CBA2] uppercase">Accurate</p>
+                            <p className="text-xl font-bold text-[#2C5E3B] dark:text-[#A9CBA2]">{countSessionItems.filter(i => i.variance === 0).length}</p>
                         </div>
-                        <div className="bg-red-500/10 p-3 rounded-lg text-center border border-red-500/20">
-                            <p className="text-xs text-red-400 uppercase">Variance</p>
-                            <p className="text-xl font-bold text-red-400">{countSessionItems.filter(i => i.variance !== 0).length}</p>
+                        <div className="bg-red-500/10 p-3 rounded-xl text-center border border-red-500/20">
+                            <p className="text-xs text-red-600 dark:text-red-400 uppercase">Variance</p>
+                            <p className="text-xl font-bold text-red-600 dark:text-red-400">{countSessionItems.filter(i => i.variance !== 0).length}</p>
                         </div>
                     </div>
 
@@ -197,9 +197,9 @@ export const CountOperations: React.FC<CountOperationsProps> = ({
                             const hasVariance = item.variance !== 0;
 
                             return (
-                                <div key={item.productId} className={`p-4 rounded-xl border ${hasVariance ? 'bg-red-500/5 border-red-500/20' : 'bg-green-500/5 border-green-500/20'} flex flex-col md:flex-row items-center justify-between gap-4`}>
+                                <div key={item.productId} className={`p-4 rounded-xl border ${hasVariance ? 'bg-red-500/5 border-red-500/20' : 'bg-[#2C5E3B]/5 dark:bg-[#A9CBA2]/5 border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20'} flex flex-col md:flex-row items-center justify-between gap-4`}>
                                     <div className="flex items-center gap-4 flex-1">
-                                        <div className="w-10 h-10 rounded bg-black flex items-center justify-center overflow-hidden">
+                                        <div className="w-10 h-10 rounded-xl bg-stone-50/50 dark:bg-[#1C2620]/30 border border-[#E2DCCE]/30 dark:border-[#A9CBA2]/[0.04] flex items-center justify-center overflow-hidden">
                                             {product?.image && !product.image.includes('placeholder.com') ? (
                                                 <img
                                                     src={product.image}
@@ -207,19 +207,19 @@ export const CountOperations: React.FC<CountOperationsProps> = ({
                                                     className="w-full h-full object-cover"
                                                     onError={(e) => {
                                                         e.currentTarget.style.display = 'none';
-                                                        (e.currentTarget.parentElement as HTMLElement).innerHTML = '<div class="w-full h-full flex items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-package text-gray-600"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg></div>';
+                                                        (e.currentTarget.parentElement as HTMLElement).innerHTML = '<div class="w-full h-full flex items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-package text-stone-500"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg></div>';
                                                     }}
                                                 />
                                             ) : (
-                                                <Package size={16} className="text-gray-600" />
+                                                <Package size={16} className="text-stone-500" />
                                             )}
                                         </div>
                                         <div>
-                                            <p className="font-bold text-white">{product?.name}</p>
+                                            <p className="font-bold text-stone-900 dark:text-stone-100">{product?.name}</p>
                                             <div className="flex gap-4 text-xs mt-1">
-                                                <span className="text-gray-400">System: <strong className="text-white">{item.systemQty}</strong></span>
-                                                <span className="text-cyber-primary">Counted: <strong className="text-white">{item.countedQty}</strong></span>
-                                                <span className={hasVariance ? 'text-red-400 font-bold' : 'text-green-400 font-bold'}>
+                                                <span className="text-stone-500 dark:text-stone-400">System: <strong className="text-stone-900 dark:text-stone-100">{item.systemQty}</strong></span>
+                                                <span className="text-[#2C5E3B] dark:text-[#A9CBA2]">Counted: <strong className="text-stone-900 dark:text-stone-100">{item.countedQty}</strong></span>
+                                                <span className={hasVariance ? 'text-red-600 dark:text-red-400 font-bold' : 'text-[#2C5E3B] dark:text-[#A9CBA2] font-bold'}>
                                                     Var: {item.variance && item.variance > 0 ? '+' : ''}{item.variance}
                                                 </span>
                                             </div>
@@ -239,7 +239,7 @@ export const CountOperations: React.FC<CountOperationsProps> = ({
                                                     setCountSessionStatus('Active');
                                                     addNotification('info', `Marked ${product?.name} for recount.`);
                                                 }}
-                                                className="px-3 py-1.5 bg-white/5 text-white text-xs font-bold rounded-lg hover:bg-white/10"
+                                                className="woody-btn-secondary px-3 py-1.5 text-xs"
                                             >
                                                 Recount
                                             </button>
@@ -281,7 +281,7 @@ export const CountOperations: React.FC<CountOperationsProps> = ({
                                                 }}
                                                 className={`px-3 py-1.5 text-xs font-bold rounded-lg border flex items-center gap-1 ${approvingVariance === idx
                                                     ? 'bg-red-500/10 text-red-400/50 border-red-500/20 cursor-not-allowed'
-                                                    : 'bg-red-500/20 text-red-400 border-red-500/30 hover:bg-red-500/30'
+                                                    : 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20 dark:border-red-500/20 hover:bg-red-500/20'
                                                     }`}
                                             >
                                                 {approvingVariance === idx ? (
@@ -297,7 +297,7 @@ export const CountOperations: React.FC<CountOperationsProps> = ({
                                     )}
 
                                     {(!hasVariance || item.status === 'Approved') && (
-                                        <div className="flex items-center gap-2 text-green-400 text-xs font-bold px-3 py-1.5 bg-green-500/10 rounded-lg">
+                                        <div className="flex items-center gap-2 text-[#2C5E3B] dark:text-[#A9CBA2] text-xs font-bold px-3 py-1.5 bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 rounded-lg">
                                             <CheckCircle size={14} />
                                             {item.status === 'Approved' ? 'Adjusted' : 'Matched'}
                                         </div>
@@ -307,7 +307,7 @@ export const CountOperations: React.FC<CountOperationsProps> = ({
                         })}
                     </div>
 
-                    <div className="pt-4 border-t border-white/10 flex justify-end">
+                    <div className="pt-4 border-t border-[#E2DCCE]/30 dark:border-[#A9CBA2]/[0.04] flex justify-end">
                         <button
                             onClick={() => {
                                 if (countSessionItems.some(i => i.status !== 'Approved' && i.variance !== 0)) {
@@ -317,7 +317,7 @@ export const CountOperations: React.FC<CountOperationsProps> = ({
                                 setCountSessionItems([]);
                                 addNotification('success', 'Count session completed!');
                             }}
-                            className="px-6 py-3 bg-cyber-primary text-black font-bold rounded-xl hover:bg-cyber-accent transition-colors"
+                            className="woody-btn-primary px-6 py-3"
                         >
                             Complete Session
                         </button>

@@ -216,7 +216,7 @@ export const BulkDistributionModal: React.FC<BulkDistributionModalProps> = ({
                     <div className="p-6 border-b border-white/10 flex justify-between items-center bg-black/20">
                         <div>
                             <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                                <Layers className="text-blue-500" />
+                                <Layers className="text-[#A9CBA2]" />
                                 Bulk Distribution Center
                             </h2>
                             <p className="text-gray-400 text-xs mt-1">Push stock to multiple locations simultaneously</p>
@@ -233,7 +233,7 @@ export const BulkDistributionModal: React.FC<BulkDistributionModalProps> = ({
                             <button
                                 onClick={() => setBulkDistributionMode('single')}
                                 className={`flex-1 p-4 rounded-xl border transition-all ${bulkDistributionMode === 'single'
-                                    ? 'bg-blue-500/10 border-blue-500/50 shadow-[0_0_20px_rgba(59,130,246,0.2)]'
+                                    ? 'bg-[#2C5E3B]/10 border-[#2C5E3B]/50 shadow-[0_0_20px_rgba(44,94,59,0.2)]'
                                     : 'bg-black/20 border-white/5 hover:bg-white/5'
                                     }`}
                             >
@@ -243,7 +243,7 @@ export const BulkDistributionModal: React.FC<BulkDistributionModalProps> = ({
                             <button
                                 onClick={() => setBulkDistributionMode('wave')}
                                 className={`flex-1 p-4 rounded-xl border transition-all ${bulkDistributionMode === 'wave'
-                                    ? 'bg-purple-500/10 border-purple-500/50 shadow-[0_0_20px_rgba(168,85,247,0.2)]'
+                                    ? 'bg-[#2C5E3B]/10 border-[#2C5E3B]/50 shadow-[0_0_20px_rgba(44,94,59,0.2)]'
                                     : 'bg-black/20 border-white/5 hover:bg-white/5'
                                     }`}
                             >
@@ -356,11 +356,11 @@ export const BulkDistributionModal: React.FC<BulkDistributionModalProps> = ({
                         {/* Wave Mode Content */}
                         {bulkDistributionMode === 'wave' && (
                             <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-300">
-                                <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4 flex items-start gap-3">
-                                    <AlertOctagon className="text-blue-400 shrink-0" size={20} />
+                                <div className="bg-[#2C5E3B]/10 border border-[#2C5E3B]/20 rounded-xl p-4 flex items-start gap-3">
+                                    <AlertOctagon className="text-[#A9CBA2] shrink-0" size={20} />
                                     <div>
-                                        <h4 className="font-bold text-blue-400 text-sm">Wave Distribution Mode</h4>
-                                        <p className="text-xs text-blue-300/80 mt-1">Add multiple products to build a distribution wave. Each product can have unique store allocations.</p>
+                                        <h4 className="font-bold text-[#A9CBA2] text-sm">Wave Distribution Mode</h4>
+                                        <p className="text-xs text-[#A9CBA2]/80 mt-1">Add multiple products to build a distribution wave. Each product can have unique store allocations.</p>
                                     </div>
                                 </div>
 
@@ -477,7 +477,7 @@ export const BulkDistributionModal: React.FC<BulkDistributionModalProps> = ({
                             }
                             className={`px-6 py-2 rounded-lg font-bold transition-colors flex items-center gap-2 ${((bulkDistributionMode === 'single' && bulkDistributionProductId && bulkDistributionAllocations.filter(a => a.quantity > 0).length > 0) ||
                                 (bulkDistributionMode === 'wave' && waveProducts.length > 0 && waveProducts.some(wp => wp.allocations.some(a => a.quantity > 0))))
-                                ? 'bg-blue-500 text-white hover:bg-blue-400 shadow-lg shadow-blue-500/20'
+                                ? 'bg-[#2C5E3B] text-white hover:bg-[#3a7a4d] shadow-lg shadow-[#2C5E3B]/20'
                                 : 'bg-white/5 text-gray-500 cursor-not-allowed'
                                 }`}
                         >

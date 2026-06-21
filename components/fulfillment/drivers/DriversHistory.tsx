@@ -43,12 +43,12 @@ export const DriversHistory: React.FC<DriversHistoryProps> = ({
             
             <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-8 mb-12 relative z-10">
                 <div className="flex items-center gap-6">
-                    <div className="p-5 bg-cyan-50 dark:bg-cyan-500/10 rounded-2xl border-2 border-cyan-100 dark:border-cyan-500/20 shadow-sm"><HistoryIcon size={28} className="text-cyan-600 dark:text-cyan-400" /></div>
-                    <div><h4 className="text-3xl font-black text-gray-900 dark:text-white uppercase tracking-tighter italic">Mission Log</h4><div className="flex items-center gap-2.5 mt-1.5"><div className="w-2 h-2 rounded-full bg-cyan-500 animate-pulse" /><p className="text-gray-400 dark:text-gray-500 text-[10px] uppercase font-bold tracking-[0.25em]">Past assignment records</p></div></div>
+                    <div className="p-5 bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 rounded-2xl border-2 border-[#2C5E3B]/10 dark:border-[#A9CBA2]/20 shadow-sm"><HistoryIcon size={28} className="text-[#2C5E3B] dark:text-[#A9CBA2]" /></div>
+                    <div><h4 className="text-3xl font-black text-gray-900 dark:text-white uppercase tracking-tighter italic">Mission Log</h4><div className="flex items-center gap-2.5 mt-1.5"><div className="w-2 h-2 rounded-full bg-[#A9CBA2] animate-pulse" /><p className="text-gray-400 dark:text-gray-500 text-[10px] uppercase font-bold tracking-[0.25em]">Past assignment records</p></div></div>
                 </div>
                 <div className="relative w-full xl:w-[450px] group">
-                    <div className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-cyan-600 transition-colors pointer-events-none"><Search size={20} /></div>
-                    <input type="text" placeholder="SEARCH RELAY RECORDS..." value={searchQuery} onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }} className="w-full bg-gray-50 dark:bg-black/60 border-2 border-gray-100 dark:border-white/10 rounded-[1.5rem] pl-16 pr-8 py-5 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-cyan-500/50 transition-all font-mono uppercase tracking-[0.15em] placeholder:text-gray-400 dark:placeholder:text-gray-800 shadow-inner" />
+                    <div className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#2C5E3B] transition-colors pointer-events-none"><Search size={20} /></div>
+                    <input type="text" placeholder="SEARCH RELAY RECORDS..." value={searchQuery} onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }} className="w-full bg-gray-50 dark:bg-black/60 border-2 border-gray-100 dark:border-white/10 rounded-[1.5rem] pl-16 pr-8 py-5 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-[#2C5E3B]/50 transition-all font-mono uppercase tracking-[0.15em] placeholder:text-gray-400 dark:placeholder:text-gray-800 shadow-inner" />
                 </div>
             </div>
 
@@ -58,17 +58,17 @@ export const DriversHistory: React.FC<DriversHistoryProps> = ({
                         {paginatedHistory.map((job: any) => {
                             const destSite = sites.find(s => s.id === job.destSiteId);
                             return (
-                                <div key={job.id} onClick={() => { setSelectedJob(job); setIsDetailsOpen(true); }} className="flex flex-col md:flex-row items-center gap-5 md:gap-8 bg-gray-50/50 dark:bg-white/[0.03] hover:bg-gray-100 dark:hover:bg-white/[0.06] border-2 border-gray-50 dark:border-white/5 hover:border-cyan-500/30 rounded-[1.5rem] lg:rounded-[2rem] p-5 lg:p-7 transition-all group/item cursor-pointer shadow-sm hover:shadow-cyan-500/5">
+                                <div key={job.id} onClick={() => { setSelectedJob(job); setIsDetailsOpen(true); }} className="flex flex-col md:flex-row items-center gap-5 md:gap-8 bg-gray-50/50 dark:bg-white/[0.03] hover:bg-gray-100 dark:hover:bg-white/[0.06] border-2 border-gray-50 dark:border-white/5 hover:border-[#2C5E3B]/30 rounded-[1.5rem] lg:rounded-[2rem] p-5 lg:p-7 transition-all group/item cursor-pointer shadow-sm hover:shadow-[#2C5E3B]/5">
                                     <div className="w-full md:w-40 flex flex-col justify-center">
-                                        <span className="text-[11px] font-black text-cyan-700 dark:text-cyan-500/50 group-hover/item:text-cyan-600 dark:group-hover/item:text-cyan-400 transition-colors uppercase tracking-widest">{formatJobId(job)}</span>
+                                        <span className="text-[11px] font-black text-[#2C5E3B] dark:text-[#A9CBA2]/50 group-hover/item:text-[#2C5E3B] dark:group-hover/item:text-[#A9CBA2] transition-colors uppercase tracking-widest">{formatJobId(job)}</span>
                                         <p className="text-[10px] text-gray-400 dark:text-gray-600 font-bold mt-1.5 uppercase tracking-wider italic">{formatDateTime(job.updatedAt || job.createdAt)}</p>
                                     </div>
                                     <div className="h-12 w-px bg-gray-200 dark:bg-white/5 hidden md:block" />
                                     <div className="flex-1 flex items-center gap-5 min-w-0 w-full">
-                                        <div className="p-4 bg-white dark:bg-black/40 rounded-2xl border-2 border-gray-100 dark:border-white/5 shadow-sm group-hover/item:border-cyan-500/20 transition-all"><Package size={22} className="text-gray-300 dark:text-gray-500 group-hover/item:text-cyan-600 dark:group-hover/item:text-white transition-colors" /></div>
+                                        <div className="p-4 bg-white dark:bg-black/40 rounded-2xl border-2 border-gray-100 dark:border-white/5 shadow-sm group-hover/item:border-[#2C5E3B]/20 transition-all"><Package size={22} className="text-gray-300 dark:text-gray-500 group-hover/item:text-[#2C5E3B] dark:group-hover/item:text-white transition-colors" /></div>
                                         <div className="min-w-0">
                                             <p className="text-[10px] text-gray-400 dark:text-gray-500 font-black uppercase tracking-widest mb-1.5 italic">Destination</p>
-                                            <h6 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tight truncate underline decoration-cyan-500/10 group-hover/item:decoration-cyan-500/30 decoration-2 underline-offset-4">{destSite?.name || 'Local Delivery'}</h6>
+                                            <h6 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tight truncate underline decoration-[#A9CBA2]/10 group-hover/item:decoration-[#A9CBA2]/30 decoration-2 underline-offset-4">{destSite?.name || 'Local Delivery'}</h6>
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-5 md:gap-10 w-full md:w-auto justify-between md:justify-end border-t md:border-t-0 border-gray-100 dark:border-white/5 pt-5 md:pt-0 mt-2 md:mt-0">

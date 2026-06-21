@@ -31,11 +31,13 @@ export default function WMSDashboard() {
   const { movements, addNotification, activeSite, employees } = useData();
   const { getWorkerPoints, getLeaderboard } = useGamification();
 
-  // Theme-aware colors for Charts
-  const chartStroke = theme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)';
-  const chartText = theme === 'dark' ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)';
-  const tooltipBg = theme === 'dark' ? '#111111' : '#ffffff';
-  const tooltipBorder = theme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)';
+  // Theme-aware colors for Charts (Aligned with woody / woodygreen theme)
+  const chartStroke = theme === 'dark' ? 'rgba(169, 203, 162, 0.1)' : 'rgba(44, 94, 59, 0.1)';
+  const chartText = theme === 'dark' ? 'rgba(169, 203, 162, 0.5)' : 'rgba(44, 94, 59, 0.6)';
+  const tooltipBg = theme === 'dark' ? '#18201B' : '#FAF8F5';
+  const tooltipBorder = theme === 'dark' ? 'rgba(169, 203, 162, 0.15)' : 'rgba(44, 94, 59, 0.15)';
+  const inboundColor = theme === 'dark' ? '#A9CBA2' : '#2C5E3B';
+  const outboundColor = theme === 'dark' ? '#E2C899' : '#8C6239';
 
   // --- DATE FILTER ---
   // Using startDate and endDate from the hook to pass to server metrics
@@ -167,7 +169,6 @@ export default function WMSDashboard() {
   };
 
   const handleQuickAction = (action: string) => {
-    // ... existing quick action logic
     // Haptic feedback for PDA
     if (native.isNative()) {
       native.vibrate(30);
@@ -188,27 +189,26 @@ export default function WMSDashboard() {
   };
 
   return (
-    <div className="space-y-8 dark:bg-[#050507] bg-[#f8f9fa] -m-8 p-8 min-h-screen relative transition-colors duration-500">
-      {/* Background Depth */}
+    <div className="space-y-8 bg-transparent -m-8 p-8 min-h-screen relative transition-colors duration-500">
+      {/* Background Depth & Organic Flows */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-0 right-0 w-[800px] h-[800px] dark:bg-cyber-primary/5 bg-cyber-primary/2 rounded-full blur-[150px] -mr-96 -mt-96 opacity-40" />
-        <div className="absolute bottom-0 left-0 w-[600px] h-[600px] dark:bg-blue-500/5 bg-blue-500/2 rounded-full blur-[120px] -ml-72 -mb-72 opacity-30" />
+        <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-[#2C5E3B]/10 dark:bg-[#1E3F27]/5 rounded-full blur-[150px] -mr-96 -mt-96 opacity-40 animate-pulse-slow" />
+        <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-amber-600/10 dark:bg-amber-700/3 rounded-full blur-[120px] -ml-72 -mb-72 opacity-30 animate-pulse-slow" />
       </div>
 
       <div className="relative z-10 space-y-8">
 
-
         {/* Header with Date Filter & Alerts */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 dark:border-white/[0.08] border-black/[0.05]">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-[#E2DCCE]/40 dark:border-white/[0.04]">
           <div>
-            <div className="flex items-center gap-3 mb-2">
-              <div className="p-2.5 bg-cyber-primary/20 rounded-xl border border-cyber-primary/30 shadow-[0_0_15px_rgba(0,255,157,0.2)]">
-                <Box className="text-cyber-primary animate-pulse-slow" size={24} />
+            <div className="flex items-center gap-4 mb-2">
+              <div className="p-3 bg-gradient-to-tr from-[#1E3F27] via-[#2C5E3B] to-amber-700 rounded-2xl shadow-[0_8px_20px_rgba(44,94,59,0.2)]">
+                <Box className="text-white animate-pulse-slow" size={24} />
               </div>
               <div>
-                <h1 className="text-3xl font-bold dark:text-white text-slate-900 tracking-tight uppercase">Warehouse Operations Center</h1>
-                <div className="flex items-center gap-2 dark:text-gray-500 text-slate-400 text-[10px] font-bold uppercase tracking-[0.3em] mt-2">
-                  <span className={`w-1.5 h-1.5 rounded-full ${refreshing ? 'bg-cyber-primary animate-ping' : 'bg-cyber-primary opacity-40'}`}></span>
+                <h1 className="text-3xl font-extrabold dark:text-[#EAE5D9] text-[#1E3F27] tracking-tight uppercase">Warehouse Operations Center</h1>
+                <div className="flex items-center gap-2 text-[#4D6E56] dark:text-[#7A9E83] text-[10px] font-bold uppercase tracking-[0.3em] mt-2">
+                  <span className={`w-1.5 h-1.5 rounded-full ${refreshing ? 'bg-amber-600 animate-ping' : 'bg-[#2C5E3B] opacity-60'}`}></span>
                   {refreshing ? 'Synchronizing Operational Data...' : 'Operational Command Node'}
                 </div>
               </div>
@@ -216,13 +216,13 @@ export default function WMSDashboard() {
           </div>
 
           <div className="flex flex-wrap items-center gap-4">
-            <div className="flex items-center gap-3 p-1.5 dark:bg-white/[0.05] bg-white border dark:border-white/[0.1] border-black/[0.05] rounded-2xl shadow-sm">
-              <div className="px-5 py-2.5 dark:bg-white/[0.02] bg-red-500/[0.03] border dark:border-white/[0.05] border-red-500/10 text-red-500 text-[10px] font-bold uppercase tracking-widest rounded-xl flex items-center">
-                <AlertTriangle size={14} className="mr-2.5 opacity-40" />
+            <div className="flex items-center gap-3 p-1.5 bg-white/80 dark:bg-[#18201B]/70 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-2xl shadow-sm backdrop-blur-md">
+              <div className="px-5 py-2.5 bg-red-500/[0.03] dark:bg-red-500/[0.02] border border-red-500/10 text-red-600 dark:text-red-400 text-[10px] font-bold uppercase tracking-widest rounded-xl flex items-center">
+                <AlertTriangle size={14} className="mr-2.5 opacity-60" />
                 {metrics.active_alerts} Alerts Active
               </div>
-              <div className="px-5 py-2.5 dark:bg-white/[0.02] bg-blue-500/[0.03] border dark:border-white/[0.05] border-blue-500/10 text-blue-500 text-[10px] font-bold uppercase tracking-widest rounded-xl flex items-center">
-                <Thermometer size={14} className="mr-2.5 opacity-40" />
+              <div className="px-5 py-2.5 bg-amber-600/[0.03] dark:bg-amber-600/[0.02] border border-amber-600/10 text-amber-700 dark:text-amber-500 text-[10px] font-bold uppercase tracking-widest rounded-xl flex items-center">
+                <Thermometer size={14} className="mr-2.5 opacity-60" />
                 Zone C: -4°C
               </div>
             </div>
@@ -234,32 +234,32 @@ export default function WMSDashboard() {
           </div>
         </div>
 
-        {/* KPI Grid - Glass Cards */}
+        {/* KPI Grid - Earthy Glass Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {[
-            { title: 'Pending Picks', value: metrics.pendingPicks, sub: `${metrics.criticalPicks} Priority`, icon: ClipboardList, color: 'text-yellow-400', bg: 'bg-yellow-500/10', route: METRIC_ROUTES.picks },
-            { title: 'Inbound POs', value: metrics.inboundPOs, sub: 'Dock Schedule', icon: Truck, color: 'text-blue-400', bg: 'bg-blue-500/10', route: METRIC_ROUTES.procurement },
-            { title: 'Cycle Time', value: metrics.avgCycleTime, sub: 'Efficiency', icon: Clock, color: 'text-cyber-primary', bg: 'bg-cyber-primary/10', route: METRIC_ROUTES.wms },
-            { title: 'Pick Accuracy', value: metrics.pickAccuracy, sub: 'Quality Score', icon: CheckCircle, color: 'text-purple-400', bg: 'bg-purple-500/10', route: METRIC_ROUTES.picks },
+            { title: 'Pending Picks', value: metrics.pendingPicks, sub: `${metrics.criticalPicks} Priority`, icon: ClipboardList, color: 'text-amber-600 dark:text-amber-500', bg: 'bg-amber-500/10 dark:bg-amber-500/5', route: METRIC_ROUTES.picks },
+            { title: 'Inbound POs', value: metrics.inboundPOs, sub: 'Dock Schedule', icon: Truck, color: 'text-emerald-700 dark:text-[#A9CBA2]', bg: 'bg-emerald-500/10 dark:bg-emerald-500/5', route: METRIC_ROUTES.procurement },
+            { title: 'Cycle Time', value: metrics.avgCycleTime, sub: 'Efficiency', icon: Clock, color: 'text-[#2C5E3B] dark:text-[#A9CBA2]', bg: 'bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10', route: METRIC_ROUTES.wms },
+            { title: 'Pick Accuracy', value: metrics.pickAccuracy, sub: 'Quality Score', icon: CheckCircle, color: 'text-yellow-600 dark:text-[#E2C899]', bg: 'bg-yellow-500/10 dark:bg-yellow-500/5', route: METRIC_ROUTES.picks },
           ].map((kpi, idx) => (
             <div key={idx} onClick={() => navigate(kpi.route)} className="group relative cursor-pointer">
-              <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent rounded-3xl -z-10 transition-opacity opacity-0 group-hover:opacity-100 duration-500" />
-              <div className={`h-full dark:bg-white/[0.06] bg-white backdrop-blur-2xl border dark:border-white/[0.12] border-black/[0.05] rounded-[2.5rem] p-7 transition-all duration-500 hover:translate-y-[-4px] dark:hover:border-white/[0.2] hover:border-black/10 dark:hover:bg-white/[0.08] hover:bg-white/90 shadow-sm dark:shadow-[0_30px_60px_rgba(0,0,0,0.5)] hover:shadow-xl`}>
+              <div className="absolute inset-0 bg-gradient-to-br from-[#2C5E3B]/5 to-transparent rounded-3xl -z-10 transition-opacity opacity-0 group-hover:opacity-100 duration-500" />
+              <div className="h-full bg-white/80 dark:bg-[#18201B]/70 border border-[#E2DCCE] dark:border-emerald-950/20 backdrop-blur-2xl rounded-[2.5rem] p-7 transition-all duration-500 hover:translate-y-[-4px] hover:border-[#CFC6B4] dark:hover:border-emerald-800/30 hover:bg-white dark:hover:bg-[#1C2620] shadow-sm dark:shadow-[0_24px_80px_rgba(5,8,6,0.65)] hover:shadow-xl">
                 <div className="flex items-start justify-between mb-5">
-                  <div className={`p-4 rounded-2xl ${kpi.bg} border dark:border-white/[0.05] border-black/[0.02] shadow-inner transition-transform duration-500 group-hover:scale-110`}>
+                  <div className={`p-4 rounded-2xl ${kpi.bg} border border-[#E2DCCE]/50 dark:border-emerald-950/10 shadow-inner transition-transform duration-500 group-hover:scale-110`}>
                     <kpi.icon size={22} className={kpi.color} />
                   </div>
                 </div>
                 <div>
-                  <h3 className="dark:text-gray-500 text-slate-400 text-[10px] font-bold uppercase tracking-[0.25em] mb-2">{kpi.title}</h3>
+                  <h3 className="text-[#4D6E56] dark:text-[#7A9E83] text-[10px] font-bold uppercase tracking-[0.25em] mb-2">{kpi.title}</h3>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-3xl font-bold dark:text-white text-slate-900 tracking-tight leading-none">{kpi.value}</span>
-                    <span className={`text-[11px] font-bold ${kpi.color} opacity-60`}>{kpi.sub}</span>
+                    <span className="text-3xl font-extrabold text-[#1E3F27] dark:text-[#EAE5D9] tracking-tight leading-none">{kpi.value}</span>
+                    <span className={`text-[11px] font-bold ${kpi.color} opacity-80`}>{kpi.sub}</span>
                   </div>
                 </div>
-                <div className="mt-4 pt-4 border-t dark:border-white/5 border-black/5 flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity">
-                  <span className="text-[9px] dark:text-gray-500 text-slate-500 font-bold uppercase tracking-widest">View Module</span>
-                  <ArrowRight size={14} className="dark:text-gray-600 text-slate-600 group-hover:text-white transition-colors" />
+                <div className="mt-4 pt-4 border-t border-[#E2DCCE]/40 dark:border-white/[0.04] flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity">
+                  <span className="text-[9px] text-[#4D6E56] dark:text-[#7A9E83] font-bold uppercase tracking-widest">View Module</span>
+                  <ArrowRight size={14} className="text-[#4D6E56] dark:text-[#A9CBA2] group-hover:translate-x-1 transition-transform" />
                 </div>
               </div>
             </div>
@@ -269,38 +269,39 @@ export default function WMSDashboard() {
         {/* Main Charts Area */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Inbound vs Outbound Flow */}
-          <div className="lg:col-span-2 dark:bg-white/[0.06] bg-white backdrop-blur-2xl border dark:border-white/[0.12] border-black/5 rounded-[2.5rem] p-8 relative overflow-hidden shadow-sm transition-colors duration-500">
-            <div className="absolute top-0 right-0 w-64 h-64 dark:bg-cyber-primary/5 bg-cyber-primary/2 rounded-full blur-[100px] -mr-32 -mt-32" />
+          <div className="lg:col-span-2 bg-white/80 dark:bg-[#18201B]/70 border border-[#E2DCCE] dark:border-emerald-950/20 backdrop-blur-2xl rounded-[2.5rem] p-8 relative overflow-hidden shadow-sm transition-all duration-500">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-[#2C5E3B]/5 dark:bg-[#1E3F27]/3 rounded-full blur-[100px] -mr-32 -mt-32" />
             <div className="flex items-center justify-between mb-10 relative">
               <div>
-                <h3 className="text-lg font-bold dark:text-white text-slate-900 flex items-center gap-3">
-                  <div className="w-1.5 h-6 bg-cyber-primary rounded-full shadow-[0_0_10px_rgba(0,255,157,0.3)]" />
+                <h3 className="text-lg font-extrabold text-[#1E3F27] dark:text-[#EAE5D9] flex items-center gap-3">
+                  <div className="w-1.5 h-6 bg-[#2C5E3B] rounded-full shadow-[0_0_10px_rgba(44,94,59,0.3)]" />
                   Flow Dynamics
                 </h3>
-                <p className="dark:text-gray-500 text-slate-400 text-[10px] mt-1 font-bold uppercase tracking-widest opacity-60">Daily item movement velocity</p>
+                <p className="text-[#4D6E56] dark:text-[#7A9E83] text-[10px] mt-1 font-bold uppercase tracking-widest opacity-60">Daily item movement velocity</p>
               </div>
-              <div className="flex items-center gap-6 p-2 dark:bg-white/[0.05] bg-slate-50 border dark:border-white/[0.1] border-black/[0.05] rounded-2xl shadow-sm transition-colors">
+              <div className="flex items-center gap-6 p-2 bg-white/50 dark:bg-black/10 border border-[#E2DCCE]/60 dark:border-emerald-950/20 rounded-2xl shadow-sm">
                 <div className="flex items-center gap-2 px-3 py-1 rounded-xl">
-                  <div className="w-2.5 h-2.5 bg-cyber-primary rounded-sm opacity-60" />
-                  <span className="text-[10px] font-bold dark:text-gray-500 text-slate-400 uppercase tracking-widest">Inbound</span>
+                  <div className="w-2.5 h-2.5 bg-[#2C5E3B] dark:bg-[#A9CBA2] rounded-sm opacity-80" />
+                  <span className="text-[10px] font-bold text-[#4D6E56] dark:text-[#7A9E83] uppercase tracking-widest">Inbound</span>
                 </div>
                 <div className="flex items-center gap-2 px-3 py-1 rounded-xl">
-                  <div className="w-2.5 h-2.5 bg-blue-500 rounded-sm opacity-60" />
-                  <span className="text-[10px] font-bold dark:text-gray-500 text-slate-400 uppercase tracking-widest">Outbound</span>
+                  <div className="w-2.5 h-2.5 bg-[#8C6239] dark:bg-[#E2C899] rounded-sm opacity-80" />
+                  <span className="text-[10px] font-bold text-[#4D6E56] dark:text-[#7A9E83] uppercase tracking-widest">Outbound</span>
                 </div>
               </div>
             </div>
+            
             <div className="h-[340px] w-full relative">
               <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
                 <BarChart data={INBOUND_OUTBOUND_DATA} barGap={12}>
                   <defs>
                     <linearGradient id="inboundGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#00ff9d" stopOpacity={1} />
-                      <stop offset="100%" stopColor="#00ff9d" stopOpacity={0.3} />
+                      <stop offset="0%" stopColor={inboundColor} stopOpacity={1} />
+                      <stop offset="100%" stopColor={inboundColor} stopOpacity={0.3} />
                     </linearGradient>
                     <linearGradient id="outboundGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#3b82f6" stopOpacity={1} />
-                      <stop offset="100%" stopColor="#3b82f6" stopOpacity={0.3} />
+                      <stop offset="0%" stopColor={outboundColor} stopOpacity={1} />
+                      <stop offset="100%" stopColor={outboundColor} stopOpacity={0.3} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="0" stroke={chartStroke} vertical={false} />
@@ -322,22 +323,20 @@ export default function WMSDashboard() {
                     dx={-10}
                   />
                   <Tooltip
-                    cursor={{ fill: theme === 'dark' ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)' }}
+                    cursor={{ fill: theme === 'dark' ? 'rgba(169,203,162,0.02)' : 'rgba(44,94,59,0.02)' }}
                     content={({ active, payload }) => {
                       if (active && payload && payload.length) {
                         return (
-                          <div
-                            className="backdrop-blur-2xl p-4 rounded-2xl shadow-2xl border bg-white/95 dark:bg-black/95 border-gray-200 dark:border-white/10"
-                          >
-                            <p className="text-[10px] font-black dark:text-gray-500 text-slate-500 uppercase tracking-[0.2em] mb-3">{payload[0].payload.date}</p>
+                          <div className="backdrop-blur-2xl p-4 rounded-2xl shadow-2xl border bg-[#FAF8F5]/95 dark:bg-[#18201B]/95 border-[#E2DCCE] dark:border-emerald-950/20">
+                            <p className="text-[10px] font-black text-[#4D6E56] dark:text-[#A9CBA2] uppercase tracking-[0.2em] mb-3">{payload[0].payload.date}</p>
                             <div className="space-y-2">
                               {payload.map((entry: any, i: number) => (
                                 <div key={i} className="flex items-center justify-between gap-8">
                                   <div className="flex items-center gap-2">
-                                    <div className={`w-2 h-2 rounded-full ${entry.fill === 'url(#inboundGradient)' ? 'bg-[#00ff9d]' : 'bg-[#3b82f6]'}`} />
-                                    <span className="text-xs font-bold dark:text-white text-slate-900 uppercase tracking-tight">{entry.name}</span>
+                                    <div className={`w-2 h-2 rounded-full ${entry.fill === 'url(#inboundGradient)' ? 'bg-[#2C5E3B] dark:bg-[#A9CBA2]' : 'bg-[#8C6239] dark:bg-[#E2C899]'}`} />
+                                    <span className="text-xs font-bold text-[#1E3F27] dark:text-[#EAE5D9] uppercase tracking-tight">{entry.name}</span>
                                   </div>
-                                  <span className="text-sm font-black dark:text-white text-slate-900">{entry.value}</span>
+                                  <span className="text-sm font-black text-[#1E3F27] dark:text-[#EAE5D9]">{entry.value}</span>
                                 </div>
                               ))}
                             </div>
@@ -356,32 +355,32 @@ export default function WMSDashboard() {
 
           {/* Storage Density & Velocity */}
           <div className="flex flex-col gap-6">
-            <div className="dark:bg-white/[0.06] bg-white backdrop-blur-2xl border dark:border-white/[0.1] border-black/[0.05] rounded-[2.5rem] p-10 flex-1 shadow-sm transition-colors duration-500">
-              <h3 className="text-lg font-bold dark:text-white text-slate-900 mb-8 flex items-center gap-4">
-                <Thermometer className="dark:text-cyber-primary text-cyber-primary opacity-60" size={20} />
+            <div className="bg-white/80 dark:bg-[#18201B]/70 border border-[#E2DCCE] dark:border-emerald-950/20 backdrop-blur-2xl rounded-[2.5rem] p-10 flex-1 shadow-sm transition-colors duration-500">
+              <h3 className="text-lg font-bold text-[#1E3F27] dark:text-[#EAE5D9] mb-8 flex items-center gap-4">
+                <Thermometer className="text-[#2C5E3B] dark:text-[#A9CBA2] opacity-80" size={20} />
                 Spatial Density
               </h3>
               <div className="space-y-7">
                 {(warehouseMetrics?.zone_data?.length > 0 ? warehouseMetrics.zone_data : MOCK_ZONES).slice(0, 4).map((zone: any) => {
                   const percent = (zone.occupied / zone.capacity) * 100;
-                  let colorClass = 'from-cyber-primary to-emerald-400';
-                  if (percent > 90) colorClass = 'from-red-500 to-orange-500';
-                  else if (percent > 75) colorClass = 'from-yellow-400 to-orange-400';
+                  let colorClass = 'from-[#2C5E3B] to-emerald-500 dark:from-[#A9CBA2] dark:to-emerald-400';
+                  if (percent > 90) colorClass = 'from-red-600 to-orange-500';
+                  else if (percent > 75) colorClass = 'from-amber-600 to-yellow-500';
 
                   return (
                     <div key={zone.id} className="group cursor-help">
                       <div className="flex justify-between items-end mb-2.5 px-0.5">
                         <div>
-                          <span className="text-xs font-bold dark:text-white text-slate-900 uppercase tracking-wider">{zone.name}</span>
-                          <p className="text-[9px] dark:text-gray-500 text-slate-400 font-bold uppercase tracking-widest mt-0.5 opacity-60">Automated Racking</p>
+                          <span className="text-xs font-bold text-[#1E3F27] dark:text-[#EAE5D9] uppercase tracking-wider">{zone.name}</span>
+                          <p className="text-[9px] text-[#4D6E56] dark:text-[#7A9E83] font-bold uppercase tracking-widest mt-0.5 opacity-60">Automated Racking</p>
                         </div>
                         <div className="text-right">
-                          <span className={`text-[11px] font-bold ${percent > 90 ? 'text-red-400' : 'dark:text-cyber-primary text-cyber-primary'}`}>{percent.toFixed(0)}%</span>
+                          <span className={`text-[11px] font-bold ${percent > 90 ? 'text-red-600 dark:text-red-400' : 'text-[#2C5E3B] dark:text-[#A9CBA2]'}`}>{percent.toFixed(0)}%</span>
                         </div>
                       </div>
-                      <div className="w-full dark:bg-black/20 bg-slate-100 rounded-full h-2 overflow-hidden border dark:border-white/5 border-black/[0.03]">
+                      <div className="w-full bg-[#FAF8F5] dark:bg-black/35 border border-[#E2DCCE]/40 dark:border-white/[0.04] rounded-full h-2 overflow-hidden p-0.5">
                         <div
-                          className={`h-full bg-gradient-to-r ${colorClass} transition-all duration-1000 ease-out shadow-[0_0_10px_rgba(0,255,157,0.2)]`}
+                          className={`h-full rounded-full bg-gradient-to-r ${colorClass} transition-all duration-1000 ease-out shadow-[0_0_10px_rgba(44,94,59,0.15)]`}
                           ref={(el) => { if (el) el.style.width = `${percent}%`; }}
                         />
                       </div>
@@ -391,29 +390,29 @@ export default function WMSDashboard() {
               </div>
             </div>
 
-            <div className="dark:bg-white/[0.06] bg-white backdrop-blur-2xl border dark:border-white/[0.1] border-black/[0.05] rounded-[2.5rem] p-10 shadow-sm transition-colors duration-500">
-              <h4 className="text-[10px] font-bold dark:text-gray-500 text-slate-400 uppercase tracking-[0.3em] mb-6">Velocity Ranking</h4>
+            <div className="bg-white/80 dark:bg-[#18201B]/70 border border-[#E2DCCE] dark:border-emerald-950/20 backdrop-blur-2xl rounded-[2.5rem] p-10 shadow-sm transition-colors duration-500">
+              <h4 className="text-[10px] font-bold text-[#4D6E56] dark:text-[#7A9E83] uppercase tracking-[0.3em] mb-6">Velocity Ranking</h4>
               <div className="space-y-4">
                 {FAST_MOVERS.length > 0 ? FAST_MOVERS.slice(0, 3).map((item: any, i: number) => (
-                  <div key={i} className="flex items-center justify-between p-4 dark:bg-white/[0.02] bg-slate-50/50 rounded-2xl border dark:border-white/[0.05] border-black/[0.03] group hover:dark:bg-white/[0.05] hover:bg-slate-100/50 transition-all cursor-pointer">
+                  <div key={i} className="flex items-center justify-between p-4 bg-[#FAF8F5]/80 dark:bg-[#1C2620]/45 rounded-2xl border border-[#E2DCCE]/50 dark:border-emerald-950/15 group hover:bg-[#FAF8F5] hover:dark:bg-[#1C2620]/80 transition-all cursor-pointer">
                     <div className="flex items-center gap-5 min-w-0">
-                      <div className="w-12 h-12 rounded-2xl dark:bg-white/[0.03] bg-white flex items-center justify-center font-bold dark:text-gray-600 text-slate-400 text-[10px] border dark:border-white/[0.05] border-black/[0.05] group-hover:text-cyber-primary group-hover:dark:border-cyber-primary/20 group-hover:border-cyber-primary/10 transition-colors">
+                      <div className="w-12 h-12 rounded-2xl bg-white dark:bg-black/25 flex items-center justify-center font-bold text-[#4D6E56] dark:text-[#7A9E83] text-[10px] border border-[#E2DCCE] dark:border-emerald-950/25 group-hover:text-[#2C5E3B] group-hover:dark:text-[#A9CBA2] group-hover:border-[#2C5E3B]/25 group-hover:dark:border-[#A9CBA2]/25 transition-colors">
                         0{i + 1}
                       </div>
                       <div className="truncate">
-                        <span className="text-xs font-bold dark:text-gray-200 text-slate-900 truncate block group-hover:dark:text-white group-hover:text-cyber-primary transition-colors">{item.name}</span>
-                        <p className="text-[9px] dark:text-gray-500 text-slate-400 font-bold uppercase tracking-tighter mt-0.5 opacity-60">SKU Fast-Tracked</p>
+                        <span className="text-xs font-bold text-[#1E3F27] dark:text-[#EAE5D9] truncate block group-hover:text-[#2C5E3B] group-hover:dark:text-[#A9CBA2] transition-colors">{item.name}</span>
+                        <p className="text-[9px] text-[#4D6E56] dark:text-[#7A9E83] font-bold uppercase tracking-tighter mt-0.5 opacity-60">SKU Fast-Tracked</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3 text-right shrink-0">
                       <div className="text-right">
-                        <span className="block text-xs font-black dark:text-white text-slate-900">{item.moved}</span>
-                        {item.trend && <span className="text-[9px] font-bold text-cyber-primary">{item.trend}</span>}
+                        <span className="block text-xs font-black text-[#1E3F27] dark:text-[#EAE5D9]">{item.moved}</span>
+                        {item.trend && <span className="text-[9px] font-bold text-[#2C5E3B] dark:text-[#A9CBA2]">{item.trend}</span>}
                       </div>
                     </div>
                   </div>
                 )) : (
-                  <p className="text-[10px] text-gray-500 font-black uppercase tracking-widest text-center py-4">Scanning Network...</p>
+                  <p className="text-[10px] text-stone-500 font-bold uppercase tracking-widest text-center py-4">Scanning Network...</p>
                 )}
               </div>
             </div>
@@ -421,87 +420,85 @@ export default function WMSDashboard() {
         </div>
 
         {/* Operational Pipeline - Premium Breakdown */}
-        <div className="dark:bg-white/[0.04] bg-white backdrop-blur-2xl border dark:border-white/[0.08] border-black/[0.05] rounded-[2.5rem] p-10 relative overflow-hidden shadow-sm transition-colors duration-500">
+        <div className="bg-white/80 dark:bg-[#18201B]/70 border border-[#E2DCCE] dark:border-emerald-950/20 backdrop-blur-2xl rounded-[2.5rem] p-10 relative overflow-hidden shadow-sm transition-colors duration-500">
           <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
-            <div className="absolute top-0 right-0 w-[500px] h-full bg-cyber-primary/5 blur-[120px] rounded-full translate-x-1/2" />
+            <div className="absolute top-0 right-0 w-[500px] h-full bg-[#2C5E3B]/5 blur-[120px] rounded-full translate-x-1/2" />
           </div>
 
-          <div className="flex flex-col md:flex-row md:items-center justify-between mb-10 gap-6 relative transition-colors duration-500">
+          <div className="flex flex-col md:flex-row md:items-center justify-between mb-10 gap-6 relative">
             <div>
-              <h3 className="text-xl font-bold dark:text-white text-slate-900 flex items-center gap-4 uppercase tracking-tight">
-                <div className="p-3 dark:bg-white/[0.03] bg-white border dark:border-white/10 border-black/5 rounded-2xl shadow-sm">
-                  <Activity className="text-cyber-primary" size={24} />
+              <h3 className="text-xl font-extrabold text-[#1E3F27] dark:text-[#EAE5D9] flex items-center gap-4 uppercase tracking-tight">
+                <div className="p-3 bg-white dark:bg-black/25 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-2xl shadow-sm">
+                  <Activity className="text-[#2C5E3B] dark:text-[#A9CBA2]" size={24} />
                 </div>
                 Operational Throughput
               </h3>
-              <p className="dark:text-gray-500 text-slate-400 text-xs mt-2 font-bold uppercase tracking-widest opacity-60">Real-time throughput analysis</p>
+              <p className="text-[#4D6E56] dark:text-[#7A9E83] text-xs mt-2 font-bold uppercase tracking-widest opacity-60">Real-time throughput analysis</p>
             </div>
-            <div className="flex items-center gap-3 px-6 py-3 dark:bg-white/[0.03] bg-white border dark:border-white/10 border-black/5 rounded-2xl shrink-0 shadow-sm">
-              <span className="w-2 h-2 rounded-full bg-cyber-primary opacity-60" />
-              <span className="text-[10px] font-bold dark:text-white text-slate-600 uppercase tracking-widest">System Online</span>
+            <div className="flex items-center gap-3 px-6 py-3 bg-[#FAF8F5]/80 dark:bg-black/25 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-2xl shrink-0 shadow-sm">
+              <span className="w-2 h-2 rounded-full bg-[#2C5E3B] dark:bg-[#A9CBA2] opacity-80" />
+              <span className="text-[10px] font-bold text-[#4D6E56] dark:text-[#7A9E83] uppercase tracking-widest">System Online</span>
             </div>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5 relative">
             {[
-              { label: 'Putaway', key: 'PUTAWAY', sub: 'Inbound Ingest', icon: Package, color: 'text-blue-400', bg: 'bg-blue-500/10' },
-              { label: 'Picking', key: 'PICK', sub: 'Outbound Flow', icon: Target, color: 'text-yellow-400', bg: 'bg-yellow-500/10' },
-              { label: 'Packing', key: 'PACK', sub: 'QA Validated', icon: Box, color: 'text-purple-400', bg: 'bg-purple-500/10' },
-              { label: 'Dispatch', key: 'DISPATCH', sub: 'Postal Ready', icon: Truck, color: 'text-green-400', bg: 'bg-green-500/10' },
-              { label: 'Internal', key: 'TRANSFER', sub: 'Cross-Network', icon: ArrowRight, iconColor: 'text-pink-400', bg: 'bg-pink-500/10' },
-              { label: 'Audits', key: 'COUNT', sub: 'Purity Check', icon: ClipboardList, color: 'text-orange-400', bg: 'bg-orange-500/10' },
-              { label: 'Compliance', key: 'WASTE', sub: 'Resolution', icon: AlertTriangle, color: 'text-red-400', bg: 'bg-red-500/10' },
-              { label: 'Returns', key: 'RETURNS', sub: 'Reverse Log', icon: ArrowRight, color: 'text-indigo-400', bg: 'bg-indigo-500/10' },
-              { label: 'Resupply', key: 'REPLENISH', sub: 'Buffer Sync', icon: Activity, color: 'text-cyan-400', bg: 'bg-cyan-500/10' },
-            ].map((cluster, i) => (
+              { label: 'Putaway', key: 'PUTAWAY', sub: 'Inbound Ingest', icon: Package, color: 'text-emerald-700 dark:text-[#A9CBA2]', bg: 'bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10' },
+              { label: 'Picking', key: 'PICK', sub: 'Outbound Flow', icon: Target, color: 'text-amber-600 dark:text-amber-500', bg: 'bg-amber-500/10' },
+              { label: 'Packing', key: 'PACK', sub: 'QA Validated', icon: Box, color: 'text-yellow-600 dark:text-[#E2C899]', bg: 'bg-yellow-500/10' },
+              { label: 'Dispatch', key: 'DISPATCH', sub: 'Postal Ready', icon: Truck, color: 'text-emerald-600 dark:text-[#7A9E83]', bg: 'bg-emerald-500/10' },
+              { label: 'Internal', key: 'TRANSFER', sub: 'Cross-Network', icon: ArrowRight, iconColor: 'text-stone-500', bg: 'bg-stone-500/10' },
+              { label: 'Audits', key: 'COUNT', sub: 'Purity Check', icon: ClipboardList, color: 'text-orange-600 dark:text-orange-400', bg: 'bg-orange-500/10' },
+              { label: 'Compliance', key: 'WASTE', sub: 'Resolution', icon: AlertTriangle, color: 'text-red-600 dark:text-red-400', bg: 'bg-red-500/10' },
+              { label: 'Returns', key: 'RETURNS', sub: 'Reverse Log', icon: ArrowRight, color: 'text-amber-700 dark:text-amber-600', bg: 'bg-amber-600/10' },
+              { label: 'Resupply', key: 'REPLENISH', sub: 'Buffer Sync', icon: Activity, color: 'text-emerald-600 dark:text-emerald-500', bg: 'bg-emerald-500/10' },
+            ].map((cluster) => (
               <div
                 key={cluster.key}
-                className="dark:bg-white/[0.03] bg-white backdrop-blur-md p-6 rounded-[2rem] border dark:border-white/5 border-black/[0.05] dark:hover:border-white/10 hover:border-black/10 dark:hover:bg-white/[0.05] hover:bg-slate-50 transition-all duration-500 hover:translate-y-[-4px] group relative cursor-pointer shadow-sm hover:shadow-md overflow-hidden"
+                className="bg-[#FAF8F5]/80 dark:bg-black/20 backdrop-blur-md p-6 rounded-[2rem] border border-[#E2DCCE] dark:border-emerald-950/20 hover:border-[#CFC6B4] dark:hover:border-emerald-800/30 hover:bg-[#FAF8F5] dark:hover:bg-[#1C2620]/65 transition-all duration-500 hover:translate-y-[-4px] group relative cursor-pointer shadow-sm hover:shadow-md overflow-hidden"
               >
                 <div className="flex items-center justify-between mb-6 relative">
-                  <div className={`p-3 rounded-2xl ${cluster.bg} border dark:border-white/5 border-black/[0.02] transition-transform duration-500 group-hover:scale-110`}>
+                  <div className={`p-3 rounded-2xl ${cluster.bg} border border-[#E2DCCE]/40 dark:border-emerald-950/10 transition-transform duration-500 group-hover:scale-110`}>
                     <cluster.icon size={18} className={cluster.color || cluster.iconColor} />
                   </div>
                   <div className="flex flex-col items-end">
-                    <span className="text-2xl font-bold dark:text-white text-slate-900 group-hover:text-cyber-primary transition-colors">
+                    <span className="text-2xl font-extrabold text-[#1E3F27] dark:text-[#EAE5D9] group-hover:text-[#2C5E3B] group-hover:dark:text-[#A9CBA2] transition-colors">
                       {warehouseMetrics?.queue_breakdown?.[cluster.key] || 0}
                     </span>
-                    <span className="text-[8px] font-bold dark:text-gray-500 text-slate-400 uppercase tracking-widest">Jobs</span>
+                    <span className="text-[8px] font-bold text-[#4D6E56] dark:text-[#7A9E83] uppercase tracking-widest">Jobs</span>
                   </div>
                 </div>
                 <div className="relative">
-                  <p className="text-xs font-bold dark:text-white text-slate-900 uppercase tracking-wider">{cluster.label}</p>
-                  <p className="text-[9px] dark:text-gray-500 text-slate-400 font-bold uppercase tracking-tight mt-1 truncate opacity-60">{cluster.sub}</p>
+                  <p className="text-xs font-bold text-[#1E3F27] dark:text-[#EAE5D9] uppercase tracking-wider">{cluster.label}</p>
+                  <p className="text-[9px] text-[#4D6E56] dark:text-[#7A9E83] font-bold uppercase tracking-tight mt-1 truncate opacity-60">{cluster.sub}</p>
                 </div>
               </div>
             ))}
-
-            {/* Hub Placeholder - will be rendered after the grid */}
           </div>
         </div>
 
         {/* Site Performance Elite Hub - Expansive Command View */}
-        <div className="dark:bg-white/[0.04] bg-white backdrop-blur-2xl p-10 rounded-[3rem] border dark:border-white/10 border-black/[0.05] shadow-xl relative overflow-hidden group transition-all mt-6">
+        <div className="bg-white/80 dark:bg-[#18201B]/70 border border-[#E2DCCE] dark:border-emerald-950/20 backdrop-blur-2xl p-10 rounded-[3rem] shadow-xl relative overflow-hidden group transition-all mt-6">
           {/* Background Accents */}
-          <div className="absolute top-0 right-0 w-[600px] h-[600px] dark:bg-cyber-primary/5 bg-cyber-primary/2 rounded-full blur-[120px] -mr-64 -mt-64 transition-opacity opacity-50" />
+          <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-[#2C5E3B]/5 dark:bg-[#1E3F27]/3 rounded-full blur-[120px] -mr-64 -mt-64 transition-opacity opacity-50" />
 
           <div className="relative">
             <div className="flex items-center justify-between mb-12">
               <div>
-                <h3 className="text-2xl font-black dark:text-white text-slate-900 flex items-center gap-4 uppercase tracking-tighter">
-                  <div className="p-4 rounded-2xl dark:bg-yellow-400/10 bg-yellow-400/5 border dark:border-yellow-400/20 border-black/5 shadow-inner">
-                    <Trophy size={32} className="text-yellow-400" />
+                <h3 className="text-2xl font-black text-[#1E3F27] dark:text-[#EAE5D9] flex items-center gap-4 uppercase tracking-tighter">
+                  <div className="p-4 rounded-2xl bg-amber-500/10 dark:bg-amber-500/5 border border-amber-600/20 dark:border-amber-600/10 shadow-inner">
+                    <Trophy size={32} className="text-amber-600 dark:text-amber-500" />
                   </div>
                   Performance Elite Hub
                 </h3>
-                <p className="dark:text-gray-500 text-slate-400 text-[10px] mt-2 font-bold uppercase tracking-[0.3em] opacity-60">Site Command: {activeSite?.name || 'Central Network'}</p>
+                <p className="text-[#4D6E56] dark:text-[#7A9E83] text-[10px] mt-2 font-bold uppercase tracking-[0.3em] opacity-60">Site Command: {activeSite?.name || 'Central Network'}</p>
               </div>
-              <div className="flex items-center gap-4 px-6 py-3 dark:bg-white/[0.05] bg-slate-50 rounded-2xl border dark:border-white/5 border-black/5 shadow-sm">
+              <div className="flex items-center gap-4 px-6 py-3 bg-[#FAF8F5]/80 dark:bg-[#1C2620]/45 rounded-2xl border border-[#E2DCCE] dark:border-emerald-950/20 shadow-sm">
                 <div className="flex flex-col items-end">
-                  <span className="text-[10px] font-bold dark:text-gray-500 text-slate-400 uppercase tracking-widest leading-none mb-1">Live Feed</span>
-                  <span className="text-xs font-black dark:text-cyber-primary text-cyber-primary uppercase">Operational Pulse Active</span>
+                  <span className="text-[10px] font-bold text-[#4D6E56] dark:text-[#7A9E83] uppercase tracking-widest leading-none mb-1">Live Feed</span>
+                  <span className="text-xs font-black text-[#2C5E3B] dark:text-[#A9CBA2] uppercase">Operational Pulse Active</span>
                 </div>
-                <div className="w-2 h-2 rounded-full bg-cyber-primary animate-pulse shadow-[0_0_8px_rgba(0,255,157,0.5)]" />
+                <div className="w-2 h-2 rounded-full bg-[#2C5E3B] dark:bg-[#A9CBA2] animate-pulse shadow-[0_0_8px_rgba(44,94,59,0.5)]" />
               </div>
             </div>
 
@@ -511,81 +508,81 @@ export default function WMSDashboard() {
                 const configurations = [
                   {
                     rank: 1,
-                    border: 'dark:border-yellow-400/40 border-yellow-400/20',
-                    glow: 'shadow-[0_0_40px_rgba(251,191,36,0.15)] dark:shadow-[0_0_60px_rgba(251,191,36,0.1)]',
+                    border: 'border-amber-500/40 dark:border-amber-500/20',
+                    glow: 'shadow-[0_0_40px_rgba(217,119,6,0.15)] dark:shadow-[0_0_60px_rgba(217,119,6,0.1)]',
                     crown: true,
                     medal: '🥇',
-                    bg: 'from-yellow-400 to-amber-500 shadow-[0_0_12px_rgba(251,191,36,0.4)]'
+                    bg: 'from-amber-600 to-amber-700 shadow-[0_0_12px_rgba(217,119,6,0.4)]'
                   },
                   {
                     rank: 2,
-                    border: 'border-slate-400/30',
+                    border: 'border-[#2C5E3B]/30',
                     glow: 'shadow-lg',
                     crown: false,
                     medal: '🥈',
-                    bg: 'from-slate-400 to-slate-500'
+                    bg: 'from-[#2C5E3B] to-[#1E3F27]'
                   },
                   {
                     rank: 3,
-                    border: 'border-amber-600/30',
+                    border: 'border-[#C29F68]/30',
                     glow: 'shadow-lg',
                     crown: false,
                     medal: '🥉',
-                    bg: 'from-amber-600 to-orange-700'
+                    bg: 'from-[#C29F68] to-[#8C6239]'
                   },
                   {
                     rank: 4,
-                    border: 'border-gray-500/20',
+                    border: 'border-stone-500/20',
                     glow: 'shadow-lg',
                     crown: false,
                     medal: '🏅',
-                    bg: 'from-gray-500 to-gray-600'
+                    bg: 'from-stone-500 to-stone-600'
                   },
                   {
                     rank: 5,
-                    border: 'border-gray-700/20',
+                    border: 'border-stone-700/20',
                     glow: 'shadow-lg',
                     crown: false,
                     medal: '🏅',
-                    bg: 'from-gray-700 to-gray-800'
+                    bg: 'from-stone-700 to-stone-800'
                   }
                 ];
                 const config = configurations[idx];
 
                 return (
-                  <div key={worker.id} className={`relative flex flex-col p-6 rounded-[2rem] dark:bg-white/[0.03] bg-white border ${config.border} ${config.glow} transition-all hover:translate-y-[-8px] hover:dark:bg-white/[0.05] group/card overflow-hidden`}>
+                  <div key={worker.id} className={`relative flex flex-col p-6 rounded-[2rem] bg-white dark:bg-black/35 border ${config.border} ${config.glow} transition-all hover:translate-y-[-8px] hover:bg-[#FAF8F5] hover:dark:bg-[#1C2620]/65 group/card overflow-hidden`}>
                     {/* Rank Number Graphic */}
-                    <div className="absolute top-4 right-6 text-5xl font-black opacity-5 dark:text-white text-slate-900 italic select-none">#{config.rank}</div>
+                    <div className="absolute top-4 right-6 text-5xl font-black opacity-5 text-[#1E3F27] dark:text-[#EAE5D9] italic select-none">#{config.rank}</div>
 
                     <div className="flex flex-col items-center text-center mb-8 relative">
                       <div className="relative mb-6">
-                        <div className={`w-24 h-24 rounded-2xl dark:bg-black/40 bg-slate-100 flex items-center justify-center border-2 border-white/10 overflow-hidden relative shadow-2xl transition-transform group-hover/card:scale-110 duration-700`}>
-                          <User size={40} className="dark:text-white text-slate-600 opacity-40" />
-                          <div className={`absolute bottom-0 inset-x-0 h-1/3 bg-gradient-to-t from-black/40 to-transparent`} />
+                        <div className="w-24 h-24 rounded-2xl bg-[#FAF8F5] dark:bg-black/35 flex items-center justify-center border-2 border-[#E2DCCE]/50 dark:border-emerald-950/20 overflow-hidden relative shadow-2xl transition-transform group-hover/card:scale-110 duration-700">
+                          <User size={40} className="text-[#4D6E56] dark:text-[#7A9E83] opacity-40" />
+                          <div className="absolute bottom-0 inset-x-0 h-1/3 bg-gradient-to-t from-black/40 to-transparent" />
                         </div>
                         <div className={`absolute -bottom-2.5 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-gradient-to-r ${config.bg} text-[10px] font-black text-white shadow-xl whitespace-nowrap`}>
                           LVL {worker.level}
                         </div>
-                        {config.crown && <Crown size={24} className="absolute -top-4 -right-2 text-yellow-400 rotate-12 drop-shadow-[0_0_8px_rgba(251,191,36,0.6)]" />}
+                        {config.crown && <Crown size={24} className="absolute -top-4 -right-2 text-amber-500 rotate-12 drop-shadow-[0_0_8px_rgba(217,119,6,0.6)]" />}
                       </div>
-                      <h4 className="text-xl font-black dark:text-white text-slate-900 truncate w-full mb-1 tracking-tight">{worker.employeeName}</h4>
-                      <p className="text-[10px] dark:text-gray-500 text-slate-400 font-bold uppercase tracking-[0.2em]">{worker.levelTitle}</p>
+                      <h4 className="text-xl font-black text-[#1E3F27] dark:text-[#EAE5D9] truncate w-full mb-1 tracking-tight">{worker.employeeName}</h4>
+                      <p className="text-[10px] text-[#4D6E56] dark:text-[#7A9E83] font-bold uppercase tracking-[0.2em]">{worker.levelTitle}</p>
                     </div>
 
                     {/* Operational Scorecard */}
                     <div className="grid grid-cols-2 gap-3 mb-8">
-                      <div className="p-4 rounded-2xl dark:bg-white/[0.02] bg-slate-50 border dark:border-white/5 border-black/[0.03]">
-                        <p className="text-[8px] dark:text-gray-500 text-slate-400 font-black uppercase tracking-widest mb-1.5">Efficiency</p>
+                      <div className="p-4 rounded-2xl bg-[#FAF8F5] dark:bg-black/25 border border-[#E2DCCE] dark:border-emerald-950/20">
+                        <p className="text-[8px] text-[#4D6E56] dark:text-[#7A9E83] font-black uppercase tracking-widest mb-1.5">Efficiency</p>
                         <div className="flex items-baseline gap-1">
-                          <span className="text-lg font-bold dark:text-white text-slate-900">{worker.averageAccuracy || '98'}</span>
-                          <span className="text-[9px] font-bold text-cyber-primary">%</span>
+                          <span className="text-lg font-bold text-[#1E3F27] dark:text-[#EAE5D9]">{worker.averageAccuracy || '98'}</span>
+                          <span className="text-[9px] font-bold text-[#2C5E3B] dark:text-[#A9CBA2]">%</span>
                         </div>
                       </div>
-                      <div className="p-4 rounded-2xl dark:bg-white/[0.02] bg-slate-50 border dark:border-white/5 border-black/[0.03]">
-                        <p className="text-[8px] dark:text-gray-500 text-slate-400 font-black uppercase tracking-widest mb-1.5">Velocity</p>
+                      <div className="p-4 rounded-2xl bg-[#FAF8F5] dark:bg-black/25 border border-[#E2DCCE] dark:border-emerald-950/20">
+                        <p className="text-[8px] text-[#4D6E56] dark:text-[#7A9E83] font-black uppercase tracking-widest mb-1.5">Velocity</p>
                         <div className="flex items-baseline gap-1">
-                          <span className="text-lg font-bold dark:text-white text-slate-900">{worker.averageTimePerJob || '4.2'}</span>
-                          <span className="text-[9px] font-bold text-cyber-primary">MNS</span>
+                          <span className="text-lg font-bold text-[#1E3F27] dark:text-[#EAE5D9]">{worker.averageTimePerJob || '4.2'}</span>
+                          <span className="text-[9px] font-bold text-[#2C5E3B] dark:text-[#A9CBA2]">MNS</span>
                         </div>
                       </div>
                     </div>
@@ -593,10 +590,10 @@ export default function WMSDashboard() {
                     {/* Weekly Performance Bar */}
                     <div className="mt-auto">
                       <div className="flex justify-between items-end mb-3">
-                        <span className="text-[9px] dark:text-gray-500 text-slate-400 font-black uppercase tracking-widest mb-1.5">Weekly Target</span>
-                        <span className="text-sm font-black dark:text-white text-slate-900">{worker.weeklyPoints.toLocaleString()} <span className="text-[9px] text-cyber-primary">PTS</span></span>
+                        <span className="text-[9px] text-[#4D6E56] dark:text-[#7A9E83] font-black uppercase tracking-widest mb-1.5">Weekly Target</span>
+                        <span className="text-sm font-black text-[#1E3F27] dark:text-[#EAE5D9]">{worker.weeklyPoints.toLocaleString()} <span className="text-[9px] text-[#2C5E3B] dark:text-[#A9CBA2]">PTS</span></span>
                       </div>
-                      <div className="h-3 dark:bg-black/40 bg-slate-100 rounded-lg overflow-hidden border dark:border-white/5 border-black/[0.02] p-0.5">
+                      <div className="h-3 bg-[#FAF8F5] dark:bg-black/45 rounded-lg overflow-hidden border border-[#E2DCCE]/50 dark:border-emerald-950/20 p-0.5">
                         <div
                           className={`h-full rounded-md bg-gradient-to-r ${config.bg} relative`}
                           ref={(el) => { if (el) el.style.width = `${Math.min(100, (worker.weeklyPoints / 2500) * 100)}%`; }}
@@ -609,7 +606,7 @@ export default function WMSDashboard() {
                     {/* Achievement Preview */}
                     <div className="mt-6 flex gap-2 overflow-hidden items-center justify-center opacity-70 group-hover/card:opacity-100 transition-opacity">
                       {(worker.achievements || []).slice(0, 4).map((ach: any, i: number) => (
-                        <div key={i} className="w-8 h-8 rounded-lg dark:bg-white/5 bg-slate-50 border dark:border-white/10 border-black/5 flex items-center justify-center text-xs grayscale group-hover/card:grayscale-0 transition-all" title={ach.name}>
+                        <div key={i} className="w-8 h-8 rounded-lg bg-[#FAF8F5] dark:bg-white/5 border border-[#E2DCCE] dark:border-white/10 flex items-center justify-center text-xs grayscale group-hover/card:grayscale-0 transition-all" title={ach.name}>
                           {ach.icon || '🏆'}
                         </div>
                       ))}
@@ -622,14 +619,14 @@ export default function WMSDashboard() {
             {/* Site Personnel & Scheduling Section */}
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mt-6">
               {/* Modern Site Roster Section */}
-              <div className="dark:bg-white/[0.02] bg-slate-50 border dark:border-white/5 border-black/5 rounded-[3rem] p-10 relative overflow-hidden group">
-                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyber-primary/20 to-transparent" />
+              <div className="bg-[#FAF8F5] dark:bg-white/[0.02] border border-[#E2DCCE] dark:border-white/5 rounded-[3rem] p-10 relative overflow-hidden group">
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#2C5E3B]/20 to-transparent" />
                 <SiteRoster layout="grid" limit={8} className="relative z-10" />
 
                 <div className="mt-10 flex justify-center">
                   <button
                     onClick={() => navigate('/employees')}
-                    className="px-8 py-3 dark:bg-white/5 bg-white border dark:border-white/10 border-black/10 rounded-2xl text-[10px] font-black dark:text-gray-400 text-slate-500 uppercase tracking-[0.3em] hover:text-cyber-primary hover:dark:border-white/20 hover:border-black/20 transition-all flex items-center gap-3"
+                    className="px-8 py-3 bg-white dark:bg-white/5 border border-[#E2DCCE] dark:border-white/10 rounded-2xl text-[10px] font-black text-[#4D6E56] dark:text-gray-400 uppercase tracking-[0.3em] hover:text-[#2C5E3B] hover:dark:border-white/20 hover:border-black/20 transition-all flex items-center gap-3 cursor-pointer"
                   >
                     Access Personnel Database
                     <ChevronRight size={14} />
@@ -638,8 +635,8 @@ export default function WMSDashboard() {
               </div>
 
               {/* Advanced E-Rostering Section */}
-              <div className="dark:bg-white/[0.02] bg-slate-50 border dark:border-white/5 border-black/5 rounded-[3rem] p-10 relative overflow-visible group">
-                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyber-primary/20 to-transparent" />
+              <div className="bg-[#FAF8F5] dark:bg-white/[0.02] border border-[#E2DCCE] dark:border-white/5 rounded-[3rem] p-10 relative overflow-visible group">
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#2C5E3B]/20 to-transparent" />
                 <RosterManager className="relative z-10" />
               </div>
             </div>
@@ -649,15 +646,15 @@ export default function WMSDashboard() {
         {/* Activity Monitor Row */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Live Stream */}
-          <div className="lg:col-span-3 dark:bg-white/[0.06] bg-white backdrop-blur-2xl border dark:border-white/[0.1] border-black/[0.05] rounded-[2.5rem] p-10 shadow-sm transition-colors duration-500">
+          <div className="lg:col-span-3 bg-white/80 dark:bg-[#18201B]/70 border border-[#E2DCCE] dark:border-emerald-950/20 backdrop-blur-2xl rounded-[2.5rem] p-10 shadow-sm transition-colors duration-500">
             <div className="flex items-center justify-between mb-10">
               <div>
-                <h3 className="text-xl font-bold dark:text-white text-slate-900 uppercase tracking-tight">Stream Monitor</h3>
-                <p className="text-[10px] dark:text-gray-500 text-slate-400 mt-2 uppercase font-bold tracking-[0.2em] opacity-60">Real-time execution log</p>
+                <h3 className="text-xl font-bold text-[#1E3F27] dark:text-[#EAE5D9] uppercase tracking-tight">Stream Monitor</h3>
+                <p className="text-[10px] text-[#4D6E56] dark:text-[#7A9E83] mt-2 uppercase font-bold tracking-[0.2em] opacity-60">Real-time execution log</p>
               </div>
               <button
                 onClick={handleViewAllLogs}
-                className="px-6 py-2.5 dark:bg-white/[0.05] bg-white border dark:border-white/[0.1] border-black/[0.05] rounded-2xl text-[10px] font-bold dark:text-gray-300 text-slate-600 uppercase tracking-widest hover:text-cyber-primary hover:dark:border-white/[0.2] hover:border-black/10 transition-all shadow-sm"
+                className="px-6 py-2.5 bg-white dark:bg-white/[0.05] border border-[#E2DCCE] dark:border-white/[0.1] rounded-2xl text-[10px] font-bold text-[#4D6E56] dark:text-gray-300 uppercase tracking-widest hover:text-[#2C5E3B] hover:dark:border-white/[0.2] hover:border-black/10 transition-all shadow-sm cursor-pointer"
               >
                 Full Archive
               </button>
@@ -665,16 +662,16 @@ export default function WMSDashboard() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-2">
               {movements.slice(0, 10).map((move, i) => (
-                <div key={i} className="flex items-center group py-3 px-4 border-b dark:border-white/5 border-black/5 last:border-0 hover:dark:bg-white/[0.03] hover:bg-slate-50 rounded-2xl transition-all cursor-pointer">
-                  <div className={`w-1 h-8 rounded-full mr-5 transition-all group-hover:h-4 ${move.type === 'IN' ? 'bg-cyber-primary' : 'bg-blue-500'}`} />
+                <div key={i} className="flex items-center group py-3 px-4 border-b border-[#E2DCCE]/30 dark:border-white/5 last:border-0 hover:bg-[#FAF8F5]/80 hover:dark:bg-white/[0.03] rounded-2xl transition-all cursor-pointer">
+                  <div className={`w-1 h-8 rounded-full mr-5 transition-all group-hover:h-4 ${move.type === 'IN' ? 'bg-[#2C5E3B] dark:bg-[#A9CBA2]' : 'bg-[#8C6239] dark:bg-[#E2C899]'}`} />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
-                      <span className="text-[11px] font-bold dark:text-white text-slate-900 truncate max-w-[140px] tracking-tight group-hover:text-cyber-primary transition-colors">{move.productName}</span>
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${move.type === 'IN' ? 'bg-cyber-primary/10 text-cyber-primary' : 'bg-blue-500/10 text-blue-500'}`}>{move.quantity}</span>
+                      <span className="text-[11px] font-bold text-[#1E3F27] dark:text-[#EAE5D9] truncate max-w-[140px] tracking-tight group-hover:text-[#2C5E3B] group-hover:dark:text-[#A9CBA2] transition-colors">{move.productName}</span>
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${move.type === 'IN' ? 'bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 text-[#2C5E3B] dark:text-[#A9CBA2]' : 'bg-[#8C6239]/10 dark:bg-[#E2C899]/10 text-[#8C6239] dark:text-[#E2C899]'}`}>{move.quantity}</span>
                     </div>
                     <div className="flex items-center justify-between mt-1">
-                      <p className="text-[10px] dark:text-gray-500 text-slate-400 font-bold uppercase tracking-widest opacity-60">{move.type} • {move.performedBy}</p>
-                      <span className="text-[10px] dark:text-gray-600 text-slate-500 font-bold italic">{move.date?.includes(',') ? move.date.split(',')[0] : move.date || 'Live'}</span>
+                      <p className="text-[10px] text-[#4D6E56] dark:text-[#7A9E83] font-bold uppercase tracking-widest opacity-60">{move.type} • {move.performedBy}</p>
+                      <span className="text-[10px] text-stone-400 dark:text-stone-500 font-bold italic">{move.date?.includes(',') ? move.date.split(',')[0] : move.date || 'Live'}</span>
                     </div>
                   </div>
                 </div>
@@ -684,15 +681,15 @@ export default function WMSDashboard() {
 
           {/* Global Performance Pulse */}
           <div className="lg:col-span-1 flex flex-col gap-6">
-            <div className="dark:bg-white/[0.06] bg-white backdrop-blur-2xl border dark:border-white/[0.1] border-black/[0.05] rounded-[2.5rem] p-8 flex-1 flex flex-col justify-between group overflow-hidden relative shadow-sm transition-colors duration-500">
+            <div className="bg-white/80 dark:bg-[#18201B]/70 border border-[#E2DCCE] dark:border-emerald-950/20 backdrop-blur-2xl rounded-[2.5rem] p-8 flex-1 flex flex-col justify-between group overflow-hidden relative shadow-sm transition-colors duration-500">
               <div>
-                <h4 className="text-[10px] font-bold dark:text-gray-500 text-slate-400 uppercase tracking-widest mb-6">Network Load</h4>
+                <h4 className="text-[10px] font-bold text-[#4D6E56] dark:text-[#7A9E83] uppercase tracking-widest mb-6">Network Load</h4>
                 <div className="relative h-40 w-full flex items-center justify-center">
-                  <div className="absolute inset-0 rounded-full border-4 dark:border-white/5 border-black/5 shadow-inner" />
-                  <div className="absolute inset-0 rounded-full border-4 border-cyber-primary border-t-transparent border-r-transparent opacity-60" />
+                  <div className="absolute inset-0 rounded-full border-4 border-stone-200 dark:border-white/5 shadow-inner" />
+                  <div className="absolute inset-0 rounded-full border-4 border-[#2C5E3B] dark:border-[#A9CBA2] border-t-transparent border-r-transparent opacity-60" />
                   <div className="text-center relative z-10">
-                    <span className="block text-4xl font-bold dark:text-white text-slate-900 leading-none tracking-tight">84%</span>
-                    <span className="text-[9px] font-bold text-cyber-primary uppercase tracking-widest mt-2 block">Optimal</span>
+                    <span className="block text-4xl font-extrabold text-[#1E3F27] dark:text-[#EAE5D9] leading-none tracking-tight">84%</span>
+                    <span className="text-[9px] font-bold text-[#2C5E3B] dark:text-[#A9CBA2] uppercase tracking-widest mt-2 block">Optimal</span>
                   </div>
                 </div>
               </div>
@@ -700,17 +697,17 @@ export default function WMSDashboard() {
               <div className="space-y-3 mt-8">
                 <button
                   onClick={() => handleQuickAction('receive')}
-                  className="w-full flex items-center justify-between p-4 bg-cyber-primary text-black rounded-2xl font-bold text-[10px] uppercase tracking-widest hover:bg-cyber-primary/90 transition-all active:scale-95 shadow-sm"
+                  className="w-full flex items-center justify-between p-4 bg-[#224429] dark:bg-[#EAE5D9] hover:bg-[#1B3520] dark:hover:bg-[#DFD9CA] text-[#FAF8F5] dark:text-[#1E3B24] rounded-2xl font-bold text-[10px] uppercase tracking-widest transition-all active:scale-95 shadow-sm cursor-pointer"
                 >
                   Launch Receive
                   <ArrowRight size={16} />
                 </button>
                 <button
                   onClick={() => handleQuickAction('cycle')}
-                  className="w-full flex items-center justify-between p-4 dark:bg-white/[0.03] bg-white border dark:border-white/10 border-black/5 dark:text-white text-slate-700 rounded-2xl font-bold text-[10px] uppercase tracking-widest hover:dark:bg-white/[0.06] hover:bg-slate-50 transition-all shadow-sm"
+                  className="w-full flex items-center justify-between p-4 bg-white/80 dark:bg-black/25 border border-[#E2DCCE] dark:border-emerald-950/20 text-[#2C4D35] dark:text-[#A9CBA2] hover:text-[#1E3F27] dark:hover:text-white rounded-2xl font-bold text-[10px] uppercase tracking-widest transition-all shadow-sm cursor-pointer"
                 >
                   Audit Systems
-                  <Package size={16} className="text-gray-500" />
+                  <Package size={16} className="text-[#4D6E56] dark:text-[#7A9E83]" />
                 </button>
               </div>
             </div>

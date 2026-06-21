@@ -35,7 +35,8 @@ const TAX_REGIONS = {
 };
 
 export default function Finance() {
-   const { user } = useStore();
+   const { user, theme } = useStore();
+   const accentColor = theme === 'dark' ? '#A9CBA2' : '#2C5E3B';
    const { employees, sales, expenses, allProducts, addExpense, deleteExpense, processPayroll, activeSite, addNotification, settings, sites, getStorePoints } = useData();
 
    const [activeTab, setActiveTab] = useState<FinanceTab>('overview');
@@ -452,7 +453,7 @@ export default function Finance() {
       { month: 'Next M3', low: avgRevenue * 0.95, high: avgRevenue * 1.2, projection: avgRevenue * 1.12 },
    ];
 
-   const COLORS = ['#00ff9d', '#3b82f6', '#f59e0b', '#ef4444', '#a855f7', '#ec4899'];
+    const COLORS = [accentColor, '#3b82f6', '#f59e0b', '#ef4444', '#a855f7', '#ec4899'];
 
 
 
@@ -585,18 +586,18 @@ export default function Finance() {
       generateQuarterlyReport(reportMetrics, getDateRangeLabels(), 'Financials');
    };
 
-   const TabButton = ({ id, label, icon: Icon }: any) => (
-      <button
-         onClick={() => setActiveTab(id)}
-         className={`flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${activeTab === id
-            ? 'bg-cyber-primary text-black shadow-[0_0_15px_rgba(0,255,157,0.3)]'
-            : 'text-gray-400 hover:text-white hover:bg-white/5'
-            } `}
-      >
-         <Icon size={16} className="flex-shrink-0" />
-         <span>{label}</span>
-      </button>
-   );
+    const TabButton = ({ id, label, icon: Icon }: any) => (
+       <button
+          onClick={() => setActiveTab(id)}
+          className={`flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${activeTab === id
+             ? 'bg-[#224429] dark:bg-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24]'
+             : 'text-stone-500 dark:text-[#7A9E83] hover:text-[#1E3F27] dark:hover:text-white hover:bg-stone-200/20 dark:hover:bg-white/5'
+             } `}
+       >
+          <Icon size={16} className="flex-shrink-0" />
+          <span>{label}</span>
+       </button>
+    );
 
    return (
       <div className="space-y-6">
@@ -658,25 +659,25 @@ export default function Finance() {
                   <span className="text-sm font-bold text-white font-mono">{profitMargin.toFixed(1)}%</span>
                </div>
 
-               <div className="flex items-center gap-2 h-10">
-                  <button
-                     onClick={handleExportPnL}
-                     className="h-full bg-white/5 text-white border border-white/10 px-4 rounded-xl text-sm hover:bg-white/10 hover:border-white/20 flex items-center transition-all"
-                  >
-                     <Download className="w-4 h-4 mr-2" /> JSON
-                  </button>
-                  <button
-                     onClick={handleGenerateReport}
-                     className="h-full bg-cyber-primary text-black border border-cyber-primary px-4 rounded-xl text-sm hover:brightness-110 flex items-center transition-all font-bold shadow-[0_0_15px_rgba(0,255,157,0.2)]"
-                  >
-                     <Download className="w-4 h-4 mr-2" /> PDF Report
-                  </button>
-               </div>
-            </div>
-         </div>
+                <div className="flex items-center gap-2 h-10">
+                   <button
+                      onClick={handleExportPnL}
+                      className="h-full bg-white/5 text-[#2C4D35] dark:text-[#A9CBA2] border border-[#E2DCCE] dark:border-emerald-950/20 px-4 rounded-xl text-sm hover:bg-stone-200/20 dark:hover:bg-white/10 flex items-center transition-all"
+                   >
+                      <Download className="w-4 h-4 mr-2" /> JSON
+                   </button>
+                   <button
+                      onClick={handleGenerateReport}
+                      className="h-full woody-btn-primary flex items-center"
+                   >
+                      <Download className="w-4 h-4 mr-2" /> PDF Report
+                   </button>
+                </div>
+             </div>
+          </div>
 
-         {/* Tabs */}
-         <div className="flex flex-wrap items-center gap-2 bg-cyber-gray/50 p-1.5 rounded-xl border border-white/5 w-fit">
+          {/* Tabs */}
+          <div className="flex flex-wrap items-center gap-2 bg-white/90 dark:bg-black/25 border border-[#E2DCCE] dark:border-emerald-950/20 p-1.5 rounded-xl w-fit">
             <TabButton id="overview" label="P&L Overview" icon={Activity} />
             <TabButton id="budget" label="Budget & Forecasting" icon={Target} />
             <TabButton id="expenses" label="Expense Ledger" icon={CreditCard} />
@@ -755,8 +756,8 @@ export default function Finance() {
                            <AreaChart data={cashflowData}>
                               <defs>
                                  <linearGradient id="colorInc" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="5%" stopColor="#00ff9d" stopOpacity={0.3} />
-                                    <stop offset="95%" stopColor="#00ff9d" stopOpacity={0} />
+                                    <stop offset="5%" stopColor={accentColor} stopOpacity={0.3} />
+                                    <stop offset="95%" stopColor={accentColor} stopOpacity={0} />
                                  </linearGradient>
                                  <linearGradient id="colorExp" x1="0" y1="0" x2="0" y2="1">
                                     <stop offset="5%" stopColor="#ef4444" stopOpacity={0.3} />
@@ -767,7 +768,7 @@ export default function Finance() {
                               <XAxis dataKey="name" stroke="#666" fontSize={12} tickLine={false} axisLine={false} />
                               <YAxis stroke="#666" fontSize={12} tickLine={false} axisLine={false} />
                               <Tooltip contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #333' }} />
-                              <Area type="monotone" dataKey="income" stroke="#00ff9d" fillOpacity={1} fill="url(#colorInc)" />
+                              <Area type="monotone" dataKey="income" stroke={accentColor} fillOpacity={1} fill="url(#colorInc)" />
                               <Area type="monotone" dataKey="expense" stroke="#ef4444" fillOpacity={1} fill="url(#colorExp)" />
                            </AreaChart>
                         </ResponsiveContainer>

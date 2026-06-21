@@ -16,18 +16,18 @@ export const EmailReceiptModal: React.FC = () => {
     return (
         <Modal isOpen={isEmailReceiptModalOpen} onClose={() => setIsEmailReceiptModalOpen(false)} title="Email Receipt" size="sm">
             <div className="p-6">
-                <p className="text-gray-300 mb-4">Enter customer email address:</p>
+                <p className="text-[#1E3F27] dark:text-gray-300 mb-4">Enter customer email address:</p>
                 <input
                     type="email"
                     value={emailReceiptAddress}
                     onChange={(e) => setEmailReceiptAddress(e.target.value)}
-                    className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-white mb-6 focus:outline-none focus:border-cyber-primary transition-colors"
+                    className="w-full bg-white dark:bg-black/50 border border-[#E2DCCE] dark:border-white/10 rounded-lg px-4 py-3 text-[#1E3F27] dark:text-white mb-6 focus:outline-none focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] transition-colors"
                     placeholder="customer@example.com"
                     autoFocus
                 />
                 <div className="flex justify-end gap-3">
-                    <button onClick={() => setIsEmailReceiptModalOpen(false)} className="px-4 py-2 text-gray-400 hover:text-white">Cancel</button>
-                    <button onClick={handleConfirmEmailReceipt} disabled={!emailReceiptAddress || isProcessing} className="px-6 py-2 bg-cyber-primary hover:bg-cyber-accent text-black font-bold rounded-lg disabled:opacity-50 flex items-center gap-2">
+                    <button onClick={() => setIsEmailReceiptModalOpen(false)} className="px-4 py-2 text-stone-500 hover:text-[#2C5E3B] dark:text-gray-400 dark:hover:text-white transition-colors">Cancel</button>
+                    <button onClick={handleConfirmEmailReceipt} disabled={!emailReceiptAddress || isProcessing} className="px-6 py-2 bg-gradient-to-br from-[#224429] to-[#2C5E3B] text-white hover:opacity-90 font-bold rounded-lg disabled:opacity-50 flex items-center gap-2 transition-all shadow-sm">
                         {isProcessing && <Loader2 size={16} className="animate-spin" />}
                         Send Receipt
                     </button>

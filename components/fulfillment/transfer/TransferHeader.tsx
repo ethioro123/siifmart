@@ -45,7 +45,7 @@ export const TransferHeader: React.FC<TransferHeaderProps> = ({
                         </button>
                         <button
                             onClick={() => setViewMode('History')}
-                            className={`px-3 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-wider transition-all ${viewMode === 'History' ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/20' : 'text-gray-400 hover:text-white'}`}
+                            className={`px-3 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-wider transition-all ${viewMode === 'History' ? 'bg-[#2C5E3B] text-white shadow-lg shadow-[#2C5E3B]/20' : 'text-gray-400 hover:text-white'}`}
                         >
                             History
                         </button>
@@ -57,7 +57,7 @@ export const TransferHeader: React.FC<TransferHeaderProps> = ({
                             setTransferCenterTab(isHQ ? 'smart' : isWarehouse ? 'bulk' : 'request');
                             setShowTransferCenter(true);
                         }}
-                        className="px-4 py-2 bg-gradient-to-r from-cyber-primary to-cyan-400 text-black font-bold rounded-lg hover:from-cyber-accent hover:to-cyan-300 transition-all flex items-center gap-2 shadow-lg shadow-cyber-primary/20"
+                        className="px-4 py-2 bg-gradient-to-r from-[#2C5E3B] to-[#A9CBA2] text-white font-bold rounded-lg hover:from-[#3a7a4d] hover:to-[#c0d9b9] transition-all flex items-center gap-2 shadow-lg shadow-[#2C5E3B]/20"
                     >
                         <Truck size={16} />
                         Transfer Center
@@ -73,7 +73,7 @@ export const TransferHeader: React.FC<TransferHeaderProps> = ({
                     <span className="font-bold text-white">{filteredJobs.filter(j => j.type === 'TRANSFER' && !['Received', 'Cancelled'].includes(j.transferStatus || '')).length}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-purple-400"></span>
+                    <span className="w-2 h-2 rounded-full bg-amber-400"></span>
                     <span className="text-gray-400">In Transit:</span>
                     <span className="font-bold text-white">{filteredJobs.filter(j => {
                         if (j.type !== 'TRANSFER') return false;

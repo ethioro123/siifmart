@@ -87,6 +87,8 @@ interface UseReceivingDeps {
     setOrders: (updater: (prev: PurchaseOrder[]) => PurchaseOrder[]) => void;
     setAllOrders: (updater: (prev: PurchaseOrder[]) => PurchaseOrder[]) => void;
     addNotification: (type: 'alert' | 'success' | 'info', message: string) => void;
+    setProducts?: React.Dispatch<React.SetStateAction<Product[]>>;
+    setAllProducts?: React.Dispatch<React.SetStateAction<Product[]>>;
 }
 
 // ─── Hook ───────────────────────────────────────────────────────────────────
@@ -94,7 +96,8 @@ interface UseReceivingDeps {
 export const useReceiving = (deps: UseReceivingDeps) => {
     const {
         orders, allOrders, jobs, products, allProducts,
-        activeSite, setJobs, setOrders, setAllOrders, addNotification
+        activeSite, setJobs, setOrders, setAllOrders, addNotification,
+        setProducts, setAllProducts
     } = deps;
 
     // ── receivePO ───────────────────────────────────────────────────────────
@@ -136,11 +139,70 @@ export const useReceiving = (deps: UseReceivingDeps) => {
                 const decision = skuDecisions ? skuDecisions[lineItem.sku || ''] : 'keep';
                 const scannedSku = scannedSkus ? scannedSkus[lineItem.sku || ''] : null;
 
-                // Get product details
-                const existingProduct = products.find(p => p.id === targetProductId);
+                // Get product details (check allProducts first)
+                let existingProduct = allProducts.find(p => p.id === targetProductId || p.sku === productSku);
+                if (!existingProduct) {
+                    existingProduct = products.find(p => p.id === targetProductId || p.sku === productSku);
+                }
+
                 if (existingProduct) {
                     productSku = existingProduct.sku; // Use canonical SKU
-                    productToUpdate = existingProduct;
+                    targetProductId = existingProduct.id;
+                    
+                    // Sync PO line item details if they are missing
+                    const updates: any = {};
+                    if (!existingProduct.size && lineItem.size) updates.size = lineItem.size;
+                    if (!existingProduct.brand && lineItem.brand) updates.brand = lineItem.brand;
+                    if (!existingProduct.unit && lineItem.unit) updates.unit = lineItem.unit;
+                    if (!existingProduct.category && lineItem.category) updates.category = lineItem.category;
+                    if ((!existingProduct.price || existingProduct.price === 0) && lineItem.retailPrice) updates.price = lineItem.retailPrice;
+                    if ((!existingProduct.costPrice || existingProduct.costPrice === 0) && lineItem.unitCost) updates.costPrice = lineItem.unitCost;
+                    if (!existingProduct.customAttributes && lineItem.customAttributes) updates.customAttributes = lineItem.customAttributes;
+                    if (!existingProduct.description && lineItem.description) updates.description = lineItem.description;
+                    if (!existingProduct.minStock && lineItem.minStock) updates.minStock = lineItem.minStock;
+                    if (!existingProduct.maxStock && lineItem.maxStock) updates.maxStock = lineItem.maxStock;
+
+                    if (Object.keys(updates).length > 0) {
+                        const updated = await productsService.update(existingProduct.id, updates);
+                        if (updated) {
+                            setProducts?.(prev => prev.map(p => p.id === existingProduct.id ? updated : p));
+                            setAllProducts?.(prev => prev.map(p => p.id === existingProduct.id ? updated : p));
+                        }
+                    }
+                } else {
+                    // Create product placeholder record in DB
+                    try {
+                        const created = await productsService.create({
+                            siteId: targetSiteId || activeSite?.id || '',
+                            name: productName || lineItem.productName || `Item ${productSku}`,
+                            sku: productSku || lineItem.sku,
+                            barcode: (lineItem as any).barcode || '',
+                            barcodes: (lineItem as any).barcodes || [],
+                            price: lineItem.retailPrice || 0,
+                            costPrice: lineItem.unitCost || 0,
+                            category: lineItem.category || 'Uncategorized',
+                            status: 'active',
+                            stock: 0,
+                            location: 'On Order',
+                            size: lineItem.size || '',
+                            brand: lineItem.brand || '',
+                            unit: lineItem.unit || 'UNIT',
+                            packQuantity: lineItem.packQuantity || 1,
+                            customAttributes: lineItem.customAttributes || null,
+                            description: lineItem.description || '',
+                            minStock: lineItem.minStock || 0,
+                            maxStock: lineItem.maxStock || 0
+                        } as any);
+                        if (created) {
+                            targetProductId = created.id;
+                            productSku = created.sku;
+                            setProducts?.(prev => [created, ...prev]);
+                            setAllProducts?.(prev => [created, ...prev]);
+                        }
+                    } catch (err) {
+                        console.error("Failed to create placeholder product in receivePO:", err);
+                        throw err;
+                    }
                 }
 
                 const newJob: Omit<WMSJob, 'id'> = {
@@ -186,8 +248,8 @@ export const useReceiving = (deps: UseReceivingDeps) => {
             // Update local state
             setJobs(prev => [...prev, ...newJobs]);
 
-            // Update PO status
-            const updatedPO = await purchaseOrdersService.receive(poId, false);
+            // Refresh PO details
+            const updatedPO = await purchaseOrdersService.getById(poId);
             if (updatedPO) {
                 setOrders(prev => prev.map(o => o.id === poId ? updatedPO : o));
                 setAllOrders(prev => prev.map(o => o.id === poId ? updatedPO : o));
@@ -196,12 +258,12 @@ export const useReceiving = (deps: UseReceivingDeps) => {
             addNotification('success', `Created ${newJobs.length} putaway jobs for PO ${po.poNumber}`);
 
             return newJobs;
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error receiving PO:', error);
-            addNotification('alert', 'Failed to receive PO');
+            addNotification('alert', error.message || 'Failed to receive PO');
             throw error;
         }
-    }, [orders, allOrders, products, setJobs, setOrders, setAllOrders, addNotification]);
+    }, [orders, allOrders, products, allProducts, activeSite, setJobs, setOrders, setAllOrders, addNotification, setProducts, setAllProducts]);
 
     // ── receivePOSplit ──────────────────────────────────────────────────────
 
@@ -260,35 +322,161 @@ export const useReceiving = (deps: UseReceivingDeps) => {
                             targetProductId = newProductCheck.id;
                         } else {
                             const created = await productsService.create({
-                                siteId: activeSite?.id || '',
-                                name: variant.productName || `New Item ${variant.sku}`,
+                                siteId: po.siteId || activeSite?.id || '',
+                                name: variant.productName || item.productName || `New Item ${variant.sku}`,
                                 sku: variant.sku,
                                 barcode: variant.barcode,
-                                barcodes: variant.barcodes,
-                                price: 0,
-                                costPrice: 0,
-                                category: 'Uncategorized',
+                                barcodes: variant.barcodes || [],
+                                price: item.retailPrice || 0,
+                                costPrice: item.unitCost || 0,
+                                category: item.category || 'Uncategorized',
                                 status: 'active',
-                                stock: 0
+                                stock: 0,
+                                location: 'On Order',
+                                size: item.size || '',
+                                brand: item.brand || '',
+                                unit: item.unit || 'UNIT',
+                                packQuantity: item.packQuantity || 1,
+                                customAttributes: item.customAttributes || null,
+                                description: item.description || '',
+                                minStock: item.minStock || 0,
+                                maxStock: item.maxStock || 0
                             } as any);
                             if (created) {
                                 targetProductId = created.id;
+                                setProducts?.(prev => [created, ...prev]);
+                                setAllProducts?.(prev => [created, ...prev]);
                             }
                         }
                     } catch (err) {
                         console.error("Failed to create new product during receive:", err);
+                        throw err;
                     }
                 }
-                // 2. Handle Existing Product - Update Barcodes if needed
-                else if (variant.productId) {
-                    const existingProduct = allProducts.find(p => p.id === variant.productId);
-                    if (existingProduct && variant.barcodes && variant.barcodes.length > 0) {
-                        const currentBarcodes = existingProduct.barcodes || [];
-                        const newBarcodes = variant.barcodes.filter(b => !currentBarcodes.includes(b) && b !== existingProduct.barcode);
+                // 2. Handle Existing Product - Update Barcodes and Attributes if needed
+                else if (variant.productId || itemId) {
+                    const prodId = variant.productId || item.productId;
+                    const prodSku = variant.sku || item.sku;
 
-                        if (newBarcodes.length > 0) {
-                            const updatedBarcodes = [...currentBarcodes, ...newBarcodes];
-                            await productsService.update(variant.productId, { barcodes: updatedBarcodes });
+                    let existingProduct = allProducts.find(p => 
+                        (prodId && p.id === prodId) || 
+                        (prodSku && p.sku === prodSku)
+                    );
+                    if (!existingProduct && products) {
+                        existingProduct = products.find(p => 
+                            (prodId && p.id === prodId) || 
+                            (prodSku && p.sku === prodSku)
+                        );
+                    }
+                    if (!existingProduct) {
+                        // Let's try fetching it from DB to be absolutely sure!
+                        try {
+                            if (prodId && prodId.length === 36 && !prodId.startsWith('variant-')) { // Looks like a UUID
+                                existingProduct = await productsService.getById(prodId);
+                            }
+                        } catch (e) {
+                            console.warn("Could not fetch product by ID from DB in receivePOSplit:", e);
+                        }
+                        if (!existingProduct && prodSku) {
+                            try {
+                                existingProduct = await productsService.getBySKU(prodSku) || undefined;
+                            } catch (e) {
+                                console.warn("Could not fetch product by SKU from DB in receivePOSplit:", e);
+                            }
+                        }
+                    }
+
+                    if (existingProduct) {
+                        targetProductId = existingProduct.id;
+                        productSku = existingProduct.sku;
+
+                        const updates: any = {};
+                        
+                        // Sync PO line item details if they are missing
+                        if (!existingProduct.size && item.size) updates.size = item.size;
+                        if (!existingProduct.brand && item.brand) updates.brand = item.brand;
+                        if (!existingProduct.unit && item.unit) updates.unit = item.unit;
+                        if (!existingProduct.category && item.category) updates.category = item.category;
+                        if ((!existingProduct.price || existingProduct.price === 0) && item.retailPrice) updates.price = item.retailPrice;
+                        if ((!existingProduct.costPrice || existingProduct.costPrice === 0) && item.unitCost) updates.costPrice = item.unitCost;
+                        if (!existingProduct.customAttributes && item.customAttributes) updates.customAttributes = item.customAttributes;
+                        if (!existingProduct.description && item.description) updates.description = item.description;
+                        if (!existingProduct.minStock && item.minStock) updates.minStock = item.minStock;
+                        if (!existingProduct.maxStock && item.maxStock) updates.maxStock = item.maxStock;
+
+                        const currentBarcodes = Array.isArray(existingProduct.barcodes) 
+                            ? [...existingProduct.barcodes] 
+                            : [];
+                        let changed = false;
+
+                        // Check if variant.barcode is new and needs to be registered
+                        if (variant.barcode) {
+                            const cleanBarcode = variant.barcode.trim();
+                            if (!existingProduct.barcode) {
+                                updates.barcode = cleanBarcode;
+                                changed = true;
+                            } else if (existingProduct.barcode !== cleanBarcode && !currentBarcodes.includes(cleanBarcode)) {
+                                currentBarcodes.push(cleanBarcode);
+                                changed = true;
+                            }
+                        }
+
+                        // Check if variant.barcodes has any new aliases
+                        if (variant.barcodes && variant.barcodes.length > 0) {
+                            variant.barcodes.forEach(b => {
+                                const cleanB = b.trim();
+                                if (cleanB !== existingProduct.barcode && !currentBarcodes.includes(cleanB)) {
+                                    currentBarcodes.push(cleanB);
+                                    changed = true;
+                                }
+                            });
+                        }
+
+                        if (changed || Object.keys(updates).length > 0) {
+                            if (changed) {
+                                updates.barcodes = currentBarcodes;
+                            }
+                            const updated = await productsService.update(existingProduct.id, updates);
+                            if (updated) {
+                                // Immediately update local states to prevent state desync
+                                setProducts?.(prev => prev.map(p => p.id === existingProduct.id ? updated : p));
+                                setAllProducts?.(prev => prev.map(p => p.id === existingProduct.id ? updated : p));
+                            }
+                        }
+                    } else {
+                        // Create product placeholder record in DB
+                        try {
+                            const created = await productsService.create({
+                                siteId: po.siteId || activeSite?.id || '',
+                                name: variant.productName || item.productName || `Item ${variant.sku || productSku}`,
+                                sku: variant.sku || item.sku || productSku,
+                                barcode: variant.barcode || (item as any).barcode || '',
+                                barcodes: variant.barcodes || (item as any).barcodes || [],
+                                price: item.retailPrice || 0,
+                                costPrice: item.unitCost || 0,
+                                category: item.category || 'Uncategorized',
+                                status: 'active',
+                                stock: 0,
+                                location: 'On Order',
+                                size: item.size || '',
+                                brand: item.brand || '',
+                                unit: item.unit || 'UNIT',
+                                packQuantity: item.packQuantity || 1,
+                                customAttributes: item.customAttributes || null,
+                                description: item.description || '',
+                                minStock: item.minStock || 0,
+                                maxStock: item.maxStock || 0
+                            } as any);
+                            if (created) {
+                                targetProductId = created.id;
+                                productSku = created.sku;
+                                primaryBarcode = created.barcode || variant.barcode;
+                                setProducts?.(prev => [created, ...prev]);
+                                setAllProducts?.(prev => [created, ...prev]);
+                            }
+                        } catch (err) {
+                            console.error("Failed to create placeholder product in receivePOSplit:", err);
+                            throw err;
                         }
                     }
                 }
@@ -339,15 +527,16 @@ export const useReceiving = (deps: UseReceivingDeps) => {
 
             addNotification('success', `Created ${newJobs.length} split putaway jobs`);
 
-            // Refresh PO to check if fully received
-            const updatedPO = await purchaseOrdersService.receive(poId, false);
+            // Refresh PO details
+            const updatedPO = await purchaseOrdersService.getById(poId);
             if (updatedPO) {
                 setOrders(prev => prev.map(o => o.id === poId ? updatedPO : o));
                 setAllOrders(prev => prev.map(o => o.id === poId ? updatedPO : o));
             }
-        } catch (e) {
+        } catch (e: any) {
             console.error(e);
-            addNotification('alert', "Failed to split receive");
+            addNotification('alert', e.message || "Failed to split receive");
+            throw e;
         }
     }, [orders, allOrders, jobs, allProducts, activeSite, setJobs, setOrders, setAllOrders, addNotification]);
 
@@ -359,32 +548,47 @@ export const useReceiving = (deps: UseReceivingDeps) => {
             if (!po) throw new Error('PO not found');
 
             // Calculate if full or partial
-            const poJobs = jobs.filter(j => j.orderRef === poId);
+            const poJobs = jobs.filter(j => (j.orderRef === poId || (po.po_number && j.orderRef === po.po_number) || (po.poNumber && j.orderRef === po.poNumber)) && j.type === 'PUTAWAY');
             const receivedMap: Record<string, number> = {};
             poJobs.forEach(job => {
                 job.lineItems.forEach(item => {
-                    if (item.productId) receivedMap[item.productId] = (receivedMap[item.productId] || 0) + item.expectedQty;
+                    if (item.productId) {
+                        receivedMap[item.productId] = (receivedMap[item.productId] || 0) + item.expectedQty;
+                    }
+                    if (item.sku) {
+                        receivedMap[item.sku] = (receivedMap[item.sku] || 0) + item.expectedQty;
+                    }
                 });
             });
 
             const allReceived = po.lineItems?.every(item => {
-                const received = (item.productId ? receivedMap[item.productId] : 0) || 0;
+                const product = allProducts.find(p => p.id === item.productId || (item.sku && p.sku === item.sku));
+                const candidateKeys = [
+                    item.productId,
+                    item.sku,
+                    product?.id,
+                    product?.sku
+                ].filter(Boolean) as string[];
+                
+                const received = candidateKeys.length > 0 
+                    ? candidateKeys.reduce((max, k) => Math.max(max, receivedMap[k] || 0), 0)
+                    : 0;
                 return received >= item.quantity;
             });
 
-            const status = allReceived ? 'Received' : 'Partial';
+            const status = allReceived ? 'Received' : 'Partially Received';
 
             const updated = await purchaseOrdersService.update(poId, { status: status as any });
             setOrders(prev => prev.map(o => o.id === poId ? updated : o));
             setAllOrders(prev => prev.map(o => o.id === poId ? updated : o));
 
-            addNotification('success', `PO #${po.poNumber} finalized as ${status}`);
+            addNotification('success', `PO #${po.poNumber || po.po_number} finalized as ${status}`);
         } catch (error) {
             console.error('Finalize PO Error:', error);
             addNotification('alert', 'Failed to finalize PO');
             throw error;
         }
-    }, [orders, jobs, setOrders, setAllOrders, addNotification]);
+    }, [orders, jobs, allProducts, setOrders, setAllOrders, addNotification]);
 
     return { receivePO, receivePOSplit, finalizePO };
 };

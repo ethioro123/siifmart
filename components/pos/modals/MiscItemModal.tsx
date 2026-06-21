@@ -15,21 +15,21 @@ export const MiscItemModal: React.FC = () => {
         <Modal isOpen={isMiscItemModalOpen} onClose={() => setIsMiscItemModalOpen(false)} title="Add Miscellaneous Item" size="sm">
             <div className="space-y-4">
                 <div>
-                    <label htmlFor="misc-desc" className="text-xs text-gray-500 uppercase font-bold mb-1 block">Description</label>
+                    <label htmlFor="misc-desc" className="text-xs text-[#4D6E56] dark:text-gray-400 uppercase font-bold tracking-wider mb-1 block">Description</label>
                     <input
                         id="misc-desc"
                         value={miscItem.name}
                         onChange={e => setMiscItem({ ...miscItem, name: e.target.value })}
-                        className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white"
+                        className="w-full bg-white dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-lg px-3 py-2 text-[#1E3F27] dark:text-white focus:outline-none focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] transition-colors"
                     />
                 </div>
                 <div>
-                    <label className="text-xs text-gray-500 uppercase font-bold mb-1 block">Price</label>
+                    <label className="text-xs text-[#4D6E56] dark:text-gray-400 uppercase font-bold tracking-wider mb-1 block">Price</label>
                     <input
                         type="number"
                         value={miscItem.price}
                         onChange={e => setMiscItem({ ...miscItem, price: e.target.value })}
-                        className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white font-mono"
+                        className="w-full bg-white dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-lg px-3 py-2 text-[#1E3F27] dark:text-white font-mono focus:outline-none focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] transition-colors"
                         placeholder="0.00"
                         autoFocus
                     />
@@ -37,7 +37,7 @@ export const MiscItemModal: React.FC = () => {
                 <button
                     onClick={addMiscItem}
                     disabled={!miscItem.price}
-                    className="w-full py-3 bg-cyber-primary text-black font-bold rounded-xl disabled:opacity-50"
+                    className="w-full py-3 bg-gradient-to-br from-[#224429] to-[#2C5E3B] hover:opacity-90 text-white font-bold rounded-xl shadow-md disabled:opacity-50 transition-all"
                 >
                     Add to Cart
                 </button>

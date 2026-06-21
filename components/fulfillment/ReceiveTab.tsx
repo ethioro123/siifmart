@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
-import { PurchaseOrder } from '../../types';
+import { PurchaseOrder, Product } from '../../types';
 import { generateUnifiedBatchLabelsHTML } from '../../utils/labels/ProductLabelGenerator';
 import { LabelSize, LabelFormat } from '../../utils/labels/types';
 import { useFulfillment } from './FulfillmentContext';
@@ -117,13 +117,55 @@ export const ReceiveTab: React.FC = () => {
         if (!val || !products || !orders) return;
         const normalizedVal = val.trim().toUpperCase();
 
+        const normSku = (s: string) => s.replace(/[-\/\s]/g, '').toUpperCase();
+        const getBarcodesArray = (barcodes: any): string[] => {
+            if (!barcodes) return [];
+            if (Array.isArray(barcodes)) return barcodes.filter(b => typeof b === 'string');
+            if (typeof barcodes === 'string') {
+                let clean = barcodes.trim();
+                if (clean.startsWith('{') && clean.endsWith('}')) {
+                    return clean.substring(1, clean.length - 1).split(',').map(s => s.trim().replace(/^"|"$/g, ''));
+                }
+                if (clean.startsWith('[') && clean.endsWith(']')) {
+                    try {
+                        return JSON.parse(clean);
+                    } catch (e) {
+                        return clean.substring(1, clean.length - 1).split(',').map(s => s.trim().replace(/^"|"$/g, ''));
+                    }
+                }
+                return [clean];
+            }
+            return [];
+        };
+
+        const findScannedProduct = (scannedVal: string) => {
+            const normalized = scannedVal.toUpperCase().trim();
+            const normalizedInput = normSku(normalized);
+
+            const matchProduct = (p: Product) => {
+                const matchSku = p.sku?.toUpperCase().trim() === normalized;
+                const matchBarcode = p.barcode?.toUpperCase().trim() === normalized;
+                
+                const aliasList = getBarcodesArray(p.barcodes);
+                const hasAliasMatch = aliasList.some(b => {
+                    const cleanB = b.toUpperCase().trim();
+                    return normalized === cleanB || normalizedInput === normSku(cleanB);
+                });
+
+                return matchSku || matchBarcode || hasAliasMatch ||
+                    normalizedInput === normSku(p.sku || '') ||
+                    normalizedInput === normSku(p.barcode || '');
+            };
+
+            let prod = products.find(matchProduct);
+            if (!prod) {
+                prod = allProducts.find(matchProduct);
+            }
+            return prod;
+        };
+
         if (isSplitReceiving && splitReceivingItem && splitVariants.length > 0) {
-            const scannedProduct = products.find(p => {
-                const matchSku = p.sku?.trim().toUpperCase() === normalizedVal;
-                const matchBarcode = p.barcode?.trim().toUpperCase() === normalizedVal;
-                const matchAliases = p.barcodes?.some((b: string) => b.trim().toUpperCase() === normalizedVal);
-                return matchSku || matchBarcode || matchAliases;
-            });
+            const scannedProduct = findScannedProduct(val);
 
             const splitItemSku = splitReceivingItem.sku?.trim().toUpperCase();
             const isSameProduct = scannedProduct?.id === splitReceivingItem.productId ||
@@ -131,16 +173,37 @@ export const ReceiveTab: React.FC = () => {
                 splitVariants.some(v => {
                     const vSku = v.sku?.trim().toUpperCase();
                     const vBarcode = v.barcode?.trim().toUpperCase();
-                    return vSku === normalizedVal || vBarcode === normalizedVal;
+                    const aliases = (v.barcodes || []).map((b: string) => b.trim().toUpperCase());
+                    return vSku === normalizedVal || vBarcode === normalizedVal || aliases.includes(normalizedVal) ||
+                        normSku(val) === normSku(vSku || '') ||
+                        normSku(val) === normSku(vBarcode || '') ||
+                        aliases.some(b => normSku(b) === normSku(val));
                 });
 
             if (isSameProduct) {
+                // Compute previously received quantity
+                const poJobs = jobs.filter(j => j.orderRef === splitReceivingPO.id && j.type === 'PUTAWAY');
+                let prevCount = 0;
+                poJobs.forEach(job => {
+                    job.lineItems.forEach(item => {
+                        if (item.productId === splitReceivingItem.productId || item.sku === splitReceivingItem.sku) {
+                            prevCount += (item.expectedQty || 0);
+                        }
+                    });
+                });
+
                 const totalCurrentlyAllocated = splitVariants.reduce((sum, v) => sum + v.quantity, 0);
-                if (totalCurrentlyAllocated < splitReceivingItem.quantity) {
+                const maxAllowed = splitReceivingItem.quantity - prevCount;
+
+                if (totalCurrentlyAllocated < maxAllowed) {
                     const targetIdx = splitVariants.findIndex(v => {
                         const vSku = v.sku?.trim().toUpperCase();
                         const vBarcode = v.barcode?.trim().toUpperCase();
-                        return vSku === normalizedVal || vBarcode === normalizedVal;
+                        const aliases = (v.barcodes || []).map((b: string) => b.trim().toUpperCase());
+                        return vSku === normalizedVal || vBarcode === normalizedVal || aliases.includes(normalizedVal) ||
+                            normSku(val) === normSku(vSku || '') ||
+                            normSku(val) === normSku(vBarcode || '') ||
+                            aliases.some(b => normSku(b) === normSku(val));
                     });
                     const idxToUpdate = targetIdx === -1 ? 0 : targetIdx;
                     setSplitVariants(prev => prev.map((v, idx) =>
@@ -148,7 +211,7 @@ export const ReceiveTab: React.FC = () => {
                     ));
                     addNotification('success', `Incremented ${splitReceivingItem.productName} to ${totalCurrentlyAllocated + 1} units`);
                 } else {
-                    addNotification('alert', `Cannot exceed PO quantity (${splitReceivingItem.quantity})`);
+                    addNotification('alert', `Cannot exceed remaining PO quantity (${maxAllowed})`);
                 }
                 setReceiveSearch('');
                 return;
@@ -159,7 +222,7 @@ export const ReceiveTab: React.FC = () => {
             }
         }
 
-        const product = products.find(p => p.sku === val || p.barcode === val || (p.barcodes && p.barcodes.includes(val)));
+        const product = findScannedProduct(val);
         if (product) {
             const relevantPO = orders.find(po => po.status === 'Approved' && po.lineItems?.some((li: any) => li.productId === product.id));
             if (relevantPO) {
@@ -343,6 +406,7 @@ export const ReceiveTab: React.FC = () => {
                     setReprintItem={setReprintItem}
                     isSubmitting={isSubmitting}
                     setIsSubmitting={setIsSubmitting}
+                    jobs={jobs}
                 />
             )}
 

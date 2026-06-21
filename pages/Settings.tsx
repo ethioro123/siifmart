@@ -7,7 +7,7 @@ import {
     Smartphone, Terminal, HardDrive, CloudLightning, Lock, CreditCard,
     FileText, Percent, Tag, Banknote, Keyboard, Link, Plug, Mail, MessageSquare,
     Eye, EyeOff, List, Plus, Code, Briefcase, Users, DollarSign, MapPin, Building, Store, Sparkles, Truck, Loader2, Trophy,
-    FileDown
+    FileDown, ChevronDown
 } from 'lucide-react';
 import { encodeLocation, extractSitePrefix } from '../utils/locationEncoder';
 import { CURRENCY_SYMBOL } from '../constants';
@@ -119,6 +119,7 @@ export default function SettingsPage() {
     const [isSiteModalOpen, setIsSiteModalOpen] = useState(false);
     const [newSite, setNewSite] = useState<Partial<Site>>({});
     const [isSavingSite, setIsSavingSite] = useState(false);
+    const [expandedSiteId, setExpandedSiteId] = useState<string | null>(null);
 
     // Test Location State for Barcode Preview
     const [testLocation, setTestLocation] = useState({
@@ -229,7 +230,9 @@ export default function SettingsPage() {
                     zoneCount: newSite.zoneCount,
                     aisleCount: newSite.aisleCount,
                     bayCount: newSite.bayCount,
-                    code: newSite.code || newSite.name?.substring(0, 3).toUpperCase() || 'UNK' // Use existing code if available
+                    code: newSite.code || newSite.name?.substring(0, 3).toUpperCase() || 'UNK',
+                    replenishmentSourceIds: newSite.replenishmentSourceIds ?? [],
+                    replenishmentSourceId: (newSite.replenishmentSourceIds ?? [])[0]
                 };
                 await updateSite(siteData, user?.name || 'Admin');
             } else {
@@ -245,7 +248,9 @@ export default function SettingsPage() {
                     zoneCount: newSite.zoneCount,
                     aisleCount: newSite.aisleCount,
                     bayCount: newSite.bayCount,
-                    code: 'GENERATED_BY_DB' // Placeholder, will be overwritten by sitesService
+                    code: 'GENERATED_BY_DB',
+                    replenishmentSourceIds: newSite.replenishmentSourceIds ?? [],
+                    replenishmentSourceId: (newSite.replenishmentSourceIds ?? [])[0]
                 };
                 await addSite(siteData as Site, user?.name || 'Admin');
             }
@@ -424,7 +429,7 @@ export default function SettingsPage() {
                                 </div>
                             </div>
                         }>
-                            <div className="max-w-6xl space-y-6 animate-in fade-in slide-in-from-right-4">
+                            <div className="w-full space-y-6 animate-in fade-in slide-in-from-right-4">
                                 <div className="flex justify-between items-start mb-6">
                                     <div>
                                         <SectionHeader title="Physical Locations" desc="Manage Warehouses, Distribution Centers, and Retail Stores across Ethiopia." />
@@ -464,97 +469,184 @@ export default function SettingsPage() {
                                         </button>
                                     </div>
                                 ) : (
-                                    <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-                                        {sites.map(site => (
-                                            <div key={site.id} className="bg-gradient-to-br from-cyber-gray to-black/40 border border-white/10 rounded-2xl p-6 relative group hover:border-cyber-primary/50 hover:shadow-[0_0_30px_rgba(0,255,157,0.1)] transition-all duration-300">
-                                                {/* Type Badge */}
-                                                <div className="absolute top-4 right-4 flex gap-2">
-                                                    <span className={`px-3 py-1 rounded-full text-[10px] uppercase font-bold border ${site.status === 'Active' ? 'text-green-400 border-green-500/30 bg-green-500/10' :
-                                                        site.status === 'Maintenance' ? 'text-yellow-400 border-yellow-500/30 bg-yellow-500/10' :
-                                                            'text-red-400 border-red-500/30 bg-red-500/10'
-                                                        }`}>
-                                                        {site.status}
-                                                    </span>
-                                                </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 items-start">
+                                        {[
+                                            {
+                                                types: ['Administration', 'Administrative', 'Central Operations', 'HQ', 'Headquarters'],
+                                                label: 'Administration',
+                                                desc: 'Central Operations',
+                                                dotColor: 'bg-purple-500',
+                                                shadowColor: 'rgba(168,85,247,0.5)',
+                                                iconColor: 'bg-purple-500/20 text-purple-300'
+                                            },
+                                            {
+                                                types: ['Warehouse'],
+                                                label: 'Warehouse',
+                                                desc: 'Storage & Fulfillment',
+                                                dotColor: 'bg-blue-500',
+                                                shadowColor: 'rgba(59,130,246,0.5)',
+                                                iconColor: 'bg-blue-500/20 text-blue-400'
+                                            },
+                                            {
+                                                types: ['Distribution Center'],
+                                                label: 'Distribution Center',
+                                                desc: 'Regional Hub',
+                                                dotColor: 'bg-cyan-500',
+                                                shadowColor: 'rgba(6,182,212,0.5)',
+                                                iconColor: 'bg-cyan-500/20 text-cyan-400'
+                                            },
+                                            {
+                                                types: ['Store'],
+                                                label: 'Retail Store',
+                                                desc: 'Customer-facing',
+                                                dotColor: 'bg-green-500',
+                                                shadowColor: 'rgba(34,197,94,0.5)',
+                                                iconColor: 'bg-green-500/20 text-green-400'
+                                            },
+                                            {
+                                                types: ['Dark Store'],
+                                                label: 'Online Store',
+                                                desc: 'Online Fulfillment',
+                                                dotColor: 'bg-orange-500',
+                                                shadowColor: 'rgba(249,115,22,0.5)',
+                                                iconColor: 'bg-orange-500/20 text-orange-400'
+                                            }
+                                        ].map(cat => {
+                                            const catSites = sites.filter(s => cat.types.includes(s.type));
 
-                                                {/* Icon */}
-                                                <div
-                                                    className={`w-16 h-16 rounded-2xl mb-4 flex items-center justify-center ${site.type === 'Warehouse'
-                                                        ? 'bg-blue-500/20 text-blue-400'
-                                                        : site.type === 'Store' || site.type === 'Dark Store'
-                                                            ? 'bg-green-500/20 text-green-400'
-                                                            : 'bg-purple-500/20 text-purple-300'
-                                                        }`}
-                                                >
-                                                    {site.type === 'Warehouse' ? (
-                                                        <Building size={32} />
-                                                    ) : site.type === 'Store' || site.type === 'Dark Store' ? (
-                                                        <Store size={32} />
+                                            return (
+                                                <div key={cat.label} className="bg-black/15 border border-white/5 rounded-2xl p-4 flex flex-col gap-3 min-h-[300px] hover:border-white/10 transition-colors">
+                                                    {/* Column Header */}
+                                                    <div className="flex items-center gap-2 border-b border-white/5 pb-2.5">
+                                                        <span 
+                                                            className={`w-2 h-2 rounded-full ${cat.dotColor} shrink-0`} 
+                                                            ref={(el) => { if (el) el.style.boxShadow = `0 0 8px ${cat.shadowColor}`; }}
+                                                        />
+                                                        <h5 className="text-white font-bold text-xs uppercase tracking-wider truncate" title={cat.label}>{cat.label}s</h5>
+                                                        <span className="text-[9px] text-gray-400 bg-white/5 px-1.5 py-0.5 rounded font-mono font-bold shrink-0 ml-auto">
+                                                            {catSites.length}
+                                                        </span>
+                                                    </div>
+
+                                                    {/* Column contents */}
+                                                    {catSites.length === 0 ? (
+                                                        <div className="flex-1 flex flex-col items-center justify-center py-8 text-center opacity-40">
+                                                            <MapPin size={16} className="text-gray-600 mb-1" />
+                                                            <span className="text-[10px] text-gray-500 italic">No locations</span>
+                                                        </div>
                                                     ) : (
-                                                        <Building size={32} />
+                                                        <div className="flex flex-col gap-2.5 max-h-[500px] overflow-y-auto custom-scrollbar pr-1">
+                                                            {catSites.map(site => (
+                                                                <div 
+                                                                    key={site.id} 
+                                                                    onClick={() => setExpandedSiteId(expandedSiteId === site.id ? null : site.id)}
+                                                                    className={`bg-white/5 hover:bg-white/10 border ${
+                                                                        expandedSiteId === site.id ? 'border-cyber-primary/40 bg-cyber-primary/5' : 'border-white/5'
+                                                                    } rounded-xl p-3 cursor-pointer transition-all duration-200 group`}
+                                                                >
+                                                                    <div className="flex items-start justify-between gap-1.5">
+                                                                        <div className="min-w-0 flex-1">
+                                                                            <div className="flex items-center gap-1.5">
+                                                                                <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                                                                                    site.status === 'Active' ? 'bg-green-500' :
+                                                                                    site.status === 'Maintenance' ? 'bg-yellow-500' : 'bg-red-500'
+                                                                                }`} />
+                                                                                <h6 className="text-white font-bold text-xs leading-tight truncate group-hover:text-cyber-primary transition-colors" title={site.name}>
+                                                                                    {site.name}
+                                                                                </h6>
+                                                                            </div>
+                                                                            <p className="text-[10px] text-gray-400 mt-1 line-clamp-2" title={site.address}>
+                                                                                {site.address}
+                                                                            </p>
+                                                                        </div>
+                                                                        <ChevronDown
+                                                                            size={14}
+                                                                            className={`text-gray-500 shrink-0 transition-transform mt-0.5 ${
+                                                                                expandedSiteId === site.id ? 'rotate-180 text-cyber-primary' : ''
+                                                                            }`}
+                                                                        />
+                                                                    </div>
+
+                                                                    {/* Expanded details inside column */}
+                                                                    {expandedSiteId === site.id && (
+                                                                        <div className="mt-2.5 pt-2.5 border-t border-white/5 space-y-2 text-[10px] text-gray-400" onClick={(e) => e.stopPropagation()}>
+                                                                            <div className="grid grid-cols-2 gap-2">
+                                                                                <div>
+                                                                                    <span className="font-bold text-gray-500 block uppercase tracking-wider text-[8px]">Code</span>
+                                                                                    <span className="font-mono text-cyber-primary font-bold">{site.code || 'N/A'}</span>
+                                                                                </div>
+                                                                                <div>
+                                                                                    <span className="font-bold text-gray-500 block uppercase tracking-wider text-[8px]">Status</span>
+                                                                                    <span className={`font-semibold ${
+                                                                                        site.status === 'Active' ? 'text-green-400' :
+                                                                                        site.status === 'Maintenance' ? 'text-yellow-400' : 'text-red-400'
+                                                                                    }`}>{site.status}</span>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div>
+                                                                                <span className="font-bold text-gray-500 block uppercase tracking-wider text-[8px]">Manager</span>
+                                                                                <span className="text-white font-medium">{site.manager || 'Unassigned'}</span>
+                                                                            </div>
+                                                                            <div>
+                                                                                <span className="font-bold text-gray-500 block uppercase tracking-wider text-[8px]">
+                                                                                    {site.type === 'Warehouse' || site.type === 'Distribution Center'
+                                                                                        ? 'Capacity'
+                                                                                        : site.type === 'Administration'
+                                                                                            ? 'Staff Limit'
+                                                                                            : 'Terminals'}
+                                                                                </span>
+                                                                                <span className="text-white font-semibold">
+                                                                                    {site.type === 'Warehouse' || site.type === 'Distribution Center'
+                                                                                        ? `${site.capacity || 0} m²`
+                                                                                        : site.type === 'Administration'
+                                                                                            ? `${site.capacity || 0} staff`
+                                                                                            : `${site.terminalCount || 0} POS`}
+                                                                                </span>
+                                                                            </div>
+                                                                            {(site.type === 'Store' || site.type === 'Dark Store' || site.type === 'Online Store') && (
+                                                                                <div>
+                                                                                    <span className="font-bold text-gray-500 block uppercase tracking-wider text-[8px]">Replenishment Sources</span>
+                                                                                    <span className="text-white font-medium block" title={
+                                                                                        (site.replenishmentSourceIds ?? []).length > 0
+                                                                                            ? (site.replenishmentSourceIds ?? []).map(id => sites.find(s => s.id === id)?.name || 'Unknown').join(', ')
+                                                                                            : 'Not Configured'
+                                                                                    }>
+                                                                                        {(site.replenishmentSourceIds ?? []).length > 0
+                                                                                            ? (site.replenishmentSourceIds ?? []).map(id => sites.find(s => s.id === id)?.name || 'Unknown').join(', ')
+                                                                                            : 'Not Configured'}
+                                                                                    </span>
+                                                                                </div>
+                                                                            )}
+
+                                                                            {/* Action Buttons */}
+                                                                            <div className="flex gap-2 justify-end pt-2 border-t border-white/5">
+                                                                                <button
+                                                                                    onClick={() => { setNewSite(site); setIsSiteModalOpen(true); }}
+                                                                                    className="px-2.5 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-white text-[9px] font-bold transition-colors flex items-center gap-1"
+                                                                                    title="Edit Location"
+                                                                                >
+                                                                                    <Code size={10} className="text-cyber-primary" />
+                                                                                    <span>Edit</span>
+                                                                                </button>
+                                                                                <button
+                                                                                    onClick={() => handleDeleteSite(site.id)}
+                                                                                    className="px-2.5 py-1.5 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 rounded-lg text-red-400 text-[9px] font-bold transition-colors flex items-center gap-1"
+                                                                                    title="Delete Location"
+                                                                                    disabled={isDeleting}
+                                                                                >
+                                                                                    <Trash2 size={10} />
+                                                                                    <span>Delete</span>
+                                                                                </button>
+                                                                            </div>
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            ))}
+                                                        </div>
                                                     )}
                                                 </div>
-
-                                                {/* Name & Type */}
-                                                <div className="flex justify-between items-start mb-2">
-                                                    <h4 className="text-white font-bold text-lg leading-tight pr-2">{site.name}</h4>
-                                                    <span className="font-mono text-[10px] font-bold px-2 py-1 rounded bg-black/40 border border-white/10 backdrop-blur-md tracking-widest text-cyber-primary shadow-[0_0_10px_rgba(0,255,157,0.15)] group-hover:shadow-[0_0_15px_rgba(0,255,157,0.3)] group-hover:border-cyber-primary/40 transition-all shrink-0">
-                                                        {site.code || 'N/A'}
-                                                    </span>
-                                                </div>
-                                                <p className="text-xs text-gray-500 uppercase font-bold mb-3">
-                                                    {site.type === 'Administration' ? 'Administration Office' : site.type}
-                                                </p>
-
-                                                {/* Address */}
-                                                <p className="text-sm text-gray-400 flex items-start gap-2 mb-4">
-                                                    <MapPin size={14} className="mt-0.5 shrink-0" />
-                                                    <span>{site.address}</span>
-                                                </p>
-
-                                                {/* Details Grid */}
-                                                <div className="grid grid-cols-2 gap-4 pt-4 border-t border-white/10">
-                                                    <div>
-                                                        <p className="text-[10px] text-gray-500 uppercase font-bold mb-1">Manager</p>
-                                                        <p className="text-sm text-white font-medium">{site.manager || 'Unassigned'}</p>
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-[10px] text-gray-500 uppercase font-bold mb-1">
-                                                            {site.type === 'Warehouse' || site.type === 'Distribution Center'
-                                                                ? 'Capacity (m²)'
-                                                                : site.type === 'Administration'
-                                                                    ? 'Offices'
-                                                                    : 'Terminals'}
-                                                        </p>
-                                                        <p className="text-sm text-cyber-primary font-mono font-bold">
-                                                            {site.type === 'Warehouse' || site.type === 'Distribution Center'
-                                                                ? `${site.capacity || 0} m²`
-                                                                : site.type === 'Administration'
-                                                                    ? `${site.capacity || 0} staff`
-                                                                    : `${site.terminalCount || 0} POS`}
-                                                        </p>
-                                                    </div>
-                                                </div>
-
-                                                {/* Action Buttons */}
-                                                <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
-                                                    <button
-                                                        onClick={() => { setNewSite(site); setIsSiteModalOpen(true); }}
-                                                        className="p-2 bg-white/10 hover:bg-white/20 rounded-lg text-white backdrop-blur-sm transition-colors"
-                                                        title="Edit Location"
-                                                    >
-                                                        <Code size={16} />
-                                                    </button>
-                                                    <button
-                                                        onClick={() => handleDeleteSite(site.id)}
-                                                        className="p-2 bg-red-500/20 hover:bg-red-500/40 rounded-lg text-red-400 backdrop-blur-sm transition-colors"
-                                                        title="Delete Location"
-                                                    >
-                                                        <Trash2 size={16} />
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        ))}
+                                            );
+                                        })}
                                     </div>
                                 )}
                             </div>
@@ -614,7 +706,7 @@ export default function SettingsPage() {
                                 { type: 'Warehouse', label: 'Warehouse', desc: 'Storage & Fulfillment', icon: Box, color: 'blue' },
                                 { type: 'Distribution Center', label: 'Distribution', desc: 'Regional Hub', icon: Truck, color: 'cyan' },
                                 { type: 'Store', label: 'Retail Store', desc: 'Customer-facing', icon: Store, color: 'green' },
-                                { type: 'Dark Store', label: 'Dark Store', desc: 'Online Fulfillment', icon: ShoppingCart, color: 'orange' },
+                                { type: 'Dark Store', label: 'Online Store', desc: 'Online Fulfillment', icon: ShoppingCart, color: 'orange' },
                             ].map(({ type, label, desc, icon: Icon, color }) => (
                                 <button
                                     key={type}
@@ -908,6 +1000,53 @@ export default function SettingsPage() {
                                             aria-label="POS Terminals"
                                         />
                                     </div>
+                                    <div>
+                                        <label className="text-xs text-gray-400 uppercase font-bold mb-1 block">Replenishment Sources</label>
+                                        <p className="text-[10px] text-gray-500 mb-2">Select one or more supply hubs — the system will route to the one with the most available stock.</p>
+                                        <div className="w-full bg-black/30 border border-white/10 rounded-lg overflow-y-auto max-h-40 divide-y divide-white/5" aria-label="Replenishment Sources">
+                                            {sites
+                                                .filter(s => s.type === 'Warehouse' || s.type === 'Distribution Center')
+                                                .map(s => {
+                                                    const selected = (newSite.replenishmentSourceIds ?? []).includes(s.id);
+                                                    return (
+                                                        <label
+                                                            key={s.id}
+                                                            className={`flex items-center gap-3 px-3 py-2.5 cursor-pointer transition-colors ${
+                                                                selected ? 'bg-cyber-primary/10' : 'hover:bg-white/5'
+                                                            }`}
+                                                        >
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={selected}
+                                                                onChange={() => {
+                                                                    const current = newSite.replenishmentSourceIds ?? [];
+                                                                    const next = selected
+                                                                        ? current.filter(id => id !== s.id)
+                                                                        : [...current, s.id];
+                                                                    setNewSite({ ...newSite, replenishmentSourceIds: next, replenishmentSourceId: next[0] });
+                                                                }}
+                                                                className="accent-cyber-primary w-3.5 h-3.5 flex-shrink-0"
+                                                                aria-label={`Select ${s.name} as replenishment source`}
+                                                            />
+                                                            <span className="flex-1 min-w-0">
+                                                                <span className="text-white text-xs font-semibold block truncate">{s.name}</span>
+                                                                <span className="text-gray-500 text-[10px] block">{s.code} · {s.type}</span>
+                                                            </span>
+                                                            {selected && <span className="text-cyber-primary text-[9px] font-bold uppercase flex-shrink-0">Selected</span>}
+                                                        </label>
+                                                    );
+                                                })
+                                            }
+                                            {sites.filter(s => s.type === 'Warehouse' || s.type === 'Distribution Center').length === 0 && (
+                                                <p className="text-gray-500 text-xs px-3 py-4 text-center">No warehouses or distribution centers configured.</p>
+                                            )}
+                                        </div>
+                                        {(newSite.replenishmentSourceIds ?? []).length > 0 && (
+                                            <p className="text-[10px] text-cyber-primary mt-1">
+                                                {(newSite.replenishmentSourceIds ?? []).length} source{(newSite.replenishmentSourceIds ?? []).length > 1 ? 's' : ''} selected
+                                            </p>
+                                        )}
+                                    </div>
                                 </>
                             )}
                         </div>
@@ -924,7 +1063,7 @@ export default function SettingsPage() {
                             ) : newSite.type === 'Warehouse' || newSite.type === 'Distribution Center' ? (
                                 <>📦 <span className="text-blue-400 font-bold">{newSite.type}s</span> are inventory storage facilities that handle receiving, putaway, and fulfillment operations.</>
                             ) : newSite.type === 'Dark Store' ? (
-                                <>🌙 <span className="text-orange-400 font-bold">Dark Stores</span> are fulfillment-only locations for online orders. No walk-in customers.</>
+                                <>🌙 <span className="text-orange-400 font-bold">Online Stores</span> are fulfillment-only locations for online orders. No walk-in customers.</>
                             ) : (
                                 <>🏪 <span className="text-green-400 font-bold">Retail Stores</span> are customer-facing locations with point-of-sale terminals.</>
                             )}

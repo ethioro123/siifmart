@@ -24,6 +24,8 @@ export const ProductSchema = z.object({
     size: optionalString,
     unit: z.string().default('piece'),
     packQuantity: optionalNumber,
+    minStock: optionalNumber,
+    maxStock: optionalNumber,
     approvalStatus: z.enum(['pending', 'approved', 'rejected', 'archived']).optional(),
     createdBy: optionalString,
     createdAt: optionalString,

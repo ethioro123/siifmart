@@ -45,12 +45,12 @@ export const AssignPendingJobs: React.FC<AssignPendingJobsProps> = ({
     };
 
     return (
-        <div className="bg-white dark:bg-zinc-900/50 backdrop-blur-lg rounded-2xl border border-slate-200 dark:border-white/5 flex flex-col overflow-hidden shadow-xl transition-colors duration-300">
-            <div className="p-4 border-b border-slate-200 dark:border-white/5 bg-slate-50/50 dark:bg-white/5 font-black text-[10px] text-slate-500 dark:text-gray-400 uppercase tracking-widest flex justify-between items-center transition-colors">
+        <div className="glass-panel flex flex-col overflow-hidden">
+            <div className="p-4 border-b border-[#E2DCCE]/30 dark:border-[#A9CBA2]/[0.04] bg-stone-50/50 dark:bg-black/20 font-black text-[10px] text-stone-550 dark:text-stone-400 uppercase tracking-widest flex justify-between items-center transition-colors">
                 <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-cyan-500 dark:bg-cyber-primary animate-pulse" />
+                    <span className="w-2 h-2 rounded-full bg-[#2C5E3B] dark:bg-[#A9CBA2] animate-pulse" />
                     <span>{t('warehouse.pendingJobs')}</span>
-                    <span className="bg-cyan-500/10 dark:bg-cyber-primary/10 text-cyan-600 dark:text-cyber-primary px-2 py-0.5 rounded-full border border-cyan-500/20 dark:border-cyber-primary/20 ml-1">
+                    <span className="bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 text-[#2C5E3B] dark:text-[#A9CBA2] px-2 py-0.5 rounded-full border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20 ml-1">
                         {(() => {
                             const nonCompleted = ['pending', 'in-progress', 'assigned', 'accepted'];
                             let filtered = filteredJobs.filter(j => 
@@ -75,7 +75,7 @@ export const AssignPendingJobs: React.FC<AssignPendingJobsProps> = ({
                     </span>
                 </div>
                 {!selectedJob && filteredJobs.filter(j => j.status?.toLowerCase() === 'pending').length > 0 && (
-                    <span className="text-[10px] text-blue-600 dark:text-blue-400/60 normal-case font-medium flex items-center gap-1">
+                    <span className="text-[10px] text-[#2C5E3B] dark:text-[#A9CBA2] normal-case font-medium flex items-center gap-1">
                         <ArrowRight size={10} /> {t('warehouse.selectJobToAssign')}
                     </span>
                 )}
@@ -158,23 +158,23 @@ export const AssignPendingJobs: React.FC<AssignPendingJobsProps> = ({
                                     setIsDetailsOpen(false);
                                 }}
                                 className={`p-4 rounded-2xl border transition-all duration-300 ${selectedJob?.id === job.id
-                                    ? 'bg-cyan-500/5 dark:bg-cyber-primary/10 border-cyan-500 dark:border-cyber-primary shadow-lg shadow-cyan-500/10 dark:shadow-[0_0_20px_rgba(0,255,157,0.15)] scale-[1.02]'
-                                    : 'bg-slate-50 dark:bg-white/5 border-slate-100 dark:border-white/5 hover:border-slate-300 dark:hover:border-white/10 hover:bg-white dark:hover:bg-white/[0.08] hover:scale-[1.01] cursor-pointer'
+                                    ? 'bg-[#2C5E3B]/5 dark:bg-[#A9CBA2]/10 border-[#2C5E3B] dark:border-[#A9CBA2] shadow-sm scale-[1.01]'
+                                    : 'bg-stone-50/50 dark:bg-[#1C2620]/30 border-[#E2DCCE]/30 dark:border-[#A9CBA2]/[0.04] hover:border-[#CFC6B4]/60 dark:hover:border-[#A9CBA2]/10 hover:bg-stone-100/50 dark:hover:bg-[#EAE5D9]/10 hover:scale-[1.01] cursor-pointer'
                                     } `}
                             >
                                 <div className="flex justify-between items-start mb-3">
                                     <div className="flex-1">
                                         <div className="flex items-center gap-2 mb-2">
-                                            <span className={`text-[9px] font-black px-2 py-0.5 rounded shadow-sm tracking-tighter uppercase ${job.type === 'PICK' ? 'bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-500/30' :
+                                            <span className={`text-[9px] font-black px-2 py-0.5 rounded shadow-sm tracking-tighter uppercase ${job.type === 'PICK' ? 'bg-[#2C5E3B]/10 dark:bg-[#2C5E3B]/20 text-[#2C5E3B] dark:text-[#A9CBA2] border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20' :
                                                 job.type === 'PACK' ? 'bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-500/30' :
                                                     job.type === 'RECEIVE' ? 'bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-500/30' :
-                                                        (job.type === 'DRIVER' || job.type === 'DISPATCH') ? 'bg-cyan-100 dark:bg-cyan-500/20 text-cyan-700 dark:text-cyan-400 border border-cyan-200 dark:border-cyan-500/30' :
-                                                            'bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-400 border border-purple-200 dark:border-purple-500/30'} `}>
+                                                        (job.type === 'DRIVER' || job.type === 'DISPATCH') ? 'bg-[#2C5E3B]/5 dark:bg-[#A9CBA2]/5 text-[#2C5E3B]/80 dark:text-[#A9CBA2]/80 border border-[#2C5E3B]/10 dark:border-[#A9CBA2]/10' :
+                                                            'bg-[#FAF8F5] dark:bg-[#1C2620]/40 text-[#2C5E3B] dark:text-[#A9CBA2] border border-[#E2DCCE] dark:border-[#A9CBA2]/10'} `}>
                                                 {job.type}
                                             </span>
                                             <span className={`text-[9px] px-2 py-0.5 rounded font-black tracking-tighter uppercase border ${job.priority === 'Critical' ? 'bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-400 border-red-200 dark:border-red-500/30' :
                                                 job.priority === 'High' ? 'bg-orange-100 dark:bg-orange-500/20 text-orange-700 dark:text-orange-400 border-orange-200 dark:border-orange-500/30' :
-                                                    'bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400/60 border-slate-100 dark:border-white/5'
+                                                    'bg-[#EAE5D9] dark:bg-[#2C5E3B]/10 text-[#2C5E3B] dark:text-[#A9CBA2]/60 border-[#E2DCCE] dark:border-[#A9CBA2]/10'
                                                 } `}>
                                                 {job.priority}
                                             </span>
@@ -188,17 +188,17 @@ export const AssignPendingJobs: React.FC<AssignPendingJobsProps> = ({
                                             const assignee = employees.find(e => e.id === job.assignedTo);
                                             return assignee ? (
                                                 <div className="flex items-center gap-1.5 mt-0.5">
-                                                    <div className="w-4 h-4 rounded-md bg-cyan-100 dark:bg-cyber-primary/20 border border-cyan-200 dark:border-cyber-primary/30 flex items-center justify-center text-[8px] font-black text-cyan-600 dark:text-cyber-primary">
+                                                    <div className="w-4 h-4 rounded-md bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/20 border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/30 flex items-center justify-center text-[8px] font-black text-[#2C5E3B] dark:text-[#A9CBA2]">
                                                         {assignee.name?.charAt(0)}
                                                     </div>
-                                                    <span className="text-[9px] text-slate-500 dark:text-gray-400 font-bold">{assignee.name}</span>
+                                                    <span className="text-[9px] text-stone-500 dark:text-stone-400 font-bold">{assignee.name}</span>
                                                 </div>
                                             ) : null;
                                         })()}
                                         <div className="flex items-center gap-2">
-                                            <span className="text-[10px] text-cyan-600 dark:text-cyber-primary font-mono font-black tracking-widest">{formatJobId(job)}</span>
+                                            <span className="text-[10px] text-[#2C5E3B] dark:text-[#A9CBA2] font-mono font-black tracking-widest">{formatJobId(job)}</span>
                                             {job.orderRef && job.type !== 'PICK' && (
-                                                <span className="text-[9px] text-slate-400 dark:text-gray-500 font-bold border-l border-slate-200 dark:border-white/10 pl-2">
+                                                <span className="text-[9px] text-stone-400 dark:text-stone-500 font-bold border-l border-[#E2DCCE]/30 dark:border-emerald-950/20 pl-2">
                                                     PO: {formatOrderRef(job.orderRef)}
                                                 </span>
                                             )}
@@ -245,7 +245,7 @@ export const AssignPendingJobs: React.FC<AssignPendingJobsProps> = ({
                                         <div className="flex items-center gap-1.5 pt-1">
                                             {job.sourceSiteId && (
                                                 <div className="flex items-center gap-1">
-                                                    <div className="w-1.5 h-1.5 rounded-full bg-blue-500/50" />
+                                                    <div className="w-1.5 h-1.5 rounded-full bg-[#2C5E3B]/50" />
                                                     <span className="text-[9px] text-slate-500 dark:text-gray-400 uppercase font-black">{sites.find(s => s.id === job.sourceSiteId)?.name.split(' ')[0] || job.sourceSiteId}</span>
                                                 </div>
                                             )}

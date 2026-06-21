@@ -10,7 +10,7 @@ import { useLanguage } from '../../../contexts/LanguageContext';
 import Button from '../../shared/Button';
 import { getSellUnit } from '../../../utils/units';
 
-export const formatBeautifulLocation = (loc: string | undefined, theme: 'purple' | 'cyan' = 'cyan') => {
+export const formatBeautifulLocation = (loc: string | undefined, theme: 'purple' | 'cyan' | 'woody' = 'woody') => {
     if (!loc || loc === 'PENDING' || loc === 'Unassigned') {
         return <span className="text-base font-black font-mono text-gray-900 dark:text-white tracking-widest">{loc || 'PENDING'}</span>;
     }
@@ -18,12 +18,16 @@ export const formatBeautifulLocation = (loc: string | undefined, theme: 'purple'
     const parts = loc.split('-').map(p => p.trim());
 
     if (parts.length >= 3) {
-        const themeClass = theme === 'purple'
-            ? 'bg-purple-50 dark:bg-purple-500/20 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-500/30 shadow-sm'
-            : 'bg-cyan-50 dark:bg-cyan-500/20 text-cyan-700 dark:text-cyan-300 border-cyan-200 dark:border-cyan-500/30 shadow-sm';
-        const dimThemeClass = theme === 'purple'
-            ? 'bg-purple-100/50 dark:bg-purple-500/10 text-purple-600 dark:text-purple-300/80 border-purple-200 dark:border-purple-500/20'
-            : 'bg-cyan-100/50 dark:bg-cyan-500/10 text-cyan-600 dark:text-cyan-300/80 border-cyan-200 dark:border-cyan-500/20';
+        const themeClass = theme === 'woody'
+            ? 'bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/25 text-[#2C5E3B] dark:text-[#A9CBA2] border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20 shadow-sm'
+            : theme === 'purple'
+                ? 'bg-[#2C5E3B]/10 dark:bg-[#2C5E3B]/20 text-[#2C5E3B] dark:text-[#A9CBA2] border-[#2C5E3B]/20 dark:border-[#A9CBA2]/30'
+                : 'bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-500/30';
+        const dimThemeClass = theme === 'woody'
+            ? 'bg-[#FAF8F5] dark:bg-[#A9CBA2]/10 border-[#E2DCCE]/60 dark:border-[#A9CBA2]/15 text-[#2C5E3B] dark:text-[#A9CBA2]'
+            : theme === 'purple'
+                ? 'bg-[#2C5E3B]/5 dark:bg-[#2C5E3B]/10 text-[#2C5E3B]/80 dark:text-[#A9CBA2]/80 border-[#2C5E3B]/10 dark:border-[#A9CBA2]/20'
+                : 'bg-amber-50 dark:bg-amber-500/10 text-amber-600/80 dark:text-amber-300/80 border-amber-100 dark:border-amber-500/20';
 
         return (
             <div className="flex items-center gap-2 mt-0.5">
@@ -90,16 +94,16 @@ export const PutawayJobModal: React.FC<PutawayJobModalProps> = ({
 
     return (
         <div className="fixed inset-0 z-[160] flex items-stretch md:items-center justify-center p-0 md:p-4 bg-gray-900/60 dark:bg-black/95 backdrop-blur-md animate-in fade-in duration-300">
-            <div className="bg-white dark:bg-[#0a0a0a] w-full md:max-w-5xl md:max-h-[92vh] md:rounded-[3rem] border-0 md:border-2 border-gray-100 dark:border-white/10 shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-500">
+            <div className="bg-white dark:bg-[#0a0a0a] w-full md:max-w-5xl md:max-h-[92vh] md:rounded-[3rem] border-0 md:border-2 border-[#E2DCCE]/60 dark:border-white/10 shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-500">
 
                 {/* Header Section */}
-                <div className="relative p-5 md:p-10 border-b border-gray-100 dark:border-white/10 bg-gray-50 dark:bg-black/40 overflow-hidden shrink-0">
-                    <div className="hidden md:block absolute -top-16 -right-16 w-80 h-80 bg-blue-500/10 dark:bg-blue-500/20 blur-[120px] rounded-full pointer-events-none" />
-                    <div className="hidden md:block absolute -bottom-16 -left-16 w-80 h-80 bg-indigo-500/10 dark:bg-indigo-500/20 blur-[120px] rounded-full pointer-events-none" />
+                <div className="relative p-5 md:p-10 border-b border-[#E2DCCE]/60 dark:border-white/10 bg-[#FAF8F5]/50 dark:bg-black/40 overflow-hidden shrink-0">
+                    <div className="hidden md:block absolute -top-16 -right-16 w-80 h-80 bg-[#2C5E3B]/10 dark:bg-[#2C5E3B]/20 blur-[120px] rounded-full pointer-events-none" />
+                    <div className="hidden md:block absolute -bottom-16 -left-16 w-80 h-80 bg-[#A9CBA2]/10 dark:bg-[#A9CBA2]/20 blur-[120px] rounded-full pointer-events-none" />
 
                     <div className="relative flex justify-between items-start">
                         <div className="flex items-center gap-6">
-                            <div className="hidden md:flex w-20 h-20 rounded-[2rem] bg-blue-600 dark:bg-blue-500/20 border-2 border-blue-400/30 items-center justify-center text-white dark:text-blue-400 shadow-[0_0_40px_rgba(37,99,235,0.2)] transition-all duration-700 active:scale-95">
+                            <div className="hidden md:flex w-20 h-20 rounded-[2rem] bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/25 border-2 border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20 items-center justify-center text-[#2C5E3B] dark:text-[#A9CBA2] shadow-sm transition-all duration-700 active:scale-95">
                                 <Archive size={40} className="stroke-[2.5]" />
                             </div>
                             <div>
@@ -107,7 +111,7 @@ export const PutawayJobModal: React.FC<PutawayJobModalProps> = ({
                                     <h2 className="text-xl md:text-2xl font-black text-gray-900 dark:text-white tracking-tight uppercase leading-none">
                                         Job Details
                                     </h2>
-                                    <span className="px-3 py-1 rounded-xl bg-white dark:bg-white/5 border-2 border-gray-100 dark:border-white/10 text-[10px] md:text-xs font-black font-mono text-gray-900 dark:text-blue-400 shadow-inner uppercase tracking-[0.1em] transition-all group hover:border-blue-500/30">
+                                    <span className="px-3 py-1 rounded-xl bg-white dark:bg-white/5 border-2 border-[#E2DCCE]/60 dark:border-white/10 text-[10px] md:text-xs font-black font-mono text-gray-900 dark:text-[#A9CBA2] shadow-inner uppercase tracking-[0.1em] transition-all group hover:border-[#2C5E3B]/30">
                                         #{formatJobId(job)}
                                     </span>
                                 </div>
@@ -119,7 +123,7 @@ export const PutawayJobModal: React.FC<PutawayJobModalProps> = ({
                                         {job.priority} Priority
                                     </span>
                                     <span className="flex items-center gap-2.5 font-mono bg-gray-100 dark:bg-white/5 px-3 py-1.5 rounded-xl border border-gray-200 dark:border-white/10">
-                                        <MapPin size={14} className="text-blue-600 dark:text-blue-400" />
+                                        <MapPin size={14} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
                                         {sourceSite?.name || 'Automated Hub'}
                                     </span>
                                     <span className="hidden md:flex items-center gap-2.5 font-mono bg-gray-100 dark:bg-white/5 px-3 py-1.5 rounded-xl border border-gray-200 dark:border-white/10">
@@ -129,7 +133,7 @@ export const PutawayJobModal: React.FC<PutawayJobModalProps> = ({
                                 </div>
                             </div>
                         </div>
-                        <button onClick={onClose} aria-label="Close" className="p-3.5 bg-white dark:bg-white/5 border-2 border-gray-100 dark:border-white/10 rounded-2xl text-gray-400 dark:text-gray-600 hover:text-gray-900 dark:hover:text-white transition-all shadow-sm active:scale-90">
+                        <button onClick={onClose} aria-label="Close" className="p-3.5 bg-white dark:bg-white/5 border-2 border-[#E2DCCE]/65 dark:border-white/10 rounded-2xl text-gray-400 dark:text-gray-600 hover:text-gray-900 dark:hover:text-white transition-all shadow-sm active:scale-90">
                             <X size={24} />
                         </button>
                     </div>
@@ -137,10 +141,10 @@ export const PutawayJobModal: React.FC<PutawayJobModalProps> = ({
 
 
                 {/* Simplified Mobile View */}
-                <div className="md:hidden flex-1 flex flex-col justify-center px-4 py-4 space-y-4 bg-[radial-gradient(circle_at_50%_0%,rgba(59,130,246,0.05),transparent)]">
-                    <div className="bg-white dark:bg-white/[0.02] border-2 border-gray-100 dark:border-white/10 p-5 rounded-[2rem] shadow-2xl relative overflow-hidden text-center">
-                        <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/5 blur-3xl rounded-full" />
-                        <Package size={36} className="mx-auto mb-4 text-blue-500 dark:text-blue-400 opacity-50" />
+                <div className="md:hidden flex-1 flex flex-col justify-center px-4 py-4 space-y-4 bg-[radial-gradient(circle_at_50%_0%,rgba(44,94,59,0.05),transparent)]">
+                    <div className="bg-[#FAF8F5]/85 dark:bg-white/[0.02] border-2 border-[#E2DCCE]/60 dark:border-white/10 p-5 rounded-[2rem] shadow-2xl relative overflow-hidden text-center">
+                        <div className="absolute top-0 right-0 w-24 h-24 bg-[#2C5E3B]/5 blur-3xl rounded-full" />
+                        <Package size={36} className="mx-auto mb-4 text-[#2C5E3B] dark:text-[#A9CBA2] opacity-50" />
                         
                         <div className="space-y-2 mb-4">
                             <span className="text-[10px] text-gray-400 font-black uppercase tracking-[0.4em] block">Total Inventory</span>
@@ -162,11 +166,11 @@ export const PutawayJobModal: React.FC<PutawayJobModalProps> = ({
                         <div className="space-y-3">
                             <div className="flex justify-between items-center px-1">
                                 <span className="text-[10px] text-gray-400 font-black uppercase tracking-[0.3em]">Job Progress</span>
-                                <span className="text-[10px] text-blue-500 font-black tabular-nums">{Math.round(progressPercent)}%</span>
+                                <span className="text-[10px] text-[#2C5E3B] dark:text-[#A9CBA2] font-black tabular-nums">{Math.round(progressPercent)}%</span>
                             </div>
                             <div className="w-full h-2 bg-gray-100 dark:bg-white/5 rounded-full overflow-hidden shadow-inner border border-gray-200 dark:border-white/10">
                                 <div
-                                    className="h-full bg-blue-500 rounded-full transition-all duration-1000 ease-out shadow-[0_0_20px_rgba(59,130,246,0.3)]"
+                                    className="h-full bg-[#2C5E3B] dark:bg-[#A9CBA2] rounded-full transition-all duration-1000 ease-out shadow-sm"
                                     ref={(el) => { if (el) el.style.width = `${progressPercent}%`; }}
                                 />
                             </div>
@@ -186,44 +190,44 @@ export const PutawayJobModal: React.FC<PutawayJobModalProps> = ({
                 </div>
 
                 {/* Main Content Dashboard - Desktop Only */}
-                <div className="hidden md:block flex-1 overflow-y-auto p-10 space-y-12 custom-scrollbar bg-[radial-gradient(circle_at_50%_0%,rgba(59,130,246,0.05),transparent)] relative">
+                <div className="hidden md:block flex-1 overflow-y-auto p-10 space-y-12 custom-scrollbar bg-[radial-gradient(circle_at_50%_0%,rgba(44,94,59,0.05),transparent)] relative">
                     
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 relative z-10">
-                        <div className="bg-white dark:bg-white/[0.02] border-2 border-gray-100 dark:border-white/10 p-5 rounded-2xl shadow-lg relative overflow-hidden group hover:border-blue-500/20 transition-all duration-500">
-                            <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/5 blur-3xl rounded-full" />
+                        <div className="bg-[#FAF8F5]/50 dark:bg-white/[0.02] border-2 border-[#E2DCCE]/65 dark:border-white/10 p-5 rounded-2xl shadow-lg relative overflow-hidden group hover:border-[#2C5E3B]/20 transition-all duration-500">
+                            <div className="absolute top-0 right-0 w-24 h-24 bg-[#2C5E3B]/5 blur-3xl rounded-full" />
                             <span className="text-[10px] text-gray-400 dark:text-gray-500 font-black uppercase tracking-[0.2em] block mb-3">Progress</span>
                             <div className="flex items-baseline justify-between mb-3 gap-2">
                                 <span className="text-2xl font-black text-gray-900 dark:text-white tabular-nums">{Math.round(progressPercent)}%</span>
-                                <span className="text-[9px] text-blue-600 dark:text-blue-400 font-black uppercase tracking-widest bg-blue-50 dark:bg-blue-500/10 px-2 py-1 rounded-lg border border-blue-100 dark:border-blue-500/20 whitespace-nowrap">{completedItems} / {totalItems}</span>
+                                <span className="text-[9px] text-[#2C5E3B] dark:text-[#A9CBA2] font-black uppercase tracking-widest bg-[#2C5E3B]/10 dark:bg-white/5 px-2 py-1 rounded-lg border border-[#2C5E3B]/20 dark:border-white/10 whitespace-nowrap">{completedItems} / {totalItems}</span>
                             </div>
                             <div className="w-full h-2 bg-gray-100 dark:bg-white/5 rounded-full overflow-hidden shadow-inner border border-gray-200 dark:border-white/10">
                                 <div
-                                    className="h-full bg-blue-500 rounded-full transition-all duration-1000 ease-out shadow-[0_0_12px_rgba(59,130,246,0.3)]"
+                                    className="h-full bg-[#2C5E3B] dark:bg-[#A9CBA2] rounded-full transition-all duration-1000 ease-out shadow-sm"
                                     ref={(el) => { if (el) el.style.width = `${progressPercent}%`; }}
                                 />
                             </div>
                         </div>
 
-                        <div className="bg-white dark:bg-white/[0.02] border-2 border-gray-100 dark:border-white/10 p-5 rounded-2xl shadow-lg relative overflow-hidden group hover:border-emerald-500/20 transition-all duration-500">
+                        <div className="bg-[#FAF8F5]/50 dark:bg-white/[0.02] border-2 border-[#E2DCCE]/65 dark:border-white/10 p-5 rounded-2xl shadow-lg relative overflow-hidden group hover:border-emerald-500/20 transition-all duration-500">
                             <span className="text-[10px] text-gray-400 dark:text-gray-500 font-black uppercase tracking-[0.2em] block mb-3">Status</span>
                             <div className="flex items-center gap-3">
-                                <div className={`w-3 h-3 rounded-full shadow-[0_0_10px_currentColor] animate-pulse border-2 border-white/20 ${job.status === 'Completed' ? 'text-emerald-500 bg-emerald-500' : 'text-blue-500 bg-blue-500'}`} />
-                                <span className={`text-xl font-black uppercase tracking-tight transition-colors ${job.status === 'Completed' ? 'text-emerald-600 dark:text-emerald-400' : 'text-blue-600 dark:text-blue-400'}`}>
+                                <div className={`w-3 h-3 rounded-full shadow-[0_0_10px_currentColor] animate-pulse border-2 border-white/20 ${job.status === 'Completed' ? 'text-emerald-500 bg-emerald-500' : 'text-[#2C5E3B] bg-[#2C5E3B] dark:text-[#A9CBA2] dark:bg-[#A9CBA2]'}`} />
+                                <span className={`text-xl font-black uppercase tracking-tight transition-colors ${job.status === 'Completed' ? 'text-emerald-600 dark:text-emerald-400' : 'text-[#2C5E3B] dark:text-[#A9CBA2]'}`}>
                                     {job.status}
                                 </span>
                             </div>
                             <div className="mt-3 flex items-center gap-2">
                                 <div className="p-1 bg-gray-50 dark:bg-white/5 rounded-md border border-gray-100 dark:border-white/10">
-                                    <Clock size={11} className="text-blue-500 dark:text-blue-400" />
+                                    <Clock size={11} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
                                 </div>
-                                <span className="text-[9px] text-gray-500 dark:text-gray-500 font-black uppercase tracking-[0.15em]">Updated</span>
+                                <span className="text-[9px] text-gray-550 dark:text-gray-500 font-black uppercase tracking-[0.15em]">Updated</span>
                             </div>
                         </div>
 
-                        <div className="bg-white dark:bg-white/[0.02] border-2 border-gray-100 dark:border-white/10 p-5 rounded-2xl shadow-lg group hover:border-indigo-500/20 transition-all duration-500">
+                        <div className="bg-[#FAF8F5]/50 dark:bg-white/[0.02] border-2 border-[#E2DCCE]/65 dark:border-white/10 p-5 rounded-2xl shadow-lg group hover:border-[#2C5E3B]/20 transition-all duration-500">
                             <span className="text-[10px] text-gray-400 dark:text-gray-500 font-black uppercase tracking-[0.2em] block mb-3">Reference</span>
                             <div className="flex items-center gap-3">
-                                <div className="p-2 bg-indigo-50 dark:bg-indigo-500/10 rounded-xl border border-indigo-100 dark:border-indigo-400/20 text-indigo-600 dark:text-indigo-400 shadow-sm transition-all group-hover:scale-105">
+                                <div className="p-2 bg-[#FAF8F5] dark:bg-[#A9CBA2]/10 border border-[#E2DCCE] dark:border-[#A9CBA2]/25 text-[#2C5E3B] dark:text-[#A9CBA2] shadow-sm transition-all group-hover:scale-105">
                                     <Barcode size={20} className="stroke-[2]" />
                                 </div>
                                 <span className="text-lg font-black font-mono text-gray-900 dark:text-white truncate uppercase tracking-tighter">
@@ -237,13 +241,13 @@ export const PutawayJobModal: React.FC<PutawayJobModalProps> = ({
                     <div className="space-y-6 relative z-10">
                         <div className="flex items-center justify-between px-4">
                             <h3 className="font-black text-gray-900 dark:text-white flex items-center gap-4 text-xs uppercase tracking-[0.4em]">
-                                <span className="w-8 h-8 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/20">
+                                <span className="w-8 h-8 rounded-xl bg-[#2C5E3B] flex items-center justify-center text-white shadow-md">
                                     <Package size={18} strokeWidth={2.5} />
                                 </span>
                                 Item Manifest
                             </h3>
-                            <div className="flex items-center gap-3 bg-white dark:bg-white/5 px-4 py-2 rounded-2xl border-2 border-gray-100 dark:border-white/10 shadow-lg">
-                                <span className="text-[10px] font-black text-gray-900 dark:text-blue-400 uppercase tracking-widest tabular-nums">
+                            <div className="flex items-center gap-3 bg-[#FAF8F5] dark:bg-white/5 px-4 py-2 rounded-2xl border-2 border-[#E2DCCE]/60 dark:border-white/10 shadow-lg">
+                                <span className="text-[10px] font-black text-gray-900 dark:text-[#A9CBA2] uppercase tracking-widest tabular-nums">
                                     {totalItems} Verified Unit{totalItems !== 1 ? 's' : ''}
                                 </span>
                             </div>
@@ -255,8 +259,8 @@ export const PutawayJobModal: React.FC<PutawayJobModalProps> = ({
                                 const isDone = item.status === 'Completed' || item.status === 'Picked';
 
                                 return (
-                                    <div key={idx} className={`group relative bg-white dark:bg-white/[0.03] border-2 ${isDone ? 'border-emerald-200 dark:border-emerald-500/30 bg-emerald-50/20 dark:bg-emerald-500/5' : 'border-gray-100 dark:border-white/10 shadow-xl'
-                                        } rounded-[2rem] p-5 md:p-8 flex flex-col md:flex-row md:items-center justify-between hover:border-blue-500/40 dark:hover:border-blue-400/40 hover:shadow-2xl transition-all duration-700 gap-6 animate-in slide-in-from-bottom-4 duration-500 opacity-100`}>
+                                    <div key={idx} className={`group relative bg-white dark:bg-white/[0.03] border-2 ${isDone ? 'border-emerald-200 dark:border-emerald-500/30 bg-emerald-50/20 dark:bg-emerald-500/5' : 'border-[#E2DCCE]/65 dark:border-white/10 shadow-xl'
+                                        } rounded-[2rem] p-5 md:p-8 flex flex-col md:flex-row md:items-center justify-between hover:border-[#2C5E3B]/30 dark:hover:border-[#A9CBA2]/30 hover:shadow-2xl transition-all duration-700 gap-6 animate-in slide-in-from-bottom-4 duration-500 opacity-100`}>
 
                                         <div className="flex items-center gap-6">
                                             {/* Specimen Visual */}
@@ -279,15 +283,15 @@ export const PutawayJobModal: React.FC<PutawayJobModalProps> = ({
 
                                             {/* Specimen Analytics */}
                                             <div className="min-w-0 flex-1">
-                                                <h4 className="text-sm md:text-base text-gray-900 dark:text-white font-black tracking-tight mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors uppercase truncate drop-shadow-sm leading-tight leading-normal whitespace-pre-wrap sm:whitespace-nowrap">
+                                                <h4 className="text-sm md:text-base text-gray-900 dark:text-white font-black tracking-tight mb-2 group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] transition-colors uppercase truncate drop-shadow-sm leading-tight leading-normal whitespace-pre-wrap sm:whitespace-nowrap">
                                                     {item.name || product?.name || 'Unknown Item'}
                                                 </h4>
                                                 <div className="flex items-center gap-3 flex-wrap">
-                                                    <span className="text-[10px] font-mono font-black text-gray-900 dark:text-blue-300 bg-gray-100 dark:bg-blue-500/10 px-3 py-1.5 rounded-xl border border-gray-200 dark:border-blue-400/20 uppercase tracking-widest shadow-inner">
+                                                    <span className="text-[10px] font-mono font-black text-gray-950 dark:text-[#A9CBA2] bg-[#FAF8F5] dark:bg-[#2C5E3B]/10 px-3 py-1.5 rounded-xl border border-[#E2DCCE]/60 dark:border-[#2C5E3B]/20 uppercase tracking-widest shadow-inner">
                                                         SKU: {item.sku || product?.sku || 'NULL-ID'}
                                                     </span>
                                                     {product?.barcode && (
-                                                        <div className="flex items-center gap-2.5 text-[10px] text-gray-400 dark:text-gray-500 font-black uppercase tracking-widest font-mono group-hover:text-gray-900 dark:group-hover:text-gray-300 transition-colors">
+                                                        <div className="flex items-center gap-2.5 text-[10px] text-gray-400 dark:text-gray-500 font-black uppercase tracking-widest font-mono group-hover:text-gray-950 dark:group-hover:text-gray-300 transition-colors">
                                                             <Barcode size={14} className="opacity-50" />
                                                             {product.barcode}
                                                         </div>
@@ -301,9 +305,9 @@ export const PutawayJobModal: React.FC<PutawayJobModalProps> = ({
                                             <div className="text-left xl:text-right flex flex-col items-start xl:items-end flex-1 xl:flex-none">
                                                 <span className="text-[9px] text-gray-400 dark:text-gray-500 font-black uppercase tracking-[0.2em] block mb-1 sm:mb-2">Storage Location</span>
                                                 <div className="relative group/loc">
-                                                    <div className="absolute inset-0 bg-blue-500/10 rounded-2xl blur-lg transition-all opacity-0 group-hover/loc:opacity-100" />
+                                                    <div className="absolute inset-0 bg-[#2C5E3B]/10 rounded-2xl blur-lg transition-all opacity-0 group-hover/loc:opacity-100" />
                                                     <div className="relative">
-                                                        {formatBeautifulLocation(product?.location, 'cyan')}
+                                                        {formatBeautifulLocation(product?.location, 'woody')}
                                                     </div>
                                                 </div>
                                             </div>
@@ -337,7 +341,7 @@ export const PutawayJobModal: React.FC<PutawayJobModalProps> = ({
                                                             onStartPutaway(job);
                                                         }}
                                                         disabled={isSubmitting}
-                                                        className="h-10 sm:h-12 px-4 sm:px-6 bg-gray-900 dark:bg-blue-600 font-black text-white rounded-xl sm:rounded-2xl text-[10px] sm:text-[11px] uppercase tracking-[0.1em] shadow-lg shadow-gray-900/20 dark:shadow-blue-500/30 hover:bg-black dark:hover:bg-blue-500 transition-all active:scale-95 disabled:opacity-40 border border-gray-800 dark:border-blue-400 whitespace-nowrap shrink-0"
+                                                        className="woody-btn-primary h-10 sm:h-12 px-4 sm:px-6 text-[10px] sm:text-[11px]"
                                                     >
                                                         Start Job
                                                     </button>
@@ -352,14 +356,14 @@ export const PutawayJobModal: React.FC<PutawayJobModalProps> = ({
                 </div>
 
                 {/* Secure Footer Interface */}
-                <div className="p-6 md:p-10 border-t-2 border-gray-100 dark:border-white/10 bg-gray-50 dark:bg-black/60 flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-6 shrink-0 relative z-20">
+                <div className="p-6 md:p-10 border-t-2 border-[#E2DCCE]/60 dark:border-white/10 bg-[#FAF8F5]/50 dark:bg-black/60 flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-6 shrink-0 relative z-20">
                     <div className="hidden md:flex items-center gap-5">
-                        <div className="w-14 h-14 rounded-2xl bg-white dark:bg-white/5 border-2 border-gray-100 dark:border-white/10 flex items-center justify-center text-gray-300 dark:text-gray-700 shadow-inner group transition-all">
-                            <UserIcon size={28} className="group-hover:text-blue-500 transition-colors" />
+                        <div className="w-14 h-14 rounded-2xl bg-white dark:bg-white/5 border-2 border-gray-100 dark:border-white/10 flex items-center justify-center text-gray-300 dark:text-gray-750 shadow-inner group transition-all">
+                            <UserIcon size={28} className="group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] transition-colors" />
                         </div>
                         <div className="flex flex-col">
-                            <span className="text-[10px] text-gray-400 dark:text-gray-600 font-black uppercase tracking-[0.4em] mb-1">Assigned To</span>
-                            <span className="text-sm font-black text-gray-900 dark:text-gray-300 uppercase tracking-[0.1em]">{(() => {
+                            <span className="text-[10px] text-gray-400 dark:text-gray-650 font-black uppercase tracking-[0.4em] mb-1">Assigned To</span>
+                            <span className="text-sm font-black text-gray-950 dark:text-gray-300 uppercase tracking-[0.1em]">{(() => {
                                 if (!job.assignedTo) return 'Unassigned';
                                 const emp = employees.find(e => e.id === job.assignedTo || e.name === job.assignedTo);
                                 return emp?.name || job.assignedTo;
@@ -370,7 +374,7 @@ export const PutawayJobModal: React.FC<PutawayJobModalProps> = ({
                     <div className="flex flex-col sm:flex-row items-stretch gap-4">
                         <button
                             onClick={onClose}
-                            className="flex-1 px-6 md:px-10 py-5 rounded-2xl bg-white dark:bg-white/5 hover:bg-gray-50 dark:hover:bg-white/10 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-black text-[11px] uppercase tracking-[0.3em] transition-all border-2 border-gray-100 dark:border-white/10 shadow-lg active:scale-95"
+                            className="woody-btn-secondary px-6 md:px-10 py-5 text-[11px]"
                         >
                             Close
                         </button>
@@ -381,7 +385,7 @@ export const PutawayJobModal: React.FC<PutawayJobModalProps> = ({
                                     <button
                                         onClick={() => onCompleteJob(job)}
                                         disabled={isSubmitting}
-                                        className="w-full px-6 md:px-16 py-5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl font-black text-[11px] uppercase tracking-[0.3em] shadow-[0_0_40px_rgba(16,185,129,0.3)] transition-all flex items-center justify-center gap-4 active:scale-95 disabled:opacity-40 border border-emerald-400/50"
+                                        className="w-full px-6 md:px-16 py-5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl font-black text-[11px] uppercase tracking-[0.3em] shadow-md transition-all flex items-center justify-center gap-4 active:scale-95 disabled:opacity-40 border border-emerald-400/50"
                                     >
                                         {isSubmitting ? <Loader2 size={24} className="animate-spin" /> : <><CheckCircle size={24} strokeWidth={3} /> Complete Job</>}
                                     </button>
@@ -389,7 +393,7 @@ export const PutawayJobModal: React.FC<PutawayJobModalProps> = ({
                                     <button
                                         onClick={() => onStartPutaway(job)}
                                         disabled={isSubmitting}
-                                        className="w-full px-6 md:px-16 py-5 bg-blue-600 dark:bg-white text-white dark:text-black hover:bg-blue-500 dark:hover:bg-gray-100 rounded-2xl font-black text-[11px] uppercase tracking-[0.3em] shadow-[0_0_40px_rgba(37,99,235,0.3)] dark:shadow-[0_0_40px_rgba(255,255,255,0.05)] transition-all flex items-center justify-center gap-4 active:scale-95 disabled:opacity-40 group border-2 border-blue-400/30 dark:border-gray-200"
+                                        className="woody-btn-primary px-6 md:px-16 py-5 text-[11px] flex items-center justify-center gap-4"
                                     >
                                         {isSubmitting ? (
                                             <Loader2 size={24} className="animate-spin" />

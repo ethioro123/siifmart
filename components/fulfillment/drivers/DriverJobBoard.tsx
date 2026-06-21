@@ -66,7 +66,7 @@ export const DriverJobBoard: React.FC<DriverJobBoardProps> = ({
                                     </div>
                                     <div className="mb-5">
                                         <p className="text-[9px] text-gray-400 dark:text-gray-500 font-black uppercase tracking-widest mb-1.5 italic">Payload Route</p>
-                                        <div className="flex items-center gap-3 text-xs font-black text-gray-900 dark:text-white uppercase leading-none italic"><span>{source?.name || 'Central'}</span><span className="text-cyan-500">→</span><span>{dest?.name || 'Client'}</span></div>
+                                        <div className="flex items-center gap-3 text-xs font-black text-gray-900 dark:text-white uppercase leading-none italic"><span>{source?.name || 'Central'}</span><span className="text-[#A9CBA2]">→</span><span>{dest?.name || 'Client'}</span></div>
                                     </div>
                                     <div className="flex items-center justify-between gap-4 pt-4 border-t-2 border-gray-50 dark:border-white/5">
                                         <div className="bg-gray-100 dark:bg-black/40 px-4 py-2 rounded-xl border border-gray-200 dark:border-white/5 shadow-inner"><span className="text-[10px] font-black text-gray-900 dark:text-white">{job.items || 0}</span><span className="text-[8px] text-gray-400 dark:text-gray-500 ml-1.5 uppercase font-bold tracking-widest">Units</span></div>
@@ -80,7 +80,7 @@ export const DriverJobBoard: React.FC<DriverJobBoardProps> = ({
                                                     if (job.orderRef) { const parentTransfer = jobs.find(j => j.id === job.orderRef && j.type === 'TRANSFER'); if (parentTransfer) await wmsJobsService.update(parentTransfer.id, { transferStatus: 'In-Transit' } as any); }
                                                     await refreshData(); addNotification('success', 'Payload secure. Departing.');
                                                 } catch (err) { addNotification('alert', 'Comm link error.'); } finally { setProcessingJobIds(prev => { const next = new Set(prev); next.delete(job.id); return next; }); }
-                                            }} className="flex-1 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 disabled:opacity-50 transition-all shadow-xl bg-purple-600 dark:bg-purple-600 text-white active:scale-95">{processingJobIds.has(job.id) ? <RefreshCw className="animate-spin" size={14} /> : <Zap size={14} />} PICKUP</button>
+                                            }} className="flex-1 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 disabled:opacity-50 transition-all shadow-xl bg-[#2C5E3B] text-white active:scale-95">{processingJobIds.has(job.id) ? <RefreshCw className="animate-spin" size={14} /> : <Zap size={14} />} PICKUP</button>
                                         ) : (
                                             <button onClick={async (e) => {
                                                 e.stopPropagation(); const currentEmployee = employees.find(emp => (user?.email && emp.email === user.email) || (user?.name && emp.name?.toLowerCase() === user.name.toLowerCase()) || ((user as any)?.employeeId && emp.id === (user as any).employeeId) || emp.id === user?.id);

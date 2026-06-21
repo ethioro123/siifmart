@@ -45,7 +45,7 @@ export const DriverActiveMission: React.FC<DriverActiveMissionProps> = ({
         <div className="space-y-5">
             <div className="flex items-center justify-between px-3">
                 <h4 className="text-[11px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-[0.25em] flex items-center gap-2.5 italic">
-                    <div className="w-2 h-2 rounded-full bg-cyan-500 animate-pulse shadow-[0_0_10px_rgba(6,182,212,0.4)]" />
+                    <div className="w-2 h-2 rounded-full bg-[#A9CBA2] animate-pulse shadow-[0_0_10px_rgba(169,203,162,0.4)]" />
                     {t('warehouse.docks.currentMission') || 'Active Mission'}
                 </h4>
             </div>
@@ -60,19 +60,19 @@ export const DriverActiveMission: React.FC<DriverActiveMissionProps> = ({
                     {paginatedJobs.map((job, idx) => {
                         const destSite = sites.find(s => s.id === job.destSiteId); const isPending = job.status === 'Pending'; const isFirst = idx === 0 && !isPending;
                         return (
-                            <div key={job.id} onClick={() => { setSelectedJob(job); setIsDetailsOpen(true); }} className={`group rounded-[2.5rem] transition-all border-2 cursor-pointer shadow-sm active:scale-[0.98] ${isPending ? 'bg-gray-100 dark:bg-black/30 border-gray-200 dark:border-white/5 opacity-60' : isFirst ? 'bg-cyan-50 dark:bg-cyan-950/20 border-cyan-200 dark:border-cyan-500/30 shadow-cyan-500/5' : 'bg-gray-50 dark:bg-white/5 border-gray-200 dark:border-white/10'}`}>
+                            <div key={job.id} onClick={() => { setSelectedJob(job); setIsDetailsOpen(true); }} className={`group rounded-[2.5rem] transition-all border-2 cursor-pointer shadow-sm active:scale-[0.98] ${isPending ? 'bg-gray-100 dark:bg-black/30 border-gray-200 dark:border-white/5 opacity-60' : isFirst ? 'bg-[#2C5E3B]/5 dark:bg-[#2C5E3B]/10 border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20 shadow-[#2C5E3B]/5' : 'bg-gray-50 dark:bg-white/5 border-gray-200 dark:border-white/10'}`}>
                                 <div className="p-6 flex flex-col gap-4">
                                     <div className="flex justify-between items-center">
                                         <div className="flex items-center gap-3">
-                                            <div className={`w-3 h-3 rounded-full border-2 border-white/20 dark:border-black/20 ${job.transferStatus === 'In-Transit' || job.transferStatus === 'Shipped' ? 'bg-purple-500 animate-pulse' : 'bg-cyan-500 animate-pulse'}`} />
+                                            <div className={`w-3 h-3 rounded-full border-2 border-white/20 dark:border-black/20 ${job.transferStatus === 'In-Transit' || job.transferStatus === 'Shipped' ? 'bg-amber-500 animate-pulse' : 'bg-[#A9CBA2] animate-pulse'}`} />
                                             <span className="text-xs font-black text-gray-900 dark:text-gray-300 tracking-[0.15em] uppercase">{formatJobId(job)}</span>
                                         </div>
-                                        <span className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest border-2 ${job.transferStatus === 'In-Transit' || job.transferStatus === 'Shipped' ? 'bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-400 border-purple-200 dark:border-purple-500/30' : 'bg-cyan-100 dark:bg-cyan-500/20 text-cyan-700 dark:text-cyan-400 border-cyan-200 dark:border-cyan-500/30'}`}>{job.transferStatus === 'In-Transit' || job.transferStatus === 'Shipped' ? 'In-Transit' : 'Active'}</span>
+                                        <span className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest border-2 ${job.transferStatus === 'In-Transit' || job.transferStatus === 'Shipped' ? 'bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-500/30' : 'bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 text-[#2C5E3B] dark:text-[#A9CBA2] border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20'}`}>{job.transferStatus === 'In-Transit' || job.transferStatus === 'Shipped' ? 'In-Transit' : 'Active'}</span>
                                     </div>
                                     <div>
-                                        <h3 className="text-2xl font-black text-gray-900 dark:text-white leading-none tracking-tight mb-2 underline decoration-cyan-500/30 decoration-4 underline-offset-4">{destSite?.name || 'Customer'}</h3>
+                                        <h3 className="text-2xl font-black text-gray-900 dark:text-white leading-none tracking-tight mb-2 underline decoration-[#A9CBA2]/30 decoration-4 underline-offset-4">{destSite?.name || 'Customer'}</h3>
                                         <div className="flex items-start gap-2 text-gray-500 dark:text-gray-400">
-                                            <MapPin size={14} className="mt-0.5 shrink-0 text-cyan-600 dark:text-cyan-400" />
+                                            <MapPin size={14} className="mt-0.5 shrink-0 text-[#2C5E3B] dark:text-[#A9CBA2]" />
                                             <p className="text-[10px] font-bold uppercase tracking-wider leading-relaxed">{destSite?.address || 'Address Hidden'}{job.location ? ` • ${job.location}` : ''}</p>
                                         </div>
                                     </div>
@@ -83,7 +83,7 @@ export const DriverActiveMission: React.FC<DriverActiveMissionProps> = ({
                                     })()}
                                     {!isPending && (
                                         <div className="flex items-center gap-3 pt-5 border-t-2 border-gray-100 dark:border-white/5">
-                                            {(job.transferStatus === 'In-Transit' || job.transferStatus === 'Shipped') && ( <button onClick={(e) => { e.stopPropagation(); if (destSite?.address) window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(destSite.address)}`, '_blank'); else addNotification('info', 'Address pending.'); }} className="px-5 py-3 bg-gray-200 dark:bg-white/10 hover:bg-gray-300 dark:hover:bg-white/20 rounded-2xl text-[10px] font-black text-gray-900 dark:text-white uppercase flex items-center justify-center gap-2 transition-all shadow-sm active:scale-95"><Navigation size={14} className="text-cyan-600 dark:text-cyan-400" />GPS</button> )}
+                                            {(job.transferStatus === 'In-Transit' || job.transferStatus === 'Shipped') && ( <button onClick={(e) => { e.stopPropagation(); if (destSite?.address) window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(destSite.address)}`, '_blank'); else addNotification('info', 'Address pending.'); }} className="px-5 py-3 bg-gray-200 dark:bg-white/10 hover:bg-gray-300 dark:hover:bg-white/20 rounded-2xl text-[10px] font-black text-gray-900 dark:text-white uppercase flex items-center justify-center gap-2 transition-all shadow-sm active:scale-95"><Navigation size={14} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />GPS</button> )}
                                             {(job.transferStatus === 'In-Transit' || job.transferStatus === 'Shipped') ? (
                                                 <button disabled={processingJobIds.has(job.id)} onClick={async (e) => {
                                                     e.stopPropagation(); setProcessingJobIds(prev => new Set(prev).add(job.id));

@@ -163,4 +163,5 @@ export const pos: TranslationBlock = {
     outOf: { en: 'Out of', am: 'ከ', or: 'Keessaa' },
     sessionLocked: { en: 'Session Locked', am: 'ክፍለ ጊዜው ተቆልፏል', or: 'Baninsa Cufameera' },
     enterPinToResume: { en: 'Enter PIN to resume', am: 'ለመቀጠል ፒን ያስገቡ', or: 'Itti fufuuf koodii galchi' },
+    scanOrSelectProducts: { en: 'Scan barcodes or tap products to build a sale.', am: 'ሽያጭ ለመፍጠር ባርኮዶችን ይቃኙ ወይም ምርቶችን ይንኩ።', or: 'Gurgurtaa uumuuf baarkoodii dubbisi ykn oomishaalee tuqi.' },
 };

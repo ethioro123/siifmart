@@ -62,13 +62,13 @@ export const TransferHistory: React.FC<TransferHistoryProps> = ({
     return (
         <div className="border-t border-white/10 mt-10 pt-8 relative overflow-hidden group/history">
             {/* Mesh Accent */}
-            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-cyan-500/5 blur-[120px] rounded-full -mr-40 -mt-40 pointer-events-none opacity-50 group-hover/history:opacity-100 transition-opacity duration-1000" />
+            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#2C5E3B]/5 blur-[120px] rounded-full -mr-40 -mt-40 pointer-events-none opacity-50 group-hover/history:opacity-100 transition-opacity duration-1000" />
 
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
                 <div>
-                    <h4 className="text-xl font-black text-cyan-100 flex items-center gap-3 uppercase tracking-tight">
-                        <div className="p-2 bg-cyan-500/10 rounded-xl border border-cyan-500/20 group-hover/history:bg-cyan-500/20 transition-colors">
-                            <HistoryIcon size={20} className="text-cyan-400" />
+                    <h4 className="text-xl font-black text-white flex items-center gap-3 uppercase tracking-tight">
+                        <div className="p-2 bg-[#2C5E3B]/10 rounded-xl border border-[#2C5E3B]/20 group-hover/history:bg-[#2C5E3B]/20 transition-colors">
+                            <HistoryIcon size={20} className="text-[#A9CBA2]" />
                         </div>
                         Transfer History
                     </h4>
@@ -76,9 +76,9 @@ export const TransferHistory: React.FC<TransferHistoryProps> = ({
                 </div>
 
                 <div className="relative w-full md:w-80 group">
-                    <div className="absolute -inset-0.5 bg-cyan-500/20 rounded-xl blur opacity-0 group-hover:opacity-100 transition duration-500"></div>
-                    <div className="relative flex items-center bg-black/40 border border-white/10 rounded-xl focus-within:border-cyan-500 transition-all shadow-sm">
-                        <Search className="absolute left-3 text-gray-600 group-focus-within:text-cyan-400" size={16} />
+                    <div className="absolute -inset-0.5 bg-[#2C5E3B]/20 rounded-xl blur opacity-0 group-hover:opacity-100 transition duration-500"></div>
+                    <div className="relative flex items-center bg-black/40 border border-white/10 rounded-xl focus-within:border-[#2C5E3B] transition-all shadow-sm">
+                        <Search className="absolute left-3 text-gray-600 group-focus-within:text-[#A9CBA2]" size={16} />
                         <input
                             type="text"
                             placeholder="Search history..."
@@ -114,13 +114,13 @@ export const TransferHistory: React.FC<TransferHistoryProps> = ({
                                             setSelectedJob(transfer);
                                             setIsDetailsOpen(true);
                                         }}
-                                        className="group relative bg-black/40 hover:bg-black/60 border border-white/5 hover:border-cyan-500/50 rounded-2xl p-5 transition-all duration-300 cursor-pointer overflow-hidden shadow-sm"
+                                        className="group relative bg-black/40 hover:bg-black/60 border border-white/5 hover:border-[#2C5E3B]/50 rounded-2xl p-5 transition-all duration-300 cursor-pointer overflow-hidden shadow-sm"
                                     >
-                                        <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                                        <div className="absolute inset-0 bg-gradient-to-br from-[#2C5E3B]/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
 
                                         <div className="relative flex justify-between items-start mb-4">
                                             <div className="flex items-center gap-2">
-                                                <div className="p-1.5 rounded-lg bg-cyan-500/10 text-cyan-400">
+                                                <div className="p-1.5 rounded-lg bg-[#2C5E3B]/10 text-[#A9CBA2]">
                                                     <Package size={14} />
                                                 </div>
                                                 <span className="text-[10px] uppercase font-black tracking-widest text-gray-500">
@@ -132,14 +132,14 @@ export const TransferHistory: React.FC<TransferHistoryProps> = ({
                                                 ? 'bg-red-500/10 text-red-400 border-red-500/20' 
                                                 : transfer.status === 'Completed' || transfer.transferStatus === 'Received'
                                                 ? 'bg-green-500/10 text-green-400 border-green-500/20'
-                                                : 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20'
+                                                : 'bg-[#2C5E3B]/10 text-[#A9CBA2] border-[#2C5E3B]/20'
                                             }`}>
                                                 {transfer.transferStatus || transfer.status}
                                             </span>
                                         </div>
 
                                         <div className="relative mb-4">
-                                            <h5 className="text-white font-black text-sm truncate group-hover:text-cyan-100 transition-colors uppercase tracking-tight">
+                                            <h5 className="text-white font-black text-sm truncate group-hover:text-[#A9CBA2] transition-colors uppercase tracking-tight">
                                                 {formattedId}
                                             </h5>
                                             <div className="flex flex-col gap-1.5 mt-2">
@@ -148,7 +148,7 @@ export const TransferHistory: React.FC<TransferHistoryProps> = ({
                                                     <span className="text-[10px] font-black text-gray-300 uppercase tracking-tight">
                                                         {formattedId}
                                                         {transfer.jobNumber && transfer.jobNumber !== formattedId && (
-                                                            <> <span className="text-cyan-500/50 mr-1">•</span> {transfer.jobNumber}</>
+                                                            <> <span className="text-[#A9CBA2]/50 mr-1">•</span> {transfer.jobNumber}</>
                                                         )}
                                                     </span>
                                                 </div>
@@ -166,7 +166,7 @@ export const TransferHistory: React.FC<TransferHistoryProps> = ({
                                             <div className="relative mb-4">
                                                 <p className="text-[10px] text-gray-600 truncate">
                                                     {productNames.slice(0, 2).join(', ')}
-                                                    {productNames.length > 2 && <span className="text-cyan-500/60 ml-1">+{productNames.length - 2} more</span>}
+                                                    {productNames.length > 2 && <span className="text-[#A9CBA2]/60 ml-1">+{productNames.length - 2} more</span>}
                                                 </p>
                                             </div>
                                         )}
@@ -176,8 +176,8 @@ export const TransferHistory: React.FC<TransferHistoryProps> = ({
                                                 <Box size={12} className="text-gray-500" />
                                                 <span className="text-[10px] font-black text-gray-400">{totalItems} {totalItems === 1 ? 'Item' : 'Items'}</span>
                                             </div>
-                                            <div className="w-6 h-6 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-cyan-500/20 transition-colors border border-white/10 group-hover:border-cyan-500/30">
-                                                <ChevronRight size={14} className="text-gray-600 group-hover:text-cyan-400 transition-colors" />
+                                            <div className="w-6 h-6 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-[#2C5E3B]/20 transition-colors border border-white/10 group-hover:border-[#2C5E3B]/30">
+                                                <ChevronRight size={14} className="text-gray-600 group-hover:text-[#A9CBA2] transition-colors" />
                                             </div>
                                         </div>
                                     </motion.div>

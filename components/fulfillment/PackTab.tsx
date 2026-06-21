@@ -15,6 +15,7 @@ import { Search, ScanLine, CheckCircle, X, Loader2 } from 'lucide-react';
 import { useScanOnly } from '../../hooks/useScanOnly';
 import { inventoryRequestsService } from '../../services/supabase.service';
 import { FulfillmentSuccessScreen } from './FulfillmentSuccessScreen';
+import { isWeightBased, isVolumeBased } from '../../utils/units';
 
 export const PackTab: React.FC = () => {
     const {
@@ -37,6 +38,33 @@ export const PackTab: React.FC = () => {
         setEarnedPoints,
         setShowPointsPopup
     } = useFulfillment();
+
+    const getLabelQtyAndUnit = (item: any, product?: any) => {
+        if (product) {
+            const unit = product.unit;
+            const isWeightVol = isWeightBased(unit) || isVolumeBased(unit);
+            const sizeNum = product.size ? parseFloat(product.size as string) : 0;
+            if (isWeightVol && sizeNum > 0) {
+                const expected = item.expectedQty || (item as any).quantity || 0;
+                const picked = item.pickedQty !== undefined && item.pickedQty !== null ? item.pickedQty : expected;
+                const displayPickedCases = picked <= expected ? picked : (sizeNum > 0 ? picked / sizeNum : picked);
+                return {
+                    quantity: `${displayPickedCases} x ${sizeNum}`,
+                    unit
+                };
+            }
+        }
+        if ((item as any).requestedMeasureQty !== undefined && (item as any).requestedMeasureQty !== null) {
+            return {
+                quantity: (item as any).requestedMeasureQty,
+                unit: product?.unit || item.unit || 'KG'
+            };
+        }
+        return {
+            quantity: item.pickedQty !== undefined && item.pickedQty !== null ? item.pickedQty : (item.expectedQty || 0),
+            unit: product?.unit || item.unit
+        };
+    };
 
     // --- LOCAL STATE ---
     const [packSearch, setPackSearch] = useState('');
@@ -240,17 +268,30 @@ export const PackTab: React.FC = () => {
     const handleUpdateItemQty = async (itemIndex: number, qty: number) => {
         if (!selectedPackJob) return;
 
-        const expectedQty = selectedPackJob.lineItems![itemIndex].expectedQty || 1;
-        const newStatus = qty >= expectedQty ? 'Picked' : 'In-Progress';
+        const item = selectedPackJob.lineItems![itemIndex];
+        const product = products.find(p => (p.id === item.productId || p.sku === item.sku) && (p.siteId === selectedPackJob.siteId || p.site_id === selectedPackJob.siteId));
+        
+        let casesQty = qty;
+        if (product) {
+            const unit = product.unit;
+            const isWeightVol = isWeightBased(unit) || isVolumeBased(unit);
+            const sizeNum = product.size ? parseFloat(product.size as string) : 0;
+            if (isWeightVol && sizeNum > 0) {
+                casesQty = qty / sizeNum;
+            }
+        }
+
+        const expectedQty = item.expectedQty || 1;
+        const newStatus = casesQty >= expectedQty ? 'Picked' : 'In-Progress';
 
         // Optimistic Update
-        await updateJobItem(selectedPackJob.id, itemIndex, newStatus, qty);
+        await updateJobItem(selectedPackJob.id, itemIndex, newStatus, casesQty);
 
         const updatedLineItems = [...(selectedPackJob.lineItems || [])];
         updatedLineItems[itemIndex] = {
             ...updatedLineItems[itemIndex],
             status: newStatus as any,
-            pickedQty: qty
+            pickedQty: casesQty
         };
 
         const updatedJob = filteredJobs.find(j => j.id === selectedPackJob.id);
@@ -287,11 +328,12 @@ export const PackTab: React.FC = () => {
                 destSiteName: boxDetails.destSite?.name || boxDetails.destSiteName,
                 lineItems: selectedPackJob.lineItems?.map((i: any) => {
                     const product = products.find(p => p.sku === i.sku || p.id === i.productId);
+                    const qtyInfo = getLabelQtyAndUnit(i, product);
                     return {
                         name: i.name || product?.name || 'Unknown Product',
                         sku: i.sku || product?.sku || 'N/A',
-                        quantity: i.pickedQty || i.expectedQty || 0,
-                        unit: product?.unit
+                        quantity: qtyInfo.quantity,
+                        unit: qtyInfo.unit
                     };
                 })
             };
@@ -347,11 +389,12 @@ export const PackTab: React.FC = () => {
                 destSiteName: destSite?.name,
                 lineItems: job.lineItems?.map((i: any) => {
                     const product = products.find(p => p.sku === i.sku || p.id === i.productId);
+                    const qtyInfo = getLabelQtyAndUnit(i, product);
                     return {
                         name: i.name || product?.name || 'Unknown Product',
                         sku: i.sku || product?.sku || 'N/A',
-                        quantity: i.pickedQty || i.expectedQty || 0,
-                        unit: product?.unit
+                        quantity: qtyInfo.quantity,
+                        unit: qtyInfo.unit
                     };
                 })
             };
@@ -408,8 +451,8 @@ export const PackTab: React.FC = () => {
                 lineItems: [{
                     name: item.name || product?.name || 'Unknown Product',
                     sku: item.sku || product?.sku || 'N/A',
-                    quantity: item.pickedQty || item.expectedQty || 1,
-                    unit: product?.unit
+                    quantity: getLabelQtyAndUnit(item, product).quantity,
+                    unit: getLabelQtyAndUnit(item, product).unit
                 }]
             };
 
@@ -437,16 +480,29 @@ export const PackTab: React.FC = () => {
     const handleScanConfirmPack = async (itemIndex: number, qty: number) => {
         if (!selectedPackJob) return;
 
-        const expectedQty = selectedPackJob.lineItems![itemIndex].expectedQty || 1;
-        const newStatus = qty >= expectedQty ? 'Picked' : 'In-Progress';
+        const item = selectedPackJob.lineItems![itemIndex];
+        const product = products.find(p => (p.id === item.productId || p.sku === item.sku) && (p.siteId === selectedPackJob.siteId || p.site_id === selectedPackJob.siteId));
+        
+        let casesQty = qty;
+        if (product) {
+            const unit = product.unit;
+            const isWeightVol = isWeightBased(unit) || isVolumeBased(unit);
+            const sizeNum = product.size ? parseFloat(product.size as string) : 0;
+            if (isWeightVol && sizeNum > 0) {
+                casesQty = qty / sizeNum;
+            }
+        }
 
-        await updateJobItem(selectedPackJob.id, itemIndex, newStatus, qty);
+        const expectedQty = item.expectedQty || 1;
+        const newStatus = casesQty >= expectedQty ? 'Picked' : 'In-Progress';
+
+        await updateJobItem(selectedPackJob.id, itemIndex, newStatus, casesQty);
 
         const updatedLineItems = [...(selectedPackJob.lineItems || [])];
         updatedLineItems[itemIndex] = {
             ...updatedLineItems[itemIndex],
             status: newStatus as any,
-            pickedQty: qty
+            pickedQty: casesQty
         };
 
         setSelectedPackJob({ ...selectedPackJob, lineItems: updatedLineItems, trackingNumber: selectedPackJob.trackingNumber });
@@ -528,16 +584,16 @@ export const PackTab: React.FC = () => {
                         {/* ═══════ GLOBAL SCAN BAR ═══════ */}
                         <div className="px-4 pb-4">
                             <form onSubmit={handleGlobalScan} className="relative group">
-                                <div className={`absolute inset-0 rounded-2xl blur-xl transition-opacity duration-500 ${scanSuccess ? 'bg-green-500/20 opacity-100' : scanError ? 'bg-red-500/20 opacity-100' : 'bg-cyan-500/10 opacity-0 group-focus-within:opacity-100'}`} />
+                                <div className={`absolute inset-0 rounded-2xl blur-xl transition-opacity duration-500 ${scanSuccess ? 'bg-green-500/20 opacity-100' : scanError ? 'bg-red-500/20 opacity-100' : 'bg-[#2C5E3B]/10 opacity-0 group-focus-within:opacity-100'}`} />
                                 <div className={`relative flex items-center gap-3 bg-gray-50 dark:bg-black/60 border-2 rounded-2xl px-5 py-4 transition-all duration-300 ${scanSuccess ? 'border-green-500/50 bg-green-500/5' : scanError ? 'border-red-500/50 bg-red-500/5' : 'border-gray-200 dark:border-white/10 focus-within:border-cyan-500 shadow-sm'}`}>
                                     {isScanning ? (
-                                        <Loader2 size={22} className="text-cyan-400 animate-spin shrink-0" />
+                                        <Loader2 size={22} className="text-[#A9CBA2] animate-spin shrink-0" />
                                     ) : scanSuccess ? (
                                         <CheckCircle size={22} className="text-green-400 shrink-0" />
                                     ) : scanError ? (
                                         <X size={22} className="text-red-400 shrink-0" />
                                     ) : (
-                                        <ScanLine size={22} className="text-cyan-400 shrink-0" />
+                                        <ScanLine size={22} className="text-[#A9CBA2] shrink-0" />
                                     )}
                                     <input
                                         ref={scanInputRef}
@@ -555,7 +611,7 @@ export const PackTab: React.FC = () => {
                                         <button
                                             type="submit"
                                             disabled={isScanning}
-                                            className="px-5 py-2 bg-cyan-600 hover:bg-cyan-500 text-white rounded-xl font-black text-xs uppercase tracking-widest transition-all active:scale-95 disabled:opacity-50"
+                                            className="px-5 py-2 bg-[#2C5E3B] hover:bg-[#3a7a4d] text-white rounded-xl font-black text-xs uppercase tracking-widest transition-all active:scale-95 disabled:opacity-50"
                                         >
                                             GO
                                         </button>

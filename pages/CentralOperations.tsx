@@ -385,6 +385,7 @@ export default function CentralOperations() {
     const { workerPoints } = useGamification();
     const { loading, theme } = useStore();
     const navigate = useNavigate();
+    const accentColor = theme === 'dark' ? '#A9CBA2' : '#2C5E3B';
 
     // --- SERVER-SIDE METRICS ---
     const [serverMetrics, setServerMetrics] = useState<any>(null); // Inventory Snapshot
@@ -641,7 +642,7 @@ export default function CentralOperations() {
     );
 
     return (
-        <div className="min-h-screen p-6 pb-20 animate-in fade-in duration-700 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-cyber-dark via-cyber-black to-cyber-black">
+        <div className="min-h-screen p-6 pb-20 animate-in fade-in duration-700 bg-transparent">
 
             {/* --- HEADER --- */}
             <div className="flex flex-col md:flex-row justify-between items-end mb-6 relative z-10">
@@ -655,16 +656,16 @@ export default function CentralOperations() {
                         </h1>
                     </div>
                     <p className="text-gray-400 font-medium flex items-center gap-2">
-                        <Radio size={14} className="text-green-400 animate-pulse" />
+                        <Radio size={14} className="text-[#A9CBA2] dark:text-[#2C5E3B] animate-pulse" />
                         <span className="text-xs font-mono text-gray-400">LIVE FEED CONNECTED</span>
                     </p>
                 </div>
 
                 <div className="flex items-center gap-6 mt-4 md:mt-0 h-full">
                     <DateRangeSelector
-                        value={dateRange}
-                        onChange={setDateRange}
-                        className="hidden xl:block"
+                         value={dateRange}
+                         onChange={setDateRange}
+                         className="hidden xl:block"
                     />
 
                     <EthiopianDateWidget />
@@ -678,7 +679,7 @@ export default function CentralOperations() {
 
                     <button
                         onClick={handleGenerateReport}
-                        className="hidden md:flex items-center gap-2 bg-cyber-primary text-black px-4 py-2.5 rounded-xl font-bold hover:bg-cyber-primary/90 transition-all shadow-[0_0_15px_rgba(0,255,157,0.3)] h-[46px]"
+                        className="hidden md:flex items-center gap-2 woody-btn-primary h-[46px]"
                     >
                         <Download size={18} />
                         <span className="hidden lg:inline">Report</span>
@@ -764,15 +765,15 @@ export default function CentralOperations() {
                                     <AreaChart data={revenueBySiteData}>
                                         <defs>
                                             <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                                                <stop offset="5%" stopColor="#00ff9d" stopOpacity={0.4} />
-                                                <stop offset="95%" stopColor="#00ff9d" stopOpacity={0} />
+                                                <stop offset="5%" stopColor={accentColor} stopOpacity={0.4} />
+                                                <stop offset="95%" stopColor={accentColor} stopOpacity={0} />
                                             </linearGradient>
                                         </defs>
                                         <CartesianGrid strokeDasharray="3 3" stroke={chartGridColor} vertical={false} />
                                         <XAxis dataKey="name" stroke={chartAxisColor} fontSize={11} tickLine={false} axisLine={false} />
                                         <YAxis stroke={chartAxisColor} fontSize={11} tickLine={false} axisLine={false} tickFormatter={(val) => `${val / 1000}k`} />
                                         <Tooltip contentStyle={{ backgroundColor: tooltipBg, backdropFilter: 'blur(10px)', border: `1px solid ${tooltipBorder}`, borderRadius: '12px' }} itemStyle={{ color: tooltipText, fontSize: '12px' }} />
-                                        <Area type="monotone" dataKey="revenue" stroke="#00ff9d" strokeWidth={3} fillOpacity={1} fill="url(#colorRevenue)" />
+                                        <Area type="monotone" dataKey="revenue" stroke={accentColor} strokeWidth={3} fillOpacity={1} fill="url(#colorRevenue)" />
                                     </AreaChart>
                                 </ResponsiveContainer>
                             </WidgetErrorBoundary>

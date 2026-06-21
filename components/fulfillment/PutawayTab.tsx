@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { WMSJob, Employee, WarehouseZone, Product } from '../../types';
 import { PutawayHistory } from './putaway/PutawayHistory';
 import { PutawayHeader } from './putaway/PutawayHeader';
@@ -38,6 +38,8 @@ export const PutawayTab: React.FC<PutawayTabProps> = ({
     isSubmitting, setIsSubmitting, refreshData, handleStartJob,
     selectedJob, setSelectedJob, setIsDetailsOpen, resolveOrderRef, isDetailsOpen, sites: tabSites
 }) => {
+    const isSubmittingRef = useRef(false);
+
     // --- PUTAWAY-SPECIFIC STATE ---
     const [putawaySearch, setPutawaySearch] = useState('');
     const [putawayCurrentPage, setPutawayCurrentPage] = useState(1);
@@ -130,10 +132,16 @@ export const PutawayTab: React.FC<PutawayTabProps> = ({
     const currentProduct = useMemo(() => {
         if (!currentItem) return undefined;
         const targetSiteId = activeSite?.id;
-        return allProducts.find(p =>
+        let prod = allProducts.find(p =>
             (p.id === currentItem.productId || p.sku === currentItem.sku) &&
             (p.siteId === targetSiteId || p.site_id === targetSiteId)
         );
+        if (!prod) {
+            prod = allProducts.find(p =>
+                p.id === currentItem.productId || p.sku === currentItem.sku
+            );
+        }
+        return prod;
     }, [currentItem, allProducts, activeSite]);
 
     const recommendation = useMemo(() => {
@@ -241,6 +249,10 @@ export const PutawayTab: React.FC<PutawayTabProps> = ({
 
     const handleScanItem = async (barcode: string) => {
         if (!selectedJob || !currentItem) return;
+        if (isSubmitting || isSubmittingRef.current) {
+            console.warn("⚠️ Already submitting putaway. Ignoring duplicate scan.");
+            return;
+        }
 
         // [NEW] Enforce location scan first
         if (!scannedLocation) {
@@ -256,10 +268,36 @@ export const PutawayTab: React.FC<PutawayTabProps> = ({
         const normSku = (s: string) => s.replace(/[-\/\s]/g, '').toUpperCase();
         const normalizedInput = normSku(normalized);
 
+        const getBarcodesArray = (barcodes: any): string[] => {
+            if (!barcodes) return [];
+            if (Array.isArray(barcodes)) return barcodes.filter(b => typeof b === 'string');
+            if (typeof barcodes === 'string') {
+                let clean = barcodes.trim();
+                if (clean.startsWith('{') && clean.endsWith('}')) {
+                    return clean.substring(1, clean.length - 1).split(',').map(s => s.trim().replace(/^"|"$/g, ''));
+                }
+                if (clean.startsWith('[') && clean.endsWith(']')) {
+                    try {
+                        return JSON.parse(clean);
+                    } catch (e) {
+                        return clean.substring(1, clean.length - 1).split(',').map(s => s.trim().replace(/^"|"$/g, ''));
+                    }
+                }
+                return [clean];
+            }
+            return [];
+        };
+
+        const aliasList = getBarcodesArray(product?.barcodes);
+        const hasAliasMatch = aliasList.some(b => {
+            const cleanB = b.toUpperCase().trim();
+            return normalized === cleanB || normalizedInput === normSku(cleanB);
+        });
+
         const isValid =
             normalized === currentItem.sku?.toUpperCase() ||
             normalized === product?.barcode?.toUpperCase() ||
-            (product?.barcodes && product.barcodes.includes(normalized)) ||
+            hasAliasMatch ||
             normalizedInput === normSku(currentItem.sku || '') ||
             normalizedInput === normSku(product?.barcode || '');
 
@@ -268,6 +306,7 @@ export const PutawayTab: React.FC<PutawayTabProps> = ({
             throw new Error('Wrong item');
         }
 
+        isSubmittingRef.current = true;
         setIsSubmitting(true);
         try {
             // Capture a single timestamp for consistency across inventory and putaway history
@@ -337,6 +376,7 @@ export const PutawayTab: React.FC<PutawayTabProps> = ({
             addNotification('alert', 'Error processing putaway');
             throw e;
         } finally {
+            isSubmittingRef.current = false;
             setIsSubmitting(false);
         }
     };

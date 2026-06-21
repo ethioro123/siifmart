@@ -6,6 +6,7 @@ import { formatCompactNumber } from '../../utils/formatting';
 import { CURRENCY_SYMBOL } from '../../constants';
 import { Supplier } from '../../types';
 import { DateRangeOption } from '../../hooks/useDateFilter';
+import { useStore } from '../../contexts/CentralStore';
 
 interface ProcurementMetrics {
     totalSpend: number;
@@ -23,19 +24,25 @@ interface ProcurementDashboardProps {
     suppliers: Supplier[];
 }
 
-const COLORS = ['#00ff9d', '#3b82f6', '#f59e0b', '#ec4899', '#8b5cf6'];
-
 export const ProcurementDashboard: React.FC<ProcurementDashboardProps> = ({
     metrics, dateRange, setDateRange, suppliers
 }) => {
+    const { theme } = useStore();
+    const accentColor = theme === 'dark' ? '#A9CBA2' : '#2C5E3B';
+    const COLORS = [
+        accentColor,
+        theme === 'dark' ? '#E2C899' : '#8C6239', // soft amber / warm brown
+        theme === 'dark' ? '#8DBFA3' : '#3E7B54', // medium forest green
+        theme === 'dark' ? '#EFE9DB' : '#736B5C', // light beige / dark stone
+        theme === 'dark' ? '#DFB98A' : '#A67F5D'  // gold-amber / medium brown
+    ];
 
     const KpiCard = ({ title, value, sub, icon: Icon, color }: any) => (
-        <div className="bg-white dark:bg-black/60 backdrop-blur-2xl border border-gray-200 dark:border-white/5 rounded-2xl p-5 hover:border-blue-500/30 dark:hover:border-white/10 transition-colors group shadow-sm dark:shadow-none">
+        <div className="glass-panel glass-panel-hover p-5 group shadow-sm dark:shadow-none">
             <div className="flex justify-between items-start mb-4">
-                <div className={`p-3 rounded-xl bg-gray-50 dark:bg-white/5 ${color} group-hover:scale-110 transition-transform`}>
+                <div className={`p-3 rounded-xl bg-stone-100/50 dark:bg-white/5 ${color} group-hover:scale-110 transition-transform`}>
                     <Icon size={24} />
                 </div>
-                {/* <div className="text-xs text-green-400 font-mono bg-green-500/10 px-2 py-1 rounded">+12.5%</div> */}
             </div>
             <h3 className="text-gray-500 dark:text-gray-400 text-xs uppercase font-bold tracking-wider mb-1">{title}</h3>
             <div className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight mb-1">{value}</div>
@@ -73,16 +80,16 @@ export const ProcurementDashboard: React.FC<ProcurementDashboardProps> = ({
     if (!isMounted) {
         return (
             <div className="space-y-6 animate-in fade-in">
-                <div className="h-20 bg-black/60 backdrop-blur-2xl border border-white/5 rounded-xl animate-pulse" />
+                <div className="h-20 glass-panel rounded-xl animate-pulse" />
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div className="h-32 bg-black/60 backdrop-blur-2xl border border-white/5 rounded-2xl animate-pulse" />
-                    <div className="h-32 bg-black/60 backdrop-blur-2xl border border-white/5 rounded-2xl animate-pulse" />
-                    <div className="h-32 bg-black/60 backdrop-blur-2xl border border-white/5 rounded-2xl animate-pulse" />
-                    <div className="h-32 bg-black/60 backdrop-blur-2xl border border-white/5 rounded-2xl animate-pulse" />
+                    <div className="h-32 glass-panel rounded-2xl animate-pulse" />
+                    <div className="h-32 glass-panel rounded-2xl animate-pulse" />
+                    <div className="h-32 glass-panel rounded-2xl animate-pulse" />
+                    <div className="h-32 glass-panel rounded-2xl animate-pulse" />
                 </div>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div className="h-[400px] bg-black/60 backdrop-blur-2xl border border-white/5 rounded-2xl animate-pulse" />
-                    <div className="h-[400px] bg-black/60 backdrop-blur-2xl border border-white/5 rounded-2xl animate-pulse" />
+                    <div className="h-[400px] glass-panel rounded-2xl animate-pulse" />
+                    <div className="h-[400px] glass-panel rounded-2xl animate-pulse" />
                 </div>
             </div>
         );
@@ -91,10 +98,10 @@ export const ProcurementDashboard: React.FC<ProcurementDashboardProps> = ({
     return (
         <div className="space-y-6 animate-in fade-in">
             {/* Date Analysis Filter */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-black/60 backdrop-blur-2xl p-4 rounded-xl border border-gray-200 dark:border-white/5 relative z-10 shadow-sm dark:shadow-none">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 glass-panel p-4 rounded-xl relative z-10 shadow-sm dark:shadow-none">
                 <div className="flex items-center gap-3">
-                    <div className="p-2 bg-blue-500/10 dark:bg-cyber-primary/10 rounded-lg">
-                        <Calendar className="w-5 h-5 text-blue-600 dark:text-cyber-primary" />
+                    <div className="p-2 bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 rounded-lg">
+                        <Calendar className="w-5 h-5 text-[#2C5E3B] dark:text-[#A9CBA2]" />
                     </div>
                     <div>
                         <h3 className="text-gray-900 dark:text-white font-bold text-sm">Temporal Analysis</h3>
@@ -116,24 +123,24 @@ export const ProcurementDashboard: React.FC<ProcurementDashboardProps> = ({
                 </div>
             </div>
             {/* Metrics */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 relative z-0">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 relative z-0">
                 <KpiCard
                     title={`Total Spend (${dateRange === 'All Time' ? 'Life' : dateRange.replace('This ', '')})`}
                     value={formatCompactNumber(metrics.totalSpend, { currency: CURRENCY_SYMBOL })}
                     sub="Across all categories"
                     icon={DollarSign}
-                    color="text-cyber-primary"
+                    color="text-[#2C5E3B] dark:text-[#A9CBA2]"
                 />
-                <KpiCard title="Open Orders" value={metrics.openPO} sub={`Value: ${formatCompactNumber(metrics.pendingValue, { currency: CURRENCY_SYMBOL })}`} icon={Package} color="text-blue-400" />
-                <KpiCard title="Potential Revenue" value={formatCompactNumber(metrics.potentialRevenue, { currency: CURRENCY_SYMBOL })} sub="From current PO items" icon={TrendingUp} color="text-green-400" />
-                <KpiCard title="Active Vendors" value={suppliers.filter(s => s.status === 'Active').length} sub="Top rated first" icon={Building} color="text-yellow-400" />
-                <KpiCard title="On-Time Delivery" value="94.2%" sub="Last 30 Days" icon={Clock} color="text-purple-400" />
+                <KpiCard title="Open Orders" value={metrics.openPO} sub={`Value: ${formatCompactNumber(metrics.pendingValue, { currency: CURRENCY_SYMBOL })}`} icon={Package} color="text-[#8C6239] dark:text-[#E2C899]" />
+                <KpiCard title="Potential Revenue" value={formatCompactNumber(metrics.potentialRevenue, { currency: CURRENCY_SYMBOL })} sub="From current PO items" icon={TrendingUp} color="text-emerald-600 dark:text-[#A9CBA2]" />
+                <KpiCard title="Active Vendors" value={suppliers.filter(s => s.status === 'Active').length} sub="Top rated first" icon={Building} color="text-amber-600 dark:text-amber-400" />
+                <KpiCard title="On-Time Delivery" value="94.2%" sub="Last 30 Days" icon={Clock} color="text-[#8C6239] dark:text-[#E2C899]" />
             </div>
 
             {/* Charts */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="bg-white dark:bg-black/60 backdrop-blur-2xl border border-gray-200 dark:border-white/5 rounded-2xl p-6 shadow-sm dark:shadow-none">
-                    <h3 className="font-bold text-gray-900 dark:text-white mb-6">Spend by Category</h3>
+                <div className="glass-panel rounded-2xl p-6">
+                    <h3 className="font-bold text-gray-900 dark:text-white mb-6 text-sm uppercase tracking-widest text-[#4D6E56] dark:text-[#7A9E83]">Spend by Category</h3>
                     <div className="h-[300px]">
                         <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                             <PieChart>
@@ -142,7 +149,7 @@ export const ProcurementDashboard: React.FC<ProcurementDashboardProps> = ({
                                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke="none" />
                                     ))}
                                 </Pie>
-                                <Tooltip contentStyle={{ backgroundColor: '#1a1a1a', border: '#333' }} />
+                                <Tooltip contentStyle={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '12px' }} />
                             </PieChart>
                         </ResponsiveContainer>
                     </div>
@@ -150,14 +157,8 @@ export const ProcurementDashboard: React.FC<ProcurementDashboardProps> = ({
                         {metrics.categoryData.map((entry, index) => (
                             <div key={index} className="flex items-center gap-2 text-xs text-gray-400">
                                 <div
-                                    className={`w-2 h-2 rounded-full ${[
-                                        'bg-[#00ff9d]',
-                                        'bg-[#3b82f6]',
-                                        'bg-[#f59e0b]',
-                                        'bg-[#ec4899]',
-                                        'bg-[#8b5cf6]'
-                                    ][index % 5]
-                                        }`}
+                                    className="w-2 h-2 rounded-full"
+                                    ref={(el) => { if (el) el.style.backgroundColor = COLORS[index % COLORS.length]; }}
                                 ></div>
                                 {entry.name}
                             </div>
@@ -165,22 +166,22 @@ export const ProcurementDashboard: React.FC<ProcurementDashboardProps> = ({
                     </div>
                 </div>
 
-                <div className="bg-white dark:bg-black/60 backdrop-blur-2xl border border-gray-200 dark:border-white/5 rounded-2xl p-6 shadow-sm dark:shadow-none">
-                    <h3 className="font-bold text-gray-900 dark:text-white mb-6">Monthly Spend Trend</h3>
+                <div className="glass-panel rounded-2xl p-6">
+                    <h3 className="font-bold text-gray-900 dark:text-white mb-6 text-sm uppercase tracking-widest text-[#4D6E56] dark:text-[#7A9E83]">Monthly Spend Trend</h3>
                     <div className="h-[300px]">
                         <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                             <AreaChart data={metrics.trendData}>
                                 <defs>
                                     <linearGradient id="colorSpend" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
-                                        <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                                        <stop offset="5%" stopColor={accentColor} stopOpacity={0.3} />
+                                        <stop offset="95%" stopColor={accentColor} stopOpacity={0} />
                                     </linearGradient>
                                 </defs>
-                                <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
-                                <XAxis dataKey="name" stroke="#666" fontSize={12} tickLine={false} axisLine={false} />
-                                <YAxis stroke="#666" fontSize={12} tickLine={false} axisLine={false} />
-                                <Tooltip contentStyle={{ backgroundColor: '#1a1a1a', border: '#333' }} />
-                                <Area type="monotone" dataKey="spend" stroke="#3b82f6" fillOpacity={1} fill="url(#colorSpend)" />
+                                <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" vertical={false} />
+                                <XAxis dataKey="name" stroke="var(--text-base)" fontSize={12} tickLine={false} axisLine={false} opacity={0.5} />
+                                <YAxis stroke="var(--text-base)" fontSize={12} tickLine={false} axisLine={false} opacity={0.5} />
+                                <Tooltip contentStyle={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '12px' }} />
+                                <Area type="monotone" dataKey="spend" stroke={accentColor} fillOpacity={1} fill="url(#colorSpend)" strokeWidth={2} />
                             </AreaChart>
                         </ResponsiveContainer>
                     </div>

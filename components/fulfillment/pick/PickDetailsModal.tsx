@@ -4,6 +4,7 @@ import { WMSJob, Product } from '../../../types';
 import { useFulfillment } from '../FulfillmentContext';
 import { formatDateTime } from '../../../utils/formatting';
 import { formatJobId } from '../../../utils/jobIdFormatter';
+import { formatProductSize, isWeightBased, isVolumeBased } from '../../../utils/units';
 
 interface PickDetailsModalProps {
     selectedItem: WMSJob;
@@ -44,6 +45,22 @@ export const PickDetailsModal: React.FC<PickDetailsModalProps> = ({
     }
     const itemsArray = Array.isArray(rawItems) ? rawItems : [];
 
+    const getItemMeasureQty = (item: any, productInfo?: any) => {
+        if ((item as any).requestedMeasureQty !== undefined && (item as any).requestedMeasureQty !== null) {
+            return (item as any).requestedMeasureQty;
+        }
+        if (productInfo) {
+            const unit = productInfo.unit;
+            const isWeightVol = isWeightBased(unit) || isVolumeBased(unit);
+            const sizeNum = productInfo.size ? parseFloat(productInfo.size as string) : 0;
+            if (isWeightVol && sizeNum > 0) {
+                const expected = item.expectedQty || (item as any).quantity || 0;
+                return expected * sizeNum;
+            }
+        }
+        return null;
+    };
+
     const data = {
         id: selectedItem.id,
         reference: formatJobId(selectedItem),
@@ -69,28 +86,28 @@ export const PickDetailsModal: React.FC<PickDetailsModalProps> = ({
 
     const destDisplay = data.destSite ? (
         <>
-            {data.destSite.name} <span className="text-blue-600/50 dark:text-blue-400/50 font-normal lowercase">({data.destSite.code || data.destSite.id})</span>
+            {data.destSite.name} <span className="text-[#2C5E3B]/50 dark:text-[#A9CBA2]/50 font-normal lowercase">({data.destSite.code || data.destSite.id})</span>
         </>
     ) : 'Internal / Unknown';
 
     return (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[200] p-4 animate-in fade-in duration-200">
             <div className="bg-white dark:bg-black border-2 border-zinc-900 dark:border-white/10 rounded-3xl w-full max-w-4xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden relative">
-                {/* 🌟 Modal Ambient Glow - Purple Theme for Pick */}
-                <div className="absolute -top-24 -right-24 w-64 h-64 bg-purple-500/5 dark:bg-purple-500/10 blur-[100px] rounded-full pointer-events-none" />
-                <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-fuchsia-500/5 dark:bg-fuchsia-500/10 blur-[100px] rounded-full pointer-events-none" />
+                {/* 🌿 Modal Ambient Glow - Forest Green Theme for Pick */}
+                <div className="absolute -top-24 -right-24 w-64 h-64 bg-[#2C5E3B]/5 dark:bg-[#2C5E3B]/10 blur-[100px] rounded-full pointer-events-none" />
+                <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-[#A9CBA2]/5 dark:bg-[#A9CBA2]/10 blur-[100px] rounded-full pointer-events-none" />
 
                 {/* Header */}
                 <div className="p-6 border-b border-zinc-200 dark:border-white/10 flex justify-between items-start bg-zinc-50/80 dark:bg-zinc-950/50 backdrop-blur-sm">
                     <div className="flex gap-4 relative z-10">
-                        <div className="p-3 rounded-xl border border-zinc-300 dark:border-purple-500/20 bg-zinc-100 dark:bg-purple-500/10 text-zinc-950 dark:text-purple-400 shadow-md dark:shadow-purple-500/20 transition-all duration-500">
+                        <div className="p-3 rounded-xl border border-zinc-300 dark:border-[#2C5E3B]/30 bg-zinc-100 dark:bg-[#2C5E3B]/10 text-zinc-950 dark:text-[#A9CBA2] shadow-md dark:shadow-[#2C5E3B]/20 transition-all duration-500">
                             <Package size={24} />
                         </div>
                         <div>
                             <div className="flex items-center gap-2 mb-1">
                                 <h3 className="text-xl font-black text-zinc-950 dark:text-zinc-100 uppercase tracking-tight font-mono">{data.reference}</h3>
                                 <div className="flex gap-2">
-                                    <span className={`px-2 py-0.5 rounded text-[9px] font-mono border ${data.status === 'Completed' ? 'bg-green-500/10 border-green-500/20 text-green-600 dark:text-green-400' : 'bg-red-500/10 border-red-500/20 text-red-600 dark:text-red-400'}`}>
+                                    <span className={`px-2 py-0.5 rounded text-[9px] font-mono border ${(data.status || '').toLowerCase() === 'completed' ? 'bg-green-500/10 border-green-500/20 text-green-600 dark:text-green-400' : 'bg-red-500/10 border-red-500/20 text-red-600 dark:text-red-400'}`}>
                                         {data.status}
                                     </span>
                                     {itemsArray.some(li => (li.returnedQty || 0) > 0) && (
@@ -123,8 +140,8 @@ export const PickDetailsModal: React.FC<PickDetailsModalProps> = ({
                         </div>
                     </div>
                     <div className="bg-white dark:bg-black p-4 flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-zinc-100 dark:bg-purple-950 flex items-center justify-center border border-zinc-300 dark:border-purple-500/30 shadow-inner">
-                            <span className="text-[10px] font-black text-zinc-950 dark:text-purple-400">{(data.user || 'S').charAt(0).toUpperCase()}</span>
+                        <div className="w-8 h-8 rounded-full bg-zinc-100 dark:bg-[#2C5E3B]/20 flex items-center justify-center border border-zinc-300 dark:border-[#2C5E3B]/40 shadow-inner">
+                            <span className="text-[10px] font-black text-zinc-950 dark:text-[#A9CBA2]">{(data.user || 'S').charAt(0).toUpperCase()}</span>
                         </div>
                         <div>
                             <p className="text-[10px] text-zinc-400 dark:text-zinc-500 uppercase font-black tracking-widest leading-none mb-1">Performed By</p>
@@ -141,12 +158,12 @@ export const PickDetailsModal: React.FC<PickDetailsModalProps> = ({
                         </div>
                     </div>
                     <div className="bg-white dark:bg-black p-4 flex items-center gap-3">
-                        <div className="p-2 bg-zinc-50 dark:bg-white/5 rounded-lg text-blue-600 dark:text-blue-400">
+                        <div className="p-2 bg-zinc-50 dark:bg-white/5 rounded-lg text-[#2C5E3B] dark:text-[#A9CBA2]">
                             <ArrowRight size={18} />
                         </div>
                         <div>
                             <p className="text-[10px] text-zinc-400 dark:text-zinc-500 uppercase font-black tracking-widest leading-none mb-1">Destination</p>
-                            <p className="text-xs text-blue-600 dark:text-blue-400 font-black uppercase break-words leading-tight">{destDisplay}</p>
+                            <p className="text-xs text-[#2C5E3B] dark:text-[#A9CBA2] font-black uppercase break-words leading-tight">{destDisplay}</p>
                         </div>
                     </div>
                 </div>
@@ -185,14 +202,14 @@ export const PickDetailsModal: React.FC<PickDetailsModalProps> = ({
                                                 )}
 
                                                 {(productInfo?.category || item.category) && (
-                                                    <span className="text-[10px] text-purple-600 dark:text-purple-500 font-black uppercase tracking-widest border border-purple-500/20 bg-purple-500/5 px-2 py-0.5 rounded shadow-sm">
+                                                    <span className="text-[10px] text-[#2C5E3B] dark:text-[#A9CBA2] font-black uppercase tracking-widest border border-[#2C5E3B]/20 bg-[#2C5E3B]/5 dark:bg-[#2C5E3B]/10 px-2 py-0.5 rounded shadow-sm">
                                                         {productInfo?.category || item.category}
                                                     </span>
                                                 )}
 
-                                                {(productInfo?.size || productInfo?.unit) && (
+                                                {productInfo?.size && (
                                                     <span className="text-[10px] text-zinc-600 dark:text-zinc-400 font-black uppercase tracking-widest bg-zinc-100 dark:bg-white/5 px-2 py-0.5 rounded border border-zinc-200 dark:border-white/10">
-                                                        {productInfo?.size} {productInfo?.unit}
+                                                        {formatProductSize(productInfo)}
                                                     </span>
                                                 )}
 
@@ -202,7 +219,7 @@ export const PickDetailsModal: React.FC<PickDetailsModalProps> = ({
                                             {item.location && item.location !== 'Unknown' && (
                                                 <div className="flex items-center gap-2 mt-2 pt-2 border-t border-zinc-100 dark:border-white/5">
                                                     <span className="text-[9px] font-black text-zinc-500 dark:text-zinc-500 uppercase tracking-widest">From Bay:</span>
-                                                    <span className="text-[9px] font-black font-mono bg-purple-500/10 text-purple-600 dark:text-purple-400 px-1.5 py-0.5 rounded flex items-center gap-1">
+                                                    <span className="text-[9px] font-black font-mono bg-[#2C5E3B]/10 text-[#2C5E3B] dark:text-[#A9CBA2] px-1.5 py-0.5 rounded flex items-center gap-1">
                                                         <MapPin size={10} /> {item.location}
                                                     </span>
                                                 </div>
@@ -225,20 +242,17 @@ export const PickDetailsModal: React.FC<PickDetailsModalProps> = ({
                                                 {isShortPicked && (
                                                     <span className="text-xs font-mono font-bold text-red-500 line-through opacity-80" title="Short Picked">{item.orderedQty}</span>
                                                 )}
-                                                <p className="text-lg font-black text-zinc-950 dark:text-purple-400 tabular-nums font-mono">
+                                                <p className="text-lg font-black text-zinc-950 dark:text-[#A9CBA2] tabular-nums font-mono">
                                                     {(() => {
                                                         const expected = item.expectedQty || (item as any).quantity || 0;
                                                         const picked = item.pickedQty !== undefined && item.pickedQty !== null ? item.pickedQty : 0;
-                                                        let displayPicked = picked;
 
-                                                        if ((item as any).requestedMeasureQty && expected === item.expectedQty) {
+                                                        const measureQty = getItemMeasureQty(item, productInfo);
+                                                        if (measureQty && expected === item.expectedQty) {
                                                             const unitDef = productInfo?.unit ? productInfo.unit : '';
-                                                            // Calculate proportional volume picked.
-                                                            if (expected > 0) {
-                                                                const fillRatio = picked / expected;
-                                                                displayPicked = (item as any).requestedMeasureQty * fillRatio;
-                                                            }
-                                                            return <span className="text-lg font-mono font-black text-green-400">{displayPicked} / {(item as any).requestedMeasureQty} <span className="text-[10px] text-green-500/60 font-bold uppercase tracking-widest">{unitDef}</span></span>;
+                                                            const sizeNum = productInfo?.size ? parseFloat(productInfo.size as string) : 0;
+                                                            const displayPickedCases = picked <= expected ? picked : (sizeNum > 0 ? picked / sizeNum : picked);
+                                                            return <span className="text-lg font-mono font-black text-green-400">{displayPickedCases} x {sizeNum} / {expected} x {sizeNum} <span className="text-[10px] text-green-500/60 font-bold uppercase tracking-widest">{unitDef}</span></span>;
                                                         }
                                                         return <span className="text-lg font-mono font-black text-green-400">{picked} / {expected}</span>;
                                                     })()}
@@ -255,7 +269,7 @@ export const PickDetailsModal: React.FC<PickDetailsModalProps> = ({
                 {/* Footer */}
                 <div className="p-6 border-t border-zinc-200 dark:border-zinc-900 bg-zinc-50/50 dark:bg-zinc-950/40 flex justify-between items-center gap-3 shrink-0">
                     <div className="flex gap-2">
-                        {selectedItem.status === 'Completed' && (
+                        {((selectedItem as any).status || '').toLowerCase() === 'completed' && (
                             <button
                                 onClick={() => onReturn?.(selectedItem)}
                                 className="flex items-center gap-2 px-4 py-2 bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/20 rounded-xl font-black uppercase tracking-widest text-[10px] transition-all"

@@ -134,10 +134,12 @@ interface DataContextType {
 
   // Exposed Setters (for Split Contexts like Fulfillment)
   setProducts: React.Dispatch<React.SetStateAction<Product[]>>;
+  setAllProducts: React.Dispatch<React.SetStateAction<Product[]>>;
   setOrders: React.Dispatch<React.SetStateAction<PurchaseOrder[]>>;
   setAllOrders: React.Dispatch<React.SetStateAction<PurchaseOrder[]>>;
   setSales: React.Dispatch<React.SetStateAction<SaleRecord[]>>;
   setAllSales: React.Dispatch<React.SetStateAction<SaleRecord[]>>;
+
 
   // Actions
   updateSettings: (settings: Partial<SystemConfig>, user: string) => void;
@@ -745,18 +747,28 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
           rejectedBy: data.rejected_by,
           rejectedAt: data.rejected_at,
           rejectionReason: data.rejection_reason,
-          priceUpdatedAt: data.price_updated_at // [NEW] Map timestamp
+          priceUpdatedAt: data.price_updated_at,
+          packQuantity: data.pack_quantity,
+          customAttributes: data.custom_attributes,
+          minStock: data.min_stock,
+          maxStock: data.max_stock,
+          productId: data.product_id
         });
 
         if (event === 'INSERT') {
           const mapped = mapRealtimeProduct(payload);
           setProducts(prev => [mapped, ...prev]);
+          setAllProducts(prev => [mapped, ...prev]);
         }
         else if (event === 'UPDATE') {
           const mapped = mapRealtimeProduct(payload);
           setProducts(prev => prev.map(p => p.id === payload.id ? { ...p, ...mapped } : p));
+          setAllProducts(prev => prev.map(p => p.id === payload.id ? { ...p, ...mapped } : p));
         }
-        else if (event === 'DELETE') setProducts(prev => prev.filter(p => p.id !== payload.id));
+        else if (event === 'DELETE') {
+          setProducts(prev => prev.filter(p => p.id !== payload.id));
+          setAllProducts(prev => prev.filter(p => p.id !== payload.id));
+        }
       },
       onSaleChange: (event, payload) => {
         if (event === 'INSERT') setSales(prev => [payload, ...prev]);
@@ -984,6 +996,7 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
     allSales,
     allOrders,
     setProducts,
+    setAllProducts,
     setOrders,
     setAllOrders,
     setSales,
@@ -1122,6 +1135,7 @@ export const useData = () => {
       allSales: [],
       allOrders: [],
       setProducts: () => { },
+      setAllProducts: () => { },
       setOrders: () => { },
       setAllOrders: () => { },
       setSales: () => { },

@@ -49,16 +49,16 @@ export const ReceiveReprintModal: React.FC<ReceiveReprintModalProps> = ({
             <motion.div
                 initial={{ opacity: 0, scale: 0.9, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
-                className="relative bg-white dark:bg-black border-2 border-slate-200 dark:border-white/10 w-full max-w-2xl rounded-3xl overflow-hidden shadow-2xl flex flex-col max-h-[calc(100vh-2rem)]"
+                className="relative glass-panel w-full max-w-2xl overflow-hidden flex flex-col max-h-[calc(100vh-2rem)]"
             >
                 {/* 🌟 Background Glows (Futuristic Accents) */}
-                <div className="hidden md:block absolute top-0 right-0 w-64 h-64 bg-cyan-500/5 dark:bg-cyan-500/10 blur-[100px] rounded-full pointer-events-none" />
-                <div className="hidden md:block absolute bottom-0 left-0 w-64 h-64 bg-violet-500/5 dark:bg-violet-400/10 blur-[80px] rounded-full pointer-events-none" />
+                <div className="hidden md:block absolute top-0 right-0 w-64 h-64 bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/5 blur-[100px] rounded-full pointer-events-none" />
+                <div className="hidden md:block absolute bottom-0 left-0 w-64 h-64 bg-amber-600/10 dark:bg-amber-700/5 blur-[80px] rounded-full pointer-events-none" />
 
                 {/* Header */}
-                <div className="p-6 border-b border-slate-200 dark:border-white/5 flex justify-between items-center bg-slate-50 dark:bg-white/[0.02] shrink-0 backdrop-blur-md">
+                <div className="p-6 border-b border-[#E2DCCE]/60 dark:border-[#A9CBA2]/[0.06] flex justify-between items-center bg-[#FAF8F5]/30 dark:bg-[#1C2620]/30 shrink-0 backdrop-blur-md">
                     <div className="flex items-center gap-3">
-                        <div className="p-2.5 bg-cyan-50 dark:bg-cyan-500 rounded-xl border border-cyan-100 dark:border-cyan-400 text-cyan-600 dark:text-black shadow-md dark:shadow-cyan-500/20">
+                        <div className="p-2.5 bg-[#2C5E3B]/15 dark:bg-[#A9CBA2]/15 rounded-xl border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20 text-[#2C5E3B] dark:text-[#A9CBA2] shadow-sm">
                             <Printer size={22} />
                         </div>
                         <div>
@@ -79,24 +79,24 @@ export const ReceiveReprintModal: React.FC<ReceiveReprintModalProps> = ({
 
                     {/* Product Summary HUD */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-white/10 rounded-2xl p-4 flex items-center gap-4">
-                            <div className="w-12 h-12 bg-white dark:bg-black rounded-xl border border-slate-100 dark:border-white/5 flex items-center justify-center text-slate-400 dark:text-zinc-600">
+                        <div className="glass-panel-pushed p-4 flex items-center gap-4">
+                            <div className="w-12 h-12 bg-white/50 dark:bg-black/30 rounded-xl border border-[#E2DCCE]/20 dark:border-[#A9CBA2]/[0.02] flex items-center justify-center text-[#2C5E3B]/60 dark:text-[#A9CBA2]/60">
                                 <Box size={24} />
                             </div>
                             <div className="flex-1 min-w-0">
                                 <p className="text-[10px] text-slate-400 dark:text-zinc-500 uppercase font-black tracking-[0.2em] mb-0.5">Product</p>
                                 <p className="text-sm font-black text-slate-900 dark:text-white truncate uppercase drop-shadow-sm">{reprintItem.name}</p>
-                                <p className="text-[10px] text-slate-400 dark:text-gray-500 font-black tracking-widest mt-1 truncate border-t border-slate-100 dark:border-white/5 pt-1">{reprintItem.sku}</p>
+                                <p className="text-[10px] text-slate-400 dark:text-gray-500 font-black tracking-widest mt-1 truncate border-t border-[#E2DCCE]/20 dark:border-[#A9CBA2]/[0.02] pt-1">{reprintItem.sku}</p>
                             </div>
                         </div>
 
-                        <div className="bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-white/10 rounded-2xl p-4">
+                        <div className="glass-panel-pushed p-4">
                             <p className="text-[10px] text-slate-400 dark:text-zinc-500 uppercase font-black tracking-[0.2em] mb-2">Print Quantity</p>
                             <div className="flex items-center justify-center gap-2">
                                 <button
                                     onClick={() => setReprintItem({ ...reprintItem, qty: Math.max(1, reprintItem.qty - 1) })}
                                     title="Decrease Quantity"
-                                    className="w-9 h-9 bg-white dark:bg-black rounded-xl flex items-center justify-center border border-slate-200 dark:border-white/10 hover:border-slate-900 dark:hover:border-zinc-300 text-slate-900 dark:text-white transition-all shadow-sm shrink-0"
+                                    className="w-9 h-9 bg-white/85 dark:bg-black/30 rounded-xl flex items-center justify-center border border-[#E2DCCE] dark:border-emerald-950/20 hover:border-[#2C5E3B] dark:hover:border-[#A9CBA2] text-[#2C5E3B] dark:text-[#A9CBA2] transition-all shadow-sm shrink-0"
                                 >
                                     <Minus size={16} />
                                 </button>
@@ -111,7 +111,7 @@ export const ReceiveReprintModal: React.FC<ReceiveReprintModalProps> = ({
                                 <button
                                     onClick={() => setReprintItem({ ...reprintItem, qty: reprintItem.qty + 1 })}
                                     title="Increase Quantity"
-                                    className="w-9 h-9 bg-white dark:bg-black rounded-xl flex items-center justify-center border border-slate-200 dark:border-white/10 hover:border-slate-900 dark:hover:border-zinc-300 text-slate-900 dark:text-white transition-all shadow-sm shrink-0"
+                                    className="w-9 h-9 bg-white/85 dark:bg-black/30 rounded-xl flex items-center justify-center border border-[#E2DCCE] dark:border-emerald-950/20 hover:border-[#2C5E3B] dark:hover:border-[#A9CBA2] text-[#2C5E3B] dark:text-[#A9CBA2] transition-all shadow-sm shrink-0"
                                 >
                                     <Plus size={16} />
                                 </button>
@@ -130,8 +130,8 @@ export const ReceiveReprintModal: React.FC<ReceiveReprintModalProps> = ({
                                     key={size}
                                     onClick={() => setReprintSize(size)}
                                     className={`py-2 text-[10px] font-black font-mono border rounded-lg transition-all ${reprintSize === size
-                                        ? 'bg-slate-900 dark:bg-cyan-500 border-slate-900 dark:border-cyan-400 text-white dark:text-black shadow-md dark:shadow-cyan-500/20 scale-105'
-                                        : 'bg-slate-50 dark:bg-zinc-950/40 border-slate-200 dark:border-white/5 text-slate-400 dark:text-zinc-500 hover:border-cyan-500/50'
+                                        ? 'bg-[#2C5E3B] dark:bg-[#EAE5D9] border-[#2C5E3B] dark:border-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24] shadow-md scale-105'
+                                        : 'bg-white/50 dark:bg-black/10 border-[#E2DCCE] dark:border-emerald-950/20 text-[#2C4D35]/60 dark:text-[#A9CBA2]/40 hover:border-[#2C5E3B]/50 dark:hover:border-[#A9CBA2]/30'
                                         }`}
                                 >
                                     {size}
@@ -151,8 +151,8 @@ export const ReceiveReprintModal: React.FC<ReceiveReprintModalProps> = ({
                                     key={format}
                                     onClick={() => setReprintFormat(format)}
                                     className={`flex-1 py-3 flex items-center justify-center gap-2 rounded-xl border font-black font-mono text-[10px] uppercase tracking-wider transition-all ${reprintFormat === format
-                                        ? 'bg-slate-900 dark:bg-violet-500 border-slate-900 dark:border-violet-400 text-white dark:text-black shadow-lg dark:shadow-violet-500/20 scale-105'
-                                        : 'bg-slate-50 dark:bg-zinc-950/40 border-slate-200 dark:border-white/5 text-slate-400 dark:text-zinc-500 hover:border-violet-500/50'
+                                        ? 'bg-[#2C5E3B] dark:bg-[#EAE5D9] border-[#2C5E3B] dark:border-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24] shadow-lg scale-105'
+                                        : 'bg-white/50 dark:bg-black/10 border-[#E2DCCE] dark:border-emerald-950/20 text-[#2C4D35]/60 dark:text-[#A9CBA2]/40 hover:border-[#2C5E3B]/50 dark:hover:border-[#A9CBA2]/30'
                                         }`}
                                 >
                                     {format === 'QR' && <QrCode size={14} />}
@@ -175,12 +175,12 @@ export const ReceiveReprintModal: React.FC<ReceiveReprintModalProps> = ({
                                     key={opt}
                                     onClick={() => toggleOption(opt)}
                                     className={`flex items-center justify-between px-4 py-3 rounded-xl border transition-all ${reprintOptions[opt]
-                                        ? 'bg-slate-900 dark:bg-cyan-500 border-slate-900 dark:border-cyan-400 text-white dark:text-black font-black font-mono shadow-md scale-[1.02]'
-                                        : 'bg-slate-50 dark:bg-black/20 border-slate-200 dark:border-white/5 text-slate-400 hover:border-cyan-500/20'
+                                        ? 'bg-[#2C5E3B] dark:bg-[#EAE5D9] border-[#2C5E3B] dark:border-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24] font-black font-mono shadow-md scale-[1.02]'
+                                        : 'bg-white/50 dark:bg-black/10 border-[#E2DCCE] dark:border-emerald-950/20 text-[#2C4D35]/60 dark:text-[#A9CBA2]/40 hover:border-[#2C5E3B]/20 dark:hover:border-[#A9CBA2]/10'
                                         }`}
                                 >
                                     <span className="text-[10px] uppercase tracking-widest">{opt.replace('show', '')}</span>
-                                    {reprintOptions[opt] ? <Eye size={14} className="text-white dark:text-black" /> : <EyeOff size={14} className="text-slate-300 dark:text-zinc-500" />}
+                                    {reprintOptions[opt] ? <Eye size={14} className="text-[#FAF8F5] dark:text-[#1E3B24]" /> : <EyeOff size={14} className="text-[#2C4D35]/40 dark:text-[#A9CBA2]/40" />}
                                 </button>
                             ))}
                         </div>
@@ -188,14 +188,14 @@ export const ReceiveReprintModal: React.FC<ReceiveReprintModalProps> = ({
                 </div>
 
                 {/* Footer Action */}
-                <div className="p-8 border-t border-slate-200 dark:border-zinc-900 bg-slate-50 dark:bg-zinc-950/40 shrink-0 backdrop-blur-md">
+                <div className="p-8 border-t border-[#E2DCCE]/50 dark:border-emerald-950/20 bg-white/20 dark:bg-[#1C2620]/20 shrink-0 backdrop-blur-md">
                     <button
                         disabled={isSubmitting}
                         onClick={handleReprintLabels}
                         className="w-full relative group shadow-lg"
                     >
-                        <div className="absolute -inset-1 bg-cyan-500 dark:bg-cyan-400 rounded-2xl blur opacity-0 group-hover:opacity-10 dark:group-hover:opacity-20 transition duration-1000 group-disabled:opacity-0" />
-                        <div className="relative flex items-center justify-center gap-3 py-4 bg-cyan-500 dark:bg-cyan-500 hover:bg-cyan-600 dark:hover:bg-cyan-400 text-white dark:text-black font-black rounded-2xl shadow-md dark:shadow-cyan-500/20 transition-all disabled:opacity-50 disabled:grayscale border border-cyan-400 dark:border-cyan-400/30">
+                        <div className="absolute -inset-1 bg-[#2C5E3B] dark:bg-[#A9CBA2] rounded-2xl blur opacity-0 group-hover:opacity-10 dark:group-hover:opacity-20 transition duration-1000 group-disabled:opacity-0" />
+                        <div className="relative flex items-center justify-center gap-3 py-4 woody-btn-primary w-full text-[#FAF8F5] dark:text-[#1E3B24] font-black shadow-md transition-all disabled:opacity-50 disabled:grayscale">
                             {isSubmitting ? (
                                 <RefreshCw className="animate-spin" size={20} />
                             ) : (

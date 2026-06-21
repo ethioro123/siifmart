@@ -8,6 +8,7 @@ import { WMSJob, User, Site, Product } from '../types';
 import { formatJobId } from '../utils/jobIdFormatter';
 import { generatePackLabelHTML } from '../utils/labels/PackLabelGenerator';
 import { useLanguage } from '../contexts/LanguageContext';
+import { isWeightBased, isVolumeBased } from '../utils/units';
 import Button from './shared/Button';
 
 interface OutboundJobModalProps {
@@ -70,6 +71,34 @@ export const OutboundJobModal: React.FC<OutboundJobModalProps> = ({
         return products.find(p => p.id === item.productId) || products.find(p => p.sku === item.sku);
     };
 
+    const getLabelQtyAndUnit = (item: any, product?: any) => {
+        const prod = product || getProduct(item);
+        if (prod) {
+            const unit = prod.unit;
+            const isWeightVol = isWeightBased(unit) || isVolumeBased(unit);
+            const sizeNum = prod.size ? parseFloat(prod.size as string) : 0;
+            if (isWeightVol && sizeNum > 0) {
+                const expected = item.expectedQty || (item as any).quantity || 0;
+                const picked = item.pickedQty !== undefined && item.pickedQty !== null ? item.pickedQty : expected;
+                const displayPickedCases = picked <= expected ? picked : (sizeNum > 0 ? picked / sizeNum : picked);
+                return {
+                    quantity: `${displayPickedCases} x ${sizeNum}`,
+                    unit
+                };
+            }
+        }
+        if ((item as any).requestedMeasureQty !== undefined && (item as any).requestedMeasureQty !== null) {
+            return {
+                quantity: (item as any).requestedMeasureQty,
+                unit: product?.unit || item.unit || 'KG'
+            };
+        }
+        return {
+            quantity: item.pickedQty !== undefined && item.pickedQty !== null ? item.pickedQty : (item.expectedQty || (item as any).quantity || 0),
+            unit: prod?.unit || item.unit
+        };
+    };
+
     // Helper: Handle Reprint Label (XL)
     const handleReprintLabel = async () => {
         setIsSubmitting(true);
@@ -80,11 +109,16 @@ export const OutboundJobModal: React.FC<OutboundJobModalProps> = ({
                 itemCount: job.items || job.lineItems?.length || 0,
                 packDate: job.shippedAt || new Date().toISOString(),
                 trackingNumber: job.trackingNumber || job.id,
-                lineItems: job.lineItems?.map(li => ({
-                    name: li.name,
-                    sku: li.sku,
-                    quantity: li.pickedQty || li.expectedQty || (li as any).quantity || 0
-                }))
+                lineItems: job.lineItems?.map(li => {
+                    const product = getProduct(li);
+                    const qtyInfo = getLabelQtyAndUnit(li, product);
+                    return {
+                        name: li.name || product?.name || 'Unknown Product',
+                        sku: li.sku || product?.sku || 'N/A',
+                        quantity: qtyInfo.quantity,
+                        unit: qtyInfo.unit
+                    };
+                })
             }, { size: 'XL', format: 'Both' });
 
             const printWindow = window.open('', '_blank');

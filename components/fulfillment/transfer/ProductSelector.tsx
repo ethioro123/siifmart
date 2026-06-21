@@ -33,7 +33,7 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
         <div className="space-y-4 bg-black/40 p-4 rounded-xl border border-white/10">
             <div className="flex justify-between items-center">
                 <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                    <Search size={16} className="text-blue-400" />
+                    <Search size={16} className="text-[#A9CBA2]" />
                     {title}
                 </h3>
                 <button onClick={onCancel} className="text-gray-500 hover:text-white transition-colors" aria-label="Close Product Selector">
@@ -75,7 +75,7 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
                                     )}
                                 </div>
                                 <div>
-                                    <div className="text-sm font-bold text-white group-hover:text-blue-400 transition-colors">
+                                    <div className="text-sm font-bold text-white group-hover:text-[#A9CBA2] transition-colors">
                                         {product.name}
                                     </div>
                                     <div className="text-[10px] text-gray-500 font-mono">

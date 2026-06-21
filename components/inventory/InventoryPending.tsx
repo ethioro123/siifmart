@@ -192,31 +192,31 @@ export const InventoryPending: React.FC<InventoryPendingProps> = ({
         <div className="space-y-6 animate-in fade-in">
             {/* Pending Products Section */}
             <div className="glass-panel rounded-2xl overflow-hidden">
-                <div className="p-6 border-b border-gray-200 dark:border-white/5 flex items-center justify-between">
+                <div className="p-6 border-b border-[#E2DCCE]/60 dark:border-[#A9CBA2]/10 flex items-center justify-between">
                     <div>
-                        <h3 className="font-bold text-amber-400 flex items-center gap-2">
+                        <h3 className="font-bold text-amber-600 dark:text-amber-500 flex items-center gap-2">
                             <Package size={18} /> New Products Awaiting Approval
                         </h3>
-                        <p className="text-xs text-gray-400 mt-1">{pendingProducts.length} products pending review</p>
+                        <p className="text-xs text-secondary mt-1">{pendingProducts.length} products pending review</p>
                     </div>
                 </div>
 
                 {pendingProducts.length === 0 ? (
-                    <div className="p-12 text-center text-gray-500">
+                    <div className="p-12 text-center text-secondary">
                         <CheckCircle size={48} className="mx-auto opacity-30 mb-4" />
                         <p>No pending products awaiting approval.</p>
                     </div>
                 ) : (
                     <div className="overflow-x-auto">
                         <table className="w-full text-left">
-                            <thead><tr className="bg-black/20 border-b border-white/5">
-                                <th className="p-4 text-xs text-gray-500 uppercase">Product</th>
-                                <th className="p-4 text-xs text-gray-500 uppercase">SKU</th>
-                                <th className="p-4 text-xs text-gray-500 uppercase">Category</th>
-                                <th className="p-4 text-xs text-gray-500 uppercase text-right">Price</th>
-                                <th className="p-4 text-xs text-gray-500 uppercase">Created By</th>
-                                <th className="p-4 text-xs text-gray-500 uppercase">Created At</th>
-                                <th className="p-4 text-xs text-gray-500 uppercase text-center">Actions</th>
+                            <thead><tr className="bg-gray-50 dark:bg-black/20 border-b border-gray-200 dark:border-white/10">
+                                <th className="p-4 text-xs text-secondary uppercase font-bold">Product</th>
+                                <th className="p-4 text-xs text-secondary uppercase font-bold">SKU</th>
+                                <th className="p-4 text-xs text-secondary uppercase font-bold">Category</th>
+                                <th className="p-4 text-xs text-secondary uppercase font-bold text-right">Price</th>
+                                <th className="p-4 text-xs text-secondary uppercase font-bold">Created By</th>
+                                <th className="p-4 text-xs text-secondary uppercase font-bold">Created At</th>
+                                <th className="p-4 text-xs text-secondary uppercase font-bold text-center">Actions</th>
                             </tr></thead>
                             <tbody className="divide-y divide-gray-100 dark:divide-white/5">
                                 {pendingProducts.map((prod) => (
@@ -235,22 +235,22 @@ export const InventoryPending: React.FC<InventoryPendingProps> = ({
                                                             }}
                                                         />
                                                     ) : (
-                                                        <Package size={16} className="text-gray-600" />
+                                                        <Package size={16} className="text-gray-600 animate-pulse" />
                                                     )}
                                                 </div>
                                                 <div>
                                                     <p className="font-semibold text-gray-900 dark:text-white text-sm">{prod.name}</p>
-                                                    <p className="text-[10px] text-gray-500 dark:text-gray-400">{prod.brand}</p>
+                                                    <p className="text-[10px] text-secondary">{prod.brand}</p>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className="p-4 font-mono text-xs text-gray-500 dark:text-gray-400">{prod.sku}</td>
-                                        <td className="p-4 text-xs text-gray-600 dark:text-gray-300">{prod.category}</td>
+                                        <td className="p-4 font-mono text-xs text-secondary">{prod.sku}</td>
+                                        <td className="p-4 text-xs text-secondary">{prod.category}</td>
                                         <td className="p-4 text-sm font-bold text-gray-900 dark:text-white text-right">{CURRENCY_SYMBOL}{prod.price?.toLocaleString()}</td>
-                                        <td className="p-4 text-xs text-cyan-400 flex items-center gap-1">
+                                        <td className="p-4 text-xs text-[#2C5E3B] dark:text-[#A9CBA2] flex items-center gap-1 font-bold">
                                             <User size={12} /> {prod.createdBy || prod.created_by || 'Unknown'}
                                         </td>
-                                        <td className="p-4 text-xs text-gray-400">
+                                        <td className="p-4 text-xs text-secondary">
                                             {prod.createdAt || prod.created_at ? formatDateTime(prod.createdAt || prod.created_at || '') : '-'}
                                         </td>
                                         <td className="p-4">
@@ -264,7 +264,7 @@ export const InventoryPending: React.FC<InventoryPendingProps> = ({
                                                             variant="success"
                                                             size="sm"
                                                             icon={<CheckCircle size={14} />}
-                                                            className="px-3 py-1.5"
+                                                            className="px-3 py-1.5 font-bold"
                                                         >
                                                             Approve
                                                         </Button>
@@ -281,14 +281,14 @@ export const InventoryPending: React.FC<InventoryPendingProps> = ({
                                                                     requestedAt: (prod as any).createdAt || (prod as any).created_at || '',
                                                                     status: 'pending',
                                                                     siteId: prod.siteId || (prod as any).site_id || ''
-                                                                };
+                                                                 };
                                                                 setRequestForDetails(pseudoRequest);
                                                                 setIsRequestDetailsModalOpen(true);
                                                             }}
                                                             variant="ghost"
                                                             size="sm"
                                                             icon={<Search size={14} />}
-                                                            className="px-3 py-1.5 bg-blue-500/10 text-blue-400 font-bold hover:bg-blue-500/20"
+                                                            className="px-3 py-1.5 bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 text-[#2C5E3B] dark:text-[#A9CBA2] font-bold hover:bg-[#2C5E3B]/20 dark:hover:bg-[#A9CBA2]/20"
                                                         >
                                                             Details
                                                         </Button>
@@ -297,14 +297,14 @@ export const InventoryPending: React.FC<InventoryPendingProps> = ({
                                                             variant="danger"
                                                             size="sm"
                                                             icon={<XCircle size={14} />}
-                                                            className="px-3 py-1.5"
+                                                            className="px-3 py-1.5 font-bold"
                                                         >
                                                             Reject
                                                         </Button>
                                                     </>
                                                 ) : (
                                                     <div className="flex items-center justify-center">
-                                                        <span className="text-xs text-amber-500/50 italic border border-amber-500/10 px-3 py-1 bg-amber-500/5 rounded-lg flex items-center gap-1">
+                                                        <span className="text-xs text-amber-600 dark:text-amber-500/80 italic border border-[#E2DCCE] dark:border-amber-500/10 px-3 py-1 bg-amber-500/5 rounded-lg flex items-center gap-1">
                                                             <Clock size={12} /> Awaiting CEO
                                                         </span>
                                                     </div>
@@ -321,12 +321,12 @@ export const InventoryPending: React.FC<InventoryPendingProps> = ({
 
             {/* Pending Changes Section */}
             <div className="glass-panel rounded-2xl overflow-hidden">
-                <div className="p-6 border-b border-gray-200 dark:border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="p-6 border-b border-[#E2DCCE]/60 dark:border-[#A9CBA2]/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
-                        <h3 className="font-bold text-orange-400 flex items-center gap-2">
+                        <h3 className="font-bold text-orange-600 dark:text-orange-500 flex items-center gap-2">
                             <Edit size={18} /> Change Requests Awaiting Approval
                         </h3>
-                        <p className="text-xs text-gray-400 mt-1">{pendingChanges.length} change requests pending review</p>
+                        <p className="text-xs text-secondary mt-1">{pendingChanges.length} change requests pending review</p>
                     </div>
                     {canApprove && pendingChanges.length > 0 && (
                         <Button
@@ -334,51 +334,51 @@ export const InventoryPending: React.FC<InventoryPendingProps> = ({
                             variant="danger"
                             size="sm"
                             icon={<Trash2 size={14} />}
-                            className="px-4 py-2 bg-red-500/10 text-red-400 border border-red-500/20"
+                            className="px-4 py-2 bg-red-500/10 text-red-500 border border-red-500/20"
                         >
                             Clear Ghost Requests
                         </Button>
                     )}
                 </div>
                 {pendingChanges.length === 0 ? (
-                    <div className="p-12 text-center text-gray-500">
+                    <div className="p-12 text-center text-secondary">
                         <CheckCircle size={48} className="mx-auto opacity-30 mb-4" />
                         <p>No pending change requests.</p>
                     </div>
                 ) : (
                     <div className="overflow-x-auto">
                         <table className="w-full text-left">
-                            <thead><tr className="bg-black/20 border-b border-white/5">
-                                <th className="p-4 text-xs text-gray-500 uppercase">Request Type</th>
-                                <th className="p-4 text-xs text-gray-500 uppercase">Product</th>
-                                <th className="p-4 text-xs text-gray-500 uppercase">SKU</th>
-                                <th className="p-4 text-xs text-gray-500 uppercase">Details</th>
-                                <th className="p-4 text-xs text-gray-500 uppercase">Requested By</th>
-                                <th className="p-4 text-xs text-gray-500 uppercase">Requested At</th>
-                                <th className="p-4 text-xs text-gray-500 uppercase text-center">Actions</th>
+                            <thead><tr className="bg-gray-50 dark:bg-black/20 border-b border-gray-200 dark:border-white/10">
+                                <th className="p-4 text-xs text-secondary uppercase font-bold">Request Type</th>
+                                <th className="p-4 text-xs text-secondary uppercase font-bold">Product</th>
+                                <th className="p-4 text-xs text-secondary uppercase font-bold">SKU</th>
+                                <th className="p-4 text-xs text-secondary uppercase font-bold">Details</th>
+                                <th className="p-4 text-xs text-secondary uppercase font-bold">Requested By</th>
+                                <th className="p-4 text-xs text-secondary uppercase font-bold">Requested At</th>
+                                <th className="p-4 text-xs text-secondary uppercase font-bold text-center">Actions</th>
                             </tr></thead>
                             <tbody className="divide-y divide-gray-100 dark:divide-white/5">
                                 {pendingChanges.map((change) => (
                                     <tr key={change.id} className="hover:bg-gray-50 dark:hover:bg-white/5">
                                         <td className="p-4">
-                                            <span className={`text-[10px] font-bold px-2 py-1 rounded uppercase border ${change.changeType === 'edit' ? 'text-blue-400 border-blue-400/20 bg-blue-400/10' :
-                                                change.changeType === 'delete' ? 'text-red-400 border-red-400/20 bg-red-400/10' :
-                                                    'text-yellow-400 border-yellow-400/20 bg-yellow-400/10'
+                                            <span className={`text-[10px] font-bold px-2 py-1 rounded uppercase border ${change.changeType === 'edit' ? 'text-blue-500 border-blue-500/20 bg-blue-500/10' :
+                                                change.changeType === 'delete' ? 'text-red-500 border-red-500/20 bg-red-500/10' :
+                                                    'text-yellow-600 dark:text-yellow-400 border-yellow-500/20 bg-yellow-500/10'
                                                 }`}>
                                                 {change.changeType === 'stock_adjustment' ? 'Stock Adj.' : change.changeType}
                                             </span>
                                         </td>
                                         <td className="p-4 font-semibold text-gray-900 dark:text-white text-sm">{change.productName}</td>
-                                        <td className="p-4 font-mono text-xs text-gray-500 dark:text-gray-400">{change.productSku}</td>
-                                        <td className="p-4 text-xs text-gray-600 dark:text-gray-300">
+                                        <td className="p-4 font-mono text-xs text-secondary">{change.productSku}</td>
+                                        <td className="p-4 text-xs text-secondary">
                                             {change.changeType === 'delete' && (
-                                                <span className="flex items-center gap-2 text-red-400 font-medium">
+                                                <span className="flex items-center gap-2 text-red-500 font-medium">
                                                     <Trash2 size={12} /> Permanently delete this product
                                                 </span>
                                             )}
                                             {change.changeType === 'edit' && (
                                                 <div className="space-y-1">
-                                                    <span className="text-blue-400 font-medium flex items-center gap-1">
+                                                    <span className="text-blue-500 font-medium flex items-center gap-1">
                                                         <Edit size={12} /> Field Updates Requested:
                                                     </span>
                                                     {renderChangeDiff(change)}
@@ -386,20 +386,20 @@ export const InventoryPending: React.FC<InventoryPendingProps> = ({
                                             )}
                                             {change.changeType === 'stock_adjustment' && (
                                                 <div className="space-y-1">
-                                                    <span className="text-yellow-400 font-medium flex items-center gap-1">
+                                                    <span className="text-yellow-600 dark:text-yellow-400 font-medium flex items-center gap-1">
                                                         <RefreshCw size={12} /> Stock Adjustment:
                                                     </span>
-                                                    <span className={change.adjustmentType === 'IN' ? 'text-green-400 font-bold' : 'text-red-400 font-bold'}>
+                                                    <span className={change.adjustmentType === 'IN' ? 'text-green-500 font-bold' : 'text-red-500 font-bold'}>
                                                         {change.adjustmentType === 'IN' ? '+' : '-'}{change.adjustmentQty} units
                                                     </span>
-                                                    <p className="text-[10px] text-gray-500 italic mt-0.5">Reason: {change.adjustmentReason}</p>
+                                                    <p className="text-[10px] text-secondary italic mt-0.5">Reason: {change.adjustmentReason}</p>
                                                 </div>
                                             )}
                                         </td>
-                                        <td className="p-4 text-xs text-cyan-400 flex items-center gap-1">
+                                        <td className="p-4 text-xs text-[#2C5E3B] dark:text-[#A9CBA2] flex items-center gap-1 font-bold">
                                             <User size={12} /> {change.requestedBy}
                                         </td>
-                                        <td className="p-4 text-xs text-gray-400">
+                                        <td className="p-4 text-xs text-secondary">
                                             {formatDateTime(change.requestedAt || (change as any).requested_at || '', { showTime: true })}
                                         </td>
                                         <td className="p-4 text-center">
@@ -412,7 +412,7 @@ export const InventoryPending: React.FC<InventoryPendingProps> = ({
                                                         variant="success"
                                                         size="sm"
                                                         icon={<CheckCircle size={14} />}
-                                                        className="px-3 py-1.5"
+                                                        className="px-3 py-1.5 font-bold"
                                                     >
                                                         Approve
                                                     </Button>
@@ -424,7 +424,7 @@ export const InventoryPending: React.FC<InventoryPendingProps> = ({
                                                         variant="ghost"
                                                         size="sm"
                                                         icon={<Search size={14} />}
-                                                        className="px-3 py-1.5 bg-blue-500/10 text-blue-400 font-bold hover:bg-blue-500/20"
+                                                        className="px-3 py-1.5 bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 text-[#2C5E3B] dark:text-[#A9CBA2] font-bold hover:bg-[#2C5E3B]/20 dark:hover:bg-[#A9CBA2]/20"
                                                     >
                                                         Details
                                                     </Button>
@@ -433,7 +433,7 @@ export const InventoryPending: React.FC<InventoryPendingProps> = ({
                                                         variant="danger"
                                                         size="sm"
                                                         icon={<XCircle size={14} />}
-                                                        className="px-3 py-1.5"
+                                                        className="px-3 py-1.5 font-bold"
                                                     >
                                                         Reject
                                                     </Button>
@@ -475,12 +475,12 @@ export const InventoryPending: React.FC<InventoryPendingProps> = ({
                             </div>
                             <div>
                                 <h4 className="text-gray-900 dark:text-white font-bold">{requestForDetails?.productName}</h4>
-                                <p className="text-gray-500 dark:text-gray-400 text-xs">SKU: {requestForDetails?.productSku}</p>
+                                <p className="text-secondary text-xs">SKU: {requestForDetails?.productSku}</p>
                             </div>
                         </div>
                         <div className="text-right">
-                            <p className="text-[10px] text-gray-500 uppercase font-bold">Requested By</p>
-                            <p className="text-cyan-400 text-sm font-medium">{requestForDetails?.requestedBy}</p>
+                            <p className="text-[10px] text-secondary uppercase font-bold">Requested By</p>
+                            <p className="text-[#2C5E3B] dark:text-[#A9CBA2] text-sm font-bold">{requestForDetails?.requestedBy}</p>
                         </div>
                     </div>
 
@@ -489,7 +489,7 @@ export const InventoryPending: React.FC<InventoryPendingProps> = ({
                     </div>
 
                     {canApprove && (
-                        <div className="flex gap-4 pt-4 border-t border-white/5">
+                        <div className="flex gap-4 pt-4 border-t border-gray-200 dark:border-white/10">
                             {(!requestForDetails?.approvalRole || canApproveThisChange(requestForDetails!)) ? (
                                 <>
                                     <Button
@@ -506,7 +506,7 @@ export const InventoryPending: React.FC<InventoryPendingProps> = ({
                                         }}
                                         variant="success"
                                         icon={<CheckCircle size={18} />}
-                                        className="flex-1 py-3 bg-green-500 hover:bg-green-600 rounded-xl text-white font-bold transition-all shadow-lg shadow-green-500/20"
+                                        className="flex-1 py-3 font-bold transition-all shadow-md"
                                     >
                                         Approve Request
                                     </Button>
@@ -525,13 +525,13 @@ export const InventoryPending: React.FC<InventoryPendingProps> = ({
                                         }}
                                         variant="danger"
                                         icon={<XCircle size={18} />}
-                                        className="flex-1 py-3 bg-red-500 hover:bg-red-600 rounded-xl text-white font-bold transition-all shadow-lg shadow-red-500/20"
+                                        className="flex-1 py-3 font-bold transition-all shadow-md"
                                     >
                                         Reject Request
                                     </Button>
                                 </>
                             ) : (
-                                <div className="flex-1 text-center py-3 text-amber-400/60 text-sm font-bold italic">
+                                <div className="flex-1 text-center py-3 text-amber-500/60 text-sm font-bold italic">
                                     {requestForDetails ? getAwaitingLabel(requestForDetails) : 'Awaiting Approval'}
                                 </div>
                             )}
@@ -552,7 +552,7 @@ export const InventoryPending: React.FC<InventoryPendingProps> = ({
                 title="Reject Request"
             >
                 <div className="space-y-4">
-                    <p className="text-gray-400 text-sm">
+                    <p className="text-secondary text-sm">
                         Please provide a reason for rejecting this request.
                         The requester will be notified.
                     </p>
@@ -560,7 +560,7 @@ export const InventoryPending: React.FC<InventoryPendingProps> = ({
                         value={rejectionReason}
                         onChange={(e) => setRejectionReason(e.target.value)}
                         placeholder="Reason for rejection..."
-                        className="w-full h-32 bg-black/20 border border-white/10 rounded-xl p-4 text-white focus:outline-none focus:border-red-500/50"
+                        className="w-full h-32 bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl p-4 text-gray-900 dark:text-white placeholder-stone-400 dark:placeholder-stone-500 focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:ring-4 focus:ring-[#2C5E3B]/10 dark:focus:ring-[#A9CBA2]/10 focus:outline-none transition-all duration-300"
                         autoFocus
                     />
                     <div className="flex gap-4 justify-end">

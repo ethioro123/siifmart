@@ -107,13 +107,13 @@ export const PurchaseOrdersList: React.FC<PurchaseOrdersListProps> = ({
     };
 
     return (
-        <div className="bg-white dark:bg-black/60 backdrop-blur-2xl border border-gray-200 dark:border-white/5 rounded-2xl overflow-hidden animate-in fade-in shadow-sm dark:shadow-none">
+        <div className="glass-panel rounded-2xl overflow-hidden animate-in fade-in">
             {/* Modern Filter Toolbar */}
-            <div className="p-4 border-b border-gray-100 dark:border-white/5 space-y-4">
+            <div className="p-4 border-b border-[#E2DCCE]/50 dark:border-emerald-950/20 space-y-4">
                 {/* Row 1: Search & Dropdowns */}
                 <div className="flex flex-col md:flex-row gap-4">
                     {/* Search */}
-                    <div className="flex items-center bg-gray-50 dark:bg-black/30 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2.5 flex-1 focus-within:border-blue-500/50 dark:focus-within:border-cyber-primary/50 transition-colors shadow-inner">
+                    <div className="flex items-center glass-panel-pushed rounded-xl px-4 py-2.5 flex-1 focus-within:border-[#2C5E3B]/50 dark:focus-within:border-[#A9CBA2]/50 transition-colors">
                         <Search className="w-4 h-4 text-gray-400" />
                         <input
                             type="text"
@@ -129,7 +129,7 @@ export const PurchaseOrdersList: React.FC<PurchaseOrdersListProps> = ({
                         aria-label="Filter by Supplier"
                         value={supplierFilter}
                         onChange={(e) => onSupplierFilterChange(e.target.value)}
-                        className="bg-gray-50 dark:bg-black/30 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-blue-500/50 dark:focus:border-cyber-primary/50 min-w-[150px] transition-colors"
+                        className="glass-panel-pushed rounded-xl px-4 py-2.5 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-[#2C5E3B]/50 dark:focus:border-[#A9CBA2]/50 min-w-[150px] transition-colors"
                     >
                         <option value="All">All Suppliers</option>
                         {suppliers.map(s => (
@@ -142,7 +142,7 @@ export const PurchaseOrdersList: React.FC<PurchaseOrdersListProps> = ({
                         aria-label="Sort POs"
                         value={sort}
                         onChange={(e) => onSortChange(e.target.value as any)}
-                        className="bg-gray-50 dark:bg-black/30 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-blue-500/50 dark:focus:border-cyber-primary/50 min-w-[150px] transition-colors"
+                        className="glass-panel-pushed rounded-xl px-4 py-2.5 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-[#2C5E3B]/50 dark:focus:border-[#A9CBA2]/50 min-w-[150px] transition-colors"
                     >
                         <option value="dateDesc">Date: Newest</option>
                         <option value="dateAsc">Date: Oldest</option>
@@ -159,8 +159,8 @@ export const PurchaseOrdersList: React.FC<PurchaseOrdersListProps> = ({
                             key={status}
                             onClick={() => onStatusFilterChange(status as any)}
                             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${statusFilter === status
-                                ? 'bg-blue-600 dark:bg-cyber-primary text-white dark:text-black border-blue-600 dark:border-cyber-primary shadow-[0_0_10px_rgba(0,255,157,0.2)]'
-                                : 'bg-gray-50 dark:bg-white/5 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-white/5 hover:bg-gray-100 dark:hover:bg-white/10 hover:text-gray-900 dark:hover:text-white'
+                                ? 'bg-[#224429] dark:bg-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24] border-[#224429] dark:border-[#EAE5D9]'
+                                : 'glass-panel-pushed text-gray-500 dark:text-gray-400 hover:bg-stone-100 dark:hover:bg-white/10 hover:text-gray-900 dark:hover:text-white'
                                 }`}
                         >
                             {status}
@@ -171,9 +171,9 @@ export const PurchaseOrdersList: React.FC<PurchaseOrdersListProps> = ({
 
             {/* Bulk Actions Bar (CEO Only) */}
             {user?.role === 'super_admin' && selectedPOIds.length > 0 && (
-                <div className="mx-4 mb-4 bg-cyber-primary/10 border border-cyber-primary/30 rounded-lg p-3 flex items-center justify-between">
+                <div className="mx-4 mb-4 bg-[#2C5E3B]/10 border border-[#2C5E3B]/20 dark:bg-[#A9CBA2]/10 dark:border-[#A9CBA2]/20 rounded-lg p-3 flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <span className="text-sm font-bold text-cyber-primary">
+                        <span className="text-sm font-bold text-[#2C5E3B] dark:text-[#A9CBA2]">
                             {selectedPOIds.length} PO{selectedPOIds.length !== 1 ? 's' : ''} selected
                         </span>
                         <button
@@ -186,7 +186,7 @@ export const PurchaseOrdersList: React.FC<PurchaseOrdersListProps> = ({
                     <button
                         onClick={handleBulkApprove}
                         disabled={isBulkApproving}
-                        className="px-4 py-2 bg-green-500 hover:bg-green-600 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-bold rounded-lg text-sm transition-colors flex items-center gap-2"
+                        className="px-4 py-2 bg-[#2C5E3B] hover:bg-[#224429] dark:bg-[#A9CBA2] dark:hover:bg-[#8dae86] text-[#FAF8F5] dark:text-[#1E3B24] disabled:bg-gray-600 disabled:cursor-not-allowed font-bold rounded-lg text-sm transition-colors flex items-center gap-2 shadow-md"
                     >
                         <CheckCircle size={16} /> Approve Selected
                     </button>
@@ -196,14 +196,14 @@ export const PurchaseOrdersList: React.FC<PurchaseOrdersListProps> = ({
             <div className="overflow-x-auto p-4">
                 <table className="w-full text-left">
                     <thead>
-                        <tr className="bg-gray-50 dark:bg-white/5 border-b border-gray-100 dark:border-white/5">
+                        <tr className="glass-panel-pushed border-b border-[#E2DCCE]/50 dark:border-emerald-950/20">
                             {/* Bulk Selection Checkbox (CEO Only) */}
                             {user?.role === 'super_admin' && (
                                 <th className="p-4 w-12">
                                     <input
                                         type="checkbox"
                                         aria-label="Select all drafts"
-                                        className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 dark:text-cyber-primary bg-white dark:bg-black/50"
+                                        className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-[#2C5E3B] dark:text-[#A9CBA2] bg-white dark:bg-black/50"
                                         onChange={(e) => {
                                             if (e.target.checked) setSelectedPOIds(orders.filter(o => o.status === 'Draft').map(o => o.id));
                                             else setSelectedPOIds([]);
@@ -225,12 +225,12 @@ export const PurchaseOrdersList: React.FC<PurchaseOrdersListProps> = ({
                             <th className="p-4 text-xs text-gray-500 dark:text-gray-400 uppercase"></th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-100 dark:divide-white/5">
+                    <tbody className="divide-y divide-[#E2DCCE]/30 dark:divide-emerald-950/10">
                         {orders.map((po) => {
                             const isDraft = po.status === 'Draft';
                             const isSelected = selectedPOIds.includes(po.id);
                             return (
-                                <tr key={po.id} className={`hover:bg-gray-50 dark:hover:bg-white/5 group transition-colors ${isSelected ? 'bg-blue-50 dark:bg-cyber-primary/5 border-l-2 border-blue-500 dark:border-cyber-primary' : ''}`}>
+                                <tr key={po.id} className={`hover:bg-gray-50 dark:hover:bg-white/5 group transition-colors ${isSelected ? 'bg-[#2C5E3B]/5 dark:bg-[#A9CBA2]/5 border-l-2 border-[#2C5E3B] dark:border-[#A9CBA2]' : ''}`}>
                                     {user?.role === 'super_admin' && (
                                         <td className="p-4">
                                             {isDraft ? (
@@ -242,7 +242,7 @@ export const PurchaseOrdersList: React.FC<PurchaseOrdersListProps> = ({
                                                         if (e.target.checked) setSelectedPOIds(prev => [...prev, po.id]);
                                                         else setSelectedPOIds(prev => prev.filter(id => id !== po.id));
                                                     }}
-                                                    className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 dark:text-cyber-primary bg-white dark:bg-black/50"
+                                                    className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-[#2C5E3B] dark:text-[#A9CBA2] bg-white dark:bg-black/50"
                                                 />
                                             ) : <span className="w-4 h-4 block"></span>}
                                         </td>
@@ -250,7 +250,7 @@ export const PurchaseOrdersList: React.FC<PurchaseOrdersListProps> = ({
                                     <td className="p-4 text-sm font-mono text-gray-900 dark:text-white font-bold">{formatPONumber(po)}</td>
                                     <td className="p-4">
                                         <div className={`mx-auto px-2 py-0.5 rounded text-[9px] font-bold border uppercase text-center w-fit ${po.priority === 'High' || po.priority === 'Urgent' ? 'text-red-400 border-red-500/20 bg-red-500/10' :
-                                            po.priority === 'Low' ? 'text-blue-400 border-blue-500/20 bg-blue-500/10' :
+                                            po.priority === 'Low' ? 'text-[#8C6239] dark:text-[#E2C899] border-[#8C6239]/20 dark:border-[#E2C899]/20 bg-[#8C6239]/10 dark:bg-[#E2C899]/5' :
                                                 'text-gray-400 border-gray-500/20 bg-gray-500/10'
                                             }`}>
                                             {po.priority || 'Normal'}
@@ -264,16 +264,16 @@ export const PurchaseOrdersList: React.FC<PurchaseOrdersListProps> = ({
                                         </div>
                                     </td>
                                     <td className="p-4 text-xs text-gray-400 dark:text-gray-500 whitespace-nowrap">{po.date}</td>
-                                    <td className="p-4 text-xs text-blue-600 dark:text-blue-400 whitespace-nowrap">{po.expectedDelivery || 'N/A'}</td>
+                                    <td className="p-4 text-xs text-[#8C6239] dark:text-[#E2C899] whitespace-nowrap">{po.expectedDelivery || 'N/A'}</td>
                                     <td className="p-4 text-sm text-gray-600 dark:text-gray-300 font-mono text-right">{po.itemsCount}</td>
-                                    <td className="p-4 text-sm text-blue-600 dark:text-cyber-primary font-mono text-right font-bold">{CURRENCY_SYMBOL} {po.totalAmount.toLocaleString()}</td>
+                                    <td className="p-4 text-sm text-[#2C5E3B] dark:text-[#A9CBA2] font-mono text-right font-bold">{CURRENCY_SYMBOL} {po.totalAmount.toLocaleString()}</td>
                                     <td className="p-4 text-center">
                                         <span className={`inline-flex items-center px-2 py-1 rounded text-[10px] font-bold uppercase border ${po.status === 'Received' ? 'text-green-400 border-green-500/20 bg-green-500/10' :
-                                            po.status === 'Partially Received' ? 'text-indigo-400 border-indigo-500/20 bg-indigo-500/10' :
-                                                po.status === 'Approved' ? 'text-cyan-400 border-cyan-500/20 bg-cyan-500/10' :
-                                                    po.status === 'Ordered' ? 'text-purple-400 border-purple-500/20 bg-purple-500/10' :
+                                            po.status === 'Partially Received' ? 'text-amber-500 dark:text-amber-400 border-amber-500/20 bg-amber-500/10' :
+                                                po.status === 'Approved' ? 'text-[#2C5E3B] dark:text-[#A9CBA2] border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20 bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10' :
+                                                    po.status === 'Ordered' ? 'text-amber-600 dark:text-[#E2C899] border-amber-500/20 dark:border-[#E2C899]/20 bg-amber-500/10 dark:bg-amber-500/5' :
                                                         po.status === 'Draft' ? 'text-yellow-400 border-yellow-500/20 bg-yellow-500/10' :
-                                                            po.status === 'Pending' ? 'text-blue-400 border-blue-500/20 bg-blue-500/10' :
+                                                            po.status === 'Pending' ? 'text-[#8C6239] dark:text-[#E2C899] border-[#8C6239]/20 dark:border-[#E2C899]/20 bg-[#8C6239]/10 dark:bg-[#E2C899]/10' :
                                                                 'text-red-400 border-red-500/20 bg-red-500/10'
                                             }`}>
                                             {po.status}
@@ -305,7 +305,7 @@ export const PurchaseOrdersList: React.FC<PurchaseOrdersListProps> = ({
                                               (po.status === 'Draft' && (po.createdBy === user?.name || po.requestedBy === user?.name))) && (
                                                 <button
                                                     onClick={(e) => { e.stopPropagation(); onEdit(po); }}
-                                                    className="p-1 text-blue-400 hover:text-blue-300"
+                                                    className="p-1 text-[#2C5E3B] dark:text-[#A9CBA2] hover:opacity-80"
                                                     title="Edit"
                                                 >
                                                     <Edit3 size={14} />
@@ -341,7 +341,7 @@ export const PurchaseOrdersList: React.FC<PurchaseOrdersListProps> = ({
             </div>
 
             {/* Pagination Controls */}
-            <div className="flex items-center justify-between p-4 border-t border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-black/20 rounded-b-2xl">
+            <div className="flex items-center justify-between p-4 border-t border-[#E2DCCE]/50 dark:border-emerald-950/20 glass-panel-pushed rounded-b-2xl">
                 <p className="text-xs text-gray-500 dark:text-gray-500 font-mono">
                     Showing <span className="text-gray-900 dark:text-gray-300">{orders.length}</span> of <span className="text-gray-900 dark:text-gray-300">{totalCount}</span> Results
                 </p>
@@ -353,9 +353,9 @@ export const PurchaseOrdersList: React.FC<PurchaseOrdersListProps> = ({
                     >
                         Previous
                     </button>
-                    <div className="flex items-center px-4 bg-white dark:bg-white/5 rounded-lg border border-gray-200 dark:border-white/10 shadow-inner">
+                    <div className="flex items-center px-4 glass-panel-pushed rounded-lg">
                         <span className="text-[10px] text-gray-400 dark:text-gray-500 uppercase font-bold tracking-wider mr-2">Page</span>
-                        <span className="text-sm font-mono font-bold text-blue-600 dark:text-cyber-primary">{currentPage}</span>
+                        <span className="text-sm font-mono font-bold text-[#2C5E3B] dark:text-[#A9CBA2]">{currentPage}</span>
                         <span className="text-[10px] text-gray-400 dark:text-gray-500 mx-2">of</span>
                         <span className="text-sm font-mono text-gray-900 dark:text-white">{Math.ceil(totalCount / ITEMS_PER_PAGE)}</span>
                     </div>

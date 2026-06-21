@@ -80,30 +80,30 @@ export const PackHistory: React.FC<PackHistoryProps> = ({
     }, [filteredHistory, currentPage]);
 
     return (
-        <div className="border-t border-gray-100 dark:border-white/10 mt-8 pt-8 relative overflow-hidden group/history">
-            {/* 🌈 Futuristic Mesh Accent */}
-            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-cyan-500/10 blur-[120px] rounded-full -mr-40 -mt-40 pointer-events-none opacity-50 group-hover/history:opacity-100 transition-opacity duration-1000" />
-            <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+        <div className="border-t border-[#E2DCCE] dark:border-[#A9CBA2]/10 mt-8 pt-8 relative overflow-hidden group/history">
+            {/* 🌿 Forest Mesh Accent */}
+            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#2C5E3B]/10 blur-[120px] rounded-full -mr-40 -mt-40 pointer-events-none opacity-50 group-hover/history:opacity-100 transition-opacity duration-1000" />
+            <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-[#A9CBA2]/10 to-transparent" />
 
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 mb-8">
-                <h4 className="text-xl font-black text-gray-700 dark:text-cyan-100 flex items-center gap-3 uppercase tracking-tight">
-                    <div className="p-2 bg-gray-100 dark:bg-cyan-500/10 rounded-xl border border-gray-200 dark:border-cyan-500/20 group-hover/history:bg-gray-200 dark:group-hover/history:bg-cyan-500/20 transition-colors">
-                        <HistoryIcon size={20} className="text-gray-500 dark:text-cyan-400" />
+                <h4 className="text-xl font-black text-gray-700 dark:text-[#EAE5D9] flex items-center gap-3 uppercase tracking-tight">
+                    <div className="p-2 bg-[#E2DCCE] dark:bg-[#2C5E3B]/10 rounded-xl border border-[#E2DCCE] dark:border-[#2C5E3B]/20 group-hover/history:bg-[#E2DCCE] dark:group-hover/history:bg-[#2C5E3B]/20 transition-colors">
+                        <HistoryIcon size={20} className="text-gray-500 dark:text-[#A9CBA2]" />
                     </div>
                     Pack History
                 </h4>
 
                 {/* History Search */}
                 <div className="relative w-full sm:w-72 group">
-                    <div className="absolute -inset-0.5 bg-cyan-600 dark:bg-cyan-100 rounded-xl blur opacity-0 group-hover:opacity-5 transition duration-500"></div>
-                    <div className="relative flex items-center bg-gray-50 dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-xl focus-within:border-cyan-500 transition-all shadow-sm">
-                        <Search className="absolute left-3 text-gray-400 dark:text-gray-600 group-focus-within:text-cyan-600 dark:group-focus-within:text-cyan-200 transition-colors" size={16} />
+                    <div className="absolute -inset-0.5 bg-[#2C5E3B] dark:bg-[#A9CBA2] rounded-xl blur opacity-0 group-hover:opacity-5 transition duration-500"></div>
+                    <div className="relative flex items-center bg-[#FAF8F5] dark:bg-[#1C2620]/40 border border-[#E2DCCE] dark:border-[#A9CBA2]/10 rounded-xl focus-within:border-[#2C5E3B] transition-all shadow-sm">
+                        <Search className="absolute left-3 text-gray-400 dark:text-[#A9CBA2]/40 group-focus-within:text-[#2C5E3B] dark:group-focus-within:text-[#A9CBA2] transition-colors" size={16} />
                         <input
                             type="text"
                             placeholder="Search by ID or Order..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            className="w-full bg-transparent border-none rounded-xl pl-10 pr-4 py-3 text-xs text-gray-700 dark:text-cyan-200 font-black uppercase tracking-widest focus:outline-none placeholder:text-gray-400 dark:placeholder:text-gray-600"
+                            className="w-full bg-transparent border-none rounded-xl pl-10 pr-4 py-3 text-xs text-gray-700 dark:text-[#EAE5D9] font-black uppercase tracking-widest focus:outline-none placeholder:text-gray-400 dark:placeholder:text-[#A9CBA2]/30"
                         />
                     </div>
                 </div>
@@ -136,8 +136,8 @@ export const PackHistory: React.FC<PackHistoryProps> = ({
                                         >
                                             <div className="flex items-center justify-between">
                                                 <div className="flex items-center gap-3">
-                                                    <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-cyan-500/10 flex items-center justify-center shrink-0 border border-gray-200 dark:border-cyan-500/20">
-                                                        <Archive size={14} className="text-gray-500 dark:text-cyan-400" />
+                                                    <div className="w-8 h-8 rounded-full bg-[#E2DCCE] dark:bg-[#2C5E3B]/10 flex items-center justify-center shrink-0 border border-[#E2DCCE] dark:border-[#2C5E3B]/20">
+                                                        <Archive size={14} className="text-gray-500 dark:text-[#A9CBA2]" />
                                                     </div>
                                                     <div className="flex flex-col">
                                                         <div className="flex items-center gap-2">
@@ -154,8 +154,8 @@ export const PackHistory: React.FC<PackHistoryProps> = ({
                                                     </div>
                                                 </div>
                                                 <div className="flex items-center gap-2 shrink-0">
-                                                    <div className="w-6 h-6 rounded-full bg-cyan-950 flex items-center justify-center border border-cyan-500/30">
-                                                        <span className="text-[8px] font-black text-cyan-400">{(job.resolvedUser?.name || 'S').charAt(0).toUpperCase()}</span>
+                                                    <div className="w-6 h-6 rounded-full bg-[#2C5E3B]/20 flex items-center justify-center border border-[#2C5E3B]/30">
+                                                        <span className="text-[8px] font-black text-[#2C5E3B] dark:text-[#A9CBA2]">{(job.resolvedUser?.name || 'S').charAt(0).toUpperCase()}</span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -167,14 +167,14 @@ export const PackHistory: React.FC<PackHistoryProps> = ({
                                             animate={{ opacity: 1, y: 0 }}
                                             transition={{ delay: index * 0.05 }}
                                             onClick={() => onJobSelect && onJobSelect(job)}
-                                            className="hidden md:block group relative bg-gray-50 dark:bg-black/60 hover:bg-white dark:hover:bg-black border-2 border-gray-100 dark:border-white/5 hover:border-cyan-500 dark:hover:border-cyan-400/50 rounded-2xl p-5 transition-all duration-300 overflow-hidden shadow-sm hover:shadow-cyan-500/10 cursor-pointer"
+                                            className="hidden md:block group relative bg-[#FAF8F5] dark:bg-[#1C2620]/60 hover:bg-white dark:hover:bg-[#1C2620] border-2 border-[#E2DCCE] dark:border-[#A9CBA2]/5 hover:border-[#2C5E3B] dark:hover:border-[#A9CBA2]/50 rounded-2xl p-5 transition-all duration-300 overflow-hidden shadow-sm hover:shadow-[#2C5E3B]/10 cursor-pointer"
                                         >
                                             {/* Hover Glow */}
                                             <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
 
                                             <div className="relative flex justify-between items-start mb-4">
                                                 <div className="flex items-center gap-2">
-                                                    <div className="p-1.5 rounded-lg transition-colors bg-cyan-500/10 text-cyan-400">
+                                                    <div className="p-1.5 rounded-lg transition-colors bg-[#2C5E3B]/10 text-[#2C5E3B] dark:text-[#A9CBA2]">
                                                         <Archive size={14} />
                                                     </div>
                                                     <span className="text-[10px] uppercase tracking-widest font-black text-gray-500">
@@ -197,15 +197,15 @@ export const PackHistory: React.FC<PackHistoryProps> = ({
                                                 </h5>
                                                 <div className="flex flex-col gap-2 mt-2">
                                                     <div className="flex items-center gap-1.5 transition-colors">
-                                                        <Calendar size={10} className="text-cyan-500/50" />
-                                                        <span className="text-[10px] font-mono font-black text-cyan-400 bg-cyan-500/10 px-1.5 py-0.5 rounded tracking-tighter uppercase transition-all group-hover:bg-cyan-500/20">
+                                                        <Calendar size={10} className="text-[#2C5E3B]/50" />
+                                                        <span className="text-[10px] font-mono font-black text-[#2C5E3B] dark:text-[#A9CBA2] bg-[#2C5E3B]/10 px-1.5 py-0.5 rounded tracking-tighter uppercase transition-all group-hover:bg-[#2C5E3B]/20">
                                                             {formatDateTime(job.updatedAt || job.createdAt || '', { showTime: true })}
                                                         </span>
                                                     </div>
                                                     {job.trackingNumber && (
                                                         <div className="flex items-center gap-1.5 transition-colors">
-                                                            <Barcode size={10} className="text-cyan-600/40 dark:text-cyan-500/40 group-hover:text-cyan-600 dark:group-hover:text-cyan-400" />
-                                                            <span className="text-[10px] font-mono font-black text-gray-500 dark:text-gray-400 bg-gray-200/50 dark:bg-white/5 px-1.5 py-0.5 rounded tracking-widest uppercase transition-all group-hover:text-cyan-700 dark:group-hover:text-cyan-100 group-hover:bg-cyan-100 dark:group-hover:bg-cyan-900/40 border border-transparent group-hover:border-cyan-500/30 shadow-[0_0_10px_rgba(6,182,212,0)] group-hover:shadow-[0_0_10px_rgba(6,182,212,0.2)]">
+                                                            <Barcode size={10} className="text-[#2C5E3B]/40 dark:text-[#A9CBA2]/40 group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2]" />
+                                                            <span className="text-[10px] font-mono font-black text-gray-500 dark:text-gray-400 bg-gray-200/50 dark:bg-white/5 px-1.5 py-0.5 rounded tracking-widest uppercase transition-all group-hover:text-[#2C5E3B] dark:group-hover:text-[#EAE5D9] group-hover:bg-[#2C5E3B]/10 dark:group-hover:bg-[#2C5E3B]/20 border border-transparent group-hover:border-[#2C5E3B]/30 shadow-[0_0_10px_rgba(44,94,59,0)] group-hover:shadow-[0_0_10px_rgba(44,94,59,0.2)]">
                                                                 {job.trackingNumber}
                                                             </span>
                                                         </div>
@@ -218,15 +218,15 @@ export const PackHistory: React.FC<PackHistoryProps> = ({
                                                 <div className="relative mb-3 px-0.5">
                                                     <p className="text-[10px] text-zinc-500 dark:text-zinc-400 truncate leading-relaxed">
                                                         {productNames.slice(0, 2).join(', ')}
-                                                        {productNames.length > 2 && <span className="text-cyan-500 dark:text-cyan-400"> +{productNames.length - 2} more</span>}
+                                                        {productNames.length > 2 && <span className="text-[#2C5E3B] dark:text-[#A9CBA2]"> +{productNames.length - 2} more</span>}
                                                     </p>
                                                 </div>
                                             )}
 
                                             <div className="relative flex items-center justify-between border-t border-gray-100 dark:border-white/5 pt-3 mt-auto">
                                                 <div className="flex items-center gap-2">
-                                                    <div className="w-6 h-6 rounded-full bg-gray-100 dark:bg-cyan-950 flex items-center justify-center border border-gray-200 dark:border-cyan-500/30 shadow-inner group-hover/history:scale-110 transition-transform">
-                                                        <span className="text-[9px] font-black text-gray-500 dark:text-cyan-400">{(job.resolvedUser?.name || 'S').charAt(0).toUpperCase()}</span>
+                                                    <div className="w-6 h-6 rounded-full bg-[#E2DCCE] dark:bg-[#2C5E3B]/20 flex items-center justify-center border border-[#E2DCCE] dark:border-[#2C5E3B]/30 shadow-inner group-hover/history:scale-110 transition-transform">
+                                                        <span className="text-[9px] font-black text-gray-500 dark:text-[#A9CBA2]">{(job.resolvedUser?.name || 'S').charAt(0).toUpperCase()}</span>
                                                     </div>
                                                     <div className="flex flex-col">
                                                         <span className="text-[9px] font-black text-gray-400 dark:text-gray-600 uppercase tracking-widest leading-tight">By</span>
@@ -237,9 +237,9 @@ export const PackHistory: React.FC<PackHistoryProps> = ({
                                                 </div>
 
                                                 <div className="flex items-center gap-3">
-                                                    <div className="flex items-center gap-1.5 bg-gray-100 dark:bg-cyan-500/5 px-2 py-1 rounded-lg border border-gray-200 dark:border-cyan-500/10 group-hover:border-cyan-600 dark:group-hover:border-cyan-500/30 transition-all">
-                                                        <Box size={12} className="text-gray-500 dark:text-cyan-400" />
-                                                        <span className="text-[10px] font-black text-gray-700 dark:text-cyan-100 tabular-nums">{totalItems} {totalItems === 1 ? 'Item' : 'Items'}</span>
+                                                    <div className="flex items-center gap-1.5 bg-[#EAE5D9] dark:bg-[#2C5E3B]/5 px-2 py-1 rounded-lg border border-[#E2DCCE] dark:border-[#2C5E3B]/10 group-hover:border-[#2C5E3B] dark:group-hover:border-[#2C5E3B]/30 transition-all">
+                                                        <Box size={12} className="text-gray-500 dark:text-[#A9CBA2]" />
+                                                        <span className="text-[10px] font-black text-gray-700 dark:text-[#EAE5D9] tabular-nums">{totalItems} {totalItems === 1 ? 'Item' : 'Items'}</span>
                                                     </div>
                                                     {job.status === 'Completed' && (
                                                         <button
@@ -257,7 +257,7 @@ export const PackHistory: React.FC<PackHistoryProps> = ({
                                                                 e.stopPropagation();
                                                                 setOpenPrintMenuId(openPrintMenuId === job.id ? null : job.id);
                                                             }}
-                                                            className={`p-1.5 rounded-lg transition-colors border flex items-center justify-center ${openPrintMenuId === job.id ? 'bg-cyan-500/20 border-cyan-500/50 text-cyan-400' : 'hover:bg-cyan-500/20 text-cyan-500 border-transparent hover:border-cyan-500/30'}`}
+                                                            className={`p-1.5 rounded-lg transition-colors border flex items-center justify-center ${openPrintMenuId === job.id ? 'bg-[#2C5E3B]/20 border-[#2C5E3B]/50 text-[#2C5E3B] dark:text-[#A9CBA2]' : 'hover:bg-[#2C5E3B]/20 text-[#2C5E3B] dark:text-[#A9CBA2] border-transparent hover:border-[#2C5E3B]/30'}`}
                                                             title="Reprint Label"
                                                         >
                                                             <Printer size={12} />
@@ -269,10 +269,10 @@ export const PackHistory: React.FC<PackHistoryProps> = ({
                                                                     initial={{ opacity: 0, scale: 0.95, y: 10 }}
                                                                     animate={{ opacity: 1, scale: 1, y: 0 }}
                                                                     exit={{ opacity: 0, scale: 0.95, y: 5 }}
-                                                                    className="absolute bottom-[calc(100%+8px)] right-0 w-32 bg-white dark:bg-black/95 border border-gray-200 dark:border-cyan-500/30 rounded-xl p-2 shadow-xl dark:shadow-cyan-900/20 z-[100] flex flex-col gap-1 backdrop-blur-md"
+                                                                    className="absolute bottom-[calc(100%+8px)] right-0 w-32 bg-white dark:bg-[#1C2620]/95 border border-gray-200 dark:border-[#2C5E3B]/30 rounded-xl p-2 shadow-xl dark:shadow-[#2C5E3B]/20 z-[100] flex flex-col gap-1 backdrop-blur-md"
                                                                     onClick={(e) => e.stopPropagation()}
                                                                 >
-                                                                    <div className="text-[9px] font-black text-gray-400 dark:text-cyan-500/50 uppercase tracking-widest px-2 pb-1 border-b border-gray-100 dark:border-white/5 mb-1">Select Size</div>
+                                                                    <div className="text-[9px] font-black text-gray-400 dark:text-[#A9CBA2]/50 uppercase tracking-widest px-2 pb-1 border-b border-gray-100 dark:border-white/5 mb-1">Select Size</div>
                                                                     {(['Small', 'Medium', 'Large', 'XL'] as const).map(size => (
                                                                         <button
                                                                             key={size}
@@ -281,7 +281,7 @@ export const PackHistory: React.FC<PackHistoryProps> = ({
                                                                                 if (onReprintLabel) onReprintLabel(job as WMSJob, size);
                                                                                 setOpenPrintMenuId(null);
                                                                             }}
-                                                                            className="w-full text-left px-2 py-1.5 rounded-lg text-xs font-bold text-gray-300 hover:text-white hover:bg-cyan-500/20 transition-colors"
+                                                                            className="w-full text-left px-2 py-1.5 rounded-lg text-xs font-bold text-gray-300 hover:text-white hover:bg-[#2C5E3B]/20 transition-colors"
                                                                         >
                                                                             {size}
                                                                         </button>
@@ -309,8 +309,8 @@ export const PackHistory: React.FC<PackHistoryProps> = ({
                     />
                 </>
             ) : (
-                <div className="flex flex-col items-center justify-center py-20 text-gray-400 dark:text-gray-500 bg-gray-50 dark:bg-black/20 rounded-2xl border border-gray-200 dark:border-white/5 border-dashed">
-                    <HistoryIcon size={32} className="mb-4 opacity-50 dark:text-cyan-500" />
+                <div className="flex flex-col items-center justify-center py-20 text-gray-400 dark:text-[#A9CBA2]/40 glass-panel-pushed rounded-2xl border border-dashed">
+                    <HistoryIcon size={32} className="mb-4 opacity-50 dark:text-[#A9CBA2]" />
                     <p className="font-bold tracking-widest uppercase text-sm">No historical records found.</p>
                 </div>
             )}

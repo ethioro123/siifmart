@@ -199,28 +199,28 @@ export const ReceiveHistory: React.FC<ReceiveHistoryProps> = ({
     };
 
     return (
-        <div className="border-t border-slate-200 dark:border-white/10 mt-4 md:mt-8 pt-4 md:pt-8 relative overflow-hidden group/history">
+        <div className="border-t border-[#E2DCCE]/60 dark:border-[#A9CBA2]/10 mt-4 md:mt-8 pt-4 md:pt-8 relative overflow-hidden group/history">
             {/* 🌈 Futuristic Mesh Accent — hidden on mobile */}
-            <div className="hidden md:block absolute top-0 right-0 w-[500px] h-[500px] bg-violet-500/5 dark:bg-violet-500/10 blur-[120px] rounded-full -mr-40 -mt-40 pointer-events-none opacity-50 group-hover/history:opacity-100 transition-opacity duration-1000" />
-            <div className="hidden md:block absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-zinc-200 dark:via-white/10 to-transparent" />
+            <div className="hidden md:block absolute top-0 right-0 w-[500px] h-[500px] bg-[#2C5E3B]/10 dark:bg-[#1E3F27]/5 blur-[120px] rounded-full -mr-40 -mt-40 pointer-events-none opacity-50 group-hover/history:opacity-100 transition-opacity duration-1000" />
+            <div className="hidden md:block absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-[#E2DCCE] dark:via-[#A9CBA2]/10 to-transparent" />
 
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 md:gap-6 mb-4 md:mb-8">
-                <h4 className="text-base md:text-xl font-black text-slate-900 dark:text-zinc-100 flex items-center gap-2 md:gap-3 uppercase tracking-tight">
-                    <div className="hidden md:block p-2 bg-slate-50 dark:bg-violet-500/10 rounded-xl border border-slate-200 dark:border-violet-500/20 group-hover/history:bg-violet-500/20 transition-colors">
-                        <HistoryIcon size={20} className="text-slate-900 dark:text-violet-400" />
+                <h4 className="text-base md:text-xl font-black text-[#1E3F27] dark:text-[#EAE5D9] flex items-center gap-2 md:gap-3 uppercase tracking-tight">
+                    <div className="hidden md:block p-2 bg-white/80 dark:bg-[#18201B]/50 rounded-xl border border-[#E2DCCE]/60 dark:border-[#A9CBA2]/10 group-hover/history:bg-[#2C5E3B]/10 group-hover/history:dark:bg-[#A9CBA2]/10 transition-colors">
+                        <HistoryIcon size={20} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
                     </div>
                     History Logs
                 </h4>
                 <div className="relative w-full sm:w-72 group">
                     <div className="hidden md:block absolute -inset-0.5 bg-zinc-900 dark:bg-zinc-100 rounded-xl blur opacity-0 group-hover:opacity-10 dark:group-hover:opacity-5 transition duration-500"></div>
-                    <div className="relative flex items-center bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-xl focus-within:border-slate-900 dark:focus-within:border-zinc-500 transition-all shadow-sm">
-                        <Search className="absolute left-3 text-slate-400 dark:text-zinc-600 group-focus-within:text-slate-900 dark:group-focus-within:text-zinc-200 transition-colors" size={16} />
+                    <div className="relative flex items-center bg-white/90 dark:bg-black/25 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-xl focus-within:border-[#2C5E3B] dark:focus-within:border-[#A9CBA2] transition-all shadow-sm">
+                        <Search className="absolute left-3 text-[#4D6E56] dark:text-[#7A9E83] group-focus-within:text-[#2C5E3B] dark:group-focus-within:text-[#A9CBA2] transition-colors" size={16} />
                         <input
                             type="text"
                             placeholder="Filter by Reference..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            className="w-full bg-transparent border-none rounded-xl pl-10 pr-4 py-2.5 md:py-3 text-xs text-slate-900 dark:text-zinc-200 font-black uppercase tracking-widest focus:outline-none placeholder:text-slate-400 dark:placeholder:text-zinc-600"
+                            className="w-full bg-transparent border-none rounded-xl pl-10 pr-4 py-2.5 md:py-3 text-xs text-[#1E3F27] dark:text-[#EAE5D9] font-black uppercase tracking-widest focus:outline-none placeholder:text-stone-400 dark:placeholder:text-stone-500"
                         />
                     </div>
                 </div>
@@ -240,22 +240,22 @@ export const ReceiveHistory: React.FC<ReceiveHistoryProps> = ({
                                         setSelectedJob(item.rawData);
                                         setIsDetailsOpen(true);
                                     }}
-                                    className="group relative bg-white dark:bg-black/60 hover:bg-slate-50 dark:hover:bg-black border border-slate-100 dark:border-white/5 hover:border-violet-500/50 dark:hover:border-violet-400/50 rounded-xl md:rounded-2xl p-3 md:p-5 transition-all duration-300 cursor-pointer overflow-hidden shadow-sm hover:shadow-violet-500/10"
+                                    className="group relative glass-panel hover:border-[#2C5E3B]/40 dark:hover:border-[#A9CBA2]/30 p-3 md:p-5 cursor-pointer overflow-hidden hover:shadow-[0_8px_30px_rgba(44,94,59,0.05)] dark:hover:shadow-[0_12px_48px_-8px_rgba(5,8,6,0.4)] transition-all duration-300"
                                 >
                                     {/* Hover Glow — hidden on mobile */}
-                                    <div className="hidden md:block absolute inset-0 bg-zinc-900/5 dark:bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+                                    <div className="hidden md:block absolute inset-0 bg-stone-900/5 dark:bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
 
                                     {/* Top Row: Type & Status */}
                                     <div className="relative flex justify-between items-start mb-2 md:mb-4">
                                         <div className="flex items-center gap-2">
-                                            <div className={`p-1.5 rounded-lg transition-colors ${item.type === 'PO' ? 'bg-slate-100 dark:bg-violet-500 text-slate-900 dark:text-black shadow-md dark:shadow-violet-500/20' : 'bg-slate-50 dark:bg-white/5 text-slate-500 dark:text-violet-400 group-hover:bg-violet-500/10'}`}>
+                                            <div className={`p-1.5 rounded-lg transition-colors ${item.type === 'PO' ? 'bg-[#2C5E3B]/10 dark:bg-[#EAE5D9] text-[#2C5E3B] dark:text-[#1E3B24] shadow-md dark:shadow-none border border-transparent dark:border-[#EAE5D9]/15' : 'bg-stone-50 dark:bg-white/5 text-stone-500 dark:text-[#A9CBA2] group-hover:bg-[#2C5E3B]/10 dark:group-hover:bg-[#A9CBA2]/10'}`}>
                                                 {item.type === 'PO' ? <ReceiptText size={14} /> : <PackageCheck size={14} />}
                                             </div>
-                                            <span className="text-[10px] uppercase tracking-widest font-black text-zinc-500 dark:text-zinc-500">
+                                            <span className="text-[10px] uppercase tracking-widest font-black text-stone-500 dark:text-stone-400">
                                                 {item.actionType}
                                             </span>
                                         </div>
-                                        <span className="text-[10px] font-black text-zinc-500 dark:text-zinc-600 group-hover:text-violet-500 dark:group-hover:text-violet-400 transition-colors uppercase tracking-widest font-mono">
+                                        <span className="text-[10px] font-black text-[#2C5E3B] dark:text-[#A9CBA2] group-hover:text-[#2C5E3B]/80 dark:group-hover:text-[#A9CBA2]/80 transition-colors uppercase tracking-widest font-mono">
                                             {getRelativeTime(item.date)}
                                         </span>
                                         {item.type === 'JOB' && ((item.rawData as any)?.lineItems || (item.rawData as any)?.line_items || []).some((li: any) => (li.returnedQty || li.returned_qty) > 0) && (
@@ -267,37 +267,37 @@ export const ReceiveHistory: React.FC<ReceiveHistoryProps> = ({
 
                                     {/* Main Content */}
                                     <div className="relative mb-2 md:mb-4">
-                                        <h5 className="text-slate-900 dark:text-zinc-200 font-black text-xs md:text-sm truncate pr-2 group-hover:text-black dark:group-hover:text-zinc-100 transition-colors uppercase tracking-tight">
+                                        <h5 className="text-[#1E3F27] dark:text-[#EAE5D9] font-black text-xs md:text-sm truncate pr-2 transition-colors uppercase tracking-tight">
                                             {item.subtitle}
                                         </h5>
-                                        <p className="text-[9px] text-slate-400 dark:text-zinc-600 font-black uppercase tracking-[0.2em] mt-1 flex items-center gap-2">
-                                            <span className="bg-slate-50 dark:bg-violet-500/5 px-1.5 py-0.5 rounded text-slate-500 dark:text-violet-400 transition-colors group-hover:bg-violet-500/10 group-hover:text-violet-600 dark:group-hover:text-violet-300">#{item.reference}</span>
-                                            {item.sku && <span className="hidden md:inline text-slate-200 dark:text-zinc-800 font-black">| <span className="text-slate-400 dark:text-zinc-600 group-hover:text-violet-500 dark:group-hover:text-violet-400">{item.sku}</span></span>}
+                                        <p className="text-[9px] text-stone-400 dark:text-stone-500 font-black uppercase tracking-[0.2em] mt-1 flex items-center gap-2">
+                                            <span className="bg-[#FAF8F5] dark:bg-[#2C5E3B]/10 px-1.5 py-0.5 rounded text-stone-500 dark:text-[#A9CBA2] border border-[#E2DCCE]/50 dark:border-transparent transition-colors group-hover:bg-[#2C5E3B]/10 group-hover:text-[#2C5E3B] dark:group-hover:bg-[#A9CBA2]/15 dark:group-hover:text-white">#{item.reference}</span>
+                                            {item.sku && <span className="hidden md:inline text-[#E2DCCE] dark:text-zinc-800 font-black">| <span className="text-stone-400 dark:text-stone-500 group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2]">{item.sku}</span></span>}
                                         </p>
                                     </div>
 
                                     {/* Footer: User & Details */}
-                                    <div className="relative flex items-center justify-between border-t border-slate-50 dark:border-white/5 pt-2 md:pt-3 mt-auto">
+                                    <div className="relative flex items-center justify-between border-t border-[#E2DCCE]/40 dark:border-white/5 pt-2 md:pt-3 mt-auto">
                                         <div className="hidden md:flex items-center gap-2">
-                                            <div className="w-6 h-6 rounded-full bg-slate-50 dark:bg-violet-950 flex items-center justify-center border border-slate-200 dark:border-violet-500/30 shadow-inner group-hover/history:scale-110 transition-transform">
-                                                <span className="text-[9px] font-black text-slate-900 dark:text-violet-400">{(item.resolvedUser?.name || 'S').charAt(0).toUpperCase()}</span>
+                                            <div className="w-6 h-6 rounded-full bg-[#FAF8F5] dark:bg-[#1E3B24]/40 flex items-center justify-center border border-[#E2DCCE] dark:border-[#A9CBA2]/20 shadow-inner group-hover/history:scale-110 transition-transform">
+                                                <span className="text-[9px] font-black text-[#2C5E3B] dark:text-[#A9CBA2]">{(item.resolvedUser?.name || 'S').charAt(0).toUpperCase()}</span>
                                             </div>
                                             <div className="flex flex-col">
-                                                <span className="text-[9px] font-black text-slate-400 dark:text-zinc-600 uppercase tracking-widest leading-tight">By</span>
-                                                <span className="text-[9px] font-black text-slate-900 dark:text-zinc-400 uppercase tracking-wider leading-tight">
-                                                    {item.resolvedUser?.name} <span className="text-slate-400 dark:text-zinc-600 font-normal lowercase">({item.resolvedUser?.displayId})</span>
+                                                <span className="text-[9px] font-black text-stone-400 dark:text-stone-500 uppercase tracking-widest leading-tight">By</span>
+                                                <span className="text-[9px] font-black text-[#1E3F27] dark:text-[#EAE5D9] uppercase tracking-wider leading-tight">
+                                                    {item.resolvedUser?.name} <span className="text-stone-400 dark:text-stone-500 font-normal lowercase">({item.resolvedUser?.displayId})</span>
                                                 </span>
                                             </div>
                                         </div>
 
                                             <div className="flex items-center gap-2">
                                                 {item.displayQty ? (
-                                                    <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-violet-500/5 px-2 py-1 rounded-lg border border-slate-200 dark:border-violet-500/10 group-hover:border-violet-500/30 transition-all">
-                                                        <Box size={12} className="text-slate-600 dark:text-violet-400" />
-                                                        <span className="text-[10px] font-black text-slate-900 dark:text-violet-100 tabular-nums">{item.displayQty}</span>
+                                                    <div className="flex items-center gap-1.5 bg-stone-50 dark:bg-white/5 px-2 py-1 rounded-lg border border-stone-200 dark:border-white/5 group-hover:border-[#2C5E3B]/30 dark:group-hover:border-[#A9CBA2]/30 transition-all">
+                                                        <Box size={12} className="text-stone-500 dark:text-[#A9CBA2]" />
+                                                        <span className="text-[10px] font-black text-[#1E3F27] dark:text-[#EAE5D9] tabular-nums">{item.displayQty}</span>
                                                     </div>
                                                 ) : (
-                                                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-zinc-600">{item.items} units</span>
+                                                    <span className="text-[10px] font-black uppercase tracking-widest text-stone-500 dark:text-stone-400">{item.items} units</span>
                                                 )}
                                                 {item.type === 'JOB' && (item.rawData as any)?.status === 'Completed' && (
                                                     <button
@@ -335,14 +335,14 @@ export const ReceiveHistory: React.FC<ReceiveHistoryProps> = ({
                                                             setReturnType('procurement');
                                                             setReturnJob(adaptedJob as any);
                                                         }}
-                                                        className="flex items-center gap-1 bg-violet-100 hover:bg-violet-200 dark:bg-purple-500/5 dark:hover:bg-purple-500/15 px-2 py-1 rounded-lg border border-violet-300 dark:border-purple-500/10 hover:border-violet-400 dark:hover:border-purple-500/30 transition-all text-violet-800 hover:text-violet-900 dark:text-purple-400 dark:hover:text-purple-300"
+                                                        className="flex items-center gap-1 bg-amber-100 hover:bg-amber-200 dark:bg-amber-500/5 dark:hover:bg-amber-500/15 px-2 py-1 rounded-lg border border-amber-300 dark:border-amber-500/10 hover:border-amber-400 dark:hover:border-amber-500/30 transition-all text-amber-800 hover:text-amber-900 dark:text-amber-400 dark:hover:text-amber-300"
                                                         title="Return PO items (requires procurement approval)"
                                                     >
                                                         <Undo2 size={10} />
                                                         <span className="text-[9px] font-black uppercase tracking-widest">Return</span>
                                                     </button>
                                                 )}
-                                                <ChevronRight size={14} className="text-slate-400 dark:text-violet-400 group-hover:translate-x-1 transition-all" />
+                                                <ChevronRight size={14} className="text-stone-400 dark:text-[#A9CBA2] group-hover:translate-x-1 transition-all" />
                                             </div>
                                     </div>
                                 </motion.div>
@@ -359,12 +359,12 @@ export const ReceiveHistory: React.FC<ReceiveHistoryProps> = ({
                     />
                 </>
             ) : (
-                <div className="flex flex-col items-center justify-center py-12 md:py-20 bg-slate-50/50 dark:bg-zinc-100/[0.02] rounded-2xl md:rounded-3xl border border-dashed border-slate-200 dark:border-white/10">
-                    <div className="p-4 bg-slate-100 dark:bg-gray-900 rounded-2xl mb-4 border border-slate-200 dark:border-white/5 shadow-xl">
-                        <HistoryIcon size={32} className="text-slate-300 dark:text-gray-600" />
+                <div className="flex flex-col items-center justify-center py-12 md:py-20 bg-stone-50 dark:bg-zinc-100/[0.02] rounded-2xl md:rounded-3xl border border-dashed border-[#E2DCCE]/60 dark:border-white/10">
+                    <div className="p-4 bg-stone-50 dark:bg-[#1C2620]/30 rounded-2xl mb-4 border border-[#E2DCCE]/60 dark:border-[#A9CBA2]/10 shadow-xl">
+                        <HistoryIcon size={32} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
                     </div>
-                    <h3 className="text-lg font-black text-slate-900 dark:text-white mb-1 uppercase tracking-widest">No history found</h3>
-                    <p className="text-slate-400 dark:text-gray-500 text-xs uppercase tracking-[0.2em] font-black">Scanning records empty</p>
+                    <h3 className="text-lg font-black text-[#1E3F27] dark:text-white mb-1 uppercase tracking-widest">No history found</h3>
+                    <p className="text-stone-500 dark:text-stone-400 text-xs uppercase tracking-[0.2em] font-black">Scanning records empty</p>
                 </div>
             )}
 

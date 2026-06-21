@@ -92,17 +92,17 @@ export const InventoryBarcodeAudit: React.FC<InventoryBarcodeAuditProps> = ({
     return (
         <div className="space-y-6 animate-in fade-in">
             <div className="glass-panel rounded-2xl overflow-hidden">
-                <div className="p-6 border-b border-white/5">
-                    <h3 className="font-bold text-blue-400 flex items-center gap-2">
+                <div className="p-6 border-b border-[#E2DCCE]/60 dark:border-[#A9CBA2]/10">
+                    <h3 className="font-bold text-[#2C5E3B] dark:text-[#A9CBA2] flex items-center gap-2">
                         <Barcode size={18} /> Barcode Mapping Audit Log
                     </h3>
-                    <p className="text-xs text-gray-400 mt-1">{filteredBarcodes.length} barcode mappings matched</p>
+                    <p className="text-xs text-secondary mt-1">{filteredBarcodes.length} barcode mappings matched</p>
                 </div>
 
                 {/* Advanced Filters */}
                 <div className="p-6 border-b border-gray-200 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.01] flex flex-col md:flex-row gap-4 items-center">
                     <div className="relative flex-1 group">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-blue-400 transition-colors" size={16} />
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-[#2C5E3B] dark:group-focus-within:text-[#A9CBA2] transition-colors" size={16} />
                         <input
                             type="text"
                             placeholder="Search by product, barcode, or SKU..."
@@ -111,7 +111,7 @@ export const InventoryBarcodeAudit: React.FC<InventoryBarcodeAuditProps> = ({
                                 setBarcodeSearch(e.target.value);
                                 setCurrentBarcodePage(1);
                             }}
-                            className="w-full bg-white dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-2xl py-3 pl-12 pr-4 text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-600 focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all"
+                            className="w-full bg-white dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-2xl py-3 pl-12 pr-4 text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-600 focus:border-[#2C5E3B]/50 dark:focus:border-[#A9CBA2]/50 focus:ring-4 focus:ring-[#2C5E3B]/10 dark:focus:ring-[#A9CBA2]/10 transition-all"
                         />
                     </div>
 
@@ -126,7 +126,7 @@ export const InventoryBarcodeAudit: React.FC<InventoryBarcodeAuditProps> = ({
                                         setBarcodeSiteFilter(e.target.value);
                                         setCurrentBarcodePage(1);
                                     }}
-                                    className="w-full bg-white dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-2xl py-3 pl-10 pr-10 text-[11px] font-black uppercase tracking-widest text-gray-700 dark:text-gray-300 appearance-none focus:border-blue-500/50 transition-all cursor-pointer"
+                                    className="w-full bg-white dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-2xl py-3 pl-10 pr-10 text-[11px] font-black uppercase tracking-widest text-gray-700 dark:text-gray-300 appearance-none focus:border-[#2C5E3B]/50 dark:focus:border-[#A9CBA2]/50 transition-all cursor-pointer"
                                 >
                                     <option value="All">All Locations</option>
                                     {sites.map(s => (
@@ -146,7 +146,7 @@ export const InventoryBarcodeAudit: React.FC<InventoryBarcodeAuditProps> = ({
                                     const [key, direction] = e.target.value.split('-');
                                     setBarcodeSort({ key, direction: direction as 'asc' | 'desc' });
                                 }}
-                                className="w-full bg-white dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-2xl py-3 pl-10 pr-10 text-[11px] font-black uppercase tracking-widest text-gray-700 dark:text-gray-300 appearance-none focus:border-blue-500/50 transition-all cursor-pointer"
+                                className="w-full bg-white dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-2xl py-3 pl-10 pr-10 text-[11px] font-black uppercase tracking-widest text-gray-700 dark:text-gray-300 appearance-none focus:border-[#2C5E3B]/50 dark:focus:border-[#A9CBA2]/50 transition-all cursor-pointer"
                             >
                                 <option value="date-desc">Newest First</option>
                                 <option value="date-asc">Oldest First</option>
@@ -186,12 +186,12 @@ export const InventoryBarcodeAudit: React.FC<InventoryBarcodeAuditProps> = ({
                             {filteredBarcodes.slice((currentBarcodePage - 1) * BARCODE_PER_PAGE, currentBarcodePage * BARCODE_PER_PAGE).map((approval) => (
                                 <div
                                     key={approval.id}
-                                    className="group bg-white dark:bg-white/[0.02] border border-gray-200 dark:border-white/[0.05] hover:border-blue-500/30 rounded-2xl transition-all duration-300 overflow-hidden"
+                                    className="group bg-white/80 dark:bg-[#18201B]/40 border border-[#E2DCCE] dark:border-emerald-950/20 hover:border-[#2C5E3B]/30 dark:hover:border-[#A9CBA2]/30 rounded-2xl transition-all duration-300 overflow-hidden"
                                 >
                                     <div className="p-4 flex flex-col md:flex-row md:items-center gap-6">
                                         {/* Left: Product Info & Thumb */}
                                         <div className="flex items-center gap-4 flex-1 min-w-0">
-                                            <div className="w-14 h-14 rounded-xl bg-gray-100 dark:bg-black/40 border border-gray-200 dark:border-white/10 flex items-center justify-center flex-shrink-0 overflow-hidden group-hover:border-blue-500/30 transition-colors">
+                                            <div className="w-14 h-14 rounded-xl bg-gray-100 dark:bg-black/40 border border-gray-200 dark:border-white/10 flex items-center justify-center flex-shrink-0 overflow-hidden group-hover:border-[#2C5E3B]/30 dark:group-hover:border-[#A9CBA2]/30 transition-colors">
                                                 {approval.image_url ? (
                                                     <img src={approval.image_url} alt="Evidence" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                                                 ) : (
@@ -201,14 +201,14 @@ export const InventoryBarcodeAudit: React.FC<InventoryBarcodeAuditProps> = ({
                                                 )}
                                             </div>
                                             <div className="min-w-0">
-                                                <h4 className="text-[14px] font-black text-gray-900 dark:text-white tracking-tight group-hover:text-blue-400 transition-colors truncate">
+                                                <h4 className="text-[14px] font-black text-gray-900 dark:text-white tracking-tight group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] transition-colors truncate font-sans">
                                                     {approval.product?.name || 'Unknown Product'}
                                                 </h4>
                                                 <div className="flex items-center gap-2 mt-1">
                                                     <span className="text-[10px] font-black font-mono text-gray-500 bg-gray-100 dark:bg-black/40 px-2 py-0.5 rounded-md border border-gray-200 dark:border-white/5 uppercase tracking-tighter">
                                                         {approval.product?.sku || 'NO SKU'}
                                                     </span>
-                                                    <span className="text-[10px] font-black text-blue-400/80 uppercase tracking-widest bg-blue-500/5 px-2 py-0.5 rounded-md">
+                                                    <span className="text-[10px] font-black text-amber-600 dark:text-[#DFD5C6] uppercase tracking-widest bg-amber-500/5 px-2 py-0.5 rounded-md border border-[#E2DCCE]/50 dark:border-white/5">
                                                         Mapped to {approval.barcode}
                                                     </span>
                                                 </div>
@@ -220,10 +220,10 @@ export const InventoryBarcodeAudit: React.FC<InventoryBarcodeAuditProps> = ({
                                             <div className="flex flex-col gap-1">
                                                 <span className="text-[9px] uppercase tracking-[0.2em] text-gray-600 font-bold">Recorded By</span>
                                                 <div className="flex items-center gap-2">
-                                                    <div className="w-5 h-5 rounded-full bg-cyan-500/10 flex items-center justify-center border border-cyan-500/20">
-                                                        <User size={10} className="text-cyan-400" />
+                                                    <div className="w-5 h-5 rounded-full bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 flex items-center justify-center border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20">
+                                                        <User size={10} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
                                                     </div>
-                                                    <span className="text-gray-300 font-bold">{getEmployeeName(approval.created_by)}</span>
+                                                    <span className="text-gray-700 dark:text-gray-300 font-bold">{getEmployeeName(approval.created_by)}</span>
                                                 </div>
                                             </div>
 
@@ -231,7 +231,7 @@ export const InventoryBarcodeAudit: React.FC<InventoryBarcodeAuditProps> = ({
                                                 <span className="text-[9px] uppercase tracking-[0.2em] text-gray-600 font-bold">Timestamp</span>
                                                 <div className="flex items-center gap-2">
                                                     <Clock size={12} className="text-gray-500" />
-                                                    <span className="text-gray-300 font-mono tracking-tighter">{formatDateTime(approval.created_at || '', { showTime: true })}</span>
+                                                    <span className="text-gray-700 dark:text-gray-300 font-mono tracking-tighter">{formatDateTime(approval.created_at || '', { showTime: true })}</span>
                                                 </div>
                                             </div>
 
@@ -251,7 +251,7 @@ export const InventoryBarcodeAudit: React.FC<InventoryBarcodeAuditProps> = ({
                                                     setSelectedAuditRecord(approval);
                                                     setIsApprovalDetailsOpen(true);
                                                 }}
-                                                className="px-4 py-2 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/20 hover:border-blue-500/40 transition-all flex items-center gap-2 text-xs font-black uppercase tracking-widest group/btn"
+                                                className="px-4 py-2 rounded-xl bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 hover:bg-[#2C5E3B]/20 dark:hover:bg-[#A9CBA2]/20 text-[#2C5E3B] dark:text-[#A9CBA2] border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20 transition-all flex items-center gap-2 text-xs font-black uppercase tracking-widest group/btn"
                                             >
                                                 Details
                                                 <ChevronRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
@@ -276,7 +276,7 @@ export const InventoryBarcodeAudit: React.FC<InventoryBarcodeAuditProps> = ({
                     {filteredBarcodes.length > 0 && (
                         <div className="flex justify-between items-center mt-8 p-4 border-t border-gray-200 dark:border-white/5 bg-gray-50 dark:bg-black/20 rounded-b-2xl">
                             <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest flex items-center gap-3 ml-2">
-                                <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                                <div className="w-1.5 h-1.5 rounded-full bg-[#2C5E3B] dark:bg-[#A9CBA2]" />
                                 Showing {(currentBarcodePage - 1) * BARCODE_PER_PAGE + 1} - {Math.min(currentBarcodePage * BARCODE_PER_PAGE, filteredBarcodes.length)} of {filteredBarcodes.length} Records
                             </div>
                             {filteredBarcodes.length > BARCODE_PER_PAGE && (
@@ -319,14 +319,14 @@ export const InventoryBarcodeAudit: React.FC<InventoryBarcodeAuditProps> = ({
                                 )}
                             </div>
                             <div>
-                                <h3 className="text-lg font-bold text-white">{selectedAuditRecord.product?.name}</h3>
+                                <h3 className="text-lg font-bold text-gray-900 dark:text-white font-sans">{selectedAuditRecord.product?.name}</h3>
                                 <div className="flex gap-2 mt-2">
-                                    <span className="px-2 py-1 rounded bg-white/10 text-xs font-mono">{selectedAuditRecord.product?.sku}</span>
-                                    <span className="px-2 py-1 rounded bg-blue-500/20 text-blue-400 text-xs font-mono font-bold flex items-center gap-1">
+                                    <span className="px-2 py-1 rounded bg-gray-100 dark:bg-white/10 border border-[#E2DCCE]/50 dark:border-white/5 text-gray-700 dark:text-white text-xs font-mono">{selectedAuditRecord.product?.sku}</span>
+                                    <span className="px-2 py-1 rounded bg-[#2C5E3B]/10 text-[#2C5E3B] dark:bg-[#A9CBA2]/10 dark:text-[#A9CBA2] border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20 text-xs font-mono font-bold flex items-center gap-1">
                                         <Barcode size={12} /> {selectedAuditRecord.barcode}
                                     </span>
                                 </div>
-                                <div className="mt-4 flex items-center gap-4 text-xs text-gray-400">
+                                <div className="mt-4 flex items-center gap-4 text-xs text-secondary">
                                     <div className="flex items-center gap-1"><User size={12} /> {getEmployeeName(selectedAuditRecord.created_by)}</div>
                                     <div className="flex items-center gap-1"><Clock size={12} /> {formatDateTime(selectedAuditRecord.created_at || '')}</div>
                                 </div>
@@ -343,10 +343,10 @@ export const InventoryBarcodeAudit: React.FC<InventoryBarcodeAuditProps> = ({
                             </p>
                         </div>
 
-                        <div className="flex justify-end gap-3 pt-4 border-t border-white/10">
+                        <div className="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-white/10">
                             <button
                                 onClick={() => setIsApprovalDetailsOpen(false)}
-                                className="px-4 py-2 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 transition-colors text-sm font-bold"
+                                className="px-4 py-2 rounded-xl text-gray-400 hover:text-gray-600 dark:hover:text-white transition-colors text-sm font-bold"
                             >
                                 Close
                             </button>

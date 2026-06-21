@@ -36,67 +36,67 @@ export const ReturnModal: React.FC = () => {
         >
             <div className="space-y-6">
                 {!foundSaleForReturn ? (
-                    <div className="bg-black/20 border border-white/5 rounded-xl p-8 text-center space-y-4">
-                        <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mx-auto">
-                            <RotateCcw size={32} className="text-gray-400" />
+                    <div className="bg-white/50 dark:bg-black/20 border border-[#E2DCCE] dark:border-white/5 rounded-2xl p-8 text-center space-y-4">
+                        <div className="w-16 h-16 rounded-full bg-[#2C5E3B]/10 flex items-center justify-center mx-auto">
+                            <RotateCcw size={32} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
                         </div>
-                        <h3 className="text-lg font-bold text-white">{t('pos.findTransaction')}</h3>
-                        <p className="text-gray-400 text-sm max-w-xs mx-auto">{t('pos.returnInstruction')}</p>
+                        <h3 className="text-lg font-bold text-[#1E3F27] dark:text-[#EAE5D9]">{t('pos.findTransaction')}</h3>
+                        <p className="text-[#4D6E56] dark:text-gray-400 text-sm max-w-xs mx-auto">{t('pos.returnInstruction')}</p>
 
                         <div className="flex max-w-md mx-auto gap-2 mt-4">
                             <input
                                 type="text"
                                 placeholder="e.g. TX-9981"
-                                className="flex-1 bg-black/30 border border-white/20 rounded-lg px-4 py-3 text-white outline-none focus:border-cyber-primary"
+                                className="flex-1 bg-white dark:bg-black/30 border border-[#E2DCCE] dark:border-white/20 rounded-xl px-4 py-3 text-[#1E3F27] dark:text-white outline-none focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] transition-colors"
                                 value={returnSearchId}
                                 onChange={(e) => setReturnSearchId(e.target.value)}
                             />
                             <Button
                                 onClick={handleSearchForReturn}
-                                className="bg-cyber-primary text-black px-6 rounded-lg font-bold hover:bg-cyber-accent"
+                                className="bg-[#2C5E3B] text-white px-6 rounded-xl font-bold hover:opacity-90 transition-all cursor-pointer shadow-sm"
                             >
                                 Lookup
                             </Button>
                         </div>
-                        <p className="text-xs text-gray-500 mt-2">Tip: You can use 'TX-9981' to test.</p>
+                        <p className="text-xs text-[#4D6E56] dark:text-gray-500 mt-2">Tip: You can use 'TX-9981' to test.</p>
                     </div>
                 ) : (
                     <div className="space-y-6 animate-in fade-in">
-                        <div className="flex items-center justify-between bg-white/5 p-4 rounded-xl border border-white/5">
+                        <div className="flex items-center justify-between bg-[#FAF8F5] dark:bg-white/5 p-4 rounded-xl border border-[#E2DCCE] dark:border-white/5">
                             <div>
-                                <p className="text-xs text-gray-400 uppercase">Transaction ID</p>
-                                <p className="text-white font-mono font-bold">{foundSaleForReturn.receiptNumber || `SALE-${foundSaleForReturn.id.substring(0, 8).toUpperCase()}`}</p>
-                                <p className="text-xs text-gray-500">{foundSaleForReturn.date}</p>
+                                <p className="text-xs text-[#4D6E56] dark:text-gray-400 uppercase">Transaction ID</p>
+                                <p className="text-[#1E3F27] dark:text-white font-mono font-bold">{foundSaleForReturn.receiptNumber || `SALE-${foundSaleForReturn.id.substring(0, 8).toUpperCase()}`}</p>
+                                <p className="text-xs text-[#4D6E56] dark:text-gray-500">{foundSaleForReturn.date}</p>
                             </div>
-                            <button onClick={() => setFoundSaleForReturn(null)} className="text-xs text-cyber-primary hover:underline">
+                            <button onClick={() => setFoundSaleForReturn(null)} className="text-xs text-[#2C5E3B] dark:text-[#A9CBA2] hover:underline">
                                 {t('common.edit')}
                             </button>
                         </div>
 
                         <div className="space-y-3">
-                            <p className="text-sm font-bold text-white">{t('pos.selectItemsToReturn')}</p>
-                            <div className="bg-black/20 rounded-xl border border-white/5 overflow-hidden">
+                            <p className="text-sm font-bold text-[#1E3F27] dark:text-white">{t('pos.selectItemsToReturn')}</p>
+                            <div className="bg-[#FAF8F5] dark:bg-black/20 rounded-xl border border-[#E2DCCE] dark:border-white/5 overflow-hidden">
                                 {foundSaleForReturn.items.map(item => {
                                     const itemConfig = returnConfig[item.id] || { qty: 0, condition: 'Resalable', reason: 'Customer Changed Mind' };
                                     return (
-                                        <div key={item.id} className="p-4 border-b border-white/5 last:border-0 flex flex-col gap-3">
+                                        <div key={item.id} className="p-4 border-b border-[#E2DCCE]/50 dark:border-white/5 last:border-0 flex flex-col gap-3">
                                             <div className="flex justify-between items-start">
                                                 <div>
-                                                    <p className="text-sm text-white font-medium">{item.name}</p>
-                                                    <p className="text-xs text-gray-500">Sold: {item.quantity} @ {formatCompactNumber(item.price, { currency: CURRENCY_SYMBOL })}</p>
+                                                    <p className="text-sm text-[#1E3F27] dark:text-white font-medium">{item.name}</p>
+                                                    <p className="text-xs text-[#4D6E56] dark:text-gray-500">Sold: {item.quantity} @ {formatCompactNumber(item.price, { currency: CURRENCY_SYMBOL })}</p>
                                                 </div>
-                                                <div className="flex items-center gap-3 bg-black/30 rounded-lg p-1">
+                                                <div className="flex items-center bg-white/90 dark:bg-black/35 rounded-lg p-1 border border-[#E2DCCE]/50 dark:border-white/5">
                                                     <button
                                                         onClick={() => updateReturnConfig(item.id, 'qty', Math.max(0, itemConfig.qty - 1))}
-                                                        className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 rounded"
+                                                        className="w-8 h-8 flex items-center justify-center text-stone-500 hover:text-[#1E3F27] dark:hover:text-white hover:bg-white/10 rounded"
                                                         aria-label="Decrease return quantity"
                                                     >
                                                         <Minus size={14} />
                                                     </button>
-                                                    <span className="w-6 text-center font-mono text-white">{itemConfig.qty}</span>
+                                                    <span className="w-6 text-center font-mono text-[#1E3F27] dark:text-white">{itemConfig.qty}</span>
                                                     <button
                                                         onClick={() => updateReturnConfig(item.id, 'qty', Math.min(item.quantity, itemConfig.qty + 1))}
-                                                        className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 rounded"
+                                                        className="w-8 h-8 flex items-center justify-center text-stone-500 hover:text-[#1E3F27] dark:hover:text-white hover:bg-white/10 rounded"
                                                         aria-label="Increase return quantity"
                                                     >
                                                         <Plus size={14} />
@@ -109,7 +109,7 @@ export const ReturnModal: React.FC = () => {
                                                     <select
                                                         value={itemConfig.reason}
                                                         onChange={(e) => updateReturnConfig(item.id, 'reason', e.target.value)}
-                                                        className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs text-gray-300 outline-none"
+                                                        className="bg-white dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-xl px-3 py-2 text-xs text-[#1E3F27] dark:text-gray-300 outline-none"
                                                         aria-label="Return reason"
                                                     >
                                                         <option>Defective</option>
@@ -120,7 +120,7 @@ export const ReturnModal: React.FC = () => {
                                                     <select
                                                         value={itemConfig.condition}
                                                         onChange={(e) => updateReturnConfig(item.id, 'condition', e.target.value)}
-                                                        className={`bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs outline-none ${itemConfig.condition === 'Damaged' ? 'text-red-400' : 'text-green-400'}`}
+                                                        className={`bg-white dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-xl px-3 py-2 text-xs outline-none ${itemConfig.condition === 'Damaged' ? 'text-red-400' : 'text-green-400'}`}
                                                         aria-label="Condition"
                                                     >
                                                         <option value="Resalable">Return to Stock (Resalable)</option>
@@ -134,31 +134,31 @@ export const ReturnModal: React.FC = () => {
                             </div>
                         </div>
 
-                        <div className="bg-black/40 border border-white/10 rounded-xl p-4">
+                        <div className="bg-white/50 dark:bg-black/25 border border-[#E2DCCE] dark:border-white/10 rounded-xl p-4">
                             <div className="flex justify-between items-center mb-4">
-                                <span className="text-gray-400">{t('pos.totalRefund')}</span>
-                                <span className="text-2xl font-mono font-bold text-cyber-primary">
+                                <span className="text-[#4D6E56] dark:text-gray-400">{t('pos.totalRefund')}</span>
+                                <span className="text-2xl font-mono font-bold text-[#2C5E3B] dark:text-[#A9CBA2]">
                                     {CURRENCY_SYMBOL} {totalRefundAmount.toLocaleString()}
                                 </span>
                             </div>
 
                             {totalRefundAmount > 0 && (
-                                <div className="mb-4 p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg flex items-start gap-3">
-                                    <AlertTriangle size={16} className="text-yellow-500 mt-0.5" />
-                                    <p className="text-xs text-yellow-200/80">
+                                <div className="mb-4 p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg flex items-start gap-3">
+                                    <AlertTriangle size={16} className="text-amber-600 dark:text-amber-500 mt-0.5" />
+                                    <p className="text-xs text-amber-600 dark:text-amber-200/80">
                                         {t('pos.refundWarning')}
                                     </p>
                                 </div>
                             )}
 
                             <div className="flex gap-3">
-                                <button onClick={() => setFoundSaleForReturn(null)} className="flex-1 py-3 bg-white/5 hover:bg-white/10 rounded-xl text-gray-400">
+                                <button onClick={() => setFoundSaleForReturn(null)} className="flex-1 py-3 bg-white/90 dark:bg-black/35 text-stone-500 border border-[#E2DCCE] dark:border-white/10 rounded-xl">
                                     Cancel
                                 </button>
                                 <button
                                     onClick={handleProcessReturn}
                                     disabled={totalRefundAmount === 0 || isProcessing}
-                                    className="flex-1 py-3 bg-cyber-primary hover:bg-cyber-accent text-black font-bold rounded-xl flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="flex-1 py-3 bg-gradient-to-r from-[#224429] to-[#2C5E3B] text-white font-bold rounded-xl flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer"
                                 >
                                     {isProcessing ? <Loader2 className="animate-spin" /> : <RotateCcw size={18} />}
                                     {isProcessing ? t('pos.processing') : t('pos.confirmRefund')}

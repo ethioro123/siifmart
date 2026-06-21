@@ -39,25 +39,25 @@ export const WasteHistory: React.FC<WasteHistoryProps> = ({
     }, [filteredHistory, currentPage]);
 
     return (
-        <div className="border-t border-white/10 mt-6 pt-8 pb-10">
+        <div className="border-t border-[#E2DCCE]/30 dark:border-[#A9CBA2]/[0.04] mt-6 pt-8 pb-10">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
                 <div>
-                    <h4 className="text-sm font-bold text-white flex items-center gap-2 uppercase tracking-wide">
-                        <HistoryIcon size={18} className="text-gray-400" />
+                    <h4 className="text-sm font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2 uppercase tracking-wide">
+                        <HistoryIcon size={18} className="text-stone-500 dark:text-stone-400" />
                         Waste Logs
                     </h4>
-                    <p className="text-gray-500 text-[10px]">Recent spoilage and damage records</p>
+                    <p className="text-stone-500 dark:text-stone-400 text-[10px]">Recent spoilage and damage records</p>
                 </div>
 
                 {/* History Search */}
                 <div className="relative w-full md:w-72">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={14} />
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-500" size={14} />
                     <input
                         type="text"
                         placeholder="Search history..."
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        className="w-full bg-black/40 border border-white/10 rounded-xl pl-9 pr-4 py-2 text-xs text-white focus:outline-none focus:border-cyber-primary/50 transition-all"
+                        className="woody-input pl-9 text-xs py-2"
                     />
                 </div>
             </div>
@@ -74,21 +74,21 @@ export const WasteHistory: React.FC<WasteHistoryProps> = ({
                                         setSelectedJob(m);
                                         setIsDetailsOpen(true);
                                     }}
-                                    className="bg-white/[0.02] border border-white/5 rounded-xl p-3 hover:bg-white/[0.04] transition-all group cursor-pointer"
+                                    className="glass-panel rounded-2xl p-3 hover:bg-stone-100/50 dark:hover:bg-[#EAE5D9]/10 transition-all group cursor-pointer"
                                 >
                                     <div className="flex justify-between items-start mb-2">
-                                        <span className="text-[10px] font-mono text-cyber-primary font-bold">{m.id.slice(0, 8)}</span>
-                                        <span className="text-[9px] px-1.5 py-0.5 rounded uppercase font-black bg-red-500/10 text-red-400">
+                                        <span className="text-[10px] font-mono text-[#2C5E3B] dark:text-[#A9CBA2] font-bold">{m.id.slice(0, 8)}</span>
+                                        <span className="text-[9px] px-1.5 py-0.5 rounded uppercase font-black bg-red-500/10 text-red-600 dark:text-red-400">
                                             {m.reason.replace('Waste: ', '')}
                                         </span>
                                     </div>
                                     <div className="flex justify-between items-end">
                                         <div>
-                                            <p className="text-[10px] text-gray-500 truncate max-w-[100px]">{product?.name || 'Unknown Item'}</p>
-                                            <p className="text-[9px] text-gray-600 mt-0.5">{formatDateTime(m.date)}</p>
+                                            <p className="text-[10px] text-stone-500 dark:text-stone-400 truncate max-w-[100px]">{product?.name || 'Unknown Item'}</p>
+                                            <p className="text-[9px] text-stone-400 dark:text-stone-500 mt-0.5">{formatDateTime(m.date)}</p>
                                         </div>
-                                        <div className="text-right text-white font-bold text-xs">
-                                            {m.quantity} <span className="text-[9px] text-gray-500 font-normal">units</span>
+                                        <div className="text-right text-stone-900 dark:text-stone-100 font-bold text-xs">
+                                            {m.quantity} <span className="text-[9px] text-stone-500 dark:text-stone-400 font-normal">units</span>
                                         </div>
                                     </div>
                                 </div>
@@ -105,8 +105,8 @@ export const WasteHistory: React.FC<WasteHistoryProps> = ({
                     />
                 </>
             ) : (
-                <div className="text-center py-10 bg-white/[0.01] rounded-2xl border border-dashed border-white/5">
-                    <p className="text-gray-500 text-xs">No matching history found</p>
+                <div className="text-center py-10 bg-stone-50/10 dark:bg-[#1C2620]/10 rounded-2xl border border-dashed border-[#E2DCCE]/30 dark:border-[#A9CBA2]/[0.04]">
+                    <p className="text-stone-500 dark:text-stone-400 text-xs">No matching history found</p>
                 </div>
             )}
         </div>

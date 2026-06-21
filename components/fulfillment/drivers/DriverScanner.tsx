@@ -31,10 +31,10 @@ export const DriverScanner: React.FC<DriverScannerProps> = ({
 
             <div className="w-full max-w-lg space-y-8 text-center">
                 <div className="relative inline-block">
-                    <div className="absolute-inset-4 bg-cyan-500/20 blur-xl animate-pulse rounded-full" />
-                    <div className="w-64 h-64 border-2 border-dashed border-cyan-500/50 rounded-3xl flex items-center justify-center relative overflow-hidden">
-                        <div className="absolute top-0 left-0 w-full h-1 bg-cyan-400/50 shadow-[0_0_15px_rgba(34,211,238,0.8)] animate-[scan_2s_infinite]" />
-                        <QrCode size={120} className="text-cyan-400 opacity-20" />
+                    <div className="absolute-inset-4 bg-[#2C5E3B]/20 blur-xl animate-pulse rounded-full" />
+                    <div className="w-64 h-64 border-2 border-dashed border-[#A9CBA2]/50 rounded-3xl flex items-center justify-center relative overflow-hidden">
+                        <div className="absolute top-0 left-0 w-full h-1 bg-[#A9CBA2]/50 shadow-[0_0_15px_rgba(169,203,162,0.8)] animate-[scan_2s_infinite]" />
+                        <QrCode size={120} className="text-[#A9CBA2] opacity-20" />
                     </div>
                 </div>
 
@@ -65,7 +65,7 @@ export const DriverScanner: React.FC<DriverScannerProps> = ({
                             setDriverScannerOpen(false);
                             setSelectedJob(null);
                         }}
-                        className="w-full py-4 bg-cyan-500 text-black font-black uppercase tracking-widest rounded-2xl shadow-[0_0_20px_rgba(6,182,212,0.4)] hover:bg-cyan-400 transition-all active:scale-95"
+                        className="w-full py-4 bg-[#2C5E3B] text-white font-black uppercase tracking-widest rounded-2xl shadow-[0_0_20px_rgba(44,94,59,0.4)] hover:bg-[#3a7a4d] transition-all active:scale-95"
                     >
                         Complete Delivery
                     </button>
