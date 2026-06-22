@@ -260,10 +260,30 @@ export const TransferRequestModal: React.FC<TransferRequestModalProps> = ({
                                             aria-label="Select Destination Site"
                                         >
                                             <option value="">Select Destination</option>
-                                            {sites.filter(s => s.id !== (transferSourceSite || activeSite?.id) && s.type !== 'Administration').map(site => (
-                                                <option key={site.id} value={site.id}>{site.name} ({site.type})</option>
-                                            ))}
+                                            {(() => {
+                                                const sourceSite = sites.find(s => s.id === (transferSourceSite || activeSite?.id));
+                                                const allowedSourceIds = sourceSite?.replenishmentSourceIds || [];
+                                                return sites.filter(s =>
+                                                    s.id !== (transferSourceSite || activeSite?.id) &&
+                                                    s.type !== 'Administration' &&
+                                                    allowedSourceIds.includes(s.id)
+                                                ).map(site => (
+                                                    <option key={site.id} value={site.id}>{site.name} ({site.type})</option>
+                                                ));
+                                            })()}
                                         </select>
+                                        {(() => {
+                                            const sourceSite = sites.find(s => s.id === (transferSourceSite || activeSite?.id));
+                                            const allowedSourceIds = sourceSite?.replenishmentSourceIds || [];
+                                            if (allowedSourceIds.length === 0) {
+                                                return (
+                                                    <p className="text-[10px] text-red-400 mt-1.5 font-bold uppercase tracking-wide">
+                                                        ⚠️ No designated replenishment warehouses configured for {sourceSite?.name || 'this store'}. Please configure them in Settings.
+                                                    </p>
+                                                );
+                                            }
+                                            return null;
+                                        })()}
                                     </div>
                                 </div>
 

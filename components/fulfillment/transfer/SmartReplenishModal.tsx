@@ -100,13 +100,18 @@ export const SmartReplenishModal: React.FC<SmartReplenishModalProps> = ({
 
     const handleSelectLowStockProduct = (targetProduct: any) => {
         setDistHubSelectedSku(targetProduct.sku);
-        setDistHubSelectedDestSite(targetProduct.siteId || targetProduct.site_id);
+        const destId = targetProduct.siteId || targetProduct.site_id;
+        setDistHubSelectedDestSite(destId);
 
-        // Find sources with surplus of this SKU
+        const targetStore = sites.find(s => s.id === destId);
+        const allowedSourceIds = targetStore?.replenishmentSourceIds || [];
+
+        // Find sources with surplus of this SKU that are designated replenishment sources
         const potentialSources = allProducts.filter(p =>
             p.sku === targetProduct.sku &&
             p.stock > 10 && // Must have some safety stock
-            (p.siteId || p.site_id) !== (targetProduct.siteId || targetProduct.site_id)
+            (p.siteId || p.site_id) !== destId &&
+            allowedSourceIds.includes(p.siteId || p.site_id || '')
         );
 
         const mappedSources = potentialSources.map(p => ({
@@ -655,8 +660,24 @@ export const SmartReplenishModal: React.FC<SmartReplenishModalProps> = ({
                                             
                                             {distHubAvailableSources.length === 0 ? (
                                                 <div className="p-6 border border-dashed border-white/10 rounded-2xl text-center">
-                                                    <p className="text-xs text-red-400 font-bold uppercase tracking-widest">No Sources Available</p>
-                                                    <p className="text-[9px] text-gray-500 mt-1">No other locations have surplus stock (&gt;10 units) of this SKU.</p>
+                                                    {(() => {
+                                                        const targetStore = sites.find(s => s.id === distHubSelectedDestSite);
+                                                        const allowedSourceIds = targetStore?.replenishmentSourceIds || [];
+                                                        if (allowedSourceIds.length === 0) {
+                                                            return (
+                                                                <>
+                                                                    <p className="text-xs text-red-400 font-bold uppercase tracking-widest">No Feeder Warehouses Configured</p>
+                                                                    <p className="text-[9px] text-gray-500 mt-1">Please configure replenishment sources for {targetStore?.name || 'this store'} in Settings.</p>
+                                                                </>
+                                                            );
+                                                        }
+                                                        return (
+                                                            <>
+                                                                <p className="text-xs text-red-400 font-bold uppercase tracking-widest">No Sources Available</p>
+                                                                <p className="text-[9px] text-gray-500 mt-1">No configured feeder warehouses have surplus stock (&gt;10 units) of this SKU.</p>
+                                                            </>
+                                                        );
+                                                    })()}
                                                 </div>
                                             ) : (
                                                 distHubAvailableSources.map(source => {

@@ -95,6 +95,9 @@ export const ReceiveTab: React.FC = () => {
     }, [receivingPO, jobs]);
 
     const filteredReceiveOrders = useMemo(() => {
+        const employeeId = employees.find((e: any) => e.email === user?.email || e.name === user?.name || e.id === user?.id)?.id;
+        const isStaffWithLimitedAccess = !['admin', 'warehouse_manager', 'super_admin', 'dispatcher', 'inventory_specialist'].includes(user?.role || '');
+
         return orders.filter(o => {
             const isApproved = o.status === 'Approved';
             const matchesSearch = o.id.toLowerCase().includes(receiveSearch.toLowerCase()) ||
@@ -103,9 +106,22 @@ export const ReceiveTab: React.FC = () => {
                 const remaining = item.quantity - (item.receivedQty || 0);
                 return remaining > 0;
             });
-            return isApproved && matchesSearch && hasItemsToReceive;
+            
+            if (!isApproved || !matchesSearch || !hasItemsToReceive) return false;
+
+            if (isStaffWithLimitedAccess) {
+                const hasAssignedReceiveJob = jobs.some(j => 
+                    j.type === 'RECEIVE' && 
+                    j.orderRef === o.id && 
+                    j.assignedTo === employeeId &&
+                    !['completed', 'cancelled', 'deleted'].includes(j.status?.toLowerCase() || '')
+                );
+                if (!hasAssignedReceiveJob) return false;
+            }
+
+            return true;
         });
-    }, [orders, receiveSearch]);
+    }, [orders, receiveSearch, jobs, employees, user]);
 
     const receiveOrdersTotalPages = Math.ceil(filteredReceiveOrders.length / RECEIVE_ITEMS_PER_PAGE);
     const paginatedReceiveOrders = useMemo(() => {
@@ -224,7 +240,25 @@ export const ReceiveTab: React.FC = () => {
 
         const product = findScannedProduct(val);
         if (product) {
-            const relevantPO = orders.find(po => po.status === 'Approved' && po.lineItems?.some((li: any) => li.productId === product.id));
+            const employeeId = employees.find((e: any) => e.email === user?.email || e.name === user?.name || e.id === user?.id)?.id;
+            const isStaffWithLimitedAccess = !['admin', 'warehouse_manager', 'super_admin', 'dispatcher', 'inventory_specialist'].includes(user?.role || '');
+
+            const relevantPO = orders.find(po => {
+                const matches = po.status === 'Approved' && po.lineItems?.some((li: any) => li.productId === product.id);
+                if (!matches) return false;
+
+                if (isStaffWithLimitedAccess) {
+                    const hasAssignedReceiveJob = jobs.some(j => 
+                        j.type === 'RECEIVE' && 
+                        j.orderRef === po.id && 
+                        j.assignedTo === employeeId &&
+                        !['completed', 'cancelled', 'deleted'].includes(j.status?.toLowerCase() || '')
+                    );
+                    if (!hasAssignedReceiveJob) return false;
+                }
+                return true;
+            });
+
             if (relevantPO) {
                 const lineItem = relevantPO.lineItems?.find((li: any) => li.productId === product.id);
                 if (lineItem) {

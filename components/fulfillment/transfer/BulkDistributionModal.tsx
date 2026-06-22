@@ -278,7 +278,11 @@ export const BulkDistributionModal: React.FC<BulkDistributionModalProps> = ({
                                                 products={allProducts}
                                                 onSelect={(product) => {
                                                     setBulkDistributionProductId(product.id);
-                                                    const stores = sites.filter(s => s.type === 'Store');
+                                                    const warehouseId = bulkDistributionSourceSite || activeSite?.id;
+                                                    const stores = sites.filter(s =>
+                                                        s.type === 'Store' &&
+                                                        (s.replenishmentSourceIds || []).includes(warehouseId || '')
+                                                    );
                                                     setBulkDistributionAllocations(stores.map(s => ({ storeId: s.id, quantity: 0 })));
                                                     setIsSearchingProduct(false);
                                                 }}
@@ -326,27 +330,33 @@ export const BulkDistributionModal: React.FC<BulkDistributionModalProps> = ({
                                             </div>
                                         </div>
                                         <div className="divide-y divide-white/5 max-h-[300px] overflow-y-auto custom-scrollbar">
-                                            {bulkDistributionAllocations.map(alloc => {
-                                                const site = sites.find(s => s.id === alloc.storeId);
-                                                return (
-                                                    <div key={alloc.storeId} className="p-3 flex items-center justify-between hover:bg-white/[0.02]">
-                                                        <span className="text-sm text-gray-300">{site?.name}</span>
-                                                        <input
-                                                            type="number"
-                                                            min="0"
-                                                            value={alloc.quantity}
-                                                            onChange={(e) => {
-                                                                const newAllocs = [...bulkDistributionAllocations];
-                                                                const target = newAllocs.find(a => a.storeId === alloc.storeId);
-                                                                if (target) target.quantity = parseInt(e.target.value) || 0;
-                                                                setBulkDistributionAllocations(newAllocs);
-                                                            }}
-                                                            className="w-20 bg-black/40 border border-white/10 rounded px-2 py-1 text-right text-white focus:border-blue-500 focus:outline-none"
-                                                            aria-label={`Quantity for ${site?.name}`}
-                                                        />
-                                                    </div>
-                                                );
-                                            })}
+                                            {bulkDistributionAllocations.length === 0 ? (
+                                                <div className="p-6 text-center text-red-400 font-bold text-xs uppercase tracking-wider">
+                                                    ⚠️ No stores have this warehouse configured as a replenishment source.
+                                                </div>
+                                            ) : (
+                                                bulkDistributionAllocations.map(alloc => {
+                                                    const site = sites.find(s => s.id === alloc.storeId);
+                                                    return (
+                                                        <div key={alloc.storeId} className="p-3 flex items-center justify-between hover:bg-white/[0.02]">
+                                                            <span className="text-sm text-gray-300">{site?.name}</span>
+                                                            <input
+                                                                type="number"
+                                                                min="0"
+                                                                value={alloc.quantity}
+                                                                onChange={(e) => {
+                                                                    const newAllocs = [...bulkDistributionAllocations];
+                                                                    const target = newAllocs.find(a => a.storeId === alloc.storeId);
+                                                                    if (target) target.quantity = parseInt(e.target.value) || 0;
+                                                                    setBulkDistributionAllocations(newAllocs);
+                                                                }}
+                                                                className="w-20 bg-black/40 border border-white/10 rounded px-2 py-1 text-right text-white focus:border-blue-500 focus:outline-none"
+                                                                aria-label={`Quantity for ${site?.name}`}
+                                                            />
+                                                        </div>
+                                                    );
+                                                })
+                                            )}
                                         </div>
                                     </div>
                                 )}
@@ -369,7 +379,11 @@ export const BulkDistributionModal: React.FC<BulkDistributionModalProps> = ({
                                         <ProductSelector
                                             products={allProducts}
                                             onSelect={(product) => {
-                                                const stores = sites.filter(s => s.type === 'Store');
+                                                const warehouseId = bulkDistributionSourceSite || activeSite?.id;
+                                                const stores = sites.filter(s =>
+                                                    s.type === 'Store' &&
+                                                    (s.replenishmentSourceIds || []).includes(warehouseId || '')
+                                                );
                                                 setWaveProducts([...waveProducts, {
                                                     productId: product.id,
                                                     allocations: stores.map(s => ({ storeId: s.id, quantity: 0 }))
@@ -421,28 +435,34 @@ export const BulkDistributionModal: React.FC<BulkDistributionModalProps> = ({
                                                     }} className="text-red-400 hover:text-red-300" aria-label={`Remove ${prod?.name} from wave`}><X size={16} /></button>
                                                 </div>
                                                 <div className="p-3 grid grid-cols-2 sm:grid-cols-3 gap-2">
-                                                    {wp.allocations.map(alloc => {
-                                                        const site = sites.find(s => s.id === alloc.storeId);
-                                                        return (
-                                                            <div key={alloc.storeId} className="flex items-center justify-between text-xs bg-black/40 p-2 rounded">
-                                                                <span className="text-gray-400 truncate max-w-[80px]">{site?.name}</span>
-                                                                <input
-                                                                    type="number"
-                                                                    className="w-12 bg-transparent border-b border-white/20 text-right text-white focus:outline-none focus:border-blue-500"
-                                                                    value={alloc.quantity}
-                                                                    onChange={(e) => {
-                                                                        const newWp = [...waveProducts];
-                                                                        const targetIndex = newWp[idx].allocations.findIndex(a => a.storeId === alloc.storeId);
-                                                                        if (targetIndex !== -1) {
-                                                                            newWp[idx].allocations[targetIndex].quantity = parseInt(e.target.value) || 0;
-                                                                            setWaveProducts(newWp);
-                                                                        }
-                                                                    }}
-                                                                    aria-label={`Quantity for ${site?.name}`}
-                                                                />
-                                                            </div>
-                                                        );
-                                                    })}
+                                                    {wp.allocations.length === 0 ? (
+                                                        <div className="col-span-full p-4 text-center text-red-400 font-bold text-[10px] uppercase tracking-wider">
+                                                            ⚠️ No stores have this warehouse configured as a replenishment source.
+                                                        </div>
+                                                    ) : (
+                                                        wp.allocations.map(alloc => {
+                                                            const site = sites.find(s => s.id === alloc.storeId);
+                                                            return (
+                                                                <div key={alloc.storeId} className="flex items-center justify-between text-xs bg-black/40 p-2 rounded">
+                                                                    <span className="text-gray-400 truncate max-w-[80px]">{site?.name}</span>
+                                                                    <input
+                                                                        type="number"
+                                                                        className="w-12 bg-transparent border-b border-white/20 text-right text-white focus:outline-none focus:border-blue-500"
+                                                                        value={alloc.quantity}
+                                                                        onChange={(e) => {
+                                                                            const newWp = [...waveProducts];
+                                                                            const targetIndex = newWp[idx].allocations.findIndex(a => a.storeId === alloc.storeId);
+                                                                            if (targetIndex !== -1) {
+                                                                                newWp[idx].allocations[targetIndex].quantity = parseInt(e.target.value) || 0;
+                                                                                setWaveProducts(newWp);
+                                                                            }
+                                                                        }}
+                                                                        aria-label={`Quantity for ${site?.name}`}
+                                                                    />
+                                                                </div>
+                                                            );
+                                                        })
+                                                    )}
                                                 </div>
                                             </div>
                                         );

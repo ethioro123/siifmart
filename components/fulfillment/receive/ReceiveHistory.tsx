@@ -58,11 +58,22 @@ export const ReceiveHistory: React.FC<ReceiveHistoryProps> = ({
     const perPage = isMobile ? RECEIVE_HISTORY_PER_PAGE_MOBILE : RECEIVE_HISTORY_PER_PAGE;
 
     const filteredHistory = useMemo(() => {
+        const employeeId = employees.find((e: any) => e.email === user?.email || e.name === user?.name || e.id === user?.id)?.id;
+        const isStaffWithLimitedAccess = !['admin', 'warehouse_manager', 'super_admin', 'dispatcher', 'inventory_specialist'].includes(user?.role || '');
+
         const receivedOrders = orders.filter(o => {
             const isFullyReceived = (o.lineItems || []).length > 0 &&
                 (o.lineItems || []).every(li => (li.receivedQty || 0) >= li.quantity);
             const isMarkedReceived = o.status === 'Received' || (o.status as any) === 'Closed';
-            return isFullyReceived || isMarkedReceived;
+            
+            if (!isFullyReceived && !isMarkedReceived) return false;
+
+            if (isStaffWithLimitedAccess) {
+                const receiveJob = jobs.find(j => j.type === 'RECEIVE' && j.orderRef === o.id);
+                if (receiveJob && receiveJob.assignedTo !== employeeId) return false;
+            }
+
+            return true;
         }).map(o => {
             // Resolve User Name
             const userId = o.approvedBy || o.createdBy;
@@ -111,7 +122,11 @@ export const ReceiveHistory: React.FC<ReceiveHistoryProps> = ({
         });
 
         // Only show RECEIVE jobs here — PUTAWAY has its own history tab
-        const relevantJobs = historicalJobs.filter(j => j.type === 'RECEIVE').map(j => {
+        const relevantJobs = historicalJobs.filter(j => {
+            if (j.type !== 'RECEIVE') return false;
+            if (isStaffWithLimitedAccess && j.assignedTo !== employeeId) return false;
+            return true;
+        }).map(j => {
             // Resolve User Name
             const userId = j.completedBy || j.createdBy || j.assignedTo;
             const userObj = employees.find(e => e.id === userId || e.name === userId);
@@ -163,7 +178,7 @@ export const ReceiveHistory: React.FC<ReceiveHistoryProps> = ({
             (item.subtitle && item.subtitle.toLowerCase().includes(search.toLowerCase())) ||
             (item.resolvedUser && item.resolvedUser.name.toLowerCase().includes(search.toLowerCase()))
         );
-    }, [orders, historicalJobs, search, resolveOrderRef, employees]);
+    }, [orders, historicalJobs, search, resolveOrderRef, employees, user, jobs]);
 
     const totalPages = Math.ceil(filteredHistory.length / perPage);
     const paginatedHistory = useMemo(() => {
