@@ -83,6 +83,42 @@ export default function App() {
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [cleanupAdminProducts]);
+
+  // Prevent scaling, pinch-to-zoom, double-tap zoom, and trackpad zoom on mobile/hybrid browsers
+  React.useEffect(() => {
+    const preventPinchZoom = (e: TouchEvent) => {
+      if (e.touches.length > 1) {
+        e.preventDefault();
+      }
+    };
+
+    let lastTouchEnd = 0;
+    const preventDoubleTapZoom = (e: TouchEvent) => {
+      const now = Date.now();
+      if (now - lastTouchEnd <= 300) {
+        e.preventDefault();
+      }
+      lastTouchEnd = now;
+    };
+
+    const preventWheelZoom = (e: WheelEvent) => {
+      if (e.ctrlKey) {
+        e.preventDefault();
+      }
+    };
+
+    document.addEventListener('touchstart', preventPinchZoom, { passive: false });
+    document.addEventListener('touchmove', preventPinchZoom, { passive: false });
+    document.addEventListener('touchend', preventDoubleTapZoom, { passive: false });
+    document.addEventListener('wheel', preventWheelZoom, { passive: false });
+
+    return () => {
+      document.removeEventListener('touchstart', preventPinchZoom);
+      document.removeEventListener('touchmove', preventPinchZoom);
+      document.removeEventListener('touchend', preventDoubleTapZoom);
+      document.removeEventListener('wheel', preventWheelZoom);
+    };
+  }, []);
   // Initial Auth/Data Loading State
   if (loading || (user && isDataInitialLoading)) {
     // Calculate progress based on entities loaded
