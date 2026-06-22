@@ -103,23 +103,23 @@ export const ReceivingModal: React.FC = () => {
                             </div>
                             <div className="max-h-[300px] overflow-y-auto custom-scrollbar divide-y divide-[#E2DCCE]/60 dark:divide-white/5 bg-transparent">
                                 {receivingSummary.items.map((item: any, idx: number) => {
-                                    const prod = allProducts.find((p: any) => p.sku?.trim()?.toUpperCase() === item.sku?.trim()?.toUpperCase());
-                                    const resolvedUnit = item.unit || prod?.unit || '';
-                                    const isWeightVol = isWeightBased(resolvedUnit) || isVolumeBased(resolvedUnit);
-                                    const sizeNum = prod?.size ? parseFloat(prod.size as string) : 0;
-                                    const displayExpected = item.displayExpectedQty || item.expectedQty;
+                                    const resolvedUnit = item.unit || '';
+                                    const sizeNum = item.productSize || 0;
+                                    const isWeightVol = (isWeightBased(resolvedUnit) || isVolumeBased(resolvedUnit)) && sizeNum > 0;
 
-                                    const formattedExpected = (isWeightVol && sizeNum > 0) ? (() => {
-                                        const cases = displayExpected / sizeNum;
-                                        const casesStr = cases % 1 === 0 ? cases.toString() : cases.toFixed(2);
-                                        return `${casesStr} x ${sizeNum} ${resolvedUnit}`;
-                                    })() : `${displayExpected}${resolvedUnit ? ` ${resolvedUnit}` : ''}`;
+                                    // displayExpectedQty is the case count; rawExpected is the physical total
+                                    const casesExpected = item.displayExpectedQty || item.expectedQty;
+                                    const rawExpected = isWeightVol ? casesExpected * sizeNum : casesExpected;
 
-                                    const formattedReceived = (isWeightVol && sizeNum > 0) ? (() => {
-                                        const cases = item.receivedQty / sizeNum;
-                                        const casesStr = cases % 1 === 0 ? cases.toString() : cases.toFixed(2);
-                                        return `${casesStr} x ${sizeNum} ${resolvedUnit}`;
-                                    })() : `${item.receivedQty}${resolvedUnit ? ` ${resolvedUnit}` : ''}`;
+                                    const formattedExpected = isWeightVol
+                                        ? `${casesExpected % 1 === 0 ? casesExpected : casesExpected.toFixed(2)} x ${sizeNum} ${resolvedUnit}`
+                                        : `${casesExpected}${resolvedUnit ? ` ${resolvedUnit}` : ''}`;
+
+                                    // receivedQty stored raw — convert to cases for display
+                                    const casesReceived = isWeightVol ? item.receivedQty / sizeNum : item.receivedQty;
+                                    const formattedReceived = isWeightVol
+                                        ? `${casesReceived % 1 === 0 ? casesReceived : casesReceived.toFixed(2)} x ${sizeNum} ${resolvedUnit}`
+                                        : `${item.receivedQty}${resolvedUnit ? ` ${resolvedUnit}` : ''}`;
 
                                     return (
                                         <div key={idx} className="p-3 flex items-center justify-between hover:bg-stone-50 dark:hover:bg-white/5 transition-colors">
@@ -129,7 +129,7 @@ export const ReceivingModal: React.FC = () => {
                                             </div>
                                             <div className="flex flex-col items-end">
                                                 <div className="flex items-center gap-2">
-                                                    <span className={`text-xs font-bold ${item.receivedQty < displayExpected ? 'text-rose-600 dark:text-red-400' : 'text-emerald-700 dark:text-green-400'}`}>
+                                                    <span className={`text-xs font-bold ${item.receivedQty < rawExpected ? 'text-rose-600 dark:text-red-400' : 'text-emerald-700 dark:text-green-400'}`}>
                                                         {t('posCommand.received')} {formattedReceived} {t('pos.outOf')} {formattedExpected}
                                                     </span>
                                                 </div>
@@ -245,13 +245,16 @@ export const ReceivingModal: React.FC = () => {
                                             </thead>
                                             <tbody className="divide-y divide-[#E2DCCE]/60 dark:divide-white/5 bg-transparent">
                                                 {transferReceivingItems.map((item, index) => {
-                                                    const prod = allProducts.find(p => p.sku?.trim()?.toUpperCase() === item.sku?.trim()?.toUpperCase());
-                                                    const unit = prod?.unit || item.unit || '';
-                                                    const isWeightVol = isWeightBased(unit) || isVolumeBased(unit);
-                                                    const sizeNum = prod?.size ? parseFloat(prod.size as string) : (item.productSize || 0);
+                                                    // Use productSize stored at load time — avoids re-lookup on a product copy with null size
+                                                    const unit = item.unit || '';
+                                                    const sizeNum = item.productSize || 0;
+                                                    const isWeightVol = (isWeightBased(unit) || isVolumeBased(unit)) && sizeNum > 0;
 
-                                                    const isFullyReceived = item.receivedQty >= (item.displayExpectedQty || item.expectedQty);
-                                                    const isOverReceived = item.receivedQty > (item.displayExpectedQty || item.expectedQty);
+                                                    // displayExpectedQty is now the case count; raw threshold = cases * sizeNum
+                                                    const casesExpected = item.displayExpectedQty || item.expectedQty;
+                                                    const rawExpected = isWeightVol ? casesExpected * sizeNum : casesExpected;
+                                                    const isFullyReceived = item.receivedQty >= rawExpected;
+                                                    const isOverReceived = item.receivedQty > rawExpected;
 
                                                     return (
                                                         <tr key={index} className={`transition-colors ${isFullyReceived ? 'bg-emerald-500/[0.02]' : 'hover:bg-stone-50 dark:hover:bg-white/[0.02]'}`}>
@@ -261,15 +264,10 @@ export const ReceivingModal: React.FC = () => {
                                                             </td>
                                                             <td className="p-3 text-center">
                                                                 <span className="text-sm font-mono text-stone-700 dark:text-gray-300">
-                                                                    {isWeightVol && sizeNum > 0 ? (
-                                                                        (() => {
-                                                                            const total = item.displayExpectedQty || item.expectedQty;
-                                                                            const cases = total / sizeNum;
-                                                                            const casesStr = cases % 1 === 0 ? cases.toString() : cases.toFixed(2);
-                                                                            return `${casesStr} x ${sizeNum}`;
-                                                                        })()
+                                                                    {isWeightVol ? (
+                                                                        `${casesExpected % 1 === 0 ? casesExpected : casesExpected.toFixed(2)} x ${sizeNum}`
                                                                     ) : (
-                                                                        item.displayExpectedQty || item.expectedQty
+                                                                        casesExpected
                                                                     )}
                                                                     {' '}
                                                                     {unit ? <span className="text-[10px] text-stone-500 dark:text-gray-500 uppercase">{unit}</span> : ''}
@@ -278,7 +276,7 @@ export const ReceivingModal: React.FC = () => {
                                                             <td className="p-3">
                                                                 <div className="flex items-center justify-center gap-2">
                                                                     <button
-                                                                        onClick={() => handleUpdateTransferItem(index, 'receivedQty', Math.max(0, item.receivedQty - (isWeightVol && sizeNum > 0 ? sizeNum : 1)))}
+                                                                        onClick={() => handleUpdateTransferItem(index, 'receivedQty', Math.max(0, item.receivedQty - (isWeightVol ? sizeNum : 1)))}
                                                                         className="w-7 h-7 bg-stone-100 dark:bg-white/5 hover:bg-rose-500/20 text-stone-600 dark:text-gray-400 hover:text-rose-600 dark:hover:text-red-400 rounded flex items-center justify-center transition-all active:scale-90 border border-[#E2DCCE] dark:border-transparent hover:border-rose-500/30"
                                                                     >-</button>
                                                                     <input
@@ -286,11 +284,11 @@ export const ReceivingModal: React.FC = () => {
                                                                         placeholder="0"
                                                                         type="number"
                                                                         min="0"
-                                                                        step={isWeightVol && sizeNum > 0 ? "any" : "1"}
-                                                                        value={isWeightVol && sizeNum > 0 ? (item.receivedQty / sizeNum) : item.receivedQty}
+                                                                        step={isWeightVol ? "any" : "1"}
+                                                                        value={isWeightVol ? (item.receivedQty / sizeNum) : item.receivedQty}
                                                                         onChange={(e) => {
                                                                             const val = parseFloat(e.target.value) || 0;
-                                                                            handleUpdateTransferItem(index, 'receivedQty', isWeightVol && sizeNum > 0 ? val * sizeNum : Math.round(val));
+                                                                            handleUpdateTransferItem(index, 'receivedQty', isWeightVol ? val * sizeNum : Math.round(val));
                                                                         }}
                                                                         className={`w-14 bg-white dark:bg-black/50 border rounded text-center font-mono py-1 focus:outline-none transition-all ${
                                                                             isOverReceived
@@ -301,10 +299,10 @@ export const ReceivingModal: React.FC = () => {
                                                                         }`}
                                                                     />
                                                                     <button
-                                                                        onClick={() => handleUpdateTransferItem(index, 'receivedQty', item.receivedQty + (isWeightVol && sizeNum > 0 ? sizeNum : 1))}
+                                                                        onClick={() => handleUpdateTransferItem(index, 'receivedQty', item.receivedQty + (isWeightVol ? sizeNum : 1))}
                                                                         className="w-7 h-7 bg-stone-100 dark:bg-white/5 hover:bg-emerald-500/20 text-stone-600 dark:text-gray-400 hover:text-emerald-700 dark:hover:text-emerald-450 rounded flex items-center justify-center transition-all active:scale-90 border border-[#E2DCCE] dark:border-transparent hover:border-emerald-500/30"
                                                                     >+</button>
-                                                                    {isWeightVol && sizeNum > 0 ? (
+                                                                    {isWeightVol ? (
                                                                         <span className="text-[10px] text-stone-500 dark:text-gray-555 uppercase font-bold ml-1">x {sizeNum} {unit}</span>
                                                                     ) : (
                                                                         unit && <span className="text-[10px] text-stone-500 dark:text-gray-555 uppercase font-bold ml-1">{unit}</span>
@@ -347,17 +345,15 @@ export const ReceivingModal: React.FC = () => {
                                                 <p className="text-[10px] text-stone-500 dark:text-gray-455 uppercase font-black tracking-widest">{t('posCommand.totalExpected')}</p>
                                                 <div className="text-lg font-mono text-[#1E3F27] dark:text-white font-bold">
                                                     {transferReceivingItems.map((item, idx) => {
-                                                        const prod = allProducts.find(p => p.sku?.trim()?.toUpperCase() === item.sku?.trim()?.toUpperCase());
-                                                        const unit = prod?.unit || item.unit || '';
-                                                        const isWeightVol = isWeightBased(unit) || isVolumeBased(unit);
-                                                        const sizeNum = prod?.size ? parseFloat(prod.size as string) : (item.productSize || 0);
-                                                        const total = item.displayExpectedQty || item.expectedQty;
+                                                        const unit = item.unit || '';
+                                                        const sizeNum = item.productSize || 0;
+                                                        const isWeightVol = (isWeightBased(unit) || isVolumeBased(unit)) && sizeNum > 0;
+                                                        // displayExpectedQty is now the case count
+                                                        const casesExpected = item.displayExpectedQty || item.expectedQty;
 
-                                                        const formatted = (isWeightVol && sizeNum > 0) ? (() => {
-                                                            const cases = total / sizeNum;
-                                                            const casesStr = cases % 1 === 0 ? cases.toString() : cases.toFixed(2);
-                                                            return `${casesStr} x ${sizeNum}`;
-                                                        })() : total.toString();
+                                                        const formatted = isWeightVol
+                                                            ? `${casesExpected % 1 === 0 ? casesExpected : casesExpected.toFixed(2)} x ${sizeNum}`
+                                                            : casesExpected.toString();
 
                                                         return (
                                                             <span key={idx}>
@@ -371,19 +367,24 @@ export const ReceivingModal: React.FC = () => {
                                             </div>
                                             <div>
                                                 <p className="text-[10px] text-stone-500 dark:text-gray-455 uppercase font-black tracking-widest">{t('posCommand.totalScanned')}</p>
-                                                <div className={`text-lg font-mono font-bold ${transferReceivingItems.reduce((sum, item) => sum + item.receivedQty, 0) >= transferReceivingItems.reduce((sum, item) => sum + (item.displayExpectedQty || item.expectedQty), 0) ? 'text-emerald-700 dark:text-green-400' : 'text-[#2C5E3B] dark:text-[#A9CBA2]'}`}>
+                                                <div className={`text-lg font-mono font-bold ${
+                                                    transferReceivingItems.every(item => {
+                                                        const sizeNum = item.productSize || 0;
+                                                        const isWV = (isWeightBased(item.unit || '') || isVolumeBased(item.unit || '')) && sizeNum > 0;
+                                                        const rawExpected = isWV ? (item.displayExpectedQty || item.expectedQty) * sizeNum : (item.displayExpectedQty || item.expectedQty);
+                                                        return item.receivedQty >= rawExpected;
+                                                    }) ? 'text-emerald-700 dark:text-green-400' : 'text-[#2C5E3B] dark:text-[#A9CBA2]'
+                                                }`}>
                                                     {transferReceivingItems.map((item, idx) => {
-                                                        const prod = allProducts.find(p => p.sku?.trim()?.toUpperCase() === item.sku?.trim()?.toUpperCase());
-                                                        const unit = prod?.unit || item.unit || '';
-                                                        const isWeightVol = isWeightBased(unit) || isVolumeBased(unit);
-                                                        const sizeNum = prod?.size ? parseFloat(prod.size as string) : (item.productSize || 0);
-                                                        const scanned = item.receivedQty;
+                                                        const unit = item.unit || '';
+                                                        const sizeNum = item.productSize || 0;
+                                                        const isWeightVol = (isWeightBased(unit) || isVolumeBased(unit)) && sizeNum > 0;
+                                                        // receivedQty is stored raw, convert to cases for display
+                                                        const casesScanned = isWeightVol ? item.receivedQty / sizeNum : item.receivedQty;
 
-                                                        const formatted = (isWeightVol && sizeNum > 0) ? (() => {
-                                                            const cases = scanned / sizeNum;
-                                                            const casesStr = cases % 1 === 0 ? cases.toString() : cases.toFixed(2);
-                                                            return `${casesStr} x ${sizeNum}`;
-                                                        })() : scanned.toString();
+                                                        const formatted = isWeightVol
+                                                            ? `${casesScanned % 1 === 0 ? casesScanned : casesScanned.toFixed(2)} x ${sizeNum}`
+                                                            : casesScanned.toString();
 
                                                         return (
                                                             <span key={idx}>

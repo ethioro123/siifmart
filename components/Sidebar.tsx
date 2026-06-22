@@ -27,8 +27,8 @@ const SidebarItem: React.FC<SidebarItemProps> = ({ to, icon: Icon, label, onClic
       onClick={onClick}
       className={({ isActive }) =>
         `flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group ${isActive
-          ? 'bg-cyber-primary/10 text-cyber-primary border-r-2 border-cyber-primary'
-          : 'text-gray-400 hover:bg-cyber-gray hover:text-cyber-primary'
+          ? 'bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 text-[#2C5E3B] dark:text-[#A9CBA2] border-r-2 border-[#2C5E3B] dark:border-[#A9CBA2]'
+          : 'text-stone-500 dark:text-gray-400 hover:bg-stone-100 dark:hover:bg-white/5 hover:text-[#2C5E3B] dark:hover:text-[#A9CBA2]'
         }`
       }
     >
@@ -163,20 +163,20 @@ export default function Sidebar() {
 
       <aside className={`
         fixed inset-y-0 left-0 z-[1001]
-        w-72 bg-cyber-dark border-r border-white/5
+        w-72 bg-white dark:bg-[#1E2822] border-r border-[#E2DCCE] dark:border-white/5
         transform transition-transform duration-300 ease-in-out
         flex flex-col
         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
-        <div className="p-6 flex items-center justify-between">
+        <div className="p-6 flex items-center justify-between border-b border-[#E2DCCE] dark:border-white/5">
           <Logo size={32} />
-          <button onClick={toggleSidebar} className="text-gray-400" aria-label="Close Sidebar">
+          <button onClick={toggleSidebar} className="text-stone-400 dark:text-gray-400 hover:text-[#2C5E3B] dark:hover:text-[#A9CBA2] transition-colors" aria-label="Close Sidebar">
             <X size={24} />
           </button>
         </div>
 
-        <nav className="flex-1 px-4 space-y-2 overflow-y-auto custom-scrollbar">
-          <p className="px-4 text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Menu</p>
+        <nav className="flex-1 px-4 space-y-1 overflow-y-auto custom-scrollbar py-4">
+          <p className="px-4 text-xs font-bold text-stone-400 dark:text-gray-500 uppercase tracking-wider mb-3">Menu</p>
           {navItems.map(item => (
             <SidebarItem
               key={item.to}

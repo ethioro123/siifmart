@@ -82,12 +82,15 @@ export function ActivityCenter({
       <div className="relative" ref={notifRef}>
          <button
             onClick={() => setIsNotifOpen(!isNotifOpen)}
-            className={`p-2 rounded-full border transition-all duration-300 relative group ${isNotifOpen ? 'bg-cyber-primary/20 border-cyber-primary text-cyber-primary shadow-[0_0_15px_rgba(0,255,157,0.2)]' : 'bg-white/5 border-white/10 text-gray-400 hover:text-white hover:border-white/20'}`}
+            className={`p-2 rounded-full border transition-all duration-300 relative group ${isNotifOpen
+               ? 'bg-[#2C5E3B]/20 dark:bg-[#A9CBA2]/20 border-[#2C5E3B]/50 dark:border-[#A9CBA2]/50 text-[#2C5E3B] dark:text-[#A9CBA2]'
+               : 'bg-white/60 dark:bg-white/5 border-[#E2DCCE] dark:border-white/10 text-stone-500 dark:text-gray-400 hover:text-[#2C5E3B] dark:hover:text-white hover:border-[#2C5E3B]/30 dark:hover:border-white/20'
+            }`}
             aria-label="Notifications"
          >
             <Bell size={18} className={isNotifOpen ? 'animate-bounce' : 'group-hover:rotate-12 transition-transform'} />
             {totalAlerts > 0 && (
-               <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[10px] font-black flex items-center justify-center rounded-full border-2 border-cyber-dark shadow-lg animate-pulse">
+               <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[10px] font-black flex items-center justify-center rounded-full border-2 border-white dark:border-[#1E2822] shadow-lg animate-pulse">
                   {totalAlerts}
                </span>
             )}
@@ -95,22 +98,22 @@ export function ActivityCenter({
 
          {isNotifOpen && (
             <div
-               className="fixed sm:absolute left-2 right-2 sm:left-auto sm:right-0 top-[3.75rem] sm:top-full mt-0 sm:mt-2 w-auto sm:w-96 max-w-[400px] bg-cyber-gray border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] z-[150] animate-in fade-in slide-in-from-top-4 overflow-hidden backdrop-blur-xl"
+               className="fixed sm:absolute left-2 right-2 sm:left-auto sm:right-0 top-[3.75rem] sm:top-full mt-0 sm:mt-2 w-auto sm:w-96 max-w-[400px] bg-white dark:bg-[#1E2822] border border-[#E2DCCE] dark:border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.12)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] z-[150] animate-in fade-in slide-in-from-top-4 overflow-hidden backdrop-blur-xl"
                onClick={(e) => e.stopPropagation()}
             >
                   {/* Header */}
-                  <div className="p-4 border-b border-white/5 bg-black/20">
+                  <div className="p-4 border-b border-[#E2DCCE] dark:border-white/5 bg-stone-50/60 dark:bg-black/20">
                      <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-2">
-                           <Layout size={16} className="text-cyber-primary" />
-                           <h4 className="text-sm font-black text-white uppercase tracking-widest">Activity Center</h4>
+                           <Layout size={16} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
+                           <h4 className="text-sm font-black text-[#1E3F27] dark:text-white uppercase tracking-widest">Activity Center</h4>
                         </div>
                         <div className="flex items-center gap-3">
                            {notifTab === 'all' && filteredNotifications.length > 0 && (
                               <>
                                  <button
                                     onClick={handleMarkAllRead}
-                                    className="text-[10px] font-bold text-cyber-primary hover:text-cyber-accent uppercase transition-colors"
+                                    className="text-[10px] font-bold text-[#2C5E3B] dark:text-[#A9CBA2] hover:text-[#1E3F27] dark:hover:text-white uppercase transition-colors"
                                  >
                                     Mark all read
                                  </button>
@@ -135,27 +138,27 @@ export function ActivityCenter({
                      </div>
 
                      {/* Tabs */}
-                     <div className="flex p-1 bg-black/40 rounded-lg border border-white/5">
+                     <div className="flex p-1 bg-stone-100/60 dark:bg-black/40 rounded-lg border border-[#E2DCCE] dark:border-white/5">
                         <button
                            onClick={() => setNotifTab('all')}
-                           className={`flex-1 flex items-center justify-center gap-2 py-1.5 text-[10px] font-black uppercase tracking-wider rounded-md transition-all ${notifTab === 'all' ? 'bg-cyber-primary text-black' : 'text-gray-400 hover:text-white'}`}
+                           className={`flex-1 flex items-center justify-center gap-2 py-1.5 text-[10px] font-black uppercase tracking-wider rounded-md transition-all ${notifTab === 'all' ? 'bg-[#2C5E3B] dark:bg-[#A9CBA2] text-white dark:text-[#1E3B24]' : 'text-stone-500 dark:text-gray-400 hover:text-[#1E3F27] dark:hover:text-white'}`}
                         >
                            <Bell size={12} />
                            Alerts
                            {filteredNotifications.length > 0 && (
-                              <span className={`ml-1 px-1.5 py-0.5 rounded-full text-[9px] ${notifTab === 'all' ? 'bg-black/20' : 'bg-red-500 text-white'}`}>
+                              <span className={`ml-1 px-1.5 py-0.5 rounded-full text-[9px] ${notifTab === 'all' ? 'bg-white/20' : 'bg-red-500 text-white'}`}>
                                  {filteredNotifications.length}
                               </span>
                            )}
                         </button>
                         <button
                            onClick={() => setNotifTab('tasks')}
-                           className={`flex-1 flex items-center justify-center gap-2 py-1.5 text-[10px] font-black uppercase tracking-wider rounded-md transition-all ${notifTab === 'tasks' ? 'bg-cyber-primary text-black' : 'text-gray-400 hover:text-white'}`}
+                           className={`flex-1 flex items-center justify-center gap-2 py-1.5 text-[10px] font-black uppercase tracking-wider rounded-md transition-all ${notifTab === 'tasks' ? 'bg-[#2C5E3B] dark:bg-[#A9CBA2] text-white dark:text-[#1E3B24]' : 'text-stone-500 dark:text-gray-400 hover:text-[#1E3F27] dark:hover:text-white'}`}
                         >
                            <CheckSquare size={12} />
                            Tasks
                            {tasksAssignedToMe.filter(t => t.status === 'Pending').length > 0 && (
-                              <span className={`ml-1 px-1.5 py-0.5 rounded-full text-[9px] ${notifTab === 'tasks' ? 'bg-black/20' : 'bg-blue-500 text-white'}`}>
+                              <span className={`ml-1 px-1.5 py-0.5 rounded-full text-[9px] ${notifTab === 'tasks' ? 'bg-white/20' : 'bg-blue-500 text-white'}`}>
                                  {tasksAssignedToMe.filter(t => t.status === 'Pending').length}
                               </span>
                            )}
@@ -172,7 +175,7 @@ export function ActivityCenter({
                            {displayedNotifications.length > 0 ? (
                               <div className="divide-y divide-white/5 flex-1">
                                  {displayedNotifications.map(notif => (
-                                    <div key={notif.id} className={`p-4 hover:bg-white/5 transition-colors relative group ${!notif.read ? 'bg-cyber-primary/5' : ''}`}>
+                                    <div key={notif.id} className={`p-4 hover:bg-stone-50 dark:hover:bg-white/5 transition-colors relative group ${!notif.read ? 'bg-[#2C5E3B]/5 dark:bg-[#A9CBA2]/5' : ''}`}>
                                        <div className="flex gap-3">
                                           <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${notif.type === 'error' ? 'bg-red-500/10 text-red-500 border border-red-500/20' :
                                              notif.type === 'warning' ? 'bg-yellow-500/10 text-yellow-500 border border-yellow-500/20' :
@@ -224,24 +227,24 @@ export function ActivityCenter({
                            {/* Quick Task Toggle */}
                            <button
                               onClick={() => setShowQuickAssign(!showQuickAssign)}
-                              className="w-full flex items-center justify-between p-2 rounded-lg bg-cyber-primary/10 border border-cyber-primary/20 hover:bg-cyber-primary/20 transition-all group"
+                              className="w-full flex items-center justify-between p-2 rounded-lg bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20 hover:bg-[#2C5E3B]/20 dark:hover:bg-[#A9CBA2]/20 transition-all group"
                            >
                               <div className="flex items-center gap-2">
-                                 <Plus size={14} className="text-cyber-primary group-hover:rotate-90 transition-transform" />
-                                 <span className="text-xs font-bold text-cyber-primary uppercase tracking-wider">Quick Task Assign</span>
+                                 <Plus size={14} className="text-[#2C5E3B] dark:text-[#A9CBA2] group-hover:rotate-90 transition-transform" />
+                                 <span className="text-xs font-bold text-[#2C5E3B] dark:text-[#A9CBA2] uppercase tracking-wider">Quick Task Assign</span>
                               </div>
-                              <div className="px-1.5 py-0.5 rounded bg-black/30 text-[9px] font-bold text-gray-400">ALT+N</div>
+                              <div className="px-1.5 py-0.5 rounded bg-stone-200/60 dark:bg-black/30 text-[9px] font-bold text-stone-400 dark:text-gray-400">ALT+N</div>
                            </button>
 
                            {showQuickAssign && (
                               <div className="p-3 bg-black/30 rounded-xl border border-white/10 animate-in slide-in-from-top-2">
                                  <div className="space-y-3">
                                     <div className="relative">
-                                       <ListTodo size={12} className="absolute left-2.5 top-3 text-gray-500" />
+                                       <ListTodo size={12} className="absolute left-2.5 top-3 text-stone-400 dark:text-gray-500" />
                                        <input
                                           type="text"
                                           placeholder="Awaiting intelligence..."
-                                          className="w-full bg-black/50 border border-white/10 rounded-lg pl-8 pr-3 py-2 text-xs text-white placeholder-gray-600 outline-none focus:border-cyber-primary/50"
+                                          className="w-full bg-white dark:bg-black/50 border border-[#E2DCCE] dark:border-white/10 rounded-lg pl-8 pr-3 py-2 text-xs text-[#1E3F27] dark:text-white placeholder-stone-400 dark:placeholder-gray-600 outline-none focus:border-[#2C5E3B]/50 dark:focus:border-[#A9CBA2]/50"
                                           value={quickTaskTitle}
                                           onChange={e => setQuickTaskTitle(e.target.value)}
                                        />
@@ -278,7 +281,7 @@ export function ActivityCenter({
                                     <button
                                        onClick={handleQuickAssign}
                                        disabled={!quickTaskTitle.trim() || !quickTaskAssignee}
-                                       className="w-full py-2 bg-cyber-primary hover:bg-cyber-accent text-black font-bold text-xs rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                       className="w-full py-2 bg-[#2C5E3B] dark:bg-[#A9CBA2] hover:bg-[#1B3520] dark:hover:bg-[#DFD9CA] text-white dark:text-[#1E3B24] font-bold text-xs rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                                     >
                                        <Send size={12} />
                                        Assign Task
@@ -295,7 +298,7 @@ export function ActivityCenter({
                                        <div className="flex items-start gap-3">
                                           <button
                                              onClick={() => handleTaskStatusChange(task.id, task.status === 'Completed' ? 'Pending' : 'Completed')}
-                                             className={`mt-0.5 w-4 h-4 rounded border transition-all flex items-center justify-center ${task.status === 'Completed' ? 'bg-cyber-primary border-cyber-primary' : 'border-gray-600 hover:border-cyber-primary'}`}
+                                             className={`mt-0.5 w-4 h-4 rounded border transition-all flex items-center justify-center ${task.status === 'Completed' ? 'bg-[#2C5E3B] dark:bg-[#A9CBA2] border-[#2C5E3B] dark:border-[#A9CBA2]' : 'border-stone-300 dark:border-gray-600 hover:border-[#2C5E3B] dark:hover:border-[#A9CBA2]'}`}
                                           >
                                              {task.status === 'Completed' && <X size={12} className="text-black" />}
                                           </button>

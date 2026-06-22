@@ -234,34 +234,46 @@ export const POSCommandProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
         const items = sourceItems.map((item: any) => {
             const itemSku = item.sku?.trim()?.toUpperCase();
-            const product = itemSku ? allProducts.find(p => p.sku?.trim()?.toUpperCase() === itemSku) : null;
 
-            // Transfer stores expectedQty in PACKAGE units (e.g., 5 units of 20L = 100L)
-            // and requestedMeasureQty as the original measure request (e.g., 89 L)
+            // Pick the product record that has a valid size — store copies often have size=null
+            const allMatchingProducts = itemSku
+                ? allProducts.filter(p => p.sku?.trim()?.toUpperCase() === itemSku)
+                : [];
+            const product = allMatchingProducts.find(p => p.size && parseFloat(p.size as string) > 0)
+                ?? allMatchingProducts[0]
+                ?? null;
+
+            // expectedQty is always stored as CASE count in the WMS job
             const packageQty = item.expectedQty ?? item.expected_qty ?? item.quantity ?? 0;
             const measureQty = item.requestedMeasureQty ?? item.requested_measure_qty;
-            const productSize = parseFloat(product?.size || item.size || '0');
 
-            // Aggressive unit resolution: check item, check current product, check ANY product with this SKU
+            // Resolve size — prefer the product with a valid size, fall back to item.size
+            const productSize = parseFloat(
+                (product?.size && parseFloat(product.size as string) > 0 ? product.size : null)
+                ?? item.size
+                ?? '0'
+            ) || 0;
+
+            // Unit resolution
             const itemUnit = item.unit || item.measure_unit || item.uom;
             const productUnit = product?.unit || (product as any)?.measureUnit;
-            const fallbackUnit = measureQty ? (productSize > 1 ? 'L' : 'KG') : '';
-
-            const resolvedUnit = (itemUnit || productUnit || fallbackUnit || '').trim().toUpperCase();
+            const resolvedUnit = (itemUnit || productUnit || '').trim().toUpperCase();
 
             return {
                 productId: product?.productId || product?.id || item.productId || item.product_id,
                 sku: itemSku || item.sku,
                 name: product?.name || item.name || t('posCommand.unknownProduct'),
+                // expectedQty = case count (how many packages)
                 expectedQty: packageQty,
                 requestedMeasureQty: measureQty,
-                displayExpectedQty: measureQty || packageQty,
+                // displayExpectedQty = CASE count, so the modal renders: cases x size
+                displayExpectedQty: packageQty,
                 receivedQty: 0,
                 condition: 'Good' as const,
                 notes: '',
                 unit: resolvedUnit,
                 productSize,
-                isMeasure: !!measureQty
+                isMeasure: !!(measureQty || (productSize > 0 && (isWeightBased(resolvedUnit) || isVolumeBased(resolvedUnit))))
             };
         });
 
@@ -491,9 +503,12 @@ export const POSCommandProvider: React.FC<{ children: React.ReactNode }> = ({ ch
             }
 
             // 4. Show receiving summary
-            const hasDiscrepancies = transferReceivingItems.some(i =>
-                i.receivedQty !== (i.displayExpectedQty || i.expectedQty)
-            );
+            const hasDiscrepancies = transferReceivingItems.some(i => {
+                const sizeNum = i.productSize || 0;
+                const isWV = sizeNum > 0 && (isWeightBased(i.unit || '') || isVolumeBased(i.unit || ''));
+                const rawExpected = isWV ? (i.displayExpectedQty || i.expectedQty) * sizeNum : (i.displayExpectedQty || i.expectedQty);
+                return i.receivedQty !== rawExpected;
+            });
             setReceivingSummary({
                 orderRef: transfer.orderRef || transferId,
                 jobNumber: transfer.jobNumber || (transfer as any).job_number,
@@ -504,7 +519,8 @@ export const POSCommandProvider: React.FC<{ children: React.ReactNode }> = ({ ch
                     displayExpectedQty: i.displayExpectedQty || i.expectedQty,
                     receivedQty: i.receivedQty,
                     condition: i.condition,
-                    unit: i.unit
+                    unit: i.unit,
+                    productSize: i.productSize || 0
                 })),
                 timestamp: new Date().toISOString(),
                 hasDiscrepancies
