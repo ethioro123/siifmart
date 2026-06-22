@@ -309,7 +309,8 @@ export const purchaseOrdersService = {
             dock_slot: po.dockSlot,
             po_number: poNumber,
             requested_by: po.requestedBy,
-            created_by: po.createdBy
+            created_by: po.createdBy,
+            priority: po.priority
             // Note: approval tracking is handled via notes field (see update function)
         };
         const { error: poError } = await supabase
@@ -533,6 +534,7 @@ export const purchaseOrdersService = {
         if (updates.destination !== undefined) { dbUpdates.destination = updates.destination; }
         if (updates.discount !== undefined) { dbUpdates.discount = updates.discount; }
         if (updates.incoterms !== undefined) { dbUpdates.incoterms = updates.incoterms; }
+        if (updates.priority !== undefined) { dbUpdates.priority = updates.priority; }
 
         // Remove any undefined values
         Object.keys(dbUpdates).forEach(key => {
