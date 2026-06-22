@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
     Truck, FileText, Search, Plus, X, CheckCircle, ArrowRight, Layout, Layers,
-    AlertTriangle, Clock, MapPin, List, ChevronRight, ClipboardCheck, Minus,
+    AlertTriangle, Clock, MapPin, List, ChevronRight, ChevronDown, ClipboardCheck, Minus,
     AlertOctagon, RefreshCw, History as HistoryIcon, Package, Lock, Snowflake, Zap,
     Trash2, RotateCcw, Shield, ShieldCheck, Hash, ArrowDown, ArrowLeft, MoreHorizontal, User as UserIcon,
     Box, Printer, Scan, Navigation, Rocket, Warehouse, ShoppingBag, Activity, QrCode, LogOut, Archive
@@ -74,6 +74,7 @@ export const DriverTab: React.FC<DriverTabProps> = ({
     const [driverScannerOpen, setDriverScannerOpen] = useState(false);
     const [isIncidentModalOpen, setIsIncidentModalOpen] = useState(false);
     const [globalSearch, setGlobalSearch] = useState('');
+    const [showControlCenter, setShowControlCenter] = useState(false);
 
     const adjustStockMutation = useAdjustStockMutation();
 
@@ -229,45 +230,60 @@ export const DriverTab: React.FC<DriverTabProps> = ({
             {/* HYPER-OPTIMIZED MOBILE DASHBOARD */}
             {viewMode === 'Active' ? (
                 <div className="flex flex-col gap-4">
-                    {/* TOP: INLINE METRICS (Hyper-compact) */}
-                    <DriverMetrics
-                        filteredJobs={filteredJobs}
-                        historicalJobs={historicalJobs}
-                        employees={employees}
-                        user={user}
-                    />
-
-                    {/* MIDDLE: ACTION CENTER (Tight horizontal tools) */}
-                    <DriverTools
-                        setDriverScannerOpen={setDriverScannerOpen}
-                        onIssue={() => setIsIncidentModalOpen(true)}
-                        onDocs={handleViewDocs}
-                        onEnd={handleEndShift}
-                        addNotification={addNotification}
-                    />
-
-                    {/* GLOBAL SEARCH */}
-                    <div className="relative w-full">
-                        <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-                            <Search className="h-4 w-4 text-[#A9CBA2]" />
+                    {/* MOBILE COLLAPSIBLE TOGGLE */}
+                    <button
+                        onClick={() => setShowControlCenter(!showControlCenter)}
+                        className="flex md:hidden items-center justify-between w-full p-4 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl shadow-sm hover:bg-gray-50 dark:hover:bg-white/10 transition-all text-xs font-black uppercase tracking-wider text-gray-900 dark:text-white"
+                    >
+                        <div className="flex items-center gap-2">
+                            <Activity size={14} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
+                            <span>Shift Summary & Actions</span>
                         </div>
-                        <input
-                            type="text"
-                            placeholder="Find mission by ID, Dest, or TRK..."
-                            value={globalSearch}
-                            onChange={(e) => setGlobalSearch(e.target.value)}
-                            className="w-full bg-white dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-2xl pl-10 pr-10 py-3 text-xs md:text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-600 focus:outline-none focus:border-cyan-500/50 shadow-sm dark:shadow-inner transition-colors"
+                        <ChevronDown size={14} className={`text-gray-400 transition-transform duration-300 ${showControlCenter ? 'rotate-180' : ''}`} />
+                    </button>
+
+                    {/* METRICS, TOOLS & SEARCH CONTAINER */}
+                    <div className={`md:flex flex-col gap-4 ${showControlCenter ? 'flex' : 'hidden md:flex'}`}>
+                        {/* TOP: INLINE METRICS (Hyper-compact) */}
+                        <DriverMetrics
+                            filteredJobs={filteredJobs}
+                            historicalJobs={historicalJobs}
+                            employees={employees}
+                            user={user}
                         />
-                        {globalSearch && (
-                            <button 
-                                onClick={() => setGlobalSearch('')}
-                                aria-label="Clear search"
-                                title="Clear search"
-                                className="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
-                            >
-                                <X size={14} />
-                            </button>
-                        )}
+
+                        {/* MIDDLE: ACTION CENTER (Tight horizontal tools) */}
+                        <DriverTools
+                            setDriverScannerOpen={setDriverScannerOpen}
+                            onIssue={() => setIsIncidentModalOpen(true)}
+                            onDocs={handleViewDocs}
+                            onEnd={handleEndShift}
+                            addNotification={addNotification}
+                        />
+
+                        {/* GLOBAL SEARCH */}
+                        <div className="relative w-full">
+                            <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                                <Search className="h-4 w-4 text-[#A9CBA2]" />
+                            </div>
+                            <input
+                                type="text"
+                                placeholder="Find mission by ID, Dest, or TRK..."
+                                value={globalSearch}
+                                onChange={(e) => setGlobalSearch(e.target.value)}
+                                className="w-full bg-white dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-2xl pl-10 pr-10 py-3 text-xs md:text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-600 focus:outline-none focus:border-cyan-500/50 shadow-sm dark:shadow-inner transition-colors"
+                            />
+                            {globalSearch && (
+                                <button 
+                                    onClick={() => setGlobalSearch('')}
+                                    aria-label="Clear search"
+                                    title="Clear search"
+                                    className="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                                >
+                                    <X size={14} />
+                                </button>
+                            )}
+                        </div>
                     </div>
 
                     {/* BOTTOM: ACTIVE MISSION (The main focus, dense layout) */}

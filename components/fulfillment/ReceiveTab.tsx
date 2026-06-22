@@ -403,6 +403,8 @@ export const ReceiveTab: React.FC = () => {
                     t={t}
                     isSubmitting={isSubmitting}
                     itemsPerPage={RECEIVE_ITEMS_PER_PAGE}
+                    user={user}
+                    employees={employees}
                 />
             ) : (
                 <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">

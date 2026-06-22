@@ -7,6 +7,8 @@ import { Protected } from '../../Protected';
 import { formatPOItemDescription } from '../../procurement/utils';
 import { getSellUnit } from '../../../utils/units';
 
+import { hasPermission } from '../../../utils/permissions';
+
 interface ReceiveListProps {
     paginatedReceiveOrders: PurchaseOrder[];
     receiveOrdersTotalPages: number;
@@ -28,6 +30,8 @@ interface ReceiveListProps {
     t: (key: string) => string;
     isSubmitting: boolean;
     itemsPerPage: number;
+    user?: any;
+    employees?: any[];
 }
 
 export const ReceiveList: React.FC<ReceiveListProps> = ({
@@ -50,7 +54,9 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
     setShowReviewModal,
     t,
     isSubmitting,
-    itemsPerPage
+    itemsPerPage,
+    user,
+    employees
 }) => {
 
     if (filteredReceiveOrdersLength === 0) {
@@ -145,6 +151,15 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                                     const remainingQty = Math.max(0, item.quantity - receivedQty);
                                     const isComplete = remainingQty <= 0;
 
+                                    const employeeId = employees?.find((e: any) => e.email === user?.email || e.name === user?.name || e.id === user?.id)?.id;
+                                    const isAssigned = jobs.some(j => 
+                                        j.type === 'RECEIVE' && 
+                                        j.orderRef === po.id && 
+                                        j.assignedTo === employeeId &&
+                                        !['completed', 'cancelled', 'deleted'].includes(j.status?.toLowerCase() || '')
+                                    );
+                                    const isAllowedToReceive = isAssigned || hasPermission(user?.role, 'RECEIVE_PO');
+
                                     return (
                                         <div key={item.productId || idx} className={`p-4 md:p-5 rounded-xl border transition-all group/item ${isComplete ? 'glass-panel-pushed opacity-60 shadow-inner' : 'bg-[#FAF8F5]/85 dark:bg-[#1C2620]/30 border-[#E2DCCE]/60 dark:border-[#A9CBA2]/[0.06] shadow-sm hover:border-[#2C5E3B]/40 dark:hover:border-[#A9CBA2]/30 active:scale-[0.99] cursor-pointer'}`}>
                                             <div className="flex flex-col gap-5">
@@ -203,7 +218,7 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                                                             <Printer size={14} className="text-[#4D6E56] dark:text-zinc-500" /> Reprint Label
                                                         </button>
                                                     ) : (
-                                                        <Protected permission="RECEIVE_PO">
+                                                        isAllowedToReceive ? (
                                                             <button onClick={() => {
                                                                 const now = new Date();
                                                                 const dateStr = now.toISOString().split('T')[0].replace(/-/g, '');
@@ -244,7 +259,11 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                                                                     </>
                                                                 )}
                                                             </button>
-                                                        </Protected>
+                                                        ) : (
+                                                            <div className="w-full py-3 px-4 text-stone-500 dark:text-zinc-550 border border-dashed border-stone-200 dark:border-white/5 rounded-xl text-[10px] font-black uppercase tracking-widest text-center bg-stone-50/50 dark:bg-black/20">
+                                                                Access Restricted
+                                                            </div>
+                                                        )
                                                     )
                                                 }
                                             </div>
