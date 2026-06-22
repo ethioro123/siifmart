@@ -331,7 +331,7 @@ export default function Inventory() {
     return (
         <div className="flex flex-col min-h-screen bg-transparent text-gray-900 dark:text-white transition-colors duration-300">
             {/* --- HEADER --- */}
-            <div className="flex-none p-6 md:p-8 space-y-6">
+            <div className="flex-none p-4 sm:p-6 md:p-8 space-y-6">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
                         <h1 className="text-3xl font-black uppercase tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-[#2C5E3B] to-amber-600 dark:from-[#A9CBA2] dark:to-[#DFD5C6] drop-shadow-sm">
@@ -398,7 +398,7 @@ export default function Inventory() {
             </div>
 
             {/* --- CONTENT --- */}
-            <div className="flex-1 px-6 md:px-8 pb-8 flex flex-col">
+            <div className="flex-1 px-4 sm:px-6 md:px-8 pb-8 flex flex-col">
                 {activeTab === 'overview' && (
                     <InventoryOverview serverMetrics={serverMetrics || null} categoryData={categoryData} abcData={abcData} totalInventoryValueCost={totalInventoryValueCost} totalInventoryValueRetail={totalInventoryValueRetail} filteredProducts={localProducts} />
                 )}

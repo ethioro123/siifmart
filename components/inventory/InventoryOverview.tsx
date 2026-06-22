@@ -98,7 +98,7 @@ export const InventoryOverview: React.FC<InventoryOverviewProps> = ({
                     <h3 className="text-xs font-black text-[#4D6E56] dark:text-[#7A9E83] uppercase tracking-widest mb-6 select-none">
                         Valuation by Category
                     </h3>
-                    <div className="h-[300px]">
+                    <div className="h-[300px] touch-pan-y">
                         <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                             <BarChart data={categoryData}>
                                 <defs>
@@ -141,7 +141,7 @@ export const InventoryOverview: React.FC<InventoryOverviewProps> = ({
                     <h3 className="text-xs font-black text-[#4D6E56] dark:text-[#7A9E83] uppercase tracking-widest mb-6 select-none">
                         ABC Classification
                     </h3>
-                    <div className="h-[200px]">
+                    <div className="h-[200px] touch-pan-y">
                         <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                             <PieChart>
                                 <Pie

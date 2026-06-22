@@ -141,7 +141,7 @@ export const ProcurementDashboard: React.FC<ProcurementDashboardProps> = ({
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div className="glass-panel rounded-2xl p-6">
                     <h3 className="font-bold text-gray-900 dark:text-white mb-6 text-sm uppercase tracking-widest text-[#4D6E56] dark:text-[#7A9E83]">Spend by Category</h3>
-                    <div className="h-[300px]">
+                    <div className="h-[300px] touch-pan-y">
                         <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                             <PieChart>
                                 <Pie data={metrics.categoryData} cx="50%" cy="50%" innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value">
@@ -168,7 +168,7 @@ export const ProcurementDashboard: React.FC<ProcurementDashboardProps> = ({
 
                 <div className="glass-panel rounded-2xl p-6">
                     <h3 className="font-bold text-gray-900 dark:text-white mb-6 text-sm uppercase tracking-widest text-[#4D6E56] dark:text-[#7A9E83]">Monthly Spend Trend</h3>
-                    <div className="h-[300px]">
+                    <div className="h-[300px] touch-pan-y">
                         <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                             <AreaChart data={metrics.trendData}>
                                 <defs>

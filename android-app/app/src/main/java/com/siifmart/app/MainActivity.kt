@@ -96,9 +96,9 @@ class MainActivity : AppCompatActivity() {
             webSettings.mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
         }
         
-        // Disable zoom controls to prevent scaling inside WebView
-        webSettings.setSupportZoom(false)
-        webSettings.builtInZoomControls = false
+        // Enable zoom controls (useful for PDA)
+        webSettings.setSupportZoom(true)
+        webSettings.builtInZoomControls = true
         webSettings.displayZoomControls = false // Hide zoom controls UI
         
         // Cache settings - Modern caching strategy

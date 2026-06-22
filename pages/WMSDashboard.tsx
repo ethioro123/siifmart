@@ -291,7 +291,7 @@ export default function WMSDashboard() {
               </div>
             </div>
             
-            <div className="h-[340px] w-full relative">
+            <div className="h-[340px] w-full relative touch-pan-y">
               <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
                 <BarChart data={INBOUND_OUTBOUND_DATA} barGap={12}>
                   <defs>

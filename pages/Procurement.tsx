@@ -161,7 +161,7 @@ export default function Procurement() {
 
     return (
         <div className="flex flex-col min-h-screen bg-transparent text-gray-900 dark:text-white transition-colors duration-300">
-            <div className="flex-none p-6 md:p-8 space-y-8 pb-32">
+            <div className="flex-none p-4 sm:p-6 md:p-8 space-y-6 sm:space-y-8 pb-20 sm:pb-32">
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div>
