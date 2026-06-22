@@ -98,8 +98,8 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
     const progress = Math.min(100, ((previouslyReceived + totalScanned) / splitReceivingItem.quantity) * 100);
 
     return (
-        <div className="fixed inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-2xl flex items-center justify-center z-[200] animate-in fade-in duration-300">
-            <div className="w-full h-full md:h-[95vh] md:w-[95vw] md:max-w-6xl md:rounded-[2rem] glass-panel relative overflow-hidden flex flex-col">
+        <div className="fixed inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-2xl flex items-center justify-center z-[200] p-4 animate-in fade-in duration-300">
+            <div className="w-full max-w-6xl max-h-[90vh] md:max-h-[95vh] rounded-3xl glass-panel relative overflow-hidden flex flex-col">
 
                 {/* 🌟 Background Effects — hidden on mobile */}
                 <div className="hidden md:block absolute top-0 right-0 w-[500px] h-[500px] bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/5 blur-[120px] rounded-full pointer-events-none" />

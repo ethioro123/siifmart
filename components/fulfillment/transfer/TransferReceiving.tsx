@@ -3,6 +3,7 @@ import { ArrowDown, Box } from 'lucide-react';
 import { WMSJob, Site, ReceivingItem, Product } from '../../../types';
 import { formatJobId } from '../../../utils/jobIdFormatter';
 import { getSellUnit } from '../../../utils/units';
+import { supabase } from '../../../lib/supabase';
 
 interface TransferReceivingProps {
     activeTransferJob: WMSJob;
@@ -42,6 +43,47 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
                 // but local 'transferReceiveItems' logic here might be distinct. 
                 // If backend updates lineItems, we should pass that.
             });
+
+            // Also complete the child DISPATCH job if exists
+            try {
+                const { data: dispatchJobs } = await supabase
+                    .from('wms_jobs')
+                    .select('id')
+                    .eq('type', 'DISPATCH')
+                    .or(`order_ref.eq.${activeTransferJob.id},order_ref.eq.${activeTransferJob.jobNumber}`);
+
+                if (dispatchJobs && dispatchJobs.length > 0) {
+                    for (const dj of dispatchJobs) {
+                        await wmsJobsService.update(dj.id, {
+                            status: 'Completed',
+                            transferStatus: 'Received',
+                            receivedAt: new Date().toISOString()
+                        });
+                    }
+                }
+            } catch (err) {
+                console.warn('⚠️ Failed to complete child DISPATCH job:', err);
+            }
+
+            // Also complete the transfers table record if exists
+            try {
+                const { data: transferRecord } = await supabase
+                    .from('transfers')
+                    .select('id')
+                    .or(`id.eq.${activeTransferJob.id},id.eq.${activeTransferJob.orderRef}`);
+
+                if (transferRecord && transferRecord.length > 0) {
+                    const { transfersService } = await import('../../../services/supabase.service');
+                    for (const tr of transferRecord) {
+                        await transfersService.update(tr.id, {
+                            status: 'Completed',
+                            receivedAt: new Date().toISOString()
+                        });
+                    }
+                }
+            } catch (err) {
+                console.warn('⚠️ Failed to complete transfers table record:', err);
+            }
 
             // Process stock adjustments
             for (const item of transferReceiveItems) {

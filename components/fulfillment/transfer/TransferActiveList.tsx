@@ -30,9 +30,8 @@ export const TransferActiveList: React.FC<TransferActiveListProps> = ({
     // Filter Logic
     const filteredOngoingTransfers = useMemo(() => {
         return filteredJobs
-            .filter(j => j.type === 'TRANSFER' && j.transferStatus !== 'Received' && j.status !== 'Cancelled')
+            .filter(j => j.type === 'TRANSFER' && j.status !== 'Completed' && j.status !== 'Cancelled' && j.transferStatus !== 'Received')
             .filter(j => {
-                if (typeof transferStatusFilter === 'undefined' || transferStatusFilter === 'ALL') return true;
                 // Derive effective status from child DISPATCH if it has progressed further
                 let effStatus = j.transferStatus || 'Requested';
                 const child = filteredJobs.find(d => d.type === 'DISPATCH' && (d.orderRef === j.id || d.orderRef === j.jobNumber) && d.status !== 'Cancelled');
@@ -40,6 +39,10 @@ export const TransferActiveList: React.FC<TransferActiveListProps> = ({
                     const RANK: Record<string, number> = { 'Requested': 0, 'Approved': 1, 'Picking': 2, 'Picked': 3, 'Packed': 4, 'Shipped': 5, 'In-Transit': 6, 'Delivered': 7, 'Received': 8 };
                     if ((RANK[child.transferStatus || ''] || 0) > (RANK[effStatus] || 0)) effStatus = child.transferStatus!;
                 }
+
+                if (effStatus === 'Received') return false;
+
+                if (typeof transferStatusFilter === 'undefined' || transferStatusFilter === 'ALL') return true;
                 if (transferStatusFilter === 'Picking') return effStatus === 'Picking' || effStatus === 'Picked';
                 if (transferStatusFilter === 'In-Transit') return effStatus === 'In-Transit' || effStatus === 'Shipped';
                 return effStatus === transferStatusFilter;

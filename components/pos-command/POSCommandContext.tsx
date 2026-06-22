@@ -366,32 +366,51 @@ export const POSCommandProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         setIsConfirmingReceive(true);
         try {
             const { wmsJobsService } = await import('../../services/supabase.service');
-            const transferId = selectedTransferForReceiving;
-            let transfer = transfers.find(t => t.id === transferId) as any;
+            const selectedId = selectedTransferForReceiving;
+            
+            let transferJob: any = null;
+            let dispatchJob: any = null;
 
-            if (!transfer) {
-                const job = jobs.find(j => j.id === transferId);
-                if (job) {
-                    transfer = {
-                        id: job.id,
-                        sourceSiteId: (job as any).sourceSiteId || (job as any).source_site_id,
-                        destSiteId: job.destSiteId,
-                        status: job.status,
-                        transferStatus: job.transferStatus,
-                        items: job.lineItems || (job as any).line_items || [],
-                        orderRef: job.orderRef,
-                        jobNumber: job.jobNumber,
-                        createdAt: job.createdAt,
-                        updatedAt: job.updatedAt,
-                        lineItems: job.lineItems || (job as any).line_items
-                    } as any;
+            const selectedJobObj = jobs.find(j => j.id === selectedId);
+            if (selectedJobObj) {
+                if (selectedJobObj.type === 'TRANSFER') {
+                    transferJob = selectedJobObj;
+                    dispatchJob = jobs.find(j => j.type === 'DISPATCH' && (j.orderRef === transferJob.id || j.orderRef === transferJob.jobNumber));
+                } else if (selectedJobObj.type === 'DISPATCH') {
+                    dispatchJob = selectedJobObj;
+                    transferJob = jobs.find(j => j.type === 'TRANSFER' && (j.id === dispatchJob.orderRef || j.jobNumber === dispatchJob.orderRef));
                 }
             }
 
-            if (!transfer) throw new Error('Transfer not found');
+            let transfer = transfers.find(t => t.id === selectedId) as any;
+            if (transfer) {
+                if (!transferJob) {
+                    transferJob = jobs.find(j => j.type === 'TRANSFER' && (j.id === transfer.id || j.jobNumber === transfer.jobNumber || j.orderRef === transfer.id));
+                }
+                if (!dispatchJob) {
+                    dispatchJob = jobs.find(j => j.type === 'DISPATCH' && (j.orderRef === transfer.id || j.orderRef === transfer.jobNumber));
+                }
+            } else if (selectedJobObj) {
+                transfer = {
+                    id: selectedJobObj.id,
+                    sourceSiteId: (selectedJobObj as any).sourceSiteId || (selectedJobObj as any).source_site_id,
+                    destSiteId: selectedJobObj.destSiteId,
+                    status: selectedJobObj.status,
+                    transferStatus: selectedJobObj.transferStatus,
+                    items: selectedJobObj.lineItems || (selectedJobObj as any).line_items || [],
+                    orderRef: selectedJobObj.orderRef,
+                    jobNumber: selectedJobObj.jobNumber,
+                    createdAt: selectedJobObj.createdAt,
+                    updatedAt: selectedJobObj.updatedAt,
+                    lineItems: selectedJobObj.lineItems || (selectedJobObj as any).line_items
+                } as any;
+            }
+
+            const finalTransfer = transferJob || transfer;
+            if (!finalTransfer) throw new Error('Transfer not found');
 
             // Build updated line items — handle both camelCase and snake_case fields
-            const rawLineItems = transfer.lineItems || transfer.items || [];
+            const rawLineItems = finalTransfer.lineItems || finalTransfer.items || [];
             const updatedLineItems = rawLineItems.map((item: any) => {
                 const itemSku = (item.sku || '').trim().toUpperCase();
                 const rx = transferReceivingItems.find(i =>
@@ -409,39 +428,59 @@ export const POSCommandProvider: React.FC<{ children: React.ReactNode }> = ({ ch
                 };
             });
 
+            const timestampStr = new Date().toISOString();
+            const receiverName = user?.name || t('posCommand.posUser');
+
             // 1. Update the TRANSFER job status
-            console.log(`📦 Updating TRANSFER ${transferId} → Received/Completed`);
+            const targetTransferId = transferJob?.id || selectedId;
+            console.log(`📦 Updating TRANSFER ${targetTransferId} → Received/Completed`);
             try {
-                await wmsJobsService.update(transferId, {
+                await wmsJobsService.update(targetTransferId, {
                     transferStatus: 'Received',
-                    receivedAt: new Date().toISOString(),
-                    receivedBy: user?.name || t('posCommand.posUser'),
+                    receivedAt: timestampStr,
+                    receivedBy: receiverName,
                     status: 'Completed',
                     lineItems: updatedLineItems
                 } as any);
-                console.log(`✅ TRANSFER job ${transferId} updated to Received/Completed`);
+                console.log(`✅ TRANSFER job ${targetTransferId} updated to Received/Completed`);
             } catch (updateErr: any) {
-                console.error(`❌ Failed to update TRANSFER job ${transferId}:`, updateErr);
+                console.error(`❌ Failed to update TRANSFER job ${targetTransferId}:`, updateErr);
                 throw updateErr;
             }
 
-            // 2. Also complete the DISPATCH job if exists
-            const dispatchJob = jobs.find(j =>
+            // 2. Also complete the child DISPATCH job if exists
+            const targetDispatchJob = dispatchJob || jobs.find(j =>
                 j.type === 'DISPATCH' &&
-                (j.orderRef === transfer.id || j.orderRef === transfer.jobNumber)
+                (j.orderRef === targetTransferId || j.orderRef === finalTransfer.jobNumber)
             );
 
-            if (dispatchJob) {
+            if (targetDispatchJob && targetDispatchJob.id !== targetTransferId) {
                 try {
-                    await wmsJobsService.update(dispatchJob.id, {
+                    await wmsJobsService.update(targetDispatchJob.id, {
                         status: 'Completed',
                         transferStatus: 'Received',
-                        receivedAt: new Date().toISOString(),
-                        receivedBy: user?.name || t('posCommand.posUser')
+                        receivedAt: timestampStr,
+                        receivedBy: receiverName
                     } as any);
-                    console.log(`✅ DISPATCH job ${dispatchJob.id} updated to Completed`);
+                    console.log(`✅ DISPATCH job ${targetDispatchJob.id} updated to Completed`);
                 } catch (dErr) {
                     console.warn('⚠️ Failed to update DISPATCH job:', dErr);
+                }
+            }
+
+            // 3. Update the parent TRANSFER job if we had selected dispatchJob and targetTransferId !== transferJob.id
+            if (transferJob && transferJob.id !== targetTransferId) {
+                try {
+                    await wmsJobsService.update(transferJob.id, {
+                        status: 'Completed',
+                        transferStatus: 'Received',
+                        receivedAt: timestampStr,
+                        receivedBy: receiverName,
+                        lineItems: updatedLineItems
+                    } as any);
+                    console.log(`✅ Parent TRANSFER job ${transferJob.id} updated to Received/Completed`);
+                } catch (pErr) {
+                    console.warn('⚠️ Failed to update parent TRANSFER job:', pErr);
                 }
             }
 

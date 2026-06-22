@@ -80,8 +80,8 @@ export const ReceiveDetailsModal: React.FC<ReceiveDetailsModalProps> = ({
     };
 
     return (
-        <div className="fixed inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-sm flex items-stretch md:items-center justify-center z-[200] p-0 md:p-4 animate-in fade-in duration-200">
-            <div className="glass-panel md:rounded-3xl w-full md:max-w-2xl flex flex-col h-full md:h-auto md:max-h-[90vh] overflow-hidden relative">
+        <div className="fixed inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center z-[200] p-4 animate-in fade-in duration-200">
+            <div className="glass-panel rounded-3xl w-full max-w-2xl flex flex-col max-h-[90vh] overflow-hidden relative">
                 {/* 🌟 Modal Ambient Glow — hidden on mobile */}
                 <div className="hidden md:block absolute -top-24 -right-24 w-64 h-64 bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/5 blur-[100px] rounded-full pointer-events-none" />
                 <div className="hidden md:block absolute -bottom-24 -left-24 w-64 h-64 bg-amber-600/10 dark:bg-amber-700/5 blur-[100px] rounded-full pointer-events-none" />

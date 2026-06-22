@@ -409,14 +409,7 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
                                 {product.salePrice ? formatCompactNumber(product.salePrice, { currency: CURRENCY_SYMBOL }) : 'No active discount'}
                             </p>
                         </div>
-                        {product.costPrice !== undefined && product.costPrice > 0 && (
-                            <div className="space-y-1">
-                                <p className="text-[10px] text-gray-500 font-black uppercase tracking-widest">Cost Price</p>
-                                <p className="text-sm font-medium text-gray-900 dark:text-gray-200">
-                                    {formatCompactNumber(product.costPrice, { currency: CURRENCY_SYMBOL })}
-                                </p>
-                            </div>
-                        )}
+
                         <div className="space-y-1">
                             <p className="text-[10px] text-gray-500 font-black uppercase tracking-widest">Date Added</p>
                             <p className="text-sm font-medium text-gray-900 dark:text-gray-200">

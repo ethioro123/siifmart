@@ -27,16 +27,48 @@ export const TransferHistory: React.FC<TransferHistoryProps> = ({
     const [currentPage, setCurrentPage] = useState(1);
 
     const filteredHistory = useMemo(() => {
-        // Merge strategy: Use transfers if they explicitly exist and have length, otherwise extract from jobs
-        const completedTransfers = (transfers && transfers.length > 0) ? transfers : jobs.filter(t =>
-            t.type === 'TRANSFER' &&
-            ((t as any).status === 'Received' ||
+        // 1. Get completed transfers from wms_jobs (parent job)
+        const completedJobs = jobs.filter(t => {
+            if (t.type !== 'TRANSFER') return false;
+
+            // Also check effective status from child dispatch
+            const childDispatch = jobs.find(d =>
+                d.type === 'DISPATCH' &&
+                (d.orderRef === t.id || d.orderRef === t.jobNumber) &&
+                d.status !== 'Cancelled'
+            );
+            const effStatus = childDispatch?.transferStatus || t.transferStatus || 'Requested';
+
+            return t.status === 'Completed' ||
                 t.status === 'Cancelled' ||
-                t.status === 'Completed' ||
-                t.transferStatus === 'Received')
+                t.status === 'Received' ||
+                t.transferStatus === 'Received' ||
+                t.transferStatus === 'Delivered' ||
+                effStatus === 'Received' ||
+                effStatus === 'Delivered';
+        });
+
+        // 2. Get completed transfers from transfers table
+        const completedTransfersTable = (transfers || []).filter((t: any) =>
+            t.status === 'Completed' ||
+            t.status === 'Cancelled' ||
+            t.transferStatus === 'Received'
         );
 
-        return completedTransfers.filter((t: any) => {
+        // 3. Merge them, avoiding duplicates
+        const mergedTransfers = [...completedJobs];
+        completedTransfersTable.forEach(ct => {
+            const hasDuplicate = mergedTransfers.some(mj => 
+                mj.id === ct.id || 
+                (mj.jobNumber && ct.jobNumber && mj.jobNumber === ct.jobNumber) ||
+                (mj.orderRef && ct.id && mj.orderRef === ct.id)
+            );
+            if (!hasDuplicate) {
+                mergedTransfers.push(ct as any);
+            }
+        });
+
+        return mergedTransfers.filter((t: any) => {
             const destSite = sites.find(s => s.id === t.destSiteId);
             const sourceSite = sites.find(s => s.id === t.sourceSiteId);
             return !search ||

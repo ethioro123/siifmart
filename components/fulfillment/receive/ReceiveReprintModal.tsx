@@ -49,7 +49,7 @@ export const ReceiveReprintModal: React.FC<ReceiveReprintModalProps> = ({
             <motion.div
                 initial={{ opacity: 0, scale: 0.9, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
-                className="relative glass-panel w-full max-w-2xl overflow-hidden flex flex-col max-h-[calc(100vh-2rem)]"
+                className="relative glass-panel rounded-3xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]"
             >
                 {/* 🌟 Background Glows (Futuristic Accents) */}
                 <div className="hidden md:block absolute top-0 right-0 w-64 h-64 bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/5 blur-[100px] rounded-full pointer-events-none" />

@@ -8,14 +8,21 @@ export const systemLogsService = {
         module: string;
         ip_address?: string;
     }) {
-        const { data, error } = await supabase
+        const { error } = await supabase
             .from('system_logs')
-            .insert(log)
-            .select()
-            .single();
+            .insert(log);
 
         if (error) throw error;
-        return data;
+        
+        // Return a mock representation of the log since non-admin users cannot SELECT it.
+        // We generate a fallback UUID for frontend reconciliation.
+        return {
+            id: crypto.randomUUID(),
+            created_at: new Date().toISOString(),
+            ...log,
+            details: log.details || '',
+            ip_address: log.ip_address || null
+        };
     },
 
     async getAll(module?: string) {

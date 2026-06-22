@@ -6,6 +6,7 @@ import {
     wmsJobsService,
     transfersService
 } from '../../services/supabase.service';
+import { supabase } from '../../lib/supabase';
 
 // ─── Hook Dependencies ──────────────────────────────────────────────────────
 
@@ -113,8 +114,45 @@ export const useTransfers = (deps: UseTransfersDeps) => {
                 }
             }
 
-            await transfersService.update(id, { status: 'Completed', receivedAt: new Date().toISOString() });
-            setTransfers(prev => prev.map(t => t.id === id ? { ...t, status: 'Completed', receivedAt: new Date().toISOString() } : t));
+            const timestampStr = new Date().toISOString();
+
+            // Also complete associated WMS jobs in wms_jobs table if they exist
+            try {
+                const { data: associatedJobs } = await supabase
+                    .from('wms_jobs')
+                    .select('id, type')
+                    .or(`id.eq.${id},order_ref.eq.${id},job_number.eq.${transfer.jobNumber || ''}`);
+
+                if (associatedJobs && associatedJobs.length > 0) {
+                    for (const job of associatedJobs) {
+                        await wmsJobsService.update(job.id, {
+                            status: 'Completed',
+                            transferStatus: 'Received',
+                            receivedAt: timestampStr,
+                            receivedBy: user
+                        } as any);
+                    }
+                    
+                    setJobs(prev => prev.map(j => {
+                        const isAssociated = j.id === id || j.orderRef === id || (transfer.jobNumber && j.jobNumber === transfer.jobNumber) || (transfer.jobNumber && j.orderRef === transfer.jobNumber);
+                        if (isAssociated) {
+                            return {
+                                ...j,
+                                status: 'Completed',
+                                transferStatus: 'Received',
+                                receivedAt: timestampStr,
+                                receivedBy: user
+                            };
+                        }
+                        return j;
+                    }));
+                }
+            } catch (jobErr) {
+                console.warn('⚠️ Failed to complete associated WMS jobs during POS receive:', jobErr);
+            }
+
+            await transfersService.update(id, { status: 'Completed', receivedAt: timestampStr });
+            setTransfers(prev => prev.map(t => t.id === id ? { ...t, status: 'Completed', receivedAt: timestampStr } : t));
             addNotification('success', 'Transfer received successfully');
             logSystemEvent('Transfer Received', `Transfer ${id} received`, user, 'Inventory');
         } catch (error) {
