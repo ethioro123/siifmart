@@ -203,7 +203,8 @@ export const AssignAvailableWorkers: React.FC<AssignAvailableWorkersProps> = ({
                                                       </div>
                                                       <div className="w-full h-1 bg-stone-100 dark:bg-black/45 rounded-full overflow-hidden border border-[#E2DCCE]/20 dark:border-[#A9CBA2]/[0.04]">
                                                           <div
-                                                              className={`h-full transition-all duration-500 bg-[#2C5E3B] dark:bg-[#A9CBA2] w-[${Math.min(100, (workloadCount / 5) * 100)}%]`}
+                                                              className="h-full transition-all duration-500 bg-[#2C5E3B] dark:bg-[#A9CBA2]"
+                                                              ref={(el) => { if (el) el.style.width = `${Math.min(100, (workloadCount / 5) * 100)}%`; }}
                                                           />
                                                       </div>
                                                   </div>
