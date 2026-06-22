@@ -76,7 +76,7 @@ export const SupplierManagement: React.FC<SupplierManagementProps> = ({
 
             {/* Suppliers Table */}
             <div className="glass-panel overflow-x-auto">
-                <table className="w-full text-left border-collapse">
+                <table className="w-full text-left border-collapse hidden md:table">
                     <thead>
                         <tr className="glass-panel-pushed border-b border-[#E2DCCE]/50 dark:border-emerald-950/20 text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-widest font-black">
                             <th className="p-4 font-bold pl-6">Supplier Name</th>
@@ -163,6 +163,72 @@ export const SupplierManagement: React.FC<SupplierManagementProps> = ({
                         })}
                     </tbody>
                 </table>
+
+                {/* Mobile Card List View */}
+                <div className="block md:hidden divide-y divide-[#E2DCCE]/30 dark:divide-emerald-950/10">
+                    {paginatedSuppliers.map((sup) => {
+                        const Icon = getSupplierIcon(sup.type);
+                        return (
+                            <div
+                                key={sup.id}
+                                onClick={() => handleSupplierClick(sup)}
+                                className="p-4 space-y-4 hover:bg-stone-50 dark:hover:bg-white/5 transition-colors cursor-pointer group"
+                            >
+                                {/* Name, Status, rating */}
+                                <div className="flex items-start justify-between gap-3">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-xl bg-stone-100 dark:bg-white/5 flex items-center justify-center text-gray-400 group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] group-hover:bg-[#2C5E3B]/10 dark:group-hover:bg-[#A9CBA2]/10 transition-colors border border-[#E2DCCE]/30 dark:border-[#A9CBA2]/[0.06]">
+                                            <Icon size={20} />
+                                        </div>
+                                        <div className="text-left">
+                                            <h3 className="text-sm font-black text-gray-900 dark:text-white group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] transition-colors">{sup.name}</h3>
+                                            <p className="text-[10px] text-gray-500 font-mono font-bold uppercase mt-0.5">Terms: {sup.paymentTerms || 'Net 30'}</p>
+                                        </div>
+                                    </div>
+                                    <div className={`inline-flex px-2.5 py-1 rounded-full text-[9px] font-bold border uppercase tracking-wide ${sup.status === 'Active' ? 'text-green-400 border-green-500/20 bg-green-500/10' : 'text-red-400 border-red-500/20 bg-red-500/10'}`}>
+                                        {sup.status}
+                                    </div>
+                                </div>
+
+                                {/* Category, Rating, Performance */}
+                                <div className="grid grid-cols-2 gap-2 text-left bg-gray-50/50 dark:bg-black/10 p-3 rounded-xl border border-gray-100 dark:border-white/5">
+                                    <div>
+                                        <span className="text-[8px] text-gray-500 font-bold uppercase tracking-widest">Category</span>
+                                        <p className="text-xs text-gray-700 dark:text-gray-300 font-black uppercase mt-0.5">{sup.category}</p>
+                                        <p className="text-[9px] text-gray-400 dark:text-gray-500 font-bold italic mt-0.5">{sup.type}</p>
+                                    </div>
+                                    <div>
+                                        <span className="text-[8px] text-gray-500 font-bold uppercase tracking-widest">Performance</span>
+                                        <div className="flex items-center gap-1 mt-0.5">
+                                            <Star size={10} className="text-yellow-500 fill-yellow-500" />
+                                            <span className="text-xs text-gray-900 dark:text-white font-black">{sup.rating}</span>
+                                            <span className="text-[10px] text-gray-400">/ 5.0</span>
+                                        </div>
+                                        <span className="text-[8px] text-[#2C5E3B] dark:text-[#A9CBA2] font-black uppercase tracking-wider block mt-0.5">98% OTIF</span>
+                                    </div>
+                                </div>
+
+                                {/* Contacts & Quick Action */}
+                                <div className="flex items-center justify-between pt-1">
+                                    <div className="flex flex-col gap-0.5 text-left">
+                                        {sup.email && (
+                                            <span className="text-[10px] text-gray-500 truncate max-w-[150px]">{sup.email}</span>
+                                        )}
+                                        {sup.phone && (
+                                            <span className="text-[10px] text-gray-500">{sup.phone}</span>
+                                        )}
+                                    </div>
+                                    <button
+                                        onClick={(e) => handleCatalogClick(e, sup)}
+                                        className="px-3 py-1.5 glass-panel-pushed hover:bg-[#224429] dark:hover:bg-[#EAE5D9] hover:text-white dark:hover:text-[#1E3B24] text-[9px] font-black uppercase tracking-widest rounded-xl transition-all text-gray-500 dark:text-gray-300 flex items-center gap-1.5"
+                                    >
+                                        <Package size={12} /> Catalog
+                                    </button>
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
                 {paginatedSuppliers.length === 0 && (
                     <div className="p-12 text-center text-gray-500 flex flex-col items-center justify-center">
                         <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4">

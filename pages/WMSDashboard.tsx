@@ -189,7 +189,7 @@ export default function WMSDashboard() {
   };
 
   return (
-    <div className="space-y-8 bg-transparent -m-8 p-8 min-h-screen relative transition-colors duration-500">
+    <div className="space-y-6 md:space-y-8 bg-transparent -m-4 md:-m-8 p-4 md:p-8 min-h-screen relative transition-colors duration-500">
       {/* Background Depth & Organic Flows */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-[#2C5E3B]/10 dark:bg-[#1E3F27]/5 rounded-full blur-[150px] -mr-96 -mt-96 opacity-40 animate-pulse-slow" />
@@ -206,7 +206,7 @@ export default function WMSDashboard() {
                 <Box className="text-white animate-pulse-slow" size={24} />
               </div>
               <div>
-                <h1 className="text-3xl font-extrabold dark:text-[#EAE5D9] text-[#1E3F27] tracking-tight uppercase">Warehouse Operations Center</h1>
+                <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold dark:text-[#EAE5D9] text-[#1E3F27] tracking-tight uppercase">Warehouse Operations Center</h1>
                 <div className="flex items-center gap-2 text-[#4D6E56] dark:text-[#7A9E83] text-[10px] font-bold uppercase tracking-[0.3em] mt-2">
                   <span className={`w-1.5 h-1.5 rounded-full ${refreshing ? 'bg-amber-600 animate-ping' : 'bg-[#2C5E3B] opacity-60'}`}></span>
                   {refreshing ? 'Synchronizing Operational Data...' : 'Operational Command Node'}
@@ -244,7 +244,7 @@ export default function WMSDashboard() {
           ].map((kpi, idx) => (
             <div key={idx} onClick={() => navigate(kpi.route)} className="group relative cursor-pointer">
               <div className="absolute inset-0 bg-gradient-to-br from-[#2C5E3B]/5 to-transparent rounded-3xl -z-10 transition-opacity opacity-0 group-hover:opacity-100 duration-500" />
-              <div className="h-full bg-white/80 dark:bg-[#18201B]/70 border border-[#E2DCCE] dark:border-emerald-950/20 backdrop-blur-2xl rounded-[2.5rem] p-7 transition-all duration-500 hover:translate-y-[-4px] hover:border-[#CFC6B4] dark:hover:border-emerald-800/30 hover:bg-white dark:hover:bg-[#1C2620] shadow-sm dark:shadow-[0_24px_80px_rgba(5,8,6,0.65)] hover:shadow-xl">
+              <div className="h-full bg-white/80 dark:bg-[#18201B]/70 border border-[#E2DCCE] dark:border-emerald-950/20 backdrop-blur-2xl rounded-3xl p-5 sm:p-6 md:p-7 transition-all duration-500 hover:translate-y-[-4px] hover:border-[#CFC6B4] dark:hover:border-emerald-800/30 hover:bg-white dark:hover:bg-[#1C2620] shadow-sm dark:shadow-[0_24px_80px_rgba(5,8,6,0.65)] hover:shadow-xl">
                 <div className="flex items-start justify-between mb-5">
                   <div className={`p-4 rounded-2xl ${kpi.bg} border border-[#E2DCCE]/50 dark:border-emerald-950/10 shadow-inner transition-transform duration-500 group-hover:scale-110`}>
                     <kpi.icon size={22} className={kpi.color} />
@@ -269,7 +269,7 @@ export default function WMSDashboard() {
         {/* Main Charts Area */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Inbound vs Outbound Flow */}
-          <div className="lg:col-span-2 bg-white/80 dark:bg-[#18201B]/70 border border-[#E2DCCE] dark:border-emerald-950/20 backdrop-blur-2xl rounded-[2.5rem] p-8 relative overflow-hidden shadow-sm transition-all duration-500">
+          <div className="lg:col-span-2 bg-white/80 dark:bg-[#18201B]/70 border border-[#E2DCCE] dark:border-emerald-950/20 backdrop-blur-2xl rounded-3xl p-4 sm:p-6 md:p-8 relative overflow-hidden shadow-sm transition-all duration-500">
             <div className="absolute top-0 right-0 w-64 h-64 bg-[#2C5E3B]/5 dark:bg-[#1E3F27]/3 rounded-full blur-[100px] -mr-32 -mt-32" />
             <div className="flex items-center justify-between mb-10 relative">
               <div>
@@ -355,7 +355,7 @@ export default function WMSDashboard() {
 
           {/* Storage Density & Velocity */}
           <div className="flex flex-col gap-6">
-            <div className="bg-white/80 dark:bg-[#18201B]/70 border border-[#E2DCCE] dark:border-emerald-950/20 backdrop-blur-2xl rounded-[2.5rem] p-10 flex-1 shadow-sm transition-colors duration-500">
+            <div className="bg-white/80 dark:bg-[#18201B]/70 border border-[#E2DCCE] dark:border-emerald-950/20 backdrop-blur-2xl rounded-3xl p-5 sm:p-8 lg:p-10 flex-1 shadow-sm transition-colors duration-500">
               <h3 className="text-lg font-bold text-[#1E3F27] dark:text-[#EAE5D9] mb-8 flex items-center gap-4">
                 <Thermometer className="text-[#2C5E3B] dark:text-[#A9CBA2] opacity-80" size={20} />
                 Spatial Density
@@ -390,7 +390,7 @@ export default function WMSDashboard() {
               </div>
             </div>
 
-            <div className="bg-white/80 dark:bg-[#18201B]/70 border border-[#E2DCCE] dark:border-emerald-950/20 backdrop-blur-2xl rounded-[2.5rem] p-10 shadow-sm transition-colors duration-500">
+            <div className="bg-white/80 dark:bg-[#18201B]/70 border border-[#E2DCCE] dark:border-emerald-950/20 backdrop-blur-2xl rounded-3xl p-5 sm:p-8 lg:p-10 shadow-sm transition-colors duration-500">
               <h4 className="text-[10px] font-bold text-[#4D6E56] dark:text-[#7A9E83] uppercase tracking-[0.3em] mb-6">Velocity Ranking</h4>
               <div className="space-y-4">
                 {FAST_MOVERS.length > 0 ? FAST_MOVERS.slice(0, 3).map((item: any, i: number) => (
@@ -420,7 +420,7 @@ export default function WMSDashboard() {
         </div>
 
         {/* Operational Pipeline - Premium Breakdown */}
-        <div className="bg-white/80 dark:bg-[#18201B]/70 border border-[#E2DCCE] dark:border-emerald-950/20 backdrop-blur-2xl rounded-[2.5rem] p-10 relative overflow-hidden shadow-sm transition-colors duration-500">
+        <div className="bg-white/80 dark:bg-[#18201B]/70 border border-[#E2DCCE] dark:border-emerald-950/20 backdrop-blur-2xl rounded-3xl p-5 sm:p-8 lg:p-10 relative overflow-hidden shadow-sm transition-colors duration-500">
           <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
             <div className="absolute top-0 right-0 w-[500px] h-full bg-[#2C5E3B]/5 blur-[120px] rounded-full translate-x-1/2" />
           </div>
@@ -455,7 +455,7 @@ export default function WMSDashboard() {
             ].map((cluster) => (
               <div
                 key={cluster.key}
-                className="bg-[#FAF8F5]/80 dark:bg-black/20 backdrop-blur-md p-6 rounded-[2rem] border border-[#E2DCCE] dark:border-emerald-950/20 hover:border-[#CFC6B4] dark:hover:border-emerald-800/30 hover:bg-[#FAF8F5] dark:hover:bg-[#1C2620]/65 transition-all duration-500 hover:translate-y-[-4px] group relative cursor-pointer shadow-sm hover:shadow-md overflow-hidden"
+                className="bg-[#FAF8F5]/80 dark:bg-black/20 backdrop-blur-md p-4 sm:p-6 rounded-2xl md:rounded-[2rem] border border-[#E2DCCE] dark:border-emerald-950/20 hover:border-[#CFC6B4] dark:hover:border-emerald-800/30 hover:bg-[#FAF8F5] dark:hover:bg-[#1C2620]/65 transition-all duration-500 hover:translate-y-[-4px] group relative cursor-pointer shadow-sm hover:shadow-md overflow-hidden"
               >
                 <div className="flex items-center justify-between mb-6 relative">
                   <div className={`p-3 rounded-2xl ${cluster.bg} border border-[#E2DCCE]/40 dark:border-emerald-950/10 transition-transform duration-500 group-hover:scale-110`}>
@@ -478,7 +478,7 @@ export default function WMSDashboard() {
         </div>
 
         {/* Site Performance Elite Hub - Expansive Command View */}
-        <div className="bg-white/80 dark:bg-[#18201B]/70 border border-[#E2DCCE] dark:border-emerald-950/20 backdrop-blur-2xl p-10 rounded-[3rem] shadow-xl relative overflow-hidden group transition-all mt-6">
+        <div className="bg-white/80 dark:bg-[#18201B]/70 border border-[#E2DCCE] dark:border-emerald-950/20 backdrop-blur-2xl p-4 sm:p-6 md:p-8 lg:p-10 rounded-2xl md:rounded-[3rem] shadow-xl relative overflow-hidden group transition-all mt-6">
           {/* Background Accents */}
           <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-[#2C5E3B]/5 dark:bg-[#1E3F27]/3 rounded-full blur-[120px] -mr-64 -mt-64 transition-opacity opacity-50" />
 
@@ -550,7 +550,7 @@ export default function WMSDashboard() {
                 const config = configurations[idx];
 
                 return (
-                  <div key={worker.id} className={`relative flex flex-col p-6 rounded-[2rem] bg-white dark:bg-black/35 border ${config.border} ${config.glow} transition-all hover:translate-y-[-8px] hover:bg-[#FAF8F5] hover:dark:bg-[#1C2620]/65 group/card overflow-hidden`}>
+                  <div key={worker.id} className={`relative flex flex-col p-4 sm:p-6 rounded-2xl md:rounded-[2rem] bg-white dark:bg-black/35 border ${config.border} ${config.glow} transition-all hover:translate-y-[-8px] hover:bg-[#FAF8F5] hover:dark:bg-[#1C2620]/65 group/card overflow-hidden`}>
                     {/* Rank Number Graphic */}
                     <div className="absolute top-4 right-6 text-5xl font-black opacity-5 text-[#1E3F27] dark:text-[#EAE5D9] italic select-none">#{config.rank}</div>
 
@@ -619,7 +619,7 @@ export default function WMSDashboard() {
             {/* Site Personnel & Scheduling Section */}
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mt-6">
               {/* Modern Site Roster Section */}
-              <div className="bg-[#FAF8F5] dark:bg-white/[0.02] border border-[#E2DCCE] dark:border-white/5 rounded-[3rem] p-10 relative overflow-hidden group">
+              <div className="bg-[#FAF8F5] dark:bg-white/[0.02] border border-[#E2DCCE] dark:border-white/5 rounded-2xl md:rounded-[3rem] p-5 sm:p-8 lg:p-10 relative overflow-hidden group">
                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#2C5E3B]/20 to-transparent" />
                 <SiteRoster layout="grid" limit={8} className="relative z-10" />
 
@@ -635,7 +635,7 @@ export default function WMSDashboard() {
               </div>
 
               {/* Advanced E-Rostering Section */}
-              <div className="bg-[#FAF8F5] dark:bg-white/[0.02] border border-[#E2DCCE] dark:border-white/5 rounded-[3rem] p-10 relative overflow-visible group">
+              <div className="bg-[#FAF8F5] dark:bg-white/[0.02] border border-[#E2DCCE] dark:border-white/5 rounded-2xl md:rounded-[3rem] p-5 sm:p-8 lg:p-10 relative overflow-visible group">
                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#2C5E3B]/20 to-transparent" />
                 <RosterManager className="relative z-10" />
               </div>
@@ -646,7 +646,7 @@ export default function WMSDashboard() {
         {/* Activity Monitor Row */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Live Stream */}
-          <div className="lg:col-span-3 bg-white/80 dark:bg-[#18201B]/70 border border-[#E2DCCE] dark:border-emerald-950/20 backdrop-blur-2xl rounded-[2.5rem] p-10 shadow-sm transition-colors duration-500">
+          <div className="lg:col-span-3 bg-white/80 dark:bg-[#18201B]/70 border border-[#E2DCCE] dark:border-emerald-950/20 backdrop-blur-2xl rounded-3xl p-5 sm:p-8 lg:p-10 shadow-sm transition-colors duration-500">
             <div className="flex items-center justify-between mb-10">
               <div>
                 <h3 className="text-xl font-bold text-[#1E3F27] dark:text-[#EAE5D9] uppercase tracking-tight">Stream Monitor</h3>
@@ -681,7 +681,7 @@ export default function WMSDashboard() {
 
           {/* Global Performance Pulse */}
           <div className="lg:col-span-1 flex flex-col gap-6">
-            <div className="bg-white/80 dark:bg-[#18201B]/70 border border-[#E2DCCE] dark:border-emerald-950/20 backdrop-blur-2xl rounded-[2.5rem] p-8 flex-1 flex flex-col justify-between group overflow-hidden relative shadow-sm transition-colors duration-500">
+            <div className="bg-white/80 dark:bg-[#18201B]/70 border border-[#E2DCCE] dark:border-emerald-950/20 backdrop-blur-2xl rounded-3xl p-5 sm:p-6 lg:p-8 flex-1 flex flex-col justify-between group overflow-hidden relative shadow-sm transition-colors duration-500">
               <div>
                 <h4 className="text-[10px] font-bold text-[#4D6E56] dark:text-[#7A9E83] uppercase tracking-widest mb-6">Network Load</h4>
                 <div className="relative h-40 w-full flex items-center justify-center">
