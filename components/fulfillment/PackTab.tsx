@@ -7,6 +7,7 @@ import { PackHistory } from './pack/PackHistory';
 import { PackJobModal } from './pack/PackJobModal';
 import { PackDetailsModal } from './pack/PackDetailsModal';
 import { ReturnToWarehouseModal } from './returns/ReturnToWarehouseModal';
+import { PackDiscrepancyModal } from './pack/PackDiscrepancyModal';
 import { WMSJob } from '../../types';
 import { formatDateTime } from '../../utils/formatting';
 import { generatePackLabelHTML } from '../../utils/labels/PackLabelGenerator';
@@ -80,6 +81,7 @@ export const PackTab: React.FC = () => {
     const [selectedPackJob, setSelectedPackJob] = useState<WMSJob | null>(null);
     const [isPackModalOpen, setIsPackModalOpen] = useState(false);
     const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+    const [isDiscrepancyModalOpen, setIsDiscrepancyModalOpen] = useState(false);
 
     const [viewMode, setViewMode] = useState<'Process' | 'History'>('Process');
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -704,6 +706,7 @@ export const PackTab: React.FC = () => {
                         resolveOrderRef={resolveOrderRef}
                         onOpenScanner={handleOpenScanner}
                         onPrintItemLabel={handlePrintItemLabel}
+                        onFlagDiscrepancy={() => setIsDiscrepancyModalOpen(true)}
                     />
 
                     {isScannerOpen && (
@@ -716,6 +719,20 @@ export const PackTab: React.FC = () => {
                             isProcessing={isSubmitting}
                         />
                     )}
+
+                    {/* Pack Discrepancy Modal */}
+                    <PackDiscrepancyModal
+                        isOpen={isDiscrepancyModalOpen}
+                        onClose={() => setIsDiscrepancyModalOpen(false)}
+                        job={selectedPackJob}
+                        currentUser={user}
+                        wmsJobsService={wmsJobsService}
+                        addNotification={addNotification}
+                        refreshData={refreshData}
+                        onAcceptCount={(updatedLineItems) => {
+                            setSelectedPackJob(prev => prev ? { ...prev, lineItems: updatedLineItems } : prev);
+                        }}
+                    />
                 </>
             )}
 

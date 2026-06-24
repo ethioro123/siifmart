@@ -1,10 +1,11 @@
-import React from 'react';
-import { X, Calendar, User, Package, Archive, Box, MapPin, Printer, ScanBarcode, ArrowRight, Undo2 } from 'lucide-react';
+import React, { useState } from 'react';
+import { X, Calendar, User, Package, Archive, Box, MapPin, Printer, ScanBarcode, ArrowRight, Undo2, FileEdit } from 'lucide-react';
 import { WMSJob, Product } from '../../../types';
 import { useFulfillment } from '../FulfillmentContext';
 import { formatDateTime } from '../../../utils/formatting';
 import { formatJobId } from '../../../utils/jobIdFormatter';
 import { formatProductSize, isWeightBased, isVolumeBased } from '../../../utils/units';
+import { PickAmendModal } from './PickAmendModal';
 
 interface PickDetailsModalProps {
     selectedItem: WMSJob;
@@ -25,6 +26,9 @@ export const PickDetailsModal: React.FC<PickDetailsModalProps> = ({
     sites = [],
     onReturn
 }) => {
+    const { user, jobs, wmsJobsService, addNotification, refreshData } = useFulfillment();
+    const [amendModalOpen, setAmendModalOpen] = useState(false);
+
     // Resolve User Name
     const userId = selectedItem.completedBy || selectedItem.assignedTo;
     const userObj = employees.find(e => e.id === userId);
@@ -91,6 +95,7 @@ export const PickDetailsModal: React.FC<PickDetailsModalProps> = ({
     ) : 'Internal / Unknown';
 
     return (
+        <>
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[200] p-4 animate-in fade-in duration-200">
             <div className="bg-white dark:bg-black border-2 border-zinc-900 dark:border-white/10 rounded-3xl w-full max-w-4xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden relative">
                 {/* 🌿 Modal Ambient Glow - Forest Green Theme for Pick */}
@@ -278,6 +283,16 @@ export const PickDetailsModal: React.FC<PickDetailsModalProps> = ({
                                 Return Items
                             </button>
                         )}
+                        {/* Amend Pick — manager only */}
+                        {((selectedItem as any).status || '').toLowerCase() === 'completed' && (
+                            <button
+                                onClick={() => setAmendModalOpen(true)}
+                                className="flex items-center gap-2 px-4 py-2 bg-yellow-500/10 hover:bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 border border-yellow-500/20 rounded-xl font-black uppercase tracking-widest text-[10px] transition-all"
+                            >
+                                <FileEdit size={14} />
+                                Amend Quantities
+                            </button>
+                        )}
                     </div>
 
                     <button
@@ -290,5 +305,18 @@ export const PickDetailsModal: React.FC<PickDetailsModalProps> = ({
 
             </div>
         </div>
+
+        {/* Pick Amendment Modal — supervisor only */}
+        <PickAmendModal
+            isOpen={amendModalOpen}
+            onClose={() => setAmendModalOpen(false)}
+            job={selectedItem}
+            currentUser={user}
+            allJobs={jobs}
+            wmsJobsService={wmsJobsService}
+            addNotification={addNotification}
+            refreshData={refreshData}
+        />
+        </>
     );
 };

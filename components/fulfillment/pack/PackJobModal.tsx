@@ -25,6 +25,7 @@ interface PackJobModalProps {
     resolveOrderRef: (ref?: string) => string;
     onOpenScanner?: () => void;
     onPrintItemLabel?: (item: any, product?: any, boxSize?: string) => void;
+    onFlagDiscrepancy?: () => void;
 }
 
 export const PackJobModal: React.FC<PackJobModalProps> = ({
@@ -41,7 +42,8 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
     isSubmitting,
     resolveOrderRef,
     onOpenScanner,
-    onPrintItemLabel
+    onPrintItemLabel,
+    onFlagDiscrepancy,
 }) => {
     const { t } = useLanguage();
 
@@ -545,6 +547,15 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
                                 className="p-2.5 md:px-6 md:py-3.5 bg-white/80 dark:bg-[#18201B]/70 border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20 text-[#2C5E3B] dark:text-[#A9CBA2] hover:text-[#1E3F27] dark:hover:text-white hover:scale-105 active:scale-95 transition-all rounded-xl md:rounded-2xl font-black text-xs md:text-sm uppercase tracking-widest md:flex items-center gap-2 shadow-sm"
                             >
                                 <Barcode size={18} className="md:w-4 md:h-4" /> <span className="hidden md:inline">Open Scanner</span>
+                            </button>
+                        )}
+                        {/* Flag Discrepancy — packer count doesn't match manifest */}
+                        {onFlagDiscrepancy && job.status !== 'Completed' && (
+                            <button
+                                onClick={onFlagDiscrepancy}
+                                className="p-2.5 md:px-6 md:py-3.5 bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/20 text-orange-600 dark:text-orange-400 hover:scale-105 active:scale-95 transition-all rounded-xl md:rounded-2xl font-black text-xs md:text-sm uppercase tracking-widest md:flex items-center gap-2"
+                            >
+                                <AlertTriangle size={18} className="md:w-4 md:h-4" /> <span className="hidden md:inline">Flag Count Issue</span>
                             </button>
                         )}
                     </div>

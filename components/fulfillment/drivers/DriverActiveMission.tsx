@@ -1,9 +1,10 @@
 import React, { useMemo, useState, useEffect } from 'react';
-import { MapPin, Navigation, RefreshCw, Truck, CheckCircle, Shield } from 'lucide-react';
+import { MapPin, Navigation, RefreshCw, Truck, CheckCircle, Shield, AlertTriangle } from 'lucide-react';
 import { WMSJob, Site, User, Product } from '../../../types';
 import { formatJobId } from '../../../utils/jobIdFormatter';
 import Pagination from '../../shared/Pagination';
 import { isWeightBased, isVolumeBased } from '../../../utils/units';
+import { PartialDeliveryModal } from './PartialDeliveryModal';
 
 interface DriverActiveMissionProps {
     t: (key: string) => string; filteredJobs: WMSJob[]; employees: any[];
@@ -19,6 +20,7 @@ export const DriverActiveMission: React.FC<DriverActiveMissionProps> = ({
 }) => {
     const [currentPage, setCurrentPage] = useState(1);
     const ITEMS_PER_PAGE = 5;
+    const [partialDeliveryJob, setPartialDeliveryJob] = useState<WMSJob | null>(null);
 
     useEffect(() => {
         setCurrentPage(1);
@@ -135,31 +137,40 @@ export const DriverActiveMission: React.FC<DriverActiveMissionProps> = ({
                                                 </button>
                                             )}
                                             {(job.transferStatus === 'In-Transit' || job.transferStatus === 'Shipped') ? (
-                                                <button disabled={processingJobIds.has(job.id)} onClick={async (e) => {
-                                                    e.stopPropagation(); setProcessingJobIds(prev => new Set(prev).add(job.id));
-                                                    try {
-                                                        await wmsJobsService.update(job.id, { status: 'Completed', transferStatus: 'Delivered', deliveredAt: new Date().toISOString(), receivedBy: user?.name || 'Driver' } as any);
-                                                        if (job.orderRef) { const parentJob = jobs.find(j => j.id === job.orderRef); if (parentJob) await wmsJobsService.update(parentJob.id, { status: 'Completed', transferStatus: 'Delivered' } as any); }
-                                                        const destSiteId = job.destSiteId || (job as any).dest_site_id; const lineItems = job.lineItems || (job as any).line_items || [];
-                                                        for (const item of lineItems) {
-                                                            const qty = item.receivedQty || item.quantity || item.expectedQty || item.pickedQty || 0;
-                                                            if (qty > 0 && destSiteId) {
-                                                                const templateProduct = products.find(p => p.sku === item.sku || p.id === item.productId);
-                                                                const unit = templateProduct?.unit || item.unit;
-                                                                const isWeightVol = isWeightBased(unit) || isVolumeBased(unit);
-                                                                const sizeNum = templateProduct?.size ? parseFloat(templateProduct.size as string) : 0;
-                                                                const finalQty = (isWeightVol && sizeNum > 0) ? (qty * sizeNum) : qty;
-
-                                                                const destProduct = products.find(p => (p.sku === item.sku || p.id === item.productId || p.productId === item.productId) && (p.siteId === destSiteId || p.site_id === destSiteId));
-                                                                if (destProduct) await adjustStockMutation.mutateAsync({ productId: destProduct.id, productName: destProduct.name || item.name || 'Product', productSku: destProduct.sku || item.sku || '', siteId: destSiteId, quantity: finalQty, type: 'IN', reason: `Delivery: ${formatJobId(job)}`, canApprove: true });
-                                                                else if (templateProduct) await addProduct({ name: item.name || templateProduct?.name || 'Product', sku: item.sku || templateProduct?.sku, price: templateProduct?.price || 0, costPrice: (templateProduct as any)?.costPrice || 0, stock: finalQty, unit: templateProduct?.unit || 'pcs', siteId: destSiteId, category: templateProduct?.category || 'Uncategorized', productId: templateProduct?.productId || templateProduct?.id } as any);
+                                                <>
+                                                    {/* Partial Delivery */}
+                                                    <button
+                                                        onClick={(e) => { e.stopPropagation(); setPartialDeliveryJob(job); }}
+                                                        className="px-3 py-1.5 bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 rounded-lg text-[9px] font-black text-amber-600 dark:text-amber-400 uppercase flex items-center justify-center gap-1.5 transition-all shadow-sm active:scale-95"
+                                                    >
+                                                        <AlertTriangle size={11} /> Partial
+                                                    </button>
+                                                    {/* Full Delivery */}
+                                                    <button disabled={processingJobIds.has(job.id)} onClick={async (e) => {
+                                                        e.stopPropagation(); setProcessingJobIds(prev => new Set(prev).add(job.id));
+                                                        try {
+                                                            await wmsJobsService.update(job.id, { status: 'Completed', transferStatus: 'Delivered', deliveredAt: new Date().toISOString(), receivedBy: user?.name || 'Driver' } as any);
+                                                            if (job.orderRef) { const parentJob = jobs.find(j => j.id === job.orderRef); if (parentJob) await wmsJobsService.update(parentJob.id, { status: 'Completed', transferStatus: 'Delivered' } as any); }
+                                                            const destSiteId = job.destSiteId || (job as any).dest_site_id; const lineItems = job.lineItems || (job as any).line_items || [];
+                                                            for (const item of lineItems) {
+                                                                const qty = item.receivedQty || item.quantity || item.expectedQty || item.pickedQty || 0;
+                                                                if (qty > 0 && destSiteId) {
+                                                                    const templateProduct = products.find(p => p.sku === item.sku || p.id === item.productId);
+                                                                    const unit = templateProduct?.unit || item.unit;
+                                                                    const isWeightVol = isWeightBased(unit) || isVolumeBased(unit);
+                                                                    const sizeNum = templateProduct?.size ? parseFloat(templateProduct.size as string) : 0;
+                                                                    const finalQty = (isWeightVol && sizeNum > 0) ? (qty * sizeNum) : qty;
+                                                                    const destProduct = products.find(p => (p.sku === item.sku || p.id === item.productId || p.productId === item.productId) && (p.siteId === destSiteId || p.site_id === destSiteId));
+                                                                    if (destProduct) await adjustStockMutation.mutateAsync({ productId: destProduct.id, productName: destProduct.name || item.name || 'Product', productSku: destProduct.sku || item.sku || '', siteId: destSiteId, quantity: finalQty, type: 'IN', reason: `Delivery: ${formatJobId(job)}`, canApprove: true });
+                                                                    else if (templateProduct) await addProduct({ name: item.name || templateProduct?.name || 'Product', sku: item.sku || templateProduct?.sku, price: templateProduct?.price || 0, costPrice: (templateProduct as any)?.costPrice || 0, stock: finalQty, unit: templateProduct?.unit || 'pcs', siteId: destSiteId, category: templateProduct?.category || 'Uncategorized', productId: templateProduct?.productId || templateProduct?.id } as any);
+                                                                }
                                                             }
-                                                        }
-                                                        await refreshData(); addNotification('success', 'Safe arrival! Delivery logged.');
-                                                    } catch (err) { addNotification('alert', 'System error.'); } finally { setProcessingJobIds(prev => { const next = new Set(prev); next.delete(job.id); return next; }); }
-                                                }} className="px-4 py-1.5 bg-[#224429] dark:bg-[#EAE5D9] hover:bg-[#1B3520] dark:hover:bg-[#DFD9CA] text-[#FAF8F5] dark:text-[#1E3B24] rounded-lg text-[9px] font-black uppercase flex items-center justify-center gap-1.5 disabled:opacity-50 shadow-md active:scale-95 transition-all">
-                                                    {processingJobIds.has(job.id) ? <RefreshCw className="animate-spin" size={11} /> : <CheckCircle size={11} />} DELIVERED
-                                                </button>
+                                                            await refreshData(); addNotification('success', 'Safe arrival! Delivery logged.');
+                                                        } catch (err) { addNotification('alert', 'System error.'); } finally { setProcessingJobIds(prev => { const next = new Set(prev); next.delete(job.id); return next; }); }
+                                                    }} className="px-4 py-1.5 bg-[#224429] dark:bg-[#EAE5D9] hover:bg-[#1B3520] dark:hover:bg-[#DFD9CA] text-[#FAF8F5] dark:text-[#1E3B24] rounded-lg text-[9px] font-black uppercase flex items-center justify-center gap-1.5 disabled:opacity-50 shadow-md active:scale-95 transition-all">
+                                                        {processingJobIds.has(job.id) ? <RefreshCw className="animate-spin" size={11} /> : <CheckCircle size={11} />} DELIVERED
+                                                    </button>
+                                                </>
                                             ) : <div className="py-1.5 px-3 bg-green-500/10 border border-green-500/20 rounded-lg text-[9px] font-black text-green-600 dark:text-green-400 uppercase flex items-center justify-center gap-1.5 italic tracking-widest"><CheckCircle size={11} /> Success</div>}
                                         </div>
                                     </div>
@@ -169,6 +180,24 @@ export const DriverActiveMission: React.FC<DriverActiveMissionProps> = ({
                     })}
                     {myJobs.length > ITEMS_PER_PAGE && <div className="mt-4"><Pagination currentPage={currentPage} totalPages={totalPages} totalItems={myJobs.length} itemsPerPage={ITEMS_PER_PAGE} onPageChange={setCurrentPage} isLoading={false} itemName="Missions" /></div>}
                 </div>
+            )}
+
+            {/* Partial Delivery Modal */}
+            {partialDeliveryJob && (
+                <PartialDeliveryModal
+                    isOpen={!!partialDeliveryJob}
+                    onClose={() => setPartialDeliveryJob(null)}
+                    job={partialDeliveryJob}
+                    user={user}
+                    products={products}
+                    sites={sites}
+                    wmsJobsService={wmsJobsService}
+                    adjustStockMutation={adjustStockMutation}
+                    addProduct={addProduct}
+                    addNotification={addNotification as any}
+                    refreshData={refreshData}
+                    jobs={jobs}
+                />
             )}
         </div>
     );
