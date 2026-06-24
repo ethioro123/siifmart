@@ -346,11 +346,18 @@ export const PackTab: React.FC = () => {
 
             const html = await generatePackLabelHTML(packLabelData, { size: labelSize, format: 'Both' });
 
+            let printHTML = html;
+            const scriptTag = '<script>window.onload = function() { setTimeout(function() { window.print(); }, 500); };</script>';
+            if (printHTML.includes('</body>')) {
+                printHTML = printHTML.replace('</body>', `${scriptTag}</body>`);
+            } else {
+                printHTML += scriptTag;
+            }
+
             const printWindow = window.open('', '_blank');
             if (printWindow) {
-                printWindow.document.write(html);
+                printWindow.document.write(printHTML);
                 printWindow.document.close();
-                setTimeout(() => printWindow.print(), 500);
             }
 
             addNotification('success', 'Label ready to print!');
@@ -401,11 +408,18 @@ export const PackTab: React.FC = () => {
 
             const html = await generatePackLabelHTML(packLabelData, { size: labelSize, format: 'Both' });
 
+            let printHTML = html;
+            const scriptTag = '<script>window.onload = function() { setTimeout(function() { window.print(); }, 500); };</script>';
+            if (printHTML.includes('</body>')) {
+                printHTML = printHTML.replace('</body>', `${scriptTag}</body>`);
+            } else {
+                printHTML += scriptTag;
+            }
+
             const printWindow = window.open('', '_blank');
             if (printWindow) {
-                printWindow.document.write(html);
+                printWindow.document.write(printHTML);
                 printWindow.document.close();
-                setTimeout(() => printWindow.print(), 500);
             }
 
             addNotification('success', 'Label ready to print!');
@@ -460,11 +474,18 @@ export const PackTab: React.FC = () => {
             if (labelSize === 'Extra Large') labelSize = 'XL';
 
             const html = await generatePackLabelHTML(itemLabelData, { size: labelSize, format: 'Both' });
+            let printHTML = html;
+            const scriptTag = '<script>window.onload = function() { setTimeout(function() { window.print(); }, 500); };</script>';
+            if (printHTML.includes('</body>')) {
+                printHTML = printHTML.replace('</body>', `${scriptTag}</body>`);
+            } else {
+                printHTML += scriptTag;
+            }
+
             const printWindow = window.open('', '_blank');
             if (printWindow) {
-                printWindow.document.write(html);
+                printWindow.document.write(printHTML);
                 printWindow.document.close();
-                setTimeout(() => printWindow.print(), 500);
             }
 
             addNotification('success', `Label printed for ${item.name || item.sku}`);

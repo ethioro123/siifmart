@@ -96,11 +96,18 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
             format: labelFormat === 'QR' ? 'QR' : 'Barcode'
         });
 
+        let printHTML = labelHTML;
+        const scriptTag = '<script>window.onload = function() { setTimeout(function() { window.print(); }, 500); };</script>';
+        if (printHTML.includes('</body>')) {
+            printHTML = printHTML.replace('</body>', `${scriptTag}</body>`);
+        } else {
+            printHTML += scriptTag;
+        }
+
         const printWindow = window.open('', '_blank');
         if (printWindow) {
-            printWindow.document.write(labelHTML);
+            printWindow.document.write(printHTML);
             printWindow.document.close();
-            setTimeout(() => printWindow.print(), 500);
             addNotification('success', `Location label ${humanLabel} ready!`);
         }
     };    return (
@@ -341,11 +348,18 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
                                                 showCategory: true
                                             });
 
+                                            let printHTML = labelHTML;
+                                            const scriptTag = '<script>window.onload = function() { setTimeout(function() { window.print(); }, 500); };</script>';
+                                            if (printHTML.includes('</body>')) {
+                                                printHTML = printHTML.replace('</body>', `${scriptTag}</body>`);
+                                            } else {
+                                                printHTML += scriptTag;
+                                            }
+
                                             const printWindow = window.open('', '_blank');
                                             if (printWindow) {
-                                                printWindow.document.write(labelHTML);
+                                                printWindow.document.write(printHTML);
                                                 printWindow.document.close();
-                                                setTimeout(() => printWindow.print(), 500);
                                                 addNotification('success', `${printQty} Product label${printQty > 1 ? 's' : ''} ready!`);
                                             }
                                         }}

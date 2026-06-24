@@ -187,19 +187,19 @@ export default function LabelPrintModal({ isOpen, onClose, labels, onPrint }: La
             </head>
             <body>
                 ${labelContent}
+                <script>
+                    window.onload = function() {
+                        setTimeout(function() {
+                            window.print();
+                            window.close();
+                        }, 250);
+                    };
+                </script>
             </body>
             </html>
         `);
 
         printWindow.document.close();
-
-        // Wait for content to load then print
-        printWindow.onload = () => {
-            setTimeout(() => {
-                printWindow.print();
-                printWindow.close();
-            }, 250);
-        };
 
         onPrint();
     };

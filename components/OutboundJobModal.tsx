@@ -121,11 +121,18 @@ export const OutboundJobModal: React.FC<OutboundJobModalProps> = ({
                 })
             }, { size: 'XL', format: 'Both' });
 
+            let printHTML = html;
+            const scriptTag = '<script>window.onload = function() { setTimeout(function() { window.print(); }, 500); };</script>';
+            if (printHTML.includes('</body>')) {
+                printHTML = printHTML.replace('</body>', `${scriptTag}</body>`);
+            } else {
+                printHTML += scriptTag;
+            }
+
             const printWindow = window.open('', '_blank');
             if (printWindow) {
-                printWindow.document.write(html);
+                printWindow.document.write(printHTML);
                 printWindow.document.close();
-                setTimeout(() => printWindow.print(), 500);
             }
         } catch (error) {
             console.error("Label generation failed", error);
