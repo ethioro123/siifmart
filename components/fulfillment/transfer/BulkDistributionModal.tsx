@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Truck, RotateCcw, X, Layers, AlertOctagon, Search } from 'lucide-react';
+import { Truck, RotateCcw, X, Layers, AlertOctagon, Search, AlertTriangle } from 'lucide-react';
 import { WMSJob, Product, Site, User } from '../../../types';
 import { ProductSelector } from './ProductSelector';
 import { formatJobId } from '../../../utils/jobIdFormatter';
 import { getSellUnit } from '../../../utils/units';
+import { useData } from '../../../contexts/DataContext';
+import { logisticsZonesService } from '../../../services/supabase.service';
 
 interface BulkDistributionModalProps {
     isOpen: boolean;
@@ -34,6 +36,10 @@ export const BulkDistributionModal: React.FC<BulkDistributionModalProps> = ({
     logSystemEvent,
     renderTabs
 }) => {
+    const { settings } = useData();
+    const isRestricted = !['super_admin', 'admin'].includes(user?.role || '') && !!user?.siteId;
+    const [logisticsZones, setLogisticsZones] = useState<any[]>([]);
+
     // --- STATE ---
     const [bulkDistributionMode, setBulkDistributionMode] = useState<'single' | 'wave'>('single');
     const [bulkDistributionSourceSite, setBulkDistributionSourceSite] = useState('');
@@ -44,16 +50,69 @@ export const BulkDistributionModal: React.FC<BulkDistributionModalProps> = ({
 
     useEffect(() => {
         if (isOpen) {
-            setBulkDistributionSourceSite(activeSite?.id || '');
+            setBulkDistributionSourceSite(isRestricted ? (user?.siteId || '') : (activeSite?.id || ''));
             setBulkDistributionProductId('');
             setBulkDistributionAllocations([]);
             setWaveProducts([]);
             setBulkDistributionMode('single');
+
+            // Fetch logistics zones
+            const fetchZones = async () => {
+                try {
+                    const zones = await logisticsZonesService.getAll();
+                    setLogisticsZones(zones);
+                } catch (err) {
+                    console.error('Failed to fetch logistics zones:', err);
+                }
+            };
+            fetchZones();
         }
-    }, [isOpen, activeSite]);
+    }, [isOpen, activeSite, user, isRestricted]);
+
+    const sourceSiteObj = sites.find(s => s.id === (bulkDistributionSourceSite || activeSite?.id));
+
+    const getZoneName = (zoneId?: string) => {
+        if (!zoneId) return 'Unassigned / Free Zone';
+        const zone = logisticsZones.find(z => z.id === zoneId);
+        return zone ? zone.name : 'Loading...';
+    };
+
+    const getCrossZoneStores = () => {
+        if (!settings?.enforceRegionalZoning || !sourceSiteObj) return [];
+        const sourceZone = sourceSiteObj.logisticsZoneId || '';
+
+        if (bulkDistributionMode === 'single') {
+            return bulkDistributionAllocations
+                .filter(alloc => alloc.quantity > 0)
+                .map(alloc => sites.find(s => s.id === alloc.storeId))
+                .filter((s): s is Site => !!s && (s.logisticsZoneId || '') !== sourceZone);
+        } else {
+            const storeIds = new Set<string>();
+            waveProducts.forEach(wp => {
+                wp.allocations.forEach(alloc => {
+                    if (alloc.quantity > 0) {
+                        storeIds.add(alloc.storeId);
+                    }
+                });
+            });
+            return Array.from(storeIds)
+                .map(id => sites.find(s => s.id === id))
+                .filter((s): s is Site => !!s && (s.logisticsZoneId || '') !== sourceZone);
+        }
+    };
+
+    const crossZoneStores = getCrossZoneStores();
+    const isCrossZone = crossZoneStores.length > 0;
 
     const handleCreateDistribution = async () => {
         const actualSourceSite = bulkDistributionSourceSite || activeSite?.id;
+
+        if (settings?.enforceRegionalZoning && user?.role !== 'super_admin') {
+            if (isCrossZone) {
+                addNotification('alert', 'Cross-zone distribution is restricted. Stores can only receive stock from warehouses in the same Logistics Zone.');
+                return;
+            }
+        }
 
         try {
             let createdJobs = 0;
@@ -258,14 +317,44 @@ export const BulkDistributionModal: React.FC<BulkDistributionModalProps> = ({
                             <select
                                 id="source-warehouse-select"
                                 value={bulkDistributionSourceSite}
-                                onChange={(e) => setBulkDistributionSourceSite(e.target.value)}
-                                className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white/50 cursor-not-allowed focus:outline-none"
+                                onChange={(e) => {
+                                    setBulkDistributionSourceSite(e.target.value);
+                                    setBulkDistributionProductId('');
+                                    setBulkDistributionAllocations([]);
+                                    setWaveProducts([]);
+                                }}
+                                className={`w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm focus:outline-none ${
+                                    isRestricted 
+                                        ? 'text-white/55 cursor-not-allowed' 
+                                        : 'text-white focus:border-[#2C5E3B]'
+                                }`}
                                 aria-label="Select Distribution Source"
-                                disabled
+                                disabled={isRestricted}
                             >
-                                <option value={activeSite?.id || bulkDistributionSourceSite}>{activeSite?.name || 'Current Site'}</option>
+                                {isRestricted ? (
+                                    <option value={activeSite?.id || bulkDistributionSourceSite}>{activeSite?.name || 'Current Site'}</option>
+                                ) : (
+                                    <>
+                                        <option value="">Select Distribution Source</option>
+                                        {sites.map(site => (
+                                            <option key={site.id} value={site.id}>{site.name} ({site.type})</option>
+                                        ))}
+                                    </>
+                                )}
                             </select>
                         </div>
+
+                        {isCrossZone && settings?.enforceRegionalZoning && user?.role === 'super_admin' && (
+                            <div className="bg-yellow-500/10 border border-yellow-500/30 text-yellow-400 p-4 rounded-xl flex items-start gap-3 animate-pulse">
+                                <AlertTriangle className="shrink-0 mt-0.5 text-yellow-400" size={18} />
+                                <div>
+                                    <h4 className="font-bold text-sm text-yellow-400">⚠️ Cross-Zone Allocation Override</h4>
+                                    <p className="text-xs mt-1 text-yellow-500/90 leading-relaxed">
+                                        You are distributing stock from <span className="font-bold text-white">{getZoneName(sourceSiteObj?.logisticsZoneId)}</span> to stores in different Logistics Zones: {crossZoneStores.map(s => `${s.name} (${getZoneName(s.logisticsZoneId)})`).join(', ')}. As CEO, you are authorized to override this restriction.
+                                    </p>
+                                </div>
+                            </div>
+                        )}
 
                         {/* Single Mode Content */}
                         {bulkDistributionMode === 'single' && (
@@ -279,10 +368,16 @@ export const BulkDistributionModal: React.FC<BulkDistributionModalProps> = ({
                                                 onSelect={(product) => {
                                                     setBulkDistributionProductId(product.id);
                                                     const warehouseId = bulkDistributionSourceSite || activeSite?.id;
-                                                    const stores = sites.filter(s =>
-                                                        s.type === 'Store' &&
-                                                        (s.replenishmentSourceIds || []).includes(warehouseId || '')
-                                                    );
+                                                    const stores = sites.filter(s => {
+                                                        if (s.type !== 'Store') return false;
+
+                                                        if (settings?.enforceRegionalZoning) {
+                                                            if (user?.role !== 'super_admin' && sourceSiteObj) {
+                                                                return (s.logisticsZoneId || '') === (sourceSiteObj.logisticsZoneId || '');
+                                                            }
+                                                        }
+                                                        return true;
+                                                    });
                                                     setBulkDistributionAllocations(stores.map(s => ({ storeId: s.id, quantity: 0 })));
                                                     setIsSearchingProduct(false);
                                                 }}
@@ -380,10 +475,16 @@ export const BulkDistributionModal: React.FC<BulkDistributionModalProps> = ({
                                             products={allProducts}
                                             onSelect={(product) => {
                                                 const warehouseId = bulkDistributionSourceSite || activeSite?.id;
-                                                const stores = sites.filter(s =>
-                                                    s.type === 'Store' &&
-                                                    (s.replenishmentSourceIds || []).includes(warehouseId || '')
-                                                );
+                                                let stores = sites.filter(s => {
+                                                    if (s.type !== 'Store') return false;
+
+                                                    if (settings?.enforceRegionalZoning) {
+                                                        if (user?.role !== 'super_admin' && sourceSiteObj) {
+                                                            return (s.logisticsZoneId || '') === (sourceSiteObj.logisticsZoneId || '');
+                                                        }
+                                                    }
+                                                    return true;
+                                                });
                                                 setWaveProducts([...waveProducts, {
                                                     productId: product.id,
                                                     allocations: stores.map(s => ({ storeId: s.id, quantity: 0 }))

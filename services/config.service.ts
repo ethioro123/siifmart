@@ -113,7 +113,8 @@ export const systemConfigService = {
             posBonusTiers: 'pos_bonus_tiers',
             posBonusPayoutFrequency: 'pos_bonus_payout_frequency',
             posRoleDistribution: 'pos_role_distribution',
-            posPointRules: 'pos_point_rules'
+            posPointRules: 'pos_point_rules',
+            enforceRegionalZoning: 'enforce_regional_zoning'
         };
 
         const finalUpdates: any = {};
@@ -276,7 +277,8 @@ export const systemConfigService = {
             posBonusTiers: data.pos_bonus_tiers || [],
             posBonusPayoutFrequency: data.pos_bonus_payout_frequency || 'monthly',
             posRoleDistribution: data.pos_role_distribution || [],
-            posPointRules: data.pos_point_rules || []
+            posPointRules: data.pos_point_rules || [],
+            enforceRegionalZoning: data.enforce_regional_zoning ?? false
         };
     }
 };

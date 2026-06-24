@@ -20,7 +20,7 @@ import { Site, SiteType } from '../types';
 import { useStore } from '../contexts/CentralStore';
 import { Protected } from '../components/Protected';
 
-import { sitesService } from '../services/supabase.service';
+import { sitesService, logisticsZonesService } from '../services/supabase.service';
 import GeneralSettings from '../components/settings/GeneralSettings';
 import WMSSettings from '../components/settings/WMSSettings';
 import POSSettings from '../components/settings/POSSettings';
@@ -108,7 +108,7 @@ const ToggleGroup = ({ label, sub, checked = false, onChange, warning }: ToggleG
 
 export default function SettingsPage() {
     const { user } = useStore();
-    const { settings, updateSettings, resetData, sites, addSite, updateSite, deleteSite, systemLogs, exportSystemData, addNotification, cleanupAdminProducts, addProduct } = useData();
+    const { settings, updateSettings, resetData, sites, addSite, updateSite, deleteSite, systemLogs, exportSystemData, addNotification, cleanupAdminProducts, addProduct, refreshData } = useData();
     const [activeTab, setActiveTab] = useState<SettingsTab>('general');
     const [isSaving, setIsSaving] = useState(false);
     const [isNavOpen, setIsNavOpen] = useState(false);
@@ -120,6 +120,18 @@ export default function SettingsPage() {
     const [newSite, setNewSite] = useState<Partial<Site>>({});
     const [isSavingSite, setIsSavingSite] = useState(false);
     const [expandedSiteId, setExpandedSiteId] = useState<string | null>(null);
+    const [locationViewMode, setLocationViewMode] = useState<'category' | 'zone'>('category');
+
+    // Independent Logistics Zones State
+    const [logisticsZones, setLogisticsZones] = useState<any[]>([]);
+    const [isLoadingZones, setIsLoadingZones] = useState(false);
+    const [isZoneManagerOpen, setIsZoneManagerOpen] = useState(false);
+    const [isZoneSaving, setIsZoneSaving] = useState(false);
+
+    // Zone Form / Editing state
+    const [editingZone, setEditingZone] = useState<any | null>(null);
+    const [zoneNameInput, setZoneNameInput] = useState('');
+    const [zoneDescInput, setZoneDescInput] = useState('');
 
     // Test Location State for Barcode Preview
     const [testLocation, setTestLocation] = useState({
@@ -137,6 +149,22 @@ export default function SettingsPage() {
     // Confirmation Modals
 
     const [isGenerating, setIsGenerating] = useState(false);
+
+    const fetchZones = async () => {
+        setIsLoadingZones(true);
+        try {
+            const data = await logisticsZonesService.getAll();
+            setLogisticsZones(data);
+        } catch (error) {
+            console.error('Failed to load logistics zones:', error);
+        } finally {
+            setIsLoadingZones(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchZones();
+    }, []);
 
     const generateBarcodes = async (site: Partial<Site> & { barcodePrefix?: string }) => {
         // Use centralized utility for site prefix
@@ -232,7 +260,8 @@ export default function SettingsPage() {
                     bayCount: newSite.bayCount,
                     code: newSite.code || newSite.name?.substring(0, 3).toUpperCase() || 'UNK',
                     replenishmentSourceIds: newSite.replenishmentSourceIds ?? [],
-                    replenishmentSourceId: (newSite.replenishmentSourceIds ?? [])[0]
+                    replenishmentSourceId: (newSite.replenishmentSourceIds ?? [])[0],
+                    logisticsZoneId: newSite.logisticsZoneId || undefined
                 };
                 await updateSite(siteData, user?.name || 'Admin');
             } else {
@@ -250,7 +279,8 @@ export default function SettingsPage() {
                     bayCount: newSite.bayCount,
                     code: 'GENERATED_BY_DB',
                     replenishmentSourceIds: newSite.replenishmentSourceIds ?? [],
-                    replenishmentSourceId: (newSite.replenishmentSourceIds ?? [])[0]
+                    replenishmentSourceId: (newSite.replenishmentSourceIds ?? [])[0],
+                    logisticsZoneId: newSite.logisticsZoneId || undefined
                 };
                 await addSite(siteData as Site, user?.name || 'Admin');
             }
@@ -303,6 +333,50 @@ export default function SettingsPage() {
         }
     };
 
+    const handleSaveZone = async () => {
+        if (!zoneNameInput.trim()) {
+            addNotification('alert', 'Zone name is required');
+            return;
+        }
+        setIsZoneSaving(true);
+        try {
+            if (editingZone) {
+                await logisticsZonesService.update(editingZone.id, {
+                    name: zoneNameInput.trim(),
+                    description: zoneDescInput.trim()
+                });
+                addNotification('success', 'Logistics Zone updated successfully');
+            } else {
+                await logisticsZonesService.create({
+                    name: zoneNameInput.trim(),
+                    description: zoneDescInput.trim()
+                });
+                addNotification('success', 'Logistics Zone created successfully');
+            }
+            setZoneNameInput('');
+            setZoneDescInput('');
+            setEditingZone(null);
+            fetchZones();
+            refreshData();
+        } catch (error: any) {
+            addNotification('alert', `Failed to save Logistics Zone: ${error.message}`);
+        } finally {
+            setIsZoneSaving(false);
+        }
+    };
+
+    const handleDeleteZone = async (id: string) => {
+        if (!confirm('Are you sure you want to delete this Logistics Zone? Any locations in it will become unassigned.')) return;
+        try {
+            await logisticsZonesService.delete(id);
+            addNotification('success', 'Logistics Zone deleted successfully');
+            fetchZones();
+            refreshData();
+        } catch (error: any) {
+            addNotification('alert', `Failed to delete Logistics Zone: ${error.message}`);
+        }
+    };
+
     const TabButton = ({ id, icon: Icon, label }: { id: SettingsTab, icon: any, label: string }) => (
         <button
             onClick={() => {
@@ -318,6 +392,118 @@ export default function SettingsPage() {
             <span>{label}</span>
         </button>
     );
+
+    const renderSiteCard = (site: Site) => {
+        return (
+            <div 
+                key={site.id} 
+                onClick={() => setExpandedSiteId(expandedSiteId === site.id ? null : site.id)}
+                className={`bg-white/5 hover:bg-white/10 border ${
+                    expandedSiteId === site.id ? 'border-cyber-primary/40 bg-cyber-primary/5' : 'border-white/5'
+                } rounded-xl p-3 cursor-pointer transition-all duration-200 group`}
+            >
+                <div className="flex items-start justify-between gap-1.5">
+                    <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-1.5">
+                            <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                                site.status === 'Active' ? 'bg-green-500' :
+                                site.status === 'Maintenance' ? 'bg-yellow-500' : 'bg-red-500'
+                            }`} />
+                            <h6 className="text-white font-bold text-xs leading-tight truncate group-hover:text-cyber-primary transition-colors" title={site.name}>
+                                {site.name}
+                            </h6>
+                        </div>
+                        <p className="text-[10px] text-gray-400 mt-1 line-clamp-2" title={site.address}>
+                            {site.address}
+                        </p>
+                    </div>
+                    <ChevronDown
+                        size={14}
+                        className={`text-gray-500 shrink-0 transition-transform mt-0.5 ${
+                            expandedSiteId === site.id ? 'rotate-180 text-cyber-primary' : ''
+                        }`}
+                    />
+                </div>
+
+                {/* Expanded details inside card */}
+                {expandedSiteId === site.id && (
+                    <div className="mt-2.5 pt-2.5 border-t border-white/5 space-y-2 text-[10px] text-gray-400" onClick={(e) => e.stopPropagation()}>
+                        <div className="grid grid-cols-2 gap-2">
+                            <div>
+                                <span className="font-bold text-gray-500 block uppercase tracking-wider text-[8px]">Code</span>
+                                <span className="font-mono text-cyber-primary font-bold">{site.code || 'N/A'}</span>
+                            </div>
+                            <div>
+                                <span className="font-bold text-gray-500 block uppercase tracking-wider text-[8px]">Status</span>
+                                <span className={`font-semibold ${
+                                    site.status === 'Active' ? 'text-green-400' :
+                                    site.status === 'Maintenance' ? 'text-yellow-400' : 'text-red-400'
+                                }`}>{site.status}</span>
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                            <div>
+                                <span className="font-bold text-gray-500 block uppercase tracking-wider text-[8px]">Manager</span>
+                                <span className="text-white font-medium truncate block font-bold" title={site.manager || 'Unassigned'}>
+                                    {site.manager || 'Unassigned'}
+                                </span>
+                            </div>
+                            <div>
+                                <span className="font-bold text-gray-500 block uppercase tracking-wider text-[8px]">Logistics Zone</span>
+                                <span className="text-yellow-400 font-medium truncate block font-bold" title={
+                                    site.logisticsZoneId 
+                                        ? (logisticsZones.find(z => z.id === site.logisticsZoneId)?.name || 'Unknown') 
+                                        : 'Unassigned'
+                                }>
+                                    {site.logisticsZoneId 
+                                        ? (logisticsZones.find(z => z.id === site.logisticsZoneId)?.name || 'Unknown') 
+                                        : 'Unassigned'}
+                                </span>
+                            </div>
+                        </div>
+                        <div>
+                            <span className="font-bold text-gray-500 block uppercase tracking-wider text-[8px]">
+                                {site.type === 'Warehouse' || site.type === 'Distribution Center'
+                                    ? 'Capacity'
+                                    : site.type === 'Administration'
+                                        ? 'Staff Limit'
+                                        : 'Terminals'}
+                            </span>
+                            <span className="text-white font-semibold">
+                                {site.type === 'Warehouse' || site.type === 'Distribution Center'
+                                    ? `${site.capacity || 0} m²`
+                                    : site.type === 'Administration'
+                                        ? `${site.capacity || 0} staff`
+                                        : `${site.terminalCount || 0} POS`}
+                            </span>
+                        </div>
+
+
+                        {/* Action Buttons */}
+                        <div className="flex gap-2 justify-end pt-2 border-t border-white/5">
+                            <button
+                                onClick={() => { setNewSite(site); setIsSiteModalOpen(true); }}
+                                className="px-2.5 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-white text-[9px] font-bold transition-colors flex items-center gap-1"
+                                title="Edit Location"
+                            >
+                                <Code size={10} className="text-cyber-primary" />
+                                <span>Edit</span>
+                            </button>
+                            <button
+                                onClick={() => handleDeleteSite(site.id)}
+                                className="px-2.5 py-1.5 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 rounded-lg text-red-400 text-[9px] font-bold transition-colors flex items-center gap-1"
+                                title="Delete Location"
+                                disabled={isDeleting}
+                            >
+                                <Trash2 size={10} />
+                                <span>Delete</span>
+                            </button>
+                        </div>
+                    </div>
+                )}
+            </div>
+        );
+    };
 
     return (
         <div className="flex flex-col lg:flex-row gap-8 h-[calc(100vh-140px)]">
@@ -447,13 +633,43 @@ export default function SettingsPage() {
                                                 <span className="text-gray-400">{sites.filter(s => s.type === 'Store').length} Stores</span>
                                             </div>
                                         </div>
+                                        <div className="flex items-center gap-2 mt-4 bg-white/5 p-1 rounded-xl w-fit border border-white/5">
+                                            <button
+                                                onClick={() => setLocationViewMode('category')}
+                                                className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                                                    locationViewMode === 'category'
+                                                        ? 'bg-cyber-primary text-black shadow-[0_0_10px_rgba(0,255,157,0.2)]'
+                                                        : 'text-gray-400 hover:text-white'
+                                                }`}
+                                            >
+                                                By Category
+                                            </button>
+                                            <button
+                                                onClick={() => setLocationViewMode('zone')}
+                                                className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                                                    locationViewMode === 'zone'
+                                                        ? 'bg-cyber-primary text-black shadow-[0_0_10px_rgba(0,255,157,0.2)]'
+                                                        : 'text-gray-400 hover:text-white'
+                                                }`}
+                                            >
+                                                By Logistics Zone
+                                            </button>
+                                        </div>
                                     </div>
-                                    <button
-                                        onClick={() => { setNewSite({ type: 'Store', status: 'Active' }); setIsSiteModalOpen(true); }}
-                                        className="bg-cyber-primary text-black px-6 py-3 rounded-xl font-bold text-sm flex items-center gap-2 hover:bg-cyber-accent shadow-[0_0_15px_rgba(0,255,157,0.2)] transition-all"
-                                    >
-                                        <Plus size={18} /> Add Location
-                                    </button>
+                                    <div className="flex items-center gap-3">
+                                        <button
+                                            onClick={() => setIsZoneManagerOpen(true)}
+                                            className="bg-yellow-500/10 text-yellow-400 hover:bg-yellow-500/20 border border-yellow-500/30 px-5 py-3 rounded-xl font-bold text-sm flex items-center gap-2 transition-all"
+                                        >
+                                            <Globe size={18} /> Manage Zones
+                                        </button>
+                                        <button
+                                            onClick={() => { setNewSite({ type: 'Store', status: 'Active' }); setIsSiteModalOpen(true); }}
+                                            className="bg-cyber-primary text-black px-6 py-3 rounded-xl font-bold text-sm flex items-center gap-2 hover:bg-cyber-accent shadow-[0_0_15px_rgba(0,255,157,0.2)] transition-all"
+                                        >
+                                            <Plus size={18} /> Add Location
+                                        </button>
+                                    </div>
                                 </div>
 
                                 {sites.length === 0 ? (
@@ -467,6 +683,78 @@ export default function SettingsPage() {
                                         >
                                             <Plus size={18} /> Add First Location
                                         </button>
+                                    </div>
+                                ) : locationViewMode === 'zone' ? (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 items-start">
+                                        {/* Dynamic zones columns */}
+                                        {logisticsZones.map(zone => {
+                                            const zoneSites = sites.filter(s => s.logisticsZoneId === zone.id);
+                                            return (
+                                                <div key={zone.id} className="bg-black/15 border border-white/5 rounded-2xl p-4 flex flex-col gap-3 min-h-[300px] hover:border-white/10 transition-colors">
+                                                    {/* Column Header */}
+                                                    <div className="flex flex-col gap-1 border-b border-white/5 pb-2.5">
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="w-2 h-2 rounded-full bg-yellow-500 shrink-0 shadow-[0_0_8px_rgba(234,179,8,0.5)]" />
+                                                            <h5 className="text-white font-bold text-xs uppercase tracking-wider truncate" title={zone.name}>{zone.name}</h5>
+                                                            <span className="text-[9px] text-gray-400 bg-white/5 px-1.5 py-0.5 rounded font-mono font-bold shrink-0 ml-auto">
+                                                                {zoneSites.length}
+                                                            </span>
+                                                        </div>
+                                                        {zone.description && (
+                                                            <p className="text-[10px] text-gray-500 truncate" title={zone.description}>
+                                                                {zone.description}
+                                                            </p>
+                                                        )}
+                                                    </div>
+
+                                                    {/* Column contents */}
+                                                    {zoneSites.length === 0 ? (
+                                                        <div className="flex-1 flex flex-col items-center justify-center py-8 text-center opacity-40">
+                                                            <MapPin size={16} className="text-gray-600 mb-1" />
+                                                            <span className="text-[10px] text-gray-500 italic">No locations</span>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="flex flex-col gap-2.5 max-h-[500px] overflow-y-auto custom-scrollbar pr-1">
+                                                            {zoneSites.map(site => renderSiteCard(site))}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            );
+                                        })}
+
+                                        {/* Unassigned / Free Zone column */}
+                                        {(() => {
+                                            const unassignedSites = sites.filter(s => !s.logisticsZoneId);
+                                            return (
+                                                <div key="unassigned" className="bg-black/15 border border-white/5 rounded-2xl p-4 flex flex-col gap-3 min-h-[300px] hover:border-white/10 transition-colors">
+                                                    {/* Column Header */}
+                                                    <div className="flex flex-col gap-1 border-b border-white/5 pb-2.5">
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="w-2 h-2 rounded-full bg-gray-500 shrink-0 shadow-[0_0_8px_rgba(156,163,175,0.5)]" />
+                                                            <h5 className="text-white font-bold text-xs uppercase tracking-wider truncate">Unassigned / Free Zone</h5>
+                                                            <span className="text-[9px] text-gray-400 bg-white/5 px-1.5 py-0.5 rounded font-mono font-bold shrink-0 ml-auto">
+                                                                {unassignedSites.length}
+                                                            </span>
+                                                        </div>
+                                                        <p className="text-[10px] text-gray-500 truncate">
+                                                            Locations with no zoning restrictions
+                                                        </p>
+                                                    </div>
+
+                                                    {/* Column contents */}
+                                                    {unassignedSites.length === 0 ? (
+                                                        <div className="flex-1 flex flex-col items-center justify-center py-8 text-center opacity-40">
+                                                            <MapPin size={16} className="text-gray-600 mb-1" />
+                                                            <span className="text-[10px] text-gray-500 italic">No locations</span>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="flex flex-col gap-2.5 max-h-[500px] overflow-y-auto custom-scrollbar pr-1">
+                                                            {unassignedSites.map(site => renderSiteCard(site))}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            );
+                                        })()}
                                     </div>
                                 ) : (
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 items-start">
@@ -536,112 +824,7 @@ export default function SettingsPage() {
                                                         </div>
                                                     ) : (
                                                         <div className="flex flex-col gap-2.5 max-h-[500px] overflow-y-auto custom-scrollbar pr-1">
-                                                            {catSites.map(site => (
-                                                                <div 
-                                                                    key={site.id} 
-                                                                    onClick={() => setExpandedSiteId(expandedSiteId === site.id ? null : site.id)}
-                                                                    className={`bg-white/5 hover:bg-white/10 border ${
-                                                                        expandedSiteId === site.id ? 'border-cyber-primary/40 bg-cyber-primary/5' : 'border-white/5'
-                                                                    } rounded-xl p-3 cursor-pointer transition-all duration-200 group`}
-                                                                >
-                                                                    <div className="flex items-start justify-between gap-1.5">
-                                                                        <div className="min-w-0 flex-1">
-                                                                            <div className="flex items-center gap-1.5">
-                                                                                <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${
-                                                                                    site.status === 'Active' ? 'bg-green-500' :
-                                                                                    site.status === 'Maintenance' ? 'bg-yellow-500' : 'bg-red-500'
-                                                                                }`} />
-                                                                                <h6 className="text-white font-bold text-xs leading-tight truncate group-hover:text-cyber-primary transition-colors" title={site.name}>
-                                                                                    {site.name}
-                                                                                </h6>
-                                                                            </div>
-                                                                            <p className="text-[10px] text-gray-400 mt-1 line-clamp-2" title={site.address}>
-                                                                                {site.address}
-                                                                            </p>
-                                                                        </div>
-                                                                        <ChevronDown
-                                                                            size={14}
-                                                                            className={`text-gray-500 shrink-0 transition-transform mt-0.5 ${
-                                                                                expandedSiteId === site.id ? 'rotate-180 text-cyber-primary' : ''
-                                                                            }`}
-                                                                        />
-                                                                    </div>
-
-                                                                    {/* Expanded details inside column */}
-                                                                    {expandedSiteId === site.id && (
-                                                                        <div className="mt-2.5 pt-2.5 border-t border-white/5 space-y-2 text-[10px] text-gray-400" onClick={(e) => e.stopPropagation()}>
-                                                                            <div className="grid grid-cols-2 gap-2">
-                                                                                <div>
-                                                                                    <span className="font-bold text-gray-500 block uppercase tracking-wider text-[8px]">Code</span>
-                                                                                    <span className="font-mono text-cyber-primary font-bold">{site.code || 'N/A'}</span>
-                                                                                </div>
-                                                                                <div>
-                                                                                    <span className="font-bold text-gray-500 block uppercase tracking-wider text-[8px]">Status</span>
-                                                                                    <span className={`font-semibold ${
-                                                                                        site.status === 'Active' ? 'text-green-400' :
-                                                                                        site.status === 'Maintenance' ? 'text-yellow-400' : 'text-red-400'
-                                                                                    }`}>{site.status}</span>
-                                                                                </div>
-                                                                            </div>
-                                                                            <div>
-                                                                                <span className="font-bold text-gray-500 block uppercase tracking-wider text-[8px]">Manager</span>
-                                                                                <span className="text-white font-medium">{site.manager || 'Unassigned'}</span>
-                                                                            </div>
-                                                                            <div>
-                                                                                <span className="font-bold text-gray-500 block uppercase tracking-wider text-[8px]">
-                                                                                    {site.type === 'Warehouse' || site.type === 'Distribution Center'
-                                                                                        ? 'Capacity'
-                                                                                        : site.type === 'Administration'
-                                                                                            ? 'Staff Limit'
-                                                                                            : 'Terminals'}
-                                                                                </span>
-                                                                                <span className="text-white font-semibold">
-                                                                                    {site.type === 'Warehouse' || site.type === 'Distribution Center'
-                                                                                        ? `${site.capacity || 0} m²`
-                                                                                        : site.type === 'Administration'
-                                                                                            ? `${site.capacity || 0} staff`
-                                                                                            : `${site.terminalCount || 0} POS`}
-                                                                                </span>
-                                                                            </div>
-                                                                            {(site.type === 'Store' || site.type === 'Dark Store' || site.type === 'Online Store') && (
-                                                                                <div>
-                                                                                    <span className="font-bold text-gray-500 block uppercase tracking-wider text-[8px]">Replenishment Sources</span>
-                                                                                    <span className="text-white font-medium block" title={
-                                                                                        (site.replenishmentSourceIds ?? []).length > 0
-                                                                                            ? (site.replenishmentSourceIds ?? []).map(id => sites.find(s => s.id === id)?.name || 'Unknown').join(', ')
-                                                                                            : 'Not Configured'
-                                                                                    }>
-                                                                                        {(site.replenishmentSourceIds ?? []).length > 0
-                                                                                            ? (site.replenishmentSourceIds ?? []).map(id => sites.find(s => s.id === id)?.name || 'Unknown').join(', ')
-                                                                                            : 'Not Configured'}
-                                                                                    </span>
-                                                                                </div>
-                                                                            )}
-
-                                                                            {/* Action Buttons */}
-                                                                            <div className="flex gap-2 justify-end pt-2 border-t border-white/5">
-                                                                                <button
-                                                                                    onClick={() => { setNewSite(site); setIsSiteModalOpen(true); }}
-                                                                                    className="px-2.5 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-white text-[9px] font-bold transition-colors flex items-center gap-1"
-                                                                                    title="Edit Location"
-                                                                                >
-                                                                                    <Code size={10} className="text-cyber-primary" />
-                                                                                    <span>Edit</span>
-                                                                                </button>
-                                                                                <button
-                                                                                    onClick={() => handleDeleteSite(site.id)}
-                                                                                    className="px-2.5 py-1.5 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 rounded-lg text-red-400 text-[9px] font-bold transition-colors flex items-center gap-1"
-                                                                                    title="Delete Location"
-                                                                                    disabled={isDeleting}
-                                                                                >
-                                                                                    <Trash2 size={10} />
-                                                                                    <span>Delete</span>
-                                                                                </button>
-                                                                            </div>
-                                                                        </div>
-                                                                    )}
-                                                                </div>
-                                                            ))}
+                                                            {catSites.map(site => renderSiteCard(site))}
                                                         </div>
                                                     )}
                                                 </div>
@@ -775,6 +958,26 @@ export default function SettingsPage() {
                                 </select>
                             </div>
 
+                            <div>
+                                <label className="text-xs text-gray-400 uppercase font-bold mb-1 block">Logistics Zone</label>
+                                <select
+                                    className="w-full bg-black/30 border border-white/10 rounded-lg px-4 py-3 text-white outline-none focus:border-cyber-primary transition-colors"
+                                    value={newSite.logisticsZoneId || ''}
+                                    onChange={(e) => setNewSite({ ...newSite, logisticsZoneId: e.target.value || undefined })}
+                                    aria-label="Logistics Zone"
+                                >
+                                    <option value="">🌐 Unassigned / Free Zone</option>
+                                    {logisticsZones.map(zone => (
+                                        <option key={zone.id} value={zone.id}>
+                                            📍 {zone.name}
+                                        </option>
+                                    ))}
+                                </select>
+                                <p className="text-[9px] text-gray-500 mt-1">
+                                    Configure zones via the 'Manage Zones' button on the main Locations screen.
+                                </p>
+                            </div>
+
                             {/* Context-Aware Fields based on Site Type */}
                             {newSite.type === 'Administration' ? (
                                 <>
@@ -805,23 +1008,15 @@ export default function SettingsPage() {
                                             aria-label="Warehouse Manager"
                                         />
                                     </div>
-                                    <div>
-                                        <label className="text-xs text-gray-400 uppercase font-bold mb-1 block">Site Code (ID)</label>
-                                        <input
-                                            className="w-full bg-black/30 border border-white/10 rounded-lg px-4 py-3 text-white outline-none focus:border-cyber-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-mono"
-                                            placeholder="Auto-generated (e.g. ADD)"
-                                            value={newSite.code || ''}
-                                            onChange={(e) => {
-                                                // Only allow editing if it's a new site (no ID yet)
-                                                if (!newSite.id) {
-                                                    setNewSite({ ...newSite, code: e.target.value.toUpperCase().substring(0, 6) })
-                                                }
-                                            }}
-                                            disabled={!!newSite.id} // Immutable once created
-                                            aria-label="Site Code"
-                                        />
-                                        {newSite.id && <p className="text-[10px] text-yellow-500 mt-1 flex items-center gap-1"><Lock size={10} /> Immutable Identifier</p>}
-                                    </div>
+                                    {newSite.id && (
+                                        <div>
+                                            <label className="text-xs text-gray-400 uppercase font-bold mb-1 block">Site Code (ID)</label>
+                                            <div className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-gray-400 font-mono text-sm">
+                                                {newSite.code}
+                                            </div>
+                                            <p className="text-[10px] text-yellow-500 mt-1 flex items-center gap-1"><Lock size={10} /> Immutable Identifier</p>
+                                        </div>
+                                    )}
                                     <div>
                                         <label className="text-xs text-gray-400 uppercase font-bold mb-1 block">Storage Capacity (m²)</label>
                                         <input
@@ -971,23 +1166,15 @@ export default function SettingsPage() {
                                             aria-label="Store Manager"
                                         />
                                     </div>
-                                    <div>
-                                        <label className="text-xs text-gray-400 uppercase font-bold mb-1 block">Site Code (ID)</label>
-                                        <input
-                                            className="w-full bg-black/30 border border-white/10 rounded-lg px-4 py-3 text-white outline-none focus:border-cyber-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-mono"
-                                            placeholder="Auto-generated (e.g. RET)"
-                                            value={newSite.code || ''}
-                                            onChange={(e) => {
-                                                // Only allow editing if it's a new site (no ID yet)
-                                                if (!newSite.id) {
-                                                    setNewSite({ ...newSite, code: e.target.value.toUpperCase().substring(0, 6) })
-                                                }
-                                            }}
-                                            disabled={!!newSite.id} // Immutable once created
-                                            aria-label="Site Code"
-                                        />
-                                        {newSite.id && <p className="text-[10px] text-yellow-500 mt-1 flex items-center gap-1"><Lock size={10} /> Immutable Identifier</p>}
-                                    </div>
+                                    {newSite.id && (
+                                        <div>
+                                            <label className="text-xs text-gray-400 uppercase font-bold mb-1 block">Site Code (ID)</label>
+                                            <div className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-gray-400 font-mono text-sm">
+                                                {newSite.code}
+                                            </div>
+                                            <p className="text-[10px] text-yellow-500 mt-1 flex items-center gap-1"><Lock size={10} /> Immutable Identifier</p>
+                                        </div>
+                                    )}
                                     <div>
                                         <label className="text-xs text-gray-400 uppercase font-bold mb-1 block">POS Terminals</label>
                                         <input
@@ -999,53 +1186,6 @@ export default function SettingsPage() {
                                             onChange={(e) => setNewSite({ ...newSite, terminalCount: e.target.value === '' ? undefined : parseInt(e.target.value) })}
                                             aria-label="POS Terminals"
                                         />
-                                    </div>
-                                    <div>
-                                        <label className="text-xs text-gray-400 uppercase font-bold mb-1 block">Replenishment Sources</label>
-                                        <p className="text-[10px] text-gray-500 mb-2">Select one or more supply hubs — the system will route to the one with the most available stock.</p>
-                                        <div className="w-full bg-black/30 border border-white/10 rounded-lg overflow-y-auto max-h-40 divide-y divide-white/5" aria-label="Replenishment Sources">
-                                            {sites
-                                                .filter(s => s.type === 'Warehouse' || s.type === 'Distribution Center')
-                                                .map(s => {
-                                                    const selected = (newSite.replenishmentSourceIds ?? []).includes(s.id);
-                                                    return (
-                                                        <label
-                                                            key={s.id}
-                                                            className={`flex items-center gap-3 px-3 py-2.5 cursor-pointer transition-colors ${
-                                                                selected ? 'bg-cyber-primary/10' : 'hover:bg-white/5'
-                                                            }`}
-                                                        >
-                                                            <input
-                                                                type="checkbox"
-                                                                checked={selected}
-                                                                onChange={() => {
-                                                                    const current = newSite.replenishmentSourceIds ?? [];
-                                                                    const next = selected
-                                                                        ? current.filter(id => id !== s.id)
-                                                                        : [...current, s.id];
-                                                                    setNewSite({ ...newSite, replenishmentSourceIds: next, replenishmentSourceId: next[0] });
-                                                                }}
-                                                                className="accent-cyber-primary w-3.5 h-3.5 flex-shrink-0"
-                                                                aria-label={`Select ${s.name} as replenishment source`}
-                                                            />
-                                                            <span className="flex-1 min-w-0">
-                                                                <span className="text-white text-xs font-semibold block truncate">{s.name}</span>
-                                                                <span className="text-gray-500 text-[10px] block">{s.code} · {s.type}</span>
-                                                            </span>
-                                                            {selected && <span className="text-cyber-primary text-[9px] font-bold uppercase flex-shrink-0">Selected</span>}
-                                                        </label>
-                                                    );
-                                                })
-                                            }
-                                            {sites.filter(s => s.type === 'Warehouse' || s.type === 'Distribution Center').length === 0 && (
-                                                <p className="text-gray-500 text-xs px-3 py-4 text-center">No warehouses or distribution centers configured.</p>
-                                            )}
-                                        </div>
-                                        {(newSite.replenishmentSourceIds ?? []).length > 0 && (
-                                            <p className="text-[10px] text-cyber-primary mt-1">
-                                                {(newSite.replenishmentSourceIds ?? []).length} source{(newSite.replenishmentSourceIds ?? []).length > 1 ? 's' : ''} selected
-                                            </p>
-                                        )}
                                     </div>
                                 </>
                             )}
@@ -1157,6 +1297,140 @@ export default function SettingsPage() {
                 </div>
             </Modal >
 
+            <Modal isOpen={isZoneManagerOpen} onClose={() => { setIsZoneManagerOpen(false); setEditingZone(null); setZoneNameInput(''); setZoneDescInput(''); }} title="🌐 Manage Logistics Zones" size="lg">
+                <div className="space-y-6">
+                    {/* Global Enforcement Toggle */}
+                    <div className="flex items-start justify-between p-4 bg-white/5 rounded-xl border border-white/5 hover:border-white/10 transition-colors">
+                        <div className="space-y-1 pr-4">
+                            <p className="text-sm font-bold text-white flex items-center gap-2">
+                                <Shield className="text-cyber-primary" size={16} /> Enforce Regional Replenishment
+                            </p>
+                            <p className="text-[10px] text-gray-500 leading-relaxed">
+                                Restrict stock transfer requests to stores and warehouses within the same Logistics Zone. Bypass authorization is reserved for the CEO.
+                            </p>
+                        </div>
+                        <div
+                            onClick={async () => {
+                                try {
+                                    await updateSettings({ enforceRegionalZoning: !settings.enforceRegionalZoning }, user?.name || 'Admin');
+                                    addNotification('success', 'Regional zoning enforcement status updated');
+                                } catch (error) {
+                                    console.error(error);
+                                    addNotification('alert', 'Failed to update regional zoning enforcement');
+                                }
+                            }}
+                            className={`w-11 h-6 rounded-full p-1 cursor-pointer transition-colors relative shrink-0 ${
+                                settings.enforceRegionalZoning ? 'bg-cyber-primary' : 'bg-white/10'
+                            }`}
+                        >
+                            <div className={`w-4 h-4 bg-black rounded-full shadow-md transition-transform transform ${
+                                settings.enforceRegionalZoning ? 'translate-x-5' : 'translate-x-0'
+                            }`} />
+                        </div>
+                    </div>
+
+                    {/* Add/Edit Form */}
+                    <div className="bg-cyber-gray border border-white/10 rounded-xl p-4 space-y-4 shadow-lg">
+                        <h4 className="text-sm font-bold text-cyber-primary uppercase tracking-wider">
+                            {editingZone ? '✏️ Edit Logistics Zone' : '➕ Create New Logistics Zone'}
+                        </h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label className="text-xs text-gray-400 uppercase font-bold mb-1 block">Zone Name *</label>
+                                <input
+                                    className="w-full bg-black/30 border border-white/10 rounded-lg px-4 py-2.5 text-white outline-none focus:border-cyber-primary transition-colors text-sm"
+                                    placeholder="e.g. South Hub Zone"
+                                    value={zoneNameInput}
+                                    onChange={(e) => setZoneNameInput(e.target.value)}
+                                    aria-label="Zone Name"
+                                />
+                            </div>
+                            <div>
+                                <label className="text-xs text-gray-400 uppercase font-bold mb-1 block">Description</label>
+                                <input
+                                    className="w-full bg-black/30 border border-white/10 rounded-lg px-4 py-2.5 text-white outline-none focus:border-cyber-primary transition-colors text-sm"
+                                    placeholder="e.g. Southern region stores and Warehouses"
+                                    value={zoneDescInput}
+                                    onChange={(e) => setZoneDescInput(e.target.value)}
+                                    aria-label="Zone Description"
+                                />
+                            </div>
+                        </div>
+                        <div className="flex gap-2 justify-end pt-2">
+                            {editingZone && (
+                                <button
+                                    onClick={() => {
+                                        setEditingZone(null);
+                                        setZoneNameInput('');
+                                        setZoneDescInput('');
+                                    }}
+                                    className="px-4 py-2 bg-white/5 hover:bg-white/10 text-white rounded-lg text-xs font-bold transition-colors"
+                                >
+                                    Cancel Edit
+                                </button>
+                            )}
+                            <button
+                                onClick={handleSaveZone}
+                                disabled={isZoneSaving || !zoneNameInput.trim()}
+                                className="px-5 py-2 bg-cyber-primary text-black rounded-lg text-xs font-bold hover:bg-cyber-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
+                            >
+                                {isZoneSaving ? <Loader2 size={12} className="animate-spin" /> : editingZone ? <Save size={12} /> : <Plus size={12} />}
+                                {editingZone ? 'Update Zone' : 'Create Zone'}
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Zones List */}
+                    <div className="space-y-3">
+                        <label className="text-xs text-gray-400 uppercase font-bold block">Active Logistics Zones ({logisticsZones.length})</label>
+                        {isLoadingZones ? (
+                            <div className="py-8 flex items-center justify-center gap-2 text-gray-400 text-sm">
+                                <Loader2 className="animate-spin" size={16} /> Loading zones...
+                            </div>
+                        ) : logisticsZones.length === 0 ? (
+                            <p className="text-xs text-gray-500 italic py-4 text-center">No zones configured yet. Create one above.</p>
+                        ) : (
+                            <div className="border border-white/5 rounded-xl overflow-hidden divide-y divide-white/5 max-h-80 overflow-y-auto custom-scrollbar">
+                                {logisticsZones.map(zone => (
+                                    <div key={zone.id} className="p-4 bg-black/10 hover:bg-white/5 transition-colors flex items-center justify-between gap-4">
+                                        <div className="min-w-0 flex-1">
+                                            <h5 className="text-white font-bold text-sm truncate flex items-center gap-1.5">
+                                                <span className="w-1.5 h-1.5 rounded-full bg-yellow-500 shadow-[0_0_6px_rgba(234,179,8,0.5)] shrink-0" />
+                                                {zone.name}
+                                            </h5>
+                                            {zone.description && (
+                                                <p className="text-xs text-gray-400 mt-0.5 line-clamp-1">{zone.description}</p>
+                                            )}
+                                        </div>
+                                        <div className="flex gap-2 flex-shrink-0">
+                                            <button
+                                                onClick={() => {
+                                                    setEditingZone(zone);
+                                                    setZoneNameInput(zone.name);
+                                                    setZoneDescInput(zone.description || '');
+                                                }}
+                                                className="px-2.5 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-white text-[10px] font-bold transition-colors flex items-center gap-1"
+                                                title="Edit Zone"
+                                            >
+                                                <Code size={10} className="text-cyber-primary" />
+                                                <span>Edit</span>
+                                            </button>
+                                            <button
+                                                onClick={() => handleDeleteZone(zone.id)}
+                                                className="px-2.5 py-1.5 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 rounded-lg text-red-400 text-[10px] font-bold transition-colors flex items-center gap-1"
+                                                title="Delete Zone"
+                                            >
+                                                <Trash2 size={10} />
+                                                <span>Delete</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </Modal>
 
         </div >
     );

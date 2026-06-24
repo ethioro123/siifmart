@@ -300,7 +300,7 @@ export const InventoryZones: React.FC = () => {
                         <div className="w-full bg-stone-250 dark:bg-black/40 h-2.5 rounded-full mt-2.5 overflow-hidden border border-[#E2DCCE]/50 dark:border-white/5 relative">
                             <div 
                                 className={`h-full transition-all duration-1000 ${totalUtilization > 90 ? 'bg-red-500' : totalUtilization > 70 ? 'bg-amber-500' : 'bg-[#2C5E3B]'}`}
-                                style={{ width: `${Math.min(100, totalUtilization)}%` }}
+                                ref={(el) => { if (el) el.style.width = `${Math.min(100, totalUtilization)}%`; }}
                             />
                         </div>
                     </div>
@@ -403,10 +403,10 @@ export const InventoryZones: React.FC = () => {
 
                                 {/* Capacity Bar */}
                                 <div className="space-y-1.5 relative z-10">
-                                    <div className="w-full bg-stone-200 dark:bg-black/45 h-3 rounded-full overflow-hidden border border-[#E2DCCE]/50 dark:border-white/5 relative">
+                                    <div className="w-full bg-stone-250 dark:bg-black/45 h-3 rounded-full overflow-hidden border border-[#E2DCCE]/50 dark:border-white/5 relative">
                                         <div
                                             className={`h-full transition-all duration-1000 ${progressColorClass}`}
-                                            style={{ width: `${Math.min(100, usagePercent)}%` }}
+                                            ref={(el) => { if (el) el.style.width = `${Math.min(100, usagePercent)}%`; }}
                                         />
                                     </div>
                                     <div className="flex justify-between text-[10px] text-stone-400 dark:text-gray-500 font-mono font-bold">
@@ -472,14 +472,16 @@ export const InventoryZones: React.FC = () => {
                             <h3 className="text-base font-black text-[#1E3F27] dark:text-white uppercase tracking-wider flex items-center gap-1.5">
                                 <Plus size={18} /> Create Storage Zone
                             </h3>
-                            <button type="button" onClick={() => setIsCreateOpen(false)} className="p-1.5 rounded-lg hover:bg-stone-100 dark:hover:bg-white/5 text-stone-400"><X size={18} /></button>
+                            <button type="button" onClick={() => setIsCreateOpen(false)} title="Close" aria-label="Close" className="p-1.5 rounded-lg hover:bg-stone-100 dark:hover:bg-white/5 text-stone-400"><X size={18} /></button>
                         </div>
 
                         <div className="space-y-4">
                             <div className="space-y-1">
-                                <label className="text-[10px] text-stone-400 dark:text-gray-500 font-black uppercase tracking-wider block">Zone Name</label>
+                                <label htmlFor="create-zone-name" className="text-[10px] text-stone-400 dark:text-gray-500 font-black uppercase tracking-wider block">Zone Name</label>
                                 <input
                                     type="text"
+                                    id="create-zone-name"
+                                    title="Zone Name"
                                     required
                                     value={zoneName}
                                     onChange={(e) => setZoneName(e.target.value)}
@@ -490,8 +492,11 @@ export const InventoryZones: React.FC = () => {
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-1">
-                                    <label className="text-[10px] text-stone-400 dark:text-gray-500 font-black uppercase tracking-wider block">Storage Class</label>
+                                    <label htmlFor="create-storage-class" className="text-[10px] text-stone-400 dark:text-gray-500 font-black uppercase tracking-wider block">Storage Class</label>
                                     <select
+                                        id="create-storage-class"
+                                        title="Storage Class"
+                                        aria-label="Storage Class"
                                         value={zoneType}
                                         onChange={(e) => setZoneType(e.target.value as any)}
                                         className="w-full bg-[#FAF8F5] dark:bg-black/35 border border-[#E2DCCE] dark:border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-[#2C5E3B]"
@@ -502,9 +507,11 @@ export const InventoryZones: React.FC = () => {
                                     </select>
                                 </div>
                                 <div className="space-y-1">
-                                    <label className="text-[10px] text-stone-400 dark:text-gray-500 font-black uppercase tracking-wider block">Zone Type</label>
+                                    <label htmlFor="create-zone-subtype" className="text-[10px] text-stone-400 dark:text-gray-500 font-black uppercase tracking-wider block">Zone Type</label>
                                     <input
                                         type="text"
+                                        id="create-zone-subtype"
+                                        title="Zone Type"
                                         required
                                         value={zoneSubtype}
                                         onChange={(e) => setZoneSubtype(e.target.value.toUpperCase())}
@@ -516,9 +523,12 @@ export const InventoryZones: React.FC = () => {
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-1">
-                                    <label className="text-[10px] text-stone-400 dark:text-gray-500 font-black uppercase tracking-wider block">Item Capacity (Max)</label>
+                                    <label htmlFor="create-capacity" className="text-[10px] text-stone-400 dark:text-gray-500 font-black uppercase tracking-wider block">Item Capacity (Max)</label>
                                     <input
                                         type="number"
+                                        id="create-capacity"
+                                        title="Item Capacity (Max)"
+                                        placeholder="Item Capacity (Max)"
                                         min="1"
                                         required
                                         value={capacity}
@@ -527,9 +537,11 @@ export const InventoryZones: React.FC = () => {
                                     />
                                 </div>
                                 <div className="space-y-1">
-                                    <label className="text-[10px] text-stone-400 dark:text-gray-500 font-black uppercase tracking-wider block">Target Temp (Cold only)</label>
+                                    <label htmlFor="create-temperature" className="text-[10px] text-stone-400 dark:text-gray-500 font-black uppercase tracking-wider block">Target Temp (Cold only)</label>
                                     <input
                                         type="text"
+                                        id="create-temperature"
+                                        title="Target Temp"
                                         disabled={zoneType !== 'Cold'}
                                         value={temperature}
                                         onChange={(e) => setTemperature(e.target.value)}
@@ -541,9 +553,12 @@ export const InventoryZones: React.FC = () => {
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-1">
-                                    <label className="text-[10px] text-stone-400 dark:text-gray-500 font-black uppercase tracking-wider block">Picking Priority (1-20)</label>
+                                    <label htmlFor="create-picking-priority" className="text-[10px] text-stone-400 dark:text-gray-500 font-black uppercase tracking-wider block">Picking Priority (1-20)</label>
                                     <input
                                         type="number"
+                                        id="create-picking-priority"
+                                        title="Picking Priority (1-20)"
+                                        placeholder="Picking Priority (1-20)"
                                         min="1"
                                         max="20"
                                         required
@@ -602,14 +617,17 @@ export const InventoryZones: React.FC = () => {
                             <h3 className="text-base font-black text-[#1E3F27] dark:text-white uppercase tracking-wider flex items-center gap-1.5">
                                 <Settings2 size={18} /> Configure Zone: {selectedZone.name}
                             </h3>
-                            <button type="button" onClick={() => setIsEditOpen(false)} className="p-1.5 rounded-lg hover:bg-stone-100 dark:hover:bg-white/5 text-stone-400"><X size={18} /></button>
+                            <button type="button" onClick={() => setIsEditOpen(false)} title="Close" aria-label="Close" className="p-1.5 rounded-lg hover:bg-stone-100 dark:hover:bg-white/5 text-stone-400"><X size={18} /></button>
                         </div>
 
                         <div className="space-y-4">
                             <div className="space-y-1">
-                                <label className="text-[10px] text-stone-400 dark:text-gray-500 font-black uppercase tracking-wider block">Zone Name</label>
+                                <label htmlFor="edit-zone-name" className="text-[10px] text-stone-400 dark:text-gray-500 font-black uppercase tracking-wider block">Zone Name</label>
                                 <input
                                     type="text"
+                                    id="edit-zone-name"
+                                    title="Zone Name"
+                                    placeholder="Zone Name"
                                     required
                                     value={zoneName}
                                     onChange={(e) => setZoneName(e.target.value)}
@@ -619,8 +637,11 @@ export const InventoryZones: React.FC = () => {
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-1">
-                                    <label className="text-[10px] text-stone-400 dark:text-gray-500 font-black uppercase tracking-wider block">Storage Class</label>
+                                    <label htmlFor="edit-storage-class" className="text-[10px] text-stone-400 dark:text-gray-500 font-black uppercase tracking-wider block">Storage Class</label>
                                     <select
+                                        id="edit-storage-class"
+                                        title="Storage Class"
+                                        aria-label="Storage Class"
                                         value={zoneType}
                                         onChange={(e) => setZoneType(e.target.value as any)}
                                         className="w-full bg-[#FAF8F5] dark:bg-black/35 border border-[#E2DCCE] dark:border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-[#2C5E3B]"
@@ -631,9 +652,12 @@ export const InventoryZones: React.FC = () => {
                                     </select>
                                 </div>
                                 <div className="space-y-1">
-                                    <label className="text-[10px] text-stone-400 dark:text-gray-500 font-black uppercase tracking-wider block">Zone Type</label>
+                                    <label htmlFor="edit-zone-subtype" className="text-[10px] text-stone-400 dark:text-gray-500 font-black uppercase tracking-wider block">Zone Type</label>
                                     <input
                                         type="text"
+                                        id="edit-zone-subtype"
+                                        title="Zone Type"
+                                        placeholder="Zone Type"
                                         required
                                         value={zoneSubtype}
                                         onChange={(e) => setZoneSubtype(e.target.value.toUpperCase())}
@@ -644,9 +668,12 @@ export const InventoryZones: React.FC = () => {
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-1">
-                                    <label className="text-[10px] text-stone-400 dark:text-gray-500 font-black uppercase tracking-wider block">Item Capacity</label>
+                                    <label htmlFor="edit-capacity" className="text-[10px] text-stone-400 dark:text-gray-500 font-black uppercase tracking-wider block">Item Capacity</label>
                                     <input
                                         type="number"
+                                        id="edit-capacity"
+                                        title="Item Capacity"
+                                        placeholder="Item Capacity"
                                         min="1"
                                         required
                                         value={capacity}
@@ -655,9 +682,12 @@ export const InventoryZones: React.FC = () => {
                                     />
                                 </div>
                                 <div className="space-y-1">
-                                    <label className="text-[10px] text-stone-400 dark:text-gray-500 font-black uppercase tracking-wider block">Target Temp</label>
+                                    <label htmlFor="edit-temperature" className="text-[10px] text-stone-400 dark:text-gray-500 font-black uppercase tracking-wider block">Target Temp</label>
                                     <input
                                         type="text"
+                                        id="edit-temperature"
+                                        title="Target Temp"
+                                        placeholder="e.g. 4°C"
                                         disabled={zoneType !== 'Cold'}
                                         value={temperature}
                                         onChange={(e) => setTemperature(e.target.value)}
@@ -668,9 +698,12 @@ export const InventoryZones: React.FC = () => {
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-1">
-                                    <label className="text-[10px] text-stone-400 dark:text-gray-500 font-black uppercase tracking-wider block">Picking Priority (1-20)</label>
+                                    <label htmlFor="edit-picking-priority" className="text-[10px] text-stone-400 dark:text-gray-500 font-black uppercase tracking-wider block">Picking Priority (1-20)</label>
                                     <input
                                         type="number"
+                                        id="edit-picking-priority"
+                                        title="Picking Priority (1-20)"
+                                        placeholder="Picking Priority (1-20)"
                                         min="1"
                                         max="20"
                                         required
@@ -708,9 +741,12 @@ export const InventoryZones: React.FC = () => {
                                         <Lock size={14} className="text-red-500" />
                                         <span>Maintenance / Security Lock</span>
                                     </div>
-                                    <label className="relative inline-flex items-center cursor-pointer">
+                                    <label htmlFor="edit-zone-locked" className="relative inline-flex items-center cursor-pointer">
                                         <input
                                             type="checkbox"
+                                            id="edit-zone-locked"
+                                            title="Maintenance / Security Lock"
+                                            aria-label="Maintenance / Security Lock"
                                             checked={isLocked}
                                             onChange={(e) => setIsLocked(e.target.checked)}
                                             className="sr-only peer"
@@ -720,9 +756,11 @@ export const InventoryZones: React.FC = () => {
                                 </div>
                                 {isLocked && (
                                     <div className="space-y-1 animate-in fade-in duration-200">
-                                        <label className="text-[9px] text-stone-400 dark:text-gray-500 font-black uppercase tracking-wider block">Lock Reason</label>
+                                        <label htmlFor="edit-lock-reason" className="text-[9px] text-stone-400 dark:text-gray-500 font-black uppercase tracking-wider block">Lock Reason</label>
                                         <input
                                             type="text"
+                                            id="edit-lock-reason"
+                                            title="Lock Reason"
                                             required={isLocked}
                                             value={lockReason}
                                             onChange={(e) => setLockReason(e.target.value)}

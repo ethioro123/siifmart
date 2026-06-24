@@ -7,6 +7,7 @@
 export { sitesService } from './sites.service';
 export { warehouseZonesService } from './zones.service';
 export { systemConfigService } from './config.service';
+export { logisticsZonesService } from './logisticsZones.service';
 
 // Entity Services
 export { productsService } from './products.service';

@@ -124,6 +124,15 @@ export interface Site {
   barcodePrefix?: string; // 4-digit unique prefix for location barcodes (e.g. "1001")
   replenishmentSourceId?: string; // ID of the warehouse/DC feeding this store (legacy single-source, kept for compatibility)
   replenishmentSourceIds?: string[]; // IDs of all warehouses/DCs feeding this store (many-to-many)
+  logisticsZoneId?: string;
+}
+
+export interface LogisticsZone {
+  id: string;
+  name: string;
+  description?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export type FulfillmentStrategy = 'LOCAL_ONLY' | 'NEAREST' | 'SPLIT' | 'MANUAL';
@@ -230,6 +239,7 @@ export interface SystemConfig {
   // Site-specific eligibility (keyed by siteId)
   warehouseBonusEligibility?: Record<string, boolean>;
   posBonusEligibility?: Record<string, boolean>;
+  enforceRegionalZoning?: boolean;
 }
 
 // Bonus tier configuration

@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Truck, Search, Plus, X, Trash2, ArrowRight } from 'lucide-react';
+import { Truck, Search, Plus, X, Trash2, ArrowRight, AlertTriangle } from 'lucide-react';
 import { WMSJob, Product, Site, User } from '../../../types';
 import { ProductSelector } from './ProductSelector';
 import { formatJobId } from '../../../utils/jobIdFormatter';
 import { getSellUnit } from '../../../utils/units';
+import { useData } from '../../../contexts/DataContext';
+import { logisticsZonesService } from '../../../services/supabase.service';
 
 interface TransferRequestModalProps {
     isOpen: boolean;
@@ -32,6 +34,9 @@ export const TransferRequestModal: React.FC<TransferRequestModalProps> = ({
     refreshData,
     renderTabs
 }) => {
+    const { settings } = useData();
+    const isRestricted = !['super_admin', 'admin'].includes(user?.role || '') && !!user?.siteId;
+    const [logisticsZones, setLogisticsZones] = useState<any[]>([]);
     const [transferSourceSite, setTransferSourceSite] = useState('');
     const [transferDestSite, setTransferDestSite] = useState('');
     const [transferItems, setTransferItems] = useState<{ productId: string; quantity: number, isMeasure?: boolean }[]>([]);
@@ -41,30 +46,85 @@ export const TransferRequestModal: React.FC<TransferRequestModalProps> = ({
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isReviewMode, setIsReviewMode] = useState(false);
 
-    // Reset state when modal opens
     useEffect(() => {
         if (isOpen) {
-            const isRestricted = !['super_admin', 'admin'].includes(user?.role || '') && !!user?.siteId;
             setTransferSourceSite(isRestricted ? (user?.siteId || '') : (activeSite?.id || ''));
             setTransferDestSite('');
             setTransferItems([]);
             setTransferPriority('Normal');
             setTransferNote('');
             setIsReviewMode(false);
+
+            // Fetch logistics zones
+            const fetchZones = async () => {
+                try {
+                    const zones = await logisticsZonesService.getAll();
+                    setLogisticsZones(zones);
+                } catch (err) {
+                    console.error('Failed to fetch logistics zones:', err);
+                }
+            };
+            fetchZones();
         }
     }, [isOpen, user, activeSite]);
+
+    // Reset destination site if it becomes invalid due to source site changes under regional zoning
+    useEffect(() => {
+        if (transferDestSite && settings?.enforceRegionalZoning && user?.role !== 'super_admin') {
+            const sourceSiteObj = sites.find(s => s.id === (transferSourceSite || activeSite?.id));
+            const destSiteObj = sites.find(s => s.id === transferDestSite);
+            if (sourceSiteObj && destSiteObj && (sourceSiteObj.logisticsZoneId || '') !== (destSiteObj.logisticsZoneId || '')) {
+                setTransferDestSite('');
+            }
+        }
+    }, [transferSourceSite, transferDestSite, settings, user, sites, activeSite]);
+
+    const getZoneName = (zoneId?: string) => {
+        if (!zoneId) return 'Unassigned / Free Zone';
+        const zone = logisticsZones.find(z => z.id === zoneId);
+        return zone ? zone.name : 'Loading...';
+    };
 
     const handleReviewRequest = () => {
         const actualSourceSite = transferSourceSite || activeSite?.id;
 
         if (!actualSourceSite || !transferDestSite) {
-            addNotification('alert', 'Please select destination site');
+            addNotification('alert', 'Please select source and destination sites');
             return;
         }
         if (actualSourceSite === transferDestSite) {
             addNotification('alert', 'Source and destination cannot be the same');
             return;
         }
+
+        // Validate regional zoning restriction
+        console.log('--- Regional Zoning Enforcement Check ---');
+        console.log('settings:', settings);
+        console.log('settings?.enforceRegionalZoning:', settings?.enforceRegionalZoning);
+        console.log('actualSourceSite:', actualSourceSite);
+        console.log('transferDestSite:', transferDestSite);
+        const sourceSiteObj = sites.find(s => s.id === actualSourceSite);
+        const destSiteObj = sites.find(s => s.id === transferDestSite);
+        console.log('sourceSiteObj:', sourceSiteObj);
+        console.log('destSiteObj:', destSiteObj);
+        console.log('user?.role:', user?.role);
+
+        if (settings?.enforceRegionalZoning) {
+            if (sourceSiteObj && destSiteObj && (sourceSiteObj.logisticsZoneId || '') !== (destSiteObj.logisticsZoneId || '')) {
+                console.log('ZONES MISMATCH DETECTED:', sourceSiteObj.logisticsZoneId, 'vs', destSiteObj.logisticsZoneId);
+                if (user?.role !== 'super_admin') {
+                    console.log('USER IS NOT SUPER_ADMIN. BLOCKING TRANSFER!');
+                    addNotification('alert', 'Cross-zone transfers are restricted. Stores can only request stock from warehouses in the same Logistics Zone. Please contact the CEO for special authorization.');
+                    return;
+                } else {
+                    console.log('USER IS SUPER_ADMIN. OVERRIDE ALLOWED.');
+                }
+            } else {
+                console.log('Zones matched or site not found:', sourceSiteObj?.logisticsZoneId, 'and', destSiteObj?.logisticsZoneId);
+            }
+        }
+
+
         if (transferItems.length === 0) {
             addNotification('alert', 'Please add at least one item');
             return;
@@ -179,14 +239,46 @@ export const TransferRequestModal: React.FC<TransferRequestModalProps> = ({
                                     <h3 className="font-bold text-cyber-primary mb-4 flex items-center gap-2">
                                         <Truck size={18} /> Review Transfer Request
                                     </h3>
+                                    {(() => {
+                                        const actualSourceSite = transferSourceSite || activeSite?.id;
+                                        const sourceSiteObj = sites.find(s => s.id === actualSourceSite);
+                                        const destSiteObj = sites.find(s => s.id === transferDestSite);
+                                        const isCrossZone = sourceSiteObj && destSiteObj && (sourceSiteObj.logisticsZoneId || '') !== (destSiteObj.logisticsZoneId || '');
+                                        if (isCrossZone && settings?.enforceRegionalZoning) {
+                                            return (
+                                                <div className="bg-yellow-500/10 border border-yellow-500/30 text-yellow-400 p-4 rounded-xl flex items-start gap-3 mb-6 animate-pulse">
+                                                    <AlertTriangle className="shrink-0 mt-0.5 text-yellow-400" size={18} />
+                                                    <div>
+                                                        <h4 className="font-bold text-sm text-yellow-400">⚠️ Cross-Zone Replenishment Override</h4>
+                                                        <p className="text-xs mt-1 text-yellow-500/90 leading-relaxed">
+                                                            Transferring stock from <span className="font-bold text-white">{getZoneName(sourceSiteObj.logisticsZoneId)}</span> to <span className="font-bold text-white">{getZoneName(destSiteObj.logisticsZoneId)}</span>. As CEO, you are authorized to override this restriction.
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            );
+                                        }
+                                        return null;
+                                    })()}
                                     <div className="grid grid-cols-2 gap-4 mb-6">
                                         <div>
                                             <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-1">From (Source)</p>
-                                            <p className="text-white font-medium">{sites.find(s => s.id === (transferSourceSite || activeSite?.id))?.name || 'Current Site'}</p>
+                                            <p className="text-white font-medium">
+                                                {sites.find(s => s.id === (transferSourceSite || activeSite?.id))?.name || 'Current Site'}
+                                                {(() => {
+                                                    const s = sites.find(s => s.id === (transferSourceSite || activeSite?.id));
+                                                    return s?.logisticsZoneId ? <span className="text-[10px] text-gray-400 block mt-0.5">Zone: {getZoneName(s.logisticsZoneId)}</span> : null;
+                                                })()}
+                                            </p>
                                         </div>
                                         <div>
                                             <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-1">To (Destination)</p>
-                                            <p className="text-white font-medium">{sites.find(s => s.id === transferDestSite)?.name}</p>
+                                            <p className="text-white font-medium">
+                                                {sites.find(s => s.id === transferDestSite)?.name}
+                                                {(() => {
+                                                    const s = sites.find(s => s.id === transferDestSite);
+                                                    return s?.logisticsZoneId ? <span className="text-[10px] text-gray-400 block mt-0.5">Zone: {getZoneName(s.logisticsZoneId)}</span> : null;
+                                                })()}
+                                            </p>
                                         </div>
                                     </div>
 
@@ -243,11 +335,24 @@ export const TransferRequestModal: React.FC<TransferRequestModalProps> = ({
                                             id="source-site-select"
                                             value={transferSourceSite}
                                             onChange={(e) => setTransferSourceSite(e.target.value)}
-                                            className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white/50 cursor-not-allowed focus:outline-none"
-                                            disabled
+                                            className={`w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm focus:outline-none ${
+                                                isRestricted 
+                                                    ? 'text-white/55 cursor-not-allowed' 
+                                                    : 'text-white focus:border-cyber-primary'
+                                            }`}
+                                            disabled={isRestricted}
                                             aria-label="Select Source Site"
                                         >
-                                            <option value={activeSite?.id || transferSourceSite}>{activeSite?.name || 'Current Site'}</option>
+                                            {isRestricted ? (
+                                                <option value={activeSite?.id || transferSourceSite}>{activeSite?.name || 'Current Site'}</option>
+                                            ) : (
+                                                <>
+                                                    <option value="">Select Source Site</option>
+                                                    {sites.map(site => (
+                                                        <option key={site.id} value={site.id}>{site.name} ({site.type})</option>
+                                                    ))}
+                                                </>
+                                            )}
                                         </select>
                                     </div>
                                     <div>
@@ -260,30 +365,24 @@ export const TransferRequestModal: React.FC<TransferRequestModalProps> = ({
                                             aria-label="Select Destination Site"
                                         >
                                             <option value="">Select Destination</option>
-                                            {(() => {
-                                                const sourceSite = sites.find(s => s.id === (transferSourceSite || activeSite?.id));
-                                                const allowedSourceIds = sourceSite?.replenishmentSourceIds || [];
-                                                return sites.filter(s =>
-                                                    s.id !== (transferSourceSite || activeSite?.id) &&
-                                                    s.type !== 'Administration' &&
-                                                    allowedSourceIds.includes(s.id)
-                                                ).map(site => (
-                                                    <option key={site.id} value={site.id}>{site.name} ({site.type})</option>
-                                                ));
-                                            })()}
+                                            {sites.filter(s => {
+                                                const isSelf = s.id === (transferSourceSite || activeSite?.id);
+                                                const isAdminSite = s.type === 'Administration';
+                                                if (isSelf || isAdminSite) return false;
+
+                                                if (settings?.enforceRegionalZoning && user?.role !== 'super_admin') {
+                                                    const sourceSiteObj = sites.find(x => x.id === (transferSourceSite || activeSite?.id));
+                                                    if (sourceSiteObj) {
+                                                        const sourceZone = sourceSiteObj.logisticsZoneId || '';
+                                                        const destZone = s.logisticsZoneId || '';
+                                                        return sourceZone === destZone;
+                                                    }
+                                                }
+                                                return true;
+                                            }).map(site => (
+                                                <option key={site.id} value={site.id}>{site.name} ({site.type})</option>
+                                            ))}
                                         </select>
-                                        {(() => {
-                                            const sourceSite = sites.find(s => s.id === (transferSourceSite || activeSite?.id));
-                                            const allowedSourceIds = sourceSite?.replenishmentSourceIds || [];
-                                            if (allowedSourceIds.length === 0) {
-                                                return (
-                                                    <p className="text-[10px] text-red-400 mt-1.5 font-bold uppercase tracking-wide">
-                                                        ⚠️ No designated replenishment warehouses configured for {sourceSite?.name || 'this store'}. Please configure them in Settings.
-                                                    </p>
-                                                );
-                                            }
-                                            return null;
-                                        })()}
                                     </div>
                                 </div>
 

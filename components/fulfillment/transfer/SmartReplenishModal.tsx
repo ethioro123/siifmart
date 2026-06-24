@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Truck, RefreshCw, X, Activity, ShieldCheck, Rocket, Trash2, ArrowRight, Warehouse, ShoppingBag, Plus, Minus } from 'lucide-react';
+import { Truck, RefreshCw, X, Activity, ShieldCheck, Rocket, Trash2, ArrowRight, Warehouse, ShoppingBag, Plus, Minus, AlertTriangle } from 'lucide-react';
 import { WMSJob, Product, Site, User } from '../../../types';
 import { formatJobId } from '../../../utils/jobIdFormatter';
 import { formatCompactNumber } from '../../../utils/formatting';
 import { ProgressBar } from '../../shared/ProgressBar';
 import { getSellUnit } from '../../../utils/units';
+import { useData } from '../../../contexts/DataContext';
+import { logisticsZonesService } from '../../../services/supabase.service';
 
 interface SmartReplenishModalProps {
     isOpen: boolean;
@@ -33,6 +35,12 @@ export const SmartReplenishModal: React.FC<SmartReplenishModalProps> = ({
     refreshData,
     renderTabs
 }) => {
+    const { settings } = useData();
+    const [logisticsZones, setLogisticsZones] = useState<any[]>([]);
+    const isRestricted = !['super_admin', 'admin'].includes(user?.role || '') && !!user?.siteId;
+    const userSiteObj = sites.find(s => s.id === user?.siteId);
+    const userZoneId = userSiteObj?.logisticsZoneId || '';
+
     // --- STATE ---
     const [distHubLoading, setDistHubLoading] = useState(false);
     const [distHubLowStockItems, setDistHubLowStockItems] = useState<any[]>([]);
@@ -54,6 +62,17 @@ export const SmartReplenishModal: React.FC<SmartReplenishModalProps> = ({
             setDistHubTimer(0);
             interval = setInterval(() => setDistHubTimer(prev => prev + 1), 1000);
             fetchDistHubData();
+
+            // Fetch logistics zones
+            const fetchZones = async () => {
+                try {
+                    const zones = await logisticsZonesService.getAll();
+                    setLogisticsZones(zones);
+                } catch (err) {
+                    console.error('Failed to fetch logistics zones:', err);
+                }
+            };
+            fetchZones();
         }
         return () => clearInterval(interval);
     }, [isOpen]);
@@ -62,6 +81,12 @@ export const SmartReplenishModal: React.FC<SmartReplenishModalProps> = ({
         const mins = Math.floor(seconds / 60);
         const secs = seconds % 60;
         return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    };
+
+    const getZoneName = (zoneId?: string) => {
+        if (!zoneId) return 'Unassigned / Free Zone';
+        const zone = logisticsZones.find(z => z.id === zoneId);
+        return zone ? zone.name : 'Loading...';
     };
 
     const fetchDistHubData = async () => {
@@ -75,6 +100,18 @@ export const SmartReplenishModal: React.FC<SmartReplenishModalProps> = ({
             let healthyItems = 0;
 
             allSiteProducts.forEach((p: any) => {
+                const productSite = sites.find(s => s.id === (p.siteId || p.site_id));
+                if (productSite?.type !== 'Store') {
+                    return; // Skip warehouses/distribution centers
+                }
+
+                // If zoning is enforced and user is restricted, only show stores in the same zone as the user's site
+                if (settings?.enforceRegionalZoning && isRestricted && userSiteObj) {
+                    if ((productSite.logisticsZoneId || '') !== userZoneId) {
+                        return; // Skip stores from other zones
+                    }
+                }
+
                 totalItems++;
                 if (p.minStock > 0 && p.stock < p.minStock) {
                     lowStock.push(p);
@@ -104,15 +141,33 @@ export const SmartReplenishModal: React.FC<SmartReplenishModalProps> = ({
         setDistHubSelectedDestSite(destId);
 
         const targetStore = sites.find(s => s.id === destId);
-        const allowedSourceIds = targetStore?.replenishmentSourceIds || [];
 
-        // Find sources with surplus of this SKU that are designated replenishment sources
-        const potentialSources = allProducts.filter(p =>
-            p.sku === targetProduct.sku &&
-            p.stock > 10 && // Must have some safety stock
-            (p.siteId || p.site_id) !== destId &&
-            allowedSourceIds.includes(p.siteId || p.site_id || '')
-        );
+        // Find sources with stock > 0 of this SKU
+        let potentialSources = allProducts.filter(p => {
+            if (p.sku !== targetProduct.sku) return false;
+            if (p.stock <= 0) return false;
+            if ((p.siteId || p.site_id) === destId) return false;
+
+            const sourceSiteObj = sites.find(s => s.id === (p.siteId || p.site_id));
+            const isWarehouseType = sourceSiteObj && (
+                sourceSiteObj.type === 'Warehouse' || 
+                sourceSiteObj.type === 'Distribution Center' || 
+                sourceSiteObj.type === 'Storage & Fulfillment' || 
+                sourceSiteObj.type === 'Regional Hub'
+            );
+            if (!isWarehouseType) return false;
+
+            // Under regional zoning, we route by zone.
+            // Regular managers can only target warehouses in the same zone.
+            // CEOs can target any warehouse (with override warnings).
+            if (settings?.enforceRegionalZoning) {
+                if (user?.role !== 'super_admin' && targetStore && sourceSiteObj) {
+                    return (sourceSiteObj.logisticsZoneId || '') === (targetStore.logisticsZoneId || '');
+                }
+            }
+
+            return true;
+        });
 
         const mappedSources = potentialSources.map(p => ({
             ...p,
@@ -326,6 +381,18 @@ export const SmartReplenishModal: React.FC<SmartReplenishModalProps> = ({
     };
 
     const submitDistTransfers = async () => {
+        if (settings?.enforceRegionalZoning && user?.role !== 'super_admin') {
+            const hasCrossZoneDraft = dbDraftJobs.some(draft => {
+                const sourceSiteObj = sites.find(s => s.id === draft.sourceSiteId);
+                const destSiteObj = sites.find(s => s.id === draft.destSiteId);
+                return sourceSiteObj && destSiteObj && (sourceSiteObj.logisticsZoneId || '') !== (destSiteObj.logisticsZoneId || '');
+            });
+            if (hasCrossZoneDraft) {
+                addNotification('alert', 'Cross-zone replenishment is restricted. Manifests can only be deployed between locations in the same Logistics Zone.');
+                return;
+            }
+        }
+
         setDistHubLoading(true);
         try {
             let successCount = 0;
@@ -660,36 +727,27 @@ export const SmartReplenishModal: React.FC<SmartReplenishModalProps> = ({
                                             
                                             {distHubAvailableSources.length === 0 ? (
                                                 <div className="p-6 border border-dashed border-white/10 rounded-2xl text-center">
-                                                    {(() => {
-                                                        const targetStore = sites.find(s => s.id === distHubSelectedDestSite);
-                                                        const allowedSourceIds = targetStore?.replenishmentSourceIds || [];
-                                                        if (allowedSourceIds.length === 0) {
-                                                            return (
-                                                                <>
-                                                                    <p className="text-xs text-red-400 font-bold uppercase tracking-widest">No Feeder Warehouses Configured</p>
-                                                                    <p className="text-[9px] text-gray-500 mt-1">Please configure replenishment sources for {targetStore?.name || 'this store'} in Settings.</p>
-                                                                </>
-                                                            );
-                                                        }
-                                                        return (
-                                                            <>
-                                                                <p className="text-xs text-red-400 font-bold uppercase tracking-widest">No Sources Available</p>
-                                                                <p className="text-[9px] text-gray-500 mt-1">No configured feeder warehouses have surplus stock (&gt;10 units) of this SKU.</p>
-                                                            </>
-                                                        );
-                                                    })()}
+                                                    <p className="text-xs text-red-400 font-bold uppercase tracking-widest">No Sources Available</p>
+                                                    <p className="text-[9px] text-gray-500 mt-1">No warehouses in the network (or same Logistics Zone if zoning is enforced) have stock of this SKU.</p>
                                                 </div>
                                             ) : (
                                                 distHubAvailableSources.map(source => {
                                                     const isWarehouse = source.site?.type === 'Warehouse';
                                                     const allocQty = distHubAllocQty[source.id] || Math.min(10, source.stock);
+                                                    const targetStoreObj = sites.find(s => s.id === distHubSelectedDestSite);
+                                                    const isCrossZone = targetStoreObj && source.site && (targetStoreObj.logisticsZoneId || '') !== (source.site.logisticsZoneId || '');
                                                     return (
                                                         <div key={source.id} className="p-4 bg-white/[0.02] border border-white/5 hover:border-[#2C5E3B]/40 rounded-xl group transition-all duration-300">
                                                             <div className="flex justify-between items-start mb-3">
                                                                 <div className="min-w-0 flex-1 pr-2">
-                                                                    <div className="flex items-center gap-2 mb-1">
+                                                                    <div className="flex items-center gap-2 mb-1 flex-wrap">
                                                                         {isWarehouse ? <Warehouse size={12} className="text-[#A9CBA2]" /> : <ShoppingBag size={12} className="text-amber-400" />}
                                                                         <span className="text-xs font-bold text-white truncate uppercase tracking-wide">{source.site?.name}</span>
+                                                                        {isCrossZone && settings?.enforceRegionalZoning && (
+                                                                            <span className="text-[8px] bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 px-1.5 py-0.5 rounded font-black tracking-tighter uppercase shrink-0">
+                                                                                ⚠️ CROSS-ZONE OVERRIDE
+                                                                            </span>
+                                                                        )}
                                                                     </div>
                                                                     <div className="text-[9px] text-gray-500 font-mono uppercase tracking-widest">{source.site?.type}</div>
                                                                 </div>
@@ -774,9 +832,28 @@ export const SmartReplenishModal: React.FC<SmartReplenishModalProps> = ({
                                             const sourceName = sites.find(s => s.id === draft.sourceSiteId)?.name || 'Source Warehouse';
                                             const destName = sites.find(s => s.id === draft.destSiteId)?.name || 'Dest Store';
 
+                                            const sourceSiteObj = sites.find(s => s.id === draft.sourceSiteId);
+                                            const destSiteObj = sites.find(s => s.id === draft.destSiteId);
+                                            const isDraftCrossZone = sourceSiteObj && destSiteObj && (sourceSiteObj.logisticsZoneId || '') !== (destSiteObj.logisticsZoneId || '');
+
                                             return (
-                                                <div key={draft.id} className="p-4 bg-blue-500/[0.02] border border-blue-500/15 rounded-xl relative overflow-hidden group">
-                                                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-500" />
+                                                <div key={draft.id} className={`p-4 bg-blue-500/[0.02] border rounded-xl relative overflow-hidden group ${
+                                                    isDraftCrossZone && settings?.enforceRegionalZoning 
+                                                        ? 'border-yellow-500/30 bg-yellow-500/[0.01]' 
+                                                        : 'border-blue-500/15'
+                                                }`}>
+                                                    <div className={`absolute left-0 top-0 bottom-0 w-1 ${
+                                                        isDraftCrossZone && settings?.enforceRegionalZoning ? 'bg-yellow-500' : 'bg-blue-500'
+                                                    }`} />
+
+                                                    {isDraftCrossZone && settings?.enforceRegionalZoning && (
+                                                        <div className="bg-yellow-500/10 border border-yellow-500/20 text-yellow-400 text-[10px] p-2.5 rounded-lg mb-3 flex items-start gap-1.5 animate-pulse">
+                                                            <AlertTriangle className="shrink-0 text-yellow-400 mt-0.5" size={12} />
+                                                            <span>
+                                                                Cross-Zone Override: {getZoneName(sourceSiteObj?.logisticsZoneId)} ➔ {getZoneName(destSiteObj?.logisticsZoneId)}
+                                                            </span>
+                                                        </div>
+                                                    )}
                                                     
                                                     {/* Manifest Header */}
                                                     <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-wider mb-2 pl-1 border-b border-white/5 pb-2">

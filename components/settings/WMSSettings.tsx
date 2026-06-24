@@ -131,6 +131,8 @@ export default function WMSSettings() {
         bayScan: true
     });
 
+
+
     const [isSaving, setIsSaving] = useState<string | null>(null);
 
     // Sync from settings
@@ -152,15 +154,19 @@ export default function WMSSettings() {
                 strictScanning: settings.strictScanning ?? true,
                 bayScan: settings.bayScan ?? true
             });
+
         }
     }, [settings]);
 
     const handleSaveSection = async (section: 'inbound' | 'health' | 'outbound') => {
-        const data = section === 'inbound' ? inbound : section === 'health' ? health : outbound;
+        const data = 
+            section === 'inbound' ? inbound : 
+            section === 'health' ? health : 
+            outbound;
         setIsSaving(section);
         try {
             await updateSettings(data as any, user?.name || 'Admin');
-            addNotification('success', `${section.charAt(0).toUpperCase() + section.slice(1)} wms settings saved`);
+            addNotification('success', `${section.charAt(0).toUpperCase() + section.slice(1)} settings saved`);
         } catch (err) {
             console.error(err);
             addNotification('alert', `Failed to save ${section} settings`);
@@ -390,6 +396,7 @@ export default function WMSSettings() {
                                     </div>
                                 </div>
                             </div>
+
                         </div>
                     </div>
 

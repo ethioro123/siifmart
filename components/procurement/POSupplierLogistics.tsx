@@ -133,8 +133,8 @@ export const POSupplierLogistics: React.FC<POSupplierLogisticsProps> = ({
             </div>
 
              {/* Logistics Section */}
-            <div className="relative overflow-hidden rounded-xl p-[1px] group">
-                <div className="absolute inset-0 bg-gradient-to-bl from-amber-500/10 via-transparent to-[#2C5E3B]/10 dark:from-amber-500/15 dark:via-transparent dark:to-[#2C5E3B]/10 opacity-40"></div>
+            <div className="relative rounded-xl p-[1px] group">
+                <div className="absolute inset-0 bg-gradient-to-bl from-amber-500/10 via-transparent to-[#2C5E3B]/10 dark:from-amber-500/15 dark:via-transparent dark:to-[#2C5E3B]/10 rounded-xl opacity-40"></div>
                 <div className="relative bg-white dark:bg-black/60 backdrop-blur-xl rounded-xl p-6 h-full border border-gray-200 dark:border-white/5 transition-all hover:bg-gray-50/50 dark:hover:bg-black/50 shadow-sm dark:shadow-none">
                     <div className="absolute top-0 right-0 p-4 opacity-30 group-hover:opacity-100 transition-opacity">
                         <MapPin size={20} className="text-amber-700 dark:text-amber-500" />
@@ -164,7 +164,7 @@ export const POSupplierLogistics: React.FC<POSupplierLogisticsProps> = ({
 
                             {/* Dropdown Menu */}
                             {isSiteDropdownOpen && (
-                                <div className="absolute z-50 w-full mt-2 bg-white dark:bg-[#0d0d0d] border border-gray-200 dark:border-white/10 rounded-xl shadow-2xl backdrop-blur-2xl max-h-60 overflow-y-auto p-2 ring-1 ring-black/5 dark:ring-white/10">
+                                <div className="absolute z-50 w-full mt-2 bg-white dark:bg-[#0d0d0d] border border-gray-200 dark:border-white/10 rounded-xl shadow-2xl backdrop-blur-2xl max-h-60 overflow-y-auto custom-scrollbar p-2 ring-1 ring-black/5 dark:ring-white/10">
                                     <div className="text-[9px] text-gray-400 dark:text-gray-500 uppercase font-black p-2 pb-1 tracking-tighter">Available Warehouses</div>
                                     {sites.filter(s => s.type === 'Warehouse' || s.type === 'Distribution Center').map(s => (
                                         <div

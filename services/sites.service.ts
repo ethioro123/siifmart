@@ -37,6 +37,7 @@ function mapSiteRow(s: any, replenishmentSourceIds: string[]): any {
     const ids = replenishmentSourceIds ?? [];
     return {
         ...s,
+        logisticsZoneId: s.logistics_zone_id,
         terminalCount: s.terminal_count,
         bonusEnabled: s.bonus_enabled,
         warehouseBonusEnabled: s.warehouse_bonus_enabled,
@@ -124,7 +125,9 @@ export const sitesService = {
                 ? nextId.toString().padStart(4, '0')
                 : null,
             // Keep legacy field in sync with first source
-            replenishment_source_id: sourceIds[0] ?? null
+            replenishment_source_id: sourceIds[0] ?? null,
+            logistics_zone_id: site.logisticsZoneId ?? null,
+            site_number: nextId
         };
 
         const { data, error } = await supabase
@@ -176,6 +179,10 @@ export const sitesService = {
             dbUpdates.is_fulfillment_node = updates.isFulfillmentNode;
             delete dbUpdates.isFulfillmentNode;
         }
+        if (updates.logisticsZoneId !== undefined) {
+            dbUpdates.logistics_zone_id = updates.logisticsZoneId;
+            delete dbUpdates.logisticsZoneId;
+        }
 
         // Compute new source IDs from multi-source array (falling back to single-source)
         const sourceIds: string[] =
@@ -211,21 +218,7 @@ export const sitesService = {
             ? sourceIds
             : (await fetchReplenishmentSourceIds([id]))[id] ?? [];
 
-        return {
-            ...data,
-            terminalCount: data.terminal_count,
-            bonusEnabled: data.bonus_enabled,
-            warehouseBonusEnabled: data.warehouse_bonus_enabled,
-            taxJurisdictionId: data.tax_jurisdiction_id,
-            fulfillmentStrategy: data.fulfillment_strategy,
-            isFulfillmentNode: data.is_fulfillment_node,
-            siteNumber: data.site_number,
-            code: data.code || 'UNK',
-            replenishmentSourceId: finalSourceIds[0] ?? data.replenishment_source_id ?? undefined,
-            replenishmentSourceIds: finalSourceIds.length > 0
-                ? finalSourceIds
-                : (data.replenishment_source_id ? [data.replenishment_source_id] : []),
-        };
+        return mapSiteRow(data, finalSourceIds);
     },
 
     async delete(id: string) {
