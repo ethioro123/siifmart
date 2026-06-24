@@ -44,7 +44,7 @@ interface ProductDetailsModalProps {
 }
 
 export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ product, isOpen, onClose }) => {
-    const { movements, employees, refreshData } = useData();
+    const { movements, employees, refreshData, deleteProduct } = useData();
     const { user, showToast } = useStore();
 
     const [isEditingThresholds, setIsEditingThresholds] = React.useState(false);
@@ -60,6 +60,46 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
     }, [product, isEditingThresholds]);
 
     if (!product) return null;
+
+    const isCEO = user?.role === 'super_admin';
+    const isStoreManager = user?.role === 'store_manager';
+    const showDeleteButton = isCEO || isStoreManager;
+    const isDeleteDisabled = isStoreManager && product.stock > 0;
+
+    const handleDelete = async () => {
+        if (!isCEO && !isStoreManager) return;
+
+        if (isCEO) {
+            const confirmation = window.prompt(
+                `WARNING: You are about to permanently delete "${product.name}" (${product.sku}).\n` +
+                `This action cannot be undone and will update related transaction records.\n\n` +
+                `To confirm deletion, please type "DELETE" below:`
+            );
+            if (confirmation !== 'DELETE') {
+                showToast('Deletion cancelled. Confirmation text did not match.', 'info');
+                return;
+            }
+        } else if (isStoreManager) {
+            if (product.stock > 0) {
+                showToast('Store Managers can only delete products that are out of stock.', 'error');
+                return;
+            }
+            const confirm = window.confirm(
+                `Are you sure you want to permanently delete "${product.name}"?\n` +
+                `All related records will be updated.`
+            );
+            if (!confirm) return;
+        }
+
+        try {
+            await deleteProduct(product.id);
+            showToast('Product successfully deleted', 'success');
+            onClose();
+            await refreshData();
+        } catch (error: any) {
+            showToast(error.message || 'Failed to delete product', 'error');
+        }
+    };
 
     const canEditThresholds = user?.role === 'super_admin' || user?.role === 'store_manager';
 
@@ -112,7 +152,6 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
     const hasCommercial = customAttrs?.commercial && Object.values(customAttrs.commercial).some((v: any) => v !== '' && v !== null && v !== undefined && v !== false);
     const hasDescriptive = customAttrs?.descriptive && Object.values(customAttrs.descriptive).some((v: any) => v !== '' && v !== null && v !== undefined);
     const hasAnyAttributes = hasPhysical || hasPackaging || hasStorage || hasCommercial || hasDescriptive;
-
     const recentReceives = movements
         ? movements
             .filter(m => (m.productId === product.id || m.productId === product.productId) && m.type === 'IN')
@@ -120,8 +159,35 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
             .slice(0, 5)
         : [];
 
+    const modalFooter = (
+        <div className="flex items-center justify-between w-full">
+            <div>
+                {showDeleteButton && (
+                    <button
+                        onClick={handleDelete}
+                        disabled={isDeleteDisabled}
+                        className={`px-4 py-2 text-xs font-black uppercase tracking-wider rounded-xl transition-all border ${
+                            isDeleteDisabled
+                                ? 'bg-stone-100 dark:bg-white/5 border-stone-200 dark:border-white/5 text-stone-400 dark:text-gray-500 cursor-not-allowed opacity-50'
+                                : 'bg-red-500/10 hover:bg-red-500/25 border-red-500/20 text-red-600 dark:text-red-400 hover:scale-105 active:scale-95'
+                        }`}
+                        title={isDeleteDisabled ? 'Store Managers can only delete products when they are out of stock' : 'Permanently delete this product'}
+                    >
+                        Delete Product
+                    </button>
+                )}
+            </div>
+            <button
+                onClick={onClose}
+                className="px-4 py-2 bg-stone-100 hover:bg-stone-200 dark:bg-white/5 dark:hover:bg-white/10 text-stone-600 dark:text-stone-300 font-bold text-xs rounded-xl border border-stone-200 dark:border-white/10 transition-colors uppercase tracking-wider"
+            >
+                Close
+            </button>
+        </div>
+    );
+
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title="Product Details" size="xl">
+        <Modal isOpen={isOpen} onClose={onClose} title="Product Details" size="xl" footer={modalFooter}>
             <div className="space-y-5">
 
                 {/* ── Product Header ── */}

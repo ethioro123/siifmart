@@ -649,26 +649,25 @@ export const productsService = {
     // Only for CEO use when absolutely necessary
     async cascadeDelete(id: string) {
 
-        // 1. Delete related stock_movements
+        // 1. Set product_id = NULL in referencing stock_movements
         const { error: movementsError } = await supabase
             .from('stock_movements')
-            .delete()
+            .update({ product_id: null })
             .eq('product_id', id);
 
         if (movementsError) {
-            console.warn('⚠️ Failed to delete stock movements:', movementsError);
-            // Continue anyway - might not have any movements
-        } else {
+            console.warn('⚠️ Failed to update stock movements:', movementsError);
         }
 
-        // 2. Delete related sale line items (if table exists)
+        // 2. Set product_id = NULL in referencing sale_items (if table exists)
         try {
             const { error: saleItemsError } = await supabase
                 .from('sale_items')
-                .delete()
+                .update({ product_id: null })
                 .eq('product_id', id);
 
-            if (!saleItemsError) {
+            if (saleItemsError) {
+                console.warn('⚠️ Failed to update sale_items:', saleItemsError);
             }
         } catch (e) {
             console.warn('⚠️ sale_items table may not exist:', e);
@@ -680,22 +679,21 @@ export const productsService = {
             .delete()
             .eq('product_id', id);
 
-        if (!requestsError) {
+        if (requestsError) {
+            console.warn('⚠️ Failed to delete inventory_requests:', requestsError);
         }
 
-        // 4. Detach from Purchase Order Items (DELETE items to resolve FK constraint)
+        // 4. Set product_id = NULL in referencing po_items
         const { error: poItemsError } = await supabase
             .from('po_items')
-            .delete()
+            .update({ product_id: null })
             .eq('product_id', id);
 
         if (poItemsError) {
-            console.warn('⚠️ Failed to delete po_items:', poItemsError);
-            // If we fail here, the next step will likely fail
-        } else {
+            console.warn('⚠️ Failed to update po_items:', poItemsError);
         }
 
-        // 4. Finally delete the product itself
+        // 5. Finally delete the product itself
         const { error: productError } = await supabase
             .from('products')
             .delete()

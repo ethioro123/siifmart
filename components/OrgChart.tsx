@@ -32,24 +32,34 @@ const ROLE_LABELS: Record<string, string> = {
     dispatch_manager: 'Dispatch Manager',
     assistant_manager: 'Asst. Manager',
     shift_lead: 'Shift Lead',
-    // Level 4 - Staff
+    // Level 4 - Staff (Store)
     cashier: 'Cashier',
     sales_associate: 'Sales Associate',
     stock_clerk: 'Stock Clerk',
+    customer_service: 'Customer Service',
+    auditor: 'Auditor',
+    it_support: 'IT Support',
+    // Level 4 - Staff (Warehouse)
     picker: 'Picker',
     packer: 'Packer',
     receiver: 'Receiver',
     driver: 'Driver',
     forklift_operator: 'Forklift Op.',
     inventory_specialist: 'Inventory Spec.',
-    customer_service: 'Customer Service',
-    auditor: 'Auditor',
-    it_support: 'IT Support',
     // Legacy (backwards compatibility)
-    admin: 'Assistant CEO',
+    admin: 'Admin (Legacy)',
     manager: 'Manager',
     hr: 'HR',
     pos: 'POS Staff',
+    dispatcher: 'Dispatcher',
+    cs_manager: 'CS Manager',
+    store_supervisor: 'Store Supervisor',
+    returns_clerk: 'Returns Clerk',
+    merchandiser: 'Merchandiser',
+    loss_prevention: 'Loss Prevention',
+    accountant: 'Accountant',
+    data_analyst: 'Data Analyst',
+    training_coordinator: 'Training Coord.',
 };
 
 // Hierarchical Card Sizing: Each level is exactly 10% smaller than the level above
@@ -73,24 +83,34 @@ const CARD_SIZES: Record<string, { width: number; height: number; level: number 
     dispatch_manager: { width: 162, height: 130, level: 3 },
     assistant_manager: { width: 162, height: 130, level: 3 },
     shift_lead: { width: 162, height: 130, level: 3 },
-    // Level 4
+    // Level 4 - Store Staff
     cashier: { width: 146, height: 117, level: 4 },
     sales_associate: { width: 146, height: 117, level: 4 },
     stock_clerk: { width: 146, height: 117, level: 4 },
+    customer_service: { width: 146, height: 117, level: 4 },
+    auditor: { width: 146, height: 117, level: 4 },
+    it_support: { width: 146, height: 117, level: 4 },
+    // Level 4 - Warehouse Staff
     picker: { width: 146, height: 117, level: 4 },
     packer: { width: 146, height: 117, level: 4 },
     receiver: { width: 146, height: 117, level: 4 },
     driver: { width: 146, height: 117, level: 4 },
     forklift_operator: { width: 146, height: 117, level: 4 },
     inventory_specialist: { width: 146, height: 117, level: 4 },
-    customer_service: { width: 146, height: 117, level: 4 },
-    auditor: { width: 146, height: 117, level: 4 },
-    it_support: { width: 146, height: 117, level: 4 },
     // Legacy
     admin: { width: 180, height: 144, level: 2 },
     manager: { width: 162, height: 130, level: 3 },
     hr: { width: 180, height: 144, level: 2 },
     pos: { width: 146, height: 117, level: 4 },
+    dispatcher: { width: 162, height: 130, level: 3 },
+    cs_manager: { width: 162, height: 130, level: 3 },
+    store_supervisor: { width: 162, height: 130, level: 3 },
+    returns_clerk: { width: 146, height: 117, level: 4 },
+    merchandiser: { width: 146, height: 117, level: 4 },
+    loss_prevention: { width: 146, height: 117, level: 4 },
+    accountant: { width: 146, height: 117, level: 4 },
+    data_analyst: { width: 146, height: 117, level: 4 },
+    training_coordinator: { width: 146, height: 117, level: 4 },
     default: { width: 146, height: 117, level: 4 }
 };
 
@@ -113,12 +133,497 @@ const ROLE_COLORS: Record<string, string> = {
     // Level 4 - Staff (Slate)
     default: '#64748b',
     // Legacy
-    admin: '#3b82f6',
+    admin: '#94a3b8',         // greyed out — stripped role
     manager: '#14b8a6',
     hr: '#3b82f6',
+    pos: '#64748b',
+    dispatcher: '#14b8a6',
+    cs_manager: '#14b8a6',
+    store_supervisor: '#14b8a6',
+    returns_clerk: '#64748b',
+    merchandiser: '#64748b',
+    loss_prevention: '#64748b',
+    accountant: '#64748b',
+    data_analyst: '#64748b',
+    training_coordinator: '#64748b',
 };
 
 // === TYPES ===
+
+// ============================================================================
+// HIERARCHY MODAL — Full-screen role reporting structure
+// ============================================================================
+
+const DEPT_COLORS: Record<string, { bg: string; bgDark: string; border: string; borderDark: string; text: string; textDark: string; dot: string }> = {
+    executive:   { bg: '#f0f4f0', bgDark: '#1a2e1e', border: '#2C5E3B', borderDark: '#A9CBA2', text: '#1a3a22', textDark: '#A9CBA2', dot: '#2C5E3B' },
+    store:       { bg: '#faf8f5', bgDark: '#232E27', border: '#4D6E56', borderDark: '#6a8f72', text: '#2C4D35', textDark: '#b8d4bc', dot: '#4D6E56' },
+    warehouse:   { bg: '#f2f7f2', bgDark: '#1d2c20', border: '#3a6644', borderDark: '#7aab82', text: '#1e4028', textDark: '#9dc4a4', dot: '#3a6644' },
+    finance:     { bg: '#fdf9f0', bgDark: '#2a2618', border: '#8a7340', borderDark: '#c8aa60', text: '#5a4a20', textDark: '#d4bc7a', dot: '#8a7340' },
+    hr:          { bg: '#faf5f0', bgDark: '#2a2018', border: '#8a5a30', borderDark: '#c47840', text: '#5a3018', textDark: '#d4945a', dot: '#8a5a30' },
+    procurement: { bg: '#f5f8f5', bgDark: '#1e2c22', border: '#567a5e', borderDark: '#8ab492', text: '#2a4e32', textDark: '#a8c8b0', dot: '#567a5e' },
+    support:     { bg: '#f5f5f3', bgDark: '#21271e', border: '#6b7a6e', borderDark: '#8ea090', text: '#3a4a3c', textDark: '#9eb0a0', dot: '#6b7a6e' },
+};
+
+interface HierarchyNode {
+    role: string;
+    label: string;
+    dept: string;
+    reportsTo: string | null;
+    children?: HierarchyNode[];
+}
+
+const HIERARCHY_TREE: HierarchyNode[] = [
+    {
+        role: 'super_admin', label: 'CEO', dept: 'executive', reportsTo: null,
+        children: [
+            {
+                role: 'regional_manager', label: 'Regional Manager', dept: 'executive', reportsTo: 'CEO',
+                children: [
+                    {
+                        role: 'operations_manager', label: 'Operations Manager', dept: 'executive', reportsTo: 'Regional Manager',
+                        children: [
+                            {
+                                role: 'store_manager', label: 'Store Manager', dept: 'store', reportsTo: 'Operations Manager',
+                                children: [
+                                    {
+                                        role: 'assistant_manager', label: 'Assistant Manager', dept: 'store', reportsTo: 'Store Manager',
+                                        children: [
+                                            { role: 'shift_lead', label: 'Shift Lead', dept: 'store', reportsTo: 'Assistant Manager',
+                                              children: [
+                                                { role: 'cashier', label: 'Cashier', dept: 'store', reportsTo: 'Shift Lead' },
+                                                { role: 'sales_associate', label: 'Sales Associate', dept: 'store', reportsTo: 'Shift Lead' },
+                                                { role: 'customer_service', label: 'Customer Service', dept: 'store', reportsTo: 'Shift Lead' },
+                                              ]
+                                            },
+                                        ]
+                                    },
+                                    { role: 'store_supervisor', label: 'Store Supervisor', dept: 'store', reportsTo: 'Store Manager' },
+                                    { role: 'merchandiser', label: 'Merchandiser', dept: 'store', reportsTo: 'Store Manager' },
+                                    { role: 'loss_prevention', label: 'Loss Prevention', dept: 'store', reportsTo: 'Store Manager' },
+                                    { role: 'returns_clerk', label: 'Returns Clerk', dept: 'store', reportsTo: 'Store Manager' },
+                                ]
+                            },
+                            {
+                                role: 'warehouse_manager', label: 'Warehouse Manager', dept: 'warehouse', reportsTo: 'Operations Manager',
+                                children: [
+                                    {
+                                        role: 'dispatch_manager', label: 'Dispatch Manager', dept: 'warehouse', reportsTo: 'Warehouse Manager',
+                                        children: [
+                                            { role: 'driver', label: 'Driver', dept: 'warehouse', reportsTo: 'Dispatch Manager' },
+                                            { role: 'dispatcher', label: 'Dispatcher', dept: 'warehouse', reportsTo: 'Dispatch Manager' },
+                                        ]
+                                    },
+                                    { role: 'receiver', label: 'Receiver', dept: 'warehouse', reportsTo: 'Warehouse Manager' },
+                                    { role: 'picker', label: 'Picker', dept: 'warehouse', reportsTo: 'Warehouse Manager' },
+                                    { role: 'packer', label: 'Packer', dept: 'warehouse', reportsTo: 'Warehouse Manager' },
+                                    { role: 'forklift_operator', label: 'Forklift Operator', dept: 'warehouse', reportsTo: 'Warehouse Manager' },
+                                    { role: 'inventory_specialist', label: 'Inventory Specialist', dept: 'warehouse', reportsTo: 'Warehouse Manager' },
+                                    { role: 'stock_clerk', label: 'Stock Clerk', dept: 'warehouse', reportsTo: 'Warehouse Manager' },
+                                ]
+                            },
+                        ]
+                    },
+                    {
+                        role: 'supply_chain_manager', label: 'Supply Chain Manager', dept: 'procurement', reportsTo: 'Regional Manager',
+                    },
+                ]
+            },
+            {
+                role: 'finance_manager', label: 'Finance Manager', dept: 'finance', reportsTo: 'CEO',
+                children: [
+                    { role: 'auditor', label: 'Auditor', dept: 'finance', reportsTo: 'Finance Manager' },
+                    { role: 'accountant', label: 'Accountant', dept: 'finance', reportsTo: 'Finance Manager' },
+                    { role: 'data_analyst', label: 'Data Analyst', dept: 'finance', reportsTo: 'Finance Manager' },
+                ]
+            },
+            {
+                role: 'hr_manager', label: 'HR Manager', dept: 'hr', reportsTo: 'CEO',
+                children: [
+                    { role: 'hr', label: 'HR', dept: 'hr', reportsTo: 'HR Manager' },
+                    { role: 'training_coordinator', label: 'Training Coordinator', dept: 'hr', reportsTo: 'HR Manager' },
+                ]
+            },
+            {
+                role: 'procurement_manager', label: 'Procurement Manager', dept: 'procurement', reportsTo: 'CEO',
+            },
+            {
+                role: 'it_support', label: 'IT Support', dept: 'support', reportsTo: 'CEO',
+            },
+        ]
+    }
+];
+
+const RoleCard = ({ node, depth, isDarkMode }: { node: HierarchyNode; depth: number; isDarkMode: boolean }) => {
+    const [open, setOpen] = React.useState(depth < 2);
+    const colors = DEPT_COLORS[node.dept] || DEPT_COLORS.support;
+    const hasChildren = node.children && node.children.length > 0;
+    const isRoot = depth === 0;
+
+    const bg = isDarkMode ? colors.bgDark : colors.bg;
+    const border = isDarkMode ? colors.borderDark : colors.border;
+    const textColor = isDarkMode ? colors.textDark : colors.text;
+    const subColor = isDarkMode ? '#6b8070' : '#7a9080';
+
+    return (
+        <div style={{ marginLeft: depth === 0 ? 0 : 20 }}>
+            <div
+                onClick={() => hasChildren && setOpen(o => !o)}
+                style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 10,
+                    padding: isRoot ? '12px 18px' : '9px 14px',
+                    marginBottom: 6,
+                    borderRadius: 10,
+                    border: `1.5px solid ${border}`,
+                    background: bg,
+                    cursor: hasChildren ? 'pointer' : 'default',
+                    transition: 'all 0.15s',
+                    userSelect: 'none',
+                    maxWidth: isRoot ? 280 : 260,
+                }}
+            >
+                <span style={{
+                    width: isRoot ? 12 : 8,
+                    height: isRoot ? 12 : 8,
+                    borderRadius: '50%',
+                    background: colors.dot,
+                    flexShrink: 0,
+                }} />
+
+                <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{
+                        fontWeight: isRoot ? 700 : 600,
+                        fontSize: isRoot ? 15 : 13,
+                        color: textColor,
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                    }}>{node.label}</div>
+                    {node.reportsTo && (
+                        <div style={{ fontSize: 10, color: subColor, marginTop: 1 }}>
+                            Reports to {node.reportsTo}
+                        </div>
+                    )}
+                </div>
+
+                {hasChildren && (
+                    <span style={{
+                        fontSize: 11,
+                        color: textColor,
+                        opacity: 0.6,
+                        transition: 'transform 0.2s',
+                        transform: open ? 'rotate(90deg)' : 'rotate(0deg)',
+                        display: 'inline-block',
+                        fontWeight: 700,
+                    }}>▶</span>
+                )}
+            </div>
+
+            {hasChildren && open && (
+                <div style={{
+                    borderLeft: `2px solid ${border}`,
+                    marginLeft: isRoot ? 10 : 14,
+                    paddingLeft: 12,
+                    marginBottom: 4,
+                }}>
+                    {node.children!.map(child => (
+                        <RoleCard key={child.role} node={child} depth={depth + 1} isDarkMode={isDarkMode} />
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+};
+
+const HierarchyModal = ({ onClose, isDark }: { onClose: () => void; isDark: boolean }) => {
+    // Uses the app's Woody Forest design tokens
+    const bg       = isDark ? '#18201B' : '#F7F3ED';
+    const surface  = isDark ? '#1E2822' : '#ffffff';
+    const card     = isDark ? '#232E27' : '#ffffff';
+    const border   = isDark ? 'rgba(169,203,162,0.1)' : '#E2DCCE';
+    const text     = isDark ? '#e5e5e5' : '#111827';
+    const subtext  = isDark ? '#7a9a82' : '#6b7a6e';
+    const primary  = isDark ? '#A9CBA2' : '#2C5E3B';
+    const accent   = isDark ? '#2C5E3B' : '#4D6E56';
+
+    const depts = [
+        { key: 'executive',   label: 'Executive',   emoji: '👑' },
+        { key: 'store',       label: 'Store Ops',   emoji: '🏪' },
+        { key: 'warehouse',   label: 'Warehouse',   emoji: '📦' },
+        { key: 'finance',     label: 'Finance',     emoji: '💰' },
+        { key: 'hr',          label: 'HR',          emoji: '👥' },
+        { key: 'procurement', label: 'Procurement', emoji: '🔗' },
+        { key: 'support',     label: 'Support',     emoji: '🛠' },
+    ];
+
+    return (
+        <div style={{
+            position: 'fixed', inset: 0, zIndex: 9999,
+            background: 'rgba(10,18,12,0.75)',
+            backdropFilter: 'blur(8px)',
+            display: 'flex', alignItems: 'stretch',
+            animation: 'hmFadeIn 0.2s ease',
+        }}>
+            <style>{`
+                @keyframes hmFadeIn  { from { opacity:0 } to { opacity:1 } }
+                @keyframes hmSlideUp { from { transform:translateY(20px); opacity:0 } to { transform:translateY(0); opacity:1 } }
+                .hm-scroll::-webkit-scrollbar { width: 4px; }
+                .hm-scroll::-webkit-scrollbar-track { background: transparent; }
+                .hm-scroll::-webkit-scrollbar-thumb { background: rgba(169,203,162,0.25); border-radius: 99px; }
+                .hm-scroll::-webkit-scrollbar-thumb:hover { background: rgba(169,203,162,0.5); }
+            `}</style>
+
+            <div style={{
+                flex: 1, display: 'flex', flexDirection: 'column',
+                background: bg,
+                animation: 'hmSlideUp 0.25s ease',
+                overflow: 'hidden',
+            }}>
+                {/* ── Header ── */}
+                <div style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    padding: '18px 32px',
+                    borderBottom: `1px solid ${border}`,
+                    flexShrink: 0,
+                    background: surface,
+                }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                        <div style={{
+                            width: 38, height: 38, borderRadius: 10,
+                            background: `linear-gradient(135deg, ${accent}, ${primary})`,
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            fontSize: 18,
+                        }}>🏢</div>
+                        <div>
+                            <div style={{ fontWeight: 700, fontSize: 18, color: text, letterSpacing: '-0.3px', fontFamily: 'Inter, sans-serif' }}>Organisation Hierarchy</div>
+                            <div style={{ fontSize: 11, color: subtext, marginTop: 1 }}>Click any role to expand or collapse its direct reports</div>
+                        </div>
+                    </div>
+
+                    {/* Legend pills */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                        {depts.map(d => {
+                            const c = DEPT_COLORS[d.key];
+                            const pillBg     = isDark ? c.bgDark   : c.bg;
+                            const pillBorder = isDark ? c.borderDark : c.border;
+                            const pillText   = isDark ? c.textDark  : c.text;
+                            return (
+                                <div key={d.key} style={{
+                                    display: 'flex', alignItems: 'center', gap: 5,
+                                    padding: '4px 10px', borderRadius: 99,
+                                    background: pillBg,
+                                    border: `1px solid ${pillBorder}`,
+                                    fontSize: 11, fontWeight: 600, color: pillText,
+                                }}>
+                                    <span style={{ width: 6, height: 6, borderRadius: '50%', background: c.dot }} />
+                                    {d.emoji} {d.label}
+                                </div>
+                            );
+                        })}
+
+                        <button
+                            onClick={onClose}
+                            style={{
+                                marginLeft: 8,
+                                width: 34, height: 34, borderRadius: 99,
+                                border: `1.5px solid ${border}`,
+                                background: 'transparent',
+                                color: subtext, fontSize: 18, cursor: 'pointer',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            }}
+                            title="Close"
+                        >×</button>
+                    </div>
+                </div>
+
+                {/* ── Body ── */}
+                <div style={{
+                    flex: 1, overflow: 'hidden',
+                    display: 'grid',
+                    gridTemplateColumns: '320px 1fr',
+                }}>
+                    {/* Left: Collapsible Tree */}
+                    <div className="hm-scroll" style={{
+                        padding: '20px 16px',
+                        borderRight: `1px solid ${border}`,
+                        overflowY: 'auto',
+                        background: surface,
+                    }}>
+                        <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.12em', color: subtext, textTransform: 'uppercase', marginBottom: 12 }}>Reporting Tree</div>
+                        {HIERARCHY_TREE.map(node => (
+                            <RoleCard key={node.role} node={node} depth={0} isDarkMode={isDark} />
+                        ))}
+                    </div>
+
+                    {/* Right: Department swimlane cards */}
+                    <div className="hm-scroll" style={{ padding: '20px 24px', overflowY: 'auto', background: bg }}>
+                        <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.12em', color: subtext, textTransform: 'uppercase', marginBottom: 14 }}>By Department</div>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 14 }}>
+                            {[
+                                {
+                                    dept: 'executive', title: 'Executive', emoji: '👑',
+                                    roles: [
+                                        { role: 'super_admin',      label: 'CEO',                sub: '— Owner / Board' },
+                                        { role: 'regional_manager', label: 'Regional Manager',   sub: '→ CEO' },
+                                        { role: 'operations_manager', label: 'Operations Manager', sub: '→ Regional Manager' },
+                                    ]
+                                },
+                                {
+                                    dept: 'store', title: 'Store Operations', emoji: '🏪',
+                                    roles: [
+                                        { role: 'store_manager',     label: 'Store Manager',     sub: '→ Operations Manager' },
+                                        { role: 'assistant_manager', label: 'Assistant Manager', sub: '→ Store Manager' },
+                                        { role: 'shift_lead',        label: 'Shift Lead',        sub: '→ Assistant Manager' },
+                                        { role: 'store_supervisor',  label: 'Store Supervisor',  sub: '→ Store Manager' },
+                                        { role: 'cashier',           label: 'Cashier',           sub: '→ Shift Lead' },
+                                        { role: 'sales_associate',   label: 'Sales Associate',   sub: '→ Shift Lead' },
+                                        { role: 'customer_service',  label: 'Customer Service',  sub: '→ Shift Lead' },
+                                        { role: 'merchandiser',      label: 'Merchandiser',      sub: '→ Store Manager' },
+                                        { role: 'loss_prevention',   label: 'Loss Prevention',   sub: '→ Store Manager' },
+                                        { role: 'returns_clerk',     label: 'Returns Clerk',     sub: '→ Store Manager' },
+                                    ]
+                                },
+                                {
+                                    dept: 'warehouse', title: 'Warehouse', emoji: '📦',
+                                    roles: [
+                                        { role: 'warehouse_manager',  label: 'Warehouse Manager',    sub: '→ Operations Manager' },
+                                        { role: 'dispatch_manager',   label: 'Dispatch Manager',     sub: '→ Warehouse Manager' },
+                                        { role: 'dispatcher',         label: 'Dispatcher',           sub: '→ Dispatch Manager' },
+                                        { role: 'receiver',           label: 'Receiver',             sub: '→ Warehouse Manager' },
+                                        { role: 'picker',             label: 'Picker',               sub: '→ Warehouse Manager' },
+                                        { role: 'packer',             label: 'Packer',               sub: '→ Warehouse Manager' },
+                                        { role: 'driver',             label: 'Driver',               sub: '→ Dispatch Manager' },
+                                        { role: 'forklift_operator',  label: 'Forklift Operator',    sub: '→ Warehouse Manager' },
+                                        { role: 'inventory_specialist', label: 'Inventory Specialist', sub: '→ Warehouse Manager' },
+                                        { role: 'stock_clerk',        label: 'Stock Clerk',          sub: '→ Warehouse Manager' },
+                                    ]
+                                },
+                                {
+                                    dept: 'finance', title: 'Finance', emoji: '💰',
+                                    roles: [
+                                        { role: 'finance_manager', label: 'Finance Manager', sub: '→ CEO' },
+                                        { role: 'auditor',         label: 'Auditor',         sub: '→ Finance Manager' },
+                                        { role: 'accountant',      label: 'Accountant',      sub: '→ Finance Manager' },
+                                        { role: 'data_analyst',    label: 'Data Analyst',    sub: '→ Finance Manager' },
+                                    ]
+                                },
+                                {
+                                    dept: 'hr', title: 'Human Resources', emoji: '👥',
+                                    roles: [
+                                        { role: 'hr_manager',           label: 'HR Manager',           sub: '→ CEO' },
+                                        { role: 'hr',                   label: 'HR Staff',             sub: '→ HR Manager' },
+                                        { role: 'training_coordinator', label: 'Training Coordinator', sub: '→ HR Manager' },
+                                    ]
+                                },
+                                {
+                                    dept: 'procurement', title: 'Procurement', emoji: '🔗',
+                                    roles: [
+                                        { role: 'procurement_manager',  label: 'Procurement Manager',  sub: '→ CEO' },
+                                        { role: 'supply_chain_manager', label: 'Supply Chain Manager', sub: '→ Regional Manager' },
+                                    ]
+                                },
+                                {
+                                    dept: 'support', title: 'Support', emoji: '🛠',
+                                    roles: [
+                                        { role: 'it_support', label: 'IT Support', sub: '→ CEO (cross-functional)' },
+                                    ]
+                                },
+                            ].map(section => {
+                                const c = DEPT_COLORS[section.dept];
+                                const cardBg      = isDark ? c.bgDark    : c.bg;
+                                const cardBorder  = isDark ? c.borderDark : c.border;
+                                const headerText  = isDark ? c.textDark   : c.text;
+                                return (
+                                    <div key={section.dept} style={{
+                                        borderRadius: 12,
+                                        border: `1px solid ${cardBorder}`,
+                                        overflow: 'hidden',
+                                        background: card,
+                                    }}>
+                                        {/* Dept header */}
+                                        <div style={{
+                                            padding: '10px 14px',
+                                            background: cardBg,
+                                            borderBottom: `1px solid ${cardBorder}`,
+                                            display: 'flex', alignItems: 'center', gap: 7,
+                                        }}>
+                                            <span style={{ fontSize: 14 }}>{section.emoji}</span>
+                                            <span style={{ fontWeight: 700, fontSize: 12, color: headerText }}>{section.title}</span>
+                                            <span style={{
+                                                marginLeft: 'auto',
+                                                background: c.dot,
+                                                color: '#fff',
+                                                borderRadius: 99, padding: '1px 7px',
+                                                fontSize: 10, fontWeight: 700,
+                                            }}>{section.roles.length}</span>
+                                        </div>
+
+                                        {/* Role rows */}
+                                        <div style={{ padding: '6px 0' }}>
+                                            {section.roles.map((r, i) => (
+                                                <div key={r.role} style={{
+                                                    display: 'flex', alignItems: 'center', gap: 9,
+                                                    padding: '6px 14px',
+                                                    borderBottom: i < section.roles.length - 1
+                                                        ? `1px solid ${isDark ? 'rgba(169,203,162,0.05)' : '#f5f2ed'}`
+                                                        : 'none',
+                                                }}>
+                                                    <span style={{
+                                                        width: 6, height: 6,
+                                                        borderRadius: '50%',
+                                                        background: c.dot, flexShrink: 0,
+                                                    }} />
+                                                    <div style={{ minWidth: 0 }}>
+                                                        <div style={{ fontSize: 12, fontWeight: 600, color: text, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.label}</div>
+                                                        <div style={{ fontSize: 10, color: subtext }}>{r.sub}</div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                </div>
+
+                {/* ── Footer ── */}
+                <div style={{
+                    padding: '10px 32px',
+                    borderTop: `1px solid ${border}`,
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    flexShrink: 0,
+                    background: surface,
+                }}>
+                    <div style={{ fontSize: 11, color: subtext, fontFamily: 'Inter, sans-serif' }}>
+                        {Object.keys(ROLE_LABELS).length} roles across 7 departments
+                    </div>
+                    <button
+                        onClick={onClose}
+                        style={{
+                            padding: '8px 22px',
+                            borderRadius: 10,
+                            background: isDark
+                                ? `linear-gradient(135deg, ${accent}, ${primary}30)`
+                                : `linear-gradient(135deg, #2C5E3B, #4D6E56)`,
+                            color: isDark ? primary : '#F7F3ED',
+                            fontWeight: 600,
+                            fontSize: 13,
+                            border: `1px solid ${isDark ? primary + '40' : '#2C5E3B'}`,
+                            cursor: 'pointer',
+                            letterSpacing: '0.01em',
+                        }}
+                    >Close</button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+// === TYPES ===
+
 interface OrgNode {
     id: string;
     x: number;
@@ -358,6 +863,7 @@ const OrgChart: React.FC<OrgChartProps> = ({ employees, sites }) => {
     const isDark = useTheme(); // Theme Hook
     const [nodes, setNodes] = useState<OrgNode[]>([]);
     const [connections, setConnections] = useState<Connection[]>([]);
+    const [showHierarchy, setShowHierarchy] = useState(false);
     const [selectedId, setSelectedId] = useState<string | null>(null);
     const [selectedConnectionId, setSelectedConnectionId] = useState<string | null>(null);
     const [guideLines, setGuideLines] = useState<{ x: number[]; y: number[] }>({ x: [], y: [] });
@@ -915,6 +1421,10 @@ const OrgChart: React.FC<OrgChartProps> = ({ employees, sites }) => {
 
     return (
         <div className="w-full h-full flex flex-col relative bg-transparent">
+            {/* Full-screen Hierarchy Modal */}
+            {showHierarchy && (
+                <HierarchyModal onClose={() => setShowHierarchy(false)} isDark={isDark} />
+            )}
             {/* Header Toolbar */}
             <div className={`flex items-center justify-between px-4 py-3 border-b z-10 shadow-sm ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'}`}>
                 <div className="flex items-center gap-4">
@@ -927,6 +1437,21 @@ const OrgChart: React.FC<OrgChartProps> = ({ employees, sites }) => {
                 </div>
 
                 <div className="flex items-center gap-3">
+                    {/* Hierarchy View Button */}
+                    <button
+                        onClick={() => setShowHierarchy(true)}
+                        className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded border transition-colors ${
+                            isDark
+                                ? 'bg-violet-900/30 border-violet-700 text-violet-300 hover:bg-violet-900/50'
+                                : 'bg-violet-50 border-violet-200 text-violet-700 hover:bg-violet-100'
+                        }`}
+                        title="View full reporting hierarchy"
+                    >
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7h18M3 12h12M3 17h6" />
+                        </svg>
+                        Hierarchy
+                    </button>
                     {/* Zoom Controls */}
                     <div className={`flex items-center gap-1 px-2 py-1 rounded border ${isDark ? 'bg-slate-900/50 border-slate-700' : 'bg-gray-50 border-gray-200'}`}>
                         <button onClick={handleZoomOut} className={`p-1 rounded hover:bg-gray-200 ${isDark ? 'hover:bg-slate-700 text-slate-400' : 'text-gray-600'}`} title="Zoom Out (-)">

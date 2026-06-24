@@ -25,7 +25,7 @@ export type { Permission };
  */
 export const PERMISSIONS = {
     // Dashboard
-    VIEW_ADMIN_DASHBOARD: ['super_admin', 'admin', 'hr', 'auditor', 'finance_manager', 'it_support'],
+    VIEW_ADMIN_DASHBOARD: ['super_admin', 'hr', 'auditor', 'finance_manager', 'it_support'],
     ACCESS_ADMIN_MODULE: ['super_admin'],
     VIEW_WMS_DASHBOARD: ['super_admin', 'warehouse_manager', 'dispatcher', 'picker', 'driver', 'procurement_manager', 'inventory_specialist'],
     VIEW_POS_DASHBOARD: ['super_admin', 'store_manager', 'assistant_manager', 'shift_lead', 'pos', 'store_supervisor', 'cs_manager'],
@@ -62,15 +62,15 @@ export const PERMISSIONS = {
     VIEW_CUSTOMER_HISTORY: ['super_admin', 'store_manager', 'assistant_manager', 'shift_lead', 'auditor', 'cs_manager'],
 
     // Employees
-    ACCESS_EMPLOYEES: ['super_admin', 'admin', 'hr', 'store_manager', 'assistant_manager', 'shift_lead', 'store_supervisor'],
+    ACCESS_EMPLOYEES: ['super_admin', 'hr', 'store_manager', 'assistant_manager', 'shift_lead', 'store_supervisor'],
     ADD_EMPLOYEE: ['super_admin', 'hr'],
     EDIT_EMPLOYEE: ['super_admin', 'hr', 'it_support'],
     DELETE_EMPLOYEE: ['super_admin'],
-    TERMINATE_EMPLOYEE: ['super_admin', 'admin', 'hr'],
-    MANAGE_SHIFTS: ['super_admin', 'admin', 'hr', 'store_manager', 'assistant_manager', 'shift_lead', 'warehouse_manager', 'dispatcher', 'store_supervisor'],
+    TERMINATE_EMPLOYEE: ['super_admin', 'hr'],
+    MANAGE_SHIFTS: ['super_admin', 'hr', 'store_manager', 'assistant_manager', 'shift_lead', 'warehouse_manager', 'dispatcher', 'store_supervisor'],
     VIEW_SALARY: ['super_admin', 'hr', 'finance_manager'],
-    RESET_PASSWORD: ['super_admin', 'admin', 'it_support'],
-    CREATE_LOGIN_ACCOUNT: ['super_admin', 'admin', 'it_support'],
+    RESET_PASSWORD: ['super_admin', 'it_support'],
+    CREATE_LOGIN_ACCOUNT: ['super_admin', 'it_support'],
     APPROVE_EMPLOYEE: ['super_admin', 'hr'],
 
     // Procurement
@@ -108,11 +108,11 @@ export const PERMISSIONS = {
     MANAGE_REPLENISHMENT: ['super_admin', 'warehouse_manager', 'dispatcher', 'inventory_specialist'],
 
     // Settings
-    ACCESS_SETTINGS: ['super_admin', 'admin', 'hr', 'it_support'],
+    ACCESS_SETTINGS: ['super_admin', 'hr', 'it_support'],
     EDIT_SYSTEM_SETTINGS: ['super_admin', 'it_support'],
     EDIT_OPERATIONAL_SETTINGS: ['super_admin'],
     EDIT_HR_SETTINGS: ['super_admin', 'hr'],
-    VIEW_AUDIT_LOGS: ['super_admin', 'admin', 'auditor', 'it_support'],
+    VIEW_AUDIT_LOGS: ['super_admin', 'auditor', 'it_support'],
     MANAGE_ROLES: ['super_admin'],
     MANAGE_SITES: ['super_admin'],
 } as const;
@@ -267,7 +267,7 @@ export function getAccessibleModules(userRole: UserRole | undefined): string[] {
  * Check if user is admin level (super_admin or admin)
  */
 export function isAdmin(userRole: UserRole | undefined): boolean {
-    return userRole === 'super_admin' || userRole === 'admin';
+    return userRole === 'super_admin';
 }
 
 /**
@@ -399,14 +399,14 @@ export function getRoleColor(role: UserRole): string {
  * Check if user should see all sites or just their own
  */
 export function canViewAllSites(userRole: UserRole | undefined): boolean {
-    return ['super_admin', 'regional_manager', 'operations_manager', 'finance_manager', 'hr_manager', 'supply_chain_manager', 'admin', 'hr', 'auditor', 'it_support', 'cs_manager'].includes(userRole || '');
+    return ['super_admin', 'regional_manager', 'operations_manager', 'finance_manager', 'hr_manager', 'supply_chain_manager', 'hr', 'auditor', 'it_support', 'cs_manager'].includes(userRole || '');
 }
 
 /**
  * Check if user should see all employees or filtered
  */
 export function canViewAllEmployees(userRole: UserRole | undefined): boolean {
-    return ['super_admin', 'regional_manager', 'operations_manager', 'finance_manager', 'hr_manager', 'supply_chain_manager', 'admin', 'hr', 'it_support'].includes(userRole || '');
+    return ['super_admin', 'regional_manager', 'operations_manager', 'finance_manager', 'hr_manager', 'supply_chain_manager', 'hr', 'it_support'].includes(userRole || '');
 }
 
 /**

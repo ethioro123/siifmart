@@ -233,9 +233,8 @@ export default function App() {
                   if (user?.role === 'finance_manager' || user?.role === 'auditor') return <Navigate to="/finance" replace />;
                   if (user?.role === 'procurement_manager') return <Navigate to="/procurement" replace />;
                   if (user?.role === 'it_support') return <Navigate to="/settings" replace />;
-                  if (user?.role === 'admin') return <Navigate to="/admin" replace />;
 
-                  return <Navigate to="/admin" replace />; // Default fallback
+                  return <Navigate to="/pos-dashboard" replace />; // Default fallback
                 })()}
               </ProtectedRoute>
             } />

@@ -400,7 +400,7 @@ export const OutboundJobModal: React.FC<OutboundJobModalProps> = ({
                                         }
                                     }}
                                     disabled={isSubmitting}
-                                    className="h-14 flex-1 bg-[#DFF20F] hover:bg-[#cbe60d] text-black rounded-2xl font-black text-sm uppercase tracking-[0.2em] shadow-[0_10px_40px_rgba(223,242,15,0.3)] transition-all flex items-center justify-center gap-3 disabled:opacity-50"
+                                    className="h-14 flex-1 bg-[#224429] dark:bg-[#EAE5D9] hover:bg-[#1B3520] dark:hover:bg-[#DFD9CA] text-[#FAF8F5] dark:text-[#1E3B24] rounded-2xl font-black text-sm uppercase tracking-[0.2em] shadow-md transition-all flex items-center justify-center gap-3 disabled:opacity-50"
                                 >
                                     <CheckCircle size={20} />
                                     DELIVERED

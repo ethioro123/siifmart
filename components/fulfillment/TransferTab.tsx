@@ -264,7 +264,7 @@ export const TransferTab: React.FC<TransferTabProps> = ({
 
     const renderTransferCenterTabs = () => (
         <div className="flex bg-white/5 rounded-xl p-1 gap-1">
-            {(activeSite?.type === 'HQ' || activeSite?.type === 'Administration' || ['super_admin', 'admin'].includes(user?.role || '')) && (
+            {(activeSite?.type === 'HQ' || activeSite?.type === 'Administration' || ['super_admin', 'admin', 'warehouse_manager'].includes(user?.role || '')) && (
                 <button
                     onClick={() => { setTransferCenterTab('smart'); }}
                     className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-bold transition-all ${transferCenterTab === 'smart' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
@@ -273,7 +273,7 @@ export const TransferTab: React.FC<TransferTabProps> = ({
                     Smart Replenish
                 </button>
             )}
-            {(activeSite?.type === 'HQ' || activeSite?.type === 'Administration' || activeSite?.type === 'Warehouse' || activeSite?.type === 'Distribution Center' || ['super_admin', 'admin'].includes(user?.role || '')) && (
+            {(activeSite?.type === 'HQ' || activeSite?.type === 'Administration' || activeSite?.type === 'Warehouse' || activeSite?.type === 'Distribution Center' || ['super_admin', 'admin', 'warehouse_manager'].includes(user?.role || '')) && (
                 <button
                     onClick={() => setTransferCenterTab('bulk')}
                     className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-bold transition-all ${transferCenterTab === 'bulk' ? 'bg-[#2C5E3B]/20 text-[#A9CBA2] border border-[#2C5E3B]/30' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}

@@ -18,7 +18,7 @@ export type Permission =
     | 'inventory.view' | 'inventory.create' | 'inventory.edit' | 'inventory.delete'
     | 'inventory.adjust' | 'inventory.count' | 'inventory.transfer'
     // Warehouse
-    | 'warehouse.view' | 'warehouse.receive' | 'warehouse.pick' | 'warehouse.pack'
+    | 'warehouse.view' | 'warehouse.view_tasks' | 'warehouse.receive' | 'warehouse.pick' | 'warehouse.pack'
     | 'warehouse.dispatch' | 'warehouse.putaway' | 'warehouse.count'
     // Procurement
     | 'procurement.view' | 'procurement.create_po' | 'procurement.edit_po'
@@ -51,7 +51,7 @@ export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
         'dashboard.view', 'admin.view',
         'pos.view', 'pos.create_sale', 'pos.refund', 'pos.hold_order', 'pos.void_sale',
         'inventory.view', 'inventory.create', 'inventory.edit', 'inventory.delete', 'inventory.adjust', 'inventory.count', 'inventory.transfer',
-        'warehouse.view', 'warehouse.receive', 'warehouse.pick', 'warehouse.pack', 'warehouse.dispatch', 'warehouse.putaway', 'warehouse.count',
+        'warehouse.view', 'warehouse.view_tasks', 'warehouse.receive', 'warehouse.pick', 'warehouse.pack', 'warehouse.dispatch', 'warehouse.putaway', 'warehouse.count',
         'procurement.view', 'procurement.create_po', 'procurement.edit_po', 'procurement.approve_po', 'procurement.delete_po', 'procurement.receive',
         'finance.view', 'finance.view_reports', 'finance.create_expense', 'finance.approve_expense', 'finance.edit_expense', 'finance.delete_expense', 'finance.manage_payroll', 'finance.view_payroll',
         'sales.view', 'sales.view_reports', 'sales.create', 'sales.refund',
@@ -72,17 +72,17 @@ export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
         // Warehouse operations manager
         'dashboard.view',
         'inventory.view', 'inventory.create', 'inventory.edit', 'inventory.adjust', 'inventory.count', 'inventory.transfer',
-        'warehouse.view', 'warehouse.receive', 'warehouse.pick', 'warehouse.pack', 'warehouse.dispatch', 'warehouse.putaway', 'warehouse.count',
-        'procurement.view', 'procurement.create_po', 'procurement.edit_po', 'procurement.receive',
+        'warehouse.view', 'warehouse.view_tasks', 'warehouse.receive', 'warehouse.pick', 'warehouse.pack', 'warehouse.dispatch', 'warehouse.putaway', 'warehouse.count',
+        'procurement.view', 'procurement.receive',
         'employees.view', 'employees.manage_attendance'
     ],
 
     dispatcher: [
-        // Warehouse dispatcher
+        // Warehouse dispatcher — coordinates and assigns jobs, has read-only visibility into all task details
         'dashboard.view',
         'inventory.view',
-        'warehouse.view', 'warehouse.dispatch',
-        'procurement.view'
+        'warehouse.view', 'warehouse.view_tasks', 'warehouse.dispatch',
+        'employees.view', 'employees.manage_attendance'
     ],
 
     finance_manager: [
@@ -120,7 +120,7 @@ export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
     store_supervisor: [
         // Store floor supervisor
         'dashboard.view',
-        'pos.view', 'pos.create_sale', 'pos.hold_order',
+        'pos.view', 'pos.create_sale', 'pos.refund', 'pos.hold_order',
         'inventory.view', 'inventory.count',
         'sales.view',
         'sales.view',
@@ -131,8 +131,8 @@ export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
     inventory_specialist: [
         // Inventory control specialist
         'dashboard.view',
-        'inventory.view', 'inventory.count', 'inventory.transfer',
-        'warehouse.view', 'warehouse.count'
+        'inventory.view', 'inventory.count', 'inventory.adjust', 'inventory.transfer',
+        'warehouse.view', 'warehouse.view_tasks', 'warehouse.count'
     ],
 
     pos: [
@@ -229,7 +229,7 @@ export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
     shift_lead: [
         // Team lead with limited supervisor access
         'dashboard.view',
-        'pos.view', 'pos.create_sale', 'pos.hold_order',
+        'pos.view', 'pos.create_sale', 'pos.refund', 'pos.hold_order',
         'inventory.view', 'inventory.count',
         'customers.view', 'customers.create', 'customers.edit',
         'employees.view', 'employees.manage_attendance'
@@ -283,10 +283,10 @@ export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
 
     regional_manager: [
         'dashboard.view', 'admin.view',
-        'pos.view', 'pos.create_sale', 'pos.refund', 'pos.hold_order',
+        'pos.view', 'pos.create_sale', 'pos.refund', 'pos.hold_order', 'pos.void_sale',
         'inventory.view', 'inventory.create', 'inventory.edit', 'inventory.adjust', 'inventory.count', 'inventory.transfer',
         'warehouse.view', 'warehouse.receive', 'warehouse.pick', 'warehouse.pack', 'warehouse.dispatch', 'warehouse.putaway', 'warehouse.count',
-        'procurement.view', 'procurement.create_po', 'procurement.edit_po', 'procurement.approve_po', 'procurement.receive',
+        'procurement.view', 'procurement.create_po', 'procurement.edit_po', 'procurement.approve_po', 'procurement.delete_po', 'procurement.receive',
         'finance.view', 'finance.view_reports', 'finance.create_expense', 'finance.approve_expense',
         'sales.view', 'sales.view_reports', 'sales.create', 'sales.refund',
         'customers.view', 'customers.create', 'customers.edit', 'customers.view_history', 'customers.manage_loyalty',
@@ -297,16 +297,16 @@ export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
 
     operations_manager: [
         'dashboard.view', 'admin.view',
-        'pos.view', 'pos.create_sale', 'pos.refund', 'pos.hold_order',
+        'pos.view', 'pos.create_sale', 'pos.refund', 'pos.hold_order', 'pos.void_sale',
         'inventory.view', 'inventory.create', 'inventory.edit', 'inventory.adjust', 'inventory.count', 'inventory.transfer',
         'warehouse.view', 'warehouse.receive', 'warehouse.pick', 'warehouse.pack', 'warehouse.dispatch', 'warehouse.putaway', 'warehouse.count',
-        'procurement.view', 'procurement.create_po', 'procurement.edit_po', 'procurement.receive',
-        'finance.view', 'finance.view_reports',
-        'sales.view', 'sales.view_reports', 'sales.create',
-        'customers.view', 'customers.create', 'customers.edit', 'customers.view_history',
-        'employees.view', 'employees.edit', 'employees.manage_attendance',
-        'pricing.view', 'pricing.edit',
-        'settings.view'
+        'procurement.view', 'procurement.create_po', 'procurement.edit_po', 'procurement.approve_po', 'procurement.delete_po', 'procurement.receive',
+        'finance.view', 'finance.view_reports', 'finance.create_expense', 'finance.approve_expense',
+        'sales.view', 'sales.view_reports', 'sales.create', 'sales.refund',
+        'customers.view', 'customers.create', 'customers.edit', 'customers.view_history', 'customers.manage_loyalty',
+        'employees.view', 'employees.create', 'employees.edit', 'employees.approve', 'employees.manage_attendance',
+        'pricing.view', 'pricing.edit', 'pricing.create_promo', 'pricing.approve_promo',
+        'settings.view', 'settings.edit', 'settings.manage_sites'
     ],
 
     hr_manager: [
@@ -331,6 +331,7 @@ export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
         'dashboard.view',
         'pos.view', 'pos.create_sale', 'pos.refund', 'pos.hold_order', 'pos.void_sale',
         'inventory.view', 'inventory.edit', 'inventory.count',
+        'procurement.view',
         'sales.view', 'sales.view_reports', 'sales.create', 'sales.refund',
         'customers.view', 'customers.create', 'customers.edit', 'customers.view_history', 'customers.manage_loyalty',
         'employees.view', 'employees.edit', 'employees.manage_attendance'
@@ -418,6 +419,7 @@ export const CONFLICTING_DUTIES: Record<Permission, Permission[]> = {
     'inventory.adjust': [],
     'inventory.transfer': [],
     'warehouse.view': [],
+    'warehouse.view_tasks': [],
     'warehouse.dispatch': [],
     'warehouse.putaway': [],
     'procurement.view': [],
@@ -627,6 +629,7 @@ export function getPermissionDescription(permission: Permission): string {
         'inventory.count': 'Perform inventory counts',
         'inventory.transfer': 'Transfer inventory',
         'warehouse.view': 'View warehouse',
+        'warehouse.view_tasks': 'View task details (read-only)',
         'warehouse.receive': 'Receive goods',
         'warehouse.pick': 'Pick orders',
         'warehouse.pack': 'Pack orders',

@@ -44,8 +44,8 @@ export const DriverJobBoard: React.FC<DriverJobBoardProps> = ({
     return (
         <div className="space-y-4 pt-4">
             <button onClick={() => setIsExpanded(!isExpanded)} className="w-full flex items-center justify-between p-4 bg-gray-50 dark:bg-white/5 border-2 border-gray-100 dark:border-white/10 rounded-2xl hover:bg-gray-100 dark:hover:bg-white/10 transition-all shadow-sm active:scale-[0.98]">
-                <div className="flex items-center gap-3"><div className="w-2.5 h-2.5 rounded-full bg-yellow-500 shadow-[0_0_10px_rgba(234,179,8,0.4)] animate-pulse" /><span className="text-[11px] font-black text-gray-900 dark:text-white uppercase tracking-widest italic">{finalT('warehouse.docks.availableMissions') || 'Available Missions'}</span></div>
-                <span className="text-[9px] font-black text-yellow-600 dark:text-yellow-500 bg-yellow-500/10 dark:bg-yellow-500/10 px-3 py-1 rounded-full uppercase border border-yellow-500/20">{filteredDispatchJobs.length} Available</span>
+                <div className="flex items-center gap-3"><div className="w-2.5 h-2.5 rounded-full bg-[#A9CBA2] shadow-[0_0_10px_rgba(169,203,162,0.4)] animate-pulse" /><span className="text-[11px] font-black text-gray-900 dark:text-white uppercase tracking-widest italic">{finalT('warehouse.docks.availableMissions') || 'Available Missions'}</span></div>
+                <span className="text-[9px] font-black text-[#2C5E3B] dark:text-[#A9CBA2] bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 px-3 py-1 rounded-full uppercase border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20">{filteredDispatchJobs.length} Available</span>
             </button>
             {isExpanded && (
                 <div className="space-y-5">
@@ -61,8 +61,8 @@ export const DriverJobBoard: React.FC<DriverJobBoardProps> = ({
                             return (
                                 <div key={job.id} onClick={() => { setSelectedJob(job); setIsDetailsOpen(true); }} className={`group border ${isCritical ? 'border-red-500/20 shadow-red-500/5' : 'border-gray-200 dark:border-white/10'} rounded-3xl p-5 bg-white dark:bg-white/5 cursor-pointer relative overflow-hidden shadow-sm active:scale-[0.98] transition-all`}>
                                     <div className="flex justify-between items-start mb-3">
-                                        <div className="flex items-center gap-2"><div className={`w-2 h-2 rounded-full ${isCritical ? 'bg-red-500 animate-ping' : 'bg-yellow-500'}`} /><p className="text-[10px] font-black text-gray-500 dark:text-gray-400 tracking-widest uppercase">{formatJobId(job)}</p></div>
-                                        <div className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-[0.2em] border ${isCritical ? 'bg-red-500/10 text-red-600 dark:text-red-500 border-red-500/20' : 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-500 border-yellow-500/20'}`}>{job.priority}</div>
+                                        <div className="flex items-center gap-2"><div className={`w-2 h-2 rounded-full ${isCritical ? 'bg-red-500 animate-ping' : 'bg-[#A9CBA2]'}`} /><p className="text-[10px] font-black text-gray-500 dark:text-gray-400 tracking-widest uppercase">{formatJobId(job)}</p></div>
+                                        <div className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-[0.2em] border ${isCritical ? 'bg-red-500/10 text-red-600 dark:text-red-500 border-red-500/20' : 'bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 text-[#2C5E3B] dark:text-[#A9CBA2] border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20'}`}>{job.priority}</div>
                                     </div>
                                     <div className="mb-4">
                                         <p className="text-[9px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider mb-1">Route</p>
@@ -87,7 +87,7 @@ export const DriverJobBoard: React.FC<DriverJobBoardProps> = ({
                                                 if (!currentEmployee) { addNotification('alert', 'Protocol fault. Identify profile.'); return; }
                                                 const isInternal = !currentEmployee?.driverType || currentEmployee?.driverType === 'internal'; setProcessingJobIds(prev => new Set(prev).add(job.id));
                                                 try { await wmsJobsService.update(job.id, { assignedTo: currentEmployee.id, status: isInternal ? 'In-Progress' : 'Pending' }); await refreshData(); addNotification('success', 'Mission Accepted.'); } catch (err) { addNotification('alert', 'Auth failed.'); } finally { setProcessingJobIds(prev => { const next = new Set(prev); next.delete(job.id); return next; }); }
-                                            }} className={`flex-1 py-2 rounded-xl text-[10px] font-black uppercase tracking-[0.15em] flex items-center justify-center gap-2 disabled:opacity-50 transition-all shadow-md active:scale-95 ${isCritical ? 'bg-red-600 text-white' : 'bg-yellow-500 hover:bg-yellow-400 text-black'}`}>{processingJobIds.has(job.id) ? <RefreshCw className="animate-spin" size={13} /> : <Zap size={13} />} ACCEPT</button>
+                                            }} className={`flex-1 py-2 rounded-xl text-[10px] font-black uppercase tracking-[0.15em] flex items-center justify-center gap-2 disabled:opacity-50 transition-all shadow-md active:scale-95 ${isCritical ? 'bg-red-600 text-white' : 'bg-[#224429] dark:bg-[#EAE5D9] hover:bg-[#1B3520] dark:hover:bg-[#DFD9CA] text-[#FAF8F5] dark:text-[#1E3B24]'}`}>{processingJobIds.has(job.id) ? <RefreshCw className="animate-spin" size={13} /> : <Zap size={13} />} ACCEPT</button>
                                         )}
                                     </div>
                                 </div>
