@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePOS } from './POSContext';
 import { useData } from '../../contexts/DataContext';
@@ -11,6 +12,7 @@ import {
     ArrowLeft, Search, ArrowRight, X, Link, ShoppingBag,
     RefreshCw, WifiOff, CloudOff, CheckCircle, Trophy, Box, Package, Plus
 } from 'lucide-react';
+
 
 export const POSProductGrid: React.FC = () => {
     const { t } = useLanguage();
@@ -37,6 +39,12 @@ export const POSProductGrid: React.FC = () => {
     } = usePOS();
 
     const { triggerSync, posSyncStatus, posPendingSyncCount, settings } = useData();
+
+    const [visibleCount, setVisibleCount] = useState(40);
+
+    useEffect(() => {
+        setVisibleCount(40);
+    }, [searchTerm, selectedCategory]);
 
     // Helper to check for Neutralino (native app mode)
     const isNativeApp = typeof window !== 'undefined' && (window as any).Neutralino;
@@ -232,8 +240,9 @@ export const POSProductGrid: React.FC = () => {
                         </p>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                        {filteredProducts.map(product => (
+                    <>
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                            {filteredProducts.slice(0, visibleCount).map(product => (
                             <button
                                 key={product.id}
                                 onClick={() => {
@@ -310,7 +319,18 @@ export const POSProductGrid: React.FC = () => {
                                 </div>
                             </button>
                         ))}
-                    </div>
+                        </div>
+                        {filteredProducts.length > visibleCount && (
+                            <div className="flex justify-center pt-6 pb-8">
+                                <button
+                                    onClick={() => setVisibleCount(prev => prev + 40)}
+                                    className="px-6 py-3 bg-[#2C5E3B]/10 hover:bg-[#2C5E3B] dark:bg-white/5 dark:hover:bg-white/10 border border-[#2C5E3B]/20 dark:border-white/10 hover:text-white text-[#2C5E3B] dark:text-[#A9CBA2] font-bold text-xs uppercase tracking-widest rounded-2xl transition-all shadow-sm hover:shadow active:scale-95 flex items-center gap-2"
+                                >
+                                    Load More Products ({filteredProducts.length - visibleCount} remaining)
+                                </button>
+                            </div>
+                        )}
+                    </>
                 )}
             </div>
         </div>
