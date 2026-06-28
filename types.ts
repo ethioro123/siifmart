@@ -1418,9 +1418,26 @@ export interface DiscrepancyClaim {
 
 // --- METRICS ---
 export interface ServerMetrics {
+  total_count: number;
   total_value_cost: number;
   total_value_retail: number;
   stock_turnover_rate: number;
   low_stock_count: number;
+  out_of_stock_count: number;
+  active_alerts: number;
   dead_stock_value: number;
+  total_revenue: number;
+  net_profit: number;
+  profit_margin: number;
+  active_orders: number;
+  return_rate: number;
+  total_returned_value: number;
+  inbound_pos: number;
+  avg_cycle_time: string;
+  // Chart data arrays from server
+  category_stats: Array<{ name: string; value: number }>;
+  abc_stats: Array<{ name: string; value: number }>;
+  site_performance: Array<{ name: string; revenue: number; transactions: number }>;
+  sales_by_category: Array<{ name: string; value: number }>;
+  top_products: Array<{ name: string; sales: number; count: number }>;
 }
