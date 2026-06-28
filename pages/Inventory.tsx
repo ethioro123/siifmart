@@ -427,7 +427,7 @@ export default function Inventory() {
                 {activeTab === 'pending' && (
                     <InventoryPending
                         pendingProducts={pendingProducts} pendingChanges={pendingChanges} allProducts={allProducts}
-                        canApprove={['super_admin', 'procurement_manager', 'procurement', 'warehouse_manager', 'manager', 'warehouse'].includes(user?.role?.toLowerCase() || '')}
+                        canApprove={canApprove}
                         userRole={user?.role}
                         isSubmitting={approveRequestMutation.isPending || rejectRequestMutation.isPending}
                         onApproveProduct={handleApproveProduct} onApproveChange={handleApproveChange}
@@ -453,11 +453,11 @@ export default function Inventory() {
                                     isNew,
                                     activeSite: activeSite as any,
                                     user,
-                                    canApprove: !isReadOnly,
+                                    canApprove: canApprove,
                                     stockToAdjust: data.stock || 0
                                 });
-                                if (editingProduct && isReadOnly) {
-                                    addNotification('info', `Request submitted for ${editingProduct.name}`);
+                                if (!canApprove) {
+                                    addNotification('info', `Request submitted for approval: ${data.name}`);
                                 } else {
                                     addNotification('success', editingProduct ? 'Product updated' : 'Product created');
                                 }

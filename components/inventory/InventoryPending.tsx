@@ -63,9 +63,10 @@ export const InventoryPending: React.FC<InventoryPendingProps> = ({
 
     const getAwaitingLabel = (change: PendingInventoryChange): string => {
         const requiredRole = change.approvalRole || (change as any).approval_role;
+        if (change.changeType === 'edit' || change.changeType === 'create') return 'Awaiting CEO Approval';
         if (requiredRole === 'procurement_manager') return 'Awaiting Procurement Manager';
         if (requiredRole === 'warehouse_manager') return 'Awaiting Warehouse Manager';
-        return 'Awaiting Approval';
+        return 'Awaiting CEO Approval';
     };
 
     // --- HELPER: Render Diff ---

@@ -38,7 +38,9 @@ export type UserRole =
   // Legacy roles (for backwards compatibility during migration)
   | 'admin' | 'hr' | 'pos' | 'dispatcher'
   | 'cs_manager' | 'returns_clerk' | 'merchandiser' | 'loss_prevention'
-  | 'accountant' | 'data_analyst' | 'training_coordinator';
+  | 'accountant' | 'data_analyst' | 'training_coordinator'
+  // New roles
+  | 'buyer' | 'demand_planner' | 'inventory_manager' | 'logistics_manager' | 'security_manager';
 export type ThemeMode = 'dark' | 'light';
 export type PaymentMethod = 'Cash' | 'Card' | 'Mobile Money';
 

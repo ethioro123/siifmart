@@ -39,7 +39,7 @@ export const PERMISSIONS = {
     VIEW_ALL_TRANSACTIONS: ['super_admin', 'store_manager', 'assistant_manager', 'shift_lead', 'auditor', 'finance_manager', 'store_supervisor'],
 
     // Inventory
-    ACCESS_INVENTORY: ['super_admin', 'store_manager', 'assistant_manager', 'shift_lead', 'warehouse_manager', 'dispatcher', 'auditor', 'procurement_manager', 'inventory_specialist', 'store_supervisor', 'pos'],
+    ACCESS_INVENTORY: ['super_admin', 'store_manager', 'assistant_manager', 'shift_lead', 'warehouse_manager', 'dispatcher', 'auditor', 'procurement_manager', 'inventory_specialist', 'store_supervisor', 'pos', 'logistics_manager', 'inventory_manager', 'demand_planner'],
     ADD_PRODUCT: ['super_admin', 'warehouse_manager'],
     EDIT_PRODUCT: ['super_admin', 'warehouse_manager'],
     DELETE_PRODUCT: ['super_admin'],
@@ -62,7 +62,7 @@ export const PERMISSIONS = {
     VIEW_CUSTOMER_HISTORY: ['super_admin', 'store_manager', 'assistant_manager', 'shift_lead', 'auditor', 'cs_manager'],
 
     // Employees
-    ACCESS_EMPLOYEES: ['super_admin', 'hr', 'store_manager', 'assistant_manager', 'shift_lead', 'store_supervisor'],
+    ACCESS_EMPLOYEES: ['super_admin', 'hr', 'store_manager', 'assistant_manager', 'shift_lead', 'store_supervisor', 'security_manager', 'logistics_manager', 'inventory_manager'],
     ADD_EMPLOYEE: ['super_admin', 'hr'],
     EDIT_EMPLOYEE: ['super_admin', 'hr', 'it_support'],
     DELETE_EMPLOYEE: ['super_admin'],
@@ -74,8 +74,8 @@ export const PERMISSIONS = {
     APPROVE_EMPLOYEE: ['super_admin', 'hr'],
 
     // Procurement
-    ACCESS_PROCUREMENT: ['super_admin', 'warehouse_manager', 'procurement_manager', 'finance_manager'],
-    CREATE_PO: ['super_admin', 'warehouse_manager', 'procurement_manager'],
+    ACCESS_PROCUREMENT: ['super_admin', 'warehouse_manager', 'procurement_manager', 'finance_manager', 'buyer', 'demand_planner'],
+    CREATE_PO: ['super_admin', 'warehouse_manager', 'procurement_manager', 'buyer'],
     APPROVE_PO: ['super_admin', 'procurement_manager', 'finance_manager'],
     RECEIVE_PO: ['super_admin', 'warehouse_manager', 'dispatcher', 'inventory_specialist'],
     DELETE_PO: ['super_admin', 'procurement_manager'],
@@ -97,7 +97,7 @@ export const PERMISSIONS = {
     APPROVE_PRICE_CHANGE: ['super_admin', 'finance_manager'],
 
     // Warehouse
-    ACCESS_WAREHOUSE: ['super_admin', 'warehouse_manager', 'dispatcher', 'picker', 'driver', 'inventory_specialist', 'packer', 'receiver'],
+    ACCESS_WAREHOUSE: ['super_admin', 'warehouse_manager', 'dispatcher', 'picker', 'driver', 'inventory_specialist', 'packer', 'receiver', 'logistics_manager', 'inventory_manager'],
     MANAGE_WAREHOUSE: ['super_admin', 'warehouse_manager', 'inventory_specialist'],
     ASSIGN_TASKS: ['super_admin', 'warehouse_manager', 'dispatcher', 'inventory_specialist'],
     COMPLETE_TASKS: ['super_admin', 'warehouse_manager', 'dispatcher', 'picker', 'driver', 'packer', 'receiver'],
@@ -108,11 +108,11 @@ export const PERMISSIONS = {
     MANAGE_REPLENISHMENT: ['super_admin', 'warehouse_manager', 'dispatcher', 'inventory_specialist'],
 
     // Settings
-    ACCESS_SETTINGS: ['super_admin', 'hr', 'it_support'],
+    ACCESS_SETTINGS: ['super_admin', 'hr', 'it_support', 'security_manager'],
     EDIT_SYSTEM_SETTINGS: ['super_admin', 'it_support'],
     EDIT_OPERATIONAL_SETTINGS: ['super_admin'],
     EDIT_HR_SETTINGS: ['super_admin', 'hr'],
-    VIEW_AUDIT_LOGS: ['super_admin', 'auditor', 'it_support'],
+    VIEW_AUDIT_LOGS: ['super_admin', 'auditor', 'it_support', 'security_manager'],
     MANAGE_ROLES: ['super_admin'],
     MANAGE_SITES: ['super_admin'],
 } as const;
@@ -399,14 +399,14 @@ export function getRoleColor(role: UserRole): string {
  * Check if user should see all sites or just their own
  */
 export function canViewAllSites(userRole: UserRole | undefined): boolean {
-    return ['super_admin', 'regional_manager', 'operations_manager', 'finance_manager', 'hr_manager', 'supply_chain_manager', 'hr', 'auditor', 'it_support', 'cs_manager'].includes(userRole || '');
+    return ['super_admin', 'regional_manager', 'operations_manager', 'finance_manager', 'hr_manager', 'supply_chain_manager', 'hr', 'auditor', 'it_support', 'cs_manager', 'logistics_manager', 'inventory_manager', 'security_manager'].includes(userRole || '');
 }
 
 /**
  * Check if user should see all employees or filtered
  */
 export function canViewAllEmployees(userRole: UserRole | undefined): boolean {
-    return ['super_admin', 'regional_manager', 'operations_manager', 'finance_manager', 'hr_manager', 'supply_chain_manager', 'hr', 'it_support'].includes(userRole || '');
+    return ['super_admin', 'regional_manager', 'operations_manager', 'finance_manager', 'hr_manager', 'supply_chain_manager', 'hr', 'it_support', 'logistics_manager', 'inventory_manager', 'security_manager'].includes(userRole || '');
 }
 
 /**

@@ -29,6 +29,9 @@ const ROLE_LABELS: Record<string, string> = {
     // Level 3 - Site Managers
     store_manager: 'Store Manager',
     warehouse_manager: 'Warehouse Manager',
+    logistics_manager: 'Logistics Manager',
+    inventory_manager: 'Inventory Manager',
+    security_manager: 'Security Manager',
     dispatch_manager: 'Dispatch Manager',
     assistant_manager: 'Asst. Manager',
     shift_lead: 'Shift Lead',
@@ -46,6 +49,8 @@ const ROLE_LABELS: Record<string, string> = {
     driver: 'Driver',
     forklift_operator: 'Forklift Op.',
     inventory_specialist: 'Inventory Spec.',
+    buyer: 'Sourcing Buyer',
+    demand_planner: 'Demand Planner',
     // Legacy (backwards compatibility)
     admin: 'Admin (Legacy)',
     manager: 'Manager',
@@ -80,6 +85,9 @@ const CARD_SIZES: Record<string, { width: number; height: number; level: number 
     // Level 3
     store_manager: { width: 162, height: 130, level: 3 },
     warehouse_manager: { width: 162, height: 130, level: 3 },
+    logistics_manager: { width: 162, height: 130, level: 3 },
+    inventory_manager: { width: 162, height: 130, level: 3 },
+    security_manager: { width: 162, height: 130, level: 3 },
     dispatch_manager: { width: 162, height: 130, level: 3 },
     assistant_manager: { width: 162, height: 130, level: 3 },
     shift_lead: { width: 162, height: 130, level: 3 },
@@ -97,6 +105,8 @@ const CARD_SIZES: Record<string, { width: number; height: number; level: number 
     driver: { width: 146, height: 117, level: 4 },
     forklift_operator: { width: 146, height: 117, level: 4 },
     inventory_specialist: { width: 146, height: 117, level: 4 },
+    buyer: { width: 146, height: 117, level: 4 },
+    demand_planner: { width: 146, height: 117, level: 4 },
     // Legacy
     admin: { width: 180, height: 144, level: 2 },
     manager: { width: 162, height: 130, level: 3 },
@@ -127,9 +137,14 @@ const ROLE_COLORS: Record<string, string> = {
     // Level 3 - Managers (Teal)
     store_manager: '#14b8a6',
     warehouse_manager: '#14b8a6',
+    logistics_manager: '#4f46e5',
+    inventory_manager: '#0d9488',
+    security_manager: '#e11d48',
     dispatch_manager: '#14b8a6',
     assistant_manager: '#14b8a6',
     shift_lead: '#14b8a6',
+    buyer: '#d97706',
+    demand_planner: '#7c3aed',
     // Level 4 - Staff (Slate)
     default: '#64748b',
     // Legacy
@@ -199,32 +214,50 @@ const HIERARCHY_TREE: HierarchyNode[] = [
                                     },
                                     { role: 'store_supervisor', label: 'Store Supervisor', dept: 'store', reportsTo: 'Store Manager' },
                                     { role: 'merchandiser', label: 'Merchandiser', dept: 'store', reportsTo: 'Store Manager' },
-                                    { role: 'loss_prevention', label: 'Loss Prevention', dept: 'store', reportsTo: 'Store Manager' },
                                     { role: 'returns_clerk', label: 'Returns Clerk', dept: 'store', reportsTo: 'Store Manager' },
                                 ]
                             },
                             {
                                 role: 'warehouse_manager', label: 'Warehouse Manager', dept: 'warehouse', reportsTo: 'Operations Manager',
                                 children: [
-                                    {
-                                        role: 'dispatch_manager', label: 'Dispatch Manager', dept: 'warehouse', reportsTo: 'Warehouse Manager',
-                                        children: [
-                                            { role: 'driver', label: 'Driver', dept: 'warehouse', reportsTo: 'Dispatch Manager' },
-                                            { role: 'dispatcher', label: 'Dispatcher', dept: 'warehouse', reportsTo: 'Dispatch Manager' },
-                                        ]
-                                    },
                                     { role: 'receiver', label: 'Receiver', dept: 'warehouse', reportsTo: 'Warehouse Manager' },
                                     { role: 'picker', label: 'Picker', dept: 'warehouse', reportsTo: 'Warehouse Manager' },
                                     { role: 'packer', label: 'Packer', dept: 'warehouse', reportsTo: 'Warehouse Manager' },
                                     { role: 'forklift_operator', label: 'Forklift Operator', dept: 'warehouse', reportsTo: 'Warehouse Manager' },
-                                    { role: 'inventory_specialist', label: 'Inventory Specialist', dept: 'warehouse', reportsTo: 'Warehouse Manager' },
-                                    { role: 'stock_clerk', label: 'Stock Clerk', dept: 'warehouse', reportsTo: 'Warehouse Manager' },
                                 ]
                             },
+                            {
+                                role: 'logistics_manager', label: 'Logistics Manager', dept: 'warehouse', reportsTo: 'Operations Manager',
+                                children: [
+                                    {
+                                        role: 'dispatch_manager', label: 'Dispatch Manager', dept: 'warehouse', reportsTo: 'Logistics Manager',
+                                        children: [
+                                            { role: 'driver', label: 'Driver', dept: 'warehouse', reportsTo: 'Dispatch Manager' },
+                                            { role: 'dispatcher', label: 'Dispatcher', dept: 'warehouse', reportsTo: 'Dispatch Manager' },
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                role: 'inventory_manager', label: 'Inventory Manager', dept: 'warehouse', reportsTo: 'Operations Manager',
+                                children: [
+                                    { role: 'inventory_specialist', label: 'Inventory Specialist', dept: 'warehouse', reportsTo: 'Inventory Manager' },
+                                    { role: 'stock_clerk', label: 'Stock Clerk', dept: 'warehouse', reportsTo: 'Inventory Manager' },
+                                ]
+                            },
+                            {
+                                role: 'security_manager', label: 'Security & LP Manager', dept: 'support', reportsTo: 'Operations Manager',
+                                children: [
+                                    { role: 'loss_prevention', label: 'Loss Prevention', dept: 'store', reportsTo: 'Security & LP Manager' }
+                                ]
+                            }
                         ]
                     },
                     {
                         role: 'supply_chain_manager', label: 'Supply Chain Manager', dept: 'procurement', reportsTo: 'Regional Manager',
+                        children: [
+                            { role: 'demand_planner', label: 'Demand Planner', dept: 'procurement', reportsTo: 'Supply Chain Manager' }
+                        ]
                     },
                 ]
             },
@@ -245,6 +278,9 @@ const HIERARCHY_TREE: HierarchyNode[] = [
             },
             {
                 role: 'procurement_manager', label: 'Procurement Manager', dept: 'procurement', reportsTo: 'CEO',
+                children: [
+                    { role: 'buyer', label: 'Sourcing Buyer', dept: 'procurement', reportsTo: 'Procurement Manager' }
+                ]
             },
             {
                 role: 'it_support', label: 'IT Support', dept: 'support', reportsTo: 'CEO',
@@ -265,68 +301,64 @@ const RoleCard = ({ node, depth, isDarkMode }: { node: HierarchyNode; depth: num
     const subColor = isDarkMode ? '#6b8070' : '#7a9080';
 
     return (
-        <div style={{ marginLeft: depth === 0 ? 0 : 20 }}>
+        <div className={depth === 0 ? 'ml-0' : 'ml-5'}>
             <div
                 onClick={() => hasChildren && setOpen(o => !o)}
-                style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 10,
-                    padding: isRoot ? '12px 18px' : '9px 14px',
-                    marginBottom: 6,
-                    borderRadius: 10,
-                    border: `1.5px solid ${border}`,
-                    background: bg,
-                    cursor: hasChildren ? 'pointer' : 'default',
-                    transition: 'all 0.15s',
-                    userSelect: 'none',
-                    maxWidth: isRoot ? 280 : 260,
+                className={`flex items-center gap-[10px] mb-1.5 rounded-[10px] transition-all duration-150 select-none ${
+                    isRoot ? 'px-[18px] py-[12px] max-w-[280px]' : 'px-[14px] py-[9px] max-w-[260px]'
+                } ${hasChildren ? 'cursor-pointer' : 'cursor-default'}`}
+                ref={(el) => {
+                    if (el) {
+                        el.style.border = `1.5px solid ${border}`;
+                        el.style.background = bg;
+                    }
                 }}
             >
-                <span style={{
-                    width: isRoot ? 12 : 8,
-                    height: isRoot ? 12 : 8,
-                    borderRadius: '50%',
-                    background: colors.dot,
-                    flexShrink: 0,
-                }} />
+                <span
+                    className={`rounded-full shrink-0 ${isRoot ? 'w-3 h-3' : 'w-2 h-2'}`}
+                    ref={(el) => {
+                        if (el) el.style.background = colors.dot;
+                    }}
+                />
 
-                <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{
-                        fontWeight: isRoot ? 700 : 600,
-                        fontSize: isRoot ? 15 : 13,
-                        color: textColor,
-                        whiteSpace: 'nowrap',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                    }}>{node.label}</div>
+                <div className="flex-1 min-w-0">
+                    <div
+                        className={`truncate ${isRoot ? 'font-bold text-[15px]' : 'font-semibold text-[13px]'}`}
+                        ref={(el) => {
+                            if (el) el.style.color = textColor;
+                        }}
+                    >{node.label}</div>
                     {node.reportsTo && (
-                        <div style={{ fontSize: 10, color: subColor, marginTop: 1 }}>
+                        <div
+                            className="text-[10px] mt-[1px]"
+                            ref={(el) => {
+                                if (el) el.style.color = subColor;
+                            }}
+                        >
                             Reports to {node.reportsTo}
                         </div>
                     )}
                 </div>
 
                 {hasChildren && (
-                    <span style={{
-                        fontSize: 11,
-                        color: textColor,
-                        opacity: 0.6,
-                        transition: 'transform 0.2s',
-                        transform: open ? 'rotate(90deg)' : 'rotate(0deg)',
-                        display: 'inline-block',
-                        fontWeight: 700,
-                    }}>▶</span>
+                    <span
+                        className={`text-[11px] opacity-60 transition-transform duration-200 inline-block font-bold ${
+                            open ? 'rotate-90' : 'rotate-0'
+                        }`}
+                        ref={(el) => {
+                            if (el) el.style.color = textColor;
+                        }}
+                    >▶</span>
                 )}
             </div>
 
             {hasChildren && open && (
-                <div style={{
-                    borderLeft: `2px solid ${border}`,
-                    marginLeft: isRoot ? 10 : 14,
-                    paddingLeft: 12,
-                    marginBottom: 4,
-                }}>
+                <div
+                    className={`pl-3 mb-1 ${isRoot ? 'ml-2.5' : 'ml-[14px]'}`}
+                    ref={(el) => {
+                        if (el) el.style.borderLeft = `2px solid ${border}`;
+                    }}
+                >
                     {node.children!.map(child => (
                         <RoleCard key={child.role} node={child} depth={depth + 1} isDarkMode={isDarkMode} />
                     ))}
@@ -358,13 +390,12 @@ const HierarchyModal = ({ onClose, isDark }: { onClose: () => void; isDark: bool
     ];
 
     return (
-        <div style={{
-            position: 'fixed', inset: 0, zIndex: 9999,
-            background: 'rgba(10,18,12,0.75)',
-            backdropFilter: 'blur(8px)',
-            display: 'flex', alignItems: 'stretch',
-            animation: 'hmFadeIn 0.2s ease',
-        }}>
+        <div
+            className="fixed inset-0 z-[9999] backdrop-blur-[8px] flex items-stretch bg-[#0a180c]/75"
+            ref={(el) => {
+                if (el) el.style.animation = 'hmFadeIn 0.2s ease';
+            }}
+        >
             <style>{`
                 @keyframes hmFadeIn  { from { opacity:0 } to { opacity:1 } }
                 @keyframes hmSlideUp { from { transform:translateY(20px); opacity:0 } to { transform:translateY(0); opacity:1 } }
@@ -374,49 +405,73 @@ const HierarchyModal = ({ onClose, isDark }: { onClose: () => void; isDark: bool
                 .hm-scroll::-webkit-scrollbar-thumb:hover { background: rgba(169,203,162,0.5); }
             `}</style>
 
-            <div style={{
-                flex: 1, display: 'flex', flexDirection: 'column',
-                background: bg,
-                animation: 'hmSlideUp 0.25s ease',
-                overflow: 'hidden',
-            }}>
+            <div
+                className="flex-1 flex flex-col overflow-hidden"
+                ref={(el) => {
+                    if (el) {
+                        el.style.background = bg;
+                        el.style.animation = 'hmSlideUp 0.25s ease';
+                    }
+                }}
+            >
                 {/* ── Header ── */}
-                <div style={{
-                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                    padding: '18px 32px',
-                    borderBottom: `1px solid ${border}`,
-                    flexShrink: 0,
-                    background: surface,
-                }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                        <div style={{
-                            width: 38, height: 38, borderRadius: 10,
-                            background: `linear-gradient(135deg, ${accent}, ${primary})`,
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            fontSize: 18,
-                        }}>🏢</div>
+                <div
+                    className="flex items-center justify-between px-8 py-[18px] shrink-0"
+                    ref={(el) => {
+                        if (el) {
+                            el.style.borderBottom = `1px solid ${border}`;
+                            el.style.background = surface;
+                        }
+                    }}
+                >
+                    <div className="flex items-center gap-3">
+                        <div
+                            className="w-[38px] h-[38px] rounded-[10px] flex items-center justify-center text-[18px]"
+                            ref={(el) => {
+                                if (el) el.style.background = `linear-gradient(135deg, ${accent}, ${primary})`;
+                            }}
+                        >🏢</div>
                         <div>
-                            <div style={{ fontWeight: 700, fontSize: 18, color: text, letterSpacing: '-0.3px', fontFamily: 'Inter, sans-serif' }}>Organisation Hierarchy</div>
-                            <div style={{ fontSize: 11, color: subtext, marginTop: 1 }}>Click any role to expand or collapse its direct reports</div>
+                            <div
+                                className="font-bold text-[18px] tracking-[-0.3px] font-sans"
+                                ref={(el) => {
+                                    if (el) el.style.color = text;
+                                }}
+                            >Organisation Hierarchy</div>
+                            <div
+                                className="text-[11px] mt-[1px]"
+                                ref={(el) => {
+                                    if (el) el.style.color = subtext;
+                                }}
+                            >Click any role to expand or collapse its direct reports</div>
                         </div>
                     </div>
 
                     {/* Legend pills */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                    <div className="flex items-center gap-1.5 flex-wrap justify-end">
                         {depts.map(d => {
                             const c = DEPT_COLORS[d.key];
                             const pillBg     = isDark ? c.bgDark   : c.bg;
                             const pillBorder = isDark ? c.borderDark : c.border;
                             const pillText   = isDark ? c.textDark  : c.text;
                             return (
-                                <div key={d.key} style={{
-                                    display: 'flex', alignItems: 'center', gap: 5,
-                                    padding: '4px 10px', borderRadius: 99,
-                                    background: pillBg,
-                                    border: `1px solid ${pillBorder}`,
-                                    fontSize: 11, fontWeight: 600, color: pillText,
-                                }}>
-                                    <span style={{ width: 6, height: 6, borderRadius: '50%', background: c.dot }} />
+                                <div
+                                    key={d.key}
+                                    className="flex items-center gap-1.25 px-2.5 py-1 rounded-full text-[11px] font-semibold"
+                                    ref={(el) => {
+                                        if (el) {
+                                            el.style.background = pillBg;
+                                            el.style.border = `1px solid ${pillBorder}`;
+                                            el.style.color = pillText;
+                                        }
+                                    }}
+                                >
+                                    <span
+                                        className="w-1.5 h-1.5 rounded-full"
+                                        ref={(el) => {
+                                            if (el) el.style.background = c.dot;
+                                        }}
+                                    />
                                     {d.emoji} {d.label}
                                 </div>
                             );
@@ -424,13 +479,12 @@ const HierarchyModal = ({ onClose, isDark }: { onClose: () => void; isDark: bool
 
                         <button
                             onClick={onClose}
-                            style={{
-                                marginLeft: 8,
-                                width: 34, height: 34, borderRadius: 99,
-                                border: `1.5px solid ${border}`,
-                                background: 'transparent',
-                                color: subtext, fontSize: 18, cursor: 'pointer',
-                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            className="ml-2 w-[34px] h-[34px] rounded-full bg-transparent text-[18px] cursor-pointer flex items-center justify-center"
+                            ref={(el) => {
+                                if (el) {
+                                    el.style.border = `1.5px solid ${border}`;
+                                    el.style.color = subtext;
+                                }
                             }}
                             title="Close"
                         >×</button>
@@ -438,29 +492,43 @@ const HierarchyModal = ({ onClose, isDark }: { onClose: () => void; isDark: bool
                 </div>
 
                 {/* ── Body ── */}
-                <div style={{
-                    flex: 1, overflow: 'hidden',
-                    display: 'grid',
-                    gridTemplateColumns: '320px 1fr',
-                }}>
+                <div className="flex-1 overflow-hidden grid grid-cols-[320px_1fr]">
                     {/* Left: Collapsible Tree */}
-                    <div className="hm-scroll" style={{
-                        padding: '20px 16px',
-                        borderRight: `1px solid ${border}`,
-                        overflowY: 'auto',
-                        background: surface,
-                    }}>
-                        <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.12em', color: subtext, textTransform: 'uppercase', marginBottom: 12 }}>Reporting Tree</div>
+                    <div
+                        className="hm-scroll p-5 overflow-y-auto"
+                        ref={(el) => {
+                            if (el) {
+                                el.style.borderRight = `1px solid ${border}`;
+                                el.style.background = surface;
+                            }
+                        }}
+                    >
+                        <div
+                            className="text-[10px] font-bold tracking-[0.12em] uppercase mb-3"
+                            ref={(el) => {
+                                if (el) el.style.color = subtext;
+                            }}
+                        >Reporting Tree</div>
                         {HIERARCHY_TREE.map(node => (
                             <RoleCard key={node.role} node={node} depth={0} isDarkMode={isDark} />
                         ))}
                     </div>
 
                     {/* Right: Department swimlane cards */}
-                    <div className="hm-scroll" style={{ padding: '20px 24px', overflowY: 'auto', background: bg }}>
-                        <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.12em', color: subtext, textTransform: 'uppercase', marginBottom: 14 }}>By Department</div>
+                    <div
+                        className="hm-scroll px-6 py-5 overflow-y-auto"
+                        ref={(el) => {
+                            if (el) el.style.background = bg;
+                        }}
+                    >
+                        <div
+                            className="text-[10px] font-bold tracking-[0.12em] uppercase mb-3.5"
+                            ref={(el) => {
+                                if (el) el.style.color = subtext;
+                            }}
+                        >By Department</div>
 
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 14 }}>
+                        <div className="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-3.5">
                             {[
                                 {
                                     dept: 'executive', title: 'Executive', emoji: '👑',
@@ -481,7 +549,6 @@ const HierarchyModal = ({ onClose, isDark }: { onClose: () => void; isDark: bool
                                         { role: 'sales_associate',   label: 'Sales Associate',   sub: '→ Shift Lead' },
                                         { role: 'customer_service',  label: 'Customer Service',  sub: '→ Shift Lead' },
                                         { role: 'merchandiser',      label: 'Merchandiser',      sub: '→ Store Manager' },
-                                        { role: 'loss_prevention',   label: 'Loss Prevention',   sub: '→ Store Manager' },
                                         { role: 'returns_clerk',     label: 'Returns Clerk',     sub: '→ Store Manager' },
                                     ]
                                 },
@@ -489,15 +556,17 @@ const HierarchyModal = ({ onClose, isDark }: { onClose: () => void; isDark: bool
                                     dept: 'warehouse', title: 'Warehouse', emoji: '📦',
                                     roles: [
                                         { role: 'warehouse_manager',  label: 'Warehouse Manager',    sub: '→ Operations Manager' },
-                                        { role: 'dispatch_manager',   label: 'Dispatch Manager',     sub: '→ Warehouse Manager' },
+                                        { role: 'logistics_manager',  label: 'Logistics Manager',    sub: '→ Operations Manager' },
+                                        { role: 'inventory_manager',  label: 'Inventory Manager',    sub: '→ Operations Manager' },
+                                        { role: 'dispatch_manager',   label: 'Dispatch Manager',     sub: '→ Logistics Manager' },
                                         { role: 'dispatcher',         label: 'Dispatcher',           sub: '→ Dispatch Manager' },
+                                        { role: 'driver',             label: 'Driver',               sub: '→ Dispatch Manager' },
+                                        { role: 'inventory_specialist', label: 'Inventory Specialist', sub: '→ Inventory Manager' },
+                                        { role: 'stock_clerk',        label: 'Stock Clerk',          sub: '→ Inventory Manager' },
                                         { role: 'receiver',           label: 'Receiver',             sub: '→ Warehouse Manager' },
                                         { role: 'picker',             label: 'Picker',               sub: '→ Warehouse Manager' },
                                         { role: 'packer',             label: 'Packer',               sub: '→ Warehouse Manager' },
-                                        { role: 'driver',             label: 'Driver',               sub: '→ Dispatch Manager' },
                                         { role: 'forklift_operator',  label: 'Forklift Operator',    sub: '→ Warehouse Manager' },
-                                        { role: 'inventory_specialist', label: 'Inventory Specialist', sub: '→ Warehouse Manager' },
-                                        { role: 'stock_clerk',        label: 'Stock Clerk',          sub: '→ Warehouse Manager' },
                                     ]
                                 },
                                 {
@@ -521,13 +590,17 @@ const HierarchyModal = ({ onClose, isDark }: { onClose: () => void; isDark: bool
                                     dept: 'procurement', title: 'Procurement', emoji: '🔗',
                                     roles: [
                                         { role: 'procurement_manager',  label: 'Procurement Manager',  sub: '→ CEO' },
+                                        { role: 'buyer',                label: 'Sourcing Buyer',       sub: '→ Procurement Manager' },
                                         { role: 'supply_chain_manager', label: 'Supply Chain Manager', sub: '→ Regional Manager' },
+                                        { role: 'demand_planner',       label: 'Demand Planner',       sub: '→ Supply Chain Manager' },
                                     ]
                                 },
                                 {
-                                    dept: 'support', title: 'Support', emoji: '🛠',
+                                    dept: 'support', title: 'Support & Security', emoji: '🛡',
                                     roles: [
-                                        { role: 'it_support', label: 'IT Support', sub: '→ CEO (cross-functional)' },
+                                        { role: 'security_manager', label: 'Security & LP Manager', sub: '→ Operations Manager' },
+                                        { role: 'loss_prevention',  label: 'Loss Prevention',  sub: '→ Security & LP Manager' },
+                                        { role: 'it_support',       label: 'IT Support',       sub: '→ CEO (cross-functional)' },
                                     ]
                                 },
                             ].map(section => {
@@ -536,48 +609,74 @@ const HierarchyModal = ({ onClose, isDark }: { onClose: () => void; isDark: bool
                                 const cardBorder  = isDark ? c.borderDark : c.border;
                                 const headerText  = isDark ? c.textDark   : c.text;
                                 return (
-                                    <div key={section.dept} style={{
-                                        borderRadius: 12,
-                                        border: `1px solid ${cardBorder}`,
-                                        overflow: 'hidden',
-                                        background: card,
-                                    }}>
+                                    <div
+                                        key={section.dept}
+                                        className="rounded-xl overflow-hidden"
+                                        ref={(el) => {
+                                            if (el) {
+                                                el.style.border = `1px solid ${cardBorder}`;
+                                                el.style.background = card;
+                                            }
+                                        }}
+                                    >
                                         {/* Dept header */}
-                                        <div style={{
-                                            padding: '10px 14px',
-                                            background: cardBg,
-                                            borderBottom: `1px solid ${cardBorder}`,
-                                            display: 'flex', alignItems: 'center', gap: 7,
-                                        }}>
-                                            <span style={{ fontSize: 14 }}>{section.emoji}</span>
-                                            <span style={{ fontWeight: 700, fontSize: 12, color: headerText }}>{section.title}</span>
-                                            <span style={{
-                                                marginLeft: 'auto',
-                                                background: c.dot,
-                                                color: '#fff',
-                                                borderRadius: 99, padding: '1px 7px',
-                                                fontSize: 10, fontWeight: 700,
-                                            }}>{section.roles.length}</span>
+                                        <div
+                                            className="px-3.5 py-2.5 flex items-center gap-1.75"
+                                            ref={(el) => {
+                                                if (el) {
+                                                    el.style.background = cardBg;
+                                                    el.style.borderBottom = `1px solid ${cardBorder}`;
+                                                }
+                                            }}
+                                        >
+                                            <span className="text-[14px]">{section.emoji}</span>
+                                            <span
+                                                className="font-bold text-[12px]"
+                                                ref={(el) => {
+                                                    if (el) el.style.color = headerText;
+                                                }}
+                                            >{section.title}</span>
+                                            <span
+                                                className="ml-auto text-white rounded-full px-[7px] py-[1px] text-[10px] font-bold"
+                                                ref={(el) => {
+                                                    if (el) el.style.background = c.dot;
+                                                }}
+                                            >{section.roles.length}</span>
                                         </div>
 
                                         {/* Role rows */}
-                                        <div style={{ padding: '6px 0' }}>
+                                        <div className="py-1.5">
                                             {section.roles.map((r, i) => (
-                                                <div key={r.role} style={{
-                                                    display: 'flex', alignItems: 'center', gap: 9,
-                                                    padding: '6px 14px',
-                                                    borderBottom: i < section.roles.length - 1
-                                                        ? `1px solid ${isDark ? 'rgba(169,203,162,0.05)' : '#f5f2ed'}`
-                                                        : 'none',
-                                                }}>
-                                                    <span style={{
-                                                        width: 6, height: 6,
-                                                        borderRadius: '50%',
-                                                        background: c.dot, flexShrink: 0,
-                                                    }} />
-                                                    <div style={{ minWidth: 0 }}>
-                                                        <div style={{ fontSize: 12, fontWeight: 600, color: text, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.label}</div>
-                                                        <div style={{ fontSize: 10, color: subtext }}>{r.sub}</div>
+                                                <div
+                                                    key={r.role}
+                                                    className="flex items-center gap-2.25 px-3.5 py-1.5"
+                                                    ref={(el) => {
+                                                        if (el) {
+                                                            el.style.borderBottom = i < section.roles.length - 1
+                                                                ? `1px solid ${isDark ? 'rgba(169,203,162,0.05)' : '#f5f2ed'}`
+                                                                : 'none';
+                                                        }
+                                                    }}
+                                                >
+                                                    <span
+                                                        className="w-1.5 h-1.5 rounded-full shrink-0"
+                                                        ref={(el) => {
+                                                            if (el) el.style.background = c.dot;
+                                                        }}
+                                                    />
+                                                    <div className="min-w-0">
+                                                        <div
+                                                            className="text-[12px] font-semibold truncate"
+                                                            ref={(el) => {
+                                                                if (el) el.style.color = text;
+                                                            }}
+                                                        >{r.label}</div>
+                                                        <div
+                                                            className="text-[10px]"
+                                                            ref={(el) => {
+                                                                if (el) el.style.color = subtext;
+                                                            }}
+                                                        >{r.sub}</div>
                                                     </div>
                                                 </div>
                                             ))}
@@ -590,30 +689,34 @@ const HierarchyModal = ({ onClose, isDark }: { onClose: () => void; isDark: bool
                 </div>
 
                 {/* ── Footer ── */}
-                <div style={{
-                    padding: '10px 32px',
-                    borderTop: `1px solid ${border}`,
-                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                    flexShrink: 0,
-                    background: surface,
-                }}>
-                    <div style={{ fontSize: 11, color: subtext, fontFamily: 'Inter, sans-serif' }}>
+                <div
+                    className="px-8 py-2.5 flex items-center justify-between shrink-0 font-sans"
+                    ref={(el) => {
+                        if (el) {
+                            el.style.borderTop = `1px solid ${border}`;
+                            el.style.background = surface;
+                        }
+                    }}
+                >
+                    <div
+                        className="text-[11px]"
+                        ref={(el) => {
+                            if (el) el.style.color = subtext;
+                        }}
+                    >
                         {Object.keys(ROLE_LABELS).length} roles across 7 departments
                     </div>
                     <button
                         onClick={onClose}
-                        style={{
-                            padding: '8px 22px',
-                            borderRadius: 10,
-                            background: isDark
-                                ? `linear-gradient(135deg, ${accent}, ${primary}30)`
-                                : `linear-gradient(135deg, #2C5E3B, #4D6E56)`,
-                            color: isDark ? primary : '#F7F3ED',
-                            fontWeight: 600,
-                            fontSize: 13,
-                            border: `1px solid ${isDark ? primary + '40' : '#2C5E3B'}`,
-                            cursor: 'pointer',
-                            letterSpacing: '0.01em',
+                        className="px-[22px] py-2 rounded-[10px] cursor-pointer font-semibold text-[13px] transition-all hover:opacity-90"
+                        ref={(el) => {
+                            if (el) {
+                                el.style.background = isDark
+                                    ? `linear-gradient(135deg, ${accent}, ${primary}30)`
+                                    : `linear-gradient(135deg, #2C5E3B, #4D6E56)`;
+                                el.style.color = isDark ? primary : '#F7F3ED';
+                                el.style.border = `1px solid ${isDark ? primary + '40' : '#2C5E3B'}`;
+                            }
                         }}
                     >Close</button>
                 </div>

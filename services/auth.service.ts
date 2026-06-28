@@ -35,7 +35,9 @@ export type UserRole =
     // Legacy (backwards compatibility)
     | 'admin' | 'hr' | 'pos' | 'dispatcher'
     | 'cs_manager' | 'returns_clerk' | 'merchandiser' | 'loss_prevention'
-    | 'accountant' | 'data_analyst' | 'training_coordinator' | 'store_supervisor';
+    | 'accountant' | 'data_analyst' | 'training_coordinator' | 'store_supervisor'
+    // New roles
+    | 'buyer' | 'demand_planner' | 'inventory_manager' | 'logistics_manager' | 'security_manager';
 
 export interface UserProfile {
     id: string;
@@ -443,6 +445,21 @@ export const ROLE_PERMISSIONS: Record<string, string[]> = {
         'dashboard', 'sales', 'inventory', 'finance', 'profile'
     ],
     it_support: [
+        'dashboard', 'settings', 'employees', 'profile'
+    ],
+    buyer: [
+        'dashboard', 'procurement', 'profile'
+    ],
+    demand_planner: [
+        'dashboard', 'inventory', 'procurement', 'sales', 'profile'
+    ],
+    inventory_manager: [
+        'dashboard', 'inventory', 'warehouse', 'profile'
+    ],
+    logistics_manager: [
+        'dashboard', 'warehouse', 'inventory', 'employees', 'profile'
+    ],
+    security_manager: [
         'dashboard', 'settings', 'employees', 'profile'
     ],
 

@@ -249,6 +249,36 @@ export const ROLE_SEGREGATION_RULES: RoleSegregationRule[] = [
         siteType: 'Any',
         department: 'Management',
         description: 'Operations Manager - Field operations'
+    },
+    {
+        role: 'logistics_manager',
+        siteType: 'Any',
+        department: 'Transport',
+        description: 'Logistics Manager - Oversees transport and fleet'
+    },
+    {
+        role: 'inventory_manager',
+        siteType: 'Any',
+        department: 'Logistics & Warehouse',
+        description: 'Inventory Manager - Stock audit and accuracy control'
+    },
+    {
+        role: 'security_manager',
+        siteType: 'Any',
+        department: 'Security',
+        description: 'Security & LP Manager - Shrinkage and compliance audit'
+    },
+    {
+        role: 'buyer',
+        siteType: 'Administration',
+        department: 'Procurement',
+        description: 'Sourcing Buyer - Supplier purchase orders'
+    },
+    {
+        role: 'demand_planner',
+        siteType: 'Administration',
+        department: 'Logistics & Warehouse',
+        description: 'Demand Planner - Stock allocation forecasting'
     }
 ];
 

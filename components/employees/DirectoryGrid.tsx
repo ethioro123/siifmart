@@ -39,7 +39,19 @@ export default function DirectoryGrid({ displayedEmployees, isLoadingEmployees, 
                            className="w-12 h-12 rounded-full object-cover border border-[#E2DCCE] dark:border-white/10"
                            alt={employee.name}
                         />
-                        <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white dark:border-[#131915] ${employee.status === 'Active' ? 'bg-emerald-500' : 'bg-gray-400'}`} />
+                        {(() => {
+                           const loggedInToday = employee.lastLoginAt && (() => {
+                              const date = new Date(employee.lastLoginAt);
+                              const today = new Date();
+                              return date.getDate() === today.getDate() &&
+                                 date.getMonth() === today.getMonth() &&
+                                 date.getFullYear() === today.getFullYear();
+                           })();
+                           const isOnlineAndActive = employee.status === 'Active' && loggedInToday;
+                           return (
+                              <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white dark:border-[#131915] ${isOnlineAndActive ? 'bg-emerald-500' : 'bg-red-500'}`} />
+                           );
+                        })()}
                      </div>
 
                      <div className="flex-1 min-w-0">

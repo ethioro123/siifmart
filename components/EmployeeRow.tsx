@@ -51,9 +51,19 @@ export default function EmployeeRow({
                     alt={employee.name}
                     className="w-10 h-10 rounded-full object-cover border border-[#E2DCCE] dark:border-white/10"
                 />
-                <div className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-white dark:border-[#131915] ${employee.status === 'Active' ? 'bg-emerald-500' :
-                    isPending ? 'bg-amber-500' : 'bg-gray-400'
-                    }`} />
+                {(() => {
+                    const loggedInToday = employee.lastLoginAt && (() => {
+                        const date = new Date(employee.lastLoginAt);
+                        const today = new Date();
+                        return date.getDate() === today.getDate() &&
+                            date.getMonth() === today.getMonth() &&
+                            date.getFullYear() === today.getFullYear();
+                    })();
+                    const isOnlineAndActive = employee.status === 'Active' && loggedInToday;
+                    return (
+                        <div className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-white dark:border-[#131915] ${isOnlineAndActive ? 'bg-emerald-500' : 'bg-red-500'}`} />
+                    );
+                })()}
             </div>
 
             {/* Name & Role */}

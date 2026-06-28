@@ -119,16 +119,9 @@ export default function AddEmployeeWizard({
                                             />
                                         </div>
                                     </div>
-                                    <div>
-                                        <label className="text-xs text-gray-400 uppercase font-bold mb-1 block">Email Address (Optional)</label>
-                                        <input
-                                            className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white focus:border-cyber-primary outline-none"
-                                            value={newEmpData.email}
-                                            placeholder="e.g. user@company.com"
-                                            onChange={e => setNewEmpData({ ...newEmpData, email: e.target.value.toLowerCase() })}
-                                            aria-label="Email Address"
-                                            title="Email Address"
-                                        />
+                                    <div className="bg-white/5 rounded-lg px-3 py-2.5 border border-white/10">
+                                        <span className="text-xs text-gray-400 uppercase font-bold">Email Address</span>
+                                        <p className="text-xs text-cyan-400 mt-1">📧 Auto-generated after employee ID is assigned</p>
                                     </div>
                                     <div>
                                         <label className="text-xs text-gray-400 uppercase font-bold mb-1 block">Password (For Login) <span className="text-red-500">*</span></label>
@@ -320,7 +313,7 @@ export default function AddEmployeeWizard({
                                         </div>
                                         <div className="flex justify-between">
                                             <span className="text-gray-400">Email:</span>
-                                            <span className="text-white font-mono text-xs">{newEmpData.email || 'Not provided'}</span>
+                                            <span className="text-cyan-400 font-mono text-xs italic">Auto-assigned with ID</span>
                                         </div>
                                         <div className="flex justify-between">
                                             <span className="text-gray-400">Phone:</span>
@@ -375,7 +368,7 @@ export default function AddEmployeeWizard({
                                     </div>
                                 )}
 
-                                {newEmpData.email && newEmpData.password && (
+                                {newEmpData.password && (
                                     <div className="bg-cyber-primary/10 rounded-xl p-4 border border-cyber-primary/30">
                                         <h4 className="text-xs text-cyber-primary uppercase font-bold mb-3 flex items-center gap-2">
                                             <Key size={14} /> Login Credentials
@@ -383,7 +376,7 @@ export default function AddEmployeeWizard({
                                         <div className="space-y-2 text-sm">
                                             <div className="flex justify-between">
                                                 <span className="text-gray-400">Email:</span>
-                                                <span className="text-white font-mono text-xs">{newEmpData.email}</span>
+                                                <span className="text-cyan-400 font-mono text-xs italic">Auto-generated with employee ID</span>
                                             </div>
                                             <div className="flex justify-between items-center">
                                                 <span className="text-gray-400">Password:</span>
@@ -393,7 +386,7 @@ export default function AddEmployeeWizard({
                                                         : '•'.repeat(newEmpData.password.length)}
                                                 </span>
                                             </div>
-                                            <p className="text-xs text-cyan-400 mt-2">✓ Login account will be created</p>
+                                            <p className="text-xs text-cyan-400 mt-2">✓ Login account will be created with auto-generated email</p>
                                         </div>
                                     </div>
                                 )}

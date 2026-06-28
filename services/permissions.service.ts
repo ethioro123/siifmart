@@ -367,6 +367,38 @@ export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
         'dashboard.view',
         'customers.view', 'customers.create', 'customers.edit', 'customers.view_history',
         'sales.view', 'sales.refund'
+    ],
+
+    buyer: [
+        'dashboard.view',
+        'procurement.view', 'procurement.create_po', 'procurement.edit_po', 'procurement.receive'
+    ],
+
+    demand_planner: [
+        'dashboard.view',
+        'inventory.view',
+        'procurement.view',
+        'sales.view'
+    ],
+
+    inventory_manager: [
+        'dashboard.view',
+        'inventory.view', 'inventory.create', 'inventory.edit', 'inventory.adjust', 'inventory.count', 'inventory.transfer',
+        'warehouse.view', 'warehouse.view_tasks', 'warehouse.count',
+        'employees.view'
+    ],
+
+    logistics_manager: [
+        'dashboard.view',
+        'warehouse.view', 'warehouse.view_tasks', 'warehouse.receive', 'warehouse.pick', 'warehouse.pack', 'warehouse.dispatch', 'warehouse.putaway', 'warehouse.count',
+        'inventory.view', 'inventory.transfer',
+        'employees.view', 'employees.manage_attendance'
+    ],
+
+    security_manager: [
+        'dashboard.view',
+        'settings.view_logs',
+        'employees.view', 'employees.manage_attendance'
     ]
 };
 
