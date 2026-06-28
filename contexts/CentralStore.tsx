@@ -18,6 +18,7 @@ interface User {
   siteId?: string;
   employeeId?: string;
   email?: string;
+  loginLocation?: string;
 }
 
 interface ToastMessage {
@@ -44,6 +45,56 @@ interface StoreContextType {
   showToast: (message: string, type?: 'info' | 'warning' | 'error' | 'success', duration?: number) => void;
   updateUserAvatar: (newAvatar: string) => void; // Update current user's avatar
 }
+
+const fetchLoginLocation = async (): Promise<string> => {
+  const IPAPI_URL = 'https://ipapi.co/json/';
+  const GEODB_URL = 'https://geolocation-db.com/json/';
+
+  // 1. Try GPS Geolocation first (short 1.5s timeout)
+  if (typeof navigator !== 'undefined' && navigator.geolocation) {
+    try {
+      const pos = await new Promise<GeolocationPosition>((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          enableHighAccuracy: false,
+          timeout: 1500,
+          maximumAge: 120000
+        });
+      });
+      return `GPS: ${pos.coords.latitude.toFixed(4)}, ${pos.coords.longitude.toFixed(4)}`;
+    } catch (geoErr) {
+      console.warn('GPS location attempt failed:', geoErr);
+    }
+  }
+
+  // 2. Try Primary IP Geolocation API
+  try {
+    const res = await fetch(IPAPI_URL);
+    if (res.ok) {
+      const data = await res.json();
+      if (data.city && data.country_name) {
+        return `${data.city}, ${data.country_name} (${data.ip})`;
+      }
+    }
+  } catch (e) {
+    console.warn('Primary IP location lookup failed:', e);
+  }
+
+  // 3. Try backup IP Geolocation API
+  try {
+    const res = await fetch(GEODB_URL);
+    if (res.ok) {
+      const data = await res.json();
+      if (data.city && data.country_name) {
+        return `${data.city}, ${data.country_name} (${data.IPv4})`;
+      }
+    }
+  } catch (backupErr) {
+    console.warn('Backup IP location lookup failed:', backupErr);
+  }
+
+  // If all attempts failed, throw to block login
+  throw new Error('Location tracking failed. Geolocation data is required to access the system. Please grant location permissions or check your connection.');
+};
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
 
@@ -76,7 +127,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   // Hydrate user profile from database to ensure metadata is sync'd
   // IMPORTANT: Wrapped with timeout to prevent infinite loading on production
-  const syncUserProfile = async () => {
+  const syncUserProfile = async (presetLocation?: string) => {
     const SYNC_TIMEOUT_MS = 5000; // 5 seconds max for profile sync
 
     try {
@@ -100,6 +151,20 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         if (rawNormalized === 'ceo') mappedRole = 'super_admin';
         else if (rawNormalized === 'procurement') mappedRole = 'procurement_manager';
 
+        // Resolve location: use preset if available, otherwise reuse current or fetch silently
+        let location = presetLocation;
+        if (!location) {
+          if (user?.loginLocation) {
+            location = user.loginLocation;
+          } else {
+            try {
+              location = await fetchLoginLocation();
+            } catch (e) {
+              location = 'Stored Session Location';
+            }
+          }
+        }
+
         setUser({
           id: profile.id,
           name: profile.name,
@@ -108,8 +173,18 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           title: rawRole.charAt(0).toUpperCase() + rawRole.slice(1),
           siteId: profile.siteId,
           employeeId: profile.id,
-          email: profile.email
+          email: profile.email,
+          loginLocation: location
         });
+
+        // Audit log security event with location details only when presetLocation is provided (new sign-in)
+        if (presetLocation) {
+          systemLogsService.logSecurity(
+            'USER_LOGIN',
+            `User ${profile.name} logged in from location: ${location}`,
+            { id: profile.id, role: mappedRole, name: profile.name }
+          );
+        }
       } else {
         console.warn('CentralStore: No profile returned, user may need to re-login');
       }
@@ -230,11 +305,16 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
       console.log('CentralStore: Attempting login...');
+
+      // 1. MUST capture location first (throws if fails)
+      const location = await fetchLoginLocation();
+      console.log('CentralStore: Location captured successfully:', location);
+
       const result = await authService.signIn(email, password);
       console.log('CentralStore: Sign in successful!');
 
       if (result?.user) {
-        await syncUserProfile();
+        await syncUserProfile(location);
         console.log('CentralStore: Login complete!');
         // Force navigate to root to trigger role-based redirects in App.tsx
         window.location.hash = '#/';
@@ -242,10 +322,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       }
 
       return false;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Login failed:', error);
-
-      return false;
+      // Re-throw so that LoginPage can display the specific error message
+      throw error;
     }
   };
 

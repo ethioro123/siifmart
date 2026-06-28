@@ -76,7 +76,14 @@ export function UserMenu({
                   <div className="p-4 border-b border-[#E2DCCE] dark:border-white/5 bg-stone-50/60 dark:bg-black/20" onClick={(e) => e.stopPropagation()}>
                      <p className="text-xs font-bold text-stone-400 dark:text-gray-400 uppercase tracking-wider mb-1">Signed in as</p>
                      <p className="text-sm font-bold text-[#1E3F27] dark:text-white truncate">{user.name}</p>
-                     <p className="text-[10px] font-mono text-[#2C5E3B] dark:text-[#A9CBA2] uppercase mb-3">{formatRole(user.role)}</p>
+                     <p className="text-[10px] font-mono text-[#2C5E3B] dark:text-[#A9CBA2] uppercase mb-1">{formatRole(user.role)}</p>
+                     
+                     {user.loginLocation && (
+                        <div className="flex items-center gap-1.5 mb-3 text-[9px] font-medium text-stone-500 dark:text-gray-400/80 bg-stone-100/50 dark:bg-white/5 px-2 py-1 rounded-md border border-[#E2DCCE]/50 dark:border-white/5 w-fit">
+                           <MapPin size={9} className="text-[#2C5E3B] dark:text-[#A9CBA2] shrink-0" />
+                           <span className="truncate max-w-[200px]" title={user.loginLocation}>{user.loginLocation}</span>
+                        </div>
+                     )}
 
                      {/* Performance Highlights */}
                      {currentUserPoints && (

@@ -2,6 +2,7 @@ import React from 'react';
 import { User, Mail, Phone, MapPin, Briefcase, Calendar, Star, Building, TrendingUp } from 'lucide-react';
 import { ResponsiveContainer, BarChart, CartesianGrid, XAxis, Tooltip, Bar } from 'recharts';
 import { Employee, EmployeeTask } from '../../../types';
+import { useStore } from '../../../contexts/CentralStore';
 
 // Mock attendance data
 const ATTENDANCE_DATA = [
@@ -19,6 +20,7 @@ interface OverviewTabProps {
 }
 
 export default function OverviewTab({ employee, employeeTasks, sites }: OverviewTabProps) {
+    const { user } = useStore();
     return (
         <div className="space-y-8 animate-in fade-in">
             {/* Stats Grid */}
@@ -76,6 +78,17 @@ export default function OverviewTab({ employee, employeeTasks, sites }: Overview
                                 <p className="text-gray-900 dark:text-white font-medium">{employee.address || 'No address provided'}</p>
                             </div>
                         </div>
+                        {isOwnProfile && user?.loginLocation && (
+                            <div className="flex items-center gap-4 group animate-in fade-in duration-300">
+                                <div className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-white/5 flex items-center justify-center text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">
+                                    <MapPin size={18} className="text-cyber-primary" />
+                                </div>
+                                <div>
+                                    <p className="text-[10px] text-gray-500 uppercase font-black">Session Login Location</p>
+                                    <p className="text-gray-900 dark:text-white font-medium">{user.loginLocation}</p>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
 
