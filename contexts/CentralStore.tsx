@@ -151,18 +151,27 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         if (rawNormalized === 'ceo') mappedRole = 'super_admin';
         else if (rawNormalized === 'procurement') mappedRole = 'procurement_manager';
 
-        // Resolve location: use preset if available, otherwise reuse current or fetch silently
+        // Resolve location: use preset, then check sessionStorage, then fetch precisely.
         let location = presetLocation;
         if (!location) {
-          if (user?.loginLocation) {
-            location = user.loginLocation;
-          } else {
-            try {
-              location = await fetchLoginLocation();
-            } catch (e) {
-              location = 'Stored Session Location';
-            }
+          try {
+            location = sessionStorage.getItem('siifmart_login_location') || undefined;
+          } catch (e) {
+            console.warn('sessionStorage is disabled in this environment', e);
           }
+        }
+
+        if (!location) {
+          // If no pre-cached session location, we must attempt to fetch the location.
+          // This will throw an error to block the sign-in if location tracking is disabled.
+          location = await fetchLoginLocation();
+        }
+
+        // Cache the verified login location for this browser session
+        try {
+          sessionStorage.setItem('siifmart_login_location', location);
+        } catch (e) {
+          console.warn('Could not cache session location', e);
         }
 
         setUser({
@@ -193,6 +202,15 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         console.warn('⚠️ CentralStore: Profile sync timed out after 5s - continuing without blocking');
       } else {
         console.error('CentralStore: Sync failed', error);
+        // Force logout if strict location check throws error during sync lifecycle
+        if (error?.message?.includes('Location tracking failed')) {
+          await authService.signOut();
+          setUser(null);
+          try {
+            sessionStorage.removeItem('siifmart_login_location');
+          } catch (e) {}
+          throw error;
+        }
       }
     }
   };
@@ -206,9 +224,16 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       async (event, session) => {
         console.log('Auth state changed:', event);
         if (event === 'SIGNED_IN' && session?.user) {
-          await syncUserProfile();
+          try {
+            await syncUserProfile();
+          } catch (e) {
+            console.error('Auto sign-in profile sync failed due to geolocation lock:', e);
+          }
         } else if (event === 'SIGNED_OUT') {
           setUser(null);
+          try {
+            sessionStorage.removeItem('siifmart_login_location');
+          } catch (e) {}
         }
       }
     );
@@ -332,6 +357,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const logout = async () => {
     await authService.signOut();
     setUser(null);
+    try {
+      sessionStorage.removeItem('siifmart_login_location');
+    } catch (e) {}
   };
 
   const toggleTheme = () => {
