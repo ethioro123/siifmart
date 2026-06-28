@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useStore } from './contexts/CentralStore';
 import './utils/clearSession'; // Make clearSession available globally
@@ -8,27 +8,43 @@ import LoginPage from './components/LoginPage';
 import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
 
-// Pages
-// Dashboard removed
-import POSTerminal from './pages/POSTerminal';
-import POSCommand from './pages/POSCommand';
-import CentralOperations from './pages/CentralOperations';
-import WMSDashboard from './pages/WMSDashboard';
-import Inventory from './pages/Inventory';
-import NetworkView from './pages/NetworkView';
-import SettingsPage from './pages/Settings';
-import Roadmap from './pages/Roadmap';
-import Procurement from './pages/Procurement';
-import Customers from './pages/Customers';
-import SalesHistory from './pages/SalesHistory';
-import Employees from './pages/Employees';
-import Fulfillment from './pages/Fulfillment';
-import Merchandising from './pages/Merchandising';
-import Financials from './pages/Financials';
-import LocationSelect from './pages/LocationSelect';
-import Profile from './pages/Profile';
+// Lazy-loaded Pages
+const POSTerminal = lazy(() => import('./pages/POSTerminal'));
+const POSCommand = lazy(() => import('./pages/POSCommand'));
+const CentralOperations = lazy(() => import('./pages/CentralOperations'));
+const WMSDashboard = lazy(() => import('./pages/WMSDashboard'));
+const Inventory = lazy(() => import('./pages/Inventory'));
+const NetworkView = lazy(() => import('./pages/NetworkView'));
+const SettingsPage = lazy(() => import('./pages/Settings'));
+const Roadmap = lazy(() => import('./pages/Roadmap'));
+const Procurement = lazy(() => import('./pages/Procurement'));
+const Customers = lazy(() => import('./pages/Customers'));
+const SalesHistory = lazy(() => import('./pages/SalesHistory'));
+const Employees = lazy(() => import('./pages/Employees'));
+const Fulfillment = lazy(() => import('./pages/Fulfillment'));
+const Merchandising = lazy(() => import('./pages/Merchandising'));
+const Financials = lazy(() => import('./pages/Financials'));
+const LocationSelect = lazy(() => import('./pages/LocationSelect'));
+const Profile = lazy(() => import('./pages/Profile'));
+const MigrationPanel = lazy(() => import('./pages/MigrationPanel'));
 
-import MigrationPanel from './pages/MigrationPanel';
+// Fallback loader for code splitting
+function ModuleLoader() {
+  return (
+    <div className="flex flex-col items-center justify-center min-h-[50vh] p-8 text-center animate-pulse-slow">
+      <div className="relative mb-4">
+        <div className="absolute inset-0 bg-cyber-primary/20 blur-xl rounded-full animate-pulse" />
+        <div className="w-12 h-12 bg-black/30 backdrop-blur-xl border border-cyber-primary/30 rounded-xl flex items-center justify-center relative z-10 shadow-[0_0_20px_rgba(0,255,157,0.1)]">
+          <div className="w-6 h-6 border-t-2 border-r-2 border-cyber-primary rounded-full animate-spin" />
+        </div>
+      </div>
+      <p className="text-xs text-cyber-primary/70 font-mono uppercase tracking-[0.2em]">
+        Hydrating Module...
+      </p>
+    </div>
+  );
+}
+
 
 import { native } from './utils/native';
 import { runAutoMigration } from './utils/autoMigrate';
@@ -196,7 +212,8 @@ export default function App() {
         <LoginPage />
       ) : (
         <Layout>
-          <Routes>
+          <Suspense fallback={<ModuleLoader />}>
+            <Routes>
             {/* Dashboard - Accessible by all authenticated users, content varies by role */}
             <Route path="/" element={
               <ProtectedRoute module="dashboard">
@@ -372,7 +389,8 @@ export default function App() {
 
             <Route path="*" element={<div className="text-center pt-20 text-gray-500">Module Access Restricted or Not Found</div>} />
           </Routes>
-        </Layout>
+        </Suspense>
+      </Layout>
       )}
     </Router>
   );
