@@ -120,6 +120,9 @@ const canApprove = ['super_admin', 'CEO'].includes(user?.role || '');
 3. Update interface in `/types.ts`
 4. Update service mapper in `supabase.service.ts`
 
+### Versioning & GitHub Pushing
+- **Always update the version number under the login page** when pushing changes to GitHub. Increment the version string in [LoginPage.tsx](file:///Users/shukriidriss/Downloads/siifmart%2080/components/LoginPage.tsx).
+
 ---
 
 ## Don'ts
@@ -128,3 +131,5 @@ const canApprove = ['super_admin', 'CEO'].includes(user?.role || '');
 - ❌ Don't skip role checks for sensitive actions
 - ❌ Don't hardcode site IDs
 - ❌ Don't create duplicate mutation logic in components
+- ❌ Don't push to GitHub without incrementing/verifying the version number in [LoginPage.tsx](file:///Users/shukriidriss/Downloads/siifmart%2080/components/LoginPage.tsx)
+
