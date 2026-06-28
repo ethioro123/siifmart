@@ -13,13 +13,22 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     // Initialize from localStorage only - completely independent
     const [language, setLocalLanguage] = useState<Language>(() => {
-        const saved = localStorage.getItem('siifmart_language') as Language;
-        return saved || 'en';
+        try {
+            const saved = localStorage.getItem('siifmart_language') as Language;
+            return saved || 'en';
+        } catch (e) {
+            console.warn('LocalStorage read failed for language settings', e);
+            return 'en';
+        }
     });
 
     // Persist to localStorage whenever language changes
     useEffect(() => {
-        localStorage.setItem('siifmart_language', language);
+        try {
+            localStorage.setItem('siifmart_language', language);
+        } catch (e) {
+            console.warn('LocalStorage write failed for language settings', e);
+        }
 
         // Update document dir for RTL if needed
         // document.dir = language === 'ar' ? 'rtl' : 'ltr'; 

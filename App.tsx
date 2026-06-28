@@ -69,16 +69,20 @@ export default function App() {
     // This ensures that "multi-account" testing works by forcing sessions to be tab-specific (sessionStorage).
     // It prevents standard localStorage tokens from leaking across tabs.
     if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-      const keysToRemove: string[] = [];
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key && key.startsWith('sb-') && key.includes('-auth-token')) {
-          keysToRemove.push(key);
+      try {
+        const keysToRemove: string[] = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && key.startsWith('sb-') && key.includes('-auth-token')) {
+            keysToRemove.push(key);
+          }
         }
-      }
-      if (keysToRemove.length > 0) {
-        console.log('🧹 Cleaning up legacy localStorage auth tokens to enforce strict tab isolation:', keysToRemove);
-        keysToRemove.forEach(k => localStorage.removeItem(k));
+        if (keysToRemove.length > 0) {
+          console.log('🧹 Cleaning up legacy localStorage auth tokens to enforce strict tab isolation:', keysToRemove);
+          keysToRemove.forEach(k => localStorage.removeItem(k));
+        }
+      } catch (e) {
+        console.warn('LocalStorage cleanup failed (likely private browsing restrictions)', e);
       }
     }
     // Note: Storage buckets (system-assets, avatars) should be created manually in Supabase Dashboard.

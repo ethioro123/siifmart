@@ -54,7 +54,12 @@ const isUUID = (id: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}
 import { TRANSLATIONS, Language } from '../utils/translations';
 
 const getTranslation = (path: string): string => {
-  const lang = (localStorage.getItem('siifmart_language') as Language) || 'en';
+  let lang: Language = 'en';
+  try {
+    lang = (localStorage.getItem('siifmart_language') as Language) || 'en';
+  } catch (e) {
+    console.warn('Failed to read language settings from localStorage in getTranslation', e);
+  }
   const keys = path.split('.');
   let current: any = TRANSLATIONS;
 
@@ -452,7 +457,11 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
 
   // Save notifs to local storage whenever they change
   useEffect(() => {
-    localStorage.setItem('siifmart_notifications', JSON.stringify(notifications));
+    try {
+      localStorage.setItem('siifmart_notifications', JSON.stringify(notifications));
+    } catch (e) {
+      console.warn('Failed to save notifications to localStorage', e);
+    }
   }, [notifications]);
 
   // Check for expired notifications (older than 24h) every minute
@@ -632,7 +641,12 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
     } catch (error: any) {
       console.error('❌ Failed to load sites:', error);
 
-      const cached = localStorage.getItem('siifmart_sites_cache');
+      let cached = null;
+      try {
+        cached = localStorage.getItem('siifmart_sites_cache');
+      } catch (e) {
+        console.warn('Failed to read cached sites from localStorage', e);
+      }
       if (cached) {
         console.log('⚠️ Network failed, loading sites from cache.');
         setSites(JSON.parse(cached));
