@@ -47,53 +47,31 @@ interface StoreContextType {
 }
 
 const fetchLoginLocation = async (): Promise<string> => {
-  const IPAPI_URL = 'https://ipapi.co/json/';
-  const GEODB_URL = 'https://geolocation-db.com/json/';
+  if (typeof navigator === 'undefined' || !navigator.geolocation) {
+    throw new Error('Geolocation is not supported by your browser. Location tracking is required to log in.');
+  }
 
-  // 1. Try GPS Geolocation first (short 1.5s timeout)
-  if (typeof navigator !== 'undefined' && navigator.geolocation) {
-    try {
-      const pos = await new Promise<GeolocationPosition>((resolve, reject) => {
-        navigator.geolocation.getCurrentPosition(resolve, reject, {
-          enableHighAccuracy: false,
-          timeout: 1500,
-          maximumAge: 120000
-        });
+  try {
+    const pos = await new Promise<GeolocationPosition>((resolve, reject) => {
+      navigator.geolocation.getCurrentPosition(resolve, reject, {
+        enableHighAccuracy: true,
+        timeout: 10000, // 10 seconds to allow clicking "Allow" on browser prompt
+        maximumAge: 0   // Force fresh location capture
       });
-      return `GPS: ${pos.coords.latitude.toFixed(4)}, ${pos.coords.longitude.toFixed(4)}`;
-    } catch (geoErr) {
-      console.warn('GPS location attempt failed:', geoErr);
+    });
+    return `GPS: ${pos.coords.latitude.toFixed(4)}, ${pos.coords.longitude.toFixed(4)}`;
+  } catch (geoErr: any) {
+    console.error('Browser GPS geolocation failed:', geoErr);
+    
+    let errMsg = 'Location permission is required to access the system. Please grant location permissions in your browser settings.';
+    if (geoErr.code === geoErr.TIMEOUT) {
+      errMsg = 'Location request timed out. Please ensure GPS is enabled and grant location permissions to continue.';
+    } else if (geoErr.code === geoErr.POSITION_UNAVAILABLE) {
+      errMsg = 'Your location could not be determined. Please ensure your device GPS is active.';
     }
+    
+    throw new Error(`Location tracking failed: ${errMsg}`);
   }
-
-  // 2. Try Primary IP Geolocation API
-  try {
-    const res = await fetch(IPAPI_URL);
-    if (res.ok) {
-      const data = await res.json();
-      if (data.city && data.country_name) {
-        return `${data.city}, ${data.country_name} (${data.ip})`;
-      }
-    }
-  } catch (e) {
-    console.warn('Primary IP location lookup failed:', e);
-  }
-
-  // 3. Try backup IP Geolocation API
-  try {
-    const res = await fetch(GEODB_URL);
-    if (res.ok) {
-      const data = await res.json();
-      if (data.city && data.country_name) {
-        return `${data.city}, ${data.country_name} (${data.IPv4})`;
-      }
-    }
-  } catch (backupErr) {
-    console.warn('Backup IP location lookup failed:', backupErr);
-  }
-
-  // If all attempts failed, throw to block login
-  throw new Error('Location tracking failed. Geolocation data is required to access the system. Please grant location permissions or check your connection.');
 };
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
