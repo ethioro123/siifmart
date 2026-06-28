@@ -144,6 +144,7 @@ export default function Employees() {
             cropperProps={{ isOpen: false, onClose: () => {}, imageSrc: '', onCropComplete: () => {} }} 
             isProcessingImage={actions.isProcessingImage} 
             processingStatus={actions.processingStatus} 
+            user={user}
          />
       </div>
    );

@@ -27,6 +27,7 @@ interface EmployeeModalsProps {
    cropperProps: any;
    isProcessingImage: boolean;
    processingStatus: string;
+   user?: any;
 }
 
 export default function EmployeeModals({
@@ -35,7 +36,8 @@ export default function EmployeeModals({
    isAddModalOpen, sites, employees, wizardProps,
    terminateProps, deleteProps,
    approveProps, validationProps,
-   cropperProps, isProcessingImage, processingStatus
+   cropperProps, isProcessingImage, processingStatus,
+   user
 }: EmployeeModalsProps) {
    return (
       <>
@@ -54,7 +56,7 @@ export default function EmployeeModals({
          <ImageCropper {...cropperProps} />
 
          {/* Onboarding Wizard */}
-         <AddEmployeeWizard isOpen={isAddModalOpen} {...wizardProps} />
+         <AddEmployeeWizard isOpen={isAddModalOpen} {...wizardProps} user={user} sites={sites} />
 
          {/* Staff Profile Modal */}
          <Modal isOpen={!!selectedEmployee} onClose={() => setSelectedEmployee(null)} title="Staff Profile" size="2xl">
