@@ -6,6 +6,7 @@ import { useSessionManager } from '../utils/useSessionManager';
 import { useDataRefresh } from '../utils/useDataRefresh';
 import { useNetworkStatus } from '../utils/useNetworkStatus';
 import { systemLogsService } from '../services/systemLogs.service';
+import { systemLogsService as dbSystemLogsService } from '../services/supabase.service';
 import { APP_CONFIG } from '../config/app.config';
 import Toast from '../components/Toast';
 
@@ -166,11 +167,24 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
         // Audit log security event with location details only when presetLocation is provided (new sign-in)
         if (presetLocation) {
+          // 1. Log to client-side localStorage audit trail
           systemLogsService.logSecurity(
             'USER_LOGIN',
             `User ${profile.name} logged in from location: ${location}`,
             { id: profile.id, role: mappedRole, name: profile.name }
           );
+
+          // 2. Log to global Supabase database system_logs table (displays in Settings -> Audit Log)
+          try {
+            dbSystemLogsService.create({
+              user_name: profile.name,
+              action: 'USER_LOGIN',
+              details: `Logged in from location: ${location}`,
+              module: 'Security'
+            }).catch(dbErr => console.error('Non-blocking DB logging failure:', dbErr));
+          } catch (err) {
+            console.error('Failed to log USER_LOGIN to database:', err);
+          }
         }
       } else {
         console.warn('CentralStore: No profile returned, user may need to re-login');
