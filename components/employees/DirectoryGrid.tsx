@@ -1,16 +1,17 @@
 import React from 'react';
 import { Loader2, User } from 'lucide-react';
 import { Employee } from '../../types';
-import { SYSTEM_ROLES } from '../../utils/roles';
+import { SYSTEM_ROLES, canViewLocation } from '../../utils/roles';
 
 interface DirectoryGridProps {
    displayedEmployees: Employee[];
    isLoadingEmployees: boolean;
    sites: any[];
    setSelectedEmployee: (emp: Employee) => void;
+   currentUser?: any;
 }
 
-export default function DirectoryGrid({ displayedEmployees, isLoadingEmployees, sites, setSelectedEmployee }: DirectoryGridProps) {
+export default function DirectoryGrid({ displayedEmployees, isLoadingEmployees, sites, setSelectedEmployee, currentUser }: DirectoryGridProps) {
    if (isLoadingEmployees && displayedEmployees.length === 0) {
       return (
          <div className="col-span-full flex justify-center py-12">
@@ -23,6 +24,8 @@ export default function DirectoryGrid({ displayedEmployees, isLoadingEmployees, 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
          {displayedEmployees.map((employee) => {
             const roleConfig = SYSTEM_ROLES.find(r => r.id === employee.role) || SYSTEM_ROLES[8];
+            const isOwn = currentUser?.id === employee.id;
+            const canSeeLocation = canViewLocation(currentUser?.role, employee.role, isOwn);
             return (
                <div
                   key={employee.id}
@@ -45,6 +48,31 @@ export default function DirectoryGrid({ displayedEmployees, isLoadingEmployees, 
                         <p className="text-[11px] text-stone-500 dark:text-gray-400 mt-1.5 truncate font-medium">
                            {sites.find(s => s.id === employee.siteId)?.name || 'Unassigned'}
                         </p>
+                        {canSeeLocation && employee.lastLoginGps ? (
+                           <p className="text-[10px] text-stone-400 dark:text-stone-500 font-mono mt-0.5 truncate" title={employee.lastLoginGps}>
+                              📍 {employee.lastLoginGps.replace('GPS: ', '')}
+                           </p>
+                        ) : employee.lastLoginGps ? (
+                           <p className="text-[10px] text-stone-300 dark:text-stone-600 italic mt-0.5 truncate select-none" title="Location is hidden due to hierarchy permissions">
+                              📍 Protected
+                           </p>
+                        ) : null}
+                        {employee.lastLoginAt && (
+                           (() => {
+                              const date = new Date(employee.lastLoginAt);
+                              const today = new Date();
+                              const loggedInToday = date.getDate() === today.getDate() &&
+                                 date.getMonth() === today.getMonth() &&
+                                 date.getFullYear() === today.getFullYear();
+                              
+                              return loggedInToday ? (
+                                 <div className="inline-flex items-center gap-1 text-[9px] px-1.5 py-0.5 mt-1.5 rounded bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 font-bold border border-emerald-200 dark:border-emerald-500/20 w-fit">
+                                    <span className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
+                                    Logged In Today
+                                 </div>
+                              ) : null;
+                           })()
+                        )}
                      </div>
                   </div>
                </div>

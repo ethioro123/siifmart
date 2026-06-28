@@ -71,7 +71,7 @@ export default function StaffProfileView(props: StaffProfileViewProps) {
             />
 
             <div className="min-h-[400px]">
-                {profile.activeProfileTab === 'overview' && <OverviewTab employee={employee} employeeTasks={allTasks.filter(t => t.assignedTo === employee.id)} sites={sites} />}
+                {profile.activeProfileTab === 'overview' && <OverviewTab employee={employee} employeeTasks={allTasks.filter(t => t.assignedTo === employee.id)} sites={sites} isOwnProfile={isOwnProfile} />}
                 {profile.activeProfileTab === 'gamification' && <GamificationTab employee={employee} settings={settings} sites={sites} getWorkerPoints={getWorkerPoints} getStorePoints={getStorePoints} />}
                 {profile.activeProfileTab === 'tasks' && <TasksTab canManageEmployees={canManage} isOwnProfile={isOwnProfile} employeeTasks={allTasks.filter(t => t.assignedTo === employee.id)} newTaskTitle={''} setNewTaskTitle={() => {}} newTaskPriority="Medium" setNewTaskPriority={() => {}} handleAddTask={() => {}} handleCompleteTask={() => {}} />}
                 {profile.activeProfileTab === 'timeoff' && <TimeOffTab isOwnProfile={isOwnProfile} onRequestTimeOff={() => profile.setIsTimeOffModalOpen(true)} />}

@@ -1,8 +1,9 @@
 import React from 'react';
-import { User, Mail, Phone, MapPin, Briefcase, Calendar, Star, Building, TrendingUp } from 'lucide-react';
+import { User, Mail, Phone, MapPin, Briefcase, Calendar, Star, Building, TrendingUp, Shield } from 'lucide-react';
 import { ResponsiveContainer, BarChart, CartesianGrid, XAxis, Tooltip, Bar } from 'recharts';
 import { Employee, EmployeeTask } from '../../../types';
 import { useStore } from '../../../contexts/CentralStore';
+import { canViewLocation } from '../../../utils/roles';
 
 // Mock attendance data
 const ATTENDANCE_DATA = [
@@ -17,10 +18,13 @@ interface OverviewTabProps {
     employee: Employee;
     employeeTasks: EmployeeTask[];
     sites: any[];
+    isOwnProfile?: boolean;
 }
 
-export default function OverviewTab({ employee, employeeTasks, sites }: OverviewTabProps) {
+export default function OverviewTab({ employee, employeeTasks, sites, isOwnProfile = false }: OverviewTabProps) {
     const { user } = useStore();
+    const isOwn = user?.id === employee.id;
+    const canSeeLocation = canViewLocation(user?.role, employee.role, isOwn);
     return (
         <div className="space-y-8 animate-in fade-in">
             {/* Stats Grid */}
@@ -78,14 +82,16 @@ export default function OverviewTab({ employee, employeeTasks, sites }: Overview
                                 <p className="text-gray-900 dark:text-white font-medium">{employee.address || 'No address provided'}</p>
                             </div>
                         </div>
-                        {isOwnProfile && user?.loginLocation && (
+                        {(employee.lastLoginGps || (isOwnProfile && user?.loginLocation)) && (
                             <div className="flex items-center gap-4 group animate-in fade-in duration-300">
                                 <div className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-white/5 flex items-center justify-center text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">
                                     <MapPin size={18} className="text-cyber-primary" />
                                 </div>
                                 <div>
-                                    <p className="text-[10px] text-gray-500 uppercase font-black">Session Login Location</p>
-                                    <p className="text-gray-900 dark:text-white font-medium">{user.loginLocation}</p>
+                                    <p className="text-[10px] text-gray-500 uppercase font-black">Last Login GPS Location</p>
+                                    <p className="text-gray-900 dark:text-white font-medium">
+                                        {canSeeLocation ? (employee.lastLoginGps || user?.loginLocation) : 'Protected'}
+                                    </p>
                                 </div>
                             </div>
                         )}
@@ -143,6 +149,55 @@ export default function OverviewTab({ employee, employeeTasks, sites }: Overview
                         </BarChart>
                     </ResponsiveContainer>
                 </div>
+            </div>
+
+            {/* Device & Login History */}
+            <div className="bg-gray-50 dark:bg-black/30 p-8 rounded-2xl border border-gray-100 dark:border-white/5">
+                <h4 className="text-lg font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-3">
+                    <Shield size={18} className="text-cyber-primary" />
+                    Device & Login History
+                </h4>
+                {canSeeLocation ? (
+                    <>
+                        {employee.lastLoginDevice && (
+                            <div className="mb-6 p-4 bg-white/5 rounded-xl border border-white/5 flex flex-col md:flex-row md:justify-between md:items-center gap-2">
+                                <div>
+                                    <span className="text-[10px] text-gray-500 uppercase font-black block">Active Device</span>
+                                    <span className="text-sm font-bold text-gray-900 dark:text-white">{employee.lastLoginDevice}</span>
+                                </div>
+                                {employee.lastLoginAt && (
+                                    <div className="md:text-right">
+                                        <span className="text-[10px] text-gray-500 uppercase font-black block">Last Sync Time</span>
+                                        <span className="text-xs text-gray-400 font-mono">{new Date(employee.lastLoginAt).toLocaleString()}</span>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                        
+                        <div className="space-y-3">
+                            <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">Recent Activity Session History</p>
+                            {employee.loginHistory && employee.loginHistory.length > 0 ? (
+                                <div className="divide-y divide-gray-100 dark:divide-white/5 border border-gray-100 dark:border-white/5 rounded-xl overflow-hidden bg-white/5">
+                                    {employee.loginHistory.map((login: any, idx: number) => (
+                                        <div key={idx} className="p-3 flex justify-between items-center text-xs text-gray-600 dark:text-gray-300 hover:bg-white/5 transition-colors">
+                                            <div className="flex flex-col gap-0.5">
+                                                <span className="font-semibold">{login.device || 'Unknown Device'}</span>
+                                                <span className="text-[10px] text-stone-400 dark:text-gray-550 font-mono">{login.location || 'Unknown Location'}</span>
+                                            </div>
+                                            <span className="font-mono text-stone-500 dark:text-gray-400">
+                                                {new Date(login.timestamp).toLocaleString()}
+                                            </span>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <p className="text-xs text-gray-400 italic">No login history recorded yet.</p>
+                            )}
+                        </div>
+                    </>
+                ) : (
+                    <p className="text-xs text-gray-400 italic">This employee's device session history is protected based on security level restrictions.</p>
+                )}
             </div>
         </div>
     );

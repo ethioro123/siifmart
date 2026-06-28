@@ -102,7 +102,7 @@ export default function Employees() {
          {viewMode === 'directory' && (
             <div className="space-y-6">
                <DirectoryHeader searchTerm={searchTerm} setSearchTerm={setSearchTerm} filterRole={filterRole} setFilterRole={setFilterRole} filterStatus={filterStatus} setFilterStatus={setFilterStatus} filterDepartment={filterDepartment} setFilterDepartment={setFilterDepartment} filterSite={filterSite} setFilterSite={setFilterSite} sites={sites} layoutMode={layoutMode} setLayoutMode={setLayoutMode} isTaskQueueOpen={isTaskQueueOpen} setIsTaskQueueOpen={setIsTaskQueueOpen} totalCount={totalCount} tasksCount={tasks.length} canViewAll={canViewAll} restricted={restricted} setCurrentPage={setCurrentPage} visibleEmployees={employees} />
-               {layoutMode === 'grid' ? <DirectoryGrid displayedEmployees={displayedEmployees} isLoadingEmployees={isLoadingEmployees} sites={sites} setSelectedEmployee={setSelectedEmployee} /> : <DirectoryList displayedEmployees={displayedEmployees} isLoadingEmployees={isLoadingEmployees} sites={sites} setSelectedEmployee={setSelectedEmployee} canViewAll={canViewAll} />}
+               {layoutMode === 'grid' ? <DirectoryGrid displayedEmployees={displayedEmployees} isLoadingEmployees={isLoadingEmployees} sites={sites} setSelectedEmployee={setSelectedEmployee} currentUser={user} /> : <DirectoryList displayedEmployees={displayedEmployees} isLoadingEmployees={isLoadingEmployees} sites={sites} setSelectedEmployee={setSelectedEmployee} canViewAll={canViewAll} currentUser={user} />}
                <EmployeePagination currentPage={currentPage} totalPages={totalPages} totalCount={totalCount} ITEMS_PER_PAGE={20} setCurrentPage={setCurrentPage} />
             </div>
          )}

@@ -1130,6 +1130,14 @@ export interface Employee {
   vehiclePlate?: string;
   licenseNumber?: string;
   licenseExpiry?: string;
+  lastLoginGps?: string;
+  last_login_gps?: string;
+  lastLoginAt?: string;
+  last_login_at?: string;
+  lastLoginDevice?: string;
+  last_login_device?: string;
+  loginHistory?: any[];
+  login_history?: any[];
 }
 
 export interface CartItem extends Product {

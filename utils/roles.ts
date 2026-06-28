@@ -104,3 +104,26 @@ export const getRoleHierarchy = (role: UserRole | string): number => {
     };
     return hierarchy[role] || 0;
 };
+
+export const canViewLocation = (
+    userRole: string | undefined,
+    targetRole: string,
+    isOwn: boolean
+): boolean => {
+    if (isOwn) return true;
+    if (!userRole) return false;
+
+    // CEO / Super Admin can see everyone
+    if (userRole === 'super_admin') return true;
+
+    // HR / HR Manager can see anyone except CEO (super_admin)
+    if (userRole === 'hr' || userRole === 'hr_manager') {
+        return targetRole !== 'super_admin';
+    }
+
+    // Otherwise, follow hierarchy: user role hierarchy level must be greater than target
+    const userLevel = getRoleHierarchy(userRole);
+    const targetLevel = getRoleHierarchy(targetRole);
+
+    return userLevel > targetLevel;
+};

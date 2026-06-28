@@ -3,6 +3,7 @@ import React from 'react';
 import { MapPin, ChevronRight } from 'lucide-react';
 import { Employee, Site, WorkerPoints } from '../types';
 import { formatRole } from '../utils/formatting';
+import { canViewLocation } from '../utils/roles';
 
 interface EmployeeRowProps {
     employee: Employee;
@@ -21,6 +22,7 @@ interface EmployeeRowProps {
     workerPoints?: WorkerPoints;
     estimatedBonus?: number;
     bonusTierName?: string;
+    currentUser?: any;
     key?: React.Key;
 }
 
@@ -29,9 +31,13 @@ export default function EmployeeRow({
     sites,
     roleConfig,
     onSelect,
+    currentUser,
 }: EmployeeRowProps) {
     const employeeSite = sites.find(s => s.id === employee.siteId || s.id === employee.site_id);
     const isPending = employee.status === 'Pending Approval';
+    
+    const isOwn = currentUser?.id === employee.id;
+    const canSeeLocation = canViewLocation(currentUser?.role, employee.role, isOwn);
 
     return (
         <div
@@ -57,9 +63,20 @@ export default function EmployeeRow({
             </div>
 
             {/* Location - Hidden on mobile */}
-            <div className="hidden md:flex items-center gap-1.5 text-xs text-stone-500 dark:text-gray-400 min-w-0 max-w-[160px] font-medium">
-                <MapPin size={12} className="flex-shrink-0 text-stone-400 dark:text-gray-500" />
-                <span className="truncate">{employeeSite?.name || 'Unassigned'}</span>
+            <div className="hidden md:flex flex-col gap-0.5 text-xs text-stone-500 dark:text-gray-400 min-w-[140px] max-w-[180px] font-medium">
+                <div className="flex items-center gap-1.5">
+                    <MapPin size={12} className="flex-shrink-0 text-stone-400 dark:text-gray-500" />
+                    <span className="truncate">{employeeSite?.name || 'Unassigned'}</span>
+                </div>
+                {canSeeLocation && employee.lastLoginGps ? (
+                    <span className="text-[10px] text-gray-400 dark:text-stone-500 font-mono truncate pl-3.5" title={employee.lastLoginGps}>
+                        {employee.lastLoginGps.replace('GPS: ', '')}
+                    </span>
+                ) : employee.lastLoginGps ? (
+                    <span className="text-[10px] text-stone-300 dark:text-stone-600 italic truncate pl-3.5 select-none" title="Location is hidden due to hierarchy permissions">
+                        Protected
+                    </span>
+                ) : null}
             </div>
 
             {/* Status Badge */}
@@ -67,6 +84,23 @@ export default function EmployeeRow({
                 <span className="hidden sm:inline-flex text-[10px] px-2 py-0.5 rounded bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 font-bold border border-amber-200 dark:border-amber-500/20">
                     Pending
                 </span>
+            )}
+
+            {employee.lastLoginAt && (
+                (() => {
+                    const date = new Date(employee.lastLoginAt);
+                    const today = new Date();
+                    const loggedInToday = date.getDate() === today.getDate() &&
+                        date.getMonth() === today.getMonth() &&
+                        date.getFullYear() === today.getFullYear();
+                    
+                    return loggedInToday ? (
+                        <span className="hidden sm:inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 font-bold border border-emerald-200 dark:border-emerald-500/20">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                            Logged In Today
+                        </span>
+                    ) : null;
+                })()
             )}
 
             {/* Arrow */}

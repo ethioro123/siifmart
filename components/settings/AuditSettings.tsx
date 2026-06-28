@@ -10,21 +10,39 @@ export default function AuditSettings() {
     const [searchTerm, setSearchTerm] = useState('');
     const [filterLevel, setFilterLevel] = useState('all');
 
-    // Filter logs
+    // Filter logs safely to prevent TypeError when details or user_name are null/undefined
     const filteredLogs = (systemLogs || []).filter(log => {
-        const matchesSearch = log.details.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            log.user_name?.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesLevel = filterLevel === 'all' || log.module === filterLevel;
+        const detailsStr = log.details || '';
+        const userNameStr = log.user_name || '';
+        const matchesSearch = detailsStr.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            userNameStr.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesLevel = filterLevel === 'all' || (log.module || '').toLowerCase() === filterLevel.toLowerCase();
         return matchesSearch && matchesLevel;
     });
 
     const getLevelColor = (module: string) => {
-        switch (module.toLowerCase()) {
+        switch ((module || '').toLowerCase()) {
             case 'system': return 'text-red-400 bg-red-500/10 border-red-500/20';
             case 'compliance': return 'text-yellow-400 bg-yellow-500/10 border-yellow-500/20';
             case 'inventory': return 'text-green-400 bg-green-500/10 border-green-500/20';
             default: return 'text-blue-400 bg-blue-500/10 border-blue-500/20';
         }
+    };
+
+    const handleExport = () => {
+        const csvContent = "data:text/csv;charset=utf-8,"
+            + "Timestamp,Module,Message,User\n"
+            + filteredLogs.map(log =>
+                `"${log.created_at || ''}","${log.module || ''}","${(log.details || '').replace(/"/g, '""')}","${log.user_name || 'System'}"`
+            ).join("\n");
+
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `audit_logs_${new Date().toISOString()}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     };
 
     return (
@@ -67,7 +85,10 @@ export default function AuditSettings() {
                             <option value="Security">Security</option>
                             <option value="Finance">Finance</option>
                         </select>
-                        <button className="bg-indigo-500 text-white px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 hover:bg-indigo-600 transition-colors">
+                        <button 
+                            onClick={handleExport}
+                            className="bg-indigo-500 text-white px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 hover:bg-indigo-600 transition-colors"
+                        >
                             <Download size={14} /> Export CSV
                         </button>
                     </div>

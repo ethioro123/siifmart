@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { authService } from '../services/auth.service';
 import { UserRole } from '../types';
+import { employeesService } from '../services/employees.service';
 
 import { useSessionManager } from '../utils/useSessionManager';
 import { useDataRefresh } from '../utils/useDataRefresh';
@@ -151,6 +152,50 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           sessionStorage.setItem('siifmart_login_location', location);
         } catch (e) {
           console.warn('Could not cache session location', e);
+        }
+
+        // Save last login GPS, timestamp, device, and login history to Supabase
+        if (location) {
+          try {
+            const employeeData = await employeesService.getById(profile.id);
+            const currentHistory = Array.isArray(employeeData.loginHistory) ? employeeData.loginHistory : [];
+
+            // Helper to get simplified device/OS details
+            const getDeviceDetails = (): string => {
+              if (typeof window === 'undefined' || !navigator) return 'Unknown Device';
+              const ua = navigator.userAgent;
+              let browser = 'Unknown Browser';
+              let os = 'Unknown OS';
+              if (ua.includes('Windows')) os = 'Windows';
+              else if (ua.includes('Macintosh')) os = 'macOS';
+              else if (ua.includes('Linux')) os = 'Linux';
+              else if (ua.includes('Android')) os = 'Android';
+              else if (ua.includes('iPhone') || ua.includes('iPad')) os = 'iOS';
+              if (ua.includes('Firefox')) browser = 'Firefox';
+              else if (ua.includes('Chrome')) browser = 'Chrome';
+              else if (ua.includes('Safari')) browser = 'Safari';
+              else if (ua.includes('Edge')) browser = 'Edge';
+              return `${browser} on ${os}`;
+            };
+
+            const device = getDeviceDetails();
+            const timestamp = new Date().toISOString();
+
+            // Append to login history, limit to last 20 entries
+            const updatedHistory = [
+              { timestamp, location, device },
+              ...currentHistory
+            ].slice(0, 20);
+
+            await employeesService.update(profile.id, {
+              lastLoginGps: location,
+              lastLoginAt: timestamp,
+              lastLoginDevice: device,
+              loginHistory: updatedHistory
+            });
+          } catch (updateErr) {
+            console.error('Failed to update employee login history and details:', updateErr);
+          }
         }
 
         setUser({

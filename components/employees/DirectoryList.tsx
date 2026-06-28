@@ -10,9 +10,10 @@ interface DirectoryListProps {
    sites: any[];
    setSelectedEmployee: (emp: Employee) => void;
    canViewAll: boolean;
+   currentUser?: any;
 }
 
-export default function DirectoryList({ displayedEmployees, isLoadingEmployees, sites, setSelectedEmployee, canViewAll }: DirectoryListProps) {
+export default function DirectoryList({ displayedEmployees, isLoadingEmployees, sites, setSelectedEmployee, canViewAll, currentUser }: DirectoryListProps) {
    return (
       <div className="bg-white/80 dark:bg-[#18201B]/40 border border-[#E2DCCE] dark:border-emerald-950/20 backdrop-blur-md rounded-2xl overflow-hidden shadow-sm">
          <div className="divide-y divide-[#E2DCCE]/60 dark:divide-white/5">
@@ -38,6 +39,7 @@ export default function DirectoryList({ displayedEmployees, isLoadingEmployees, 
                         canDelete={false}
                         canApprove={false}
                         isSuperAdmin={false}
+                        currentUser={currentUser}
                      />
                   );
                })

@@ -19,7 +19,11 @@ export const employeesService = {
             siteId: e.site_id,
             joinDate: e.join_date,
             performanceScore: e.performance_score,
-            attendanceRate: e.attendance_rate
+            attendanceRate: e.attendance_rate,
+            lastLoginGps: e.last_login_gps,
+            lastLoginAt: e.last_login_at,
+            lastLoginDevice: e.last_login_device,
+            loginHistory: e.login_history
         }));
     },
 
@@ -129,7 +133,11 @@ export const employeesService = {
                 siteId: e.site_id,
                 joinDate: e.join_date,
                 performanceScore: e.performance_score,
-                attendanceRate: e.attendance_rate
+                attendanceRate: e.attendance_rate,
+                lastLoginGps: e.last_login_gps,
+                lastLoginAt: e.last_login_at,
+                lastLoginDevice: e.last_login_device,
+                loginHistory: e.login_history
             })),
             count: count || 0
         };
@@ -148,7 +156,11 @@ export const employeesService = {
             siteId: data.site_id,
             joinDate: data.join_date,
             performanceScore: data.performance_score,
-            attendanceRate: data.attendance_rate
+            attendanceRate: data.attendance_rate,
+            lastLoginGps: data.last_login_gps,
+            lastLoginAt: data.last_login_at,
+            lastLoginDevice: data.last_login_device,
+            loginHistory: data.login_history
         };
     },
 
@@ -165,7 +177,11 @@ export const employeesService = {
             siteId: data.site_id,
             joinDate: data.join_date,
             performanceScore: data.performance_score,
-            attendanceRate: data.attendance_rate
+            attendanceRate: data.attendance_rate,
+            lastLoginGps: data.last_login_gps,
+            lastLoginAt: data.last_login_at,
+            lastLoginDevice: data.last_login_device,
+            loginHistory: data.login_history
         };
     },
 
@@ -200,7 +216,11 @@ export const employeesService = {
             siteId: data.site_id,
             joinDate: data.join_date,
             performanceScore: data.performance_score,
-            attendanceRate: data.attendance_rate
+            attendanceRate: data.attendance_rate,
+            lastLoginGps: data.last_login_gps,
+            lastLoginAt: data.last_login_at,
+            lastLoginDevice: data.last_login_device,
+            loginHistory: data.login_history
         };
     },
 
@@ -210,6 +230,10 @@ export const employeesService = {
         if (updates.joinDate !== undefined) { dbUpdates.join_date = updates.joinDate; delete dbUpdates.joinDate; }
         if (updates.performanceScore !== undefined) { dbUpdates.performance_score = updates.performanceScore; delete dbUpdates.performanceScore; }
         if (updates.attendanceRate !== undefined) { dbUpdates.attendance_rate = updates.attendanceRate; delete dbUpdates.attendanceRate; }
+        if (updates.lastLoginGps !== undefined) { dbUpdates.last_login_gps = updates.lastLoginGps; delete dbUpdates.lastLoginGps; }
+        if (updates.lastLoginAt !== undefined) { dbUpdates.last_login_at = updates.lastLoginAt; delete dbUpdates.lastLoginAt; }
+        if (updates.lastLoginDevice !== undefined) { dbUpdates.last_login_device = updates.lastLoginDevice; delete dbUpdates.lastLoginDevice; }
+        if (updates.loginHistory !== undefined) { dbUpdates.login_history = updates.loginHistory; delete dbUpdates.loginHistory; }
 
         const { data, error } = await supabase
             .from('employees')
@@ -224,7 +248,11 @@ export const employeesService = {
             siteId: data.site_id,
             joinDate: data.join_date,
             performanceScore: data.performance_score,
-            attendanceRate: data.attendance_rate
+            attendanceRate: data.attendance_rate,
+            lastLoginGps: data.last_login_gps,
+            lastLoginAt: data.last_login_at,
+            lastLoginDevice: data.last_login_device,
+            loginHistory: data.login_history
         };
     },
 
