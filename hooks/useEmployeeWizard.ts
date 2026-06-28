@@ -41,33 +41,20 @@ export function useEmployeeWizard({
       if (!user) return [];
       switch (user.role) {
          case 'super_admin':
-            return [
-               'super_admin', 'regional_manager', 'operations_manager', 'finance_manager', 'hr_manager', 'procurement_manager', 'supply_chain_manager',
-               'store_manager', 'warehouse_manager', 'dispatch_manager', 'assistant_manager', 'shift_lead',
-               'cashier', 'sales_associate', 'stock_clerk', 'picker', 'packer', 'receiver', 'driver', 'forklift_operator', 'inventory_specialist', 'customer_service', 'auditor', 'it_support',
-               'admin', 'hr', 'pos'
-            ];
+            return SYSTEM_ROLES.map(r => r.id);
          case 'regional_manager':
          case 'operations_manager':
          case 'admin':
-            return [
-               'store_manager', 'warehouse_manager', 'dispatch_manager', 'assistant_manager', 'shift_lead',
-               'cashier', 'sales_associate', 'stock_clerk', 'picker', 'packer', 'receiver', 'driver', 'forklift_operator', 'inventory_specialist', 'customer_service', 'auditor', 'it_support',
-               'hr', 'pos'
-            ];
          case 'hr_manager':
          case 'hr':
-            return [
-               'store_manager', 'warehouse_manager', 'dispatch_manager', 'assistant_manager', 'shift_lead',
-               'cashier', 'sales_associate', 'stock_clerk', 'picker', 'packer', 'receiver', 'driver', 'forklift_operator', 'inventory_specialist', 'customer_service', 'auditor', 'it_support',
-               'pos'
-            ];
+            // Can onboard any role except super_admin (CEO)
+            return SYSTEM_ROLES.map(r => r.id).filter(id => id !== 'super_admin');
          case 'store_manager':
-            return ['assistant_manager', 'shift_lead', 'cashier', 'sales_associate', 'stock_clerk', 'customer_service', 'pos'];
+            return ['assistant_manager', 'shift_lead', 'cashier', 'sales_associate', 'stock_clerk', 'customer_service', 'pos', 'cs_manager', 'store_supervisor', 'merchandiser'];
          case 'warehouse_manager':
-            return ['assistant_manager', 'shift_lead', 'picker', 'packer', 'receiver', 'driver', 'forklift_operator', 'inventory_specialist'];
+            return ['assistant_manager', 'shift_lead', 'picker', 'packer', 'receiver', 'driver', 'forklift_operator', 'inventory_specialist', 'dispatcher'];
          case 'dispatch_manager':
-            return ['driver'];
+            return ['driver', 'dispatcher'];
          default: return [];
       }
    };
