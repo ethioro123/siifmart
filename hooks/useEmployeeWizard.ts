@@ -112,6 +112,24 @@ export function useEmployeeWizard({
       if (locationDesc) addNotification('info', `Role Selected: ${locationDesc}`);
    };
 
+   const handleWizardNext = () => {
+      if (addStep === 1) {
+         if (!newEmpData.firstName.trim()) {
+            addNotification('alert', 'First Name is required.');
+            return;
+         }
+         if (!newEmpData.password || newEmpData.password.length < 6) {
+            addNotification('alert', 'A valid password (minimum 6 characters) is required.');
+            return;
+         }
+      }
+      setAddStep(prev => Math.min(prev + 1, 4));
+   };
+
+   const handleWizardBack = () => {
+      setAddStep(prev => Math.max(prev - 1, 1));
+   };
+
    const handleFinalSubmit = async () => {
       setIsSubmitting(true);
 
@@ -197,10 +215,10 @@ export function useEmployeeWizard({
       }
    };
 
-   return {
-      addStep, setAddStep, isSubmitting, setIsSubmitting, isAddModalOpen, setIsAddModalOpen,
-      newEmpData, setNewEmpData, availableRoles, availableDepartments,
-      resetWizard, handleOpenWizard, handleRoleChange, handleFinalSubmit,
-      getCreatableRoles
-   };
+    return {
+       addStep, setAddStep, isSubmitting, setIsSubmitting, isAddModalOpen, setIsAddModalOpen,
+       newEmpData, setNewEmpData, availableRoles, availableDepartments,
+       resetWizard, handleOpenWizard, handleRoleChange, handleFinalSubmit,
+       getCreatableRoles, handleWizardNext, handleWizardBack
+    };
 }

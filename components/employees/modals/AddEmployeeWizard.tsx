@@ -131,7 +131,7 @@ export default function AddEmployeeWizard({
                                         />
                                     </div>
                                     <div>
-                                        <label className="text-xs text-gray-400 uppercase font-bold mb-1 block">Password (For Login)</label>
+                                        <label className="text-xs text-gray-400 uppercase font-bold mb-1 block">Password (For Login) <span className="text-red-500">*</span></label>
                                         <div className="relative">
                                             <input
                                                 type={showPassword ? 'text' : 'password'}
