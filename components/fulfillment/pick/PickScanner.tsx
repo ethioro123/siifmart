@@ -6,7 +6,8 @@ import { normalizeLocation } from '../../../utils/locationTracking';
 import { formatJobId } from '../../../utils/jobIdFormatter';
 import { decodeLocation, isLocationBarcode, extractPrefixFromBarcode } from '../../../utils/locationEncoder';
 import { useScanOnly } from '../../../hooks/useScanOnly';
-import { isWeightBased, isVolumeBased } from '../../../utils/units';
+import { isWeightBased, isVolumeBased, getSellUnit } from '../../../utils/units';
+import { useLanguage } from '../../../contexts/LanguageContext';
 
 const normalizeSku = (s: string) => s.replace(/[-\/\s]/g, '').toUpperCase();
 
@@ -35,6 +36,7 @@ export const PickScanner: React.FC<PickScannerProps> = ({
     isProcessing,
     expectedPrefix
 }) => {
+    const { t } = useLanguage();
     const [step, setStep] = useState<'LOCATION' | 'ITEM' | 'QUANTITY'>('LOCATION');
     const [inputVal, setInputVal] = useState('');
     const [qtyVal, setQtyVal] = useState('');
@@ -98,108 +100,46 @@ export const PickScanner: React.FC<PickScannerProps> = ({
 
     useEffect(() => {
         lastStepChangeRef.current = Date.now();
-    }, [step]);
-
-    useEffect(() => {
         setInputVal('');
         setQtyVal('');
-        setIsItemMatched(false);
-        setMatchedBarcode('');
-        setShowSuccess(false);
-        setShowError(false);
-        setShortPickMode(false);
-        if (step !== 'LOCATION') {
-            setStep('LOCATION');
+    }, [currentItem?.id, step]);
+
+    useEffect(() => {
+        if (step !== 'LOCATION' || !inputVal || isProcessing || !expectedPrefix) return;
+        const rawVal = inputVal.trim().toUpperCase();
+        const requiredLength = expectedPrefix.length === 4 ? 15 : 14;
+
+        if (rawVal.length >= requiredLength) {
+            const scanPrefix = extractPrefixFromBarcode(rawVal);
+            if (scanPrefix && expectedPrefix !== scanPrefix) {
+                playBeep('error');
+                setErrorMsg(`WRONG SITE: ${scanPrefix}`);
+                setShowError(true);
+                setInputVal('');
+                setTimeout(() => setShowError(false), 2000);
+            }
         }
-    }, [currentItem?.sku]);
+    }, [inputVal, step, expectedPrefix, isProcessing]);
 
     const isStrictlyValid = useMemo(() => {
         if (step !== 'LOCATION') return inputVal.trim().length > 0;
         return isLocationBarcode(inputVal.trim().toUpperCase());
     }, [inputVal, step]);
 
-    useEffect(() => {
-        if (!inputVal || isProcessing) return;
-
-        const rawVal = inputVal.trim().toUpperCase();
-
-        if (step === 'LOCATION' && expectedPrefix) {
-            const requiredLength = expectedPrefix.length === 4 ? 15 : 14;
-            if (rawVal.length === requiredLength) {
-                const scanPrefix = extractPrefixFromBarcode(rawVal);
-                if (scanPrefix && expectedPrefix !== scanPrefix) {
-                    playBeep('error');
-                    setErrorMsg(`WRONG SITE: ${scanPrefix} (Expected ${expectedPrefix})`);
-                    setShowError(true);
-                    setInputVal('');
-                    setTimeout(() => setShowError(false), 2000);
-                } else {
-                    const decoded = decodeLocation(rawVal);
-                    const expectedLoc = currentProduct?.location;
-                    const normalizedExpected = expectedLoc ? (normalizeLocation(expectedLoc) || expectedLoc.trim().toUpperCase()) : null;
-
-                    if (decoded && normalizedExpected && decoded !== normalizedExpected) {
-                        playBeep('error');
-                        setErrorMsg(`WRONG BAY. Expected ${expectedLoc}`);
-                        setShowError(true);
-                        setInputVal('');
-                        setTimeout(() => setShowError(false), 2000);
-                    } else if (decoded) {
-                        onScanLocation(decoded);
-                        setStep('ITEM');
-                        setInputVal('');
-                        playBeep('success');
-                    }
-                }
-            }
-        }
-    }, [inputVal, step, expectedPrefix, isProcessing, currentProduct, onScanLocation]);
-
-    useEffect(() => {
-        if (step !== 'ITEM' || !inputVal || isProcessing || isItemMatched || isSubmitting) return;
-
-        const val = inputVal.trim().toUpperCase();
-        const normalizedVal = normalizeSku(val);
-        const skuMatch = val === currentItem?.sku || val === currentProduct?.barcode || val === currentProduct?.sku ||
-            normalizedVal === normalizeSku(currentItem?.sku || '') ||
-            normalizedVal === normalizeSku(currentProduct?.barcode || '') ||
-            normalizedVal === normalizeSku(currentProduct?.sku || '');
-        if (skuMatch) {
-            setMatchedBarcode(val);
-            setIsItemMatched(true);
-
-            const expected = currentItem?.expectedQty || 1;
-            const picked = currentItem?.pickedQty || 0;
-            const remaining = expected - picked;
-
-            if (shortPickMode) {
-                setStep('QUANTITY');
-                setQtyVal('');
-                setInputVal('');
-                playBeep('success');
-            } else {
-                handleConfirmPickImmediately(val, remaining || 1);
-            }
-        }
-    }, [inputVal, step, currentItem, currentProduct, isProcessing, isItemMatched, isSubmitting, shortPickMode]);
-
     const handleScan = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (isProcessing || isSubmitting) return;
-
-        if (!currentItem) {
-            if (onCompleteJob) {
-                onCompleteJob({ ...job, notes: (job.notes ? job.notes + ' ' : '') + '[STRICT_SCAN]' });
-            }
+        if (Date.now() - lastStepChangeRef.current < 250) {
             return;
         }
 
         const rawVal = inputVal.trim();
+        if (step !== 'QUANTITY' && !rawVal) return;
+        if (isProcessing) return;
+
         const val = rawVal.toUpperCase();
 
         if (step === 'LOCATION') {
-            if (!rawVal) return;
             if (!isLocationBarcode(val)) {
                 playBeep('error');
                 setErrorMsg('ENCODED BARCODE REQUIRED');
@@ -207,52 +147,102 @@ export const PickScanner: React.FC<PickScannerProps> = ({
                 setTimeout(() => setShowError(false), 2000);
                 return;
             }
-            const decoded = decodeLocation(val);
-            if (decoded) {
-                await onScanLocation(decoded);
-                setStep('ITEM');
-                setInputVal('');
-                playBeep('success');
-            }
-        } else if (step === 'QUANTITY') {
-            if (Date.now() - lastStepChangeRef.current < 400) return;
-
-            const qty = parseInt(qtyVal);
-            if (isNaN(qty) || qty <= 0) {
+            const scanPrefix = extractPrefixFromBarcode(val);
+            const isMatch = expectedPrefix === scanPrefix;
+            if (expectedPrefix && !isMatch) {
                 playBeep('error');
-                setErrorMsg('Enter valid quantity');
+                setErrorMsg(`WRONG SITE: ${scanPrefix}`);
                 setShowError(true);
                 setTimeout(() => setShowError(false), 2000);
                 return;
             }
-            handleConfirmPickImmediately(matchedBarcode, qty);
-        } else if (step === 'ITEM') {
-            if (!rawVal || isItemMatched) return;
+        }
 
-            const normalizedVal = normalizeSku(val);
-            const skuMatch = val === currentItem?.sku || val === currentProduct?.barcode || val === currentProduct?.sku ||
-                normalizedVal === normalizeSku(currentItem?.sku || '') ||
-                normalizedVal === normalizeSku(currentProduct?.barcode || '') ||
-                normalizedVal === normalizeSku(currentProduct?.sku || '');
-            if (skuMatch) {
+        if (step === 'LOCATION') {
+            const targetLoc = currentProduct?.location || '';
+            const normalizedTarget = normalizeLocation(targetLoc) || targetLoc.trim().toUpperCase();
+            const decodedScanned = decodeLocation(val);
+
+            if (!decodedScanned) {
+                playBeep('error');
+                setErrorMsg('Corrupt Location Data');
+                setShowError(true);
                 return;
-            } else {
+            }
+
+            if (decodedScanned !== normalizedTarget) {
+                playBeep('error');
+                setErrorMsg(`Bay Mismatch: Expected ${normalizedTarget}`);
+                setShowError(true);
+                setInputVal('');
+                setTimeout(() => setShowError(false), 2000);
+                return;
+            }
+
+            await onScanLocation(decodedScanned);
+            setStep('ITEM');
+            setInputVal('');
+            playBeep('success');
+        } else if (step === 'ITEM') {
+            const product = getProduct(currentItem);
+            const targetSku = currentItem.sku ? normalizeSku(currentItem.sku) : '';
+            const scannedVal = normalizeSku(val);
+            
+            const matchesSku = scannedVal === targetSku;
+            const matchesBarcode = product?.barcode && normalizeSku(product.barcode) === scannedVal;
+
+            if (!matchesSku && !matchesBarcode) {
                 playBeep('error');
                 setErrorMsg('Incorrect Item Scanned');
                 setShowError(true);
                 setInputVal('');
-                setTimeout(() => setShowError(false), 2500);
+                setTimeout(() => setShowError(false), 2000);
+                return;
             }
+
+            playBeep('success');
+            if (shortPickMode) {
+                setIsItemMatched(true);
+                setMatchedBarcode(val);
+                setStep('QUANTITY');
+            } else {
+                await executePick(val);
+            }
+        } else if (step === 'QUANTITY') {
+            const qty = parseFloat(qtyVal);
+            const maxExpected = currentItem?.expectedQty || 1;
+            const prod = getProduct(currentItem);
+            const sizeNum = prod?.size ? parseFloat(prod.size as string) : 0;
+            const unitDef = prod?.unit ? getSellUnit(prod.unit) : null;
+            const isWeightVol = unitDef && (unitDef.category === 'weight' || unitDef.category === 'volume');
+            const expectedMeasureQty = getItemMeasureQty(currentItem, prod);
+
+            const displayMax = isWeightVol && sizeNum > 0 ? expectedMeasureQty : maxExpected;
+
+            if (isNaN(qty) || qty <= 0 || qty > displayMax) {
+                playBeep('error');
+                setErrorMsg(`Invalid Quantity (1-${displayMax})`);
+                setShowError(true);
+                setTimeout(() => setShowError(false), 2000);
+                return;
+            }
+
+            if (qty < displayMax) {
+                const confirmed = window.confirm(`Short picking detected. You entered ${qty} but expected ${displayMax}. The system will flag this item. Continue?`);
+                if (!confirmed) return;
+            }
+
+            await executePick(matchedBarcode, qty);
         }
     };
 
-    const handleConfirmPickImmediately = async (barcode: string, quantity: number = 1) => {
+    const executePick = async (barcode: string, quantity?: number) => {
         if (isSubmitting) return;
         setIsSubmitting(true);
         try {
             await onScanItem(barcode, quantity);
             const itemName = currentItem?.name || 'Item';
-            setSuccessMsg(`Picked ${quantity}x ${itemName}`);
+            setSuccessMsg(`Picked ${quantity || 1}x ${itemName}`);
             setShowSuccess(true);
             playBeep('success');
             setInputVal('');
@@ -285,11 +275,11 @@ export const PickScanner: React.FC<PickScannerProps> = ({
             {/* Top Bar */}
             <div className="p-4 bg-[#EAE5D9] dark:bg-[#1C2620]/80 border-b border-[#E2DCCE] dark:border-[#A9CBA2]/10 flex justify-between items-center text-gray-900 dark:text-[#EAE5D9] transition-colors">
                 <div className="flex items-center gap-3">
-                    <button onClick={onClose} className="p-2 -ml-2 text-gray-500 dark:text-[#A9CBA2]/70 hover:text-gray-900 dark:hover:text-[#EAE5D9] transition-colors" aria-label="Close Scanner">
+                    <button onClick={onClose} className="p-2 -ml-2 text-gray-500 dark:text-[#A9CBA2]/70 hover:text-gray-900 dark:hover:text-[#EAE5D9] transition-colors" aria-label={t('warehouse.dismiss')}>
                         <X size={24} />
                     </button>
                     <div>
-                        <h3 className="font-bold text-lg uppercase tracking-wider">{step === 'LOCATION' ? 'Verify Source Bay' : 'Scan Item to Pick'}</h3>
+                        <h3 className="font-bold text-lg uppercase tracking-wider">{step === 'LOCATION' ? t('warehouse.putaway.confirmLocation') : t('warehouse.scanProductBarcode')}</h3>
                         <p className="text-xs text-[#2C5E3B] dark:text-[#A9CBA2] font-mono font-black">JOB: {formatJobId(job)}</p>
                     </div>
                 </div>
@@ -330,7 +320,7 @@ export const PickScanner: React.FC<PickScannerProps> = ({
 
                     {/* Instruction */}
                     <h1 className={`text-3xl md:text-5xl font-black text-gray-900 dark:text-[#EAE5D9] text-center uppercase italic tracking-tight mb-2 z-10 transition-all duration-300 ${isLocationBarcode(inputVal.trim().toUpperCase()) ? 'text-[#2C5E3B] dark:text-[#A9CBA2] scale-105' : showError ? 'text-red-600 dark:text-red-500 animate-pulse' : ''}`}>
-                        {showSuccess ? 'Success!' : showError ? 'Error!' : !currentItem ? 'Mission Complete' : step === 'LOCATION' ? (isLocationBarcode(inputVal.trim().toUpperCase()) ? 'Location Identified' : 'Locate Bay') : step === 'QUANTITY' ? 'Confirm Quantity' : 'Verify Item'}
+                        {showSuccess ? 'Success!' : showError ? 'Error!' : !currentItem ? 'Mission Complete' : step === 'LOCATION' ? (isLocationBarcode(inputVal.trim().toUpperCase()) ? 'Location Identified' : t('warehouse.scanLocation')) : step === 'QUANTITY' ? 'Confirm Quantity' : t('warehouse.scanSkuToConfirm')}
                     </h1>
 
                     {showSuccess ? (
@@ -394,10 +384,10 @@ export const PickScanner: React.FC<PickScannerProps> = ({
                         </div>
                     ) : step === 'QUANTITY' ? (
                         <div className="text-center z-10 mb-8">
-                            <p className="text-amber-600 dark:text-amber-400 text-lg uppercase tracking-widest font-bold">Short Pick — Enter Actual Qty</p>
+                            <p className="text-amber-600 dark:text-amber-400 text-lg uppercase tracking-widest font-bold">{t('warehouse.shortPick')} — Enter Actual Qty</p>
                             <p className="text-gray-900 dark:text-[#EAE5D9] text-2xl font-black mt-2">{currentItem?.name}</p>
                             <p className="text-[#2C5E3B] dark:text-[#A9CBA2] font-mono text-xl">{currentItem?.sku}</p>
-                            <p className="text-gray-500 text-sm mt-2">Expected: <span className="text-gray-900 dark:text-white font-bold">
+                            <p className="text-gray-550 text-sm mt-2">{t('warehouse.expected')}: <span className="text-gray-900 dark:text-white font-bold">
                                 {(() => {
                                     let expected = currentItem?.expectedQty || 1;
                                     const measureQty = getItemMeasureQty(currentItem);
@@ -417,7 +407,7 @@ export const PickScanner: React.FC<PickScannerProps> = ({
                                 {currentItem?.name}
                             </p>
                             <p className="text-[#2C5E3B] dark:text-[#A9CBA2] font-mono text-xl mt-1">{currentItem?.sku}</p>
-                            <p className="text-gray-555 text-xs mt-1">Expected: <span className="font-bold text-gray-900 dark:text-white">{(() => {
+                            <p className="text-gray-555 text-xs mt-1">{t('warehouse.expected')}: <span className="font-bold text-gray-900 dark:text-white">{(() => {
                                 let expected = currentItem?.expectedQty || 1;
                                 const measureQty = getItemMeasureQty(currentItem);
                                 if (measureQty) {
@@ -433,10 +423,10 @@ export const PickScanner: React.FC<PickScannerProps> = ({
                                     onClick={() => setShortPickMode(!shortPickMode)}
                                     className={`mt-3 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border ${shortPickMode
                                         ? 'bg-amber-100 dark:bg-amber-500/20 border-amber-300 dark:border-amber-500/40 text-amber-700 dark:text-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.15)]'
-                                        : 'bg-gray-100 dark:bg-white/5 border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-500 hover:text-amber-600 dark:hover:text-amber-400 hover:border-amber-300 dark:hover:border-amber-500/30'
+                                        : 'bg-gray-100 dark:bg-white/5 border-gray-200 dark:border-white/10 text-gray-655 dark:text-gray-500 hover:text-amber-600 dark:hover:text-amber-400 hover:border-amber-300 dark:hover:border-amber-500/30'
                                         }`}
                                 >
-                                    {shortPickMode ? '✓ Short Pick Mode ON' : '⚠ Short Pick'}
+                                    {shortPickMode ? '✓ Short Pick Mode ON' : `⚠ ${t('warehouse.shortPick')}`}
                                 </button>
                             )}
                         </div>
@@ -502,7 +492,7 @@ export const PickScanner: React.FC<PickScannerProps> = ({
                                 {step === 'QUANTITY' && (
                                     <div className="mb-4 text-center mt-2 animate-in fade-in duration-300">
                                         <p className="text-xs font-black uppercase tracking-widest text-[#2C5E3B] dark:text-[#A9CBA2]">
-                                            Expected: {(() => {
+                                            {t('warehouse.expected')}: {(() => {
                                                 const measureQty = getItemMeasureQty(currentItem);
                                                 if (measureQty) {
                                                     const expected = currentItem?.expectedQty || 1;
@@ -546,7 +536,7 @@ export const PickScanner: React.FC<PickScannerProps> = ({
                             ) : (
                                 <CheckCircle size={24} />
                             )}
-                            {isProcessing ? 'Validating...' : !currentItem ? 'FINISH MISSION' : step === 'QUANTITY' ? 'CONFIRM PICK' : isItemMatched ? 'COMPLETE PICK' : 'Confirm Scan'}
+                            {isProcessing ? 'Validating...' : !currentItem ? t('warehouse.completed') : step === 'QUANTITY' ? 'CONFIRM PICK' : isItemMatched ? 'COMPLETE PICK' : 'Confirm Scan'}
                         </button>
                     </form>
 
@@ -557,9 +547,9 @@ export const PickScanner: React.FC<PickScannerProps> = ({
                         return (
                             <div className="w-full max-w-md mt-6 z-10 transition-colors">
                                 <div className="flex items-center justify-between mb-2 px-1">
-                                    <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em] flex items-center gap-2">
+                                    <h4 className="text-[10px] font-black text-gray-505 uppercase tracking-[0.3em] flex items-center gap-2">
                                         <CheckCircle size={10} className="text-green-500" />
-                                        Picked So Far
+                                        {t('warehouse.picking')}
                                     </h4>
                                     <span className="text-[10px] font-mono font-black text-green-600 dark:text-green-500/60 bg-green-100 dark:bg-green-500/10 px-2 py-0.5 rounded-full border border-green-200 dark:border-green-500/20">
                                         {pickedItems.length}/{job.lineItems?.length || 0}
@@ -593,7 +583,7 @@ export const PickScanner: React.FC<PickScannerProps> = ({
                         );
                     })()}
 
-                    <p className="mt-8 text-gray-500 text-[10px] font-mono font-bold uppercase tracking-widest z-10 text-center opacity-60">
+                    <p className="mt-8 text-gray-550 text-[10px] font-mono font-bold uppercase tracking-widest z-10 text-center opacity-60">
                         15-Digit Encoded Protocol • Checksum Verified
                     </p>
                 </div>

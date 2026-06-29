@@ -230,6 +230,7 @@ export const PickTab: React.FC = () => {
                     inventoryRequestsService={inventoryRequestsService}
                     wmsJobsService={wmsJobsService}
                     jobs={jobs}
+                    t={t}
                 />
             )}
 

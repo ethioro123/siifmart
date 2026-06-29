@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Archive, Search, Calendar, Box, Package, ArrowRight, History as HistoryIcon, User, Undo2, Clock } from 'lucide-react';
+import { Search, Calendar, Box, Package, ArrowRight, History as HistoryIcon, User, Undo2, Clock } from 'lucide-react';
 import Pagination from '../../shared/Pagination';
 import { WMSJob, Product } from '../../../types';
 import { formatJobId } from '../../../utils/jobIdFormatter';
@@ -19,6 +19,7 @@ interface PickHistoryProps {
     inventoryRequestsService: any;
     wmsJobsService?: any;
     jobs?: WMSJob[];
+    t: (key: string) => string;
 }
 
 const ITEMS_PER_PAGE = 12;
@@ -34,7 +35,8 @@ export const PickHistory: React.FC<PickHistoryProps> = ({
     addNotification,
     inventoryRequestsService,
     wmsJobsService,
-    jobs = []
+    jobs = [],
+    t
 }) => {
     const [search, setSearch] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
@@ -88,16 +90,16 @@ export const PickHistory: React.FC<PickHistoryProps> = ({
                     <div className="p-2 bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/25 border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20 group-hover/history:bg-[#2C5E3B]/20 transition-colors">
                         <HistoryIcon size={20} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
                     </div>
-                    Pick History
+                    {t('warehouse.putaway.history')}
                 </h4>
 
                 {/* History Search */}
                 <div className="relative w-full sm:w-72 group">
                     <div className="relative flex items-center rounded-xl focus-within:border-zinc-500 transition-all shadow-sm">
-                        <Search className="absolute left-3 text-zinc-550 dark:text-zinc-650 group-focus-within:text-zinc-950 dark:group-focus-within:text-zinc-200 transition-colors" size={16} />
+                        <Search className="absolute left-3 text-zinc-550 dark:text-zinc-655 group-focus-within:text-zinc-950 dark:group-focus-within:text-zinc-200 transition-colors" size={16} />
                         <input
                             type="text"
-                            placeholder="Search by ID or Order..."
+                            placeholder={`${t('warehouse.searchByIdOrOrder')}`}
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                             className="woody-input w-full pl-10 pr-4 py-3 text-xs"
@@ -140,7 +142,7 @@ export const PickHistory: React.FC<PickHistoryProps> = ({
                                                         </span>
                                                     )}
                                                 </div>
-                                                <div className="flex items-center gap-2 text-[10px] text-zinc-500 dark:text-gray-400 font-bold uppercase tracking-widest">
+                                                <div className="flex items-center gap-2 text-[10px] text-zinc-550 dark:text-gray-400 font-bold uppercase tracking-widest">
                                                     <span className="flex items-center gap-1">
                                                         <User size={10} />
                                                         {((job as any).user || 'System').split(' ')[0]}
@@ -172,7 +174,7 @@ export const PickHistory: React.FC<PickHistoryProps> = ({
                                                     <Package size={14} />
                                                 </div>
                                                 <span className="text-[10px] uppercase tracking-widest font-black text-zinc-550 dark:text-zinc-500">
-                                                    Order Pick
+                                                    {t('warehouse.pickJobs').split(' ')[0]}
                                                 </span>
                                             </div>
                                             <span className={`text-[9px] px-1.5 py-0.5 rounded uppercase font-black tracking-widest ${(job.status || '').toLowerCase() === 'completed' ? 'bg-green-100 dark:bg-green-500/10 text-green-700 dark:text-green-400 border border-transparent dark:border-green-500/20' : 'bg-red-100 dark:bg-red-500/10 text-red-700 dark:text-red-400 border border-transparent dark:border-red-500/20'}`}>
@@ -202,7 +204,7 @@ export const PickHistory: React.FC<PickHistoryProps> = ({
                                             <div className="relative mb-3 px-0.5">
                                                 <p className="text-[10px] text-zinc-550 dark:text-zinc-500 truncate leading-relaxed">
                                                     {productNames.slice(0, 2).join(', ')}
-                                                    {productNames.length > 2 && <span className="text-[#2C5E3B] dark:text-[#A9CBA2]"> +{productNames.length - 2} more</span>}
+                                                    {productNames.length > 2 && <span className="text-[#2C5E3B] dark:text-[#A9CBA2]"> +{productNames.length - 2} {t('warehouse.remaining')}</span>}
                                                 </p>
                                             </div>
                                         )}
@@ -213,9 +215,9 @@ export const PickHistory: React.FC<PickHistoryProps> = ({
                                                     <span className="text-[9px] font-black text-[#2C5E3B] dark:text-[#A9CBA2]">{(job.resolvedUser?.name || 'S').charAt(0).toUpperCase()}</span>
                                                 </div>
                                                 <div className="flex flex-col">
-                                                    <span className="text-[9px] font-black text-zinc-500 dark:text-zinc-650 uppercase tracking-widest leading-tight">By</span>
+                                                    <span className="text-[9px] font-black text-zinc-500 dark:text-zinc-655 uppercase tracking-widest leading-tight">By</span>
                                                     <span className="text-[9px] font-black text-zinc-905 dark:text-zinc-400 uppercase tracking-wider leading-tight">
-                                                        {job.resolvedUser?.name} <span className="text-zinc-550 dark:text-zinc-650 font-normal lowercase">({job.resolvedUser?.displayId})</span>
+                                                        {job.resolvedUser?.name} <span className="text-zinc-550 dark:text-zinc-655 font-normal lowercase">({job.resolvedUser?.displayId})</span>
                                                     </span>
                                                 </div>
                                             </div>
@@ -233,7 +235,7 @@ export const PickHistory: React.FC<PickHistoryProps> = ({
                                                 )}
                                                 <div className="flex items-center gap-1.5 bg-[#FAF8F5] dark:bg-white/5 px-2 py-1 rounded-lg border border-[#E2DCCE]/60 dark:border-white/10 group-hover:border-[#2C5E3B]/30 transition-all">
                                                     <Box size={12} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
-                                                    <span className="text-[10px] font-black text-[#2C5E3B] dark:text-[#A9CBA2] tabular-nums">{job.items} {job.items === 1 ? 'Item' : 'Items'}</span>
+                                                    <span className="text-[10px] font-black text-[#2C5E3B] dark:text-[#A9CBA2] tabular-nums">{job.items} {job.items === 1 ? t('warehouse.itemSingular') : t('warehouse.itemPlural')}</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -257,7 +259,7 @@ export const PickHistory: React.FC<PickHistoryProps> = ({
                     <div className="p-4 bg-[#FAF8F5] dark:bg-gray-900 rounded-2xl mb-4 border border-[#E2DCCE]/60 dark:border-white/5 shadow-xl">
                         <HistoryIcon size={32} className="text-zinc-400 dark:text-gray-600" />
                     </div>
-                    <h3 className="text-lg font-black text-zinc-900 dark:text-white mb-1 uppercase tracking-widest">No history found</h3>
+                    <h3 className="text-lg font-black text-zinc-900 dark:text-white mb-1 uppercase tracking-widest">{t('warehouse.noHistoryFound')}</h3>
                     <p className="text-[#2C5E3B] dark:text-gray-500 text-xs uppercase tracking-[0.2em] font-black">History logs empty</p>
                 </div>
             )}

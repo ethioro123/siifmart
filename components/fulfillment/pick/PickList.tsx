@@ -55,12 +55,12 @@ export const PickList: React.FC<PickListProps> = ({
             {/* Sort Controls */}
             <div className="flex justify-end px-1">
                 <SortDropdown
-                    label="Sort By"
+                    label={t('warehouse.sortByLabel')}
                     options={[
-                        { id: 'priority' as const, label: 'Priority', icon: <AlertTriangle size={12} /> },
-                        { id: 'site' as const, label: 'Store', icon: <MapPin size={12} /> },
-                        { id: 'date' as const, label: 'Time', icon: <Clock size={12} /> },
-                        { id: 'items' as const, label: 'Size', icon: <List size={12} /> }
+                        { id: 'priority' as const, label: t('warehouse.prioritySort'), icon: <AlertTriangle size={12} /> },
+                        { id: 'site' as const, label: t('warehouse.storeSort'), icon: <MapPin size={12} /> },
+                        { id: 'date' as const, label: t('warehouse.timeSort'), icon: <Clock size={12} /> },
+                        { id: 'items' as const, label: t('warehouse.sizeSort'), icon: <List size={12} /> }
                     ]}
                     value={pickSortBy}
                     onChange={(val) => setPickSortBy(val)}
@@ -115,7 +115,7 @@ export const PickList: React.FC<PickListProps> = ({
                                                         <span className="bg-red-500 text-white text-[8px] font-black px-1 py-0.5 rounded uppercase animate-pulse">!</span>
                                                     )}
                                                 </div>
-                                                <span className="text-[10px] text-zinc-500 dark:text-gray-400 font-bold uppercase tracking-widest">{totalItems} items</span>
+                                                <span className="text-[10px] text-zinc-500 dark:text-gray-400 font-bold uppercase tracking-widest">{totalItems} {t('warehouse.itemPlural')}</span>
                                             </div>
                                             <ChevronRight size={18} className="text-zinc-400 dark:text-gray-600 flex-shrink-0" />
                                         </div>
@@ -134,7 +134,7 @@ export const PickList: React.FC<PickListProps> = ({
                                                     {job.priority === 'Critical' && (
                                                         <div className="flex items-center gap-1 bg-red-100 dark:bg-red-500 text-red-700 dark:text-white text-[9px] font-black px-1.5 py-0.5 rounded uppercase tracking-wider animate-pulse border border-red-500/20 dark:border-transparent">
                                                             <AlertTriangle size={8} className="fill-current" />
-                                                            Urgent
+                                                            {t('warehouse.urgentLabel')}
                                                         </div>
                                                     )}
                                                 </div>
@@ -142,7 +142,7 @@ export const PickList: React.FC<PickListProps> = ({
                                                     <div className="flex items-center gap-1.5 px-2.5 py-1 bg-stone-50 dark:bg-white/5 rounded-lg border border-stone-100 dark:border-white/5">
                                                         <div className="w-1.5 h-1.5 rounded-full bg-[#2C5E3B] dark:bg-[#A9CBA2] shadow-sm" />
                                                         <span className="text-[9px] text-slate-500 dark:text-zinc-400 font-black uppercase tracking-widest">
-                                                            {totalItems} Items
+                                                            {totalItems} {t('warehouse.itemPlural')}
                                                         </span>
                                                     </div>
                                                     <span className="w-1 h-1 rounded-full bg-zinc-300 dark:bg-gray-600" />
@@ -153,9 +153,9 @@ export const PickList: React.FC<PickListProps> = ({
                                                     <span className="text-[10px] text-zinc-500 dark:text-gray-400 font-bold uppercase tracking-widest">
                                                         {(() => {
                                                             const loc = (job as any).zone || job.location;
-                                                            if (!loc) return 'Unassigned';
+                                                            if (!loc) return t('warehouse.unassigned');
                                                             if (loc.toLowerCase().startsWith('zone')) return loc;
-                                                            return `Zone ${loc}`;
+                                                            return `${t('warehouse.zonePrefix')} ${loc}`;
                                                         })()}
                                                     </span>
                                                 </div>
@@ -166,7 +166,7 @@ export const PickList: React.FC<PickListProps> = ({
                                                     ? 'bg-orange-50 dark:bg-orange-500/20 text-orange-600 dark:text-orange-400 border-orange-100 dark:border-orange-500/30'
                                                     : 'bg-[#FAF8F5]/80 dark:bg-white/5 text-slate-500 dark:text-gray-400 border-[#E2DCCE]/60 dark:border-white/10'
                                                 } `}>
-                                                {job.status === 'In-Progress' ? '● Active' : job.priority}
+                                                {job.status === 'In-Progress' ? `● ${t('warehouse.activeLabel')}` : job.priority}
                                             </span>
                                             {['super_admin', 'warehouse_manager'].includes(user?.role as string) && (
                                                 <button
@@ -181,7 +181,7 @@ export const PickList: React.FC<PickListProps> = ({
 
                                         <div className="space-y-4 relative z-10">
                                             <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest text-zinc-500 dark:text-gray-400">
-                                                <span>Progress</span>
+                                                <span>{t('warehouse.putaway.progress')}</span>
                                                 <span className={progress === 100 ? 'text-green-600 dark:text-green-400' : 'text-[#2C5E3B] dark:text-[#A9CBA2]'}>{Math.round(progress)}%</span>
                                             </div>
 
@@ -206,12 +206,12 @@ export const PickList: React.FC<PickListProps> = ({
                                                                     <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#2C5E3B] to-[#1E3B24] dark:from-[#A9CBA2] dark:to-[#FAF8F5] flex items-center justify-center shrink-0 shadow-sm border border-white/20">
                                                                         <span className="text-[10px] font-bold text-white dark:text-[#1E3B24]">{displayInitial}</span>
                                                                     </div>
-                                                                    <span className="text-xs text-zinc-650 dark:text-gray-400 font-bold">{displayName}</span>
+                                                                    <span className="text-xs text-zinc-655 dark:text-gray-400 font-bold">{displayName}</span>
                                                                 </>
                                                             );
                                                         })()
                                                     ) : (
-                                                        <span className="text-xs text-zinc-400 dark:text-gray-600 italic font-bold">Unassigned</span>
+                                                        <span className="text-xs text-zinc-400 dark:text-gray-650 italic font-bold">{t('warehouse.unassigned')}</span>
                                                     )}
                                                 </div>
                                             </div>

@@ -56,7 +56,7 @@ export const PickHeader: React.FC<PickHeaderProps> = ({
                         </div>
                         <input
                             type="text"
-                            placeholder="Search Pick Jobs..."
+                            placeholder={`${t('warehouse.searchByIdOrOrder')}`}
                             value={pickSearch}
                             onChange={(e) => setPickSearch(e.target.value)}
                             className="woody-input w-full pl-12 pr-4 py-3 text-xs"
@@ -69,22 +69,22 @@ export const PickHeader: React.FC<PickHeaderProps> = ({
                             onClick={() => setViewMode('Process')}
                             className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-[0.15em] transition-all ${viewMode === 'Process' ? 'bg-[#2C5E3B] dark:bg-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24] shadow-md' : 'text-slate-500 dark:text-zinc-500 hover:text-[#2C5E3B] dark:hover:text-white'}`}
                         >
-                            Active
+                            {t('warehouse.activeTransfers').split(' ')[0]}
                         </button>
                         <button
                             onClick={() => setViewMode('History')}
                             className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-[0.15em] transition-all ${viewMode === 'History' ? 'bg-[#2C5E3B] dark:bg-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24] shadow-md' : 'text-slate-500 dark:text-zinc-500 hover:text-[#2C5E3B] dark:hover:text-white'}`}
                         >
-                            History
+                            {t('warehouse.history')}
                         </button>
                     </div>
 
                     {/* Stats Dashboard */}
                     <div className="grid grid-cols-3 gap-3">
                         {[
-                            { count: pendingCount, label: 'Pending', theme: 'amber' },
-                            { count: inProgressCount, label: 'Active', theme: 'blue' },
-                            { count: completedCount, label: 'Relocated', theme: 'emerald' }
+                            { count: pendingCount, label: t('warehouse.pending'), theme: 'amber' },
+                            { count: inProgressCount, label: t('warehouse.activeTransfers').split(' ')[0], theme: 'blue' },
+                            { count: completedCount, label: t('warehouse.completed'), theme: 'emerald' }
                         ].map((stat, i) => (
                             <div key={i} className="bg-stone-50 dark:bg-white/5 border border-stone-200/50 dark:border-white/10 rounded-2xl px-4 py-2.5 shadow-inner hover:bg-stone-100 dark:hover:bg-white/10 transition-all duration-300">
                                 <p className={`text-lg md:text-xl font-mono font-black tabular-nums leading-none mb-1 ${
