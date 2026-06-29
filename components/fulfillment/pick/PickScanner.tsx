@@ -450,6 +450,8 @@ export const PickScanner: React.FC<PickScannerProps> = ({
                                     <input
                                         ref={qtyRef}
                                         type="number"
+                                        inputMode="decimal"
+                                        pattern="[0-9]*"
                                         aria-label="Pick quantity"
                                         title="Pick quantity"
                                         value={qtyVal}

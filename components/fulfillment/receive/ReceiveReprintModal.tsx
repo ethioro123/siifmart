@@ -104,6 +104,8 @@ export const ReceiveReprintModal: React.FC<ReceiveReprintModalProps> = ({
                                 </button>
                                 <input
                                     type="number"
+                                    inputMode="decimal"
+                                    pattern="[0-9]*"
                                     title={t('warehouse.quantityToPrint')}
                                     aria-label={t('warehouse.quantityToPrint')}
                                     value={reprintItem.qty}

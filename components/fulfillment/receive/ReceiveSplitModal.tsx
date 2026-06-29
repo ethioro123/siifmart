@@ -210,6 +210,8 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
                                                 <div className="relative group/input">
                                                     <input
                                                         type="number"
+                                                        inputMode="decimal"
+                                                        pattern="[0-9]*"
                                                         min="0"
                                                         value={variant.quantity === 0 ? '' : variant.quantity}
                                                         onChange={(e) => setSplitVariants(prev => prev.map(v => v.id === variant.id ? { ...v, quantity: Math.max(0, parseInt(e.target.value) || 0) } : v))}

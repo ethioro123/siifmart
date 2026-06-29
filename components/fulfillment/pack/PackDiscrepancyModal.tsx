@@ -100,7 +100,7 @@ export const PackDiscrepancyModal: React.FC<PackDiscrepancyModalProps> = ({
                 };
             });
 
-            const auditNote = `[PACK DISCREPANCY by ${currentUser?.name || 'Packer'} at ${new Date().toLocaleString()}] Reason: ${REASON_OPTIONS.find(r => r.id === reasonCode)?.label}. ${notes}`;
+            const auditNote = `[PACK DISCREPANCY by ${currentUser?.name || 'Packer'} at ${new Date().toLocaleString()}] Reason: ${reasonOptions.find((r: any) => r.id === reasonCode)?.label}. ${notes}`;
 
             await wmsJobsService.update(job.id, {
                 lineItems: updatedLineItems,
@@ -206,6 +206,8 @@ export const PackDiscrepancyModal: React.FC<PackDiscrepancyModalProps> = ({
                                                         </button>
                                                         <input
                                                             type="number"
+                                                            inputMode="decimal"
+                                                            pattern="[0-9]*"
                                                             min={0}
                                                             value={line.actualCount}
                                                             onChange={e => setLineVal(i, e.target.value)}

@@ -437,6 +437,8 @@ export const PackScanner: React.FC<PackScannerProps> = ({
                                     <input
                                         ref={qtyRef}
                                         type="number"
+                                        inputMode="decimal"
+                                        pattern="[0-9]*"
                                         aria-label="Confirm quantity"
                                         title="Confirm quantity"
                                         value={qtyVal}
