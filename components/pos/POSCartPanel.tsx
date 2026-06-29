@@ -48,6 +48,7 @@ export const POSCartPanel: React.FC = () => {
     } = usePOS();
 
     const { heldOrders } = useData();
+    const [showActions, setShowActions] = useState(false);
 
     return (
         <>
@@ -83,7 +84,7 @@ export const POSCartPanel: React.FC = () => {
                     </div>
                 </div>
 
-                <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar">
+                <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar min-h-[150px]">
                     {cart.length === 0 ? (
                         <div className="h-full flex flex-col items-center justify-center text-center p-6 select-none animate-in fade-in duration-500">
                             <div className="w-16 h-16 rounded-2xl bg-[#2C5E3B]/5 flex items-center justify-center mb-4 border border-[#2C5E3B]/10 dark:border-white/5">
@@ -227,8 +228,17 @@ export const POSCartPanel: React.FC = () => {
                             <span className="text-2xl font-black text-[#2C5E3B] dark:text-[#EAE5D9] tracking-tighter tabular-nums drop-shadow-[0_2px_10px_rgba(44,94,59,0.15)] whitespace-nowrap">{CURRENCY_SYMBOL} {total.toLocaleString()}</span>
                         </div>
                     </div>
-                    {/* Command Grid - Compact */}
-                    <div className="grid grid-cols-4 gap-1.5 mb-3 relative z-10">
+                    {/* Command Grid - Collapsible on Mobile */}
+                    <div className="lg:hidden mb-2.5 relative z-10">
+                        <button
+                            onClick={() => setShowActions(!showActions)}
+                            className="w-full py-2 bg-stone-100 hover:bg-stone-200 dark:bg-white/5 dark:hover:bg-white/10 border border-[#E2DCCE] dark:border-white/5 rounded-xl text-[9px] font-black uppercase tracking-wider text-stone-600 dark:text-[#A9CBA2] flex items-center justify-center gap-1.5 transition-all duration-300 active:scale-95 cursor-pointer"
+                        >
+                            {showActions ? 'Hide Terminal Actions' : 'Show Terminal Actions'}
+                        </button>
+                    </div>
+
+                    <div className={`${showActions ? 'grid' : 'hidden lg:grid'} grid-cols-4 gap-1.5 mb-3 relative z-10`}>
                         <button
                             onClick={() => setIsRecallModalOpen(true)}
                             disabled={heldOrders.length === 0}
