@@ -10,6 +10,59 @@
 
 // Category to SKU prefix mapping
 const CATEGORY_PREFIXES: Record<string, string> = {
+    // Fresh Food & Deli
+    'Fruit & Vegetables': 'FR',
+    'Dairy, Eggs & Fridge': 'DY',
+    'Meat & Poultry': 'MT',
+    'Seafood': 'SF',
+    'Bakery & Bread': 'BK',
+    'Deli & Prepared Meals': 'DL',
+
+    // Pantry & Groceries
+    'Snacks & Confectionery': 'SN',
+    'Baking & Dessert Needs': 'BA',
+    'Grains, Pasta & Rice': 'GR',
+    'Sauces, Oils & Condiments': 'SA',
+    'Canned Food & Soups': 'CN',
+    'Breakfast & Cereals': 'BF',
+    'Tea, Coffee & Cocoa': 'TE',
+    'Drinks & Beverages': 'BV',
+
+    // Frozen Food
+    'Frozen Meals & Sides': 'FZ',
+    'Frozen Vegetables & Fruit': 'FZ',
+    'Ice Cream & Desserts': 'IC',
+
+    // Baby & Toddler
+    'Baby Food & Formula': 'BB',
+    'Nappies, Wipes & Toiletries': 'BB',
+
+    // Health & Beauty
+    'Dental & Oral Care': 'DN',
+    'Hair & Body Care': 'HB',
+    'Cosmetics & Skin Care': 'CS',
+    'Vitamins & Supplements': 'VT',
+    'Pharmacy & First Aid': 'PH',
+
+    // Household & Cleaning
+    'Laundry & Dishwashing': 'LD',
+    'Cleaning Products & Tools': 'CL',
+    'Tissues, Paper & Foils': 'TS',
+    'Pest Control & Garden Care': 'GD',
+
+    // Pet Supplies
+    'Dog Food & Accessories': 'PT',
+    'Cat Food & Accessories': 'PT',
+    'Small Pet Supplies': 'PT',
+
+    // General Merchandise & Apparel
+    'Stationery, Office & Books': 'ST',
+    'Electronics & Batteries': 'EL',
+    'Homewares, Kitchen & Dining': 'HM',
+    'Clothing & Accessories': 'CG',
+    'Toys & Recreation': 'TY',
+
+    // Fallbacks & legacy
     'Electronics': 'EL',
     'Beverages': 'BV',
     'Food': 'FD',
@@ -30,7 +83,6 @@ const CATEGORY_PREFIXES: Record<string, string> = {
     'Baby': 'BB',
     'Tools': 'TL',
     'General': 'GN',
-    // Fallback for unknown categories
     'Other': 'OT'
 };
 
