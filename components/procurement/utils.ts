@@ -71,7 +71,7 @@ export const getCategoryAttributes = (category: string) => {
     if (["Meat & Poultry", "Seafood"].includes(category)) {
         return CATEGORY_ATTRIBUTES['Meat & Poultry'];
     }
-    if (["Drinks & Beverages", "Beer & Cider", "Wine & Champagne", "Spirits & Premixed", "Non-Alcoholic Beverages"].includes(category)) {
+    if (["Drinks & Beverages"].includes(category)) {
         return CATEGORY_ATTRIBUTES['Beverages'];
     }
     if (["Snacks & Confectionery", "Baking & Dessert Needs", "Grains, Pasta & Rice", "Sauces, Oils & Condiments", "Canned Food & Soups", "Breakfast & Cereals", "Tea, Coffee & Cocoa"].includes(category)) {
@@ -103,12 +103,6 @@ export const PRODUCT_CATEGORIES = {
         "Frozen Meals & Sides",
         "Frozen Vegetables & Fruit",
         "Ice Cream & Desserts"
-    ],
-    "Beer, Wine & Spirits": [
-        "Beer & Cider",
-        "Wine & Champagne",
-        "Spirits & Premixed",
-        "Non-Alcoholic Beverages"
     ],
     "Baby & Toddler": [
         "Baby Food & Formula",
