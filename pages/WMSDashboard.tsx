@@ -189,7 +189,7 @@ export default function WMSDashboard() {
   };
 
   return (
-    <div className="space-y-6 md:space-y-8 bg-transparent -m-4 md:-m-8 p-4 md:p-8 min-h-screen relative transition-colors duration-500">
+    <div className="space-y-6 md:space-y-8 bg-transparent relative transition-colors duration-500 w-full max-w-full overflow-hidden">
       {/* Background Depth & Organic Flows */}
       <div className="absolute inset-0 pointer-events-none hidden lg:block">
         <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-[#2C5E3B]/10 dark:bg-[#1E3F27]/5 rounded-full blur-[150px] -mr-96 -mt-96 opacity-40 animate-pulse-slow" />

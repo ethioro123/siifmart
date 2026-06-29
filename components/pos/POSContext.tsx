@@ -863,14 +863,21 @@ export const POSProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
                 if (match) siteIdNum = parseInt(match[0], 10);
             }
             
+            // Generate/retrieve unique 2-digit terminal ID to prevent receipt number collisions offline
+            let terminalId = localStorage.getItem('pos_terminal_id');
+            if (!terminalId) {
+                terminalId = String(Math.floor(Math.random() * 90) + 10); // 10 to 99
+                localStorage.setItem('pos_terminal_id', terminalId);
+            }
+            
             const siteCode = siteIdNum || '0';
             const counterKey = `pos_receipt_counter_${activeSite?.id || 'default'}`;
             const prevCount = parseInt(localStorage.getItem(counterKey) || '0', 10);
             const nextCount = prevCount + 1;
             localStorage.setItem(counterKey, String(nextCount));
             
-            // Format: SiteNumber + 6-digit zero-padded sequence (e.g., Site 5 + Seq 1 = 5000001)
-            const receiptNumber = `${siteCode}${nextCount.toString().padStart(6, '0')}`;
+            // Format: SiteNumber + 2-digit TerminalId + 5-digit zero-padded sequence (e.g., Site 5 + Terminal 12 + Seq 1 = 51200001)
+            const receiptNumber = `${siteCode}${terminalId}${nextCount.toString().padStart(5, '0')}`;
             const { saleId, pointsResult } = await processSale(cart, selectedPaymentMethod, user?.name || 'Cashier', tendered, change, selectedCustomer?.id, undefined, 'In-Store', taxBreakdown, receiptNumber, total);
 
             const saleObj: SaleRecord = {

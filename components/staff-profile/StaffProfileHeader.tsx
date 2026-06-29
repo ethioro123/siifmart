@@ -10,6 +10,7 @@ interface StaffProfileHeaderProps {
     canResetPassword: boolean;
     canTerminate: boolean;
     canDelete: boolean;
+    isOnline?: boolean;
     onPhotoRequest: () => void;
     onIdCard: () => void;
     onMessage: () => void;
@@ -22,6 +23,7 @@ interface StaffProfileHeaderProps {
 
 export default function StaffProfileHeader({
     employee, isOwnProfile, canManageEmployees, canResetPassword, canTerminate, canDelete,
+    isOnline,
     onPhotoRequest, onIdCard, onMessage, onResetPassword, onTerminate, onDelete,
     photoInputRef, handleProfilePhotoSelect
 }: StaffProfileHeaderProps) {
@@ -36,6 +38,15 @@ export default function StaffProfileHeader({
                         <button onClick={onPhotoRequest} className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity cursor-pointer z-10" title="Change Photo"><Camera size={28} className="text-white" /></button>
                     )}
                 </div>
+                {/* Online / Offline Presence Dot */}
+                <span
+                    title={isOnline ? 'Online now' : 'Offline'}
+                    className={`absolute bottom-1 right-1 w-4 h-4 rounded-full border-2 border-white dark:border-gray-900 z-20 transition-colors duration-500 ${
+                        isOnline
+                            ? 'bg-green-400 shadow-[0_0_6px_rgba(74,222,128,0.8)] animate-pulse'
+                            : 'bg-gray-400 dark:bg-gray-600'
+                    }`}
+                />
                 <input type="file" ref={photoInputRef} onChange={handleProfilePhotoSelect} className="hidden" accept="image/*" title="Upload Profile Photo" />
             </div>
 

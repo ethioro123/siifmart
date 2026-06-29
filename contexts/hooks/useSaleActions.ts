@@ -3,8 +3,9 @@ import type {
     CartItem, SaleRecord, Site, Product, Customer, SystemConfig,
     PaymentMethod, ReturnItem, SystemLog, StorePoints
 } from '../../types';
-import { customersService, productsService } from '../../services/supabase.service';
+import { customersService, productsService, salesService } from '../../services/supabase.service';
 import { posDB } from '../../services/db/pos.db';
+import { CURRENCY_SYMBOL } from '../../constants';
 
 interface UseSaleActionsDeps {
     activeSite: Site | undefined;
@@ -215,14 +216,56 @@ export function useSaleActions(deps: UseSaleActionsDeps) {
     ]);
 
     const processReturn = useCallback(async (saleId: string, items: ReturnItem[], totalRefund: number, user: string) => {
-        console.log('Processing return', { saleId, items, totalRefund, user });
-        addNotification('info', 'Return processed (Stub)');
-    }, [addNotification]);
+        try {
+            // 1. Map ReturnItem[] to the shape salesService.refund expects
+            const refundItems = items.map(ri => ({
+                product_id: ri.productId,
+                quantity: ri.quantity
+            }));
+
+            // 2. Update sale status to 'Refunded' in Supabase + restore stock
+            if (navigator.onLine) {
+                await salesService.refund(saleId, refundItems, totalRefund);
+
+                // 3. Optimistically restore local product stock
+                for (const ri of items) {
+                    const product = deps.products.find(p => p.id === ri.productId);
+                    if (product) {
+                        const newStock = product.stock + ri.quantity;
+                        setProducts(prev => prev.map(p =>
+                            p.id === ri.productId ? { ...p, stock: newStock } : p
+                        ));
+                    }
+                }
+            } else {
+                addNotification('alert', 'Returns require an internet connection. Please reconnect and try again.');
+                return;
+            }
+
+            // 4. Update the sale in local state
+            setSales(prev => prev.map(s => s.id === saleId ? { ...s, status: 'Refunded' as any } : s));
+            setAllSales(prev => prev.map(s => s.id === saleId ? { ...s, status: 'Refunded' as any } : s));
+
+            addNotification('success', `Return of ${CURRENCY_SYMBOL}${totalRefund.toFixed(2)} processed for sale ${saleId.substring(0, 8)}...`);
+        } catch (error: any) {
+            console.error('processReturn failed:', error);
+            addNotification('alert', `Return failed: ${error?.message || 'Unknown error'}`);
+        }
+    }, [addNotification, setProducts, setSales, setAllSales, deps.products, deps.settings]);
 
     const releaseOrder = useCallback(async (saleId: string) => {
-        console.log('Releasing order', saleId);
-        addNotification('info', 'Order released (Stub)');
-    }, [addNotification]);
+        try {
+            if (navigator.onLine) {
+                await salesService.update(saleId, { fulfillmentStatus: 'Delivered' });
+            }
+            setSales(prev => prev.map(s => s.id === saleId ? { ...s, fulfillmentStatus: 'Delivered' } : s));
+            setAllSales(prev => prev.map(s => s.id === saleId ? { ...s, fulfillmentStatus: 'Delivered' } : s));
+            addNotification('success', 'Order marked as delivered');
+        } catch (error: any) {
+            console.error('releaseOrder failed:', error);
+            addNotification('alert', `Failed to release order: ${error?.message || 'Unknown error'}`);
+        }
+    }, [addNotification, setSales, setAllSales]);
 
     return { processSale, processReturn, releaseOrder };
 }

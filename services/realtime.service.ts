@@ -484,3 +484,57 @@ export function useRealtimeSales(siteId?: string) {
 }
 
 // End of file
+
+// ============================================================================
+// PRESENCE HOOK — Real-time Online Status
+// ============================================================================
+
+/**
+ * usePresence: Broadcasts the current user as online and returns a Set of
+ * currently online employee IDs. Uses Supabase Realtime Presence on a global
+ * 'siifmart:presence' channel.
+ *
+ * @param userId  - The authenticated employee/user ID to broadcast
+ * @param userName - Display name to broadcast alongside
+ */
+export function usePresence(userId?: string, userName?: string): Set<string> {
+    const [onlineIds, setOnlineIds] = React.useState<Set<string>>(new Set());
+
+    React.useEffect(() => {
+        if (!userId) return;
+
+        const channel = supabase.channel('siifmart:presence', {
+            config: { presence: { key: userId } }
+        });
+
+        // On sync: rebuild the full online set from presence state
+        channel.on('presence', { event: 'sync' }, () => {
+            const state = channel.presenceState<{ user_id: string }>();
+            const ids = new Set<string>(
+                Object.values(state)
+                    .flat()
+                    .map((p: any) => p.user_id)
+                    .filter(Boolean)
+            );
+            setOnlineIds(ids);
+        });
+
+        channel.subscribe(async (status) => {
+            if (status === 'SUBSCRIBED') {
+                await channel.track({
+                    user_id: userId,
+                    user_name: userName || '',
+                    online_at: new Date().toISOString()
+                });
+            }
+        });
+
+        return () => {
+            channel.untrack();
+            supabase.removeChannel(channel);
+        };
+    }, [userId, userName]);
+
+    return onlineIds;
+}
+

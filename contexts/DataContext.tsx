@@ -338,6 +338,13 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
   const [shifts, setShifts] = useState<ShiftRecord[]>([]);
   const [heldOrders, setHeldOrders] = useState<HeldOrder[]>([]);
 
+  // Restore held orders from IndexedDB on mount (survives offline/device restarts)
+  useEffect(() => {
+    posDB.getHeldOrders().then(saved => {
+      if (saved.length > 0) setHeldOrders(saved);
+    }).catch(() => {}); // Silently fail — IDB may not be available on first run
+  }, []);
+
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
   // Global State for HQ
@@ -865,12 +872,21 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
   // ══════════════════════════════════════════════════════════════
 
   const holdOrder = useCallback((order: HeldOrder) => {
-    setHeldOrders(prev => [order, ...prev]);
+    setHeldOrders(prev => {
+      const updated = [order, ...prev];
+      posDB.saveHeldOrders(updated).catch(() => {}); // Persist to IDB (non-blocking)
+      return updated;
+    });
     addNotification('info', 'Order placed on hold');
   }, [addNotification]);
 
   const releaseHold = useCallback((orderId: string) => {
-    setHeldOrders(prev => prev.filter(o => o.id !== orderId));
+    setHeldOrders(prev => {
+      const updated = prev.filter(o => o.id !== orderId);
+      posDB.saveHeldOrders(updated).catch(() => {}); // Persist to IDB (non-blocking)
+      return updated;
+    });
+    posDB.removeHeldOrder(orderId).catch(() => {}); // Belt-and-suspenders: also delete by ID
   }, []);
 
   const updatePromotion = useCallback((promotion: Partial<Promotion> & { id: string }) => {

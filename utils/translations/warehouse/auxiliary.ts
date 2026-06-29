@@ -13,7 +13,6 @@ export const auxiliary: TranslationBlock = {
     bulkDistribution: { en: 'Bulk Distribution', am: 'ጅምላ ስርጭት', or: 'Qo\'annoo Gurguddoo' },
     requestTransfer: { en: 'Request Transfer', am: 'ማስተላለፍ ይጠይቁ', or: 'Dabarsuu Kadhadhu' },
     requested: { en: 'Requested', am: 'የተጠየቀ', or: 'Kadhatee' },
-    picking: { en: 'Picking', am: 'በመምረጥ ላይ', or: 'Filannoo irra jira' },
     packed: { en: 'Packed', am: 'ተሸግቷል', or: 'Sa\'ameera' },
     inTransit: { en: 'In Transit', am: 'በመጓዝ ላይ', or: 'Deemsa irra jira' },
     delivered: { en: 'Delivered', am: 'ደርሷል', or: 'Ga\'eera' },

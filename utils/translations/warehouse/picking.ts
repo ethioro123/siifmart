@@ -1,6 +1,11 @@
 import { TranslationBlock } from '../types';
 
-export const picking: TranslationBlock = {
+export const picking: any = {
+    // Leaf translation for the key "picking" itself (e.g. t('warehouse.picking'))
+    en: 'Picking',
+    am: 'በመምረጥ ላይ',
+    or: 'Filannoo irra jira',
+
     // PICK Tab UI
     pickQueue: { en: 'Pick Queue', am: 'የመምረጫ ወረፋ', or: 'Tarree Filaannoo' },
     doneCaps: { en: 'Done', am: 'ተጠናቋል', or: 'Xumurame' },

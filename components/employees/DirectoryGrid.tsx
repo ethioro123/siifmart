@@ -9,9 +9,10 @@ interface DirectoryGridProps {
    sites: any[];
    setSelectedEmployee: (emp: Employee) => void;
    currentUser?: any;
+   onlineIds?: Set<string>;
 }
 
-export default function DirectoryGrid({ displayedEmployees, isLoadingEmployees, sites, setSelectedEmployee, currentUser }: DirectoryGridProps) {
+export default function DirectoryGrid({ displayedEmployees, isLoadingEmployees, sites, setSelectedEmployee, currentUser, onlineIds = new Set() }: DirectoryGridProps) {
    if (isLoadingEmployees && displayedEmployees.length === 0) {
       return (
          <div className="col-span-full flex justify-center py-12">
@@ -39,19 +40,15 @@ export default function DirectoryGrid({ displayedEmployees, isLoadingEmployees, 
                            className="w-12 h-12 rounded-full object-cover border border-[#E2DCCE] dark:border-white/10"
                            alt={employee.name}
                         />
-                        {(() => {
-                           const loggedInToday = employee.lastLoginAt && (() => {
-                              const date = new Date(employee.lastLoginAt);
-                              const today = new Date();
-                              return date.getDate() === today.getDate() &&
-                                 date.getMonth() === today.getMonth() &&
-                                 date.getFullYear() === today.getFullYear();
-                           })();
-                           const isOnlineAndActive = employee.status === 'Active' && loggedInToday;
-                           return (
-                              <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white dark:border-[#131915] ${isOnlineAndActive ? 'bg-emerald-500' : 'bg-red-500'}`} />
-                           );
-                        })()}
+                        {/* Real-time presence dot */}
+                        <div
+                           title={onlineIds.has(employee.id) ? 'Online now' : 'Offline'}
+                           className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white dark:border-[#131915] transition-colors duration-500 ${
+                              onlineIds.has(employee.id)
+                                 ? 'bg-emerald-400 shadow-[0_0_5px_rgba(52,211,153,0.7)] animate-pulse'
+                                 : 'bg-gray-400 dark:bg-gray-600'
+                           }`}
+                        />
                      </div>
 
                      <div className="flex-1 min-w-0">

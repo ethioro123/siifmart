@@ -36,13 +36,15 @@ interface StaffProfileViewProps {
 
 export default function StaffProfileView(props: StaffProfileViewProps) {
     const { employee, isOwnProfile = false, onClose, onRequestPhotoChange } = props;
-    const { user, updateUserAvatar } = useStore();
+    const { user, updateUserAvatar, onlineIds } = useStore();
     const { tasks: allTasks, setTasks, sites, addNotification, updateEmployee, settings, getStorePoints } = useData();
     const { getWorkerPoints } = useGamification();
 
     const profile = useStaffProfile({
         employee, user, allTasks, setTasks, updateEmployee, addNotification, updateUserAvatar
     });
+
+    const isOnline = onlineIds.has(employee.id);
 
     // Permission Logic
     const userRoleLevel = user ? getRoleHierarchy(user.role) : 0;
@@ -57,6 +59,7 @@ export default function StaffProfileView(props: StaffProfileViewProps) {
             <StaffProfileHeader 
                 employee={employee} isOwnProfile={isOwnProfile} canManageEmployees={canManage} 
                 canResetPassword={userRoleLevel > targetRoleLevel} canTerminate={canTerminate} canDelete={canDelete}
+                isOnline={isOnline}
                 onPhotoRequest={onRequestPhotoChange || (() => profile.profilePhotoInputRef.current?.click())}
                 onIdCard={() => profile.setIdCardOpen(true)} onMessage={() => profile.setIsMessageModalOpen(true)}
                 onResetPassword={() => profile.setIsPasswordModalOpen(true)} 

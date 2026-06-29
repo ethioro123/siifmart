@@ -1,5 +1,6 @@
 import { openDB, DBSchema, IDBPDatabase } from 'idb';
 import { SaleRecord } from '../../types';
+import type { HeldOrder } from '../../types';
 
 // ⚠️ Set to true to completely disable IndexedDB (for debugging IDB issues)
 const DISABLE_IDB = false;
@@ -28,10 +29,15 @@ interface POSDB extends DBSchema {
         key: string;
         value: any;
     };
+    held_orders: {
+        key: string;
+        value: HeldOrder;
+        indexes: { 'by-time': string };
+    };
 }
 
 const DB_NAME = 'siifmart-pos-db-v2';
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 
 class POSDBService {
     private db: IDBPDatabase<POSDB> | null = null;
@@ -96,6 +102,11 @@ class POSDBService {
                         // Query Cache Store (React Query)
                         if (!db.objectStoreNames.contains('query_cache')) {
                             db.createObjectStore('query_cache'); // Key-value store
+                        }
+                        // Held Orders Store (persists held carts across reloads/restarts)
+                        if (!db.objectStoreNames.contains('held_orders')) {
+                            const holdStore = db.createObjectStore('held_orders', { keyPath: 'id' });
+                            holdStore.createIndex('by-time', 'time');
                         }
                     },
                     blocked: () => {
@@ -289,6 +300,52 @@ class POSDBService {
             console.warn(`POSDB: Gracefully skipping removeQueryCache for ${key}`);
         }
     }
+
+    // ═══════════════════════════════════════════════════════════════
+    // HELD ORDERS (persisted carts — survive device restarts offline)
+    // ═══════════════════════════════════════════════════════════════
+
+    /** Replaces the entire held orders list with the provided array */
+    async saveHeldOrders(orders: HeldOrder[]) {
+        if (DISABLE_IDB || this.disabled) return;
+        try {
+            const db = await this.getDB();
+            const tx = db.transaction('held_orders', 'readwrite');
+            // Clear old entries then write the current list
+            await tx.store.clear();
+            for (const order of orders) {
+                await tx.store.put(order);
+            }
+            await tx.done;
+        } catch (err) {
+            console.warn('POSDB: Gracefully skipping saveHeldOrders due to DB error');
+        }
+    }
+
+    /** Returns all held orders sorted newest-first */
+    async getHeldOrders(): Promise<HeldOrder[]> {
+        if (DISABLE_IDB || this.disabled) return [];
+        try {
+            const db = await this.getDB();
+            const all = await db.getAll('held_orders');
+            return all.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
+        } catch (err) {
+            console.warn('POSDB: Gracefully returning [] for getHeldOrders');
+            return [];
+        }
+    }
+
+    /** Removes a single held order by ID */
+    async removeHeldOrder(id: string) {
+        if (DISABLE_IDB || this.disabled) return;
+        try {
+            const db = await this.getDB();
+            await db.delete('held_orders', id);
+        } catch (err) {
+            console.warn(`POSDB: Gracefully skipping removeHeldOrder(${id})`);
+        }
+    }
 }
+
 
 export const posDB = new POSDBService();

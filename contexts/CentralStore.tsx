@@ -10,6 +10,7 @@ import { systemLogsService } from '../services/systemLogs.service';
 import { systemLogsService as dbSystemLogsService } from '../services/supabase.service';
 import { APP_CONFIG } from '../config/app.config';
 import Toast from '../components/Toast';
+import { usePresence } from '../services/realtime.service';
 
 interface User {
   id: string;
@@ -46,6 +47,7 @@ interface StoreContextType {
   isServerDown: boolean;
   showToast: (message: string, type?: 'info' | 'warning' | 'error' | 'success', duration?: number) => void;
   updateUserAvatar: (newAvatar: string) => void; // Update current user's avatar
+  onlineIds: Set<string>;
 }
 
 const fetchLoginLocation = async (): Promise<string> => {
@@ -447,10 +449,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       console.log('📷 Setting updated user state');
       setUser(updatedUser);
       console.log('📷 User state updated successfully');
-    } else {
-      console.warn('📷 updateUserAvatar called but no user is logged in');
     }
   };
+
+  // Global Real-time Presence subscription — registered exactly once when user is logged in
+  const onlineIds = usePresence(user?.id || undefined, user?.name || undefined);
 
   const value = React.useMemo(() => ({
     user,
@@ -467,8 +470,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     isOnline,
     isServerDown,
     showToast,
-    updateUserAvatar
-  }), [user, originalUser, theme, isSidebarOpen, loading, isOnline, isServerDown]);
+    updateUserAvatar,
+    onlineIds
+  }), [user, originalUser, theme, isSidebarOpen, loading, isOnline, isServerDown, onlineIds]);
 
   return (
     <StoreContext.Provider value={value}>

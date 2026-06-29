@@ -1,7 +1,8 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { posDB } from '../services/db/pos.db';
-import { salesService, productsService } from '../services/supabase.service';
+import { salesService } from '../services/supabase.service';
+import { supabase } from '../lib/supabase';
 
 export type SyncStatus = 'synced' | 'syncing' | 'offline' | 'error' | 'pending';
 
@@ -61,13 +62,26 @@ export const usePosSync = (onSyncComplete?: (count: number) => void) => {
                         // Send sale to Supabase
                         await salesService.create(saleData, items);
 
-                        // Deduct stock for each item (was skipped when offline)
+                        // Atomically decrement stock per item using a DB-level RPC.
+                        // This is safe for concurrent offline terminals — uses GREATEST(0, stock - qty)
+                        // so two terminals selling the same item offline won't double-deduct.
                         if (items && Array.isArray(items)) {
                             for (const item of items) {
                                 try {
-                                    await productsService.adjustStock(item.id, item.quantity, 'OUT');
+                                    const { error: rpcErr } = await supabase.rpc('pos_decrement_stock', {
+                                        p_product_id: item.id,
+                                        p_quantity: item.quantity,
+                                        p_site_id: salePayload.siteId || '',
+                                        p_product_name: item.name || '',
+                                        p_reason: `POS Sale (Offline Sync) — Receipt ${salePayload.receiptNumber || salePayload.id}`,
+                                        p_performed_by: salePayload.cashierName || 'System',
+                                        p_sale_date: salePayload.date || new Date().toISOString()
+                                    });
+                                    if (rpcErr) {
+                                        console.warn(`⚠️ Atomic stock decrement failed for ${item.name || item.id} (non-blocking):`, rpcErr.message);
+                                    }
                                 } catch (stockErr) {
-                                    console.warn(`⚠️ Stock deduction failed for ${item.name || item.id} during sync (non-blocking):`, stockErr);
+                                    console.warn(`⚠️ Stock decrement failed for ${item.name || item.id} during sync (non-blocking):`, stockErr);
                                 }
                             }
                         }

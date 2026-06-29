@@ -133,6 +133,14 @@ export const PickScanner: React.FC<PickScannerProps> = ({
             return;
         }
 
+        // If there are no items left to pick, clicking the button completes the job
+        if (!currentItem) {
+            if (onCompleteJob) {
+                onCompleteJob(job);
+            }
+            return;
+        }
+
         const rawVal = inputVal.trim();
         if (step !== 'QUANTITY' && !rawVal) return;
         if (isProcessing) return;
@@ -271,7 +279,7 @@ export const PickScanner: React.FC<PickScannerProps> = ({
     };
 
     return (
-        <div className="fixed inset-0 z-[200] bg-[#FAF8F5] dark:bg-[#1C2620] flex flex-col">
+        <div className="fixed inset-0 z-[200] bg-[#FAF8F5] dark:bg-[#1C2620] flex flex-col overflow-hidden max-w-full">
             {/* Top Bar */}
             <div className="p-4 bg-[#EAE5D9] dark:bg-[#1C2620]/80 border-b border-[#E2DCCE] dark:border-[#A9CBA2]/10 flex justify-between items-center text-gray-900 dark:text-[#EAE5D9] transition-colors">
                 <div className="flex items-center gap-3">
@@ -296,7 +304,7 @@ export const PickScanner: React.FC<PickScannerProps> = ({
                 <div className={`absolute inset-0 opacity-[0.05] dark:opacity-20 blur-3xl transition-colors duration-700 pointer-events-none ${step === 'LOCATION' ? 'bg-[#2C5E3B]' : 'bg-[#A9CBA2]'}`} />
 
                 {/* Scrollable Content Container */}
-                <div className="absolute inset-0 overflow-y-auto flex flex-col items-center p-6 pb-32">
+                <div className="absolute inset-0 overflow-y-auto overflow-x-hidden flex flex-col items-center p-6 pb-32 w-full">
 
                     {/* Icon Circle */}
                     <div className={`w-32 h-32 rounded-full border-4 flex items-center justify-center mb-8 shadow-2xl z-10 transition-all duration-500 bg-white dark:bg-transparent ${showSuccess
