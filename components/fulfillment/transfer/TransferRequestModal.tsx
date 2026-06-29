@@ -6,6 +6,7 @@ import { formatJobId } from '../../../utils/jobIdFormatter';
 import { getSellUnit } from '../../../utils/units';
 import { useData } from '../../../contexts/DataContext';
 import { logisticsZonesService } from '../../../services/supabase.service';
+import { useLanguage } from '../../../contexts/LanguageContext';
 
 interface TransferRequestModalProps {
     isOpen: boolean;
@@ -34,6 +35,7 @@ export const TransferRequestModal: React.FC<TransferRequestModalProps> = ({
     refreshData,
     renderTabs
 }) => {
+    const { t } = useLanguage();
     const { settings } = useData();
     const isRestricted = !['super_admin', 'admin'].includes(user?.role || '') && !!user?.siteId;
     const [logisticsZones, setLogisticsZones] = useState<any[]>([]);
@@ -98,105 +100,59 @@ export const TransferRequestModal: React.FC<TransferRequestModalProps> = ({
         }
 
         // Validate regional zoning restriction
-        console.log('--- Regional Zoning Enforcement Check ---');
-        console.log('settings:', settings);
-        console.log('settings?.enforceRegionalZoning:', settings?.enforceRegionalZoning);
-        console.log('actualSourceSite:', actualSourceSite);
-        console.log('transferDestSite:', transferDestSite);
-        const sourceSiteObj = sites.find(s => s.id === actualSourceSite);
-        const destSiteObj = sites.find(s => s.id === transferDestSite);
-        console.log('sourceSiteObj:', sourceSiteObj);
-        console.log('destSiteObj:', destSiteObj);
-        console.log('user?.role:', user?.role);
-
-        if (settings?.enforceRegionalZoning) {
+        if (settings?.enforceRegionalZoning && user?.role !== 'super_admin') {
+            const sourceSiteObj = sites.find(s => s.id === actualSourceSite);
+            const destSiteObj = sites.find(s => s.id === transferDestSite);
             if (sourceSiteObj && destSiteObj && (sourceSiteObj.logisticsZoneId || '') !== (destSiteObj.logisticsZoneId || '')) {
-                console.log('ZONES MISMATCH DETECTED:', sourceSiteObj.logisticsZoneId, 'vs', destSiteObj.logisticsZoneId);
-                if (user?.role !== 'super_admin') {
-                    console.log('USER IS NOT SUPER_ADMIN. BLOCKING TRANSFER!');
-                    addNotification('alert', 'Cross-zone transfers are restricted. Stores can only request stock from warehouses in the same Logistics Zone. Please contact the CEO for special authorization.');
-                    return;
-                } else {
-                    console.log('USER IS SUPER_ADMIN. OVERRIDE ALLOWED.');
-                }
-            } else {
-                console.log('Zones matched or site not found:', sourceSiteObj?.logisticsZoneId, 'and', destSiteObj?.logisticsZoneId);
-            }
-        }
-
-
-        if (transferItems.length === 0) {
-            addNotification('alert', 'Please add at least one item');
-            return;
-        }
-
-        // Validate that requested amount does not exceed available stock
-        for (const item of transferItems) {
-            const product = allProducts.find(p => p.id === item.productId);
-            const sourceStockItem = allProducts.find(p => p.sku === product?.sku && p.siteId === actualSourceSite);
-
-            const rawStock = sourceStockItem?.stock || 0;
-            const unitDef = getSellUnit(sourceStockItem?.unit || product?.unit || '');
-            const sizeNum = parseFloat(sourceStockItem?.size || product?.size || '0');
-            const isWeightVol = unitDef.category === 'weight' || unitDef.category === 'volume';
-
-            const displayStock = isWeightVol && sizeNum > 0 ? rawStock * sizeNum : rawStock;
-            const deduction = (isWeightVol && sizeNum > 0 && !item.isMeasure) ? item.quantity * sizeNum : item.quantity;
-
-            if (displayStock - deduction < 0) {
-                addNotification('alert', `Cannot request more ${product?.name || 'items'} than available at source. Remaining would be negative.`);
+                addNotification('alert', `Regional Zoning Error: Cannot replenishment between ${sourceSiteObj.name} (Zone: ${getZoneName(sourceSiteObj.logisticsZoneId)}) and ${destSiteObj.name} (Zone: ${getZoneName(destSiteObj.logisticsZoneId)})`);
                 return;
             }
         }
 
-        // Passed validation, move to review mode
         setIsReviewMode(true);
     };
 
     const handleCreateTransfer = async () => {
-        const actualSourceSite = transferSourceSite || activeSite?.id;
-
+        if (isSubmitting) return;
         setIsSubmitting(true);
         try {
-            const transferJob: any = {
-                siteId: actualSourceSite, // Originating site
-                site_id: actualSourceSite,
-                sourceSiteId: actualSourceSite,
-                destSiteId: transferDestSite,
+            const actualSourceSite = transferSourceSite || activeSite?.id;
+            const destSiteObj = sites.find(s => s.id === transferDestSite);
+
+            const lineItems = transferItems.map(item => {
+                const p = allProducts.find(prod => prod.id === item.productId);
+                const unitDef = getSellUnit(p?.unit || '');
+                const baseExpectedQty = item.quantity;
+                const sizeNum = p?.size ? parseFloat(p.size as string) : 0;
+                
+                const expectedQty = (item.isMeasure && sizeNum > 0) ? baseExpectedQty / sizeNum : baseExpectedQty;
+                
+                return {
+                    sku: p?.sku || '',
+                    name: p?.name || '',
+                    unit: p?.unit || 'pcs',
+                    size: p?.size || '0',
+                    expectedQty,
+                    receivedQty: 0,
+                    status: 'Pending',
+                    productId: item.productId,
+                    isMeasure: item.isMeasure || false,
+                    requestedMeasureQty: item.isMeasure ? baseExpectedQty : undefined
+                };
+            });
+
+            // Target transfer id for wms_jobs
+            const transferJob = {
                 type: 'TRANSFER',
                 status: 'Pending',
-                priority: transferPriority,
-                items: transferItems.length,
-                lineItems: transferItems.map(item => {
-                    const product = allProducts.find(p => p.id === item.productId);
-                    let finalExpectedQty = item.quantity;
-                    let requestedMeasureQty: number | undefined = undefined;
-
-                    if (item.isMeasure) {
-                        const unitDef = getSellUnit(product?.unit || '');
-                        const sizeNum = parseFloat(product?.size || '0');
-                        if ((unitDef.category === 'weight' || unitDef.category === 'volume') && sizeNum > 0) {
-                            requestedMeasureQty = item.quantity; // Save exact measure requested
-                            finalExpectedQty = Math.ceil(item.quantity / sizeNum); // convert requested measure to required packages
-                        }
-                    }
-
-                    return {
-                        productId: item.productId,
-                        sku: product?.sku || '',
-                        name: product?.name || '',
-                        image: product?.image || '',
-                        expectedQty: finalExpectedQty,
-                        requestedMeasureQty, // Persisted for exact UI representation
-                        pickedQty: 0,
-                        status: 'Pending'
-                    };
-                }),
-                orderRef: `${Date.now()}`,
                 transferStatus: 'Requested',
-                requestedBy: user?.name || 'System',
-                note: transferNote,
-                jobNumber: undefined
+                sourceSiteId: actualSourceSite,
+                destSiteId: transferDestSite,
+                lineItems,
+                items: lineItems.reduce((acc, curr) => acc + (curr.expectedQty || 0), 0),
+                priority: transferPriority,
+                notes: transferNote,
+                siteId: actualSourceSite
             };
 
             const createdJob = await wmsJobsService.create(transferJob);
@@ -222,12 +178,12 @@ export const TransferRequestModal: React.FC<TransferRequestModalProps> = ({
                         <div>
                             <h2 className="text-xl font-bold text-white flex items-center gap-2">
                                 <Truck className="text-cyber-primary" />
-                                New Transfer Request
+                                {t('warehouse.createTransferRequest')}
                             </h2>
-                            <p className="text-gray-400 text-xs mt-1">Request stock from another location</p>
+                            <p className="text-gray-400 text-xs mt-1">{t('warehouse.requestManageTransfers')}</p>
                         </div>
                         {renderTabs()}
-                        <button onClick={onClose} aria-label="Close Modal" className="p-2 hover:bg-white/10 rounded-lg text-gray-400 hover:text-white transition-colors">
+                        <button onClick={onClose} aria-label={t('warehouse.dismiss')} className="p-2 hover:bg-white/10 rounded-lg text-gray-400 hover:text-white transition-colors">
                             <X size={20} />
                         </button>
                     </div>
@@ -237,7 +193,7 @@ export const TransferRequestModal: React.FC<TransferRequestModalProps> = ({
                             <div className="space-y-6">
                                 <div className="bg-cyber-primary/10 border border-cyber-primary/20 rounded-xl p-6">
                                     <h3 className="font-bold text-cyber-primary mb-4 flex items-center gap-2">
-                                        <Truck size={18} /> Review Transfer Request
+                                        <Truck size={18} /> {t('warehouse.transferRequest')}
                                     </h3>
                                     {(() => {
                                         const actualSourceSite = transferSourceSite || activeSite?.id;
@@ -261,7 +217,7 @@ export const TransferRequestModal: React.FC<TransferRequestModalProps> = ({
                                     })()}
                                     <div className="grid grid-cols-2 gap-4 mb-6">
                                         <div>
-                                            <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-1">From (Source)</p>
+                                            <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-1">{t('warehouse.from')}</p>
                                             <p className="text-white font-medium">
                                                 {sites.find(s => s.id === (transferSourceSite || activeSite?.id))?.name || 'Current Site'}
                                                 {(() => {
@@ -271,7 +227,7 @@ export const TransferRequestModal: React.FC<TransferRequestModalProps> = ({
                                             </p>
                                         </div>
                                         <div>
-                                            <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-1">To (Destination)</p>
+                                            <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-1">{t('warehouse.to')}</p>
                                             <p className="text-white font-medium">
                                                 {sites.find(s => s.id === transferDestSite)?.name}
                                                 {(() => {
@@ -283,7 +239,7 @@ export const TransferRequestModal: React.FC<TransferRequestModalProps> = ({
                                     </div>
 
                                     <div className="space-y-2">
-                                        <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-2">Items Requesting</p>
+                                        <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-2">{t('warehouse.putaway.itemsToPutaway')}</p>
                                         {transferItems.map((item, idx) => {
                                             const prod = allProducts.find(p => p.id === item.productId);
                                             const unitDef = getSellUnit(prod?.unit || '');
@@ -291,13 +247,13 @@ export const TransferRequestModal: React.FC<TransferRequestModalProps> = ({
                                             if (item.isMeasure) {
                                                 displayQty = `${item.quantity} ${unitDef.shortLabel}`;
                                             } else {
-                                                displayQty = `${item.quantity} Units`;
+                                                displayQty = `${item.quantity} ${t('warehouse.itemPlural')}`;
                                             }
 
                                             return (
                                                 <div key={idx} className="flex justify-between items-center bg-black/40 p-3 rounded-lg border border-white/5">
                                                     <div className="flex items-center gap-3">
-                                                        <span className="text-[10px] text-gray-500 font-mono bg-white/5 px-2 py-1 rounded">{prod?.sku}</span>
+                                                        <span className="text-[10px] text-gray-555 font-mono bg-white/5 px-2 py-1 rounded">{prod?.sku}</span>
                                                         <span className="text-sm font-medium text-white">{prod?.name}</span>
                                                     </div>
                                                     <div className="font-mono text-cyber-primary font-bold">
@@ -310,7 +266,7 @@ export const TransferRequestModal: React.FC<TransferRequestModalProps> = ({
 
                                     <div className="grid grid-cols-2 gap-4 mt-6 pt-4 border-t border-cyber-primary/20">
                                         <div>
-                                            <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-1">Priority</p>
+                                            <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-1">{t('warehouse.priority')}</p>
                                             <span className={`text-xs px-2 py-1 rounded font-bold uppercase ${transferPriority === 'Critical' ? 'bg-red-500/20 text-red-400' :
                                                 transferPriority === 'High' ? 'bg-orange-500/20 text-orange-400' :
                                                     'bg-[#2C5E3B]/20 text-[#A9CBA2]'
@@ -318,7 +274,7 @@ export const TransferRequestModal: React.FC<TransferRequestModalProps> = ({
                                         </div>
                                         {transferNote && (
                                             <div>
-                                                <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-1">Note</p>
+                                                <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-1">{t('warehouse.putaway.jobDetails')}</p>
                                                 <p className="text-gray-300 text-sm italic">"{transferNote}"</p>
                                             </div>
                                         )}
@@ -330,7 +286,7 @@ export const TransferRequestModal: React.FC<TransferRequestModalProps> = ({
                                 {/* Source & Dest */}
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label htmlFor="source-site-select" className="block text-xs font-bold text-gray-400 uppercase mb-1.5">Request From (Source)</label>
+                                        <label htmlFor="source-site-select" className="block text-xs font-bold text-gray-400 uppercase mb-1.5">{t('warehouse.from')} (Source)</label>
                                         <select
                                             id="source-site-select"
                                             value={transferSourceSite}
@@ -356,7 +312,7 @@ export const TransferRequestModal: React.FC<TransferRequestModalProps> = ({
                                         </select>
                                     </div>
                                     <div>
-                                        <label htmlFor="dest-site-select" className="block text-xs font-bold text-gray-400 uppercase mb-1.5">Destination (Target)</label>
+                                        <label htmlFor="dest-site-select" className="block text-xs font-bold text-gray-400 uppercase mb-1.5">{t('warehouse.to')} (Target)</label>
                                         <select
                                             id="dest-site-select"
                                             value={transferDestSite}
@@ -388,7 +344,7 @@ export const TransferRequestModal: React.FC<TransferRequestModalProps> = ({
 
                                 {/* Items */}
                                 <div>
-                                    <label className="block text-xs font-bold text-gray-400 uppercase mb-2">Items to Request</label>
+                                    <label className="block text-xs font-bold text-gray-400 uppercase mb-2">{t('warehouse.putaway.itemsToPutaway')}</label>
                                     <div className="bg-white/5 rounded-xl p-4 border border-white/10 space-y-3">
                                         {transferItems.map((item, idx) => {
                                             const prod = allProducts.find(p => p.id === item.productId);
@@ -397,7 +353,7 @@ export const TransferRequestModal: React.FC<TransferRequestModalProps> = ({
                                                     <div className="flex-1">
                                                         <div className="text-sm font-bold text-white mb-0.5">{prod?.name || 'Unknown Item'}</div>
                                                         <div className="flex items-center gap-2">
-                                                            <span className="text-[10px] text-gray-500 font-mono bg-white/5 px-1.5 py-0.5 rounded">{prod?.sku}</span>
+                                                            <span className="text-[10px] text-gray-555 font-mono bg-white/5 px-1.5 py-0.5 rounded">{prod?.sku}</span>
                                                             {(() => {
                                                                 const sourceStockItem = allProducts.find(p => p.sku === prod?.sku && p.siteId === transferSourceSite);
                                                                 const rawStock = sourceStockItem?.stock || 0;
@@ -418,7 +374,7 @@ export const TransferRequestModal: React.FC<TransferRequestModalProps> = ({
                                                         </div>
                                                     </div>
                                                     <div className="flex items-center gap-2">
-                                                        <span className="text-xs text-gray-500">Qty:</span>
+                                                        <span className="text-xs text-gray-555">Qty:</span>
                                                         <div className="flex gap-1">
                                                             <input
                                                                 type="number"
@@ -461,7 +417,7 @@ export const TransferRequestModal: React.FC<TransferRequestModalProps> = ({
                                                                 newItems.splice(idx, 1);
                                                                 setTransferItems(newItems);
                                                             }}
-                                                            className="p-1.5 hover:bg-red-500/20 text-gray-500 hover:text-red-400 rounded transition-colors"
+                                                            className="p-1.5 hover:bg-red-500/20 text-gray-555 hover:text-red-400 rounded transition-colors"
                                                             aria-label="Remove Item"
                                                         >
                                                             <Trash2 size={14} />
@@ -485,8 +441,6 @@ export const TransferRequestModal: React.FC<TransferRequestModalProps> = ({
                                                             setTransferItems([...transferItems, { productId: product.id, quantity: 1 }]);
                                                             addNotification('success', `Added ${product.name} to request`);
                                                         }
-                                                        // Deliberately NOT calling setIsSearchingProduct(false) here
-                                                        // so the user can continue adding products quickly.
                                                     }}
                                                     onCancel={() => setIsSearchingProduct(false)}
                                                 />
@@ -496,7 +450,7 @@ export const TransferRequestModal: React.FC<TransferRequestModalProps> = ({
                                                 onClick={() => setIsSearchingProduct(true)}
                                                 className="w-full py-3 border border-dashed border-white/20 rounded-xl text-gray-400 hover:text-white hover:border-white/40 hover:bg-white/5 transition-all flex items-center justify-center gap-2"
                                             >
-                                                <Plus size={16} /> Add Product to Request
+                                                <Plus size={16} /> {t('warehouse.addTransferItem')}
                                             </button>
                                         )}
                                     </div>
@@ -505,7 +459,7 @@ export const TransferRequestModal: React.FC<TransferRequestModalProps> = ({
                                 {/* Metadata */}
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label htmlFor="priority-select" className="block text-xs font-bold text-gray-400 uppercase mb-1.5">Priority</label>
+                                        <label htmlFor="priority-select" className="block text-xs font-bold text-gray-400 uppercase mb-1.5">{t('warehouse.priority')}</label>
                                         <select
                                             id="priority-select"
                                             value={transferPriority}
@@ -520,7 +474,7 @@ export const TransferRequestModal: React.FC<TransferRequestModalProps> = ({
                                         </select>
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-bold text-gray-400 uppercase mb-1.5">Note (Optional)</label>
+                                        <label className="block text-xs font-bold text-gray-400 uppercase mb-1.5">{t('warehouse.putaway.jobDetails')}</label>
                                         <input
                                             type="text"
                                             value={transferNote}
@@ -548,7 +502,7 @@ export const TransferRequestModal: React.FC<TransferRequestModalProps> = ({
                                     disabled={isSubmitting}
                                     className="px-6 py-2 bg-cyber-primary text-black rounded-lg font-bold text-sm hover:bg-cyber-accent transition-colors shadow-lg shadow-cyber-primary/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                                 >
-                                    {isSubmitting ? 'Confirming...' : 'Confirm Transfer'}
+                                    {isSubmitting ? 'Confirming...' : t('warehouse.confirm')}
                                     <ArrowRight size={16} />
                                 </button>
                             </>
@@ -558,14 +512,14 @@ export const TransferRequestModal: React.FC<TransferRequestModalProps> = ({
                                     onClick={onClose}
                                     className="px-4 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-white/10 font-bold text-sm transition-colors"
                                 >
-                                    Cancel
+                                    {t('warehouse.dismiss')}
                                 </button>
                                 <button
                                     onClick={handleReviewRequest}
                                     disabled={transferItems.length === 0}
                                     className="px-6 py-2 bg-white/10 text-white rounded-lg font-bold text-sm hover:bg-white/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                                 >
-                                    Review Request
+                                    {t('warehouse.transferRequest')}
                                     <ArrowRight size={16} />
                                 </button>
                             </>

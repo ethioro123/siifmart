@@ -1,7 +1,8 @@
 import React, { useState, useMemo } from 'react';
-import { Search, Package, Plus, X, AlertTriangle } from 'lucide-react';
+import { Search, Package, X } from 'lucide-react';
 import { Product } from '../../../types';
 import { getSellUnit } from '../../../utils/units';
+import { useLanguage } from '../../../contexts/LanguageContext';
 
 interface ProductSelectorProps {
     products: Product[];
@@ -14,8 +15,9 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
     products,
     onSelect,
     onCancel,
-    title = "Select Product"
+    title
 }) => {
+    const { t } = useLanguage();
     const [search, setSearch] = useState('');
 
     const filteredProducts = useMemo(() => {
@@ -34,7 +36,7 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
             <div className="flex justify-between items-center">
                 <h3 className="text-sm font-bold text-white flex items-center gap-2">
                     <Search size={16} className="text-[#A9CBA2]" />
-                    {title}
+                    {title || t('warehouse.selectItem')}
                 </h3>
                 <button onClick={onCancel} className="text-gray-500 hover:text-white transition-colors" aria-label="Close Product Selector">
                     <X size={16} />
@@ -47,7 +49,7 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
                     autoFocus
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    placeholder="Search by Name, SKU, or Barcode..."
+                    placeholder={`${t('warehouse.misc.scanBarcodeOrEnterSKU')}`}
                     className="w-full bg-black/60 border border-white/10 rounded-lg pl-10 pr-4 py-2 text-sm text-white focus:outline-none focus:border-blue-500/50"
                     aria-label="Search for products"
                 />
@@ -56,7 +58,7 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
             <div className="space-y-2 max-h-[300px] overflow-y-auto custom-scrollbar">
                 {filteredProducts.length === 0 ? (
                     <div className="text-center py-8 text-gray-500 text-xs">
-                        {filteredProducts.length === 0 && search ? "No products found." : "Start typing to search..."}
+                        {search ? "No products found." : "Start typing to search..."}
                     </div>
                 ) : (
                     filteredProducts.map(product => (
@@ -108,7 +110,7 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
                     onClick={onCancel}
                     className="text-xs text-gray-500 hover:text-white"
                 >
-                    Cancel Selection
+                    {t('warehouse.dismiss')}
                 </button>
             </div>
         </div>

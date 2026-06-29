@@ -4,6 +4,7 @@ import { WMSJob, Site, ReceivingItem, Product } from '../../../types';
 import { formatJobId } from '../../../utils/jobIdFormatter';
 import { getSellUnit } from '../../../utils/units';
 import { supabase } from '../../../lib/supabase';
+import { useLanguage } from '../../../contexts/LanguageContext';
 
 interface TransferReceivingProps {
     activeTransferJob: WMSJob;
@@ -32,6 +33,8 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
     refreshData,
     activeSite
 }) => {
+    const { t } = useLanguage();
+
     const handleConfirmReceipt = async () => {
         if (!activeTransferJob) return;
         try {
@@ -39,9 +42,6 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
             await wmsJobsService.update(activeTransferJob.id, {
                 transferStatus: 'Received',
                 status: 'Completed',
-                // Note: ideally we update lineItems with receivedQty too in a real backend, 
-                // but local 'transferReceiveItems' logic here might be distinct. 
-                // If backend updates lineItems, we should pass that.
             });
 
             // Also complete the child DISPATCH job if exists
@@ -49,7 +49,6 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
                 const { data: dispatchJobs } = await supabase
                     .from('wms_jobs')
                     .select('id')
-                    .eq('type', 'DISPATCH')
                     .or(`order_ref.eq.${activeTransferJob.id},order_ref.eq.${activeTransferJob.jobNumber}`);
 
                 if (dispatchJobs && dispatchJobs.length > 0) {
@@ -121,13 +120,13 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
                     <div>
                         <h3 className="font-bold text-white flex items-center gap-2 text-lg">
                             <ArrowDown className="text-green-500" size={24} />
-                            Receiving Transfer
+                            {t('warehouse.shipmentReceiving')}
                         </h3>
                         {activeTransferJob && (
                             <div className="flex items-center gap-2 mt-1">
                                 <span className="text-cyber-primary font-mono text-xs">{formatJobId(activeTransferJob)}</span>
                                 <span className="text-gray-500 text-xs">•</span>
-                                <span className="text-gray-400 text-xs">{activeTransferJob.items} Items</span>
+                                <span className="text-gray-400 text-xs">{activeTransferJob.items} {t('warehouse.itemPlural')}</span>
                             </div>
                         )}
                     </div>
@@ -139,7 +138,7 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
                         }}
                         className="px-4 py-2 bg-white/5 text-gray-400 hover:text-white rounded-lg font-bold transition-all text-xs"
                     >
-                        Cancel Receipt
+                        {t('warehouse.dismiss')}
                     </button>
                 </div>
             </div>
@@ -165,7 +164,7 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
                                             <p className="text-[10px] text-gray-500 font-mono">{product?.sku}</p>
                                         </div>
                                         <div className="text-right">
-                                            <span className="text-[10px] text-gray-500 uppercase font-black tracking-widest">Expected</span>
+                                            <span className="text-[10px] text-gray-500 uppercase font-black tracking-widest">{t('warehouse.expected')}</span>
                                             <p className="font-mono text-white font-bold">
                                                 {item.expectedQty}
                                                 {product?.unit && getSellUnit(product.unit).code !== 'UNIT' && (
@@ -177,7 +176,7 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
                                     <div className="grid grid-cols-2 gap-4 mt-3">
                                         <div>
                                             <label htmlFor={`received-qty-${idx}`} className="text-[10px] text-gray-500 uppercase font-black mb-1 block">
-                                                Received Qty{product?.unit && getSellUnit(product.unit).code !== 'UNIT' ? ` (${getSellUnit(product.unit).shortLabel})` : ''}
+                                                {t('warehouse.received')}{product?.unit && getSellUnit(product.unit).code !== 'UNIT' ? ` (${getSellUnit(product.unit).shortLabel})` : ''}
                                             </label>
                                             <input
                                                 id={`received-qty-${idx}`}
@@ -195,7 +194,7 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
                                             />
                                         </div>
                                         <div>
-                                            <label htmlFor={`condition-${idx}`} className="text-[10px] text-gray-500 uppercase font-black mb-1 block">Condition</label>
+                                            <label htmlFor={`condition-${idx}`} className="text-[10px] text-gray-500 uppercase font-black mb-1 block">{t('warehouse.returnCondition')}</label>
                                             <select
                                                 id={`condition-${idx}`}
                                                 value={item.condition}
@@ -207,7 +206,7 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
                                                 className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-cyber-primary focus:outline-none"
                                                 aria-label={`Condition for ${product?.name || 'item'}`}
                                             >
-                                                <option value="Good">Good</option>
+                                                <option value="Good">{t('warehouse.good')}</option>
                                                 <option value="Damaged">Damaged</option>
                                                 <option value="Missing">Missing</option>
                                             </select>
@@ -223,7 +222,7 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
                         onClick={handleConfirmReceipt}
                         className="w-full py-3 bg-green-500 text-black font-bold rounded-xl hover:bg-green-400 transition-all shadow-lg shadow-green-500/20"
                     >
-                        Confirm Receipt
+                        {t('warehouse.confirm')}
                     </button>
                 </div>
             </div>

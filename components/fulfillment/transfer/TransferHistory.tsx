@@ -12,6 +12,7 @@ interface TransferHistoryProps {
     sites: Site[];
     setSelectedJob: (job: any) => void;
     setIsDetailsOpen: (isOpen: boolean) => void;
+    t: (key: string) => string;
 }
 
 const HISTORY_ITEMS_PER_PAGE = 12;
@@ -21,7 +22,8 @@ export const TransferHistory: React.FC<TransferHistoryProps> = ({
     jobs,
     sites,
     setSelectedJob,
-    setIsDetailsOpen
+    setIsDetailsOpen,
+    t
 }) => {
     const [search, setSearch] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
@@ -102,9 +104,9 @@ export const TransferHistory: React.FC<TransferHistoryProps> = ({
                         <div className="p-2 bg-[#2C5E3B]/10 rounded-xl border border-[#2C5E3B]/20 group-hover/history:bg-[#2C5E3B]/20 transition-colors">
                             <HistoryIcon size={20} className="text-[#A9CBA2]" />
                         </div>
-                        Transfer History
+                        {t('warehouse.putaway.history')}
                     </h4>
-                    <p className="text-gray-500 text-[10px] mt-1 uppercase tracking-widest font-black">Recent completed or received transfers</p>
+                    <p className="text-gray-555 text-[10px] mt-1 uppercase tracking-widest font-black">{t('warehouse.completedAndFinalizedShipments')}</p>
                 </div>
 
                 <div className="relative w-full md:w-80 group">
@@ -113,7 +115,7 @@ export const TransferHistory: React.FC<TransferHistoryProps> = ({
                         <Search className="absolute left-3 text-gray-600 group-focus-within:text-[#A9CBA2]" size={16} />
                         <input
                             type="text"
-                            placeholder="Search history..."
+                            placeholder={`${t('warehouse.searchHistoryPlaceholder')}`}
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                             className="w-full bg-transparent border-none rounded-xl pl-10 pr-4 py-3 text-xs text-white focus:outline-none placeholder:text-gray-600 font-bold uppercase tracking-wider"
@@ -156,17 +158,17 @@ export const TransferHistory: React.FC<TransferHistoryProps> = ({
                                                     <Package size={14} />
                                                 </div>
                                                 <span className="text-[10px] uppercase font-black tracking-widest text-gray-500">
-                                                    Transfer
+                                                    {t('warehouse.interSiteTransfers').split(' ')[0]}
                                                 </span>
                                             </div>
-                                            <span className={`text-[9px] px-2 py-0.5 rounded-full uppercase font-black tracking-widest border ${
+                                            <span className={`text-[9px] px-2 py-0.5 rounded-full uppercase font-black tracking-widest border transition-all ${
                                                 transfer.status === 'Cancelled' 
                                                 ? 'bg-red-500/10 text-red-400 border-red-500/20' 
                                                 : transfer.status === 'Completed' || transfer.transferStatus === 'Received'
                                                 ? 'bg-green-500/10 text-green-400 border-green-500/20'
                                                 : 'bg-[#2C5E3B]/10 text-[#A9CBA2] border-[#2C5E3B]/20'
                                             }`}>
-                                                {transfer.transferStatus || transfer.status}
+                                                {transfer.transferStatus === 'Received' ? t('warehouse.received') : transfer.status === 'Cancelled' ? 'Cancelled' : (transfer.transferStatus || transfer.status)}
                                             </span>
                                         </div>
 
@@ -198,7 +200,7 @@ export const TransferHistory: React.FC<TransferHistoryProps> = ({
                                             <div className="relative mb-4">
                                                 <p className="text-[10px] text-gray-600 truncate">
                                                     {productNames.slice(0, 2).join(', ')}
-                                                    {productNames.length > 2 && <span className="text-[#A9CBA2]/60 ml-1">+{productNames.length - 2} more</span>}
+                                                    {productNames.length > 2 && <span className="text-[#A9CBA2]/60 ml-1">+{productNames.length - 2} {t('warehouse.remaining')}</span>}
                                                 </p>
                                             </div>
                                         )}
@@ -206,7 +208,7 @@ export const TransferHistory: React.FC<TransferHistoryProps> = ({
                                         <div className="relative flex items-center justify-between border-t border-white/5 pt-3 mt-auto">
                                             <div className="flex items-center gap-2 bg-white/[0.03] px-2 py-1 rounded-lg border border-white/5">
                                                 <Box size={12} className="text-gray-500" />
-                                                <span className="text-[10px] font-black text-gray-400">{totalItems} {totalItems === 1 ? 'Item' : 'Items'}</span>
+                                                <span className="text-[10px] font-black text-gray-400">{totalItems} {totalItems === 1 ? t('warehouse.itemSingular') : t('warehouse.itemPlural')}</span>
                                             </div>
                                             <div className="w-6 h-6 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-[#2C5E3B]/20 transition-colors border border-white/10 group-hover:border-[#2C5E3B]/30">
                                                 <ChevronRight size={14} className="text-gray-600 group-hover:text-[#A9CBA2] transition-colors" />
@@ -229,7 +231,7 @@ export const TransferHistory: React.FC<TransferHistoryProps> = ({
             ) : (
                 <div className="flex flex-col items-center justify-center py-20 bg-black/20 rounded-3xl border border-dashed border-white/5">
                     <HistoryIcon size={32} className="text-gray-700 mb-4" />
-                    <p className="text-gray-600 font-bold uppercase tracking-widest text-xs">No matching history found</p>
+                    <p className="text-gray-600 font-bold uppercase tracking-widest text-xs">{t('warehouse.noHistoryFound')}</p>
                 </div>
             )}
         </div>

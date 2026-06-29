@@ -320,6 +320,7 @@ export const TransferTab: React.FC<TransferTabProps> = ({
                                 setSelectedJob={setSelectedJob}
                                 setIsDetailsOpen={setIsDetailsOpen}
                                 setShowTransferArchive={setShowTransferArchive}
+                                t={t}
                             />
                         ) : (
                             <TransferHistory
@@ -328,6 +329,7 @@ export const TransferTab: React.FC<TransferTabProps> = ({
                                 sites={sites}
                                 setSelectedJob={setSelectedJob}
                                 setIsDetailsOpen={setIsDetailsOpen}
+                                t={t}
                             />
                         )}
                     </div>
