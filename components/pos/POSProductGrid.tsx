@@ -51,7 +51,7 @@ export const POSProductGrid: React.FC = () => {
     const native = isNativeApp ? (window as any).Neutralino.os : null;
 
     return (
-        <div className="flex-1 flex flex-col bg-white/85 dark:bg-[#18201B]/60 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-[32px] overflow-hidden pb-20 lg:pb-0 shadow-[0_24px_80px_-12px_rgba(34,50,38,0.06)] dark:shadow-[0_32px_96px_-12px_rgba(5,8,6,0.65)] backdrop-blur-2xl transition-all duration-300 relative">
+        <div className="flex-1 flex flex-col bg-white/85 dark:bg-[#18201B]/60 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-[32px] overflow-hidden pb-20 lg:pb-0 shadow-[0_24px_80px_-12px_rgba(34,50,38,0.06)] dark:shadow-[0_32px_96px_-12px_rgba(5,8,6,0.65)] lg:backdrop-blur-2xl transition-all duration-300 relative">
             <div className="absolute inset-0 bg-gradient-to-b from-[#2C5E3B]/5 to-transparent pointer-events-none" />
             <div className="p-4 border-b border-white/5 space-y-4">
                 <div className="flex gap-4">
@@ -256,15 +256,24 @@ export const POSProductGrid: React.FC = () => {
                             >
                                 <div className="aspect-square rounded-xl bg-[#F4F0E6] dark:bg-black/35 mb-4 overflow-hidden relative border border-[#E2DCCE]/40 dark:border-white/5 flex items-center justify-center">
                                     {product.image && !product.image.includes('placeholder.com') ? (
+                                        <>
                                         <img
                                             src={product.image}
                                             alt={product.name}
                                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                            loading="lazy"
                                             onError={(e) => {
+                                                // React-safe fallback: hide the broken img and let the sibling fallback show
                                                 e.currentTarget.style.display = 'none';
-                                                (e.currentTarget.parentElement as HTMLElement).innerHTML = '<div class="w-full h-full bg-[#F4F0E6] dark:bg-black/35 flex items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-[#2C5E3B]/30 dark:text-[#A9CBA2]/30"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg></div>';
+                                                const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+                                                if (fallback) fallback.style.display = 'flex';
                                             }}
                                         />
+                                        {/* React-safe fallback (hidden by default, shown on img error) */}
+                                        <div className="w-full h-full bg-[#F4F0E6] dark:bg-black/35 items-center justify-center hidden">
+                                            <Package size={32} className="text-[#2C5E3B]/20 dark:text-[#A9CBA2]/25" />
+                                        </div>
+                                        </>
                                     ) : (
                                         <div className="w-full h-full bg-[#F4F0E6] dark:bg-black/35 flex items-center justify-center">
                                             <Package size={32} className="text-[#2C5E3B]/20 dark:text-[#A9CBA2]/25" />

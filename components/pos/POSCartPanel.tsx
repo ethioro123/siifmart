@@ -53,7 +53,7 @@ export const POSCartPanel: React.FC = () => {
         <>
             {/* Right: Cart Summary - Desktop: Side Panel, Mobile: Slide-up Bottom Sheet */}
             <div className={`
-        fixed inset-0 z-50 bg-white/85 dark:bg-[#18201B]/60 backdrop-blur-2xl flex flex-col transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] border-[#E2DCCE] dark:border-emerald-950/20
+        fixed inset-0 z-50 bg-white/85 dark:bg-[#18201B]/60 lg:backdrop-blur-2xl flex flex-col transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] border-[#E2DCCE] dark:border-emerald-950/20
         lg:static lg:w-[400px] lg:bg-white/85 lg:dark:bg-[#18201B]/60 lg:border lg:border-[#E2DCCE] lg:dark:border-emerald-950/20 lg:rounded-[32px] lg:h-full lg:z-auto lg:transform-none lg:shadow-[0_24px_80px_-12px_rgba(34,50,38,0.06)] lg:dark:shadow-[0_32px_96px_-12px_rgba(5,8,6,0.65)]
         ${showCart ? 'translate-y-0' : 'translate-y-full lg:translate-y-0'}
       `}>

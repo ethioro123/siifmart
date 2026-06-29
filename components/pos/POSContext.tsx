@@ -940,7 +940,7 @@ export const POSProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const getCustomerHistory = (customerId: string) => sales.filter(sale => sale.customerId === customerId);
     const getCustomerStats = (customerId: string) => { const customerSales = getCustomerHistory(customerId); return { totalSpent: customerSales.reduce((sum, sale) => sum + sale.total, 0), totalVisits: customerSales.length }; };
 
-    const value = {
+    const value = useMemo(() => ({
         cart, setCart, searchTerm, setSearchTerm, selectedCategory, setSelectedCategory,
         serverSearchResults, isSearchingServer, serverCustomerResults, isSearchingCustomerServer,
         isPaymentModalOpen, setIsPaymentModalOpen, isReceiptModalOpen, setIsReceiptModalOpen,
@@ -981,7 +981,30 @@ export const POSProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         handleUpdateTransferItem, handleConfirmTransferReceiving, handleCloseShift, getShiftSummary,
         handleSubmitShift, handleSearchForReturn, updateReturnConfig, handleProcessReturn, handleSearchKeyDown,
         handleSelectCustomer, getCustomerHistory, getCustomerStats
-    };
+    }), [
+        // Reactive state values
+        cart, searchTerm, selectedCategory, serverSearchResults, isSearchingServer,
+        serverCustomerResults, isSearchingCustomerServer, isPaymentModalOpen, isReceiptModalOpen,
+        selectedPaymentMethod, amountTendered, isProcessing, lastSale, showPointsPopup,
+        earnedPointsData, isRecallModalOpen, cartDiscount, appliedDiscountCode,
+        appliedDiscountCodeDetails, isDiscountModalOpen, discountCodeInput, discountCodeError,
+        isValidatingCode, isMiscItemModalOpen, miscItem, isRoundingEnabled, roundingAdjustment,
+        isReturnModalOpen, returnSearchId, foundSaleForReturn, returnConfig, priceUpdatedProducts,
+        isPriceUpdatesModalOpen, isShiftModalOpen, closingStep, cashDenominations,
+        discrepancyReason, countedCash, shiftNotes, activeShift, shiftStartTime,
+        isReceivingModalOpen, scannedBarcode, receivedItems, isQRScannerOpen, receivingMode,
+        selectedTransferForReceiving, transferReceivingItems, isConfirmingReceive,
+        isHoldOrderModalOpen, holdOrderNote, isOverwriteCartModalOpen, pendingRecallOrderId,
+        isEmailReceiptModalOpen, emailReceiptAddress, showCart, selectedCustomer,
+        isCustomerModalOpen, customerSearchTerm, isReceiptPreviewOpen, receiptPreviewHTML,
+        isUnknownBarcodeModalOpen, unknownBarcode, capturedBarcodeForModal,
+        // Computed values
+        filteredProducts, categories, currentStorePoints, storeBonus, userBonusShare,
+        subtotal, tax, taxBreakdown, rawTotal, total, changeDue, isPaymentValid,
+        filteredCustomers, needsStoreSelection, weightPromptProduct, isNativeApp,
+        // Callbacks (stable via useCallback)
+        addToCart, handleScanProduct, confirmWeightEntry
+    ]);
 
     return <POSContext.Provider value={value}>{children}</POSContext.Provider>;
 };
