@@ -4,6 +4,7 @@ import {
 } from 'lucide-react';
 import { WMSJob, User } from '../../../types';
 import { formatJobId } from '../../../utils/jobIdFormatter';
+import { useLanguage } from '../../../contexts/LanguageContext';
 
 interface AmendLine {
     index: number;
@@ -36,6 +37,7 @@ export const PickAmendModal: React.FC<PickAmendModalProps> = ({
     addNotification,
     refreshData,
 }) => {
+    const { t } = useLanguage();
     const [lines, setLines] = useState<AmendLine[]>([]);
     const [reason, setReason] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -161,8 +163,8 @@ export const PickAmendModal: React.FC<PickAmendModalProps> = ({
                             </p>
                         </div>
                     </div>
-                    <button onClick={onClose} className="p-2 hover:bg-zinc-100 dark:hover:bg-white/10 rounded-lg transition-colors">
-                        <X size={18} className="text-zinc-500" />
+                    <button onClick={onClose} className="p-2 hover:bg-zinc-100 dark:hover:bg-white/10 rounded-lg transition-colors" aria-label={t('warehouse.dismiss')}>
+                        <X size={18} className="text-zinc-550" />
                     </button>
                 </div>
 
@@ -205,13 +207,13 @@ export const PickAmendModal: React.FC<PickAmendModalProps> = ({
                                             <div className="flex items-center gap-4 shrink-0">
                                                 {/* Required */}
                                                 <div className="text-center">
-                                                    <p className="text-[8px] font-black text-zinc-400 uppercase tracking-widest">Required</p>
+                                                    <p className="text-[8px] font-black text-zinc-400 uppercase tracking-widest">{t('warehouse.expected')}</p>
                                                     <p className="text-sm font-black text-zinc-600 dark:text-zinc-400 font-mono">{line.required}</p>
                                                 </div>
                                                 {/* Picked */}
                                                 <div className="text-center">
-                                                    <p className="text-[8px] font-black text-zinc-400 uppercase tracking-widest">Picked</p>
-                                                    <p className={`text-sm font-black font-mono ${isDiff ? 'line-through text-zinc-400 dark:text-zinc-600' : 'text-zinc-800 dark:text-zinc-200'}`}>{line.picked}</p>
+                                                    <p className="text-[8px] font-black text-zinc-400 uppercase tracking-widest">{t('warehouse.picking')}</p>
+                                                    <p className={`text-sm font-black font-mono ${isDiff ? 'line-through text-zinc-400 dark:text-zinc-650' : 'text-zinc-800 dark:text-zinc-200'}`}>{line.picked}</p>
                                                 </div>
                                                 {/* Arrow */}
                                                 {isDiff && <ArrowRight size={14} className="text-amber-500" />}
@@ -255,7 +257,7 @@ export const PickAmendModal: React.FC<PickAmendModalProps> = ({
                         {/* Footer */}
                         <div className="p-5 border-t border-zinc-200 dark:border-white/10 bg-zinc-50/50 dark:bg-zinc-950/50 flex justify-between items-center shrink-0">
                             <button onClick={onClose} className="px-6 py-2.5 text-xs font-black uppercase tracking-widest text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-white transition-colors">
-                                Cancel
+                                {t('warehouse.dismiss')}
                             </button>
                             <button
                                 disabled={!hasChanges || !reason.trim()}
@@ -308,7 +310,7 @@ export const PickAmendModal: React.FC<PickAmendModalProps> = ({
                                 onClick={() => setStep('EDIT')}
                                 className="px-6 py-2.5 text-xs font-black uppercase tracking-widest text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-white transition-colors"
                             >
-                                ← Back
+                                &larr; Back
                             </button>
                             <button
                                 disabled={isSubmitting}
