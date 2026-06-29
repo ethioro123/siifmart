@@ -473,6 +473,14 @@ export const POSProductGrid: React.FC = () => {
                                             {t('pos.sale')}
                                         </div>
                                     )}
+
+                                    {product.stock <= 0 && (
+                                        <div className="absolute inset-0 bg-black/40 backdrop-blur-[1px] flex items-center justify-center z-10">
+                                            <span className="bg-red-600 text-white font-extrabold text-[9px] uppercase tracking-wider px-2.5 py-1 rounded-xl shadow-md border border-red-500/20">
+                                                {t('common.outOfStock')}
+                                            </span>
+                                        </div>
+                                    )}
                                 </div>
 
                                 <div className="flex-1 flex flex-col min-w-0">
