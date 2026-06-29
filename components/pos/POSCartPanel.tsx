@@ -237,7 +237,7 @@ export const POSCartPanel: React.FC = () => {
                         >
                             <span className="flex items-center gap-2">
                                 <Settings size={14} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
-                                Terminal Actions
+                                {t('pos.terminalActions')}
                             </span>
                             <span className={`text-[8px] transform transition-transform duration-300 ${showActions ? 'rotate-180' : ''}`}>▼</span>
                         </button>
@@ -255,7 +255,7 @@ export const POSCartPanel: React.FC = () => {
                                         className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-stone-100 dark:hover:bg-white/5 text-left transition-colors disabled:opacity-30 text-[10px] font-bold text-stone-700 dark:text-gray-300 cursor-pointer"
                                     >
                                         <PlayCircle size={14} className="text-amber-600 dark:text-amber-500 shrink-0" />
-                                        <span className="truncate">Recall ({heldOrders.length})</span>
+                                        <span className="truncate">{t('pos.recall')} ({heldOrders.length})</span>
                                     </button>
 
                                     <button
@@ -264,7 +264,7 @@ export const POSCartPanel: React.FC = () => {
                                         className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-stone-100 dark:hover:bg-white/5 text-left transition-colors text-[10px] font-bold text-stone-700 dark:text-gray-300 cursor-pointer"
                                     >
                                         <PauseCircle size={14} className="text-[#2C5E3B] dark:text-[#A9CBA2] shrink-0" />
-                                        <span className="truncate">Hold Order</span>
+                                        <span className="truncate">{t('pos.holdOrder')}</span>
                                     </button>
 
                                     <Protected permission="VOID_SALE">
@@ -274,7 +274,7 @@ export const POSCartPanel: React.FC = () => {
                                             className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-red-500/10 text-left transition-colors text-[10px] font-bold text-red-600 dark:text-red-400 cursor-pointer"
                                         >
                                             <Trash2 size={14} className="shrink-0" />
-                                            <span className="truncate">Clear Cart</span>
+                                            <span className="truncate">{t('pos.clearCart')}</span>
                                         </button>
                                     </Protected>
 
@@ -285,7 +285,7 @@ export const POSCartPanel: React.FC = () => {
                                             className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-stone-100 dark:hover:bg-white/5 text-left transition-colors text-[10px] font-bold text-stone-700 dark:text-gray-300 cursor-pointer"
                                         >
                                             <RotateCcw size={14} className="text-red-500 shrink-0" />
-                                            <span className="truncate">Returns</span>
+                                            <span className="truncate">{t('pos.returns')}</span>
                                         </button>
                                     </Protected>
 
@@ -295,7 +295,7 @@ export const POSCartPanel: React.FC = () => {
                                         className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-stone-100 dark:hover:bg-white/5 text-left transition-colors text-[10px] font-bold text-stone-700 dark:text-gray-300 cursor-pointer"
                                     >
                                         <Box size={14} className="text-[#2C5E3B] dark:text-[#A9CBA2] shrink-0" />
-                                        <span className="truncate">Cash Drawer</span>
+                                        <span className="truncate">{t('pos.openDrawer')}</span>
                                     </button>
 
                                     <button
@@ -304,7 +304,7 @@ export const POSCartPanel: React.FC = () => {
                                         className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-stone-100 dark:hover:bg-white/5 text-left transition-colors text-[10px] font-bold text-stone-700 dark:text-gray-300 cursor-pointer"
                                     >
                                         <Lock size={14} className="text-amber-600 dark:text-amber-500 shrink-0" />
-                                        <span className="truncate">Shift Ops</span>
+                                        <span className="truncate">{t('pos.activeShift')}</span>
                                     </button>
 
                                     <button
@@ -313,7 +313,7 @@ export const POSCartPanel: React.FC = () => {
                                         className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-stone-100 dark:hover:bg-white/5 text-left transition-colors text-[10px] font-bold text-stone-700 dark:text-gray-300 cursor-pointer"
                                     >
                                         <Printer size={14} className="text-[#2C5E3B] dark:text-[#A9CBA2] shrink-0" />
-                                        <span className="truncate">Reprint Last</span>
+                                        <span className="truncate">{t('pos.reprintLast')}</span>
                                     </button>
 
                                     <button
@@ -329,7 +329,7 @@ export const POSCartPanel: React.FC = () => {
                                                 </span>
                                             )}
                                         </div>
-                                        <span className="truncate">Prices</span>
+                                        <span className="truncate">{t('pos.prices')}</span>
                                     </button>
                                 </div>
                             </>

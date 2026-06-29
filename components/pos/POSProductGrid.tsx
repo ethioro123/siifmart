@@ -69,7 +69,7 @@ export const POSProductGrid: React.FC = () => {
                             <input
                                 ref={searchInputRef}
                                 type="text"
-                                placeholder="Search products or scan barcode..."
+                                placeholder={t('pos.searchProducts')}
                                 className="bg-transparent border-none ml-3 flex-1 text-[#1E3F27] dark:text-[#EAE5D9] outline-none placeholder-stone-400 dark:placeholder-stone-500 font-medium min-w-0"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -104,7 +104,7 @@ export const POSProductGrid: React.FC = () => {
                                     </button>
                                     <div className="flex flex-col items-center gap-3">
                                         <div className="text-center">
-                                            <p className="text-yellow-400 text-sm font-medium mb-1">Unknown Barcode Detected</p>
+                                            <p className="text-yellow-400 text-sm font-medium mb-1">{t('pos.unknownBarcodeDetected')}</p>
                                             <p className="text-yellow-300 text-2xl font-mono font-bold tracking-wider">{unknownBarcode}</p>
                                         </div>
                                         <div className="flex items-center gap-2">
@@ -112,7 +112,7 @@ export const POSProductGrid: React.FC = () => {
                                                 onClick={() => setUnknownBarcode('')}
                                                 className="px-4 py-2 bg-white/5 border border-white/10 text-gray-300 hover:bg-white/10 rounded-xl text-sm font-bold transition-all"
                                             >
-                                                Dismiss
+                                                {t('pos.dismiss')}
                                             </button>
                                             <button
                                                 onClick={() => {
@@ -122,7 +122,7 @@ export const POSProductGrid: React.FC = () => {
                                                 className="px-4 py-2 bg-yellow-500 text-black hover:bg-yellow-400 rounded-xl text-sm font-bold flex items-center gap-2 transition-all"
                                             >
                                                 <Link size={14} />
-                                                Link Barcode
+                                                {t('pos.linkBarcode')}
                                             </button>
                                         </div>
                                     </div>
@@ -159,11 +159,11 @@ export const POSProductGrid: React.FC = () => {
                                 <CheckCircle size={14} />
                             )}
                             <span>
-                                {posSyncStatus === 'offline' ? 'Offline' :
-                                    posSyncStatus === 'syncing' ? 'Syncing...' :
-                                        (posPendingSyncCount || 0) > 0 ? 'Sync Pending' :
-                                            'Online'}
-                                {((posPendingSyncCount || 0) > 0) && ` (${posPendingSyncCount} queued)`}
+                                {posSyncStatus === 'offline' ? t('pos.offline') :
+                                    posSyncStatus === 'syncing' ? t('pos.syncing') :
+                                        (posPendingSyncCount || 0) > 0 ? t('pos.syncPending') :
+                                            t('pos.online')}
+                                {((posPendingSyncCount || 0) > 0) && ` (${posPendingSyncCount} ${t('pos.queued')})`}
                             </span>
                         </button>
                     </div>
@@ -182,7 +182,7 @@ export const POSProductGrid: React.FC = () => {
                             </div>
                             <div>
                                 <p className="text-xs font-bold text-[#1E3F27] dark:text-[#EAE5D9] flex items-center gap-1">
-                                    Team Bonus
+                                    {t('pos.teamBonus')}
                                     <span className={`px-1.5 py-0.5 rounded text-[8px] font-bold bg-gradient-to-r ${storeBonus.tier.tierColor === 'gray' ? 'from-gray-400 to-gray-500' :
                                         storeBonus.tier.tierColor === 'amber' ? 'from-amber-500 to-amber-600' :
                                             storeBonus.tier.tierColor === 'yellow' ? 'from-yellow-400 to-yellow-500' :
@@ -193,14 +193,14 @@ export const POSProductGrid: React.FC = () => {
                                         {storeBonus.tier.tierName}
                                     </span>
                                 </p>
-                                <p className="text-[10px] text-[#4D6E56] dark:text-[#7A9E83]">{currentStorePoints.monthlyPoints.toLocaleString()} pts</p>
+                                <p className="text-[10px] text-[#4D6E56] dark:text-[#7A9E83]">{currentStorePoints.monthlyPoints.toLocaleString()} {t('pos.pts')}</p>
                             </div>
                             {userBonusShare && (
                                 <div className="text-right pl-2 border-l border-[#2C5E3B]/20">
                                     <p className="text-xs text-[#2C5E3B] dark:text-[#A9CBA2] font-bold">
                                         {formatCompactNumber(userBonusShare.amount, { currency: CURRENCY_SYMBOL, maxFractionDigits: 0 })}
                                     </p>
-                                    <p className="text-[10px] text-[#4D6E56] dark:text-gray-500">your share</p>
+                                    <p className="text-[10px] text-[#4D6E56] dark:text-gray-500">{t('pos.yourShare')}</p>
                                 </div>
                             )}
                         </div>
@@ -335,7 +335,7 @@ export const POSProductGrid: React.FC = () => {
                                     onClick={() => setVisibleCount(prev => prev + 40)}
                                     className="px-6 py-3 bg-[#2C5E3B]/10 hover:bg-[#2C5E3B] dark:bg-white/5 dark:hover:bg-white/10 border border-[#2C5E3B]/20 dark:border-white/10 hover:text-white text-[#2C5E3B] dark:text-[#A9CBA2] font-bold text-xs uppercase tracking-widest rounded-2xl transition-all shadow-sm hover:shadow active:scale-95 flex items-center gap-2"
                                 >
-                                    Load More Products ({filteredProducts.length - visibleCount} remaining)
+                                    {t('pos.loadMoreProducts')} ({filteredProducts.length - visibleCount} {t('pos.remaining')})
                                 </button>
                             </div>
                         )}
