@@ -57,6 +57,8 @@ export const PickHeader: React.FC<PickHeaderProps> = ({
                         <input
                             type="text"
                             placeholder={`${t('warehouse.searchByIdOrOrder')}`}
+                            aria-label={t('warehouse.searchByIdOrOrder')}
+                            title={t('warehouse.searchByIdOrOrder')}
                             value={pickSearch}
                             onChange={(e) => setPickSearch(e.target.value)}
                             className="woody-input w-full pl-12 pr-4 py-3 text-xs"
@@ -69,7 +71,7 @@ export const PickHeader: React.FC<PickHeaderProps> = ({
                             onClick={() => setViewMode('Process')}
                             className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-[0.15em] transition-all ${viewMode === 'Process' ? 'bg-[#2C5E3B] dark:bg-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24] shadow-md' : 'text-slate-500 dark:text-zinc-500 hover:text-[#2C5E3B] dark:hover:text-white'}`}
                         >
-                            {t('warehouse.activeTransfers').split(' ')[0]}
+                            {t('warehouse.putaway.process')}
                         </button>
                         <button
                             onClick={() => setViewMode('History')}
@@ -83,7 +85,7 @@ export const PickHeader: React.FC<PickHeaderProps> = ({
                     <div className="grid grid-cols-3 gap-3">
                         {[
                             { count: pendingCount, label: t('warehouse.pending'), theme: 'amber' },
-                            { count: inProgressCount, label: t('warehouse.activeTransfers').split(' ')[0], theme: 'blue' },
+                            { count: inProgressCount, label: t('warehouse.inProgress'), theme: 'blue' },
                             { count: completedCount, label: t('warehouse.completed'), theme: 'emerald' }
                         ].map((stat, i) => (
                             <div key={i} className="bg-stone-50 dark:bg-white/5 border border-stone-200/50 dark:border-white/10 rounded-2xl px-4 py-2.5 shadow-inner hover:bg-stone-100 dark:hover:bg-white/10 transition-all duration-300">
@@ -92,7 +94,7 @@ export const PickHeader: React.FC<PickHeaderProps> = ({
                                     stat.theme === 'blue' ? 'text-[#2C5E3B] dark:text-[#A9CBA2]' :
                                     'text-emerald-600 dark:text-emerald-400'
                                 }`}>{stat.count}</p>
-                                <p className="text-[10px] text-slate-400 dark:text-zinc-650 font-black uppercase tracking-widest">{stat.label}</p>
+                                <p className="text-[10px] text-slate-400 dark:text-zinc-655 font-black uppercase tracking-widest">{stat.label}</p>
                             </div>
                         ))}
                     </div>

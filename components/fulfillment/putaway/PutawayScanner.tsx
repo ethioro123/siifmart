@@ -368,6 +368,8 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
                         <input
                             ref={inputRef}
                             type="text"
+                            aria-label="Scan location or SKU barcode"
+                            title="Scan location or SKU barcode"
                             value={inputVal}
                             onChange={(e) => setInputVal(e.target.value)}
                             onKeyDown={step === 'ITEM' ? scanOnlyHandlers.onKeyDown : undefined}

@@ -627,8 +627,10 @@ export const PackTab: React.FC = () => {
                                         onKeyDown={scanOnlyHandlers.onKeyDown}
                                         onPaste={scanOnlyHandlers.onPaste}
                                         disabled={isScanning}
+                                        aria-label="Scan Product Barcode"
+                                        title="Scan Product Barcode"
                                         className="flex-1 bg-transparent text-gray-900 dark:text-white text-lg font-mono tracking-wider outline-none placeholder-gray-400 dark:placeholder-gray-600 disabled:opacity-50"
-                                        placeholder="Scan barcode to start packing..."
+                                        placeholder={t('warehouse.scanBarcode')}
                                         autoComplete="off"
                                     />
                                     {scanInput && (
@@ -637,7 +639,7 @@ export const PackTab: React.FC = () => {
                                             disabled={isScanning}
                                             className="px-5 py-2 bg-[#2C5E3B] hover:bg-[#3a7a4d] text-white rounded-xl font-black text-xs uppercase tracking-widest transition-all active:scale-95 disabled:opacity-50"
                                         >
-                                            GO
+                                            {t('warehouse.auxiliary.go')}
                                         </button>
                                     )}
                                 </div>
@@ -686,6 +688,7 @@ export const PackTab: React.FC = () => {
                             setIsDetailsOpen(true);
                         }}
                         onReturn={(job) => setReturnJob(job)}
+                        t={t}
                     />
                 )}
             </div>

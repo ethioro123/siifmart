@@ -3,12 +3,12 @@ import {
     X, Package, Box, MapPin, CheckCircle, ArrowRight,
     Clock, Info, Barcode, Loader2
 } from 'lucide-react';
-import { WMSJob, User, Site, Product } from '../../../types';
+import { WMSJob, User, Site, Product, Employee } from '../../../types';
 import { formatJobId } from '../../../utils/jobIdFormatter';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { isWeightBased, isVolumeBased } from '../../../utils/units';
 
-export const formatBeautifulLocation = (loc: string | undefined, theme: 'purple' | 'cyan' | 'woody' = 'woody') => {
+export const formatBeautifulLocation = (loc: string | undefined, theme: 'purple' | 'cyan' | 'woody' = 'woody', t?: (key: string) => string) => {
     if (!loc || loc === 'PENDING') {
         return <span className="text-base font-mono font-black text-gray-900 dark:text-white tracking-widest">{loc || 'PENDING'}</span>;
     }
@@ -22,7 +22,7 @@ export const formatBeautifulLocation = (loc: string | undefined, theme: 'purple'
                 ? 'bg-[#2C5E3B]/10 dark:bg-[#2C5E3B]/20 text-[#2C5E3B] dark:text-[#A9CBA2] border-[#2C5E3B]/20 dark:border-[#A9CBA2]/30'
                 : 'bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-500/30';
         const dimThemeClass = theme === 'woody'
-            ? 'bg-[#FAF8F5] dark:bg-[#A9CBA2]/10 border-[#E2DCCE]/60 dark:border-[#A9CBA2]/15 text-[#2C5E3B] dark:text-[#A9CBA2]'
+            ? 'bg-[#FAF8F5] dark:bg-[#A9CBA2]/10 border-[#E2DCCE]/65 dark:border-[#A9CBA2]/15 text-[#2C5E3B] dark:text-[#A9CBA2]'
             : theme === 'purple'
                 ? 'bg-[#2C5E3B]/5 dark:bg-[#2C5E3B]/10 text-[#2C5E3B]/80 dark:text-[#A9CBA2]/80 border-[#2C5E3B]/10 dark:border-[#A9CBA2]/20'
                 : 'bg-amber-50 dark:bg-amber-500/10 text-amber-600/80 dark:text-amber-300/80 border-amber-100 dark:border-amber-500/20';
@@ -30,15 +30,15 @@ export const formatBeautifulLocation = (loc: string | undefined, theme: 'purple'
         return (
             <div className="flex items-center gap-1.5 mt-0.5">
                 <span className={`px-2 py-0.5 rounded text-xs font-bold border whitespace-nowrap ${themeClass}`}>
-                    Zone {parts[0]}
+                    {t ? t('warehouse.zone') : 'Zone'} {parts[0]}
                 </span>
                 <span className="text-gray-400 dark:text-gray-600/50 font-black text-[10px]">-</span>
                 <span className={`px-2 py-0.5 rounded text-xs font-bold border whitespace-nowrap ${dimThemeClass}`}>
-                    Aisle {parts[1]}
+                    {t ? t('warehouse.aisle') : 'Aisle'} {parts[1]}
                 </span>
                 <span className="text-gray-400 dark:text-gray-600/50 font-black text-[10px]">-</span>
                 <span className={`px-2 py-0.5 rounded text-xs font-bold border whitespace-nowrap ${dimThemeClass}`}>
-                    Bay {parts[2]}
+                    {t ? t('warehouse.bay') : 'Bay'} {parts[2]}
                 </span>
             </div>
         );
@@ -54,6 +54,7 @@ interface PickJobModalProps {
     user: User | null;
     sites: Site[];
     products: Product[];
+    employees?: Employee[];
     onStartPick: (job: WMSJob) => void;
     onCompleteJob: (job: WMSJob) => void;
     isSubmitting: boolean;
@@ -68,6 +69,7 @@ export const PickJobModal: React.FC<PickJobModalProps> = ({
     user,
     sites,
     products,
+    employees = [],
     onStartPick,
     onCompleteJob,
     isSubmitting,
@@ -147,7 +149,7 @@ export const PickJobModal: React.FC<PickJobModalProps> = ({
                                                 <>
                                                     {sourceSite.name} <span className="text-gray-500 dark:text-zinc-600 font-normal lowercase">({sourceSite.code || sourceSite.id})</span>
                                                 </>
-                                            ) : 'Local Site'}
+                                            ) : t('warehouse.picking.localSite')}
                                         </span>
                                     </span>
                                     <span className="flex items-center gap-1.5 text-gray-500">
@@ -166,7 +168,7 @@ export const PickJobModal: React.FC<PickJobModalProps> = ({
                 <div className="flex-1 overflow-y-auto p-3 md:p-6 space-y-3 md:space-y-6 custom-scrollbar dark:bg-[radial-gradient(circle_at_50%_0%,rgba(44,94,59,0.03),transparent)]">
                     <div className="hidden md:grid grid-cols-1 md:grid-cols-3 gap-4 shrink-0">
                         <div className="bg-[#FAF8F5]/50 dark:bg-white/[0.02] border border-[#E2DCCE]/65 dark:border-white/5 p-4 rounded-2xl">
-                            <span className="text-[10px] text-gray-500 dark:text-gray-500 font-black uppercase tracking-widest block mb-2">{t('warehouse.putaway.progress')}</span>
+                            <span className="text-[10px] text-gray-550 dark:text-gray-500 font-black uppercase tracking-widest block mb-2">{t('warehouse.putaway.progress')}</span>
                             <div className="flex items-end justify-between mb-2">
                                 <span className="text-2xl font-mono font-black text-gray-900 dark:text-white">{Math.round(progressPercent)}%</span>
                                 <span className="text-xs text-gray-500 dark:text-gray-400 font-bold">{completedItems} / {totalItems} SKU's</span>
@@ -176,7 +178,7 @@ export const PickJobModal: React.FC<PickJobModalProps> = ({
                             </div>
                         </div>
                         <div className="bg-[#FAF8F5]/50 dark:bg-white/[0.02] border border-[#E2DCCE]/65 dark:border-white/5 p-4 rounded-2xl">
-                            <span className="text-[10px] text-gray-550 dark:text-gray-550 font-black uppercase tracking-widest block mb-2">{t('warehouse.putaway.jobDetails').split(' ')[0]} Status</span>
+                            <span className="text-[10px] text-gray-550 dark:text-gray-500 font-black uppercase tracking-widest block mb-2">{t('warehouse.status')}</span>
                             <div className="flex items-center gap-2 mt-1">
                                 <div className={`w-2 h-2 rounded-full animate-pulse ${job.status === 'Completed' ? 'bg-green-500' : 'bg-[#2C5E3B] dark:bg-[#A9CBA2]'}`} />
                                 <span className={`text-lg font-bold uppercase tracking-tight ${job.status === 'Completed' ? 'text-green-600 dark:text-green-400' : 'text-[#2C5E3B] dark:text-[#A9CBA2]'}`}>
@@ -185,7 +187,7 @@ export const PickJobModal: React.FC<PickJobModalProps> = ({
                             </div>
                         </div>
                         <div className="bg-[#FAF8F5]/50 dark:bg-white/[0.02] border border-[#E2DCCE]/65 dark:border-white/5 p-4 rounded-2xl">
-                            <span className="text-[10px] text-gray-550 dark:text-gray-550 font-black uppercase tracking-widest block mb-2">Job Number</span>
+                            <span className="text-[10px] text-gray-550 dark:text-gray-500 font-black uppercase tracking-widest block mb-2">{t('warehouse.jobId')}</span>
                             <div className="flex items-center gap-2 mt-1">
                                 <Info size={16} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
                                 <span className="text-lg font-mono font-bold text-gray-900 dark:text-white truncate">
@@ -232,11 +234,11 @@ export const PickJobModal: React.FC<PickJobModalProps> = ({
 
                                             <div className="min-w-0">
                                                 <h4 className={`text-xs md:text-base font-bold tracking-tight mb-0.5 md:mb-1 group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] transition-colors truncate ${isDone ? 'line-through text-gray-500' : 'text-gray-900 dark:text-white'}`}>
-                                                    {item.name || product?.name || 'Unknown SKU'}
+                                                    {item.name || product?.name || t('warehouse.picking.unknownSKU')}
                                                 </h4>
                                                 <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-3">
                                                     <span className="text-[8px] md:text-[10px] font-mono font-black text-gray-955 dark:text-[#A9CBA2] bg-stone-50 dark:bg-black/40 px-1.5 md:px-2 py-0.5 rounded border border-[#E2DCCE]/60 dark:border-white/5 uppercase tracking-tighter w-fit">
-                                                        {item.sku || product?.sku || 'NO SKU'}
+                                                        {item.sku || product?.sku || t('warehouse.picking.noSKUCaps')}
                                                     </span>
                                                     {product?.barcode && (
                                                         <div className="flex items-center gap-1 md:gap-1.5 text-[8px] md:text-[10px] text-[#2C5E3B] dark:text-[#A9CBA2] font-bold uppercase tracking-widest w-fit">
@@ -250,10 +252,10 @@ export const PickJobModal: React.FC<PickJobModalProps> = ({
 
                                         <div className="flex flex-col xl:flex-row items-stretch xl:items-center justify-between xl:justify-end gap-4 xl:gap-8 pl-0 xl:pl-4 border-t xl:border-t-0 border-gray-50 dark:border-white/5 pt-4 xl:pt-0 w-full xl:w-auto shrink-0">
                                             <div className="text-left md:text-right flex flex-col items-start md:items-end w-full md:w-auto">
-                                                <span className="text-[8px] md:text-[9px] text-gray-500 dark:text-gray-600 font-black uppercase tracking-[0.2em] block mb-0.5 md:mb-1">{t('warehouse.misc.selectedStorageLocation')}</span>
+                                                <span className="text-[8px] md:text-[9px] text-gray-500 dark:text-gray-600 font-black uppercase tracking-[0.2em] block mb-0.5 md:mb-1">{t('warehouse.selectedStorageLocation')}</span>
                                                 <div className="flex items-center gap-1.5 md:gap-2">
                                                     <div className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-[#2C5E3B] dark:bg-[#A9CBA2] shadow-sm mt-0.5" />
-                                                    {formatBeautifulLocation(product?.location, 'woody')}
+                                                    {formatBeautifulLocation(product?.location, 'woody', t)}
                                                 </div>
                                             </div>
 
@@ -310,8 +312,14 @@ export const PickJobModal: React.FC<PickJobModalProps> = ({
                 <div className="p-3 md:p-6 border-t border-[#E2DCCE]/60 dark:border-white/10 bg-[#FAF8F5]/50 dark:bg-black/40 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 md:gap-4 shrink-0">
                     <div className="hidden md:flex items-center gap-4">
                         <div className="flex flex-col">
-                            <span className="text-[10px] text-gray-550 font-black uppercase tracking-widest">{t('warehouse.putaway.jobDetails')} Specialist</span>
-                            <span className="text-sm font-bold text-gray-900 dark:text-gray-300">{job.assignedTo || 'Unassigned / Available'}</span>
+                            <span className="text-[10px] text-gray-550 font-black uppercase tracking-widest">{t('warehouse.putaway.jobDetails').split(' ')[0]} {t('warehouse.assignedTo') || 'Assigned'}</span>
+                            <span className="text-sm font-bold text-gray-900 dark:text-gray-300">
+                                {(() => {
+                                    if (!job.assignedTo) return t('warehouse.putaway.unassigned') || 'Unassigned / Available';
+                                    const emp = employees.find(e => e.id === job.assignedTo || e.name === job.assignedTo || (e as any).email === job.assignedTo);
+                                    return emp?.name || job.assignedTo.slice(-8).toUpperCase();
+                                })()}
+                            </span>
                         </div>
                     </div>
 

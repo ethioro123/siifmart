@@ -4,6 +4,7 @@ import { StockMovement, Product } from '../../../types';
 import { formatCompactNumber, formatDateTime } from '../../../utils/formatting';
 import { CURRENCY_SYMBOL } from '../../../constants';
 import Pagination from '../../shared/Pagination';
+import { useLanguage } from '../../../contexts/LanguageContext';
 
 interface CountHistoryProps {
     movements: StockMovement[];
@@ -20,6 +21,7 @@ export const CountHistory: React.FC<CountHistoryProps> = ({
     setSelectedJob,
     setIsDetailsOpen
 }) => {
+    const { t } = useLanguage();
     const [countHistorySearch, setCountHistorySearch] = useState('');
     const [countHistoryPage, setCountHistoryPage] = useState(1);
 
@@ -51,10 +53,10 @@ export const CountHistory: React.FC<CountHistoryProps> = ({
                         <div className="p-2 bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 rounded-xl text-[#2C5E3B] dark:text-[#A9CBA2]">
                             <CheckCircle size={20} />
                         </div>
-                        <h4 className="text-stone-500 dark:text-stone-400 text-sm font-bold uppercase">Inventory Accuracy</h4>
+                        <h4 className="text-stone-500 dark:text-stone-400 text-sm font-bold uppercase">{t('warehouse.inventoryAccuracy')}</h4>
                     </div>
                     <p className="text-3xl font-bold text-stone-900 dark:text-stone-100">98.5%</p>
-                    <p className="text-xs text-green-600 dark:text-green-400 mt-1">↑ 1.2% from last month</p>
+                    <p className="text-xs text-green-600 dark:text-green-400 mt-1">{t('warehouse.varianceFromLastMonth')}</p>
                 </div>
 
                 <div className="glass-panel p-6 rounded-2xl">
@@ -62,7 +64,7 @@ export const CountHistory: React.FC<CountHistoryProps> = ({
                         <div className="p-2 bg-red-500/10 rounded-xl text-red-600 dark:text-red-400">
                             <AlertTriangle size={20} />
                         </div>
-                        <h4 className="text-stone-500 dark:text-stone-400 text-sm font-bold uppercase">Net Variance Value</h4>
+                        <h4 className="text-stone-500 dark:text-stone-400 text-sm font-bold uppercase">{t('warehouse.netVarianceValue')}</h4>
                     </div>
                     <p className="text-3xl font-bold text-stone-900 dark:text-stone-100">
                         {formatCompactNumber(movements
@@ -73,7 +75,7 @@ export const CountHistory: React.FC<CountHistoryProps> = ({
                                  return sum + (m.type === 'IN' ? value : -value);
                              }, 0), { currency: CURRENCY_SYMBOL })}
                     </p>
-                    <p className="text-xs text-stone-500 dark:text-stone-400 mt-1">Total value of adjustments</p>
+                    <p className="text-xs text-stone-500 dark:text-stone-400 mt-1">{t('warehouse.totalAdjustmentValue')}</p>
                 </div>
 
                 <div className="glass-panel p-6 rounded-2xl">
@@ -81,12 +83,12 @@ export const CountHistory: React.FC<CountHistoryProps> = ({
                         <div className="p-2 bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 rounded-xl text-[#2C5E3B] dark:text-[#A9CBA2]">
                             <RotateCcw size={20} />
                         </div>
-                        <h4 className="text-stone-500 dark:text-stone-400 text-sm font-bold uppercase">Cycle Counts YTD</h4>
+                        <h4 className="text-stone-500 dark:text-stone-400 text-sm font-bold uppercase">{t('warehouse.cycleCountsYTD')}</h4>
                     </div>
                     <p className="text-3xl font-bold text-stone-900 dark:text-stone-100">
                         {movements.filter(m => m.reason.includes('Cycle Count')).length}
                     </p>
-                    <p className="text-xs text-stone-500 dark:text-stone-400 mt-1">Items counted this year</p>
+                    <p className="text-xs text-stone-500 dark:text-stone-400 mt-1">{t('warehouse.itemsCountedThisYear')}</p>
                 </div>
             </div>
 
@@ -96,9 +98,9 @@ export const CountHistory: React.FC<CountHistoryProps> = ({
                     <div>
                         <h4 className="text-sm font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2 uppercase tracking-wide">
                             <HistoryIcon size={18} className="text-stone-500 dark:text-stone-400" />
-                            Count History
+                            {t('warehouse.countHistory')}
                         </h4>
-                        <p className="text-stone-500 dark:text-stone-400 text-[10px]">Recent variance and cycle count adjustments</p>
+                        <p className="text-stone-500 dark:text-stone-400 text-[10px]">{t('warehouse.recentVarianceAdjustments')}</p>
                     </div>
 
                     {/* History Search */}
@@ -106,7 +108,9 @@ export const CountHistory: React.FC<CountHistoryProps> = ({
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-500" size={14} />
                         <input
                             type="text"
-                            placeholder="Search history..."
+                            placeholder={t('warehouse.searchHistory')}
+                            aria-label="Search count history"
+                            title="Search count history"
                             value={countHistorySearch}
                             onChange={(e) => setCountHistorySearch(e.target.value)}
                             className="woody-input pl-9 text-xs py-2"
@@ -140,7 +144,7 @@ export const CountHistory: React.FC<CountHistoryProps> = ({
                                                 <p className="text-[9px] text-stone-400 dark:text-stone-500 mt-0.5">{formatDateTime(m.date)}</p>
                                             </div>
                                             <div className="text-right text-stone-900 dark:text-stone-100 font-bold text-xs">
-                                                {m.quantity} <span className="text-[9px] text-stone-500 dark:text-stone-400 font-normal">units</span>
+                                                {m.quantity} <span className="text-[9px] text-stone-500 dark:text-stone-400 font-normal">{t('warehouse.units')}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -158,7 +162,7 @@ export const CountHistory: React.FC<CountHistoryProps> = ({
                     </>
                 ) : (
                     <div className="text-center py-10 bg-stone-50/10 dark:bg-[#1C2620]/10 rounded-2xl border border-dashed border-[#E2DCCE]/30 dark:border-[#A9CBA2]/[0.04]">
-                        <p className="text-stone-500 dark:text-stone-400 text-xs">No matching history found</p>
+                        <p className="text-stone-500 dark:text-stone-400 text-xs">{t('warehouse.noMatchingHistory')}</p>
                     </div>
                 )}
             </div>

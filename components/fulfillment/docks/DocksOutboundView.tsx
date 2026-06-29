@@ -255,6 +255,8 @@ export const DocksOutboundView: React.FC<DocksOutboundViewProps> = ({
                                                                 <input
                                                                     type="text"
                                                                     placeholder="Enter Driver Name..."
+                                                                    aria-label="External Driver Name"
+                                                                    title="External Driver Name"
                                                                     defaultValue={assignedJob.externalCarrierName || ''}
                                                                     key={`carrier-${assignedJob.id}-${assignedJob.deliveryMethod}`}
                                                                     onBlur={async (e) => {
@@ -274,6 +276,7 @@ export const DocksOutboundView: React.FC<DocksOutboundViewProps> = ({
                                                             ) : (
                                                                 <select
                                                                     title="Assign Driver"
+                                                                    aria-label="Assign Driver"
                                                                     value={assignedJob.assignedTo || ''}
                                                                     onChange={async (e) => {
                                                                         const driverId = e.target.value || null;

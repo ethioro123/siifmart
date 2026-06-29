@@ -247,6 +247,7 @@ export const PickTab: React.FC = () => {
                         user={user}
                         sites={sites}
                         products={products}
+                        employees={employees}
                         onStartPick={handleStartPick}
                         onCompleteJob={handleCompleteJob}
                         isSubmitting={isSubmitting}

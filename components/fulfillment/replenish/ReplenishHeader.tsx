@@ -192,6 +192,8 @@ export const ReplenishHeader: React.FC<ReplenishHeaderProps> = ({
                 <input
                     type="text"
                     placeholder="Scan Product Barcode or Search Inventory Matrix..."
+                    aria-label="Scan or Search Inventory"
+                    title="Scan or Search Inventory"
                     value={replenishSearch}
                     onChange={(e) => setReplenishSearch(e.target.value)}
                     className="woody-input pl-11 text-[11px]"

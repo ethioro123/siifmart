@@ -45,7 +45,7 @@ export const PickList: React.FC<PickListProps> = ({
 
     const handleDelete = async (e: React.MouseEvent, jobId: string) => {
         e.stopPropagation();
-        if (window.confirm('Are you sure you want to permanently delete this job?')) {
+        if (window.confirm(t('warehouse.picking.jobDeleteConfirmPrompt'))) {
             await deleteJob(jobId);
         }
     };
@@ -147,7 +147,7 @@ export const PickList: React.FC<PickListProps> = ({
                                                     </div>
                                                     <span className="w-1 h-1 rounded-full bg-zinc-300 dark:bg-gray-600" />
                                                     <span className="text-[10px] text-zinc-500 dark:text-gray-400 font-bold uppercase tracking-widest truncate max-w-[80px]">
-                                                        {lineItems[0]?.sku || 'No SKU'}
+                                                        {lineItems[0]?.sku || t('warehouse.picking.noSKU')}
                                                     </span>
                                                     <span className="w-1 h-1 rounded-full bg-zinc-300 dark:bg-gray-600" />
                                                     <span className="text-[10px] text-zinc-500 dark:text-gray-400 font-bold uppercase tracking-widest">

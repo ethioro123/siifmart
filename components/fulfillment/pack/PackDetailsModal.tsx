@@ -1,10 +1,10 @@
 import React from 'react';
 import { X, Calendar, User, Package, Archive, Box, MapPin, Printer, ArrowRight, Undo2 } from 'lucide-react';
 import { WMSJob, Product } from '../../../types';
-import { useFulfillment } from '../FulfillmentContext';
 import { formatDateTime } from '../../../utils/formatting';
 import { formatJobId } from '../../../utils/jobIdFormatter';
 import { formatProductSize, isWeightBased, isVolumeBased } from '../../../utils/units';
+import { useLanguage } from '../../../contexts/LanguageContext';
 
 interface PackDetailsModalProps {
     selectedItem: WMSJob;
@@ -27,6 +27,7 @@ export const PackDetailsModal: React.FC<PackDetailsModalProps> = ({
     onReturn,
     onReprintLabel
 }) => {
+    const { t } = useLanguage();
     // Resolve User Name
     const userId = selectedItem.completedBy || selectedItem.assignedTo;
     const userObj = employees.find(e => e.id === userId);
@@ -74,7 +75,7 @@ export const PackDetailsModal: React.FC<PackDetailsModalProps> = ({
     const data = {
         id: selectedItem.id,
         reference: formatJobId(selectedItem),
-        title: 'Pack Order',
+        title: t('warehouse.packJobTitle'),
         status: selectedItem.status,
         date: selectedItem.updatedAt || selectedItem.createdAt || new Date().toISOString(),
         userName: userName,
@@ -95,30 +96,30 @@ export const PackDetailsModal: React.FC<PackDetailsModalProps> = ({
                 {/* Header */}
                 <div className="p-3 md:p-6 border-b border-zinc-200 dark:border-white/10 flex justify-between items-start bg-zinc-50/80 dark:bg-zinc-950/50 backdrop-blur-sm shrink-0">
                     <div className="flex gap-3 md:gap-4 relative z-10">
-                        <div className="p-2 md:p-3 rounded-lg md:rounded-xl border border-zinc-300 dark:border-[#A9CBA2]/20 bg-zinc-100 dark:bg-[#2C5E3B]/10 text-zinc-950 dark:text-[#A9CBA2] shadow-md dark:shadow-[#2C5E3B]/20 transition-all duration-500">
+                        <div className="p-2 md:p-3 rounded-lg md:rounded-xl border border-zinc-300 dark:border-[#A9CBA2]/20 bg-zinc-100 dark:bg-[#2C5E3B]/10 text-zinc-955 dark:text-[#A9CBA2] shadow-md dark:shadow-[#2C5E3B]/20 transition-all duration-500">
                             <Archive size={20} className="md:w-6 md:h-6" />
                         </div>
                         <div>
                             <div className="flex items-center gap-2 mb-0.5 md:mb-1">
-                                <h3 className="text-lg md:text-xl font-black text-zinc-950 dark:text-zinc-100 uppercase tracking-tight font-mono leading-none">{data.reference}</h3>
+                                <h3 className="text-lg md:text-xl font-black text-zinc-955 dark:text-zinc-100 uppercase tracking-tight font-mono leading-none">{data.reference}</h3>
                                 <div className="flex gap-1 md:gap-2">
                                     <span className={`px-1.5 md:px-2 py-0.5 rounded text-[8px] md:text-[9px] font-mono border ${data.status === 'Completed' ? 'bg-green-500/10 border-green-500/20 text-green-600 dark:text-green-400' : 'bg-zinc-100 border-zinc-200 text-zinc-600 dark:bg-white/5 dark:border-white/10 dark:text-zinc-400'}`}>
                                         {data.status}
                                     </span>
                                     {itemsArray.some(li => (li.returnedQty || 0) > 0) && (
                                         <span className="px-1.5 md:px-2 py-0.5 rounded text-[8px] md:text-[9px] font-mono border bg-red-500/10 border-red-500/20 text-red-600 dark:text-red-400">
-                                            {itemsArray.filter(li => (li.returnedQty || 0) > 0).length} RET
+                                            {itemsArray.filter(li => (li.returnedQty || 0) > 0).length} {t('warehouse.packing.ret')}
                                         </span>
                                     )}
                                 </div>
                             </div>
-                            <p className="text-zinc-600 dark:text-zinc-500 text-[9px] md:text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 md:gap-2 md:mt-1">
-                                <Box size={10} className="md:w-3 md:h-3 text-zinc-950 dark:text-zinc-400" />
+                            <p className="text-zinc-600 dark:text-zinc-550 text-[9px] md:text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 md:gap-2 md:mt-1">
+                                <Box size={10} className="md:w-3 md:h-3 text-zinc-955 dark:text-zinc-400" />
                                 {data.title}
                             </p>
                         </div>
                     </div>
-                    <button onClick={onClose} className="p-1.5 md:p-2 hover:bg-zinc-100 dark:hover:bg-white/10 rounded-lg text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-gray-200 transition-colors" aria-label="Close details">
+                    <button onClick={onClose} className="p-1.5 md:p-2 hover:bg-zinc-100 dark:hover:bg-white/10 rounded-lg text-gray-405 dark:text-gray-500 hover:text-gray-900 dark:hover:text-gray-200 transition-colors" aria-label={t('warehouse.dismiss')}>
                         <X size={18} className="md:w-5 md:h-5" />
                     </button>
                 </div>
@@ -130,18 +131,18 @@ export const PackDetailsModal: React.FC<PackDetailsModalProps> = ({
                             <Calendar size={14} className="md:w-[18px] md:h-[18px]" />
                         </div>
                         <div className="min-w-0">
-                            <p className="text-[8px] md:text-[10px] text-zinc-400 dark:text-zinc-500 uppercase font-black tracking-widest leading-none mb-0.5 md:mb-1 truncate">Completed</p>
-                            <p className="text-[10px] md:text-xs text-zinc-950 dark:text-zinc-200 font-mono tracking-tighter truncate">{formatDateTime(data.date, { showTime: true })}</p>
+                            <p className="text-[8px] md:text-[10px] text-zinc-405 dark:text-zinc-500 uppercase font-black tracking-widest leading-none mb-0.5 md:mb-1 truncate">{t('warehouse.completed')}</p>
+                            <p className="text-[10px] md:text-xs text-zinc-955 dark:text-zinc-200 font-mono tracking-tighter truncate">{formatDateTime(data.date, { showTime: true })}</p>
                         </div>
                     </div>
                     
                     <div className="bg-white dark:bg-black p-3 md:p-4 flex items-center gap-2 md:gap-3 border-l border-zinc-100 dark:border-white/5 lg:col-span-1">
                             <div className="w-6 h-6 md:w-8 md:h-8 shrink-0 rounded-full bg-zinc-100 dark:bg-[#2C5E3B]/20 flex items-center justify-center border border-zinc-300 dark:border-[#A9CBA2]/30 shadow-inner">
-                                <span className="text-[8px] md:text-[10px] font-black text-zinc-950 dark:text-[#A9CBA2]">{(data.userName || 'S').charAt(0).toUpperCase()}</span>
+                                <span className="text-[8px] md:text-[10px] font-black text-zinc-955 dark:text-[#A9CBA2]">{(data.userName || 'S').charAt(0).toUpperCase()}</span>
                         </div>
                         <div className="min-w-0">
-                            <p className="text-[8px] md:text-[10px] text-zinc-400 dark:text-zinc-500 uppercase font-black tracking-widest leading-none mb-0.5 md:mb-1 truncate">User</p>
-                            <p className="text-[10px] md:text-xs text-zinc-950 dark:text-zinc-200 font-black uppercase break-words leading-tight">
+                            <p className="text-[8px] md:text-[10px] text-zinc-405 dark:text-zinc-500 uppercase font-black tracking-widest leading-none mb-0.5 md:mb-1 truncate">{t('warehouse.putaway.jobDetails').split(' ')[0]}</p>
+                            <p className="text-[10px] md:text-xs text-zinc-955 dark:text-zinc-200 font-black uppercase break-words leading-tight">
                                 {data.userName} <span className="text-gray-500 dark:text-gray-600 font-normal lowercase">({data.userDisplayId})</span>
                             </p>
                         </div>
@@ -152,7 +153,7 @@ export const PackDetailsModal: React.FC<PackDetailsModalProps> = ({
                             <Printer size={14} className="md:w-[18px] md:h-[18px]" />
                         </div>
                         <div className="min-w-0">
-                            <p className="text-[8px] md:text-[10px] text-zinc-400 dark:text-zinc-500 uppercase font-black tracking-widest leading-none mb-0.5 md:mb-1 truncate">Tracking</p>
+                            <p className="text-[8px] md:text-[10px] text-zinc-405 dark:text-zinc-500 uppercase font-black tracking-widest leading-none mb-0.5 md:mb-1 truncate">{t('warehouse.labelSize').split(' ')[0]}</p>
                             <p className="text-[10px] md:text-xs text-[#2C5E3B] dark:text-[#A9CBA2] font-mono tracking-tight font-black truncate">{data.trackingNumber}</p>
                         </div>
                     </div>
@@ -162,13 +163,13 @@ export const PackDetailsModal: React.FC<PackDetailsModalProps> = ({
                             <MapPin size={14} className="md:w-[18px] md:h-[18px]" />
                         </div>
                         <div className="min-w-0">
-                            <p className="text-[8px] md:text-[10px] text-zinc-400 dark:text-zinc-500 uppercase font-black tracking-widest leading-none mb-0.5 md:mb-1 truncate">Source</p>
-                            <p className="text-[10px] md:text-xs text-zinc-950 dark:text-zinc-200 font-black uppercase break-words leading-tight">
+                            <p className="text-[8px] md:text-[10px] text-zinc-405 dark:text-zinc-500 uppercase font-black tracking-widest leading-none mb-0.5 md:mb-1 truncate">{t('warehouse.from')}</p>
+                            <p className="text-[10px] md:text-xs text-zinc-955 dark:text-zinc-200 font-black uppercase break-words leading-tight">
                                 {data.sourceSite ? (
                                     <>
-                                        {data.sourceSite.name} <span className="text-zinc-500 dark:text-zinc-600 font-normal lowercase">({data.sourceSite.code || data.sourceSite.id})</span>
+                                        {data.sourceSite.name} <span className="text-zinc-505 dark:text-zinc-600 font-normal lowercase">({data.sourceSite.code || data.sourceSite.id})</span>
                                     </>
-                                ) : 'Unknown Source'}
+                                ) : t('warehouse.packing.unknownSource')}
                             </p>
                         </div>
                     </div>
@@ -177,13 +178,13 @@ export const PackDetailsModal: React.FC<PackDetailsModalProps> = ({
                             <ArrowRight size={14} className="md:w-[18px] md:h-[18px]" />
                         </div>
                         <div className="min-w-0">
-                            <p className="text-[8px] md:text-[10px] text-zinc-400 dark:text-zinc-500 uppercase font-black tracking-widest leading-none mb-0.5 md:mb-1 truncate">Destination</p>
-                            <p className="text-[10px] md:text-xs text-zinc-950 dark:text-zinc-200 font-black uppercase break-words leading-tight">
+                            <p className="text-[8px] md:text-[10px] text-zinc-405 dark:text-zinc-500 uppercase font-black tracking-widest leading-none mb-0.5 md:mb-1 truncate">{t('warehouse.to')}</p>
+                            <p className="text-[10px] md:text-xs text-zinc-955 dark:text-zinc-200 font-black uppercase break-words leading-tight">
                                 {data.destSite ? (
                                     <>
-                                        {data.destSite.name} <span className="text-zinc-500 dark:text-zinc-600 font-normal lowercase">({data.destSite.code || data.destSite.id})</span>
+                                        {data.destSite.name} <span className="text-zinc-505 dark:text-zinc-600 font-normal lowercase">({data.destSite.code || data.destSite.id})</span>
                                     </>
-                                ) : 'Unknown Destination'}
+                                ) : t('warehouse.packing.unknownDestination')}
                             </p>
                         </div>
                     </div>
@@ -191,7 +192,7 @@ export const PackDetailsModal: React.FC<PackDetailsModalProps> = ({
 
                 {/* Line Items */}
                 <div className="flex-1 overflow-y-auto p-3 md:p-6 custom-scrollbar bg-white dark:bg-black/50">
-                    <h4 className="text-[9px] md:text-[10px] font-black text-zinc-600 dark:text-gray-500 uppercase tracking-[0.2em] mb-2 md:mb-4">Items Packed</h4>
+                    <h4 className="text-[9px] md:text-[10px] font-black text-zinc-600 dark:text-gray-500 uppercase tracking-[0.2em] mb-2 md:mb-4">{t('warehouse.picking')}</h4>
                     <div className="space-y-2 md:space-y-3">
                         {itemsArray.map((item: any, idx: number) => {
                             const isShortPicked = item.orderedQty && item.orderedQty > (item.expectedQty || item.quantity || 1);
@@ -210,14 +211,14 @@ export const PackDetailsModal: React.FC<PackDetailsModalProps> = ({
                                             {idx + 1}
                                         </div>
                                         <div className="min-w-0 pr-2">
-                                            <p className="text-[11px] md:text-sm text-zinc-950 dark:text-zinc-100 font-black uppercase tracking-tight break-words leading-tight">{item.name || item.product?.name || productInfo?.name || 'Unknown Item'}</p>
+                                            <p className="text-[11px] md:text-sm text-zinc-955 dark:text-zinc-100 font-black uppercase tracking-tight break-words leading-tight">{item.name || item.product?.name || productInfo?.name || 'Unknown Item'}</p>
                                             <div className="flex flex-wrap items-center gap-1.5 md:gap-2 mt-1 md:mt-2">
-                                                <span className="text-[8px] md:text-[10px] text-zinc-500 dark:text-zinc-400 font-mono tracking-widest bg-zinc-100 dark:bg-white/5 px-1.5 md:px-2 py-0.5 rounded uppercase border border-zinc-200 dark:border-white/10 shrink-0">
+                                                <span className="text-[8px] md:text-[10px] text-zinc-505 dark:text-zinc-400 font-mono tracking-widest bg-zinc-100 dark:bg-white/5 px-1.5 md:px-2 py-0.5 rounded uppercase border border-zinc-200 dark:border-white/10 shrink-0">
                                                     {item.sku || item.product?.sku || productInfo?.sku}
                                                 </span>
 
                                                 {(productInfo?.brand || (item as any).brand) && (
-                                                    <span className="text-[8px] md:text-[10px] text-zinc-600 dark:text-zinc-400 font-black uppercase tracking-widest bg-zinc-100 dark:bg-white/5 px-1.5 md:px-2 py-0.5 rounded border border-dashed border-zinc-300 dark:border-white/10 shrink-0 hidden sm:inline-flex">
+                                                    <span className="text-[8px] md:text-[10px] text-zinc-650 dark:text-zinc-400 font-black uppercase tracking-widest bg-zinc-100 dark:bg-white/5 px-1.5 md:px-2 py-0.5 rounded border border-dashed border-zinc-300 dark:border-white/10 shrink-0 hidden sm:inline-flex">
                                                         {productInfo?.brand || (item as any).brand}
                                                     </span>
                                                 )}
@@ -229,7 +230,7 @@ export const PackDetailsModal: React.FC<PackDetailsModalProps> = ({
                                                 )}
 
                                                 {productInfo?.size && (
-                                                    <span className="text-[8px] md:text-[10px] text-zinc-600 dark:text-zinc-400 font-black uppercase tracking-widest bg-zinc-100 dark:bg-white/5 px-1.5 md:px-2 py-0.5 rounded border border-zinc-200 dark:border-white/10 shrink-0">
+                                                    <span className="text-[8px] md:text-[10px] text-zinc-650 dark:text-zinc-400 font-black uppercase tracking-widest bg-zinc-100 dark:bg-white/5 px-1.5 md:px-2 py-0.5 rounded border border-zinc-200 dark:border-white/10 shrink-0">
                                                         {formatProductSize(productInfo)}
                                                     </span>
                                                 )}
@@ -241,19 +242,19 @@ export const PackDetailsModal: React.FC<PackDetailsModalProps> = ({
                                     <div className="flex items-center gap-4 sm:gap-6 ml-11 sm:ml-0 shrink-0 pt-2 sm:pt-0 border-t sm:border-0 border-black/5 dark:border-white/5 justify-end">
                                         {item.returnedQty > 0 && (
                                             <div className="text-right">
-                                                <p className="text-[8px] md:text-[9px] text-red-500 dark:text-red-400 uppercase font-black tracking-widest">Returned</p>
+                                                <p className="text-[8px] md:text-[9px] text-red-500 dark:text-red-400 uppercase font-black tracking-widest">{t('warehouse.packing.returned')}</p>
                                                 <p className="text-sm md:text-lg font-black text-red-600 dark:text-red-400 tabular-nums font-mono leading-none">
                                                     {item.returnedQty}
                                                 </p>
                                             </div>
                                         )}
                                         <div className="text-right">
-                                            <p className="text-[8px] md:text-[9px] text-zinc-400 dark:text-zinc-600 uppercase font-black tracking-widest">Req / Pkd</p>
+                                            <p className="text-[8px] md:text-[9px] text-zinc-400 dark:text-zinc-655 uppercase font-black tracking-widest">{t('warehouse.packing.reqPkd')}</p>
                                             <div className="flex items-center gap-1.5 md:gap-2 justify-end">
                                                 {isShortPicked && (
-                                                    <span className="text-[10px] md:text-xs font-mono font-bold text-red-500 line-through opacity-80 leading-none" title="Short Picked">{item.orderedQty}</span>
+                                                    <span className="text-[10px] md:text-xs font-mono font-bold text-red-500 line-through opacity-80 leading-none" title={t('warehouse.packing.shortPicked')}>{item.orderedQty}</span>
                                                 )}
-                                                <p className="text-sm md:text-lg font-black text-zinc-950 dark:text-[#A9CBA2] tabular-nums font-mono leading-none">
+                                                <p className="text-sm md:text-lg font-black text-zinc-955 dark:text-[#A9CBA2] tabular-nums font-mono leading-none">
                                                     {(() => {
                                                         const expected = item.expectedQty || (item as any).quantity || 0;
                                                         const picked = item.pickedQty !== undefined && item.pickedQty !== null ? item.pickedQty : 0;
@@ -277,7 +278,7 @@ export const PackDetailsModal: React.FC<PackDetailsModalProps> = ({
                 </div>
 
                 {/* Footer */}
-                <div className="p-3 md:p-6 border-t border-zinc-200 dark:border-zinc-900 bg-zinc-50/50 dark:bg-zinc-950/40 flex justify-between items-center gap-3 shrink-0">
+                <div className="p-3 md:p-6 border-t border-zinc-200 dark:border-zinc-900 bg-zinc-50/50 dark:bg-zinc-955/40 flex justify-between items-center gap-3 shrink-0">
                     <div className="flex gap-2">
                         {data.status === 'Completed' && (
                             <>
@@ -286,7 +287,7 @@ export const PackDetailsModal: React.FC<PackDetailsModalProps> = ({
                                     className="flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/20 rounded-xl font-black uppercase tracking-widest text-[9px] md:text-[10px] transition-all"
                                 >
                                     <Undo2 size={12} className="md:w-3.5 md:h-3.5" />
-                                    <span className="hidden sm:inline">Return Items</span><span className="sm:hidden">Return</span>
+                                    <span className="hidden sm:inline">{t('warehouse.packing.returnItems')}</span><span className="sm:hidden">{t('warehouse.driverHub.return')}</span>
                                 </button>
 
                             </>
@@ -297,7 +298,7 @@ export const PackDetailsModal: React.FC<PackDetailsModalProps> = ({
                                 className="flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 bg-[#2C5E3B]/10 hover:bg-[#2C5E3B]/20 text-[#2C5E3B] dark:text-[#A9CBA2] border border-[#2C5E3B]/20 rounded-xl font-black uppercase tracking-widest text-[9px] md:text-[10px] transition-all"
                             >
                                 <Printer size={12} className="md:w-3.5 md:h-3.5" />
-                                <span className="hidden sm:inline">Reprint Label</span><span className="sm:hidden">Label</span>
+                                <span className="hidden sm:inline">{t('warehouse.reprintPackLabel')}</span><span className="sm:hidden">{t('warehouse.reprintPackLabel').split(' ').slice(-1)[0]}</span>
                             </button>
 
                             {isPrintMenuOpen && (
@@ -309,7 +310,7 @@ export const PackDetailsModal: React.FC<PackDetailsModalProps> = ({
                                                 onReprintLabel?.(selectedItem, size);
                                                 setIsPrintMenuOpen(false);
                                             }}
-                                            className="w-full text-left px-3 md:px-4 py-2 text-[10px] font-black uppercase tracking-widest text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-white/5 hover:text-[#2C5E3B] transition-colors"
+                                            className="w-full text-left px-3 md:px-4 py-2 text-[10px] font-black uppercase tracking-widest text-zinc-650 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-white/5 hover:text-[#2C5E3B] transition-colors"
                                         >
                                             {size}
                                         </button>
@@ -321,9 +322,9 @@ export const PackDetailsModal: React.FC<PackDetailsModalProps> = ({
 
                     <button
                         onClick={onClose}
-                        className="px-6 md:px-8 py-2 md:py-2.5 bg-zinc-100 dark:bg-white text-zinc-950 dark:text-black hover:bg-zinc-200 dark:hover:bg-zinc-100 font-black uppercase tracking-widest text-[9px] md:text-[10px] rounded-xl transition-all shadow-md border border-zinc-300 dark:border-white/10"
+                        className="px-6 md:px-8 py-2 md:py-2.5 bg-zinc-100 dark:bg-white text-zinc-955 dark:text-black hover:bg-zinc-200 dark:hover:bg-zinc-100 font-black uppercase tracking-widest text-[9px] md:text-[10px] rounded-xl transition-all shadow-md border border-zinc-300 dark:border-white/10"
                     >
-                        Dismiss
+                        {t('warehouse.dismiss')}
                     </button>
                 </div>
 

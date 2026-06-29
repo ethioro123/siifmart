@@ -235,6 +235,8 @@ export const ReceiveHistory: React.FC<ReceiveHistoryProps> = ({
                         <input
                             type="text"
                             placeholder={t('warehouse.searchHistoryPlaceholder')}
+                            aria-label={t('warehouse.searchHistoryPlaceholder')}
+                            title={t('warehouse.searchHistoryPlaceholder')}
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                             className="w-full bg-transparent border-none rounded-xl pl-10 pr-4 py-2.5 md:py-3 text-xs text-[#1E3F27] dark:text-[#EAE5D9] font-black uppercase tracking-widest focus:outline-none placeholder:text-stone-400 dark:placeholder:text-stone-500"

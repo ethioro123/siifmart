@@ -246,6 +246,7 @@ export const DriverTab: React.FC<DriverTabProps> = ({
                     <div className={`md:flex flex-col gap-4 ${showControlCenter ? 'flex' : 'hidden md:flex'}`}>
                         {/* TOP: INLINE METRICS (Hyper-compact) */}
                         <DriverMetrics
+                            t={t}
                             filteredJobs={filteredJobs}
                             historicalJobs={historicalJobs}
                             employees={employees}
@@ -254,6 +255,7 @@ export const DriverTab: React.FC<DriverTabProps> = ({
 
                         {/* MIDDLE: ACTION CENTER (Tight horizontal tools) */}
                         <DriverTools
+                            t={t}
                             setDriverScannerOpen={setDriverScannerOpen}
                             onIssue={() => setIsIncidentModalOpen(true)}
                             onDocs={handleViewDocs}
@@ -269,6 +271,8 @@ export const DriverTab: React.FC<DriverTabProps> = ({
                             <input
                                 type="text"
                                 placeholder="Find mission by ID, Dest, or TRK..."
+                                aria-label="Search Missions"
+                                title="Search Missions"
                                 value={globalSearch}
                                 onChange={(e) => setGlobalSearch(e.target.value)}
                                 className="w-full bg-white dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-2xl pl-10 pr-10 py-3 text-xs md:text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-600 focus:outline-none focus:border-cyan-500/50 shadow-sm dark:shadow-inner transition-colors"
@@ -332,6 +336,7 @@ export const DriverTab: React.FC<DriverTabProps> = ({
             ) : (
                 /* FULL WIDTH SECTION: MISSION LOG (History) */
                 <DriversHistory
+                    t={t}
                     historicalJobs={historicalJobs}
                     sites={sites}
                     employees={employees}
@@ -350,6 +355,7 @@ export const DriverTab: React.FC<DriverTabProps> = ({
             {/* DRIVER SCANNER OVERLAY */}
             {driverScannerOpen && (
                 <DriverScanner
+                    t={t}
                     setDriverScannerOpen={setDriverScannerOpen}
                     selectedJob={selectedJob}
                     wmsJobsService={wmsJobsService}
@@ -379,6 +385,7 @@ export const DriverTab: React.FC<DriverTabProps> = ({
 
             {/* INCIDENT REPORT MODAL */}
             <IncidentReportModal
+                t={t}
                 isOpen={isIncidentModalOpen}
                 onClose={() => setIsIncidentModalOpen(false)}
                 user={user}

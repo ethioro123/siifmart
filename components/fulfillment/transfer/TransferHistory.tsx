@@ -116,6 +116,8 @@ export const TransferHistory: React.FC<TransferHistoryProps> = ({
                         <input
                             type="text"
                             placeholder={`${t('warehouse.searchHistoryPlaceholder')}`}
+                            aria-label={t('warehouse.searchHistoryPlaceholder')}
+                            title={t('warehouse.searchHistoryPlaceholder')}
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                             className="w-full bg-transparent border-none rounded-xl pl-10 pr-4 py-3 text-xs text-white focus:outline-none placeholder:text-gray-600 font-bold uppercase tracking-wider"

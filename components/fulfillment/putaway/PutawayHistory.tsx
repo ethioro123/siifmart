@@ -150,6 +150,8 @@ export const PutawayHistory: React.FC<PutawayHistoryProps> = ({
                     <input
                         type="text"
                         placeholder={`${t('warehouse.searchHistoryPlaceholder')}`}
+                        aria-label={t('warehouse.searchHistoryPlaceholder')}
+                        title={t('warehouse.searchHistoryPlaceholder')}
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         className="woody-input w-full pl-12 pr-4 py-3.5 text-[10px] uppercase tracking-[0.2em] font-black"

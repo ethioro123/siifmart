@@ -45,14 +45,14 @@ export const DriverJobBoard: React.FC<DriverJobBoardProps> = ({
         <div className="space-y-4 pt-4">
             <button onClick={() => setIsExpanded(!isExpanded)} className="w-full flex items-center justify-between p-4 bg-gray-50 dark:bg-white/5 border-2 border-gray-100 dark:border-white/10 rounded-2xl hover:bg-gray-100 dark:hover:bg-white/10 transition-all shadow-sm active:scale-[0.98]">
                 <div className="flex items-center gap-3"><div className="w-2.5 h-2.5 rounded-full bg-[#A9CBA2] shadow-[0_0_10px_rgba(169,203,162,0.4)] animate-pulse" /><span className="text-[11px] font-black text-gray-900 dark:text-white uppercase tracking-widest italic">{finalT('warehouse.docks.availableMissions') || 'Available Missions'}</span></div>
-                <span className="text-[9px] font-black text-[#2C5E3B] dark:text-[#A9CBA2] bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 px-3 py-1 rounded-full uppercase border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20">{filteredDispatchJobs.length} Available</span>
+                <span className="text-[9px] font-black text-[#2C5E3B] dark:text-[#A9CBA2] bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 px-3 py-1 rounded-full uppercase border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20">{finalT('warehouse.driverHub.availableCount').replace('{count}', String(filteredDispatchJobs.length))}</span>
             </button>
             {isExpanded && (
                 <div className="space-y-5">
                     {paginatedDispatchJobs.length === 0 ? (
                         <div className="bg-gray-50 dark:bg-black/20 rounded-2xl p-8 border-2 border-dashed border-gray-200 dark:border-white/10 text-center shadow-inner">
                             <Shield size={28} className="text-gray-300 dark:text-gray-700 mx-auto mb-3" />
-                            <h3 className="text-[10px] font-black text-gray-400 dark:text-white uppercase tracking-widest italic">All Quiet on the Front</h3>
+                            <h3 className="text-[10px] font-black text-gray-400 dark:text-white uppercase tracking-widest italic">{finalT('warehouse.driverHub.noJobsAvailable')}</h3>
                         </div>
                     ) : (
                         paginatedDispatchJobs.map(job => {
@@ -65,29 +65,29 @@ export const DriverJobBoard: React.FC<DriverJobBoardProps> = ({
                                         <div className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-[0.2em] border ${isCritical ? 'bg-red-500/10 text-red-600 dark:text-red-500 border-red-500/20' : 'bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 text-[#2C5E3B] dark:text-[#A9CBA2] border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20'}`}>{job.priority}</div>
                                     </div>
                                     <div className="mb-4">
-                                        <p className="text-[9px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider mb-1">Route</p>
-                                        <div className="flex items-center gap-2 text-xs font-bold text-gray-900 dark:text-white uppercase leading-none"><span>{source?.name || 'Central'}</span><span className="text-[#A9CBA2] font-normal">➔</span><span>{dest?.name || 'Client'}</span></div>
+                                        <p className="text-[9px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider mb-1">{finalT('warehouse.driverHub.route')}</p>
+                                        <div className="flex items-center gap-2 text-xs font-bold text-gray-900 dark:text-white uppercase leading-none"><span>{source?.name || finalT('warehouse.centralOpsArea')}</span><span className="text-[#A9CBA2] font-normal">➔</span><span>{dest?.name || finalT('warehouse.driverHub.customer')}</span></div>
                                     </div>
                                     <div className="flex items-center justify-between gap-4 pt-4 border-t border-gray-100 dark:border-white/5">
-                                        <div className="bg-gray-100 dark:bg-black/40 px-3 py-1.5 rounded-xl border border-gray-200 dark:border-white/5 shadow-inner"><span className="text-[10px] font-black text-gray-900 dark:text-white">{job.items || 0}</span><span className="text-[8px] text-gray-400 dark:text-gray-500 ml-1.5 uppercase font-bold tracking-widest">Units</span></div>
+                                        <div className="bg-gray-100 dark:bg-black/40 px-3 py-1.5 rounded-xl border border-gray-200 dark:border-white/5 shadow-inner"><span className="text-[10px] font-black text-gray-900 dark:text-white">{job.items || 0}</span><span className="text-[8px] text-gray-400 dark:text-gray-500 ml-1.5 uppercase font-bold tracking-widest">{finalT('warehouse.driverHub.units')}</span></div>
                                         {job.assignedTo ? (
                                             <button disabled={processingJobIds.has(job.id)} onClick={async (e) => {
                                                 e.stopPropagation(); const currentEmployee = employees.find(emp => (user?.email && emp.email === user.email) || (user?.name && emp.name?.toLowerCase() === user.name.toLowerCase()) || ((user as any)?.employeeId && emp.id === (user as any).employeeId) || emp.id === user?.id); const employeeId = currentEmployee?.id || user?.id;
-                                                if (job.assignedTo !== employeeId) { addNotification('info', 'Locked mission.'); return; }
+                                                if (job.assignedTo !== employeeId) { addNotification('info', finalT('warehouse.driverHub.lockedMission')); return; }
                                                 setProcessingJobIds(prev => new Set(prev).add(job.id));
                                                 try {
                                                     await wmsJobsService.update(job.id, { status: 'In-Progress', transferStatus: 'In-Transit', shippedAt: new Date().toISOString() } as any);
                                                     if (job.orderRef) { const parentTransfer = jobs.find(j => j.id === job.orderRef && j.type === 'TRANSFER'); if (parentTransfer) await wmsJobsService.update(parentTransfer.id, { transferStatus: 'In-Transit' } as any); }
-                                                    await refreshData(); addNotification('success', 'Payload secure. Departing.');
-                                                } catch (err) { addNotification('alert', 'Comm link error.'); } finally { setProcessingJobIds(prev => { const next = new Set(prev); next.delete(job.id); return next; }); }
-                                            }} className="flex-1 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 disabled:opacity-50 transition-all shadow-md bg-[#2C5E3B] text-white active:scale-95">{processingJobIds.has(job.id) ? <RefreshCw className="animate-spin" size={13} /> : <Zap size={13} />} PICKUP</button>
+                                                    await refreshData(); addNotification('success', finalT('warehouse.driverHub.payloadSecure'));
+                                                } catch (err) { addNotification('alert', finalT('warehouse.driverHub.cloudSyncFailed')); } finally { setProcessingJobIds(prev => { const next = new Set(prev); next.delete(job.id); return next; }); }
+                                            }} className="flex-1 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 disabled:opacity-50 transition-all shadow-md bg-[#2C5E3B] text-white active:scale-95">{processingJobIds.has(job.id) ? <RefreshCw className="animate-spin" size={13} /> : <Zap size={13} />} {finalT('warehouse.driverHub.pickup')}</button>
                                         ) : (
                                             <button onClick={async (e) => {
                                                 e.stopPropagation(); const currentEmployee = employees.find(emp => (user?.email && emp.email === user.email) || (user?.name && emp.name?.toLowerCase() === user.name.toLowerCase()) || ((user as any)?.employeeId && emp.id === (user as any).employeeId) || emp.id === user?.id);
-                                                if (!currentEmployee) { addNotification('alert', 'Protocol fault. Identify profile.'); return; }
+                                                if (!currentEmployee) { addNotification('alert', finalT('warehouse.driverHub.protocolFault')); return; }
                                                 const isInternal = !currentEmployee?.driverType || currentEmployee?.driverType === 'internal'; setProcessingJobIds(prev => new Set(prev).add(job.id));
-                                                try { await wmsJobsService.update(job.id, { assignedTo: currentEmployee.id, status: isInternal ? 'In-Progress' : 'Pending' }); await refreshData(); addNotification('success', 'Mission Accepted.'); } catch (err) { addNotification('alert', 'Auth failed.'); } finally { setProcessingJobIds(prev => { const next = new Set(prev); next.delete(job.id); return next; }); }
-                                            }} className={`flex-1 py-2 rounded-xl text-[10px] font-black uppercase tracking-[0.15em] flex items-center justify-center gap-2 disabled:opacity-50 transition-all shadow-md active:scale-95 ${isCritical ? 'bg-red-600 text-white' : 'bg-[#224429] dark:bg-[#EAE5D9] hover:bg-[#1B3520] dark:hover:bg-[#DFD9CA] text-[#FAF8F5] dark:text-[#1E3B24]'}`}>{processingJobIds.has(job.id) ? <RefreshCw className="animate-spin" size={13} /> : <Zap size={13} />} ACCEPT</button>
+                                                try { await wmsJobsService.update(job.id, { assignedTo: currentEmployee.id, status: isInternal ? 'In-Progress' : 'Pending' }); await refreshData(); addNotification('success', finalT('warehouse.driverHub.jobAccepted')); } catch (err) { addNotification('alert', finalT('warehouse.driverHub.jobAcceptFailed')); } finally { setProcessingJobIds(prev => { const next = new Set(prev); next.delete(job.id); return next; }); }
+                                            }} className={`flex-1 py-2 rounded-xl text-[10px] font-black uppercase tracking-[0.15em] flex items-center justify-center gap-2 disabled:opacity-50 transition-all shadow-md active:scale-95 ${isCritical ? 'bg-red-600 text-white' : 'bg-[#224429] dark:bg-[#EAE5D9] hover:bg-[#1B3520] dark:hover:bg-[#DFD9CA] text-[#FAF8F5] dark:text-[#1E3B24]'}`}>{processingJobIds.has(job.id) ? <RefreshCw className="animate-spin" size={13} /> : <Zap size={13} />} {finalT('warehouse.driverHub.acceptJob')}</button>
                                         )}
                                     </div>
                                 </div>

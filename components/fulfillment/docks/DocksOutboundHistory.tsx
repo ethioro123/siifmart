@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { History as HistoryIcon, Search, Clock, User as UserIcon, Upload, ArrowRight } from 'lucide-react';
 import Pagination from '../../shared/Pagination';
 import { WMSJob, Site, User } from '../../../types';
+import { useLanguage } from '../../../contexts/LanguageContext';
 
 interface DocksOutboundHistoryProps {
     jobs: WMSJob[];
@@ -22,6 +23,7 @@ export const DocksOutboundHistory: React.FC<DocksOutboundHistoryProps> = ({
     setIsDetailsOpen,
     formatJobId
 }) => {
+    const { t } = useLanguage();
     const [search, setSearch] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
 
@@ -58,7 +60,7 @@ export const DocksOutboundHistory: React.FC<DocksOutboundHistoryProps> = ({
                     <div className="p-2 bg-[#2C5E3B]/20 rounded-xl">
                         <HistoryIcon className="text-[#2C5E3B] dark:text-[#A9CBA2]" size={20} />
                     </div>
-                    Outbound History
+                    {t('warehouse.docks.outboundSchedule')}
                 </h3>
 
                 <div className="flex items-center gap-4">
@@ -69,6 +71,8 @@ export const DocksOutboundHistory: React.FC<DocksOutboundHistoryProps> = ({
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                             placeholder="Search Shipment, Site..."
+                            aria-label="Search Shipment or Site"
+                            title="Search Shipment or Site"
                             className="woody-input w-64 pl-10 pr-4 text-xs"
                         />
                     </div>
@@ -92,7 +96,7 @@ export const DocksOutboundHistory: React.FC<DocksOutboundHistoryProps> = ({
                         {paginatedHistory.length === 0 ? (
                             <tr>
                                 <td colSpan={6} className="px-6 py-8 text-center text-gray-500 text-xs font-bold">
-                                    No outbound history found.
+                                    {t('warehouse.noHistoryFound')}
                                 </td>
                             </tr>
                         ) : (

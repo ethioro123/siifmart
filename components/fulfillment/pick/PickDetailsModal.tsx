@@ -37,7 +37,7 @@ export const PickDetailsModal: React.FC<PickDetailsModalProps> = ({
     // Use code if available, otherwise fallback to short UUID
     const displayId = userObj?.code || (userId ? userId.slice(0, 5).toUpperCase() : '');
 
-    const userName = userObj ? userObj.name : (userId ? 'Unknown' : 'System');
+    const userName = userObj ? userObj.name : (userId ? t('warehouse.picking.unknownUser') : t('warehouse.picking.systemUser'));
     const userDisplayId = displayId;
 
     // For Pick, the destination is usually Pack/Shipping, but the SOURCE location is what we care about per item
@@ -79,7 +79,7 @@ export const PickDetailsModal: React.FC<PickDetailsModalProps> = ({
         destSite: sites.find(s => s.id === (selectedItem.destSiteId || (selectedItem as any).dest_site_id)),
         userDisplay: (
             <>
-                {userName} <span className="text-zinc-550 dark:text-zinc-650 font-normal lowercase">({userDisplayId})</span>
+                {userName} <span className="text-zinc-550 dark:text-zinc-655 font-normal lowercase">({userDisplayId})</span>
             </>
         )
     };
@@ -88,13 +88,13 @@ export const PickDetailsModal: React.FC<PickDetailsModalProps> = ({
         <>
             {data.sourceSite.name} <span className="text-emerald-600/50 dark:text-emerald-400/50 font-normal lowercase">({data.sourceSite.code || data.sourceSite.id})</span>
         </>
-    ) : 'Unknown Site';
+    ) : t('warehouse.unknownSite');
 
     const destDisplay = data.destSite ? (
         <>
             {data.destSite.name} <span className="text-[#2C5E3B]/50 dark:text-[#A9CBA2]/50 font-normal lowercase">({data.destSite.code || data.destSite.id})</span>
         </>
-    ) : 'Internal / Unknown';
+    ) : t('warehouse.picking.internalOrUnknown');
 
     return (
         <>
@@ -120,7 +120,7 @@ export const PickDetailsModal: React.FC<PickDetailsModalProps> = ({
                                     </span>
                                     {itemsArray.some(li => (li.returnedQty || 0) > 0) && (
                                         <span className="px-2 py-0.5 rounded text-[9px] font-mono border bg-red-500/10 border-red-500/20 text-red-600 dark:text-red-400">
-                                            {itemsArray.filter(li => (li.returnedQty || 0) > 0).length} RETURNED
+                                            {itemsArray.filter(li => (li.returnedQty || 0) > 0).length} {t('warehouse.packing.returned').toUpperCase()}
                                         </span>
                                     )}
                                 </div>
@@ -197,9 +197,9 @@ export const PickDetailsModal: React.FC<PickDetailsModalProps> = ({
                                             {idx + 1}
                                         </div>
                                         <div>
-                                            <p className="text-zinc-950 dark:text-zinc-100 font-black uppercase tracking-tight break-words leading-tight">{item.name || item.product?.name || productInfo?.name || 'Unknown Item'}</p>
+                                            <p className="text-zinc-950 dark:text-zinc-100 font-black uppercase tracking-tight break-words leading-tight">{item.name || item.product?.name || productInfo?.name || t('warehouse.picking.unknownItem')}</p>
                                             <div className="flex flex-wrap items-center gap-2 mt-2">
-                                                <span className="text-[10px] text-zinc-505 dark:text-zinc-400 font-mono tracking-widest bg-zinc-100 dark:bg-white/5 px-2 py-0.5 rounded uppercase border border-zinc-200 dark:border-white/10">
+                                                <span className="text-[10px] text-zinc-555 dark:text-zinc-400 font-mono tracking-widest bg-zinc-100 dark:bg-white/5 px-2 py-0.5 rounded uppercase border border-zinc-200 dark:border-white/10">
                                                     {item.sku || item.product?.sku || productInfo?.sku}
                                                 </span>
 
@@ -226,7 +226,7 @@ export const PickDetailsModal: React.FC<PickDetailsModalProps> = ({
                                             {/* Source Location */}
                                             {item.location && item.location !== 'Unknown' && (
                                                 <div className="flex items-center gap-2 mt-2 pt-2 border-t border-zinc-100 dark:border-white/5">
-                                                    <span className="text-[9px] font-black text-zinc-500 dark:text-zinc-500 uppercase tracking-widest">{t('warehouse.misc.selectedStorageLocation')}:</span>
+                                                    <span className="text-[9px] font-black text-zinc-500 dark:text-zinc-500 uppercase tracking-widest">{t('warehouse.selectedStorageLocation')}:</span>
                                                     <span className="text-[9px] font-black font-mono bg-[#2C5E3B]/10 text-[#2C5E3B] dark:text-[#A9CBA2] px-1.5 py-0.5 rounded flex items-center gap-1">
                                                         <MapPin size={10} /> {item.location}
                                                     </span>
@@ -238,14 +238,14 @@ export const PickDetailsModal: React.FC<PickDetailsModalProps> = ({
                                     <div className="flex items-center gap-6">
                                         {item.returnedQty > 0 && (
                                             <div className="text-right">
-                                                <p className="text-[9px] text-red-500 dark:text-red-400 uppercase font-black tracking-widest">Returned</p>
+                                                <p className="text-[9px] text-red-500 dark:text-red-400 uppercase font-black tracking-widest">{t('warehouse.packing.returned')}</p>
                                                 <p className="text-lg font-black text-red-600 dark:text-red-400 tabular-nums font-mono">
                                                     {item.returnedQty}
                                                 </p>
                                             </div>
                                         )}
                                         <div className="text-right">
-                                            <p className="text-[9px] text-zinc-400 dark:text-zinc-655 uppercase font-black tracking-widest">Req / Pkd</p>
+                                            <p className="text-[9px] text-zinc-400 dark:text-zinc-655 uppercase font-black tracking-widest">{t('warehouse.picking.reqPkd')}</p>
                                             <div className="flex items-center gap-2 justify-end">
                                                 {isShortPicked && (
                                                     <span className="text-xs font-mono font-bold text-red-500 line-through opacity-80" title="Short Picked">{item.orderedQty}</span>
@@ -283,7 +283,7 @@ export const PickDetailsModal: React.FC<PickDetailsModalProps> = ({
                                 className="flex items-center gap-2 px-4 py-2 bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/20 rounded-xl font-black uppercase tracking-widest text-[10px] transition-all"
                             >
                                 <Undo2 size={14} />
-                                Return Items
+                                {t('warehouse.picking.returnItems')}
                             </button>
                         )}
                         {/* Amend Pick — manager only */}
@@ -293,7 +293,7 @@ export const PickDetailsModal: React.FC<PickDetailsModalProps> = ({
                                 className="flex items-center gap-2 px-4 py-2 bg-yellow-500/10 hover:bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 border border-yellow-500/20 rounded-xl font-black uppercase tracking-widest text-[10px] transition-all"
                             >
                                 <FileEdit size={14} />
-                                Amend Quantities
+                                {t('warehouse.picking.amendQuantities')}
                             </button>
                         )}
                     </div>

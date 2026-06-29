@@ -54,6 +54,8 @@ export const ReplenishHistory: React.FC<ReplenishHistoryProps> = ({
                     <input
                         type="text"
                         placeholder="Search history..."
+                        aria-label="Search replenishment history"
+                        title="Search replenishment history"
                         value={replenishHistorySearch}
                         onChange={(e) => setReplenishHistorySearch(e.target.value)}
                         className="woody-input pl-9 text-xs py-2"

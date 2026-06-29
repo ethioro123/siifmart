@@ -2,6 +2,7 @@ import React from 'react';
 import { QrCode, AlertTriangle, FileText, LogOut, Scan } from 'lucide-react';
 
 interface DriverToolsProps {
+    t: (key: string) => string;
     setDriverScannerOpen: (val: boolean) => void;
     onIssue: () => void;
     onDocs: () => void;
@@ -10,6 +11,7 @@ interface DriverToolsProps {
 }
 
 export const DriverTools: React.FC<DriverToolsProps> = ({
+    t,
     setDriverScannerOpen,
     onIssue,
     onDocs,
@@ -19,10 +21,10 @@ export const DriverTools: React.FC<DriverToolsProps> = ({
     return (
         <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl p-2 flex items-center justify-between gap-2 shadow-sm dark:shadow-inner">
             {[
-                { icon: QrCode, label: 'SCAN', action: () => setDriverScannerOpen(true), color: 'text-[#2C5E3B] dark:text-[#A9CBA2]', bg: 'bg-[#2C5E3B]/10' },
-                { icon: AlertTriangle, label: 'ISSUE', action: onIssue, color: 'text-orange-600 dark:text-orange-400', bg: 'bg-orange-500/10' },
-                { icon: FileText, label: 'DOCS', action: onDocs, color: 'text-[#2C5E3B] dark:text-[#A9CBA2]', bg: 'bg-[#2C5E3B]/10' },
-                { icon: LogOut, label: 'END', action: onEnd, color: 'text-red-600 dark:text-red-400', bg: 'bg-red-500/10' }
+                { icon: QrCode, label: t('warehouse.driverHub.scan'), action: () => setDriverScannerOpen(true), color: 'text-[#2C5E3B] dark:text-[#A9CBA2]', bg: 'bg-[#2C5E3B]/10' },
+                { icon: AlertTriangle, label: t('warehouse.driverHub.report'), action: onIssue, color: 'text-orange-600 dark:text-orange-400', bg: 'bg-orange-500/10' },
+                { icon: FileText, label: t('warehouse.driverHub.docs'), action: onDocs, color: 'text-[#2C5E3B] dark:text-[#A9CBA2]', bg: 'bg-[#2C5E3B]/10' },
+                { icon: LogOut, label: t('warehouse.driverHub.finish'), action: onEnd, color: 'text-red-600 dark:text-red-400', bg: 'bg-red-500/10' }
             ].map((btn, i) => (
                 <button
                     key={i}

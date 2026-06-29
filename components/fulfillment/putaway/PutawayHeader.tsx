@@ -90,6 +90,8 @@ export const PutawayHeader: React.FC<PutawayHeaderProps> = ({
                         <input
                             type="text"
                             placeholder={`${t('warehouse.putaway.search')}`}
+                            aria-label={t('warehouse.putaway.search')}
+                            title={t('warehouse.putaway.search')}
                             value={putawaySearch}
                             onChange={(e) => setPutawaySearch(e.target.value)}
                             className="woody-input w-full pl-10 pr-4 text-sm"
@@ -139,6 +141,8 @@ export const PutawayHeader: React.FC<PutawayHeaderProps> = ({
                     <input
                         type="text"
                         placeholder={`${t('warehouse.putaway.search')}`}
+                        aria-label={t('warehouse.putaway.search')}
+                        title={t('warehouse.putaway.search')}
                         value={putawaySearch}
                         onChange={(e) => setPutawaySearch(e.target.value)}
                         className="woody-input w-full py-3.5 pl-12 pr-4 font-mono"

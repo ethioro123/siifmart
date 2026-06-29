@@ -56,6 +56,8 @@ export const ReceiveHeader: React.FC<ReceiveHeaderProps> = ({
                             ref={scanInputRef}
                             autoFocus
                             type="text"
+                            aria-label={t('warehouse.scanBarcodeOrSku')}
+                            title={t('warehouse.scanBarcodeOrSku')}
                             placeholder={t('warehouse.scanBarcodeOrSku')}
                             className="w-full h-12 pl-12 pr-4 bg-white/90 dark:bg-black/25 border border-[#E2DCCE] dark:border-emerald-950/20 hover:border-[#CFC6B4] dark:hover:border-emerald-900/15 rounded-xl text-[#1E3F27] dark:text-[#EAE5D9] font-mono text-sm focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:ring-4 focus:ring-[#2C5E3B]/10 dark:focus:ring-[#A9CBA2]/10 focus:outline-none transition-all placeholder:text-stone-400 dark:placeholder:text-stone-500 shadow-sm"
                             onKeyDown={(e) => {
@@ -223,6 +225,8 @@ export const ReceiveHeader: React.FC<ReceiveHeaderProps> = ({
                                     <input
                                         type="text"
                                         placeholder={t('warehouse.searchManifestSupplier')}
+                                        aria-label={t('warehouse.searchManifestSupplier')}
+                                        title={t('warehouse.searchManifestSupplier')}
                                         value={receiveSearch}
                                         onChange={(e) => setReceiveSearch(e.target.value)}
                                         className="w-full sm:w-64 bg-white/90 dark:bg-black/25 border border-[#E2DCCE] dark:border-emerald-950/20 hover:border-[#CFC6B4] dark:hover:border-emerald-900/15 rounded-xl py-2.5 pl-10 pr-10 text-xs font-black uppercase tracking-widest text-[#1E3F27] dark:text-[#EAE5D9] placeholder-stone-400 dark:placeholder-stone-500 focus:outline-none focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:ring-4 focus:ring-[#2C5E3B]/10 dark:focus:ring-[#A9CBA2]/10 transition-all shadow-sm"

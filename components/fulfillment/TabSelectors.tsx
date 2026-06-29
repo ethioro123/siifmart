@@ -40,7 +40,7 @@ export const MobileTabSelector: React.FC<TabSelectorProps> = ({
                     <div className="text-left min-w-0">
                         <p className="text-[9px] text-stone-400 dark:text-stone-500 font-bold uppercase tracking-[0.2em]">Current Section</p>
                         <p className="text-lg font-black text-stone-900 dark:text-[#EAE5D9] uppercase tracking-tighter truncate">
-                            {activeTab === 'ASSIGN' ? 'ASSIGN TASK' : t(`warehouse.tabs.${activeTab.toLowerCase()}`)}
+                            {t(`warehouse.tabs.${activeTab.toLowerCase()}`)}
                         </p>
                     </div>
                 </div>
@@ -76,8 +76,8 @@ export const MobileTabSelector: React.FC<TabSelectorProps> = ({
                                         ? 'bg-[#2C5E3B] dark:bg-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24] border-[#2C5E3B] dark:border-[#EAE5D9] shadow-sm'
                                         : 'bg-stone-50/50 dark:bg-[#18201B]/50 text-stone-700 dark:text-stone-400 border-[#E2DCCE]/50 dark:border-[#A9CBA2]/[0.04] hover:bg-stone-100/50 dark:hover:bg-[#EAE5D9]/10 hover:text-[#1E3F27] dark:hover:text-white'
                                         }`}
-                                >
-                                    <span className="text-[10px] font-black uppercase tracking-widest leading-tight text-center">{tab === 'ASSIGN' ? 'ASSIGN TASK' : t(`warehouse.tabs.${tab.toLowerCase()}`)}</span>
+                                 >
+                                    <span className="text-[10px] font-black uppercase tracking-widest leading-tight text-center">{t(`warehouse.tabs.${tab.toLowerCase()}`)}</span>
                                     {hasTransferDiscrepancies && (
                                         <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-red-500 animate-pulse" />
                                     )}
@@ -133,7 +133,7 @@ export const DesktopTabSelector: React.FC<DesktopTabSelectorProps> = ({
                                     : 'text-stone-500 dark:text-stone-400 hover:bg-[#2C5E3B]/10 dark:hover:bg-[#EAE5D9]/10 hover:text-[#2C5E3B] dark:hover:text-[#EAE5D9]'
                                 } `}
                         >
-                            {tab === 'ASSIGN' ? 'ASSIGN TASK' : t(`warehouse.tabs.${tab.toLowerCase()}`)}
+                            {t(`warehouse.tabs.${tab.toLowerCase()}`)}
                             {hasTransferDiscrepancies && (
                                 <span className="absolute -top-1 -right-1 px-1.5 py-0.5 bg-white text-[10px] text-red-600 rounded-full font-black min-w-[18px] text-center border border-red-500">
                                     {discrepancyCount}

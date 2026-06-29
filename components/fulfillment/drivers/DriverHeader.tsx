@@ -32,28 +32,30 @@ export const DriverHeader: React.FC<DriverHeaderProps> = ({
                 </div>
                 <div className="min-w-0">
                     <div className="flex items-center gap-2">
-                        <h2 className="text-sm font-black text-gray-900 dark:text-white uppercase leading-none">Driver Hub</h2>
+                        <h2 className="text-sm font-black text-gray-900 dark:text-white uppercase leading-none">
+                            {t('warehouse.driverHub.driverTitle')} {t('warehouse.driverHub.hubTitle')}
+                        </h2>
                         <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse shrink-0" />
                     </div>
-                    <p className="text-[9px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-widest mt-0.5 truncate leading-tight">
-                        {user?.name || 'Driver'} • {activeSite?.name || 'Central'}
+                    <p className="text-[9px] text-gray-550 dark:text-gray-400 font-bold uppercase tracking-widest mt-0.5 truncate leading-tight">
+                        {user?.name || t('warehouse.driverFallback')} • {activeSite?.name || t('warehouse.centralOpsArea')}
                     </p>
                 </div>
             </div>
-
+ 
             <div className="flex items-center gap-2">
                 <div className="bg-gray-100 dark:bg-black/40 p-1 rounded-xl border border-gray-200 dark:border-white/5 flex gap-1 shadow-inner">
                     <button
                         onClick={() => setViewMode('Active')}
                         className={`px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-wider transition-all ${viewMode === 'Active' ? 'bg-[#2C5E3B] text-white shadow-md shadow-[#2C5E3B]/20' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
                     >
-                        CMD
+                        {t('warehouse.driverHub.activeDeliveries')}
                     </button>
                     <button
                         onClick={() => setViewMode('History')}
                         className={`px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-wider transition-all ${viewMode === 'History' ? 'bg-[#2C5E3B]/80 text-white shadow-md shadow-[#2C5E3B]/20' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
                     >
-                        LOG
+                        {t('warehouse.driverHub.history')}
                     </button>
                 </div>
                 <button

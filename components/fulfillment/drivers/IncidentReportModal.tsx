@@ -7,6 +7,7 @@ import { User, WMSJob } from '../../../types';
 import Button from '../../shared/Button';
 
 interface IncidentReportModalProps {
+    t: (key: string) => string;
     isOpen: boolean;
     onClose: () => void;
     user: User | null;
@@ -20,6 +21,7 @@ interface IncidentReportModalProps {
 }
 
 export const IncidentReportModal: React.FC<IncidentReportModalProps> = ({
+    t,
     isOpen,
     onClose,
     user,
@@ -34,12 +36,12 @@ export const IncidentReportModal: React.FC<IncidentReportModalProps> = ({
     if (!isOpen) return null;
 
     const issueTypes = [
-        { label: 'Traffic / Delay', icon: Clock, color: 'text-amber-400', bg: 'bg-amber-500/10' },
-        { label: 'Vehicle Issue', icon: Truck, color: 'text-orange-400', bg: 'bg-orange-500/10' },
-        { label: 'Customer Not Found', icon: Navigation, color: 'text-[#A9CBA2]', bg: 'bg-[#2C5E3B]/10' },
-        { label: 'Security / Access', icon: ShieldAlert, color: 'text-red-400', bg: 'bg-red-500/10' },
-        { label: 'Package Damage', icon: AlertTriangle, color: 'text-red-500', bg: 'bg-red-600/10' },
-        { label: 'Other', icon: MessageSquare, color: 'text-gray-400', bg: 'bg-white/5' }
+        { id: 'Traffic / Delay', label: t('warehouse.driverHub.trafficDelay'), icon: Clock, color: 'text-amber-400', bg: 'bg-amber-500/10' },
+        { id: 'Vehicle Issue', label: t('warehouse.driverHub.vehicleIssue'), icon: Truck, color: 'text-orange-400', bg: 'bg-orange-500/10' },
+        { id: 'Customer Not Found', label: t('warehouse.driverHub.customerNotFound'), icon: Navigation, color: 'text-[#A9CBA2]', bg: 'bg-[#2C5E3B]/10' },
+        { id: 'Security / Access', label: t('warehouse.driverHub.securityAccess'), icon: ShieldAlert, color: 'text-red-400', bg: 'bg-red-500/10' },
+        { id: 'Package Damage', label: t('warehouse.driverHub.packageDamage'), icon: AlertTriangle, color: 'text-red-500', bg: 'bg-red-600/10' },
+        { id: 'Other', label: t('warehouse.driverHub.other'), icon: MessageSquare, color: 'text-gray-400', bg: 'bg-white/5' }
     ];
 
     const handleSubmit = async () => {
@@ -76,11 +78,11 @@ export const IncidentReportModal: React.FC<IncidentReportModalProps> = ({
                             <AlertTriangle className="text-red-400" size={20} />
                         </div>
                         <div>
-                            <h2 className="text-sm font-black text-white uppercase tracking-widest">Report Incident</h2>
-                            <p className="text-[9px] text-gray-500 font-bold uppercase tracking-widest">Immediate Management Alert</p>
+                            <h2 className="text-sm font-black text-white uppercase tracking-widest">{t('warehouse.driverHub.reportIncident')}</h2>
+                            <p className="text-[9px] text-gray-500 font-bold uppercase tracking-widest">{t('warehouse.driverHub.immediateAlert')}</p>
                         </div>
                     </div>
-                    <button onClick={onClose} aria-label="Close" className="p-2 hover:bg-white/5 rounded-full text-gray-500 transition-colors">
+                    <button onClick={onClose} aria-label={t('warehouse.driverHub.close')} className="p-2 hover:bg-white/5 rounded-full text-gray-500 transition-colors">
                         <X size={20} />
                     </button>
                 </div>
@@ -91,8 +93,8 @@ export const IncidentReportModal: React.FC<IncidentReportModalProps> = ({
                             <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center border border-green-500/30 mb-4">
                                 <CheckCircle className="text-green-400" size={32} />
                             </div>
-                            <h3 className="text-white font-black uppercase tracking-widest text-sm mb-1">Report Logged</h3>
-                            <p className="text-gray-500 text-[10px] font-bold uppercase tracking-[0.2em]">Management has been notified</p>
+                            <h3 className="text-white font-black uppercase tracking-widest text-sm mb-1">{t('warehouse.driverHub.reportLogged')}</h3>
+                            <p className="text-gray-500 text-[10px] font-bold uppercase tracking-[0.2em]">{t('warehouse.driverHub.mgmtNotified')}</p>
                         </div>
                     ) : (
                         <>
@@ -100,10 +102,10 @@ export const IncidentReportModal: React.FC<IncidentReportModalProps> = ({
                             <div className="grid grid-cols-2 gap-2">
                                 {issueTypes.map((type) => (
                                     <button
-                                        key={type.label}
-                                        onClick={() => setIssueType(type.label)}
+                                        key={type.id}
+                                        onClick={() => setIssueType(type.id)}
                                         className={`flex items-center gap-2 p-3 rounded-xl border transition-all ${
-                                            issueType === type.label 
+                                            issueType === type.id 
                                                 ? 'bg-white/10 border-white/20 shadow-inner' 
                                                 : 'bg-white/5 border-transparent opacity-60 grayscale-[0.5]'
                                         }`}
@@ -118,11 +120,13 @@ export const IncidentReportModal: React.FC<IncidentReportModalProps> = ({
 
                             {/* Details Input */}
                             <div className="space-y-2">
-                                <label className="text-[9px] font-black text-gray-500 uppercase tracking-widest ml-1">Incident Intel</label>
+                                <label className="text-[9px] font-black text-gray-500 uppercase tracking-widest ml-1">{t('warehouse.driverHub.incidentIntel')}</label>
                                 <textarea
                                     value={description}
                                     onChange={(e) => setDescription(e.target.value)}
-                                    placeholder="DESCRIBE THE SITUATION..."
+                                    placeholder={t('warehouse.driverHub.describeSituation')}
+                                    aria-label={t('warehouse.driverHub.incidentIntel')}
+                                    title={t('warehouse.driverHub.incidentIntel')}
                                     className="w-full bg-black/40 border border-white/5 rounded-2xl p-4 text-xs text-white placeholder:text-gray-700 min-h-[100px] focus:outline-none focus:border-red-500/30 transition-all font-mono uppercase tracking-widest"
                                 />
                             </div>
@@ -134,7 +138,7 @@ export const IncidentReportModal: React.FC<IncidentReportModalProps> = ({
                                 className="w-full py-4 bg-red-600 hover:bg-red-500 disabled:bg-gray-800 disabled:opacity-50 text-white rounded-2xl font-black text-xs uppercase tracking-[0.3em] flex items-center justify-center gap-2 transition-all active:scale-95 shadow-lg shadow-red-600/20"
                             >
                                 <Send size={14} />
-                                {isSubmitting ? 'SENDING...' : 'TRANSMIT REPORT'}
+                                {isSubmitting ? t('warehouse.driverHub.sending') : t('warehouse.driverHub.transmitReport')}
                             </button>
                         </>
                     )}
@@ -144,7 +148,7 @@ export const IncidentReportModal: React.FC<IncidentReportModalProps> = ({
                 {!isSuccess && activeJob && (
                     <div className="p-4 bg-white/5 border-t border-white/5 flex items-center justify-center">
                         <span className="text-[9px] font-bold text-gray-600 tracking-widest uppercase">
-                            Linked to Job: <span className="text-gray-400">#{activeJob.id.toUpperCase().slice(0,8)}</span>
+                            {t('warehouse.driverHub.linkedToJob')} <span className="text-gray-400">#{activeJob.id.toUpperCase().slice(0,8)}</span>
                         </span>
                     </div>
                 )}

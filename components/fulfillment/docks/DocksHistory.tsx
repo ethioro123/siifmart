@@ -56,6 +56,8 @@ export const DocksHistory: React.FC<DocksHistoryProps> = ({ orders, t }) => {
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                             placeholder="Search PO, Supplier..."
+                            aria-label="Search PO or Supplier"
+                            title="Search PO or Supplier"
                             className="woody-input w-64 pl-10 pr-4 text-xs"
                         />
                     </div>

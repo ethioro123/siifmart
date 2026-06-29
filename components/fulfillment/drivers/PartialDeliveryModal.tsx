@@ -20,6 +20,7 @@ interface DeliveryLine {
 }
 
 interface PartialDeliveryModalProps {
+    t: (key: string) => string;
     isOpen: boolean;
     onClose: () => void;
     job: WMSJob;
@@ -43,6 +44,7 @@ const REJECT_REASONS: { id: RejectReason; label: string; desc: string }[] = [
 ];
 
 export const PartialDeliveryModal: React.FC<PartialDeliveryModalProps> = ({
+    t,
     isOpen,
     onClose,
     job,
@@ -56,6 +58,14 @@ export const PartialDeliveryModal: React.FC<PartialDeliveryModalProps> = ({
     refreshData,
     jobs,
 }) => {
+    const dynamicReasons = [
+        { id: 'customer_refused', label: t('warehouse.driverHub.rejectReasonCustomerRefused'), desc: t('warehouse.driverHub.rejectReasonCustomerRefusedDesc') },
+        { id: 'damaged_in_transit', label: t('warehouse.driverHub.rejectReasonDamaged'), desc: t('warehouse.driverHub.rejectReasonDamagedDesc') },
+        { id: 'address_not_found', label: t('warehouse.driverHub.rejectReasonAddress'), desc: t('warehouse.driverHub.rejectReasonAddressDesc') },
+        { id: 'partial_acceptance', label: t('warehouse.driverHub.rejectReasonPartial'), desc: t('warehouse.driverHub.rejectReasonPartialDesc') },
+        { id: 'other', label: t('warehouse.driverHub.other'), desc: t('warehouse.driverHub.notes') }
+    ];
+
     const [lines, setLines] = useState<DeliveryLine[]>([]);
     const [rejectReason, setRejectReason] = useState<RejectReason>('partial_acceptance');
     const [notes, setNotes] = useState('');
@@ -207,13 +217,13 @@ export const PartialDeliveryModal: React.FC<PartialDeliveryModalProps> = ({
                             <Truck size={18} className="text-amber-400" />
                         </div>
                         <div>
-                            <h3 className="text-sm font-black text-white uppercase tracking-widest">Partial Delivery</h3>
-                            <p className="text-[10px] text-gray-500 font-mono uppercase tracking-widest mt-0.5">
-                                {formatJobId(job)} → {destSite?.name || 'Store'}
+                            <h3 className="text-sm font-black text-white uppercase tracking-widest">{t('warehouse.driverHub.partialDelivery')}</h3>
+                            <p className="text-[10px] text-gray-550 font-mono uppercase tracking-widest mt-0.5">
+                                {formatJobId(job)} → {destSite?.name || t('warehouse.driverHub.localHub')}
                             </p>
                         </div>
                     </div>
-                    <button onClick={onClose} className="p-2 hover:bg-white/5 rounded-full transition-colors">
+                    <button onClick={onClose} aria-label={t('warehouse.driverHub.close')} title={t('warehouse.driverHub.close')} className="p-2 hover:bg-white/5 rounded-full transition-colors">
                         <X size={18} className="text-gray-500" />
                     </button>
                 </div>
@@ -223,16 +233,16 @@ export const PartialDeliveryModal: React.FC<PartialDeliveryModalProps> = ({
                         <div className="w-16 h-16 bg-amber-500/15 rounded-full flex items-center justify-center border border-amber-500/20 mb-4">
                             <CheckCircle size={32} className="text-amber-400" />
                         </div>
-                        <h4 className="text-sm font-black text-white uppercase tracking-widest mb-2">Partial Delivery Logged</h4>
+                        <h4 className="text-sm font-black text-white uppercase tracking-widest mb-2">{t('warehouse.driverHub.partialDeliveryLogged')}</h4>
                         <p className="text-xs text-gray-500 max-w-xs">
-                            <strong className="text-amber-400">{totalDelivered}</strong> of <strong className="text-white">{totalDispatched}</strong> units credited to {destSite?.name || 'destination store'}.
+                            <strong className="text-amber-400">{totalDelivered}</strong> {t('warehouse.driverHub.to')} <strong className="text-white">{totalDispatched}</strong> {t('warehouse.driverHub.units').toLowerCase()} {t('warehouse.driverHub.delivered').toLowerCase()} {t('warehouse.driverHub.to').toLowerCase()} {destSite?.name || t('warehouse.driverHub.localHub')}.
                         </p>
-                        <p className="text-[10px] text-gray-600 mt-2">Undelivered stock will be reviewed by the warehouse.</p>
+                        <p className="text-[10px] text-gray-600 mt-2">{t('warehouse.driverHub.undeliveredReviewed')}</p>
                         <button
                             onClick={onClose}
                             className="mt-8 px-8 py-3 bg-amber-500 hover:bg-amber-400 text-white font-black text-xs uppercase tracking-widest rounded-xl transition-all"
                         >
-                            Done
+                            {t('warehouse.driverHub.done')}
                         </button>
                     </div>
                 ) : step === 'QUANTITIES' ? (
@@ -240,18 +250,18 @@ export const PartialDeliveryModal: React.FC<PartialDeliveryModalProps> = ({
                         {/* Progress summary */}
                         <div className="mx-5 mt-4 p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl flex items-center justify-between shrink-0">
                             <div>
-                                <p className="text-[9px] font-black text-amber-400 uppercase tracking-widest">Delivering</p>
+                                <p className="text-[9px] font-black text-amber-400 uppercase tracking-widest">{t('warehouse.driverHub.delivering')}</p>
                                 <p className="text-lg font-black text-white font-mono">{totalDelivered} <span className="text-xs text-gray-500 font-normal">/ {totalDispatched}</span></p>
                             </div>
                             <div className="text-right">
-                                <p className="text-[9px] font-black text-gray-500 uppercase tracking-widest">To</p>
-                                <p className="text-sm font-black text-amber-400 uppercase">{destSite?.name || 'Store'}</p>
+                                <p className="text-[9px] font-black text-gray-500 uppercase tracking-widest">{t('warehouse.driverHub.to')}</p>
+                                <p className="text-sm font-black text-amber-400 uppercase">{destSite?.name || t('warehouse.driverHub.localHub')}</p>
                             </div>
                         </div>
 
                         {/* Line items */}
                         <div className="flex-1 overflow-y-auto p-5 space-y-3 custom-scrollbar">
-                            <p className="text-[9px] font-black text-gray-500 uppercase tracking-[0.2em] mb-2">Delivered Quantities</p>
+                            <p className="text-[9px] font-black text-gray-500 uppercase tracking-[0.2em] mb-2">{t('warehouse.driverHub.deliveredQuantities')}</p>
                             {lines.map((line, i) => {
                                 const deliveredVal = parseInt(line.delivered);
                                 const isShort = !isNaN(deliveredVal) && deliveredVal < line.dispatched;
@@ -270,17 +280,19 @@ export const PartialDeliveryModal: React.FC<PartialDeliveryModalProps> = ({
                                             </div>
                                             <div className="flex items-center gap-3 shrink-0">
                                                 <div className="text-center">
-                                                    <p className="text-[8px] font-black text-gray-500 uppercase tracking-widest">Dispatched</p>
+                                                    <p className="text-[8px] font-black text-gray-500 uppercase tracking-widest">{t('warehouse.driverHub.dispatched')}</p>
                                                     <p className="text-sm font-black text-gray-400 font-mono">{line.dispatched}</p>
                                                 </div>
                                                 <ArrowRight size={12} className={isShort ? 'text-amber-400' : 'text-gray-600'} />
                                                 <div className="text-center">
-                                                    <p className="text-[8px] font-black text-gray-500 uppercase tracking-widest">Delivered</p>
+                                                    <p className="text-[8px] font-black text-gray-500 uppercase tracking-widest">{t('warehouse.driverHub.delivered')}</p>
                                                     <input
                                                         type="number"
                                                         min={0}
                                                         max={line.dispatched}
                                                         value={line.delivered}
+                                                        aria-label="Delivered quantity"
+                                                        title="Delivered quantity"
                                                         onChange={e => setLineDelivered(i, e.target.value)}
                                                         className={`w-14 text-center text-sm font-black font-mono border rounded-lg px-1.5 py-1 focus:outline-none transition-all ${isShort
                                                             ? 'border-amber-500/40 bg-amber-500/10 text-amber-300 focus:border-amber-400'
@@ -293,7 +305,7 @@ export const PartialDeliveryModal: React.FC<PartialDeliveryModalProps> = ({
                                         {isShort && (
                                             <div className="mt-2 flex justify-end">
                                                 <span className="text-[9px] font-black text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded">
-                                                    {line.dispatched - (deliveredVal || 0)} undelivered — will be returned to warehouse
+                                                    {line.dispatched - (deliveredVal || 0)} {t('warehouse.driverHub.undeliveredReturned')}
                                                 </span>
                                             </div>
                                         )}
@@ -304,13 +316,13 @@ export const PartialDeliveryModal: React.FC<PartialDeliveryModalProps> = ({
 
                         <div className="p-5 border-t border-white/10 flex justify-between items-center shrink-0">
                             <button onClick={onClose} className="px-5 py-2.5 text-xs font-black uppercase tracking-widest text-gray-500 hover:text-white transition-colors">
-                                Cancel
+                                {t('warehouse.driverHub.cancel')}
                             </button>
                             <button
                                 onClick={() => setStep('REASON')}
                                 className="px-8 py-2.5 bg-amber-500 hover:bg-amber-400 text-white font-black text-xs uppercase tracking-widest rounded-xl transition-all shadow-md shadow-amber-500/20 flex items-center gap-2"
                             >
-                                Next <ArrowRight size={13} />
+                                {t('warehouse.driverHub.next')} <ArrowRight size={13} />
                             </button>
                         </div>
                     </>
@@ -318,12 +330,12 @@ export const PartialDeliveryModal: React.FC<PartialDeliveryModalProps> = ({
                     /* REASON STEP */
                     <>
                         <div className="flex-1 overflow-y-auto p-5 space-y-4 custom-scrollbar">
-                            <p className="text-[9px] font-black text-gray-500 uppercase tracking-[0.2em]">Why Partial Delivery?</p>
+                            <p className="text-[9px] font-black text-gray-500 uppercase tracking-[0.2em]">{t('warehouse.driverHub.whyPartialDelivery')}</p>
                             <div className="space-y-2">
-                                {REJECT_REASONS.map(r => (
+                                {dynamicReasons.map(r => (
                                     <button
                                         key={r.id}
-                                        onClick={() => setRejectReason(r.id)}
+                                        onClick={() => setRejectReason(r.id as any)}
                                         className={`w-full flex items-center gap-3 p-3.5 rounded-xl border text-left transition-all ${rejectReason === r.id
                                             ? 'bg-amber-500/10 border-amber-500/30'
                                             : 'bg-white/5 border-white/5 opacity-60 hover:opacity-100'
@@ -338,11 +350,13 @@ export const PartialDeliveryModal: React.FC<PartialDeliveryModalProps> = ({
                                 ))}
                             </div>
                             <div>
-                                <label className="text-[9px] font-black text-gray-500 uppercase tracking-widest block mb-1.5">Driver Notes (optional)</label>
+                                <label className="text-[9px] font-black text-gray-500 uppercase tracking-widest block mb-1.5">{t('warehouse.driverHub.driverNotes')}</label>
                                 <textarea
                                     value={notes}
                                     onChange={e => setNotes(e.target.value)}
-                                    placeholder="e.g. Store manager signed for 5 of 8 crates. Remaining loaded back onto truck..."
+                                    placeholder={t('warehouse.driverHub.driverNotes')}
+                                    aria-label="Driver Notes"
+                                    title="Driver Notes"
                                     rows={3}
                                     className="w-full text-xs border border-white/10 bg-black/40 rounded-xl px-4 py-3 text-white placeholder:text-gray-700 focus:outline-none focus:border-amber-500/40 transition-all resize-none font-mono"
                                 />
@@ -350,7 +364,7 @@ export const PartialDeliveryModal: React.FC<PartialDeliveryModalProps> = ({
                         </div>
                         <div className="p-5 border-t border-white/10 flex justify-between items-center shrink-0">
                             <button onClick={() => setStep('QUANTITIES')} className="px-5 py-2.5 text-xs font-black uppercase tracking-widest text-gray-500 hover:text-white transition-colors">
-                                ← Back
+                                ← {t('warehouse.driverHub.back')}
                             </button>
                             <button
                                 disabled={isSubmitting}
@@ -358,8 +372,8 @@ export const PartialDeliveryModal: React.FC<PartialDeliveryModalProps> = ({
                                 className="px-8 py-2.5 bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-white font-black text-xs uppercase tracking-widest rounded-xl transition-all shadow-md shadow-amber-500/20 flex items-center gap-2"
                             >
                                 {isSubmitting
-                                    ? <><Loader2 size={13} className="animate-spin" /> Saving...</>
-                                    : <><CheckCircle size={13} /> Confirm Partial Delivery</>
+                                    ? <><Loader2 size={13} className="animate-spin" /> {t('warehouse.driverHub.saving')}</>
+                                    : <><CheckCircle size={13} /> {t('warehouse.driverHub.confirmPartialDelivery')}</>
                                 }
                             </button>
                         </div>

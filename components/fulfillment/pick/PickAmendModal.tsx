@@ -51,7 +51,7 @@ export const PickAmendModal: React.FC<PickAmendModalProps> = ({
         setLines(
             (job.lineItems as any[]).map((item: any, idx: number) => ({
                 index: idx,
-                name: item.name || item.productName || 'Unknown',
+                name: item.name || item.productName || t('warehouse.picking.unknownUser'),
                 sku: item.sku || '',
                 required: item.expectedQty || (item as any).quantity || 0,
                 picked: item.pickedQty ?? item.expectedQty ?? 0,
@@ -79,7 +79,7 @@ export const PickAmendModal: React.FC<PickAmendModalProps> = ({
 
     const handleConfirm = async () => {
         if (!reason.trim()) {
-            addNotification('alert', 'Please enter a reason for the amendment.');
+            addNotification('alert', t('warehouse.picking.pleaseEnterReason'));
             return;
         }
         setIsSubmitting(true);
@@ -129,10 +129,10 @@ export const PickAmendModal: React.FC<PickAmendModalProps> = ({
             }
 
             await refreshData();
-            addNotification('success', `Pick #${formatJobId(job)} amended successfully.${linkedPackJob ? ' Pack job updated.' : ''}`);
+            addNotification('success', t('warehouse.picking.amendSuccess').replace('{id}', formatJobId(job)).replace('{packInfo}', linkedPackJob ? t('warehouse.picking.packJobUpdatedInfo') : ''));
             onClose();
         } catch (err: any) {
-            addNotification('alert', 'Amendment failed: ' + (err?.message || 'Unknown error'));
+            addNotification('alert', t('warehouse.picking.amendmentFailed') + (err?.message || 'Unknown error'));
         } finally {
             setIsSubmitting(false);
         }
@@ -156,10 +156,10 @@ export const PickAmendModal: React.FC<PickAmendModalProps> = ({
                         </div>
                         <div>
                             <h3 className="text-sm font-black text-zinc-900 dark:text-zinc-100 uppercase tracking-widest">
-                                Amend Pick Quantities
+                                {t('warehouse.picking.amendPickQuantities')}
                             </h3>
                             <p className="text-[10px] text-zinc-500 dark:text-zinc-500 font-mono uppercase tracking-widest mt-0.5">
-                                {formatJobId(job)} · Supervisor Correction
+                                {formatJobId(job)} · {t('warehouse.picking.supervisorCorrection')}
                             </p>
                         </div>
                     </div>
@@ -174,8 +174,8 @@ export const PickAmendModal: React.FC<PickAmendModalProps> = ({
                         <div className="p-4 bg-red-500/10 rounded-2xl border border-red-500/20 mb-4">
                             <ShieldAlert size={32} className="text-red-500" />
                         </div>
-                        <p className="text-sm font-black text-zinc-800 dark:text-zinc-200 uppercase tracking-widest">Supervisor Required</p>
-                        <p className="text-xs text-zinc-500 mt-2">Only warehouse managers and above can amend completed picks.</p>
+                        <p className="text-sm font-black text-zinc-800 dark:text-zinc-200 uppercase tracking-widest">{t('warehouse.picking.supervisorRequired')}</p>
+                        <p className="text-xs text-zinc-500 mt-2">{t('warehouse.picking.supervisorPermissionRequired')}</p>
                     </div>
                 ) : step === 'EDIT' ? (
                     <>
@@ -183,15 +183,13 @@ export const PickAmendModal: React.FC<PickAmendModalProps> = ({
                         <div className="mx-6 mt-4 p-3 bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-500/20 rounded-xl flex items-start gap-2 shrink-0">
                             <AlertTriangle size={14} className="text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
                             <p className="text-[10px] text-amber-700 dark:text-amber-400 font-bold leading-relaxed">
-                                This will update the picked quantities and automatically cascade changes to the linked Pack job
-                                {linkedPackJob ? ` (${formatJobId(linkedPackJob)})` : ''}.
-                                All changes are logged with your name and reason.
+                                {t('warehouse.picking.amendWarningInfo').replace('{job}', linkedPackJob ? ` (${formatJobId(linkedPackJob)})` : '')}
                             </p>
                         </div>
 
                         {/* Line Items */}
                         <div className="flex-1 overflow-y-auto p-6 space-y-3 custom-scrollbar">
-                            <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] mb-3">Correct Quantities</p>
+                            <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] mb-3">{t('warehouse.picking.correctQuantities')}</p>
                             {lines.map((line, i) => {
                                 const amendedVal = parseInt(line.amended);
                                 const isValid = !isNaN(amendedVal) && amendedVal >= 0;
@@ -219,7 +217,7 @@ export const PickAmendModal: React.FC<PickAmendModalProps> = ({
                                                 {isDiff && <ArrowRight size={14} className="text-amber-500" />}
                                                 {/* Amended Input */}
                                                 <div className="text-center">
-                                                    <p className="text-[8px] font-black text-amber-500 uppercase tracking-widest">Correct To</p>
+                                                    <p className="text-[8px] font-black text-amber-500 uppercase tracking-widest">{t('warehouse.picking.correctTo')}</p>
                                                     <input
                                                         type="number"
                                                         min={0}
@@ -238,7 +236,7 @@ export const PickAmendModal: React.FC<PickAmendModalProps> = ({
                                             </div>
                                         </div>
                                         {isOver && (
-                                            <p className="text-[9px] text-red-500 font-bold mt-1.5 text-right">⚠ Exceeds required quantity — confirm this is correct</p>
+                                            <p className="text-[9px] text-red-500 font-bold mt-1.5 text-right">{t('warehouse.picking.exceedsExpectedWarning')}</p>
                                         )}
                                     </div>
                                 );
@@ -247,11 +245,11 @@ export const PickAmendModal: React.FC<PickAmendModalProps> = ({
 
                         {/* Reason input */}
                         <div className="px-6 pb-2 shrink-0">
-                            <label className="text-[9px] font-black text-zinc-400 uppercase tracking-widest block mb-1.5">Reason for Amendment *</label>
+                            <label className="text-[9px] font-black text-zinc-400 uppercase tracking-widest block mb-1.5">{t('warehouse.picking.reasonForAmendment')}</label>
                             <textarea
                                 value={reason}
                                 onChange={e => setReason(e.target.value)}
-                                placeholder="e.g. Worker entered 12 instead of 37 during manual short-pick..."
+                                placeholder={t('warehouse.picking.reasonPlaceholder')}
                                 rows={2}
                                 className="w-full text-xs border border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-black/40 rounded-xl px-4 py-3 text-zinc-800 dark:text-zinc-200 placeholder:text-zinc-400 dark:placeholder:text-zinc-700 focus:outline-none focus:border-amber-400 transition-all resize-none"
                             />
@@ -267,7 +265,7 @@ export const PickAmendModal: React.FC<PickAmendModalProps> = ({
                                 onClick={() => setStep('CONFIRM')}
                                 className="px-8 py-2.5 bg-amber-500 hover:bg-amber-400 disabled:opacity-40 disabled:grayscale text-white font-black text-xs uppercase tracking-widest rounded-xl transition-all shadow-md shadow-amber-500/20 flex items-center gap-2"
                             >
-                                <Edit3 size={13} /> Review Changes
+                                <Edit3 size={13} /> {t('warehouse.picking.reviewChanges')}
                             </button>
                         </div>
                     </>
@@ -275,7 +273,7 @@ export const PickAmendModal: React.FC<PickAmendModalProps> = ({
                     /* CONFIRM STEP */
                     <>
                         <div className="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar">
-                            <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em]">Confirm These Corrections</p>
+                            <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em]">{t('warehouse.picking.confirmTheseCorrections')}</p>
                             {lines.filter(l => {
                                 const v = parseInt(l.amended);
                                 return !isNaN(v) && v !== l.picked;
@@ -297,13 +295,13 @@ export const PickAmendModal: React.FC<PickAmendModalProps> = ({
                                 <div className="p-3 bg-blue-50 dark:bg-blue-900/10 border border-blue-200 dark:border-blue-500/20 rounded-xl flex items-start gap-2">
                                     <CheckCircle size={13} className="text-blue-500 mt-0.5 shrink-0" />
                                     <p className="text-[10px] text-blue-700 dark:text-blue-400 font-bold">
-                                        Pack job <strong>{formatJobId(linkedPackJob)}</strong> will also be updated to match corrected quantities.
+                                        {t('warehouse.picking.packJobUpdatedNotice').replace('{job}', formatJobId(linkedPackJob))}
                                     </p>
                                 </div>
                             )}
 
                             <div className="p-3 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl">
-                                <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest mb-1">Reason on Record</p>
+                                <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest mb-1">{t('warehouse.picking.reasonOnRecord')}</p>
                                 <p className="text-xs text-zinc-700 dark:text-zinc-300 italic">{reason}</p>
                             </div>
                         </div>
@@ -313,7 +311,7 @@ export const PickAmendModal: React.FC<PickAmendModalProps> = ({
                                 onClick={() => setStep('EDIT')}
                                 className="px-6 py-2.5 text-xs font-black uppercase tracking-widest text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-white transition-colors"
                             >
-                                &larr; Back
+                                &larr; {t('warehouse.back')}
                             </button>
                             <button
                                 disabled={isSubmitting}
@@ -321,8 +319,8 @@ export const PickAmendModal: React.FC<PickAmendModalProps> = ({
                                 className="px-8 py-2.5 bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-white font-black text-xs uppercase tracking-widest rounded-xl transition-all shadow-md shadow-amber-500/20 flex items-center gap-2"
                             >
                                 {isSubmitting
-                                    ? <><Loader2 size={13} className="animate-spin" /> Saving...</>
-                                    : <><CheckCircle size={13} /> Confirm Amendment</>
+                                    ? <><Loader2 size={13} className="animate-spin" /> {t('warehouse.saving')}</>
+                                    : <><CheckCircle size={13} /> {t('warehouse.picking.confirmAmendment')}</>
                                 }
                             </button>
                         </div>

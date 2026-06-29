@@ -113,7 +113,7 @@ export const PickScanner: React.FC<PickScannerProps> = ({
             const scanPrefix = extractPrefixFromBarcode(rawVal);
             if (scanPrefix && expectedPrefix !== scanPrefix) {
                 playBeep('error');
-                setErrorMsg(`WRONG SITE: ${scanPrefix}`);
+                setErrorMsg(t('warehouse.picking.wrongSite').replace('{site}', scanPrefix));
                 setShowError(true);
                 setInputVal('');
                 setTimeout(() => setShowError(false), 2000);
@@ -142,7 +142,7 @@ export const PickScanner: React.FC<PickScannerProps> = ({
         if (step === 'LOCATION') {
             if (!isLocationBarcode(val)) {
                 playBeep('error');
-                setErrorMsg('ENCODED BARCODE REQUIRED');
+                setErrorMsg(t('warehouse.picking.encodedBarcodeRequired'));
                 setShowError(true);
                 setTimeout(() => setShowError(false), 2000);
                 return;
@@ -151,7 +151,7 @@ export const PickScanner: React.FC<PickScannerProps> = ({
             const isMatch = expectedPrefix === scanPrefix;
             if (expectedPrefix && !isMatch) {
                 playBeep('error');
-                setErrorMsg(`WRONG SITE: ${scanPrefix}`);
+                setErrorMsg(t('warehouse.picking.wrongSite').replace('{site}', scanPrefix || ''));
                 setShowError(true);
                 setTimeout(() => setShowError(false), 2000);
                 return;
@@ -165,14 +165,14 @@ export const PickScanner: React.FC<PickScannerProps> = ({
 
             if (!decodedScanned) {
                 playBeep('error');
-                setErrorMsg('Corrupt Location Data');
+                setErrorMsg(t('warehouse.picking.corruptLocationData'));
                 setShowError(true);
                 return;
             }
 
             if (decodedScanned !== normalizedTarget) {
                 playBeep('error');
-                setErrorMsg(`Bay Mismatch: Expected ${normalizedTarget}`);
+                setErrorMsg(t('warehouse.picking.bayMismatch').replace('{location}', normalizedTarget));
                 setShowError(true);
                 setInputVal('');
                 setTimeout(() => setShowError(false), 2000);
@@ -193,7 +193,7 @@ export const PickScanner: React.FC<PickScannerProps> = ({
 
             if (!matchesSku && !matchesBarcode) {
                 playBeep('error');
-                setErrorMsg('Incorrect Item Scanned');
+                setErrorMsg(t('warehouse.picking.incorrectItemScanned'));
                 setShowError(true);
                 setInputVal('');
                 setTimeout(() => setShowError(false), 2000);
@@ -221,14 +221,14 @@ export const PickScanner: React.FC<PickScannerProps> = ({
 
             if (isNaN(qty) || qty <= 0 || qty > displayMax) {
                 playBeep('error');
-                setErrorMsg(`Invalid Quantity (1-${displayMax})`);
+                setErrorMsg(t('warehouse.picking.invalidQuantityRange').replace('{max}', String(displayMax)));
                 setShowError(true);
                 setTimeout(() => setShowError(false), 2000);
                 return;
             }
 
             if (qty < displayMax) {
-                const confirmed = window.confirm(`Short picking detected. You entered ${qty} but expected ${displayMax}. The system will flag this item. Continue?`);
+                const confirmed = window.confirm(t('warehouse.picking.shortPickConfirmPrompt').replace('{qty}', String(qty)).replace('{expected}', String(displayMax)));
                 if (!confirmed) return;
             }
 
@@ -320,7 +320,7 @@ export const PickScanner: React.FC<PickScannerProps> = ({
 
                     {/* Instruction */}
                     <h1 className={`text-3xl md:text-5xl font-black text-gray-900 dark:text-[#EAE5D9] text-center uppercase italic tracking-tight mb-2 z-10 transition-all duration-300 ${isLocationBarcode(inputVal.trim().toUpperCase()) ? 'text-[#2C5E3B] dark:text-[#A9CBA2] scale-105' : showError ? 'text-red-600 dark:text-red-500 animate-pulse' : ''}`}>
-                        {showSuccess ? 'Success!' : showError ? 'Error!' : !currentItem ? 'Mission Complete' : step === 'LOCATION' ? (isLocationBarcode(inputVal.trim().toUpperCase()) ? 'Location Identified' : t('warehouse.scanLocation')) : step === 'QUANTITY' ? 'Confirm Quantity' : t('warehouse.scanSkuToConfirm')}
+                        {showSuccess ? t('warehouse.picking.successCaps') : showError ? t('warehouse.picking.errorCaps') : !currentItem ? t('warehouse.picking.missionComplete') : step === 'LOCATION' ? (isLocationBarcode(inputVal.trim().toUpperCase()) ? t('warehouse.picking.locationIdentified') : t('warehouse.scanLocation')) : step === 'QUANTITY' ? t('warehouse.confirmQty') : t('warehouse.scanSkuToConfirm')}
                     </h1>
 
                     {showSuccess ? (
@@ -333,10 +333,10 @@ export const PickScanner: React.FC<PickScannerProps> = ({
                         </div>
                     ) : !currentItem ? (
                         <div className="text-center z-10 mb-8 bg-green-50 dark:bg-green-500/10 border-2 border-green-500/50 p-6 rounded-2xl shadow-[0_0_30px_rgba(34,197,94,0.1)] w-full max-w-md">
-                            <p className="text-green-700 dark:text-green-400 text-lg font-bold uppercase tracking-widest mb-4">All Items Picked!</p>
+                            <p className="text-green-700 dark:text-green-400 text-lg font-bold uppercase tracking-widest mb-4">{t('warehouse.picking.allItemsPicked')}</p>
 
                             <div className="bg-white dark:bg-black/40 rounded-xl p-4 mb-4 text-left max-h-48 overflow-y-auto border border-gray-200 dark:border-green-500/20 shadow-inner dark:shadow-none">
-                                <h4 className="text-gray-500 dark:text-gray-400 text-xs font-bold uppercase tracking-widest mb-3 border-b border-gray-200 dark:border-white/10 pb-2">Mission Summary</h4>
+                                <h4 className="text-gray-500 dark:text-gray-400 text-xs font-bold uppercase tracking-widest mb-3 border-b border-gray-200 dark:border-white/10 pb-2">{t('warehouse.picking.missionSummary')}</h4>
                                 <div className="flex flex-col gap-3">
                                     {job.lineItems?.map((item: any, idx: number) => (
                                         <div key={idx} className="flex justify-between items-start">
@@ -364,27 +364,27 @@ export const PickScanner: React.FC<PickScannerProps> = ({
                                 </div>
                             </div>
 
-                            <p className="text-gray-600 dark:text-white text-sm opacity-80 max-w-[200px] mx-auto">Click below to finalize this mission and create the Pack job.</p>
+                            <p className="text-gray-600 dark:text-white text-sm opacity-80 max-w-[200px] mx-auto">{t('warehouse.picking.finalizeMissionInfo')}</p>
                         </div>
                     ) : step === 'LOCATION' ? (
                         <div className="text-center z-10 mb-8">
                             <div className="text-center mb-8 relative">
                                 <p className="text-gray-500 dark:text-gray-400 text-sm font-medium uppercase tracking-widest mb-2">
-                                    Go to source bay
+                                    {t('warehouse.picking.goToSourceBay')}
                                 </p>
 
                                 <div className={`relative inline-block px-8 py-4 rounded-xl border-2 transition-all duration-300 bg-[#2C5E3B]/5 dark:bg-[#2C5E3B]/10 border-[#2C5E3B] text-[#2C5E3B] dark:text-[#A9CBA2] shadow-[0_0_30px_rgba(44,94,59,0.2)]`}>
                                     <p className={`font-mono font-black tracking-widest ${isLocationBarcode(inputVal.trim().toUpperCase()) ? 'text-4xl md:text-7xl text-[#2C5E3B] dark:text-[#A9CBA2]' : ((currentProduct?.location?.length || 0) > 10 ? 'text-xl md:text-2xl' : 'text-3xl md:text-5xl')}`}>
                                         {isLocationBarcode(inputVal.trim().toUpperCase())
                                             ? decodeLocation(inputVal.trim().toUpperCase())
-                                            : (normalizeLocation(inputVal) || currentProduct?.location || 'UNKNOWN BAY')}
+                                            : (normalizeLocation(inputVal) || currentProduct?.location || t('warehouse.picking.unknownBay'))}
                                     </p>
                                 </div>
                             </div>
                         </div>
                     ) : step === 'QUANTITY' ? (
                         <div className="text-center z-10 mb-8">
-                            <p className="text-amber-600 dark:text-amber-400 text-lg uppercase tracking-widest font-bold">{t('warehouse.shortPick')} — Enter Actual Qty</p>
+                            <p className="text-amber-600 dark:text-amber-400 text-lg uppercase tracking-widest font-bold">{t('warehouse.picking.shortPickEnterQty')}</p>
                             <p className="text-gray-900 dark:text-[#EAE5D9] text-2xl font-black mt-2">{currentItem?.name}</p>
                             <p className="text-[#2C5E3B] dark:text-[#A9CBA2] font-mono text-xl">{currentItem?.sku}</p>
                             <p className="text-gray-550 text-sm mt-2">{t('warehouse.expected')}: <span className="text-gray-900 dark:text-white font-bold">
@@ -402,7 +402,7 @@ export const PickScanner: React.FC<PickScannerProps> = ({
                         </div>
                     ) : (
                         <div className="text-center z-10 mb-8">
-                            <p className="text-gray-500 dark:text-gray-400 text-lg">{isItemMatched ? 'Confirm item pick:' : 'Scan product barcode to pick:'}</p>
+                            <p className="text-gray-500 dark:text-gray-400 text-lg">{isItemMatched ? t('warehouse.picking.confirmItemPick') : t('warehouse.picking.scanProductToPick')}</p>
                             <p className={`text-2xl font-bold mt-2 transition-colors ${isItemMatched ? 'text-green-600 dark:text-green-400' : 'text-gray-900 dark:text-white'}`}>
                                 {currentItem?.name}
                             </p>
@@ -426,7 +426,7 @@ export const PickScanner: React.FC<PickScannerProps> = ({
                                         : 'bg-gray-100 dark:bg-white/5 border-gray-200 dark:border-white/10 text-gray-655 dark:text-gray-500 hover:text-amber-600 dark:hover:text-amber-400 hover:border-amber-300 dark:hover:border-amber-500/30'
                                         }`}
                                 >
-                                    {shortPickMode ? '✓ Short Pick Mode ON' : `⚠ ${t('warehouse.shortPick')}`}
+                                    {shortPickMode ? t('warehouse.picking.shortPickModeOn') : `⚠ ${t('warehouse.shortPick')}`}
                                 </button>
                             )}
                         </div>
@@ -442,6 +442,8 @@ export const PickScanner: React.FC<PickScannerProps> = ({
                                     <input
                                         ref={qtyRef}
                                         type="number"
+                                        aria-label="Pick quantity"
+                                        title="Pick quantity"
                                         value={qtyVal}
                                         onChange={(e) => setQtyVal(e.target.value)}
                                         className="w-full bg-white/90 dark:bg-[#1C2620]/90 border-2 rounded-2xl py-6 px-4 text-center text-5xl font-mono text-gray-900 dark:text-[#EAE5D9] placeholder:text-gray-400 dark:placeholder:text-gray-600 focus:outline-none relative z-10 shadow-xl transition-all border-[#2C5E3B] dark:border-[#A9CBA2]/40 focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2]"
@@ -453,6 +455,8 @@ export const PickScanner: React.FC<PickScannerProps> = ({
                                     <input
                                         ref={inputRef}
                                         type="text"
+                                        aria-label="Scan barcode"
+                                        title="Scan barcode"
                                         value={inputVal}
                                         onChange={(e) => setInputVal(e.target.value)}
                                         onKeyDown={(e) => {
@@ -470,12 +474,12 @@ export const PickScanner: React.FC<PickScannerProps> = ({
                                         onPaste={(e) => {
                                             e.preventDefault();
                                             playBeep('error');
-                                            setErrorMsg('SCAN ONLY — NO PASTING');
+                                            setErrorMsg(t('warehouse.picking.scanOnlyNoPasting'));
                                             setShowError(true);
                                             setTimeout(() => setShowError(false), 2000);
                                         }}
                                         className={`w-full bg-white/90 dark:bg-[#1C2620]/90 border-2 rounded-2xl py-6 px-4 text-center text-xl md:text-3xl font-mono text-gray-900 dark:text-[#EAE5D9] placeholder:text-gray-400 dark:placeholder:text-gray-600 focus:outline-none relative z-10 shadow-xl transition-all border-[#E2DCCE] dark:border-[#A9CBA2]/10 focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2]/40`}
-                                        placeholder={step === 'LOCATION' ? 'SCAN 15-DIGIT BARCODE' : 'SCAN SKU BARCODE'}
+                                        placeholder={step === 'LOCATION' ? t('warehouse.picking.scan15DigitBarcode') : t('warehouse.picking.scanSkuBarcode')}
                                         autoFocus
                                         disabled={isProcessing}
                                     />
@@ -485,7 +489,7 @@ export const PickScanner: React.FC<PickScannerProps> = ({
                                     <div className="mb-4 text-center animate-in fade-in slide-in-from-bottom-1 duration-300 mt-2">
                                         <p className="text-xs font-black uppercase tracking-[0.3em] text-[#2C5E3B] dark:text-[#A9CBA2] flex items-center justify-center gap-3">
                                             <span className="w-2 h-2 rounded-full bg-[#2C5E3B] dark:bg-[#A9CBA2] animate-ping" />
-                                            {isLocationBarcode(inputVal.trim().toUpperCase()) ? `IDENTIFIED: ${decodeLocation(inputVal.trim().toUpperCase())}` : 'Encoded Barcode Protocol Required'}
+                                            {isLocationBarcode(inputVal.trim().toUpperCase()) ? `IDENTIFIED: ${decodeLocation(inputVal.trim().toUpperCase())}` : t('warehouse.picking.encodedBarcodeProtocolRequired')}
                                         </p>
                                     </div>
                                 )}
@@ -536,7 +540,7 @@ export const PickScanner: React.FC<PickScannerProps> = ({
                             ) : (
                                 <CheckCircle size={24} />
                             )}
-                            {isProcessing ? 'Validating...' : !currentItem ? t('warehouse.completed') : step === 'QUANTITY' ? 'CONFIRM PICK' : isItemMatched ? 'COMPLETE PICK' : 'Confirm Scan'}
+                            {isProcessing ? t('warehouse.picking.validating') : !currentItem ? t('warehouse.completed') : step === 'QUANTITY' ? t('warehouse.picking.confirmPick') : isItemMatched ? t('warehouse.picking.completePick') : t('warehouse.picking.confirmScan')}
                         </button>
                     </form>
 
@@ -584,7 +588,7 @@ export const PickScanner: React.FC<PickScannerProps> = ({
                     })()}
 
                     <p className="mt-8 text-gray-550 text-[10px] font-mono font-bold uppercase tracking-widest z-10 text-center opacity-60">
-                        15-Digit Encoded Protocol • Checksum Verified
+                        {t('warehouse.picking.checksumVerifiedInfo')}
                     </p>
                 </div>
             </div>

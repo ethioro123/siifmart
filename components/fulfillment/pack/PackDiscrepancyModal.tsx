@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import { WMSJob, User } from '../../../types';
 import { formatJobId } from '../../../utils/jobIdFormatter';
+import { useLanguage } from '../../../contexts/LanguageContext';
 
 type ReasonCode = 'underpack' | 'overpack' | 'wrong_item' | 'damaged' | 'short_picked';
 
@@ -16,26 +17,6 @@ interface PackDiscrepLine {
     actualCount: string; // what packer physically counted
 }
 
-interface PackDiscrepancyModalProps {
-    isOpen: boolean;
-    onClose: () => void;
-    job: WMSJob;
-    currentUser: User | null;
-    wmsJobsService: any;
-    addNotification: (type: 'success' | 'alert' | 'info', msg: string) => void;
-    refreshData: () => Promise<void>;
-    /** Called when packer accepts count — updates job line items */
-    onAcceptCount?: (updatedLineItems: any[]) => void;
-}
-
-const REASON_OPTIONS: { id: ReasonCode; label: string; desc: string; color: string }[] = [
-    { id: 'short_picked', label: 'Short Picked', desc: 'Items were missing when opened for packing', color: 'text-amber-500' },
-    { id: 'underpack', label: 'Underpack', desc: 'Fewer items physically present than manifest', color: 'text-orange-500' },
-    { id: 'overpack', label: 'Overpack', desc: 'More items present than on the manifest', color: 'text-blue-500' },
-    { id: 'wrong_item', label: 'Wrong Item', desc: 'A different SKU is in the box', color: 'text-purple-500' },
-    { id: 'damaged', label: 'Damaged', desc: 'Items are damaged and cannot be packed', color: 'text-red-500' },
-];
-
 export const PackDiscrepancyModal: React.FC<PackDiscrepancyModalProps> = ({
     isOpen,
     onClose,
@@ -46,6 +27,16 @@ export const PackDiscrepancyModal: React.FC<PackDiscrepancyModalProps> = ({
     refreshData,
     onAcceptCount,
 }) => {
+    const { t } = useLanguage();
+    
+    const reasonOptions = [
+        { id: 'short_picked' as const, label: t('warehouse.packing.shortPicked'), desc: t('warehouse.packing.shortPickedDesc'), color: 'text-amber-500' },
+        { id: 'underpack' as const, label: t('warehouse.packing.underpack'), desc: t('warehouse.packing.underpackDesc'), color: 'text-orange-500' },
+        { id: 'overpack' as const, label: t('warehouse.packing.overpack'), desc: t('warehouse.packing.overpackDesc'), color: 'text-blue-500' },
+        { id: 'wrong_item' as const, label: t('warehouse.packing.wrongItem'), desc: t('warehouse.packing.wrongItemDesc'), color: 'text-purple-500' },
+        { id: 'damaged' as const, label: t('warehouse.picking.damaged') || 'Damaged', desc: t('warehouse.packing.damagedDesc'), color: 'text-red-500' },
+    ];
+
     const [lines, setLines] = useState<PackDiscrepLine[]>([]);
     const [reasonCode, setReasonCode] = useState<ReasonCode>('short_picked');
     const [notes, setNotes] = useState('');
@@ -120,16 +111,16 @@ export const PackDiscrepancyModal: React.FC<PackDiscrepancyModalProps> = ({
             onAcceptCount?.(updatedLineItems);
             await refreshData();
             setStep('DONE');
-            addNotification('info', `Pack discrepancy logged for ${formatJobId(job)}. Quantities updated.`);
+            addNotification('info', t('warehouse.packing.packDiscrepancyLogged').replace('{jobId}', formatJobId(job)));
         } catch (err: any) {
-            addNotification('alert', 'Failed to log discrepancy: ' + (err?.message || 'Unknown error'));
+            addNotification('alert', t('warehouse.packing.failedToLogDiscrepancy') + (err?.message || 'Unknown error'));
         } finally {
             setIsSubmitting(false);
         }
     };
 
     return (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[300] p-4 animate-in fade-in duration-200">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-[300] p-4 animate-in fade-in duration-200">
             <div className="bg-white dark:bg-zinc-950 border-2 border-orange-500/30 rounded-3xl w-full max-w-xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden relative">
 
                 {/* Ambient glow */}
@@ -142,11 +133,11 @@ export const PackDiscrepancyModal: React.FC<PackDiscrepancyModalProps> = ({
                             <ClipboardList size={18} className="text-orange-600 dark:text-orange-400" />
                         </div>
                         <div>
-                            <h3 className="text-sm font-black text-zinc-900 dark:text-zinc-100 uppercase tracking-widest">Flag Pack Discrepancy</h3>
-                            <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-widest mt-0.5">{formatJobId(job)} · Packer Count vs. Manifest</p>
+                            <h3 className="text-sm font-black text-zinc-900 dark:text-zinc-100 uppercase tracking-widest">{t('warehouse.packing.flagDiscrepancy')}</h3>
+                            <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-widest mt-0.5">{formatJobId(job)} · {t('warehouse.packing.packerCountVsManifest')}</p>
                         </div>
                     </div>
-                    <button onClick={onClose} className="p-2 hover:bg-zinc-100 dark:hover:bg-white/10 rounded-lg transition-colors">
+                    <button onClick={onClose} className="p-2 hover:bg-zinc-100 dark:hover:bg-white/10 rounded-lg transition-colors" aria-label={t('warehouse.dismiss')}>
                         <X size={18} className="text-zinc-500" />
                     </button>
                 </div>
@@ -156,13 +147,13 @@ export const PackDiscrepancyModal: React.FC<PackDiscrepancyModalProps> = ({
                         <div className="w-16 h-16 bg-green-500/15 rounded-full flex items-center justify-center border border-green-500/20 mb-4">
                             <CheckCircle size={32} className="text-green-500" />
                         </div>
-                        <h4 className="text-sm font-black text-zinc-900 dark:text-zinc-100 uppercase tracking-widest mb-2">Discrepancy Logged</h4>
-                        <p className="text-xs text-zinc-500 max-w-xs">Quantities have been updated. The pick supervisor has been notified via the system log.</p>
+                        <h4 className="text-sm font-black text-zinc-900 dark:text-zinc-100 uppercase tracking-widest mb-2">{t('warehouse.packing.discrepancyLogged')}</h4>
+                        <p className="text-xs text-zinc-500 max-w-xs">{t('warehouse.packing.discrepancySuccessDesc')}</p>
                         <button
                             onClick={onClose}
                             className="mt-8 px-8 py-3 bg-zinc-900 dark:bg-white text-white dark:text-black font-black text-xs uppercase tracking-widest rounded-xl transition-all hover:opacity-80"
                         >
-                            Close
+                            {t('warehouse.dismiss')}
                         </button>
                     </div>
                 ) : step === 'COUNT' ? (
@@ -171,13 +162,12 @@ export const PackDiscrepancyModal: React.FC<PackDiscrepancyModalProps> = ({
                         <div className="mx-5 mt-4 p-3 bg-orange-50 dark:bg-orange-900/10 border border-orange-200 dark:border-orange-500/20 rounded-xl flex items-start gap-2 shrink-0">
                             <AlertTriangle size={13} className="text-orange-500 mt-0.5 shrink-0" />
                             <p className="text-[10px] text-orange-700 dark:text-orange-400 font-bold leading-relaxed">
-                                Physically count the items in front of you. Enter the actual count below. Any difference from the pick manifest will be logged as a discrepancy.
+                                {t('warehouse.packing.discrepancyInstructions')}
                             </p>
                         </div>
-
                         {/* Line items count */}
                         <div className="flex-1 overflow-y-auto p-5 space-y-3 custom-scrollbar">
-                            <p className="text-[9px] font-black text-zinc-400 uppercase tracking-[0.2em] mb-2">Physical Count</p>
+                            <p className="text-[9px] font-black text-zinc-400 uppercase tracking-[0.2em] mb-2">{t('warehouse.packing.physicalCount')}</p>
                             {lines.map((line, i) => {
                                 const actual = parseInt(line.actualCount);
                                 const isDiff = !isNaN(actual) && actual !== line.expected;
@@ -188,7 +178,7 @@ export const PackDiscrepancyModal: React.FC<PackDiscrepancyModalProps> = ({
                                         <div className="flex items-center justify-between gap-3">
                                             <div className="flex items-center gap-3 flex-1 min-w-0">
                                                 <div className="w-8 h-8 bg-zinc-100 dark:bg-black/40 rounded-lg flex items-center justify-center shrink-0">
-                                                    <Package size={14} className="text-zinc-500" />
+                                                    <Package size={14} className="text-zinc-505" />
                                                 </div>
                                                 <div className="min-w-0">
                                                     <p className="text-xs font-black text-zinc-900 dark:text-zinc-100 uppercase truncate">{line.name}</p>
@@ -198,17 +188,19 @@ export const PackDiscrepancyModal: React.FC<PackDiscrepancyModalProps> = ({
                                             <div className="flex items-center gap-3 shrink-0">
                                                 {/* Manifest count */}
                                                 <div className="text-center">
-                                                    <p className="text-[8px] font-black text-zinc-400 uppercase tracking-widest">Manifest</p>
+                                                    <p className="text-[8px] font-black text-zinc-400 uppercase tracking-widest">{t('warehouse.expected')}</p>
                                                     <p className="text-sm font-black font-mono text-zinc-500">{line.expected}</p>
                                                 </div>
                                                 {isDiff && <ArrowRight size={13} className={isShort ? 'text-red-400' : 'text-blue-400'} />}
                                                 {/* Actual count stepper */}
                                                 <div className="text-center">
-                                                    <p className="text-[8px] font-black text-zinc-400 uppercase tracking-widest">Counted</p>
+                                                    <p className="text-[8px] font-black text-zinc-400 uppercase tracking-widest">{t('warehouse.picking')}</p>
                                                     <div className="flex items-center gap-1 mt-0.5">
                                                         <button
                                                             onClick={() => adjustLine(i, -1)}
                                                             className="w-6 h-6 rounded-md bg-zinc-200 dark:bg-white/10 flex items-center justify-center hover:bg-zinc-300 dark:hover:bg-white/20 transition-colors"
+                                                            aria-label={t('warehouse.packing.decreaseQuantity')}
+                                                            title={t('warehouse.packing.decreaseQuantity')}
                                                         >
                                                             <Minus size={10} />
                                                         </button>
@@ -217,6 +209,9 @@ export const PackDiscrepancyModal: React.FC<PackDiscrepancyModalProps> = ({
                                                             min={0}
                                                             value={line.actualCount}
                                                             onChange={e => setLineVal(i, e.target.value)}
+                                                            aria-label="Counted quantity"
+                                                            title="Counted quantity"
+                                                            placeholder="0"
                                                             className={`w-12 text-center text-sm font-black font-mono border rounded-lg px-1 py-0.5 focus:outline-none transition-all ${isDiff
                                                                 ? isShort
                                                                     ? 'border-red-400 bg-red-50 dark:bg-red-900/10 text-red-600 dark:text-red-300'
@@ -227,6 +222,8 @@ export const PackDiscrepancyModal: React.FC<PackDiscrepancyModalProps> = ({
                                                         <button
                                                             onClick={() => adjustLine(i, 1)}
                                                             className="w-6 h-6 rounded-md bg-zinc-200 dark:bg-white/10 flex items-center justify-center hover:bg-zinc-300 dark:hover:bg-white/20 transition-colors"
+                                                            aria-label={t('warehouse.packing.increaseQuantity')}
+                                                            title={t('warehouse.packing.increaseQuantity')}
                                                         >
                                                             <Plus size={10} />
                                                         </button>
@@ -236,7 +233,7 @@ export const PackDiscrepancyModal: React.FC<PackDiscrepancyModalProps> = ({
                                         </div>
                                         {isDiff && (
                                             <div className={`mt-2 text-[9px] font-black text-right ${isShort ? 'text-red-500' : 'text-blue-500'}`}>
-                                                {isShort ? `▼ ${line.expected - (actual || 0)} MISSING` : `▲ ${(actual || 0) - line.expected} EXTRA`}
+                                                {isShort ? `▼ ${line.expected - (actual || 0)} ${t('warehouse.packing.missing')}` : `▲ ${(actual || 0) - line.expected} ${t('warehouse.packing.extra')}`}
                                             </div>
                                         )}
                                     </div>
@@ -246,14 +243,14 @@ export const PackDiscrepancyModal: React.FC<PackDiscrepancyModalProps> = ({
 
                         <div className="p-5 border-t border-zinc-200 dark:border-white/10 bg-zinc-50/50 dark:bg-zinc-950/50 flex justify-between items-center shrink-0">
                             <button onClick={onClose} className="px-5 py-2.5 text-xs font-black uppercase tracking-widest text-zinc-500 hover:text-zinc-800 dark:hover:text-white transition-colors">
-                                Cancel
+                                {t('warehouse.dismiss')}
                             </button>
                             <button
                                 disabled={!hasDiscrepancy}
                                 onClick={() => setStep('REASON')}
                                 className="px-8 py-2.5 bg-orange-500 hover:bg-orange-400 disabled:opacity-40 disabled:grayscale text-white font-black text-xs uppercase tracking-widest rounded-xl transition-all shadow-md shadow-orange-500/20 flex items-center gap-2"
                             >
-                                <AlertTriangle size={13} /> Log Discrepancy
+                                <AlertTriangle size={13} /> {t('warehouse.packing.logDiscrepancy')}
                             </button>
                         </div>
                     </>
@@ -261,39 +258,39 @@ export const PackDiscrepancyModal: React.FC<PackDiscrepancyModalProps> = ({
                     /* REASON STEP */
                     <>
                         <div className="flex-1 overflow-y-auto p-5 space-y-4 custom-scrollbar">
-                            <p className="text-[9px] font-black text-zinc-400 uppercase tracking-[0.2em]">Select Reason Code</p>
+                            <p className="text-[9px] font-black text-zinc-405 uppercase tracking-[0.2em]">{t('warehouse.packing.selectReasonCode')}</p>
                             <div className="space-y-2">
-                                {REASON_OPTIONS.map(r => (
+                                {reasonOptions.map(r => (
                                     <button
                                         key={r.id}
                                         onClick={() => setReasonCode(r.id)}
                                         className={`w-full flex items-center gap-3 p-3.5 rounded-xl border text-left transition-all ${reasonCode === r.id
                                             ? 'bg-orange-50 dark:bg-orange-900/15 border-orange-300 dark:border-orange-500/30'
-                                            : 'bg-zinc-50 dark:bg-white/5 border-zinc-200 dark:border-white/10 opacity-60 hover:opacity-100'
+                                            : 'bg-zinc-55 dark:bg-white/5 border-zinc-200 dark:border-white/10 opacity-60 hover:opacity-100'
                                         }`}
                                     >
                                         <div className={`w-3 h-3 rounded-full border-2 shrink-0 ${reasonCode === r.id ? 'border-orange-500 bg-orange-500' : 'border-zinc-400'}`} />
                                         <div>
                                             <p className={`text-xs font-black uppercase tracking-wide ${r.color}`}>{r.label}</p>
-                                            <p className="text-[10px] text-zinc-400 mt-0.5">{r.desc}</p>
+                                            <p className="text-[10px] text-zinc-405 mt-0.5">{r.desc}</p>
                                         </div>
                                     </button>
                                 ))}
                             </div>
                             <div>
-                                <label className="text-[9px] font-black text-zinc-400 uppercase tracking-widest block mb-1.5">Additional Notes (optional)</label>
+                                <label className="text-[9px] font-black text-zinc-400 uppercase tracking-widest block mb-1.5">{t('warehouse.packing.additionalNotes')}</label>
                                 <textarea
                                     value={notes}
                                     onChange={e => setNotes(e.target.value)}
-                                    placeholder="Any additional context for the supervisor..."
+                                    placeholder={t('warehouse.packing.additionalNotesPlaceholder')}
                                     rows={2}
-                                    className="w-full text-xs border border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-black/40 rounded-xl px-4 py-3 text-zinc-800 dark:text-zinc-200 placeholder:text-zinc-400 dark:placeholder:text-zinc-700 focus:outline-none focus:border-orange-400 transition-all resize-none"
+                                    className="w-full text-xs border border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-black/40 rounded-xl px-4 py-3 text-zinc-800 dark:text-zinc-200 placeholder:text-zinc-450 dark:placeholder:text-zinc-700 focus:outline-none focus:border-orange-400 transition-all resize-none"
                                 />
                             </div>
                         </div>
                         <div className="p-5 border-t border-zinc-200 dark:border-white/10 bg-zinc-50/50 dark:bg-zinc-950/50 flex justify-between items-center shrink-0">
                             <button onClick={() => setStep('COUNT')} className="px-5 py-2.5 text-xs font-black uppercase tracking-widest text-zinc-500 hover:text-zinc-800 dark:hover:text-white transition-colors">
-                                ← Back
+                                &larr; {t('warehouse.driverHub.back')}
                             </button>
                             <button
                                 disabled={isSubmitting}
@@ -301,8 +298,8 @@ export const PackDiscrepancyModal: React.FC<PackDiscrepancyModalProps> = ({
                                 className="px-8 py-2.5 bg-orange-500 hover:bg-orange-400 disabled:opacity-50 text-white font-black text-xs uppercase tracking-widest rounded-xl transition-all shadow-md shadow-orange-500/20 flex items-center gap-2"
                             >
                                 {isSubmitting
-                                    ? <><Loader2 size={13} className="animate-spin" /> Saving...</>
-                                    : <><CheckCircle size={13} /> Confirm & Log</>
+                                    ? <><Loader2 size={13} className="animate-spin" /> {t('warehouse.driverHub.saving')}</>
+                                    : <><CheckCircle size={13} /> {t('warehouse.packing.confirmAndLog')}</>
                                 }
                             </button>
                         </div>
@@ -312,3 +309,15 @@ export const PackDiscrepancyModal: React.FC<PackDiscrepancyModalProps> = ({
         </div>
     );
 };
+
+interface PackDiscrepancyModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+    job: WMSJob;
+    currentUser: User | null;
+    wmsJobsService: any;
+    addNotification: (type: 'success' | 'alert' | 'info', msg: string) => void;
+    refreshData: () => Promise<void>;
+    /** Called when packer accepts count — updates job line items */
+    onAcceptCount?: (updatedLineItems: any[]) => void;
+}

@@ -58,7 +58,7 @@ export const PickHistory: React.FC<PickHistoryProps> = ({
             const resolvedName = userObj?.name || (isCurrentUser ? user.name : null);
             const displayId = userObj?.code || (isCurrentUser ? (user.name?.slice(0, 3).toUpperCase() || '') : (userId && userId.length > 20 ? userId.slice(0, 5).toUpperCase() : userId));
             const resolvedUser = {
-                name: resolvedName || (userId ? 'Unknown' : 'System'),
+                name: resolvedName || (userId ? t('warehouse.picking.unknownUser') : t('warehouse.picking.systemUser')),
                 displayId: displayId || ''
             };
 
@@ -100,6 +100,8 @@ export const PickHistory: React.FC<PickHistoryProps> = ({
                         <input
                             type="text"
                             placeholder={`${t('warehouse.searchByIdOrOrder')}`}
+                            aria-label={t('warehouse.searchByIdOrOrder')}
+                            title={t('warehouse.searchByIdOrOrder')}
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                             className="woody-input w-full pl-10 pr-4 py-3 text-xs"
@@ -119,7 +121,7 @@ export const PickHistory: React.FC<PickHistoryProps> = ({
                                 if (typeof rawItems === 'string') { try { rawItems = JSON.parse(rawItems); } catch { rawItems = []; } }
                                 if (typeof rawItems === 'number') rawItems = [];
                                 const itemsArr = Array.isArray(rawItems) ? rawItems : [];
-                                const productNames = itemsArr.map((li: any) => li.name || li.product?.name || li.sku || 'Unknown').filter(Boolean);
+                                const productNames = itemsArr.map((li: any) => li.name || li.product?.name || li.sku || t('warehouse.picking.unknownUser')).filter(Boolean);
 
                                 return (
                                     <React.Fragment key={job.id}>
@@ -138,19 +140,19 @@ export const PickHistory: React.FC<PickHistoryProps> = ({
                                                     </span>
                                                     {(job.lineItems || []).some((li: any) => li.returnedQty > 0) && (
                                                         <span className="text-[8px] px-1.5 py-0.5 rounded uppercase font-black tracking-widest bg-red-500/20 text-red-600 dark:text-red-400">
-                                                            Returning
+                                                            {t('warehouse.picking.returning')}
                                                         </span>
                                                     )}
                                                 </div>
                                                 <div className="flex items-center gap-2 text-[10px] text-zinc-550 dark:text-gray-400 font-bold uppercase tracking-widest">
                                                     <span className="flex items-center gap-1">
                                                         <User size={10} />
-                                                        {((job as any).user || 'System').split(' ')[0]}
+                                                        {((job as any).user || t('warehouse.picking.systemUser')).split(' ')[0]}
                                                     </span>
                                                     <span className="w-1.5 h-1.5 rounded-full bg-zinc-300 dark:bg-gray-600" />
                                                     <span className="flex items-center gap-1">
                                                         <Clock size={10} />
-                                                        {formatDateTime(job.updatedAt || job.createdAt || '', { showTime: true }).split(',')[1]?.trim() || 'Just now'}
+                                                        {formatDateTime(job.updatedAt || job.createdAt || '', { showTime: true }).split(',')[1]?.trim() || t('warehouse.picking.justNow')}
                                                     </span>
                                                 </div>
                                             </div>
@@ -182,7 +184,7 @@ export const PickHistory: React.FC<PickHistoryProps> = ({
                                             </span>
                                             {(job.lineItems || []).some((li: any) => li.returnedQty > 0) && (
                                                 <span className="text-[9px] px-1.5 py-0.5 rounded uppercase font-black tracking-widest bg-red-100 dark:bg-red-500/10 text-red-700 dark:text-red-400 border border-transparent dark:border-red-500/20">
-                                                    {(job.lineItems || []).filter((li: any) => li.returnedQty > 0).length} Returned
+                                                    {(job.lineItems || []).filter((li: any) => li.returnedQty > 0).length} {t('warehouse.returned')}
                                                 </span>
                                             )}
                                         </div>
@@ -215,7 +217,7 @@ export const PickHistory: React.FC<PickHistoryProps> = ({
                                                     <span className="text-[9px] font-black text-[#2C5E3B] dark:text-[#A9CBA2]">{(job.resolvedUser?.name || 'S').charAt(0).toUpperCase()}</span>
                                                 </div>
                                                 <div className="flex flex-col">
-                                                    <span className="text-[9px] font-black text-zinc-500 dark:text-zinc-655 uppercase tracking-widest leading-tight">By</span>
+                                                    <span className="text-[9px] font-black text-zinc-500 dark:text-zinc-655 uppercase tracking-widest leading-tight">{t('warehouse.picking.by')}</span>
                                                     <span className="text-[9px] font-black text-zinc-905 dark:text-zinc-400 uppercase tracking-wider leading-tight">
                                                         {job.resolvedUser?.name} <span className="text-zinc-550 dark:text-zinc-655 font-normal lowercase">({job.resolvedUser?.displayId})</span>
                                                     </span>
@@ -227,10 +229,10 @@ export const PickHistory: React.FC<PickHistoryProps> = ({
                                                     <button
                                                         onClick={(e) => { e.stopPropagation(); setReturnJob(job); }}
                                                         className="flex items-center gap-1.5 bg-amber-100 hover:bg-amber-200 dark:bg-amber-500/5 dark:hover:bg-amber-500/15 px-2 py-1 rounded-lg border border-amber-300 dark:border-amber-500/10 hover:border-amber-400 dark:hover:border-amber-500/30 transition-all text-amber-800 hover:text-amber-900 dark:text-amber-400 dark:hover:text-amber-300"
-                                                        title="Return items to warehouse"
+                                                        title={t('warehouse.packing.returnItemsToWarehouse')}
                                                     >
                                                         <Undo2 size={10} />
-                                                        <span className="text-[9px] font-black uppercase tracking-widest">Return</span>
+                                                        <span className="text-[9px] font-black uppercase tracking-widest">{t('warehouse.driverHub.return')}</span>
                                                     </button>
                                                 )}
                                                 <div className="flex items-center gap-1.5 bg-[#FAF8F5] dark:bg-white/5 px-2 py-1 rounded-lg border border-[#E2DCCE]/60 dark:border-white/10 group-hover:border-[#2C5E3B]/30 transition-all">
@@ -260,7 +262,7 @@ export const PickHistory: React.FC<PickHistoryProps> = ({
                         <HistoryIcon size={32} className="text-zinc-400 dark:text-gray-600" />
                     </div>
                     <h3 className="text-lg font-black text-zinc-900 dark:text-white mb-1 uppercase tracking-widest">{t('warehouse.noHistoryFound')}</h3>
-                    <p className="text-[#2C5E3B] dark:text-gray-500 text-xs uppercase tracking-[0.2em] font-black">History logs empty</p>
+                    <p className="text-[#2C5E3B] dark:text-gray-500 text-xs uppercase tracking-[0.2em] font-black">{t('warehouse.picking.historyLogsEmpty')}</p>
                 </div>
             )}
 

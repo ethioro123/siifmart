@@ -7,6 +7,7 @@ import { formatDateTime } from '../../../utils/formatting';
 import { ReturnToWarehouseModal } from '../returns/ReturnToWarehouseModal';
 
 interface DriversHistoryProps {
+    t: (key: string) => string;
     historicalJobs: WMSJob[]; sites: Site[]; employees: any[]; resolveOrderRef: (ref: string | undefined) => string;
     setSelectedJob: (job: WMSJob) => void; setIsDetailsOpen: (isOpen: boolean) => void;
     products: Product[]; user: any; addNotification: (type: string, message: string) => void;
@@ -16,6 +17,7 @@ interface DriversHistoryProps {
 const ITEMS_PER_PAGE = 20;
 
 export const DriversHistory: React.FC<DriversHistoryProps> = ({
+    t,
     historicalJobs, sites, employees = [], resolveOrderRef, setSelectedJob, setIsDetailsOpen, products, user, addNotification, inventoryRequestsService, wmsJobsService, jobs = []
 }) => {
     const [searchQuery, setSearchQuery] = useState('');
@@ -44,11 +46,11 @@ export const DriversHistory: React.FC<DriversHistoryProps> = ({
             <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-8 mb-12 relative z-10">
                 <div className="flex items-center gap-6">
                     <div className="p-5 bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 rounded-2xl border-2 border-[#2C5E3B]/10 dark:border-[#A9CBA2]/20 shadow-sm"><HistoryIcon size={28} className="text-[#2C5E3B] dark:text-[#A9CBA2]" /></div>
-                    <div><h4 className="text-3xl font-black text-gray-900 dark:text-white uppercase tracking-tighter italic">Mission Log</h4><div className="flex items-center gap-2.5 mt-1.5"><div className="w-2 h-2 rounded-full bg-[#A9CBA2] animate-pulse" /><p className="text-gray-400 dark:text-gray-500 text-[10px] uppercase font-bold tracking-[0.25em]">Past assignment records</p></div></div>
+                    <div><h4 className="text-3xl font-black text-gray-900 dark:text-white uppercase tracking-tighter italic">{t('warehouse.driverHub.jobHistory')}</h4><div className="flex items-center gap-2.5 mt-1.5"><div className="w-2 h-2 rounded-full bg-[#A9CBA2] animate-pulse" /><p className="text-gray-400 dark:text-gray-500 text-[10px] uppercase font-bold tracking-[0.25em]">{t('warehouse.driverHub.pastAssignments')}</p></div></div>
                 </div>
                 <div className="relative w-full xl:w-[450px] group">
                     <div className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#2C5E3B] transition-colors pointer-events-none"><Search size={20} /></div>
-                    <input type="text" placeholder="SEARCH RELAY RECORDS..." value={searchQuery} onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }} className="w-full bg-gray-50 dark:bg-black/60 border-2 border-gray-100 dark:border-white/10 rounded-[1.5rem] pl-16 pr-8 py-5 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-[#2C5E3B]/50 transition-all font-mono uppercase tracking-[0.15em] placeholder:text-gray-400 dark:placeholder:text-gray-800 shadow-inner" />
+                    <input type="text" placeholder={t('warehouse.driverHub.searchHistory')} aria-label={t('warehouse.driverHub.searchHistory')} title={t('warehouse.driverHub.searchHistory')} value={searchQuery} onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }} className="w-full bg-gray-50 dark:bg-black/60 border-2 border-gray-100 dark:border-white/10 rounded-[1.5rem] pl-16 pr-8 py-5 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-[#2C5E3B]/50 transition-all font-mono uppercase tracking-[0.15em] placeholder:text-gray-400 dark:placeholder:text-gray-805 shadow-inner" />
                 </div>
             </div>
 
@@ -65,19 +67,19 @@ export const DriversHistory: React.FC<DriversHistoryProps> = ({
                                     </div>
                                     <div className="h-12 w-px bg-gray-200 dark:bg-white/5 hidden md:block" />
                                     <div className="flex-1 flex items-center gap-5 min-w-0 w-full">
-                                        <div className="p-4 bg-white dark:bg-black/40 rounded-2xl border-2 border-gray-100 dark:border-white/5 shadow-sm group-hover/item:border-[#2C5E3B]/20 transition-all"><Package size={22} className="text-gray-300 dark:text-gray-500 group-hover/item:text-[#2C5E3B] dark:group-hover/item:text-white transition-colors" /></div>
+                                        <div className="p-4 bg-white dark:bg-black/40 rounded-2xl border-2 border-gray-100 dark:border-white/5 shadow-sm group-hover/item:border-[#2C5E3B]/20 transition-all"><Package size={22} className="text-gray-300 dark:text-gray-505 group-hover/item:text-[#2C5E3B] dark:group-hover/item:text-white transition-colors" /></div>
                                         <div className="min-w-0">
-                                            <p className="text-[10px] text-gray-400 dark:text-gray-500 font-black uppercase tracking-widest mb-1.5 italic">Destination</p>
-                                            <h6 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tight truncate underline decoration-[#A9CBA2]/10 group-hover/item:decoration-[#A9CBA2]/30 decoration-2 underline-offset-4">{destSite?.name || 'Local Delivery'}</h6>
+                                            <p className="text-[10px] text-gray-400 dark:text-gray-500 font-black uppercase tracking-widest mb-1.5 italic">{t('warehouse.driverHub.destination')}</p>
+                                            <h6 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tight truncate underline decoration-[#A9CBA2]/10 group-hover/item:decoration-[#A9CBA2]/30 decoration-2 underline-offset-4">{destSite?.name || t('warehouse.driverHub.customer')}</h6>
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-5 md:gap-10 w-full md:w-auto justify-between md:justify-end border-t md:border-t-0 border-gray-100 dark:border-white/5 pt-5 md:pt-0 mt-2 md:mt-0">
                                         <div className="text-right">
-                                            <p className="text-gray-400 dark:text-gray-500 text-[10px] font-black uppercase tracking-widest mb-1 italic">Payload</p>
-                                            <div className="flex items-center gap-2.5 justify-end"><span className="text-gray-900 dark:text-white font-black text-2xl tracking-tighter">{job.items || 0}</span><span className="text-[10px] text-gray-300 dark:text-gray-600 font-black uppercase tracking-widest">PCS</span></div>
+                                            <p className="text-gray-400 dark:text-gray-500 text-[10px] font-black uppercase tracking-widest mb-1 italic">{t('warehouse.driverHub.totalItems')}</p>
+                                            <div className="flex items-center gap-2.5 justify-end"><span className="text-gray-900 dark:text-white font-black text-2xl tracking-tighter">{job.items || 0}</span><span className="text-[10px] text-gray-300 dark:text-gray-600 font-black uppercase tracking-widest">{t('warehouse.driverHub.units')}</span></div>
                                         </div>
-                                        <div className="flex items-center gap-3 bg-green-50 dark:bg-green-500/5 px-5 py-2.5 rounded-2xl border-2 border-green-100 dark:border-green-500/10 shadow-sm"><div className="w-2.5 h-2.5 rounded-full bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.4)]" /><span className="text-[10px] text-green-700 dark:text-green-400 uppercase font-black tracking-widest italic">Delivered</span></div>
-                                        {job.status === 'Completed' && <button onClick={(e) => { e.stopPropagation(); setReturnJob(job); }} className="flex items-center gap-2 bg-amber-50 dark:bg-amber-500/5 hover:bg-amber-100 dark:hover:bg-amber-500/15 px-5 py-2.5 rounded-2xl border-2 border-amber-100 dark:border-amber-500/10 hover:border-amber-400 dark:hover:border-amber-500/30 transition-all text-amber-700 dark:text-amber-400 shadow-sm group/btn active:scale-95"><Undo2 size={14} className="group-hover/btn:-rotate-45 transition-transform" /><span className="text-[10px] font-black uppercase tracking-widest">Return</span></button>}
+                                        <div className="flex items-center gap-3 bg-green-50 dark:bg-green-500/5 px-5 py-2.5 rounded-2xl border-2 border-green-100 dark:border-green-500/10 shadow-sm"><div className="w-2.5 h-2.5 rounded-full bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.4)]" /><span className="text-[10px] text-green-700 dark:text-green-400 uppercase font-black tracking-widest italic">{t('warehouse.driverHub.delivered')}</span></div>
+                                        {job.status === 'Completed' && <button onClick={(e) => { e.stopPropagation(); setReturnJob(job); }} className="flex items-center gap-2 bg-amber-50 dark:bg-amber-500/5 hover:bg-amber-100 dark:hover:bg-amber-500/15 px-5 py-2.5 rounded-2xl border-2 border-amber-100 dark:border-amber-500/10 hover:border-amber-400 dark:hover:border-amber-500/30 transition-all text-amber-700 dark:text-amber-400 shadow-sm group/btn active:scale-95"><Undo2 size={14} className="group-hover/btn:-rotate-45 transition-transform" /><span className="text-[10px] font-black uppercase tracking-widest">{t('warehouse.driverHub.return')}</span></button>}
                                     </div>
                                 </div>
                             );
@@ -87,8 +89,8 @@ export const DriversHistory: React.FC<DriversHistoryProps> = ({
                     <div className="text-center py-40 bg-gray-50/50 dark:bg-white/[0.02] rounded-[2.5rem] border-2 border-dashed border-gray-100 dark:border-white/5 relative overflow-hidden shadow-inner">
                         <div className="relative z-10 flex flex-col items-center">
                             <div className="p-8 bg-white dark:bg-white/5 rounded-full mb-8 border-2 border-gray-100 dark:border-white/5 shadow-sm"><Archive className="text-gray-200 dark:text-gray-700" size={56} /></div>
-                            <h3 className="text-2xl font-black text-gray-300 dark:text-white uppercase tracking-[0.4em] italic leading-none">Log Empty</h3>
-                            <p className="text-gray-400 dark:text-gray-700 font-bold uppercase tracking-widest text-[11px] mt-4 max-w-[250px] leading-relaxed">No matching relay records found in current archives</p>
+                            <h3 className="text-2xl font-black text-gray-300 dark:text-white uppercase tracking-[0.4em] italic leading-none">{t('warehouse.driverHub.logEmpty')}</h3>
+                            <p className="text-gray-400 dark:text-gray-700 font-bold uppercase tracking-widest text-[11px] mt-4 max-w-[250px] leading-relaxed">{t('warehouse.driverHub.archiveEmpty')}</p>
                         </div>
                     </div>
                 )}

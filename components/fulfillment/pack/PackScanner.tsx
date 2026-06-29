@@ -101,76 +101,47 @@ export const PackScanner: React.FC<PackScannerProps> = ({
         [job.lineItems]
     );
 
-    // Auto-focus
     useEffect(() => {
         const timeout = setTimeout(() => {
             if (step === 'CONFIRM_QTY') {
-                qtyRef.current?.focus();
+                if (qtyRef.current) qtyRef.current.focus();
             } else {
-                inputRef.current?.focus();
+                if (inputRef.current) inputRef.current.focus();
             }
         }, 100);
         return () => clearTimeout(timeout);
-    }, [step, isProcessing, showSuccess, showError]);
+    }, [step, isProcessing]);
 
-    // Track step changes for cooldown
+    // Track step transitions so we don't double scan
     useEffect(() => {
         lastStepChangeRef.current = Date.now();
-    }, [step]);
-
-    // Auto-match: when barcode matches a pending line item, auto-transition to CONFIRM_QTY
-    useEffect(() => {
-        if (step !== 'SCAN' || !inputVal || isProcessing || isSubmitting) return;
-
-        const val = inputVal.trim().toUpperCase();
-        if (val.length < 3) return;
-
-        let foundIndex = -1;
-        job.lineItems?.forEach((item, index) => {
-            const requiredAmount = getItemMeasureQty(item) || item.expectedQty || 1;
-            if (item.status === 'Completed' || (item.pickedQty || 0) >= requiredAmount) return; // Skip already packed
-            const product = getProduct(item);
-            if (
-                item.sku?.toUpperCase() === val ||
-                product?.sku?.toUpperCase() === val ||
-                product?.barcode?.toUpperCase() === val
-            ) {
-                foundIndex = index;
-            }
-        });
-
-        if (foundIndex > -1) {
-            const item = job.lineItems![foundIndex];
-            const expected = item.expectedQty || (item as any).quantity || 1;
-            setMatchedIndex(foundIndex);
-            const measureQty = getItemMeasureQty(item);
-            if (measureQty !== null && measureQty !== undefined) {
-                setQtyVal(measureQty.toString());
-            } else {
-                setQtyVal(expected.toString());
-            }
-            setStep('CONFIRM_QTY');
-            setInputVal('');
-            playBeep('success');
-        }
-    }, [inputVal, step, isProcessing, isSubmitting, job.lineItems]);
+        setInputVal('');
+        setQtyVal('');
+    }, [step, matchedIndex]);
 
     const handleScan = async (e: React.FormEvent) => {
         e.preventDefault();
 
+        // Anti-bounce guard
+        if (Date.now() - lastStepChangeRef.current < 250) {
+            return;
+        }
+
+        const rawVal = inputVal.trim();
+        if (step === 'SCAN' && !rawVal) return;
         if (isProcessing || isSubmitting) return;
 
+        const val = rawVal.toUpperCase();
+
         if (step === 'SCAN') {
-            const rawVal = inputVal.trim();
-            if (!rawVal) return;
-
-            const val = rawVal.toUpperCase();
-
-            // Try to find the item manually
             let foundIndex = -1;
+
             job.lineItems?.forEach((item, index) => {
-                const requiredAmount = getItemMeasureQty(item) || item.expectedQty || 1;
+                const measureQty = getItemMeasureQty(item);
+                const requiredAmount = measureQty || item.expectedQty || 1;
+                // If already packed, skip
                 if (item.status === 'Completed' || (item.pickedQty || 0) >= requiredAmount) return;
+
                 const product = getProduct(item);
                 if (
                     item.sku?.toUpperCase() === val ||
@@ -182,82 +153,79 @@ export const PackScanner: React.FC<PackScannerProps> = ({
             });
 
             if (foundIndex > -1) {
-                const item = job.lineItems![foundIndex];
-                const expected = item.expectedQty || (item as any).quantity || 1;
                 setMatchedIndex(foundIndex);
-                const measureQty = getItemMeasureQty(item);
-                if (measureQty !== null && measureQty !== undefined) {
+                const matchedItem = job.lineItems![foundIndex];
+                const expected = matchedItem.expectedQty || 1;
+                const measureQty = getItemMeasureQty(matchedItem);
+
+                // Open Confirmation Overlay
+                playBeep('success');
+                setStep('CONFIRM_QTY');
+                if (measureQty !== null) {
                     setQtyVal(measureQty.toString());
                 } else {
                     setQtyVal(expected.toString());
                 }
-                setStep('CONFIRM_QTY');
-                setInputVal('');
-                playBeep('success');
             } else {
-                // Check if already packed
-                const alreadyPacked = job.lineItems?.some((item, _) => {
-                    if (item.status !== 'Completed' && item.status !== 'Picked') return false;
-                    const product = getProduct(item);
-                    return item.sku?.toUpperCase() === val ||
-                        product?.sku?.toUpperCase() === val ||
-                        product?.barcode?.toUpperCase() === val;
-                });
-
                 playBeep('error');
-                setErrorMsg(alreadyPacked ? 'Already Packed!' : 'Item Not Found');
+                setErrorMsg('Item not found in this Pack job.');
                 setShowError(true);
                 setInputVal('');
-                setTimeout(() => setShowError(false), 2000);
+                setTimeout(() => {
+                    setShowError(false);
+                    scanOnlyHandlers.reset();
+                }, 2000);
             }
         } else if (step === 'CONFIRM_QTY') {
-            // Guard against rapid Enter from scanner
-            if (Date.now() - lastStepChangeRef.current < 400) return;
-            await handleConfirmQty();
-        }
-    };
+            const qty = parseFloat(qtyVal);
+            if (matchedIndex === null) return;
+            const matchedItem = job.lineItems![matchedIndex];
+            const maxExpected = matchedItem.expectedQty || 1;
+            const prod = getProduct(matchedItem);
+            const sizeNum = prod?.size ? parseFloat(prod.size as string) : 0;
+            const measureQty = getItemMeasureQty(matchedItem, prod);
 
-    const handleConfirmQty = async () => {
-        if (matchedIndex === null || isSubmitting) return;
-        const qtyRaw = parseFloat(qtyVal) || 0;
+            const displayMax = measureQty !== null ? measureQty : maxExpected;
 
-        if (qtyRaw <= 0) {
-            playBeep('error');
-            setErrorMsg('Enter a valid quantity');
-            setShowError(true);
-            setTimeout(() => setShowError(false), 2000);
-            return;
-        }
+            if (isNaN(qty) || qty <= 0 || qty > displayMax) {
+                playBeep('error');
+                setErrorMsg(`Invalid Quantity (1-${displayMax})`);
+                setShowError(true);
+                setTimeout(() => setShowError(false), 2000);
+                return;
+            }
 
-        setIsSubmitting(true);
-        try {
-            await onConfirmPack(matchedIndex, qtyRaw);
+            if (qty < displayMax) {
+                const confirmed = window.confirm(`Discrepancy detected. You entered ${qty} but expected ${displayMax}. Are you sure?`);
+                if (!confirmed) return;
+            }
 
-            const item = job.lineItems![matchedIndex];
-            setSuccessMsg(`Packed ${item.name || 'Item'}`);
-            setShowSuccess(true);
-            playBeep('success');
+            setIsSubmitting(true);
+            try {
+                await onConfirmPack(matchedIndex, qty);
+                setSuccessMsg(`Packed ${qty}x ${matchedItem.name}`);
+                setShowSuccess(true);
+                playBeep('success');
 
-            setTimeout(() => {
-                setShowSuccess(false);
-                setMatchedIndex(null);
-                setQtyVal('');
-                setInputVal('');
-                setStep('SCAN');
-                scanOnlyHandlers.reset(); // Clear stale timing so next scan starts fresh
-            }, 1500);
-        } catch (err: any) {
-            playBeep('error');
-            setErrorMsg(err?.message || 'Error packing item');
-            setShowError(true);
-            setTimeout(() => {
-                setShowError(false);
-                setStep('SCAN');
-                setMatchedIndex(null);
-                scanOnlyHandlers.reset(); // Clear stale timing so next scan starts fresh
-            }, 2500);
-        } finally {
-            setIsSubmitting(false);
+                setTimeout(() => {
+                    setShowSuccess(false);
+                    setStep('SCAN');
+                    setMatchedIndex(null);
+                    scanOnlyHandlers.reset();
+                }, 1500);
+            } catch (err: any) {
+                playBeep('error');
+                setErrorMsg(err.message || 'Saving failed');
+                setShowError(true);
+                setTimeout(() => {
+                    setShowError(false);
+                    setStep('SCAN');
+                    setMatchedIndex(null);
+                    scanOnlyHandlers.reset();
+                }, 2500);
+            } finally {
+                setIsSubmitting(false);
+            }
         }
     };
 
@@ -269,12 +237,12 @@ export const PackScanner: React.FC<PackScannerProps> = ({
             {/* Top Bar */}
             <div className="p-4 bg-[#EAE5D9] dark:bg-[#1C2620]/80 border-b border-[#E2DCCE] dark:border-[#A9CBA2]/10 flex justify-between items-center text-gray-900 dark:text-[#EAE5D9]">
                 <div className="flex items-center gap-3">
-                    <button onClick={onClose} className="p-2 -ml-2 text-gray-500 dark:text-[#A9CBA2]/70 hover:text-gray-900 dark:hover:text-[#EAE5D9]" aria-label="Close Scanner">
+                    <button onClick={onClose} className="p-2 -ml-2 text-gray-500 dark:text-[#A9CBA2]/70 hover:text-gray-900 dark:hover:text-[#EAE5D9]" aria-label={t('warehouse.dismiss')}>
                         <X size={24} />
                     </button>
                     <div>
                         <h3 className="font-bold text-lg uppercase tracking-wider">
-                            {step === 'SCAN' ? 'Scan Item to Pack' : 'Confirm Quantity'}
+                            {step === 'SCAN' ? t('warehouse.scanProductBarcode') : t('warehouse.putaway.progress')}
                         </h3>
                         <p className="text-xs text-[#2C5E3B] dark:text-[#A9CBA2] font-mono">JOB: {formatJobId(job)}</p>
                     </div>
@@ -290,7 +258,7 @@ export const PackScanner: React.FC<PackScannerProps> = ({
                         }}
                         title="Toggle Fullscreen"
                         aria-label="Toggle Fullscreen"
-                        className="p-2 bg-gray-200 dark:bg-white/5 hover:bg-gray-300 dark:hover:bg-white/10 rounded-xl text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                        className="p-2 bg-gray-200 dark:bg-white/5 hover:bg-gray-300 dark:hover:bg-white/10 rounded-xl text-gray-550 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
                     >
                         <Maximize2 size={20} />
                     </button>
@@ -333,7 +301,7 @@ export const PackScanner: React.FC<PackScannerProps> = ({
                     {/* Instruction / Status */}
                     <h1 className={`text-4xl md:text-5xl font-black text-gray-900 dark:text-[#EAE5D9] text-center uppercase italic tracking-tight mb-2 z-10 transition-all duration-300 ${showError ? 'text-red-500 animate-pulse' : ''
                         }`}>
-                        {showSuccess ? 'Packed!' : showError ? 'Error!' : isFullyPacked ? 'All Packed' : step === 'CONFIRM_QTY' ? 'Confirm Qty' : 'Scan Item'}
+                        {showSuccess ? 'Packed!' : showError ? 'Error!' : isFullyPacked ? t('warehouse.completed') : step === 'CONFIRM_QTY' ? 'Confirm Qty' : t('warehouse.scanBarcode').split(' ')[0]}
                     </h1>
 
                     {showSuccess ? (
@@ -378,7 +346,7 @@ export const PackScanner: React.FC<PackScannerProps> = ({
                                     ))}
                                 </div>
                             </div>
-                            <p className="text-gray-600 dark:text-white text-sm opacity-80 max-w-[200px] mx-auto">Tap below to complete packing and seal this shipment.</p>
+                            <p className="text-gray-650 dark:text-white text-sm opacity-80 max-w-[200px] mx-auto">Tap below to complete packing and seal this shipment.</p>
                         </div>
                     ) : step === 'CONFIRM_QTY' && matchedItem ? (
                         /* CONFIRM QUANTITY VIEW */
@@ -388,7 +356,7 @@ export const PackScanner: React.FC<PackScannerProps> = ({
                                     {matchedProduct?.image ? (
                                         <img src={matchedProduct.image} alt="" className="w-full h-full object-cover" />
                                     ) : (
-                                        <Package size={32} className="text-gray-400 dark:text-gray-600" />
+                                        <Package size={32} className="text-gray-400 dark:text-gray-605" />
                                     )}
                                 </div>
                             </div>
@@ -396,7 +364,7 @@ export const PackScanner: React.FC<PackScannerProps> = ({
                             <p className="text-[#2C5E3B] dark:text-[#A9CBA2] font-mono text-xl mt-1">{matchedItem.sku}</p>
                             <div className="mt-4 flex items-center justify-center gap-6">
                                 <div className="text-center">
-                                    <span className="text-[10px] text-gray-500 font-black uppercase tracking-widest block">Expected</span>
+                                    <span className="text-[10px] text-gray-500 font-black uppercase tracking-widest block">{t('warehouse.expected')}</span>
                                     <span className="text-3xl font-mono font-black text-gray-900 dark:text-white">
                                         {(() => {
                                             const measureQty = getItemMeasureQty(matchedItem, matchedProduct);
@@ -410,9 +378,9 @@ export const PackScanner: React.FC<PackScannerProps> = ({
                                         })()}
                                     </span>
                                 </div>
-                                <div className="text-gray-600 text-2xl">→</div>
+                                <div className="text-gray-600 text-2xl">&rarr;</div>
                                 <div className="text-center">
-                                    <span className="text-[10px] text-gray-500 font-black uppercase tracking-widest block">Packed</span>
+                                    <span className="text-[10px] text-gray-500 font-black uppercase tracking-widest block">{t('warehouse.picking')}</span>
                                     <span className="text-3xl font-mono font-black text-[#2C5E3B] dark:text-[#A9CBA2]">
                                         {(() => {
                                             const expected = matchedItem.expectedQty || 1;
@@ -438,19 +406,19 @@ export const PackScanner: React.FC<PackScannerProps> = ({
                     ) : (
                         /* SCAN VIEW — show next unpacked item as guidance */
                         <div className="text-center z-10 mb-8">
-                            <p className="text-gray-400 text-lg">Scan product barcode to verify:</p>
+                            <p className="text-gray-400 text-lg">{t('warehouse.scanProductBarcode')}</p>
                             {nextUnpackedItem && (
                                 <>
                                     <p className="text-gray-900 dark:text-[#EAE5D9] text-2xl font-bold mt-2">{nextUnpackedItem.name}</p>
                                     <p className="text-[#2C5E3B] dark:text-[#A9CBA2] font-mono text-xl mt-1">{nextUnpackedItem.sku}</p>
-                                    <p className="text-gray-400 dark:text-gray-500 text-xs mt-1">Qty: {(() => {
+                                    <p className="text-gray-400 dark:text-gray-505 text-xs mt-1">Qty: {(() => {
                                         const measureQty = getItemMeasureQty(nextUnpackedItem);
                                         if (measureQty !== null && measureQty !== undefined) {
                                             const expected = nextUnpackedItem.expectedQty || 1;
                                             const prod = getProduct(nextUnpackedItem);
                                             const unitDef = prod?.unit || '';
                                             const sizeNum = prod?.size ? parseFloat(prod.size as string) : 0;
-                                            return <>{expected} x {sizeNum} <span className="text-[10px] uppercase text-gray-400 dark:text-gray-500">{unitDef}</span></>;
+                                            return <>{expected} x {sizeNum} <span className="text-[10px] uppercase text-gray-400 dark:text-gray-505">{unitDef}</span></>;
                                         }
                                         return nextUnpackedItem.expectedQty || 1;
                                     })()}</p>
@@ -469,6 +437,8 @@ export const PackScanner: React.FC<PackScannerProps> = ({
                                     <input
                                         ref={qtyRef}
                                         type="number"
+                                        aria-label="Confirm quantity"
+                                        title="Confirm quantity"
                                         value={qtyVal}
                                         onChange={(e) => setQtyVal(e.target.value)}
                                         className="w-full bg-[#FAF8F5] dark:bg-[#1C2620]/90 border-2 rounded-2xl py-6 px-4 text-center text-5xl font-mono text-gray-900 dark:text-[#EAE5D9] placeholder:text-gray-300 dark:placeholder:text-[#A9CBA2]/30 focus:outline-none relative z-10 shadow-xl transition-all border-[#2C5E3B] dark:border-[#A9CBA2]/40 focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2]"
@@ -480,6 +450,8 @@ export const PackScanner: React.FC<PackScannerProps> = ({
                                     <input
                                         ref={inputRef}
                                         type="text"
+                                        aria-label="Scan barcode"
+                                        title="Scan barcode"
                                         value={inputVal}
                                         onChange={(e) => setInputVal(e.target.value)}
                                         onKeyDown={scanOnlyHandlers.onKeyDown}
@@ -494,7 +466,7 @@ export const PackScanner: React.FC<PackScannerProps> = ({
                                 {step === 'CONFIRM_QTY' && (
                                     <div className="mb-4 text-center mt-2 animate-in fade-in duration-300">
                                         <p className="text-xs font-black uppercase tracking-widest text-[#2C5E3B] dark:text-[#A9CBA2]">
-                                            Expected: {(() => {
+                                            {t('warehouse.expected')}: {(() => {
                                                 const measureQty = getItemMeasureQty(matchedItem, matchedProduct);
                                                 if (measureQty !== null && measureQty !== undefined) {
                                                     const expected = matchedItem?.expectedQty || 1;
@@ -540,10 +512,10 @@ export const PackScanner: React.FC<PackScannerProps> = ({
                             {isProcessing || isSubmitting
                                 ? 'Saving...'
                                 : isFullyPacked
-                                    ? 'FINISH PACKING'
+                                    ? t('warehouse.completed')
                                     : step === 'CONFIRM_QTY'
                                         ? 'CONFIRM PACK'
-                                        : 'Verify Scan'}
+                                        : t('warehouse.scanSkuToConfirm')}
                         </button>
                     </form>
 
@@ -553,7 +525,7 @@ export const PackScanner: React.FC<PackScannerProps> = ({
                             <div className="flex items-center justify-between mb-2 px-1">
                                 <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em] flex items-center gap-2">
                                     <CheckCircle size={10} className="text-green-500" />
-                                    Packed So Far
+                                    {t('warehouse.picking')}
                                 </h4>
                                 <span className="text-[10px] font-mono font-black text-green-600 dark:text-green-500/60 bg-green-500/10 px-2 py-0.5 rounded-full border border-green-500/20">
                                     {packedItems.length}/{totalItems}

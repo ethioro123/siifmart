@@ -3,6 +3,7 @@ import { X, QrCode } from 'lucide-react';
 import { WMSJob } from '../../../types';
 
 interface DriverScannerProps {
+    t: (key: string) => string;
     setDriverScannerOpen: (val: boolean) => void;
     selectedJob: WMSJob | null;
     wmsJobsService: any;
@@ -12,6 +13,7 @@ interface DriverScannerProps {
 }
 
 export const DriverScanner: React.FC<DriverScannerProps> = ({
+    t,
     setDriverScannerOpen,
     selectedJob,
     wmsJobsService,
@@ -23,43 +25,43 @@ export const DriverScanner: React.FC<DriverScannerProps> = ({
         <div className="fixed inset-0 z-[100] bg-black flex flex-col items-center justify-center p-6 bg-opacity-95 backdrop-blur-xl">
             <button
                 onClick={() => setDriverScannerOpen(false)}
-                title="Close Scanner"
+                title={t('warehouse.misc.closeScanner')}
                 className="absolute top-10 right-10 p-4 bg-white/10 hover:bg-white/20 rounded-full text-white transition-all"
             >
                 <X size={32} />
             </button>
-
+ 
             <div className="w-full max-w-lg space-y-8 text-center">
                 <div className="relative inline-block">
                     <div className="absolute-inset-4 bg-[#2C5E3B]/20 blur-xl animate-pulse rounded-full" />
                     <div className="w-64 h-64 border-2 border-dashed border-[#A9CBA2]/50 rounded-3xl flex items-center justify-center relative overflow-hidden">
-                        <div className="absolute top-0 left-0 w-full h-1 bg-[#A9CBA2]/50 shadow-[0_0_15px_rgba(169,203,162,0.8)] animate-[scan_2s_infinite]" />
+                         <div className="absolute top-0 left-0 w-full h-1 bg-[#A9CBA2]/50 shadow-[0_0_15px_rgba(169,203,162,0.8)] animate-[scan_2s_infinite]" />
                         <QrCode size={120} className="text-[#A9CBA2] opacity-20" />
                     </div>
                 </div>
-
+ 
                 <div>
-                    <h3 className="text-2xl font-black text-white uppercase tracking-tighter">Ready to Scan</h3>
-                    <p className="text-gray-500 font-bold uppercase tracking-widest text-xs mt-2">Scan QR code to complete delivery</p>
+                    <h3 className="text-2xl font-black text-white uppercase tracking-tighter">{t('warehouse.driverHub.readyToScan')}</h3>
+                    <p className="text-gray-500 font-bold uppercase tracking-widest text-xs mt-2">{t('warehouse.driverHub.scanPrompt')}</p>
                 </div>
-
+ 
                 <div className="grid grid-cols-1 gap-4">
                     <button
                         onClick={async () => {
                             if (selectedJob) {
                                 try {
                                     if (selectedJob.status === 'Completed') {
-                                        addNotification('info', 'Job already finalized.');
+                                        addNotification('info', t('warehouse.driverHub.jobAlreadyFinalized'));
                                         return;
                                     }
                                     await wmsJobsService.update(selectedJob.id, {
                                         transferStatus: 'Delivered',
                                         deliveredAt: new Date().toISOString()
                                     } as any);
-                                    addNotification('success', 'Job Completed Successfully.');
+                                    addNotification('success', t('warehouse.driverHub.jobCompletedSuccess'));
                                     await refreshData();
                                 } catch (err) {
-                                    addNotification('alert', 'Error completing delivery.');
+                                    addNotification('alert', t('warehouse.driverHub.errorCompleting'));
                                 }
                             }
                             setDriverScannerOpen(false);
@@ -67,13 +69,13 @@ export const DriverScanner: React.FC<DriverScannerProps> = ({
                         }}
                         className="w-full py-4 bg-[#2C5E3B] text-white font-black uppercase tracking-widest rounded-2xl shadow-[0_0_20px_rgba(44,94,59,0.4)] hover:bg-[#3a7a4d] transition-all active:scale-95"
                     >
-                        Complete Delivery
+                        {t('warehouse.driverHub.completeDeliveryBtn')}
                     </button>
                     <button
                         onClick={() => setDriverScannerOpen(false)}
                         className="w-full py-4 bg-white/5 text-white font-black uppercase tracking-widest rounded-2xl border border-white/10 hover:bg-white/10 transition-all"
                     >
-                        Abort Scan
+                        {t('warehouse.driverHub.abortScan')}
                     </button>
                 </div>
             </div>

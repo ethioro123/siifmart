@@ -27,6 +27,8 @@ export const core: TranslationBlock = {
     location: { en: 'Location', am: 'ቦታ', or: 'Bakka' },
     bay: { en: 'Bay', am: 'ሳጥን', or: 'Kuusaa' },
     sku: { en: 'SKU', am: 'SKU', or: 'SKU' },
+    searchPlaceholder: { en: 'Scan barcode or search...', am: 'ባርኮድ ይቃኙ ወይም ይፈልጉ...', or: 'Baarkoodii iskaani ykn barbaadi...' },
+    allMissions: { en: 'All Missions', am: 'ሁሉም ተግባራት', or: 'Hojiiwwan Hundi' },
     scanBarcode: { en: 'Scan Barcode', am: 'ባርኮድ ስካን', or: 'Baarkoodii Iskaani' },
     startJob: { en: 'Start Job', am: 'ስራ ጀምር', or: 'Hojii Jalqabi' },
     completeJob: { en: 'Complete', am: 'ጨርስ', or: 'Xumuri' },

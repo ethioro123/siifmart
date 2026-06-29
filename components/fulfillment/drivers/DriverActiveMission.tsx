@@ -56,7 +56,7 @@ export const DriverActiveMission: React.FC<DriverActiveMissionProps> = ({
             {myJobs.length === 0 ? (
                 <div className="bg-gray-50 dark:bg-black/20 border-2 border-dashed border-gray-200 dark:border-white/5 rounded-[2.5rem] p-10 text-center shadow-inner">
                     <div className="w-16 h-16 bg-gray-100 dark:bg-white/5 rounded-3xl flex items-center justify-center mx-auto mb-4 shadow-sm"><Shield className="text-gray-400 dark:text-gray-700" size={32} /></div>
-                    <p className="text-[10px] text-gray-400 dark:text-gray-500 font-black uppercase tracking-[0.2em]">{globalSearch ? 'No missions match search' : 'No Active Mission'}</p>
+                    <p className="text-[10px] text-gray-400 dark:text-gray-500 font-black uppercase tracking-[0.2em]">{globalSearch ? t('warehouse.archiveEmpty') : t('warehouse.driverHub.noActiveJob')}</p>
                 </div>
             ) : (
                 <div className="space-y-5">
@@ -69,22 +69,22 @@ export const DriverActiveMission: React.FC<DriverActiveMissionProps> = ({
                                     <div className="flex justify-between items-center">
                                         <div className="flex items-center gap-2">
                                             <span className="px-2 py-0.5 rounded bg-[#2C5E3B]/15 text-[#2C5E3B] dark:text-[#A9CBA2] text-[9px] font-black uppercase tracking-widest">
-                                                STOP {idx + 1}
+                                                {t('warehouse.driverHub.stop').toUpperCase()} {idx + 1}
                                             </span>
                                             <span className="text-[10px] font-black text-gray-500 dark:text-gray-400 tracking-[0.1em] uppercase">{formatJobId(job)}</span>
                                         </div>
                                         <span className="px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider border bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 text-[#2C5E3B] dark:text-[#A9CBA2] border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20">
-                                            {job.transferStatus === 'In-Transit' || job.transferStatus === 'Shipped' ? 'In-Transit' : 'Active'}
+                                            {job.transferStatus === 'In-Transit' || job.transferStatus === 'Shipped' ? t('warehouse.driverHub.inTransit') : t('warehouse.active')}
                                         </span>
                                     </div>
-
+ 
                                     {/* Destination & Address */}
                                     <div onClick={() => { setSelectedJob(job); setIsDetailsOpen(true); }} className="cursor-pointer hover:opacity-80 transition-opacity">
-                                        <h3 className="text-base font-bold text-gray-900 dark:text-white leading-tight tracking-tight">{destSite?.name || 'Customer'}</h3>
+                                        <h3 className="text-base font-bold text-gray-900 dark:text-white leading-tight tracking-tight">{destSite?.name || t('warehouse.driverHub.customer')}</h3>
                                         <div className="flex items-start gap-1 text-gray-500 dark:text-gray-400 mt-0.5">
                                             <MapPin size={11} className="mt-0.5 shrink-0 text-[#2C5E3B] dark:text-[#A9CBA2]" />
                                             <p className="text-[9px] font-bold uppercase tracking-wider leading-relaxed truncate max-w-[90%]">
-                                                {destSite?.address || 'Address Hidden'}{job.location ? ` • ${job.location}` : ''}
+                                                {destSite?.address || t('warehouse.driverHub.addressPending')}{job.location ? ` • ${job.location}` : ''}
                                             </p>
                                         </div>
                                     </div>
@@ -107,7 +107,7 @@ export const DriverActiveMission: React.FC<DriverActiveMissionProps> = ({
                                                     })}
                                                     {lineItems.length > 3 && (
                                                         <span className="inline-flex items-center bg-gray-100 dark:bg-white/5 px-2 py-0.5 rounded text-[9px] text-[#2C5E3B] dark:text-[#A9CBA2] font-bold italic">
-                                                            + {lineItems.length - 3} more
+                                                            + {lineItems.length - 3} {t('warehouse.driverHub.more')}
                                                         </span>
                                                     )}
                                                 </div>
@@ -123,7 +123,7 @@ export const DriverActiveMission: React.FC<DriverActiveMissionProps> = ({
                                                 const assignedEmployee = employees.find(e => e.id === job.assignedTo);
                                                 return (
                                                     <div className="flex items-center gap-1 text-[8px] font-black text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-white/5 px-2 py-0.5 rounded-full uppercase tracking-widest italic shrink-0">
-                                                        <Truck size={8} />DRV: {assignedEmployee?.name || 'Self'}
+                                                        <Truck size={8} />{t('warehouse.driverFallback')}: {assignedEmployee?.name || 'Self'}
                                                     </div>
                                                 );
                                             }
@@ -132,8 +132,8 @@ export const DriverActiveMission: React.FC<DriverActiveMissionProps> = ({
 
                                         <div className="flex items-center gap-1.5 shrink-0">
                                             {(job.transferStatus === 'In-Transit' || job.transferStatus === 'Shipped') && (
-                                                <button onClick={(e) => { e.stopPropagation(); if (destSite?.address) window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(destSite.address)}`, '_blank'); else addNotification('info', 'Address pending.'); }} className="px-3 py-1.5 bg-gray-200 dark:bg-white/10 hover:bg-gray-300 dark:hover:bg-white/20 rounded-lg text-[9px] font-black text-gray-900 dark:text-white uppercase flex items-center justify-center gap-1.5 transition-all shadow-sm active:scale-95">
-                                                    <Navigation size={11} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />GPS
+                                                <button onClick={(e) => { e.stopPropagation(); if (destSite?.address) window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(destSite.address)}`, '_blank'); else addNotification('info', t('warehouse.driverHub.addressPending')); }} className="px-3 py-1.5 bg-gray-200 dark:bg-white/10 hover:bg-gray-300 dark:hover:bg-white/20 rounded-lg text-[9px] font-black text-gray-900 dark:text-white uppercase flex items-center justify-center gap-1.5 transition-all shadow-sm active:scale-95">
+                                                    <Navigation size={11} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />{t('warehouse.driverHub.nav')}
                                                 </button>
                                             )}
                                             {(job.transferStatus === 'In-Transit' || job.transferStatus === 'Shipped') ? (
@@ -143,13 +143,13 @@ export const DriverActiveMission: React.FC<DriverActiveMissionProps> = ({
                                                         onClick={(e) => { e.stopPropagation(); setPartialDeliveryJob(job); }}
                                                         className="px-3 py-1.5 bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 rounded-lg text-[9px] font-black text-amber-600 dark:text-amber-400 uppercase flex items-center justify-center gap-1.5 transition-all shadow-sm active:scale-95"
                                                     >
-                                                        <AlertTriangle size={11} /> Partial
+                                                        <AlertTriangle size={11} /> {t('warehouse.driverHub.partial')}
                                                     </button>
                                                     {/* Full Delivery */}
                                                     <button disabled={processingJobIds.has(job.id)} onClick={async (e) => {
                                                         e.stopPropagation(); setProcessingJobIds(prev => new Set(prev).add(job.id));
                                                         try {
-                                                            await wmsJobsService.update(job.id, { status: 'Completed', transferStatus: 'Delivered', deliveredAt: new Date().toISOString(), receivedBy: user?.name || 'Driver' } as any);
+                                                            await wmsJobsService.update(job.id, { status: 'Completed', transferStatus: 'Delivered', deliveredAt: new Date().toISOString(), receivedBy: user?.name || t('warehouse.driverFallback') } as any);
                                                             if (job.orderRef) { const parentJob = jobs.find(j => j.id === job.orderRef); if (parentJob) await wmsJobsService.update(parentJob.id, { status: 'Completed', transferStatus: 'Delivered' } as any); }
                                                             const destSiteId = job.destSiteId || (job as any).dest_site_id; const lineItems = job.lineItems || (job as any).line_items || [];
                                                             for (const item of lineItems) {
@@ -165,13 +165,13 @@ export const DriverActiveMission: React.FC<DriverActiveMissionProps> = ({
                                                                     else if (templateProduct) await addProduct({ name: item.name || templateProduct?.name || 'Product', sku: item.sku || templateProduct?.sku, price: templateProduct?.price || 0, costPrice: (templateProduct as any)?.costPrice || 0, stock: finalQty, unit: templateProduct?.unit || 'pcs', siteId: destSiteId, category: templateProduct?.category || 'Uncategorized', productId: templateProduct?.productId || templateProduct?.id } as any);
                                                                 }
                                                             }
-                                                            await refreshData(); addNotification('success', 'Safe arrival! Delivery logged.');
-                                                        } catch (err) { addNotification('alert', 'System error.'); } finally { setProcessingJobIds(prev => { const next = new Set(prev); next.delete(job.id); return next; }); }
+                                                            await refreshData(); addNotification('success', t('warehouse.driverHub.deliveryCompleteMsg'));
+                                                        } catch (err) { addNotification('alert', t('warehouse.driverHub.errorCompleting')); } finally { setProcessingJobIds(prev => { const next = new Set(prev); next.delete(job.id); return next; }); }
                                                     }} className="px-4 py-1.5 bg-[#224429] dark:bg-[#EAE5D9] hover:bg-[#1B3520] dark:hover:bg-[#DFD9CA] text-[#FAF8F5] dark:text-[#1E3B24] rounded-lg text-[9px] font-black uppercase flex items-center justify-center gap-1.5 disabled:opacity-50 shadow-md active:scale-95 transition-all">
-                                                        {processingJobIds.has(job.id) ? <RefreshCw className="animate-spin" size={11} /> : <CheckCircle size={11} />} DELIVERED
+                                                        {processingJobIds.has(job.id) ? <RefreshCw className="animate-spin" size={11} /> : <CheckCircle size={11} />} {t('warehouse.driverHub.delivered').toUpperCase()}
                                                     </button>
                                                 </>
-                                            ) : <div className="py-1.5 px-3 bg-green-500/10 border border-green-500/20 rounded-lg text-[9px] font-black text-green-600 dark:text-green-400 uppercase flex items-center justify-center gap-1.5 italic tracking-widest"><CheckCircle size={11} /> Success</div>}
+                                            ) : <div className="py-1.5 px-3 bg-green-500/10 border border-green-500/20 rounded-lg text-[9px] font-black text-green-600 dark:text-green-400 uppercase flex items-center justify-center gap-1.5 italic tracking-widest"><CheckCircle size={11} /> {t('warehouse.driverHub.completedCaps') || 'Success'}</div>}
                                         </div>
                                     </div>
                                 </div>
@@ -185,6 +185,7 @@ export const DriverActiveMission: React.FC<DriverActiveMissionProps> = ({
             {/* Partial Delivery Modal */}
             {partialDeliveryJob && (
                 <PartialDeliveryModal
+                    t={t}
                     isOpen={!!partialDeliveryJob}
                     onClose={() => setPartialDeliveryJob(null)}
                     job={partialDeliveryJob}

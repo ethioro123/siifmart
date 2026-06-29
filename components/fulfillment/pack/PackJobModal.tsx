@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
     X, Package, Box, MapPin, CheckCircle, ArrowRight,
-    Clock, Archive, Info, Barcode, Loader2, Printer, AlertTriangle, Snowflake, RefreshCw,
+    Clock, Archive, Info, Barcode, Loader2, Printer, AlertTriangle, Snowflake,
     Hash, Truck, ShieldCheck
 } from 'lucide-react';
 import { WMSJob, User, Site, Product } from '../../../types';
@@ -147,7 +147,7 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
             }
             setScanError('');
         } else {
-            setScanError('Item not found in this Pack mission.');
+            setScanError(t('warehouse.packing.itemNotFoundInPackMission'));
             setTimeout(() => setScanError(''), 2000);
         }
         setScanInput('');
@@ -192,7 +192,7 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
                             <div>
                                 <div className="flex items-center gap-2 mb-0.5 md:mb-1">
                                     <h2 className="text-lg md:text-2xl font-black text-gray-900 dark:text-white tracking-tight uppercase italic leading-none">
-                                        {isFullyPacked ? 'Ready to Ship' : 'Pack Mission'}
+                                        {isFullyPacked ? t('warehouse.completed') : t('warehouse.packJobTitle')}
                                     </h2>
                                     <span className="px-2.5 py-1 rounded-xl bg-gray-150 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-[10px] md:text-xs font-mono text-gray-600 dark:text-gray-400">
                                         #{formatJobId(job)}
@@ -222,7 +222,7 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
                                 </div>
                             </div>
                         </div>
-                        <button onClick={onClose} aria-label="Close" className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-xl text-gray-400 dark:text-gray-550 hover:text-gray-900 dark:hover:text-white transition-all">
+                        <button onClick={onClose} aria-label={t('warehouse.dismiss')} className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-xl text-gray-400 dark:text-gray-550 hover:text-gray-900 dark:hover:text-white transition-all">
                             <X size={18} className="md:w-6 md:h-6" />
                         </button>
                     </div>
@@ -241,6 +241,8 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
                                     <input
                                         ref={scanInputRef}
                                         type="text"
+                                        aria-label="Scan product barcode"
+                                        title="Scan product barcode"
                                         value={scanInput}
                                         onChange={e => setScanInput(e.target.value)}
                                         onKeyDown={(e) => {
@@ -255,11 +257,11 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
                                         onPaste={(e) => {
                                             if (job.notes?.includes('[STRICT_SCAN]')) {
                                                 e.preventDefault();
-                                                setScanError('Pasting not allowed.');
+                                                setScanError(t('warehouse.packing.pastingNotAllowed'));
                                                 setTimeout(() => setScanError(''), 2000);
                                             }
                                         }}
-                                        placeholder="Scan item..."
+                                        placeholder={t('warehouse.scanBarcode')}
                                         className={`w-full bg-white/90 dark:bg-black/25 border md:border-2 ${scanError ? 'border-red-500/50 focus:border-red-500' : 'border-[#E2DCCE] dark:border-emerald-950/20 hover:border-[#CFC6B4] dark:hover:border-emerald-900/15 focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2]'} rounded-xl py-2 md:py-3 pl-10 md:pl-12 pr-3 md:pr-4 text-xs md:text-sm text-[#1E3F27] dark:text-[#EAE5D9] placeholder-stone-400 dark:placeholder-stone-500 font-mono outline-none focus:ring-4 focus:ring-[#2C5E3B]/10 dark:focus:ring-[#A9CBA2]/10 transition-all shadow-sm`}
                                     />
                                     {scanError && <span className="absolute -bottom-4 left-3 text-[10px] text-red-650 dark:text-red-400 font-bold hidden md:block">{scanError}</span>}
@@ -269,7 +271,7 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
                             {/* Job Progress Pill */}
                             <div className="flex items-center justify-between md:justify-end gap-3 shrink-0 bg-white dark:bg-white/[0.02] border border-[#E2DCCE]/65 dark:border-white/5 px-4 py-2 md:py-3 rounded-xl">
                                 <span className="text-[10px] md:text-xs font-black text-gray-900 dark:text-white uppercase tracking-widest">
-                                    <span className="text-gray-900 dark:text-white">{completedItems}</span> / {totalItems} Pkd
+                                    <span className="text-gray-900 dark:text-white">{completedItems}</span> / {totalItems} {t('warehouse.picking')}
                                 </span>
                                 <div className="w-20 md:w-24 h-2 bg-gray-250 dark:bg-white/5 rounded-full overflow-hidden shrink-0">
                                     <ProgressBar
@@ -328,11 +330,11 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
 
                                                 {/* Item Info */}
                                                 <div className="min-w-0 pr-2">
-                                                    <h4 className={`text-sm font-bold tracking-tight mb-0.5 md:mb-1 transition-colors truncate uppercase ${isDone ? 'line-through text-gray-500' : 'text-gray-900 dark:text-white group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2]'}`}>
+                                                    <h4 className={`text-sm font-bold tracking-tight mb-0.5 md:mb-1 transition-colors truncate uppercase ${isDone ? 'line-through text-gray-505' : 'text-gray-900 dark:text-white group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2]'}`}>
                                                         {item.name || product?.name || 'Unknown SKU'}
                                                     </h4>
                                                     <div className="flex items-center gap-2 flex-wrap">
-                                                        <span className="text-[10px] md:text-[11px] font-mono font-black text-gray-700 dark:text-[#A9CBA2] bg-stone-100 dark:bg-black/40 px-1.5 md:px-2 py-0.5 rounded border border-[#E2DCCE]/60 dark:border-white/5 uppercase tracking-tighter">
+                                                        <span className="text-[10px] md:text-[11px] font-mono font-black text-gray-750 dark:text-[#A9CBA2] bg-stone-100 dark:bg-black/40 px-1.5 md:px-2 py-0.5 rounded border border-[#E2DCCE]/60 dark:border-white/5 uppercase tracking-tighter">
                                                             {item.sku || product?.sku || 'NO SKU'}
                                                         </span>
                                                         {product?.barcode && (
@@ -348,7 +350,7 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
                                             {/* Pack Details */}
                                             <div className="flex items-center gap-4 md:gap-6 justify-end shrink-0">
                                                 <div className="text-right">
-                                                    <span className="text-[10px] md:text-[9px] text-gray-550 dark:text-gray-550 font-black uppercase tracking-[0.2em] block mb-0 leading-none md:mb-1">Req</span>
+                                                    <span className="text-[10px] md:text-[9px] text-gray-550 dark:text-gray-550 font-black uppercase tracking-[0.2em] block mb-0 leading-none md:mb-1">{t('warehouse.expected').slice(0, 3)}</span>
                                                     {(() => {
                                                         let expected = item.expectedQty || (item as any).quantity || 0;
                                                         if (measureQty) {
@@ -367,7 +369,7 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
                                                     })()}
                                                 </div>
                                                 <div className="text-right">
-                                                    <span className="text-[10px] md:text-[9px] text-gray-550 dark:text-gray-555 font-black uppercase tracking-[0.2em] block mb-0 leading-none md:mb-1">Pkd</span>
+                                                    <span className="text-[10px] md:text-[9px] text-gray-550 dark:text-gray-555 font-black uppercase tracking-[0.2em] block mb-0 leading-none md:mb-1">{t('warehouse.picking').slice(0, 3)}</span>
                                                     {(() => {
                                                         const expected = item.expectedQty || (item as any).quantity || 0;
                                                         const picked = item.pickedQty || 0;
@@ -393,8 +395,8 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
                                                                 <Printer size={12} className="md:w-3.5 md:h-3.5" />
                                                             </button>
                                                         )}
-                                                        <div className={`px-2.5 py-1.5 rounded-xl text-[9px] md:text-xs font-black uppercase tracking-wider border ${isDone ? 'bg-green-500/10 border-green-500/20 text-green-600 dark:text-green-400' : 'bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-400 dark:text-gray-500'}`}>
-                                                            {isDone ? '✓' : '...'} <span className="hidden sm:inline">{isDone ? ' Packed' : ' Pending'}</span>
+                                                        <div className={`px-2.5 py-1.5 rounded-xl text-[9px] md:text-xs font-black uppercase tracking-wider border ${isDone ? 'bg-green-500/10 border-green-500/20 text-green-600 dark:text-green-400' : 'bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-405 dark:text-gray-500'}`}>
+                                                            {isDone ? '✓' : '...'} <span className="hidden sm:inline">{isDone ? ` ${t('warehouse.picking')}` : ` ${t('warehouse.pending')}`}</span>
                                                         </div>
                                                     </div>
                                                 )}
@@ -405,7 +407,7 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
                                         {isScanningThis && (
                                             <div className="mt-3 md:mt-4 pt-3 md:pt-4 border-t border-[#E2DCCE]/60 dark:border-white/10 flex flex-col sm:flex-row items-center gap-3 md:gap-4 justify-between animate-in fade-in slide-in-from-top-2">
                                                 <p className="text-xs md:text-sm text-[#2C5E3B] dark:text-[#A9CBA2] font-bold flex items-center gap-1.5 md:gap-2 self-start sm:self-auto w-full sm:w-auto">
-                                                    <CheckCircle size={14} className="md:w-4 md:h-4" /> Confirm Qty
+                                                    <CheckCircle size={14} className="md:w-4 md:h-4" /> {t('warehouse.packing.confirmQty')}
                                                 </p>
                                                 <div className="flex items-center gap-2 md:gap-3 w-full sm:w-auto justify-between sm:justify-end">
                                                     <div className="flex items-center bg-white dark:bg-black/25 border border-[#E2DCCE] dark:border-white/20 rounded-xl overflow-hidden shrink-0">
@@ -417,6 +419,7 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
                                                         <input
                                                             type="number"
                                                             aria-label="Confirm Quantity"
+                                                            title="Confirm Quantity"
                                                             value={confirmQty}
                                                             onChange={e => setConfirmQty(e.target.value)}
                                                             className="w-12 md:w-16 bg-transparent text-center text-[#1E3F27] dark:text-white font-mono font-bold outline-none text-sm md:text-base"
@@ -453,7 +456,7 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
                             {/* Progress */}
                             <div className="bg-white dark:bg-white/[0.02] border border-[#E2DCCE]/60 dark:border-white/10 rounded-2xl p-5">
                                 <div className="flex justify-between items-end mb-2">
-                                    <span className="text-[10px] text-gray-500 font-black uppercase tracking-widest block">Progress</span>
+                                    <span className="text-[10px] text-gray-500 font-black uppercase tracking-widest block">{t('warehouse.putaway.progress')}</span>
                                     <span className="text-xl font-mono font-black text-gray-900 dark:text-white leading-none">{Math.round(progressPercent)}%</span>
                                 </div>
                                 <ProgressBar
@@ -465,12 +468,12 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
 
                             {/* Shipping Info */}
                             <div className="bg-white dark:bg-white/[0.02] border border-[#E2DCCE]/60 dark:border-white/10 rounded-2xl p-5 flex flex-col gap-3">
-                                <span className="text-[10px] text-gray-500 font-black uppercase tracking-widest block">Shipping</span>
+                                <span className="text-[10px] text-gray-550 font-black uppercase tracking-widest block">{t('warehouse.packing.shipping')}</span>
 
                                 <div className="flex items-center gap-3">
                                     <Truck size={14} className="text-[#2C5E3B] dark:text-[#A9CBA2] shrink-0 w-4 h-4" />
                                     <div className="min-w-0">
-                                        <span className="text-[9px] text-gray-500 font-black uppercase tracking-widest block truncate">Dest</span>
+                                        <span className="text-[9px] text-gray-500 font-black uppercase tracking-widest block truncate">{t('warehouse.to')}</span>
                                         <span className="text-gray-900 dark:text-white text-sm font-bold break-words leading-tight block">
                                             {destSite ? (
                                                 <>
@@ -484,7 +487,7 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
                                 <div className="flex items-center gap-3">
                                     <Info size={14} className="text-[#2C5E3B] dark:text-[#A9CBA2] shrink-0 w-4 h-4" />
                                     <div className="min-w-0">
-                                        <span className="text-[9px] text-gray-500 font-black uppercase tracking-widest block truncate">Job/Ref</span>
+                                        <span className="text-[9px] text-gray-550 font-black uppercase tracking-widest block truncate">{t('warehouse.putaway.jobDetails')}</span>
                                         <span className="text-gray-900 dark:text-white text-sm font-bold font-mono truncate block">{formatJobId(job)}</span>
                                     </div>
                                 </div>
@@ -492,10 +495,10 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
 
                             {/* Packing Options */}
                             <div className="bg-white dark:bg-white/[0.02] border border-[#E2DCCE]/60 dark:border-white/10 rounded-2xl p-5 flex flex-col gap-4">
-                                <span className="text-[10px] text-gray-500 font-black uppercase tracking-widest block">Options</span>
+                                <span className="text-[10px] text-gray-550 font-black uppercase tracking-widest block">{t('warehouse.packingOptions')}</span>
 
                                 <div>
-                                    <label className="text-[9px] text-gray-500 font-black uppercase tracking-widest block mb-2">Box Size</label>
+                                    <label className="text-[9px] text-gray-500 font-black uppercase tracking-widest block mb-2">{t('warehouse.boxSize')}</label>
                                     <select title="Box Size" aria-label="Select Box Size" value={boxSize} onChange={(e) => setBoxSize(e.target.value as any)} className="w-full bg-white/90 dark:bg-black/25 border border-[#E2DCCE] dark:border-white/10 hover:border-[#CFC6B4] dark:hover:border-white/20 text-[#1E3F27] dark:text-[#EAE5D9] rounded-xl p-3 text-sm outline-none focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:bg-white dark:focus:bg-zinc-900 transition-all focus:ring-4 focus:ring-[#2C5E3B]/10 dark:focus:ring-[#A9CBA2]/10">
                                         <option value="Small">{t('warehouse.boxSmall')}</option>
                                         <option value="Medium">{t('warehouse.boxMedium')}</option>
@@ -506,24 +509,24 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
 
                                 {hasFragileItems && (
                                     <div className="pt-2 border-t border-[#E2DCCE]/60 dark:border-white/10">
-                                        <p className="text-[9px] text-red-650 dark:text-red-400 font-black uppercase tracking-widest mb-2 flex items-center gap-1"><AlertTriangle size={10} /> Fragile</p>
+                                        <p className="text-[9px] text-red-650 dark:text-red-400 font-black uppercase tracking-widest mb-2 flex items-center gap-1"><AlertTriangle size={10} /> {t('warehouse.packing.fragile')}</p>
                                         <label className="flex items-center gap-3 mb-2 cursor-pointer group">
-                                            <input type="checkbox" checked={packingMaterials.bubbleWrap} onChange={e => setPackingMaterials({ ...packingMaterials, bubbleWrap: e.target.checked })} className="w-4 h-4 rounded border-[#E2DCCE] dark:border-white/20 text-[#2C5E3B] dark:text-[#A9CBA2] focus:ring-[#2C5E3B] dark:focus:ring-[#A9CBA2] focus:ring-offset-white dark:focus:ring-offset-black bg-white dark:bg-black/40" />
-                                            <span className="text-sm text-gray-700 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">Bubble Wrap</span>
+                                            <input type="checkbox" aria-label="Bubble Wrap" title="Bubble Wrap" checked={packingMaterials.bubbleWrap} onChange={e => setPackingMaterials({ ...packingMaterials, bubbleWrap: e.target.checked })} className="w-4 h-4 rounded border-[#E2DCCE] dark:border-white/20 text-[#2C5E3B] dark:text-[#A9CBA2] focus:ring-[#2C5E3B] dark:focus:ring-[#A9CBA2] focus:ring-offset-white dark:focus:ring-offset-black bg-white dark:bg-black/40" />
+                                            <span className="text-sm text-gray-700 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">{t('warehouse.packing.bubbleWrap')}</span>
                                         </label>
                                         <label className="flex items-center gap-3 cursor-pointer group">
-                                            <input type="checkbox" checked={packingMaterials.fragileStickers} onChange={e => setPackingMaterials({ ...packingMaterials, fragileStickers: e.target.checked })} className="w-4 h-4 rounded border-[#E2DCCE] dark:border-white/20 text-[#2C5E3B] dark:text-[#A9CBA2] focus:ring-[#2C5E3B] dark:focus:ring-[#A9CBA2] focus:ring-offset-white dark:focus:ring-offset-black bg-white dark:bg-black/40" />
-                                            <span className="text-sm text-gray-700 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">Stickers</span>
+                                            <input type="checkbox" aria-label="Fragile Stickers" title="Fragile Stickers" checked={packingMaterials.fragileStickers} onChange={e => setPackingMaterials({ ...packingMaterials, fragileStickers: e.target.checked })} className="w-4 h-4 rounded border-[#E2DCCE] dark:border-white/20 text-[#2C5E3B] dark:text-[#A9CBA2] focus:ring-[#2C5E3B] dark:focus:ring-[#A9CBA2] focus:ring-offset-white dark:focus:ring-offset-black bg-white dark:bg-black/40" />
+                                            <span className="text-sm text-gray-700 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">{t('warehouse.packing.stickers')}</span>
                                         </label>
                                     </div>
                                 )}
 
                                 {hasColdItems && (
                                     <div className="pt-2 border-t border-[#E2DCCE]/60 dark:border-white/10">
-                                        <p className="text-[9px] text-[#2C5E3B] dark:text-[#A9CBA2] font-black uppercase tracking-widest mb-2 flex items-center gap-1"><Snowflake size={10} /> Cold Chain</p>
+                                        <p className="text-[9px] text-[#2C5E3B] dark:text-[#A9CBA2] font-black uppercase tracking-widest mb-2 flex items-center gap-1"><Snowflake size={10} /> {t('warehouse.packing.coldChain')}</p>
                                         <label className="flex items-center gap-3 cursor-pointer group">
-                                            <input type="checkbox" checked={hasIcePack} onChange={e => setHasIcePack(e.target.checked)} className="w-4 h-4 rounded border-[#E2DCCE] dark:border-white/20 text-[#2C5E3B] dark:text-[#A9CBA2] focus:ring-[#2C5E3B] dark:focus:ring-[#A9CBA2] focus:ring-offset-white dark:focus:ring-offset-black bg-white dark:bg-black/40" />
-                                            <span className="text-sm text-gray-700 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">Ice Packs</span>
+                                            <input type="checkbox" aria-label="Ice Packs" title="Ice Packs" checked={hasIcePack} onChange={e => setHasIcePack(e.target.checked)} className="w-4 h-4 rounded border-[#E2DCCE] dark:border-white/20 text-[#2C5E3B] dark:text-[#A9CBA2] focus:ring-[#2C5E3B] dark:focus:ring-[#A9CBA2] focus:ring-offset-white dark:focus:ring-offset-black bg-white dark:bg-black/40" />
+                                            <span className="text-sm text-gray-700 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">{t('warehouse.packing.icePacks')}</span>
                                         </label>
                                     </div>
                                 )}
@@ -539,14 +542,14 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
                             disabled={isSubmitting}
                             className="p-2.5 md:px-6 md:py-3.5 bg-white/80 dark:bg-[#18201B]/70 border border-[#E2DCCE] dark:border-[#EAE5D9]/25 text-[#2C4D35] dark:text-[#A9CBA2] hover:text-[#1E3F27] dark:hover:text-white hover:scale-105 active:scale-95 transition-all rounded-xl md:rounded-2xl font-black text-xs md:text-sm uppercase tracking-widest md:flex items-center gap-2 disabled:opacity-50"
                         >
-                            <Printer size={18} className="md:w-4 md:h-4" /> <span className="hidden md:inline">Print Label</span>
+                            <Printer size={18} className="md:w-4 md:h-4" /> <span className="hidden md:inline">{t('warehouse.printLabel')}</span>
                         </button>
                         {!isFullyPacked && onOpenScanner && (
                             <button
                                 onClick={onOpenScanner}
                                 className="p-2.5 md:px-6 md:py-3.5 bg-white/80 dark:bg-[#18201B]/70 border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20 text-[#2C5E3B] dark:text-[#A9CBA2] hover:text-[#1E3F27] dark:hover:text-white hover:scale-105 active:scale-95 transition-all rounded-xl md:rounded-2xl font-black text-xs md:text-sm uppercase tracking-widest md:flex items-center gap-2 shadow-sm"
                             >
-                                <Barcode size={18} className="md:w-4 md:h-4" /> <span className="hidden md:inline">Open Scanner</span>
+                                <Barcode size={18} className="md:w-4 md:h-4" /> <span className="hidden md:inline">{t('warehouse.scanBarcode')}</span>
                             </button>
                         )}
                         {/* Flag Discrepancy — packer count doesn't match manifest */}
@@ -555,7 +558,7 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
                                 onClick={onFlagDiscrepancy}
                                 className="p-2.5 md:px-6 md:py-3.5 bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/20 text-orange-600 dark:text-orange-400 hover:scale-105 active:scale-95 transition-all rounded-xl md:rounded-2xl font-black text-xs md:text-sm uppercase tracking-widest md:flex items-center gap-2"
                             >
-                                <AlertTriangle size={18} className="md:w-4 md:h-4" /> <span className="hidden md:inline">Flag Count Issue</span>
+                                <AlertTriangle size={18} className="md:w-4 md:h-4" /> <span className="hidden md:inline">{t('warehouse.packing.flagCountIssue')}</span>
                             </button>
                         )}
                     </div>
@@ -565,14 +568,14 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
                             onClick={onClose}
                             className="px-5 py-3 md:px-7 md:py-3.5 rounded-xl md:rounded-2xl bg-white/80 dark:bg-[#18201B]/70 border border-[#E2DCCE] dark:border-emerald-950/20 text-gray-700 dark:text-[#A9CBA2] hover:text-[#1E3F27] dark:hover:text-white font-black text-xs uppercase tracking-widest transition-all active:scale-95"
                         >
-                            Close
+                            {t('warehouse.dismiss')}
                         </button>
 
                         {job.status !== 'Completed' && (
                             <button
                                 onClick={() => {
                                     if (hasColdItems && !hasIcePack) {
-                                        alert("Ice packs are required for cold chain items!");
+                                        alert(t('warehouse.packing.icePacksRequired'));
                                         return;
                                     }
                                     onCompleteJob(boxDetails);
@@ -586,7 +589,7 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
                                 {isSubmitting ? <Loader2 size={16} className="animate-spin md:w-[18px] md:h-[18px]" /> : (
                                     <>
                                         <CheckCircle size={14} className="md:w-[18px] md:h-[18px]" />
-                                        {isFullyPacked ? 'Seal IT' : 'Complete'}
+                                        {isFullyPacked ? t('warehouse.completed') : t('warehouse.packing.complete')}
                                     </>
                                 )}
                             </button>
