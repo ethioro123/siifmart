@@ -475,8 +475,8 @@ export const POSProductGrid: React.FC = () => {
                                     )}
 
                                     {product.stock <= 0 && (
-                                        <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-10">
-                                            <span className="bg-red-700 text-white font-extrabold text-[9px] uppercase tracking-wider px-2.5 py-1 rounded-lg">
+                                        <div className="absolute inset-0 bg-black/55 flex items-center justify-center z-10">
+                                            <span className="bg-red-600 text-white font-extrabold text-[9px] uppercase tracking-wider px-2.5 py-1 rounded-lg">
                                                 {t('common.outOfStock')}
                                             </span>
                                         </div>
@@ -496,9 +496,15 @@ export const POSProductGrid: React.FC = () => {
                                                 <p className="text-[#2C5E3B] dark:text-[#A9CBA2] font-black text-base tracking-tight">{CURRENCY_SYMBOL} {product.price}{product.unit && getSellUnit(product.unit).code !== 'UNIT' ? <span className="text-[8px] text-[#4D6E56]/60 dark:text-gray-500 font-bold">/{getSellUnit(product.unit).shortLabel}</span> : null}</p>
                                             )}
                                         </div>
-                                        <div className="w-8 h-8 rounded-xl bg-[#2C5E3B]/10 dark:bg-white/5 border border-[#2C5E3B]/20 dark:border-white/10 flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:bg-[#2C5E3B]/20 dark:group-hover:bg-white/10">
-                                            <Plus size={14} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
-                                        </div>
+                                         {product.stock <= 0 ? (
+                                             <span className="text-[9px] font-black text-red-600 dark:text-red-500 uppercase tracking-wider">
+                                                 {t('common.outOfStock')}
+                                             </span>
+                                         ) : (
+                                             <div className="w-8 h-8 rounded-xl bg-[#2C5E3B]/10 dark:bg-white/5 border border-[#2C5E3B]/20 dark:border-white/10 flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:bg-[#2C5E3B]/20 dark:group-hover:bg-white/10">
+                                                 <Plus size={14} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
+                                             </div>
+                                         )}
                                     </div>
                                 </div>
                             </button>
