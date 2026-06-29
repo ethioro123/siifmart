@@ -66,13 +66,13 @@ const POSCommandContent: React.FC = () => {
   if (isLocked) {
     return (
       <div className="min-h-screen w-full flex items-center justify-center p-4 relative overflow-hidden bg-gradient-to-br from-[#FAF8F5] via-[#F4F0E6] to-[#FAF8F5] dark:from-[#0B0F0D] dark:via-[#131915] dark:to-[#0B0F0D] transition-colors duration-500">
-        {/* Ambient glows */}
-        <div className="absolute top-[-10%] left-[10%] w-[45vw] h-[45vw] rounded-full bg-[#2C5E3B]/10 dark:bg-[#1E3F27]/5 blur-[120px] pointer-events-none animate-pulse" />
-        <div className="absolute bottom-[-10%] right-[10%] w-[50vw] h-[50vw] rounded-full bg-amber-600/10 dark:bg-amber-700/5 blur-[140px] pointer-events-none animate-pulse" />
-        {/* Grid */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(44,94,59,0.02)_1px,transparent_1px),linear-gradient(to_bottom,rgba(44,94,59,0.02)_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,rgba(169,203,162,0.012)_1px,transparent_1px),linear-gradient(to_bottom,rgba(169,203,162,0.012)_1px,transparent_1px)] bg-[size:32px_32px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] pointer-events-none" />
+        {/* Ambient glows — DESKTOP ONLY */}
+        <div className="hidden lg:block absolute top-[-10%] left-[10%] w-[45vw] h-[45vw] rounded-full bg-[#2C5E3B]/10 dark:bg-[#1E3F27]/5 blur-[120px] pointer-events-none animate-pulse" />
+        <div className="hidden lg:block absolute bottom-[-10%] right-[10%] w-[50vw] h-[50vw] rounded-full bg-amber-600/10 dark:bg-amber-700/5 blur-[140px] pointer-events-none animate-pulse" />
+        {/* Grid — DESKTOP ONLY */}
+        <div className="hidden lg:block absolute inset-0 bg-[linear-gradient(to_right,rgba(44,94,59,0.02)_1px,transparent_1px),linear-gradient(to_bottom,rgba(44,94,59,0.02)_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,rgba(169,203,162,0.012)_1px,transparent_1px),linear-gradient(to_bottom,rgba(169,203,162,0.012)_1px,transparent_1px)] bg-[size:32px_32px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] pointer-events-none" />
 
-        <div className="max-w-[400px] w-full bg-white/85 dark:bg-[#18201B]/60 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-[32px] p-10 relative z-10 shadow-[0_24px_80px_-12px_rgba(34,50,38,0.06)] dark:shadow-[0_32px_96px_-12px_rgba(5,8,6,0.65)] backdrop-blur-2xl flex flex-col items-center">
+        <div className="max-w-[400px] w-full bg-white/85 dark:bg-[#18201B]/60 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-[32px] p-10 relative z-10 shadow-[0_24px_80px_-12px_rgba(34,50,38,0.06)] dark:shadow-[0_32px_96px_-12px_rgba(5,8,6,0.65)] lg:backdrop-blur-2xl flex flex-col items-center">
           {/* Logo */}
           <div className="relative group mb-6 select-none">
             <div className="absolute inset-0 bg-gradient-to-tr from-[#2C5E3B] via-[#4A855A] to-amber-600 rounded-2xl blur-lg opacity-40 group-hover:opacity-60 transition-opacity duration-500" />
@@ -92,12 +92,12 @@ const POSCommandContent: React.FC = () => {
   return (
     <div className="min-h-full w-full relative bg-[#FAF8F5] dark:bg-[#18201B] transition-colors duration-500 selection:bg-[#2C5E3B]/20">
 
-      {/* === Ambient Glows (pinned to page, not container) === */}
-      <div className="fixed top-[-10%] left-[5%] w-[50vw] h-[50vw] rounded-full bg-[#2C5E3B]/8 dark:bg-[#1E3F27]/4 blur-[160px] pointer-events-none z-0" />
-      <div className="fixed bottom-[-10%] right-[5%] w-[55vw] h-[55vw] rounded-full bg-amber-600/8 dark:bg-amber-700/3 blur-[180px] pointer-events-none z-0" />
+      {/* === Ambient Glows — DESKTOP ONLY === */}
+      <div className="hidden lg:block fixed top-[-10%] left-[5%] w-[50vw] h-[50vw] rounded-full bg-[#2C5E3B]/8 dark:bg-[#1E3F27]/4 blur-[160px] pointer-events-none z-0" />
+      <div className="hidden lg:block fixed bottom-[-10%] right-[5%] w-[55vw] h-[55vw] rounded-full bg-amber-600/8 dark:bg-amber-700/3 blur-[180px] pointer-events-none z-0" />
 
-      {/* === Grid Texture === */}
-      <div className="fixed inset-0 bg-[linear-gradient(to_right,rgba(44,94,59,0.025)_1px,transparent_1px),linear-gradient(to_bottom,rgba(44,94,59,0.025)_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,rgba(169,203,162,0.012)_1px,transparent_1px),linear-gradient(to_bottom,rgba(169,203,162,0.012)_1px,transparent_1px)] bg-[size:32px_32px] [mask-image:radial-gradient(ellipse_80%_70%_at_50%_40%,#000_60%,transparent_100%)] pointer-events-none z-0" />
+      {/* === Grid Texture — DESKTOP ONLY === */}
+      <div className="hidden lg:block fixed inset-0 bg-[linear-gradient(to_right,rgba(44,94,59,0.025)_1px,transparent_1px),linear-gradient(to_bottom,rgba(44,94,59,0.025)_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,rgba(169,203,162,0.012)_1px,transparent_1px),linear-gradient(to_bottom,rgba(169,203,162,0.012)_1px,transparent_1px)] bg-[size:32px_32px] [mask-image:radial-gradient(ellipse_80%_70%_at_50%_40%,#000_60%,transparent_100%)] pointer-events-none z-0" />
 
       <div className="relative z-10 max-w-[1600px] mx-auto p-4 lg:p-6 space-y-6">
 
@@ -105,7 +105,7 @@ const POSCommandContent: React.FC = () => {
         <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-6 bg-transparent border-b border-[#E2DCCE] dark:border-emerald-950/20 px-6 pt-6 pb-6 relative z-30">
           {/* Inner ambient glow */}
           <div className="absolute inset-0 overflow-hidden rounded-[32px] pointer-events-none">
-            <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-[#2C5E3B]/5 rounded-full blur-[100px] -mr-48 -mt-48" />
+            <div className="hidden lg:block absolute top-0 right-0 w-[400px] h-[400px] bg-[#2C5E3B]/5 rounded-full blur-[100px] -mr-48 -mt-48" />
             <div className="absolute bottom-0 left-0 w-[250px] h-[250px] bg-amber-600/5 rounded-full blur-[80px] -ml-24 -mb-24" />
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/3 h-[1px] bg-gradient-to-r from-transparent via-[#2C5E3B]/30 to-transparent" />
           </div>
@@ -208,11 +208,11 @@ const POSCommandContent: React.FC = () => {
 
         {/* ===== ROSTER GRID ===== */}
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-          <div className="bg-white/85 dark:bg-[#18201B]/60 backdrop-blur-2xl border border-[#E2DCCE] dark:border-emerald-950/20 rounded-[32px] p-8 relative overflow-hidden shadow-[0_24px_80px_-12px_rgba(34,50,38,0.06)] dark:shadow-[0_32px_96px_-12px_rgba(5,8,6,0.65)]">
+          <div className="bg-white/85 dark:bg-[#18201B]/60 lg:backdrop-blur-2xl border border-[#E2DCCE] dark:border-emerald-950/20 rounded-[32px] p-8 relative overflow-hidden shadow-[0_24px_80px_-12px_rgba(34,50,38,0.06)] dark:shadow-[0_32px_96px_-12px_rgba(5,8,6,0.65)]">
             <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#2C5E3B]/20 to-transparent" />
             <SiteRoster layout="list" limit={6} highlightUser={user?.id} />
           </div>
-          <div className="bg-white/85 dark:bg-[#18201B]/60 backdrop-blur-2xl border border-[#E2DCCE] dark:border-emerald-950/20 rounded-[32px] p-8 relative overflow-hidden shadow-[0_24px_80px_-12px_rgba(34,50,38,0.06)] dark:shadow-[0_32px_96px_-12px_rgba(5,8,6,0.65)]">
+          <div className="bg-white/85 dark:bg-[#18201B]/60 lg:backdrop-blur-2xl border border-[#E2DCCE] dark:border-emerald-950/20 rounded-[32px] p-8 relative overflow-hidden shadow-[0_24px_80px_-12px_rgba(34,50,38,0.06)] dark:shadow-[0_32px_96px_-12px_rgba(5,8,6,0.65)]">
             <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#A9CBA2]/20 to-transparent" />
             <RosterManager />
           </div>

@@ -21,7 +21,7 @@ export function MobileSearch({
    if (!isMobileSearchVisible) return null;
 
    return (
-      <div className="lg:hidden fixed inset-0 z-[100] bg-white/98 dark:bg-[#18201B]/98 backdrop-blur-2xl flex flex-col animate-in fade-in zoom-in-95 duration-200">
+      <div className="lg:hidden fixed inset-0 z-[100] bg-white/98 dark:bg-[#18201B]/98 flex flex-col animate-in fade-in zoom-in-95 duration-200">
          <div className="p-4 flex items-center gap-4 bg-stone-50/80 dark:bg-[#232E27]/60 border-b border-[#E2DCCE] dark:border-white/10">
             <button
                onClick={() => { setIsMobileSearchVisible(false); setSearchValue(''); }}

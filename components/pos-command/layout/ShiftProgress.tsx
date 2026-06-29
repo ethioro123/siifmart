@@ -11,7 +11,7 @@ export const ShiftProgress: React.FC = () => {
     const progressPercent = Math.min((totalRevenue / dailyTarget) * 100, 100);
 
     return (
-        <div className="bg-white/85 dark:bg-[#18201B]/60 backdrop-blur-2xl border border-[#E2DCCE] dark:border-emerald-950/20 rounded-[32px] p-8 relative overflow-hidden shadow-[0_24px_80px_-12px_rgba(34,50,38,0.06)] dark:shadow-[0_32px_96px_-12px_rgba(5,8,6,0.65)]">
+        <div className="bg-white/85 dark:bg-[#18201B]/60 lg:backdrop-blur-2xl border border-[#E2DCCE] dark:border-emerald-950/20 rounded-[32px] p-8 relative overflow-hidden shadow-[0_24px_80px_-12px_rgba(34,50,38,0.06)] dark:shadow-[0_32px_96px_-12px_rgba(5,8,6,0.65)]">
 
             {/* Ambient glows */}
             <div className="absolute top-0 right-0 w-[350px] h-[350px] bg-[#2C5E3B]/8 dark:bg-[#2C5E3B]/4 rounded-full blur-[100px] -mr-48 -mt-48 pointer-events-none" />

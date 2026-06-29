@@ -27,7 +27,7 @@ const PinPad: React.FC<PinPadProps> = ({ pin, setPin, onEnter, onCancel }) => {
     };
 
     return (
-        <div className="w-full max-w-[320px] mx-auto bg-white/85 dark:bg-[#18201B]/60 p-6 rounded-[32px] border border-[#E2DCCE] dark:border-emerald-950/20 shadow-[0_24px_80px_-12px_rgba(34,50,38,0.06)] dark:shadow-[0_32px_96px_-12px_rgba(5,8,6,0.65)] backdrop-blur-2xl transition-all duration-300">
+        <div className="w-full max-w-[320px] mx-auto bg-white/85 dark:bg-[#18201B]/60 p-6 rounded-[32px] border border-[#E2DCCE] dark:border-emerald-950/20 shadow-[0_24px_80px_-12px_rgba(34,50,38,0.06)] dark:shadow-[0_32px_96px_-12px_rgba(5,8,6,0.65)] lg:backdrop-blur-2xl transition-all duration-300">
             {/* PIN Display */}
             <div className="flex gap-4 justify-center mb-8">
                 {[0, 1, 2, 3].map((index) => (

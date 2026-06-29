@@ -12,7 +12,7 @@ export const RecentTransactions: React.FC = () => {
     const { filteredSales, txPage, setTxPage, TX_PER_PAGE } = usePOSCommand();
 
     return (
-        <div className="bg-white/85 dark:bg-[#18201B]/60 backdrop-blur-2xl border border-[#E2DCCE] dark:border-emerald-950/20 rounded-[28px] overflow-hidden shadow-[0_4px_24px_-4px_rgba(34,50,38,0.04)] dark:shadow-[0_8px_32px_-4px_rgba(5,8,6,0.5)]">
+        <div className="bg-white/85 dark:bg-[#18201B]/60 lg:backdrop-blur-2xl border border-[#E2DCCE] dark:border-emerald-950/20 rounded-[28px] overflow-hidden shadow-[0_4px_24px_-4px_rgba(34,50,38,0.04)] dark:shadow-[0_8px_32px_-4px_rgba(5,8,6,0.5)]">
             {/* Header */}
             <div className="px-6 py-5 border-b border-[#E2DCCE]/60 dark:border-emerald-950/20 flex justify-between items-center bg-[#FAF8F5]/60 dark:bg-black/10">
                 <h3 className="font-extrabold text-[#1E3F27] dark:text-[#EAE5D9] tracking-tight">{t('posCommand.recentTransactions')}</h3>

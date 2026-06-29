@@ -59,7 +59,7 @@ const KPICard = ({ title, value, subtitle, trend, trendUp, icon, color = 'forest
     const theme = getColorClasses(color);
 
     return (
-        <div className="group relative bg-white/85 dark:bg-[#18201B]/60 backdrop-blur-2xl border border-[#E2DCCE] dark:border-emerald-950/20 rounded-[28px] p-6 overflow-hidden transition-all duration-300 shadow-[0_4px_24px_-4px_rgba(34,50,38,0.04)] dark:shadow-[0_8px_32px_-4px_rgba(5,8,6,0.5)] hover:shadow-[0_12px_40px_-8px_rgba(34,50,38,0.1)] dark:hover:shadow-[0_16px_48px_-8px_rgba(5,8,6,0.7)] hover:-translate-y-0.5">
+        <div className="group relative bg-white/85 dark:bg-[#18201B]/60 lg:backdrop-blur-2xl border border-[#E2DCCE] dark:border-emerald-950/20 rounded-[28px] p-6 overflow-hidden transition-all duration-300 shadow-[0_4px_24px_-4px_rgba(34,50,38,0.04)] dark:shadow-[0_8px_32px_-4px_rgba(5,8,6,0.5)] hover:shadow-[0_12px_40px_-8px_rgba(34,50,38,0.1)] dark:hover:shadow-[0_16px_48px_-8px_rgba(5,8,6,0.7)] hover:-translate-y-0.5">
 
             {/* Ambient corner glow */}
             <div className={`absolute -top-8 -right-8 w-32 h-32 ${theme.glow} rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500`} />

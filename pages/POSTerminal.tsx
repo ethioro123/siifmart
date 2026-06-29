@@ -14,7 +14,7 @@ const POSTerminalContent: React.FC = () => {
   if (needsStoreSelection) {
     return (
       <div className="h-full flex items-center justify-center p-4">
-        <div className="text-center p-8 bg-white/85 dark:bg-[#18201B]/60 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-[32px] max-w-md shadow-[0_24px_80px_-12px_rgba(34,50,38,0.06)] dark:shadow-[0_32px_96px_-12px_rgba(5,8,6,0.65)] backdrop-blur-2xl transition-all duration-300">
+        <div className="text-center p-8 bg-white/85 dark:bg-[#18201B]/60 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-[32px] max-w-md shadow-[0_24px_80px_-12px_rgba(34,50,38,0.06)] dark:shadow-[0_32px_96px_-12px_rgba(5,8,6,0.65)] lg:backdrop-blur-2xl transition-all duration-300">
           <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-amber-600/10 dark:bg-amber-700/10 flex items-center justify-center">
             <MapPin size={32} className="text-amber-600 dark:text-amber-500" />
           </div>

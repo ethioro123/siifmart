@@ -33,8 +33,8 @@ function ModuleLoader() {
   return (
     <div className="flex flex-col items-center justify-center min-h-[50vh] p-8 text-center animate-pulse-slow">
       <div className="relative mb-4">
-        <div className="absolute inset-0 bg-cyber-primary/20 blur-xl rounded-full animate-pulse" />
-        <div className="w-12 h-12 bg-black/30 backdrop-blur-xl border border-cyber-primary/30 rounded-xl flex items-center justify-center relative z-10 shadow-[0_0_20px_rgba(0,255,157,0.1)]">
+        <div className="hidden lg:block absolute inset-0 bg-cyber-primary/20 blur-xl rounded-full animate-pulse" />
+        <div className="w-12 h-12 bg-black/30 lg:backdrop-blur-xl border border-cyber-primary/30 rounded-xl flex items-center justify-center relative z-10 shadow-[0_0_20px_rgba(0,255,157,0.1)]">
           <div className="w-6 h-6 border-t-2 border-r-2 border-cyber-primary rounded-full animate-spin" />
         </div>
       </div>
@@ -143,8 +143,8 @@ export default function App() {
 
         {/* Logo/Icon */}
         <div className="relative mb-8 transform hover:scale-105 transition-transform duration-700">
-          <div className="absolute inset-0 bg-cyber-primary/20 blur-3xl rounded-full animate-pulse" />
-          <div className="w-20 h-20 bg-black/50 backdrop-blur-xl border border-cyber-primary/30 rounded-2xl flex items-center justify-center relative z-10 shadow-[0_0_30px_rgba(0,255,157,0.1)]">
+          <div className="hidden lg:block absolute inset-0 bg-cyber-primary/20 blur-3xl rounded-full animate-pulse" />
+          <div className="w-20 h-20 bg-black/50 lg:backdrop-blur-xl border border-cyber-primary/30 rounded-2xl flex items-center justify-center relative z-10 shadow-[0_0_30px_rgba(0,255,157,0.1)]">
             <div className="w-10 h-10 border-t-2 border-r-2 border-cyber-primary rounded-full animate-spin" />
           </div>
         </div>
@@ -155,7 +155,7 @@ export default function App() {
         </h2>
 
         {/* Progress Bar Container */}
-        <div className="w-full max-w-md bg-white/5 border border-white/10 rounded-full h-1.5 mb-2 overflow-hidden backdrop-blur-sm relative">
+        <div className="w-full max-w-md bg-white/5 border border-white/10 rounded-full h-1.5 mb-2 overflow-hidden lg:backdrop-blur-sm relative">
           {/* Animated Progress Fill */}
           <div
             ref={(el) => el?.style.setProperty('--loading-progress', `${loading ? 100 : progressPercent}%`)}
