@@ -228,100 +228,112 @@ export const POSCartPanel: React.FC = () => {
                             <span className="text-2xl font-black text-[#2C5E3B] dark:text-[#EAE5D9] tracking-tighter tabular-nums drop-shadow-[0_2px_10px_rgba(44,94,59,0.15)] whitespace-nowrap">{CURRENCY_SYMBOL} {total.toLocaleString()}</span>
                         </div>
                     </div>
-                    {/* Command Grid - Collapsible on Mobile */}
-                    <div className="lg:hidden mb-2.5 relative z-10">
+                    {/* Command Dropdown - Saves height for more cart products */}
+                    <div className="relative mb-3 z-20">
                         <button
+                            type="button"
                             onClick={() => setShowActions(!showActions)}
-                            className="w-full py-2 bg-stone-100 hover:bg-stone-200 dark:bg-white/5 dark:hover:bg-white/10 border border-[#E2DCCE] dark:border-white/5 rounded-xl text-[9px] font-black uppercase tracking-wider text-stone-600 dark:text-[#A9CBA2] flex items-center justify-center gap-1.5 transition-all duration-300 active:scale-95 cursor-pointer"
+                            className="w-full py-2.5 px-4 bg-stone-100 hover:bg-stone-200 dark:bg-white/5 dark:hover:bg-white/10 border border-[#E2DCCE] dark:border-white/5 rounded-2xl text-[10px] font-black uppercase tracking-wider text-stone-700 dark:text-gray-300 flex items-center justify-between transition-all duration-300 active:scale-[0.98] cursor-pointer"
                         >
-                            {showActions ? 'Hide Terminal Actions' : 'Show Terminal Actions'}
-                        </button>
-                    </div>
-
-                    <div className={`${showActions ? 'grid' : 'hidden lg:grid'} grid-cols-4 gap-1.5 mb-3 relative z-10`}>
-                        <button
-                            onClick={() => setIsRecallModalOpen(true)}
-                            disabled={heldOrders.length === 0}
-                            className="group relative flex flex-col items-center justify-center p-2 bg-amber-600/5 hover:bg-amber-600/10 rounded-xl border border-amber-600/20 transition-all active:scale-95 disabled:opacity-20 aspect-square min-w-0"
-                        >
-                            <div className="relative mb-0.5 group-hover:scale-110 transition-transform">
-                                <PlayCircle size={14} className="text-amber-600 dark:text-amber-500" />
-                                {heldOrders.length > 0 && (
-                                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[6px] w-3 h-3 rounded-full flex items-center justify-center animate-pulse">
-                                        {heldOrders.length}
-                                    </span>
-                                )}
-                            </div>
-                            <span className="text-[7px] font-black uppercase tracking-widest text-amber-600/60 group-hover:text-amber-600 dark:text-amber-500/60 dark:group-hover:text-amber-500 truncate w-full text-center">{t('pos.recall')}</span>
+                            <span className="flex items-center gap-2">
+                                <Settings size={14} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
+                                Terminal Actions
+                            </span>
+                            <span className={`text-[8px] transform transition-transform duration-300 ${showActions ? 'rotate-180' : ''}`}>▼</span>
                         </button>
 
-                        <button
-                            onClick={handleHoldOrder}
-                            className="group relative flex flex-col items-center justify-center p-2 bg-[#2C5E3B]/5 hover:bg-[#2C5E3B]/10 rounded-xl border border-[#2C5E3B]/20 transition-all active:scale-95 aspect-square min-w-0"
-                        >
-                            <PauseCircle size={14} className="text-[#2C5E3B] dark:text-[#A9CBA2] mb-0.5 group-hover:scale-110 transition-transform" />
-                            <span className="text-[7px] font-black uppercase tracking-widest text-[#2C5E3B]/60 dark:text-[#A9CBA2]/60 group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] truncate w-full text-center">{t('pos.hold')}</span>
-                        </button>
+                        {showActions && (
+                            <>
+                                {/* Click outside overlay to close */}
+                                <div className="fixed inset-0 z-10" onClick={() => setShowActions(false)} />
+                                
+                                <div className="absolute bottom-full mb-2 left-0 right-0 bg-white/95 dark:bg-[#18201B] border border-[#E2DCCE] dark:border-emerald-950/40 rounded-2xl shadow-2xl p-2 z-20 grid grid-cols-2 gap-1 animate-in slide-in-from-bottom-2 duration-200">
+                                    <button
+                                        type="button"
+                                        onClick={() => { setIsRecallModalOpen(true); setShowActions(false); }}
+                                        disabled={heldOrders.length === 0}
+                                        className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-stone-100 dark:hover:bg-white/5 text-left transition-colors disabled:opacity-30 text-[10px] font-bold text-stone-700 dark:text-gray-300 cursor-pointer"
+                                    >
+                                        <PlayCircle size={14} className="text-amber-600 dark:text-amber-500 shrink-0" />
+                                        <span className="truncate">Recall ({heldOrders.length})</span>
+                                    </button>
 
-                        <Protected permission="VOID_SALE">
-                            <button
-                                onClick={clearCart}
-                                className="group relative flex flex-col items-center justify-center p-2 bg-red-500/5 hover:bg-red-500/10 rounded-xl border border-red-500/20 transition-all active:scale-95 aspect-square min-w-0"
-                            >
-                                <Trash2 size={14} className="text-red-500 mb-0.5 group-hover:scale-110 transition-transform" />
-                                <span className="text-[7px] font-black uppercase tracking-widest text-red-500/60 group-hover:text-red-500 truncate w-full text-center">{t('pos.clear')}</span>
-                            </button>
-                        </Protected>
+                                    <button
+                                        type="button"
+                                        onClick={() => { handleHoldOrder(); setShowActions(false); }}
+                                        className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-stone-100 dark:hover:bg-white/5 text-left transition-colors text-[10px] font-bold text-stone-700 dark:text-gray-300 cursor-pointer"
+                                    >
+                                        <PauseCircle size={14} className="text-[#2C5E3B] dark:text-[#A9CBA2] shrink-0" />
+                                        <span className="truncate">Hold Order</span>
+                                    </button>
 
-                        <Protected permission="REFUND_SALE">
-                            <button
-                                onClick={() => setIsReturnModalOpen(true)}
-                                className="group relative flex flex-col items-center justify-center p-2 bg-[#FAF8F5] dark:bg-white/5 hover:bg-red-500/10 rounded-xl border border-[#E2DCCE] dark:border-white/5 hover:border-red-500/20 transition-all duration-300 active:scale-[0.97] aspect-square min-w-0"
-                            >
-                                <RotateCcw size={14} className="text-red-500 mb-0.5 group-hover:scale-110 transition-transform" />
-                                <span className="text-[7px] font-black uppercase tracking-widest text-stone-500 dark:text-gray-400 group-hover:text-red-500 transition-colors uppercase truncate w-full text-center">{t('pos.returns')}</span>
-                            </button>
-                        </Protected>
+                                    <Protected permission="VOID_SALE">
+                                        <button
+                                            type="button"
+                                            onClick={() => { clearCart(); setShowActions(false); }}
+                                            className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-red-500/10 text-left transition-colors text-[10px] font-bold text-red-600 dark:text-red-400 cursor-pointer"
+                                        >
+                                            <Trash2 size={14} className="shrink-0" />
+                                            <span className="truncate">Clear Cart</span>
+                                        </button>
+                                    </Protected>
 
-                        <button
-                            onClick={handleOpenDrawer}
-                            className="group relative flex flex-col items-center justify-center p-2 bg-[#FAF8F5] dark:bg-white/5 hover:bg-[#2C5E3B]/10 rounded-xl border border-[#E2DCCE] dark:border-white/5 hover:border-[#2C5E3B]/20 transition-all duration-300 active:scale-[0.97] aspect-square min-w-0"
-                        >
-                            <Box size={14} className="text-[#2C5E3B] dark:text-[#A9CBA2] mb-0.5 group-hover:scale-110 transition-transform" />
-                            <span className="text-[7px] font-black uppercase tracking-widest text-stone-500 dark:text-gray-400 group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] transition-colors uppercase truncate w-full text-center">{t('pos.drawer')}</span>
-                        </button>
+                                    <Protected permission="REFUND_SALE">
+                                        <button
+                                            type="button"
+                                            onClick={() => { setIsReturnModalOpen(true); setShowActions(false); }}
+                                            className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-stone-100 dark:hover:bg-white/5 text-left transition-colors text-[10px] font-bold text-stone-700 dark:text-gray-300 cursor-pointer"
+                                        >
+                                            <RotateCcw size={14} className="text-red-500 shrink-0" />
+                                            <span className="truncate">Returns</span>
+                                        </button>
+                                    </Protected>
 
-                        <button
-                            onClick={handleCloseShift}
-                            className="group relative flex flex-col items-center justify-center p-2 bg-[#FAF8F5] dark:bg-white/5 hover:bg-amber-600/10 rounded-xl border border-[#E2DCCE] dark:border-white/5 hover:border-amber-600/20 transition-all duration-300 active:scale-[0.97] aspect-square min-w-0"
-                        >
-                            <Lock size={14} className="text-amber-600 dark:text-amber-500 mb-0.5 group-hover:scale-110 transition-transform" />
-                            <span className="text-[7px] font-black uppercase tracking-widest text-stone-500 dark:text-gray-400 group-hover:text-amber-600 dark:group-hover:text-amber-500 transition-colors uppercase truncate w-full text-center">{t('pos.shift')}</span>
-                        </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => { handleOpenDrawer(); setShowActions(false); }}
+                                        className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-stone-100 dark:hover:bg-white/5 text-left transition-colors text-[10px] font-bold text-stone-700 dark:text-gray-300 cursor-pointer"
+                                    >
+                                        <Box size={14} className="text-[#2C5E3B] dark:text-[#A9CBA2] shrink-0" />
+                                        <span className="truncate">Cash Drawer</span>
+                                    </button>
 
-                        <button
-                            onClick={handleReprintLast}
-                            className="group relative flex flex-col items-center justify-center p-2 bg-[#FAF8F5] dark:bg-white/5 hover:bg-[#2C5E3B]/10 rounded-xl border border-[#E2DCCE] dark:border-white/5 hover:border-[#2C5E3B]/20 transition-all duration-300 active:scale-[0.97] aspect-square min-w-0"
-                        >
-                            <Printer size={14} className="text-[#2C5E3B] dark:text-[#A9CBA2] mb-0.5 group-hover:scale-110 transition-transform" />
-                            <span className="text-[7px] font-black uppercase tracking-widest text-stone-500 dark:text-gray-400 group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] transition-colors uppercase truncate w-full text-center">{t('pos.reprintShort')}</span>
-                        </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => { handleCloseShift(); setShowActions(false); }}
+                                        className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-stone-100 dark:hover:bg-white/5 text-left transition-colors text-[10px] font-bold text-stone-700 dark:text-gray-300 cursor-pointer"
+                                    >
+                                        <Lock size={14} className="text-amber-600 dark:text-amber-500 shrink-0" />
+                                        <span className="truncate">Shift Ops</span>
+                                    </button>
 
-                        {/* Price Updates Button */}
-                        <button
-                            onClick={() => setIsPriceUpdatesModalOpen(true)}
-                            className="group relative flex flex-col items-center justify-center p-2 bg-[#FAF8F5] dark:bg-white/5 hover:bg-amber-600/10 rounded-xl border border-[#E2DCCE] dark:border-white/5 hover:border-amber-600/20 transition-all duration-300 active:scale-[0.97] aspect-square min-w-0"
-                        >
-                            <div className="relative">
-                                <DollarSign size={14} className="text-amber-600 dark:text-amber-500 mb-0.5 group-hover:scale-110 transition-transform" />
-                                {priceUpdatedProducts.length > 0 && (
-                                    <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full flex items-center justify-center text-[6px] font-bold text-white shadow-sm border border-black/50">
-                                        {priceUpdatedProducts.length}
-                                    </span>
-                                )}
-                            </div>
-                            <span className="text-[7px] font-black uppercase tracking-widest text-stone-500 dark:text-gray-400 group-hover:text-amber-600 dark:group-hover:text-amber-500 transition-colors uppercase truncate w-full text-center">PRICES</span>
-                        </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => { handleReprintLast(); setShowActions(false); }}
+                                        className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-stone-100 dark:hover:bg-white/5 text-left transition-colors text-[10px] font-bold text-stone-700 dark:text-gray-300 cursor-pointer"
+                                    >
+                                        <Printer size={14} className="text-[#2C5E3B] dark:text-[#A9CBA2] shrink-0" />
+                                        <span className="truncate">Reprint Last</span>
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        onClick={() => { setIsPriceUpdatesModalOpen(true); setShowActions(false); }}
+                                        className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-stone-100 dark:hover:bg-white/5 text-left transition-colors text-[10px] font-bold text-stone-700 dark:text-gray-300 cursor-pointer"
+                                    >
+                                        <div className="relative shrink-0 flex items-center">
+                                            <DollarSign size={14} className="text-amber-600 dark:text-amber-500" />
+                                            {priceUpdatedProducts.length > 0 && (
+                                                <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full flex items-center justify-center text-[6px] font-bold text-white shadow-sm border border-black/50">
+                                                    {priceUpdatedProducts.length}
+                                                </span>
+                                            )}
+                                        </div>
+                                        <span className="truncate">Prices</span>
+                                    </button>
+                                </div>
+                            </>
+                        )}
                     </div>
 
                     <button
