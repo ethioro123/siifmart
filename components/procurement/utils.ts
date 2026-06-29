@@ -34,7 +34,7 @@ export const CATEGORY_ATTRIBUTES: Record<string, { key: string; label: string; t
     'Beverages': [
         { key: 'volume', label: 'Volume', type: 'text', placeholder: '330ml, 1L' },
         { key: 'packaging', label: 'Packaging', type: 'select', options: ['Can', 'Bottle', 'Carton', 'Keg'] },
-        { key: 'alcohol', label: 'Packs/Case', type: 'number', placeholder: '12, 24' },
+        { key: 'packs', label: 'Packs/Case', type: 'number', placeholder: '12, 24' },
     ],
 
     // PANTRY
@@ -61,16 +61,84 @@ export const CATEGORY_ATTRIBUTES: Record<string, { key: string; label: string; t
 };
 
 export const getCategoryAttributes = (category: string) => {
+    // Map specific categories to generalized attribute groups
+    if (["Fruit & Vegetables"].includes(category)) {
+        return CATEGORY_ATTRIBUTES['Fresh Produce'];
+    }
+    if (["Dairy, Eggs & Fridge"].includes(category)) {
+        return CATEGORY_ATTRIBUTES['Dairy & Eggs'];
+    }
+    if (["Meat & Poultry", "Seafood"].includes(category)) {
+        return CATEGORY_ATTRIBUTES['Meat & Poultry'];
+    }
+    if (["Drinks & Beverages", "Beer & Cider", "Wine & Champagne", "Spirits & Premixed", "Non-Alcoholic Beverages"].includes(category)) {
+        return CATEGORY_ATTRIBUTES['Beverages'];
+    }
+    if (["Snacks & Confectionery", "Baking & Dessert Needs", "Grains, Pasta & Rice", "Sauces, Oils & Condiments", "Canned Food & Soups", "Breakfast & Cereals", "Tea, Coffee & Cocoa"].includes(category)) {
+        return CATEGORY_ATTRIBUTES['Pantry & Dry Goods'];
+    }
     return CATEGORY_ATTRIBUTES[category] || CATEGORY_ATTRIBUTES['_default'];
 };
 
 export const PRODUCT_CATEGORIES = {
-    "Fresh Food": ["Fresh Produce", "Dairy & Eggs", "Meat & Poultry", "Bakery", "Seafood", "Prepared Foods"],
-    "Pantry": ["Pantry & Dry Goods", "Canned Goods", "Spices & Seasonings", "Grains & Pasta", "Breakfast & Cereal", "Snacks & Sweets", "Beverages"],
-    "Frozen": ["Frozen Foods", "Ice Cream"],
-    "Household": ["Cleaning Supplies", "Paper Goods", "Laundry", "Kitchen Essentials"],
-    "Personal Care": ["Health & Medicine", "Beauty & Personal Care", "Baby Care"],
-    "General": ["Pet Supplies", "Office & School", "Electronics", "Automotive", "Industrial", "Garden & Outdoor", "Home & Decor", "Clothing & Apparel"]
+    "Fresh Food & Deli": [
+        "Fruit & Vegetables",
+        "Dairy, Eggs & Fridge",
+        "Meat & Poultry",
+        "Seafood",
+        "Bakery & Bread",
+        "Deli & Prepared Meals"
+    ],
+    "Pantry & Groceries": [
+        "Snacks & Confectionery",
+        "Baking & Dessert Needs",
+        "Grains, Pasta & Rice",
+        "Sauces, Oils & Condiments",
+        "Canned Food & Soups",
+        "Breakfast & Cereals",
+        "Tea, Coffee & Cocoa",
+        "Drinks & Beverages"
+    ],
+    "Frozen Food": [
+        "Frozen Meals & Sides",
+        "Frozen Vegetables & Fruit",
+        "Ice Cream & Desserts"
+    ],
+    "Beer, Wine & Spirits": [
+        "Beer & Cider",
+        "Wine & Champagne",
+        "Spirits & Premixed",
+        "Non-Alcoholic Beverages"
+    ],
+    "Baby & Toddler": [
+        "Baby Food & Formula",
+        "Nappies, Wipes & Toiletries"
+    ],
+    "Health & Beauty": [
+        "Dental & Oral Care",
+        "Hair & Body Care",
+        "Cosmetics & Skin Care",
+        "Vitamins & Supplements",
+        "Pharmacy & First Aid"
+    ],
+    "Household & Cleaning": [
+        "Laundry & Dishwashing",
+        "Cleaning Products & Tools",
+        "Tissues, Paper & Foils",
+        "Pest Control & Garden Care"
+    ],
+    "Pet Supplies": [
+        "Dog Food & Accessories",
+        "Cat Food & Accessories",
+        "Small Pet Supplies"
+    ],
+    "General Merchandise & Apparel": [
+        "Stationery, Office & Books",
+        "Electronics & Batteries",
+        "Homewares, Kitchen & Dining",
+        "Clothing & Accessories",
+        "Toys & Recreation"
+    ]
 };
 
 // Re-export the new structured unit system
