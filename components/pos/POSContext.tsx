@@ -487,7 +487,7 @@ export const POSProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
             window.removeEventListener('keydown', handleGlobalKeyDown, true);
             clearTimeout(scanTimeout);
         };
-    }, [handleScanProduct, isUnknownBarcodeModalOpen]);
+    }, [handleScanProduct, isUnknownBarcodeModalOpen, weightPromptProduct]);
 
     // --- Computed Values ---
     const filteredCustomers = useMemo(() => {
@@ -538,7 +538,11 @@ export const POSProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         }
         return baseList.filter(p => {
             const searchLower = searchTerm.toLowerCase();
-            const matchesSearch = p.name.toLowerCase().includes(searchLower) || p.sku.toLowerCase().includes(searchLower) || p.barcode?.toLowerCase().includes(searchLower) || p.barcodes?.some(b => b.toLowerCase().includes(searchLower));
+            const matchesSearch = 
+                (p.name || '').toLowerCase().includes(searchLower) || 
+                (p.sku || '').toLowerCase().includes(searchLower) || 
+                (p.barcode || '').toLowerCase().includes(searchLower) || 
+                (p.barcodes || []).some(b => (b || '').toLowerCase().includes(searchLower));
             const matchesCategory = selectedCategory === 'All' || p.category === selectedCategory;
             const hasStock = p.stock > 0;
             let hasBeenReceived = false;

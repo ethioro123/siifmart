@@ -198,7 +198,7 @@ export default function Inventory() {
     const abcData = useMemo(() => {
         const accent = theme === 'dark' ? '#A9CBA2' : '#2C5E3B';
         if (serverMetrics?.abc_stats?.length) {
-            return serverMetrics.abc_stats.map((item, i) => ({
+            return serverMetrics.abc_stats.map((item: { name: string; value: number }, i: number) => ({
                 ...item,
                 color: i === 0 ? accent : i === 1 ? '#3b82f6' : '#f59e0b'
             }));
