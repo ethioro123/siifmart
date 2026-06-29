@@ -112,7 +112,7 @@ export const pos: TranslationBlock = {
     varianceReasonPlaceholder: { en: 'Please document the cause of this variance...', am: 'እባክዎ የዚህን ልዩነት ምክንያት ይመዝግቡ...', or: 'Maaloo sababa herregni itti garagara ta\'e ibsi...' },
     findTransaction: { en: 'Find Transaction', am: 'ልውውጥ ፈልግ', or: 'Gurgurtaa Barbaadi' },
     returnInstruction: { en: 'Scan the barcode on the customer\'s receipt or enter the Transaction ID manually.', am: 'የደንበኛውን ደረሰኝ ባርኮድ ይቃኙ ወይም የልውውጥ መታወቂያውን በእጅ ያስገቡ።', or: 'Nagahee maamilaa irraa baarkoodii iskaanii godhi ykn ID galchi.' },
-    selectItemsToReturn: { en: 'Select Items to Return', am: 'የሚመለሱ ዕቃዎችን ይምረጡ', or: 'Mi\'oota Deebifaman Fili' },
+    selectItemsToReturn: { en: 'Select Items to Return', am: 'የሚመለሱ ዕቃዎችን ይምረጡ', or: 'Meeshalee Deebifaman Fili' },
     totalRefund: { en: 'Total Refund', am: 'ጠቅላላ ተመላሽ', or: 'Qarshii Deebifamu' },
     refundWarning: { en: 'Warning: This action will dispense cash from the drawer and update inventory records immediately.', am: 'ማስጠንቀቂያ፡ ይህ እርምጃ ከሳጥኑ ውስጥ ገንዘብ ያወጣል እና የኢንቬንቶሪ ሪከርዶችን ወዲያውኑ ያሻሽላል።', or: 'Akeekkachiisa: Gochi kun kaaza keessaa qarshii ni baasa.' },
     confirmRefund: { en: 'Confirm Refund', am: 'ተመላሹን አረጋግጥ', or: 'Deebii Qarshii Mirkaneessi' },
@@ -151,7 +151,7 @@ export const pos: TranslationBlock = {
     reprintShort: { en: 'Reprint', am: 'እንደገና አትም', or: 'Irra Maxxansi' },
 
     // Returns
-    returnItem: { en: 'Return Item', am: 'ዕቃ ይመልሱ', or: 'Mi\'a Deebisi' },
+    returnItem: { en: 'Return Item', am: 'ዕቃ ይመልሱ', or: 'Meesha Deebisi' },
     processReturn: { en: 'Process Return', am: 'ምላሽ ሂደት', or: 'Deebii Adeemsi' },
 
     // Misc

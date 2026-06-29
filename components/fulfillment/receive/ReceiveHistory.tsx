@@ -21,6 +21,7 @@ interface ReceiveHistoryProps {
     wmsJobsService?: any;
     jobs?: WMSJob[];
     sites: any[];
+    t: (key: string) => string;
 }
 
 const RECEIVE_HISTORY_PER_PAGE = 12;
@@ -39,7 +40,8 @@ export const ReceiveHistory: React.FC<ReceiveHistoryProps> = ({
     inventoryRequestsService,
     wmsJobsService,
     jobs = [],
-    sites
+    sites,
+    t
 }) => {
     const [search, setSearch] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
@@ -97,19 +99,19 @@ export const ReceiveHistory: React.FC<ReceiveHistoryProps> = ({
                     displayQty = `${baseQty}${unitDef.code !== 'UNIT' ? ' ' + unitDef.shortLabel.toUpperCase() : ''}`;
                 }
             } else if (qtyItems.length > 0) {
-                displayQty = `${qtyItems.length} items`;
+                displayQty = `${qtyItems.length} ${t('warehouse.itemPlural')}`;
             }
 
             return {
                 id: o.id,
                 reference: o.poNumber || o.po_number || o.id.slice(0, 8),
                 type: 'PO',
-                actionType: 'Manifest Finalized',
+                actionType: t('warehouse.manifestFinalized'),
                 status: o.status === 'Approved' ? 'Received' : o.status,
                 subtitle: (o.lineItems || []).length === 1
                     ? (o.lineItems[0].productName || (o.lineItems[0] as any).name || o.supplierName)
                     : (o.lineItems || []).length > 1
-                        ? `${o.lineItems[0].productName || (o.lineItems[0] as any).name} + ${(o.lineItems || []).length - 1} more`
+                        ? `${o.lineItems[0].productName || (o.lineItems[0] as any).name} + ${(o.lineItems || []).length - 1} ${t('warehouse.more')}`
                         : o.supplierName,
                 date: o.updatedAt || o.updated_at || o.createdAt || o.created_at || new Date().toISOString(),
                 resolvedUser,
@@ -149,14 +151,14 @@ export const ReceiveHistory: React.FC<ReceiveHistoryProps> = ({
                     displayQty = `${baseQty}${unitDef.code !== 'UNIT' ? ' ' + unitDef.shortLabel.toUpperCase() : ''}`;
                 }
             } else if (j.items || qtyItems.length > 0) {
-                displayQty = `${j.items || qtyItems.length} items`;
+                displayQty = `${j.items || qtyItems.length} ${t('warehouse.itemPlural')}`;
             }
 
             return {
                 id: j.id,
                 reference: resolveOrderRef(j.orderRef) || j.jobNumber || j.id.slice(0, 8),
                 type: 'JOB',
-                actionType: j.type === 'PUTAWAY' ? 'Stock Putaway' : 'Items Received',
+                actionType: j.type === 'PUTAWAY' ? (t('warehouse.stockPutaway') || 'Stock Putaway') : t('warehouse.itemsReceived'),
                 status: j.status,
                 subtitle: j.lineItems?.[0]?.name || j.notes || 'Inbound Receipt',
                 date: j.updatedAt || j.updated_at || j.createdAt || j.created_at || new Date().toISOString(),
@@ -178,7 +180,7 @@ export const ReceiveHistory: React.FC<ReceiveHistoryProps> = ({
             (item.subtitle && item.subtitle.toLowerCase().includes(search.toLowerCase())) ||
             (item.resolvedUser && item.resolvedUser.name.toLowerCase().includes(search.toLowerCase()))
         );
-    }, [orders, historicalJobs, search, resolveOrderRef, employees, user, jobs]);
+    }, [orders, historicalJobs, search, resolveOrderRef, employees, user, jobs, t]);
 
     const totalPages = Math.ceil(filteredHistory.length / perPage);
     const paginatedHistory = useMemo(() => {
@@ -224,7 +226,7 @@ export const ReceiveHistory: React.FC<ReceiveHistoryProps> = ({
                     <div className="hidden md:block p-2 bg-white/80 dark:bg-[#18201B]/50 rounded-xl border border-[#E2DCCE]/60 dark:border-[#A9CBA2]/10 group-hover/history:bg-[#2C5E3B]/10 group-hover/history:dark:bg-[#A9CBA2]/10 transition-colors">
                         <HistoryIcon size={20} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
                     </div>
-                    History Logs
+                    {t('warehouse.recentHistory')}
                 </h4>
                 <div className="relative w-full sm:w-72 group">
                     <div className="hidden md:block absolute -inset-0.5 bg-zinc-900 dark:bg-zinc-100 rounded-xl blur opacity-0 group-hover:opacity-10 dark:group-hover:opacity-5 transition duration-500"></div>
@@ -232,7 +234,7 @@ export const ReceiveHistory: React.FC<ReceiveHistoryProps> = ({
                         <Search className="absolute left-3 text-[#4D6E56] dark:text-[#7A9E83] group-focus-within:text-[#2C5E3B] dark:group-focus-within:text-[#A9CBA2] transition-colors" size={16} />
                         <input
                             type="text"
-                            placeholder="Filter by Reference..."
+                            placeholder={t('warehouse.searchHistoryPlaceholder')}
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                             className="w-full bg-transparent border-none rounded-xl pl-10 pr-4 py-2.5 md:py-3 text-xs text-[#1E3F27] dark:text-[#EAE5D9] font-black uppercase tracking-widest focus:outline-none placeholder:text-stone-400 dark:placeholder:text-stone-500"
@@ -312,7 +314,7 @@ export const ReceiveHistory: React.FC<ReceiveHistoryProps> = ({
                                                         <span className="text-[10px] font-black text-[#1E3F27] dark:text-[#EAE5D9] tabular-nums">{item.displayQty}</span>
                                                     </div>
                                                 ) : (
-                                                    <span className="text-[10px] font-black uppercase tracking-widest text-stone-500 dark:text-stone-400">{item.items} units</span>
+                                                    <span className="text-[10px] font-black uppercase tracking-widest text-stone-500 dark:text-stone-400">{item.items} {t('warehouse.unitsLabel')}</span>
                                                 )}
                                                 {item.type === 'JOB' && (item.rawData as any)?.status === 'Completed' && (
                                                     <button
@@ -322,10 +324,10 @@ export const ReceiveHistory: React.FC<ReceiveHistoryProps> = ({
                                                             setReturnJob(item.rawData as WMSJob);
                                                         }}
                                                         className="flex items-center gap-1 bg-amber-100 hover:bg-amber-200 dark:bg-amber-500/5 dark:hover:bg-amber-500/15 px-2 py-1 rounded-lg border border-amber-300 dark:border-amber-500/10 hover:border-amber-400 dark:hover:border-amber-500/30 transition-all text-amber-800 hover:text-amber-900 dark:text-amber-400 dark:hover:text-amber-300"
-                                                        title="Return items to warehouse"
+                                                        title={t('warehouse.returnToWarehouse')}
                                                     >
                                                         <Undo2 size={10} />
-                                                        <span className="text-[9px] font-black uppercase tracking-widest">Return</span>
+                                                        <span className="text-[9px] font-black uppercase tracking-widest">{t('warehouse.undoAction')}</span>
                                                     </button>
                                                 )}
                                                 {item.type === 'PO' && (
@@ -351,10 +353,10 @@ export const ReceiveHistory: React.FC<ReceiveHistoryProps> = ({
                                                             setReturnJob(adaptedJob as any);
                                                         }}
                                                         className="flex items-center gap-1 bg-amber-100 hover:bg-amber-200 dark:bg-amber-500/5 dark:hover:bg-amber-500/15 px-2 py-1 rounded-lg border border-amber-300 dark:border-amber-500/10 hover:border-amber-400 dark:hover:border-amber-500/30 transition-all text-amber-800 hover:text-amber-900 dark:text-amber-400 dark:hover:text-amber-300"
-                                                        title="Return PO items (requires procurement approval)"
+                                                        title={t('warehouse.returnToWarehouse')}
                                                     >
                                                         <Undo2 size={10} />
-                                                        <span className="text-[9px] font-black uppercase tracking-widest">Return</span>
+                                                        <span className="text-[9px] font-black uppercase tracking-widest">{t('warehouse.undoAction')}</span>
                                                     </button>
                                                 )}
                                                 <ChevronRight size={14} className="text-stone-400 dark:text-[#A9CBA2] group-hover:translate-x-1 transition-all" />
@@ -378,8 +380,8 @@ export const ReceiveHistory: React.FC<ReceiveHistoryProps> = ({
                     <div className="p-4 bg-stone-50 dark:bg-[#1C2620]/30 rounded-2xl mb-4 border border-[#E2DCCE]/60 dark:border-[#A9CBA2]/10 shadow-xl">
                         <HistoryIcon size={32} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
                     </div>
-                    <h3 className="text-lg font-black text-[#1E3F27] dark:text-white mb-1 uppercase tracking-widest">No history found</h3>
-                    <p className="text-stone-500 dark:text-stone-400 text-xs uppercase tracking-[0.2em] font-black">Scanning records empty</p>
+                    <h3 className="text-lg font-black text-[#1E3F27] dark:text-white mb-1 uppercase tracking-widest">{t('warehouse.noHistoryFound')}</h3>
+                    <p className="text-stone-500 dark:text-stone-400 text-xs uppercase tracking-[0.2em] font-black">{t('warehouse.completedAndFinalizedShipments')}</p>
                 </div>
             )}
 

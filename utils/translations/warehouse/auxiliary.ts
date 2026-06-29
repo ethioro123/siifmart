@@ -5,7 +5,7 @@ export const auxiliary: TranslationBlock = {
     forwardPickReplenishment: { en: 'Forward Pick Replenishment', am: 'የመፊት ምረጫ ማሟያ', or: 'Filannoo Duraan Guutuu' },
     restockPickFaces: { en: 'Restock pick faces from bulk storage based on demand', am: 'የመምረጫ ፊቶችን ከጅምላ ማከማቻ በፍላጎት መሰረት ሙላ', or: 'Fuullee filannoo kuusaa gurguddoo irraa haalli barbaachisuuf guuti' },
     selectAllLowStock: { en: 'Select All Low Stock', am: 'ሁሉንም ዝቅተኛ አቅም ይምረጡ', or: 'Kuusaa Xiqqaa Hunda Fili' },
-    noItemsSelected: { en: 'No items selected for replenishment', am: 'ምንም ዕቃዎች ለማሟያ አልተመረጡም', or: 'Mi\'ootni guutuu filataman hin jiran' },
+    noItemsSelected: { en: 'No items selected for replenishment', am: 'ምንም ዕቃዎች ለማሟያ አልተመረጡም', or: 'Meeshaleen guutuu filataman hin jiran' },
 
     // Transfer Section
     interSiteTransfers: { en: 'Inter-Site Transfers', am: 'የጣቢያ-ጣቢያ ማስተላለፍ', or: 'Dabarsuu Gidduu Bakkaa' },
@@ -44,7 +44,7 @@ export const auxiliary: TranslationBlock = {
 
     // Return Section
     orderID: { en: 'Order ID (e.g. ORD-12345)', am: 'የትዕዛዝ መለያ (ለምሳሌ ORD-12345)', or: 'Eenyummaa Ajajaa (fakkeenyaaf ORD-12345)' },
-    selectItem: { en: 'Select Item', am: 'ዕቃ ይምረጡ', or: 'Mi\'a Fili' },
+    selectItem: { en: 'Select Item', am: 'ዕቃ ይምረጡ', or: 'Meesha Fili' },
     returnQuantity: { en: 'Return Quantity', am: 'የምላሽ ብዛት', or: 'Baay\'ina Deebii' },
     returnReason: { en: 'Return Reason', am: 'የምላሽ ምክንያት', or: 'Sababa Deebii' },
     returnCondition: { en: 'Return Condition', am: 'የምላሽ ሁኔታ', or: 'Haala Deebii' },

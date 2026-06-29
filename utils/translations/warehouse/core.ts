@@ -32,7 +32,7 @@ export const core: TranslationBlock = {
     completeJob: { en: 'Complete', am: 'ጨርስ', or: 'Xumuri' },
     jobId: { en: 'Job ID', am: 'የስራ መታወቂያ', or: 'Eenyummaa Hojii' },
     assignedTo: { en: 'Assigned To', am: 'የተመደበለት', or: 'Kan Ramadameef' },
-    totalItems: { en: 'Total Items', am: 'ጠቅላላ ዕቃዎች', or: 'Mi\'oota Walii Galaa' },
+    totalItems: { en: 'Total Items', am: 'ጠቅላላ ዕቃዎች', or: 'Meeshalee Walii Galaa' },
     workersActive: { en: 'Workers Active', am: 'ንቁ ሰራተኞች', or: 'Hojjettoota Jireenyaa' },
 
     // Area hierarchy
@@ -42,8 +42,8 @@ export const core: TranslationBlock = {
     // Additional core strings
     processing: { en: 'Processing...', am: 'በሂደት ላይ...', or: 'Adeemsa irra jira...' },
     continue: { en: 'Continue', am: 'ቀጥል', or: 'Itti fufi' },
-    itemCount: { en: 'Item Count', am: 'የዕቃ ብዛት', or: 'Baay\'ina Mi\'aa' },
-    items: { en: 'Items', am: 'ዕቃዎች', or: 'Mi\'oota' },
+    itemCount: { en: 'Item Count', am: 'የዕቃ ብዛት', or: 'Baay\'ina Meeshaa' },
+    items: { en: 'Items', am: 'ዕቃዎች', or: 'Meeshalee' },
     remaining: { en: 'Remaining', am: 'ቀሪ', or: 'Hafaa' },
     from: { en: 'From', am: 'ከ', or: 'Irratti' },
     to: { en: 'To', am: 'ወደ', or: 'Gara' },

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePOS } from './POSContext';
 import { useData } from '../../contexts/DataContext';
@@ -10,7 +10,7 @@ import { formatCompactNumber } from '../../utils/formatting';
 import { getSellUnit } from '../../utils/units';
 import {
     ArrowLeft, Search, ArrowRight, X, Link, ShoppingBag,
-    RefreshCw, WifiOff, CloudOff, CheckCircle, Trophy, Box, Package, Plus
+    RefreshCw, WifiOff, CloudOff, CheckCircle, Trophy, Box, Package, Plus, Filter, RotateCcw
 } from 'lucide-react';
 
 
@@ -36,15 +36,63 @@ export const POSProductGrid: React.FC = () => {
         setSelectedCategory,
         filteredProducts,
         addToCart,
+        selectedDepartment,
+        setSelectedDepartment,
+        sortBy,
+        setSortBy,
+        minPriceFilter,
+        setMinPriceFilter,
+        maxPriceFilter,
+        setMaxPriceFilter,
+        selectedBrands,
+        setSelectedBrands,
+        selectedVelocities,
+        setSelectedVelocities,
+        stockStatusFilter,
+        setStockStatusFilter,
+        onSaleOnly,
+        setOnSaleOnly,
+        competitorMatchedOnly,
+        setCompetitorMatchedOnly,
+        resetAllFilters,
     } = usePOS();
 
-    const { triggerSync, posSyncStatus, posPendingSyncCount, settings } = useData();
+    const { triggerSync, posSyncStatus, posPendingSyncCount, settings, products } = useData();
 
-    const [visibleCount, setVisibleCount] = useState(40);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
+    const ITEMS_PER_PAGE = 24;
+
+    const availableBrands = useMemo(() => {
+        const brandsSet = new Set(products.map(p => p.brand).filter((b): b is string => !!b));
+        return Array.from(brandsSet).sort();
+    }, [products]);
+
+    const activeFiltersCount = useMemo(() => {
+        let count = 0;
+        if (selectedDepartment !== 'All') count++;
+        if (selectedCategory !== 'All') count++;
+        if (minPriceFilter !== '') count++;
+        if (maxPriceFilter !== '') count++;
+        if (selectedBrands.length > 0) count++;
+        if (selectedVelocities.length > 0) count++;
+        if (stockStatusFilter !== 'all') count++;
+        if (onSaleOnly) count++;
+        if (competitorMatchedOnly) count++;
+        if (sortBy !== 'default') count++;
+        return count;
+    }, [selectedDepartment, selectedCategory, minPriceFilter, maxPriceFilter, selectedBrands, selectedVelocities, stockStatusFilter, onSaleOnly, competitorMatchedOnly, sortBy]);
+
+    const paginatedProducts = useMemo(() => {
+        const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+        return filteredProducts.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+    }, [filteredProducts, currentPage]);
+
+    const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
 
     useEffect(() => {
-        setVisibleCount(40);
-    }, [searchTerm, selectedCategory]);
+        setCurrentPage(1);
+    }, [searchTerm, selectedCategory, selectedDepartment, minPriceFilter, maxPriceFilter, selectedBrands, selectedVelocities, stockStatusFilter, onSaleOnly, competitorMatchedOnly, sortBy]);
 
     // Helper to check for Neutralino (native app mode)
     const isNativeApp = typeof window !== 'undefined' && (window as any).Neutralino;
@@ -130,6 +178,19 @@ export const POSProductGrid: React.FC = () => {
                             </div>
                         )}
                     </div>
+                    {/* Advanced Filter & Sort Button */}
+                    <button
+                        onClick={() => setIsFilterPanelOpen(true)}
+                        className="relative bg-white/90 dark:bg-black/25 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-2xl px-4 py-3 text-xs font-bold text-[#2C4D35] dark:text-[#A9CBA2] hover:text-[#1E3F27] dark:hover:text-white transition-all duration-300 flex items-center gap-2 hover:scale-105 active:scale-95 shadow-[0_2px_12px_rgba(44,94,59,0.03)] dark:shadow-none"
+                    >
+                        <Filter className="w-4 h-4 text-[#2C5E3B] dark:text-[#A9CBA2]" />
+                        <span>Filter & Sort</span>
+                        {activeFiltersCount > 0 && (
+                            <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-[9px] font-extrabold shadow-sm">
+                                {activeFiltersCount}
+                            </span>
+                        )}
+                    </button>
                     <Protected permission="ADD_PRODUCT">
                         <Button
                             variant="secondary"
@@ -207,20 +268,126 @@ export const POSProductGrid: React.FC = () => {
                     )}
                 </div>
 
-                <div className="flex items-center gap-2 overflow-x-auto pb-3 scrollbar-hide px-1 -mx-2">
-                    {categories.map(cat => (
-                        <button
-                            key={cat}
-                            onClick={() => setSelectedCategory(cat)}
-                            className={`px-4 py-2.5 rounded-xl text-[11px] font-bold uppercase tracking-wide whitespace-nowrap transition-all duration-300 ${selectedCategory === cat
-                                ? 'bg-gradient-to-br from-[#224429] to-[#2C5E3B] text-white shadow-sm'
-                                : 'text-[#4D6E56] dark:text-gray-400 hover:text-[#2C5E3B] dark:hover:text-white bg-white/90 dark:bg-black/25 border border-[#E2DCCE] dark:border-emerald-950/20'
-                                 }`}
-                        >
-                            {cat}
-                        </button>
-                    ))}
+                {/* Departments Row */}
+                <div className="space-y-2 pt-1 border-t border-stone-200/40 dark:border-white/5">
+                    <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-hide px-1 -mx-2">
+                        {['All', 'Fresh Food & Deli', 'Pantry & Groceries', 'Frozen Food', 'Household & Personal', 'General Merchandise', 'Other'].map(dept => (
+                            <button
+                                key={dept}
+                                onClick={() => setSelectedDepartment(dept)}
+                                className={`px-4 py-2 rounded-xl text-[11px] font-bold whitespace-nowrap transition-all duration-300 ${selectedDepartment === dept
+                                    ? 'bg-[#2C5E3B] text-white shadow-sm scale-[1.02]'
+                                    : 'text-[#4D6E56] dark:text-stone-400 hover:text-[#2C5E3B] dark:hover:text-white bg-white/90 dark:bg-black/25 border border-[#E2DCCE] dark:border-emerald-950/15'
+                                     }`}
+                            >
+                                {dept}
+                            </button>
+                        ))}
+                    </div>
                 </div>
+
+                {/* Subcategories Row */}
+                {categories.length > 1 && (
+                    <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-hide px-1 -mx-2 border-t border-stone-150/40 dark:border-white/5 pt-2">
+                        {categories.map(cat => (
+                            <button
+                                key={cat}
+                                onClick={() => setSelectedCategory(cat)}
+                                className={`px-3 py-1.5 rounded-lg text-[10px] font-semibold whitespace-nowrap transition-all duration-300 ${selectedCategory === cat
+                                    ? 'bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 text-[#2C5E3B] dark:text-[#A9CBA2] border border-[#2C5E3B]/30 dark:border-[#A9CBA2]/30 shadow-sm'
+                                    : 'text-[#4D6E56]/90 dark:text-stone-400 hover:text-[#2C5E3B] dark:hover:text-white bg-white/50 dark:bg-black/15 border border-[#E2DCCE]/60 dark:border-emerald-950/10'
+                                     }`}
+                                >
+                                {cat}
+                            </button>
+                        ))}
+                    </div>
+                )}
+
+                {/* Active Filter Pills Row */}
+                {activeFiltersCount > 0 && (
+                    <div className="flex flex-wrap items-center gap-1.5 pt-2 border-t border-stone-150/40 dark:border-white/5">
+                        <span className="text-[10px] font-bold text-[#4D6E56] dark:text-[#7A9E83]">Filters:</span>
+                        
+                        {selectedDepartment !== 'All' && (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-bold bg-[#2C5E3B]/10 text-[#2C5E3B] dark:text-[#A9CBA2] border border-[#2C5E3B]/20">
+                                Dept: {selectedDepartment}
+                                <button onClick={() => setSelectedDepartment('All')} title="Remove department filter" aria-label="Remove department filter" className="hover:text-red-500 ml-0.5"><X size={10} /></button>
+                            </span>
+                        )}
+                        
+                        {selectedCategory !== 'All' && (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-bold bg-[#2C5E3B]/10 text-[#2C5E3B] dark:text-[#A9CBA2] border border-[#2C5E3B]/20">
+                                Cat: {selectedCategory}
+                                <button onClick={() => setSelectedCategory('All')} title="Remove category filter" aria-label="Remove category filter" className="hover:text-red-500 ml-0.5"><X size={10} /></button>
+                            </span>
+                        )}
+
+                        {minPriceFilter !== '' && (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-bold bg-amber-600/10 text-amber-700 dark:text-amber-500 border border-amber-600/20">
+                                Min: ${minPriceFilter}
+                                <button onClick={() => setMinPriceFilter('')} title="Remove minimum price filter" aria-label="Remove minimum price filter" className="hover:text-red-500 ml-0.5"><X size={10} /></button>
+                            </span>
+                        )}
+
+                        {maxPriceFilter !== '' && (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-bold bg-amber-600/10 text-amber-700 dark:text-amber-500 border border-amber-600/20">
+                                Max: ${maxPriceFilter}
+                                <button onClick={() => setMaxPriceFilter('')} title="Remove maximum price filter" aria-label="Remove maximum price filter" className="hover:text-red-500 ml-0.5"><X size={10} /></button>
+                            </span>
+                        )}
+
+                        {selectedBrands.map(brand => (
+                            <span key={brand} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-bold bg-[#2C5E3B]/10 text-[#2C5E3B] dark:text-[#A9CBA2] border border-[#2C5E3B]/20">
+                                Brand: {brand}
+                                <button onClick={() => setSelectedBrands(prev => prev.filter(b => b !== brand))} title={`Remove brand filter: ${brand}`} aria-label={`Remove brand filter: ${brand}`} className="hover:text-red-500 ml-0.5"><X size={10} /></button>
+                            </span>
+                        ))}
+
+                        {selectedVelocities.map(vel => (
+                            <span key={vel} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-bold bg-[#2C5E3B]/10 text-[#2C5E3B] dark:text-[#A9CBA2] border border-[#2C5E3B]/20">
+                                Velocity: {vel}
+                                <button onClick={() => setSelectedVelocities(prev => prev.filter(v => v !== vel))} title={`Remove velocity filter: ${vel}`} aria-label={`Remove velocity filter: ${vel}`} className="hover:text-red-500 ml-0.5"><X size={10} /></button>
+                            </span>
+                        ))}
+
+                        {stockStatusFilter !== 'all' && (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-bold bg-blue-600/10 text-blue-700 dark:text-blue-500 border border-blue-600/20">
+                                Stock: {stockStatusFilter === 'in_stock' ? 'In Stock' : stockStatusFilter === 'low_stock' ? 'Low Stock' : 'Out of Stock'}
+                                <button onClick={() => setStockStatusFilter('all')} title="Remove stock filter" aria-label="Remove stock filter" className="hover:text-red-500 ml-0.5"><X size={10} /></button>
+                            </span>
+                        )}
+
+                        {onSaleOnly && (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-bold bg-red-600/10 text-red-700 dark:text-red-500 border border-red-600/20">
+                                🏷️ On Sale
+                                <button onClick={() => setOnSaleOnly(false)} title="Remove sale filter" aria-label="Remove sale filter" className="hover:text-red-500 ml-0.5"><X size={10} /></button>
+                            </span>
+                        )}
+
+                        {competitorMatchedOnly && (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-bold bg-purple-600/10 text-purple-700 dark:text-purple-500 border border-purple-600/20">
+                                ⚖️ Comp Price
+                                <button onClick={() => setCompetitorMatchedOnly(false)} title="Remove competitor matched filter" aria-label="Remove competitor matched filter" className="hover:text-red-500 ml-0.5"><X size={10} /></button>
+                            </span>
+                        )}
+
+                        {sortBy !== 'default' && (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-bold bg-indigo-600/10 text-indigo-700 dark:text-indigo-500 border border-indigo-600/20">
+                                Sort: {sortBy === 'price-asc' ? 'Price Asc' : sortBy === 'price-desc' ? 'Price Desc' : sortBy === 'name-asc' ? 'A-Z' : sortBy === 'name-desc' ? 'Z-A' : sortBy === 'stock-desc' ? 'Stock Desc' : sortBy === 'velocity-desc' ? 'Velocity' : 'Expiry'}
+                                <button onClick={() => setSortBy('default')} title="Reset sorting to default" aria-label="Reset sorting to default" className="hover:text-red-500 ml-0.5"><X size={10} /></button>
+                            </span>
+                        )}
+
+                        <button
+                            onClick={resetAllFilters}
+                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-bold bg-red-500 text-white hover:bg-red-600 transition-colors ml-auto"
+                        >
+                            <RotateCcw size={8} />
+                            Reset All
+                        </button>
+                    </div>
+                )}
             </div>
 
             <div className="flex-1 overflow-y-auto p-4">
@@ -242,7 +409,7 @@ export const POSProductGrid: React.FC = () => {
                 ) : (
                     <>
                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                            {filteredProducts.slice(0, visibleCount).map(product => (
+                            {paginatedProducts.map(product => (
                             <button
                                 key={product.id}
                                 onClick={() => {
@@ -329,19 +496,308 @@ export const POSProductGrid: React.FC = () => {
                             </button>
                         ))}
                         </div>
-                        {filteredProducts.length > visibleCount && (
-                            <div className="flex justify-center pt-6 pb-8">
-                                <button
-                                    onClick={() => setVisibleCount(prev => prev + 40)}
-                                    className="px-6 py-3 bg-[#2C5E3B]/10 hover:bg-[#2C5E3B] dark:bg-white/5 dark:hover:bg-white/10 border border-[#2C5E3B]/20 dark:border-white/10 hover:text-white text-[#2C5E3B] dark:text-[#A9CBA2] font-bold text-xs uppercase tracking-widest rounded-2xl transition-all shadow-sm hover:shadow active:scale-95 flex items-center gap-2"
-                                >
-                                    {t('pos.loadMoreProducts')} ({filteredProducts.length - visibleCount} {t('pos.remaining')})
-                                </button>
+                        {/* Pagination Controls */}
+                        {totalPages > 1 && (
+                            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 pb-8 border-t border-[#E2DCCE]/40 dark:border-white/5 mt-6 px-1">
+                                <span className="text-xs text-[#4D6E56] dark:text-stone-400 font-semibold">
+                                    Showing <span className="font-extrabold text-[#1E3F27] dark:text-[#EAE5D9]">{(currentPage - 1) * ITEMS_PER_PAGE + 1}</span> to{' '}
+                                    <span className="font-extrabold text-[#1E3F27] dark:text-[#EAE5D9]">
+                                        {Math.min(currentPage * ITEMS_PER_PAGE, filteredProducts.length)}
+                                    </span>{' '}
+                                    of <span className="font-extrabold text-[#1E3F27] dark:text-[#EAE5D9]">{filteredProducts.length}</span> products
+                                </span>
+                                
+                                <div className="flex items-center gap-1">
+                                    {/* First Page */}
+                                    <button
+                                        disabled={currentPage === 1}
+                                        onClick={() => setCurrentPage(1)}
+                                        className="w-8 h-8 rounded-lg flex items-center justify-center border border-[#E2DCCE] dark:border-emerald-950/20 text-[#2C5E3B] dark:text-[#A9CBA2] hover:bg-[#2C5E3B] hover:text-white disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-inherit transition-all font-bold text-xs"
+                                    >
+                                        &laquo;
+                                    </button>
+                                    
+                                    {/* Prev Page */}
+                                    <button
+                                        disabled={currentPage === 1}
+                                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                                        className="w-8 h-8 rounded-lg flex items-center justify-center border border-[#E2DCCE] dark:border-emerald-950/20 text-[#2C5E3B] dark:text-[#A9CBA2] hover:bg-[#2C5E3B] hover:text-white disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-inherit transition-all font-bold text-xs"
+                                    >
+                                        &lsaquo;
+                                    </button>
+
+                                    {/* Page Numbers */}
+                                    {(() => {
+                                        const pages = [];
+                                        const maxVisiblePages = 5;
+                                        let startPage = Math.max(1, currentPage - 2);
+                                        let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+                                        
+                                        if (endPage - startPage < maxVisiblePages - 1) {
+                                            startPage = Math.max(1, endPage - maxVisiblePages + 1);
+                                        }
+
+                                        for (let p = startPage; p <= endPage; p++) {
+                                            pages.push(
+                                                <button
+                                                    key={p}
+                                                    onClick={() => setCurrentPage(p)}
+                                                    className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs border transition-all ${currentPage === p
+                                                        ? 'bg-[#2C5E3B] border-[#2C5E3B] text-white shadow-sm'
+                                                        : 'bg-white dark:bg-black/25 border-[#E2DCCE] dark:border-emerald-950/20 text-[#4D6E56] dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-black/40'
+                                                    }`}
+                                                >
+                                                    {p}
+                                                </button>
+                                            );
+                                        }
+                                        return pages;
+                                    })()}
+
+                                    {/* Next Page */}
+                                    <button
+                                        disabled={currentPage === totalPages}
+                                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                                        className="w-8 h-8 rounded-lg flex items-center justify-center border border-[#E2DCCE] dark:border-emerald-950/20 text-[#2C5E3B] dark:text-[#A9CBA2] hover:bg-[#2C5E3B] hover:text-white disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-inherit transition-all font-bold text-xs"
+                                    >
+                                        &rsaquo;
+                                    </button>
+                                    
+                                    {/* Last Page */}
+                                    <button
+                                        disabled={currentPage === totalPages}
+                                        onClick={() => setCurrentPage(totalPages)}
+                                        className="w-8 h-8 rounded-lg flex items-center justify-center border border-[#E2DCCE] dark:border-emerald-950/20 text-[#2C5E3B] dark:text-[#A9CBA2] hover:bg-[#2C5E3B] hover:text-white disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-inherit transition-all font-bold text-xs"
+                                    >
+                                        &raquo;
+                                    </button>
+                                </div>
                             </div>
                         )}
                     </>
                 )}
             </div>
+            
+            {/* Slide-Out Advanced Filter Sidebar Overlay */}
+            {isFilterPanelOpen && (
+                <div className="fixed inset-0 z-50 overflow-hidden flex justify-end">
+                    {/* Backdrop */}
+                    <div 
+                        className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300"
+                        onClick={() => setIsFilterPanelOpen(false)}
+                    />
+                    
+                    {/* Sidebar Container */}
+                    <div className="relative w-full max-w-md bg-[#FAF6EE] dark:bg-[#121915] h-full shadow-2xl flex flex-col z-10 border-l border-[#E2DCCE]/50 dark:border-emerald-950/20 transform transition-transform duration-300">
+                        {/* Header */}
+                        <div className="p-4 border-b border-[#E2DCCE] dark:border-emerald-950/30 flex items-center justify-between bg-white/50 dark:bg-black/20">
+                            <div className="flex items-center gap-2">
+                                <Filter className="w-5 h-5 text-[#2C5E3B] dark:text-[#A9CBA2]" />
+                                <h2 className="text-base font-extrabold text-[#1E3F27] dark:text-[#EAE5D9]">Advanced Filters</h2>
+                                {activeFiltersCount > 0 && (
+                                    <span className="bg-[#2C5E3B] text-white text-[10px] font-black px-2 py-0.5 rounded-full">
+                                        {activeFiltersCount}
+                                    </span>
+                                )}
+                            </div>
+                            <button 
+                                onClick={() => setIsFilterPanelOpen(false)}
+                                title="Close filter panel"
+                                aria-label="Close filter panel"
+                                className="w-8 h-8 rounded-full bg-stone-200/50 hover:bg-stone-200 dark:bg-emerald-950/40 dark:hover:bg-emerald-950/60 flex items-center justify-center text-stone-600 dark:text-[#A9CBA2] transition-colors"
+                            >
+                                <X size={16} />
+                            </button>
+                        </div>
+                        
+                        {/* Body / Scrollable Content */}
+                        <div className="flex-1 overflow-y-auto p-5 space-y-6 scrollbar-hide">
+                            {/* Sort Options */}
+                            <div className="space-y-2">
+                                <label className="text-xs font-black uppercase tracking-wider text-[#4D6E56] dark:text-[#7A9E83]">Sort Products By</label>
+                                <div className="grid grid-cols-2 gap-2">
+                                    {[
+                                        { id: 'default', label: 'Default' },
+                                        { id: 'name-asc', label: 'Name: A-Z' },
+                                        { id: 'name-desc', label: 'Name: Z-A' },
+                                        { id: 'price-asc', label: 'Price: Low-High' },
+                                        { id: 'price-desc', label: 'Price: High-Low' },
+                                        { id: 'stock-desc', label: 'Stock: High-Low' },
+                                        { id: 'velocity-desc', label: 'Sales Velocity' },
+                                        { id: 'expiry-asc', label: 'Expiry Soon' }
+                                    ].map(opt => (
+                                        <button
+                                            key={opt.id}
+                                            onClick={() => setSortBy(opt.id)}
+                                            className={`p-2.5 rounded-xl border text-[11px] font-bold text-center transition-all ${sortBy === opt.id
+                                                ? 'bg-[#2C5E3B] border-[#2C5E3B] text-white shadow-sm'
+                                                : 'bg-white dark:bg-black/25 border-[#E2DCCE] dark:border-emerald-950/20 text-[#4D6E56] dark:text-stone-300 hover:bg-white/80 dark:hover:bg-black/40'
+                                            }`}
+                                        >
+                                            {opt.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Price Range Filter */}
+                            <div className="space-y-2">
+                                <label className="text-xs font-black uppercase tracking-wider text-[#4D6E56] dark:text-[#7A9E83]">Price Range</label>
+                                <div className="flex items-center gap-3">
+                                    <div className="flex-1 relative">
+                                        <span className="absolute left-3 top-2.5 text-xs text-stone-400 font-bold">$</span>
+                                        <input
+                                            type="number"
+                                            placeholder="Min"
+                                            value={minPriceFilter}
+                                            onChange={(e) => setMinPriceFilter(e.target.value)}
+                                            className="w-full bg-white dark:bg-black/25 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-xl pl-6 pr-3 py-2 text-xs text-[#1E3F27] dark:text-[#EAE5D9] outline-none focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2]"
+                                        />
+                                    </div>
+                                    <span className="text-xs text-stone-400 font-bold">to</span>
+                                    <div className="flex-1 relative">
+                                        <span className="absolute left-3 top-2.5 text-xs text-stone-400 font-bold">$</span>
+                                        <input
+                                            type="number"
+                                            placeholder="Max"
+                                            value={maxPriceFilter}
+                                            onChange={(e) => setMaxPriceFilter(e.target.value)}
+                                            className="w-full bg-white dark:bg-black/25 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-xl pl-6 pr-3 py-2 text-xs text-[#1E3F27] dark:text-[#EAE5D9] outline-none focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2]"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Stock Status Filter */}
+                            <div className="space-y-2">
+                                <label className="text-xs font-black uppercase tracking-wider text-[#4D6E56] dark:text-[#7A9E83]">Stock Status</label>
+                                <div className="flex flex-wrap gap-2">
+                                    {[
+                                        { id: 'all', label: 'All Items' },
+                                        { id: 'in_stock', label: 'In Stock Only' },
+                                        { id: 'low_stock', label: 'Low Stock Only' },
+                                        { id: 'out_of_stock', label: 'Out of Stock' }
+                                    ].map(opt => (
+                                        <button
+                                            key={opt.id}
+                                            onClick={() => setStockStatusFilter(opt.id as any)}
+                                            className={`px-3 py-2 rounded-xl border text-[11px] font-bold transition-all ${stockStatusFilter === opt.id
+                                                ? 'bg-[#2C5E3B] border-[#2C5E3B] text-white shadow-sm'
+                                                : 'bg-white dark:bg-black/25 border-[#E2DCCE] dark:border-emerald-950/20 text-[#4D6E56] dark:text-stone-300'
+                                            }`}
+                                        >
+                                            {opt.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Brand Filter */}
+                            {availableBrands.length > 0 && (
+                                <div className="space-y-2">
+                                    <label className="text-xs font-black uppercase tracking-wider text-[#4D6E56] dark:text-[#7A9E83]">Brands</label>
+                                    <div className="max-h-36 overflow-y-auto border border-[#E2DCCE] dark:border-emerald-950/20 rounded-xl p-3 bg-white/50 dark:bg-black/10 space-y-2 scrollbar-hide">
+                                        {availableBrands.map(brand => {
+                                            const isChecked = selectedBrands.includes(brand);
+                                            return (
+                                                <label key={brand} className="flex items-center gap-2.5 text-xs text-[#1E3F27] dark:text-[#EAE5D9] cursor-pointer">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={isChecked}
+                                                        onChange={() => {
+                                                            if (isChecked) {
+                                                                setSelectedBrands(prev => prev.filter(b => b !== brand));
+                                                            } else {
+                                                                setSelectedBrands(prev => [...prev, brand]);
+                                                            }
+                                                        }}
+                                                        className="w-3.5 h-3.5 accent-[#2C5E3B] rounded cursor-pointer"
+                                                    />
+                                                    <span>{brand}</span>
+                                                </label>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Sales Velocity */}
+                            <div className="space-y-2">
+                                <label className="text-xs font-black uppercase tracking-wider text-[#4D6E56] dark:text-[#7A9E83]">Sales Velocity</label>
+                                <div className="flex gap-2">
+                                    {['High', 'Medium', 'Low'].map(vel => {
+                                        const isChecked = selectedVelocities.includes(vel);
+                                        return (
+                                            <button
+                                                key={vel}
+                                                onClick={() => {
+                                                    if (isChecked) {
+                                                        setSelectedVelocities(prev => prev.filter(v => v !== vel));
+                                                    } else {
+                                                        setSelectedVelocities(prev => [...prev, vel]);
+                                                    }
+                                                }}
+                                                className={`flex-1 py-2 rounded-xl border text-[11px] font-bold transition-all ${isChecked
+                                                    ? 'bg-[#2C5E3B] border-[#2C5E3B] text-white shadow-sm'
+                                                    : 'bg-white dark:bg-black/25 border-[#E2DCCE] dark:border-emerald-950/20 text-[#4D6E56] dark:text-stone-300'
+                                                }`}
+                                            >
+                                                {vel}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+
+                            {/* Offers & Promotions Toggle Buttons */}
+                            <div className="space-y-3 pt-2">
+                                <label className="text-xs font-black uppercase tracking-wider text-[#4D6E56] dark:text-[#7A9E83]">Offers & Status</label>
+                                <div className="space-y-2 bg-white/50 dark:bg-black/10 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-xl p-3">
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-xs text-[#1E3F27] dark:text-[#EAE5D9]">🏷️ On Sale Only</span>
+                                        <button
+                                            onClick={() => setOnSaleOnly(!onSaleOnly)}
+                                            title="Toggle On Sale Only"
+                                            aria-label="Toggle On Sale Only"
+                                            className={`w-10 h-6 rounded-full transition-colors relative flex items-center ${onSaleOnly ? 'bg-[#2C5E3B]' : 'bg-stone-300 dark:bg-stone-700'}`}
+                                        >
+                                            <span className={`w-4 h-4 rounded-full bg-white shadow-sm absolute transition-all ${onSaleOnly ? 'left-5' : 'left-1'}`} />
+                                        </button>
+                                    </div>
+                                    <div className="flex items-center justify-between border-t border-[#E2DCCE]/50 dark:border-emerald-950/10 pt-2">
+                                        <span className="text-xs text-[#1E3F27] dark:text-[#EAE5D9]">⚖️ Competitor Price Matched</span>
+                                        <button
+                                            onClick={() => setCompetitorMatchedOnly(!competitorMatchedOnly)}
+                                            title="Toggle Competitor Price Matched"
+                                            aria-label="Toggle Competitor Price Matched"
+                                            className={`w-10 h-6 rounded-full transition-colors relative flex items-center ${competitorMatchedOnly ? 'bg-[#2C5E3B]' : 'bg-stone-300 dark:bg-stone-700'}`}
+                                        >
+                                            <span className={`w-4 h-4 rounded-full bg-white shadow-sm absolute transition-all ${competitorMatchedOnly ? 'left-5' : 'left-1'}`} />
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        {/* Footer Actions */}
+                        <div className="p-4 border-t border-[#E2DCCE] dark:border-emerald-950/30 bg-white/70 dark:bg-black/30 flex gap-3">
+                            <button
+                                onClick={resetAllFilters}
+                                className="flex-1 py-3 border border-[#E2DCCE] dark:border-emerald-950/20 hover:bg-red-50 dark:hover:bg-red-950/10 text-red-600 dark:text-red-400 font-bold text-xs uppercase tracking-wider rounded-xl transition-all flex items-center justify-center gap-1.5 active:scale-95"
+                            >
+                                <RotateCcw size={14} />
+                                Reset All
+                            </button>
+                            <button
+                                onClick={() => setIsFilterPanelOpen(false)}
+                                className="flex-1 py-3 bg-[#2C5E3B] text-white hover:bg-[#1E3F27] font-bold text-xs uppercase tracking-wider rounded-xl transition-all shadow-md active:scale-95"
+                            >
+                                Apply Filters
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

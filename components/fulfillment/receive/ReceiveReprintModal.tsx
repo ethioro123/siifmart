@@ -23,6 +23,7 @@ interface ReceiveReprintModalProps {
         showName: boolean;
     };
     setReprintOptions: (val: any) => void;
+    t: (key: string) => string;
 }
 
 export const ReceiveReprintModal: React.FC<ReceiveReprintModalProps> = ({
@@ -35,7 +36,8 @@ export const ReceiveReprintModal: React.FC<ReceiveReprintModalProps> = ({
     reprintFormat,
     setReprintFormat,
     reprintOptions,
-    setReprintOptions
+    setReprintOptions,
+    t
 }) => {
     const sizes: Array<'TINY' | 'SMALL' | 'MEDIUM' | 'LARGE' | 'XL'> = ['TINY', 'SMALL', 'MEDIUM', 'LARGE', 'XL'];
     const formats: Array<'QR' | 'Barcode' | 'Both'> = ['QR', 'Barcode', 'Both'];
@@ -62,8 +64,8 @@ export const ReceiveReprintModal: React.FC<ReceiveReprintModalProps> = ({
                             <Printer size={22} />
                         </div>
                         <div>
-                            <h3 className="text-xl font-black text-slate-900 dark:text-white tracking-tight uppercase">Advanced Printing</h3>
-                            <p className="text-[10px] text-slate-500 dark:text-zinc-500 font-black uppercase tracking-widest">Dimensions and layout attributes</p>
+                            <h3 className="text-xl font-black text-slate-900 dark:text-white tracking-tight uppercase">{t('warehouse.advancedPrinting')}</h3>
+                            <p className="text-[10px] text-slate-500 dark:text-zinc-500 font-black uppercase tracking-widest">{t('warehouse.dimensionsAndLayout')}</p>
                         </div>
                     </div>
                     <button
@@ -84,33 +86,33 @@ export const ReceiveReprintModal: React.FC<ReceiveReprintModalProps> = ({
                                 <Box size={24} />
                             </div>
                             <div className="flex-1 min-w-0">
-                                <p className="text-[10px] text-slate-400 dark:text-zinc-500 uppercase font-black tracking-[0.2em] mb-0.5">Product</p>
+                                <p className="text-[10px] text-slate-400 dark:text-zinc-500 uppercase font-black tracking-[0.2em] mb-0.5">{t('warehouse.product')}</p>
                                 <p className="text-sm font-black text-slate-900 dark:text-white truncate uppercase drop-shadow-sm">{reprintItem.name}</p>
                                 <p className="text-[10px] text-slate-400 dark:text-gray-500 font-black tracking-widest mt-1 truncate border-t border-[#E2DCCE]/20 dark:border-[#A9CBA2]/[0.02] pt-1">{reprintItem.sku}</p>
                             </div>
                         </div>
 
                         <div className="glass-panel-pushed p-4">
-                            <p className="text-[10px] text-slate-400 dark:text-zinc-500 uppercase font-black tracking-[0.2em] mb-2">Print Quantity</p>
+                            <p className="text-[10px] text-slate-400 dark:text-zinc-500 uppercase font-black tracking-[0.2em] mb-2">{t('warehouse.printQuantity')}</p>
                             <div className="flex items-center justify-center gap-2">
                                 <button
                                     onClick={() => setReprintItem({ ...reprintItem, qty: Math.max(1, reprintItem.qty - 1) })}
-                                    title="Decrease Quantity"
+                                    title={t('warehouse.decreaseQuantity')}
                                     className="w-9 h-9 bg-white/85 dark:bg-black/30 rounded-xl flex items-center justify-center border border-[#E2DCCE] dark:border-emerald-950/20 hover:border-[#2C5E3B] dark:hover:border-[#A9CBA2] text-[#2C5E3B] dark:text-[#A9CBA2] transition-all shadow-sm shrink-0"
                                 >
                                     <Minus size={16} />
                                 </button>
                                 <input
                                     type="number"
-                                    title="Quantity to Print"
-                                    aria-label="Quantity to Print"
+                                    title={t('warehouse.quantityToPrint')}
+                                    aria-label={t('warehouse.quantityToPrint')}
                                     value={reprintItem.qty}
                                     onChange={(e) => setReprintItem({ ...reprintItem, qty: Math.max(1, parseInt(e.target.value) || 1) })}
                                     className="w-16 bg-transparent border-none text-center text-xl font-black text-slate-900 dark:text-white focus:outline-none tabular-nums [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                 />
                                 <button
                                     onClick={() => setReprintItem({ ...reprintItem, qty: reprintItem.qty + 1 })}
-                                    title="Increase Quantity"
+                                    title={t('warehouse.increaseQuantity')}
                                     className="w-9 h-9 bg-white/85 dark:bg-black/30 rounded-xl flex items-center justify-center border border-[#E2DCCE] dark:border-emerald-950/20 hover:border-[#2C5E3B] dark:hover:border-[#A9CBA2] text-[#2C5E3B] dark:text-[#A9CBA2] transition-all shadow-sm shrink-0"
                                 >
                                     <Plus size={16} />
@@ -122,7 +124,7 @@ export const ReceiveReprintModal: React.FC<ReceiveReprintModalProps> = ({
                     {/* Size Selector */}
                     <div className="space-y-3">
                         <label className="text-[10px] text-slate-500 dark:text-zinc-500 uppercase font-black tracking-[0.2em] pl-1 flex items-center gap-2">
-                            <LayoutTemplate size={12} className="text-slate-400 dark:text-zinc-400" /> Label Size
+                            <LayoutTemplate size={12} className="text-slate-400 dark:text-zinc-400" /> {t('warehouse.labelSize')}
                         </label>
                         <div className="grid grid-cols-5 gap-2">
                             {sizes.map((size) => (
@@ -143,7 +145,7 @@ export const ReceiveReprintModal: React.FC<ReceiveReprintModalProps> = ({
                     {/* Format Selector */}
                     <div className="space-y-3">
                         <label className="text-[10px] text-slate-500 dark:text-zinc-500 uppercase font-black tracking-[0.2em] pl-1 flex items-center gap-2">
-                            <Tags size={12} className="text-slate-400 dark:text-zinc-400" /> Identifier Format
+                            <Tags size={12} className="text-slate-400 dark:text-zinc-400" /> {t('warehouse.identifierFormat')}
                         </label>
                         <div className="flex gap-2">
                             {formats.map((format) => (
@@ -167,7 +169,7 @@ export const ReceiveReprintModal: React.FC<ReceiveReprintModalProps> = ({
                     {/* Visibility Options */}
                     <div className="space-y-3">
                         <label className="text-[10px] text-slate-500 dark:text-zinc-500 uppercase font-black tracking-[0.2em] pl-1 flex items-center gap-2">
-                            <Eye size={12} className="text-slate-400 dark:text-zinc-400" /> Display Attributes
+                            <Eye size={12} className="text-slate-400 dark:text-zinc-400" /> {t('warehouse.displayAttributes')}
                         </label>
                         <div className="grid grid-cols-2 gap-3">
                             {(Object.keys(reprintOptions) as Array<keyof typeof reprintOptions>).map((opt) => (
@@ -179,7 +181,9 @@ export const ReceiveReprintModal: React.FC<ReceiveReprintModalProps> = ({
                                         : 'bg-white/50 dark:bg-black/10 border-[#E2DCCE] dark:border-emerald-950/20 text-[#2C4D35]/60 dark:text-[#A9CBA2]/40 hover:border-[#2C5E3B]/20 dark:hover:border-[#A9CBA2]/10'
                                         }`}
                                 >
-                                    <span className="text-[10px] uppercase tracking-widest">{opt.replace('show', '')}</span>
+                                    <span className="text-[10px] uppercase tracking-widest">
+                                        {opt === 'showPrice' ? 'Price' : opt === 'showCategory' ? 'Category' : 'Name'}
+                                    </span>
                                     {reprintOptions[opt] ? <Eye size={14} className="text-[#FAF8F5] dark:text-[#1E3B24]" /> : <EyeOff size={14} className="text-[#2C4D35]/40 dark:text-[#A9CBA2]/40" />}
                                 </button>
                             ))}
@@ -201,7 +205,7 @@ export const ReceiveReprintModal: React.FC<ReceiveReprintModalProps> = ({
                             ) : (
                                 <Printer size={20} />
                             )}
-                            GENERATE {reprintItem.qty} {reprintItem.qty === 1 ? 'LABEL' : 'LABELS'}
+                            {t('warehouse.generateLabels').toUpperCase()} ({reprintItem.qty})
                         </div>
                     </button>
                     <p className="text-[9px] text-center text-slate-400 dark:text-zinc-600 mt-6 uppercase tracking-[0.3em] font-black">Unified Template System v2.4</p>
@@ -210,4 +214,3 @@ export const ReceiveReprintModal: React.FC<ReceiveReprintModalProps> = ({
         </div>
     );
 };
-

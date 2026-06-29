@@ -13,6 +13,7 @@ interface ReceiveResolutionModalProps {
     addNotification: (type: 'success' | 'alert' | 'info', message: string) => void;
     refreshData: () => Promise<void>;
     isSubmitting: boolean;
+    t: (key: string) => string;
 }
 
 export const ReceiveResolutionModal: React.FC<ReceiveResolutionModalProps> = ({
@@ -24,7 +25,8 @@ export const ReceiveResolutionModal: React.FC<ReceiveResolutionModalProps> = ({
     setUnresolvedScans,
     addNotification,
     refreshData,
-    isSubmitting
+    isSubmitting,
+    t
 }) => {
     return (
         <div className="fixed inset-0 bg-black/60 dark:bg-black/80 z-[100] flex items-center justify-center p-4 backdrop-blur-md">
@@ -33,7 +35,7 @@ export const ReceiveResolutionModal: React.FC<ReceiveResolutionModalProps> = ({
                 <div className="absolute -top-24 -right-24 w-64 h-64 bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/5 blur-[100px] rounded-full pointer-events-none opacity-50" />
                 <div className="absolute bottom-0 left-0 w-48 h-48 bg-amber-600/10 dark:bg-amber-700/5 blur-[80px] rounded-full pointer-events-none opacity-50" />
                 <div className="p-6 border-b border-[#E2DCCE]/60 dark:border-[#A9CBA2]/[0.06] bg-[#FAF8F5]/30 dark:bg-[#1C2620]/30 flex justify-between items-center">
-                    <h3 className="text-sm font-black text-slate-900 dark:text-zinc-100 uppercase tracking-[0.2em] leading-tight">Resolve Unknown Barcode: <span className="text-[#2C5E3B] dark:text-[#A9CBA2] font-mono underline decoration-slate-900/20 dark:decoration-zinc-700">{resolvingBarcode.barcode}</span></h3>
+                    <h3 className="text-sm font-black text-slate-900 dark:text-zinc-100 uppercase tracking-[0.2em] leading-tight">{t('warehouse.resolveUnknownBarcode')}: <span className="text-[#2C5E3B] dark:text-[#A9CBA2] font-mono underline decoration-slate-900/20 dark:decoration-zinc-700">{resolvingBarcode.barcode}</span></h3>
                     <button onClick={() => setResolvingBarcode(null)} className="p-2 hover:bg-slate-100 dark:hover:bg-white/10 rounded-full text-slate-400 hover:text-slate-900 dark:hover:text-zinc-100 transition-all" aria-label="Close Resolution Modal"><X size={20} /></button>
                 </div>
                 <div className="p-8 space-y-6">
@@ -41,7 +43,7 @@ export const ReceiveResolutionModal: React.FC<ReceiveResolutionModalProps> = ({
                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-zinc-400 group-focus-within:text-[#2C5E3B] dark:group-focus-within:text-[#A9CBA2] transition-colors" size={16} />
                         <input
                             type="text"
-                            placeholder="Search product to map..."
+                            placeholder={t('warehouse.searchProductToMap')}
                             value={resolutionSearch}
                             onChange={(e) => setResolutionSearch(e.target.value)}
                             className="woody-input pl-11 py-4 text-[10px] uppercase tracking-widest font-mono"

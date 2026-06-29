@@ -25,22 +25,22 @@ export const modals: TranslationBlock = {
 
     // Incomplete Packing Modal
     incompletePacking: { en: 'Incomplete Packing', am: 'ያልተጠናቀቀ ማሸግ', or: 'Saamuu Hin Xumuramne' },
-    notAllItemsPacked: { en: 'Not all items are packed', am: 'ሁሉም ዕቃዎች አልተሸጡም', or: 'Mi\'ootni hundi hin sa\'aman' },
+    notAllItemsPacked: { en: 'Not all items are packed', am: 'ሁሉም ዕቃዎች አልተሸጡም', or: 'Meeshaleen hundi hin sa\'aman' },
     sureCompleteOrder: { en: 'Are you sure you want to complete this order?', am: 'ይህንን ትዕዛዝ ማጠናቀቅ መፈለግዎን እርግጠኛ ነዎት?', or: 'Ajaja kanaa xumuurachuu barbaaddanii mirkanooftee?' },
-    onlyPackedOfTotal: { en: 'Only {packed} of {total} items are marked as packed.', am: 'ከ{total} ዕቃዎች ውስጥ {packed} ብቻ እንደተሸጡ ምልክት ተደርጎባቸዋል።', or: 'Mi\'oota {total} irraa {packed} qofa akka sa\'aman mallatteeffameera.' },
-    unpackedMarkedMissing: { en: '⚠️ Unpacked items will be marked as "Missing" or "Backordered".', am: '⚠️ ያልተሸጡ ዕቃዎች እንደ "ጠፍቷል" ወይም "በትዕዛዝ" ምልክት ይደረጋቸዋል።', or: '⚠️ Mi\'ootni hin sa\'amne "Hinqabne" yookaan "Ajaja Keessa" jechuun mallatteeffamu.' },
+    onlyPackedOfTotal: { en: 'Only {packed} of {total} items are marked as packed.', am: 'ከ{total} ዕቃዎች ውስጥ {packed} ብቻ እንደተሸጡ ምልክት ተደርጎባቸዋል።', or: 'Meeshalee {total} irraa {packed} qofa akka sa\'aman mallatteeffameera.' },
+    unpackedMarkedMissing: { en: '⚠️ Unpacked items will be marked as "Missing" or "Backordered".', am: '⚠️ ያልተሸጡ ዕቃዎች እንደ "ጠፍቷል" ወይም "በትዕዛዝ" ምልክት ይደረጋቸዋል።', or: '⚠️ Meeshaleen hin sa\'amne "Hinqabne" yookaan "Ajaja Keessa" jechuun mallatteeffamu.' },
     goBack: { en: 'Go Back', am: 'ተመለስ', or: 'Deebi\'i' },
 
     // Missing Ice Packs Modal
     missingIcePacks: { en: 'Missing Ice Packs', am: 'የበረዶ አሰር አልተገኘም', or: 'Akkorii Qorichoo Hin Argamne' },
-    coldItemsDetected: { en: 'Cold items detected', am: 'የቅዝቃዜ ዕቃዎች ተገኝተዋል', or: 'Mi\'oota Qabaa Argame' },
-    orderContainsColdItems: { en: 'This order contains cold items but ice packs have not been added.', am: 'ይህ ትዕዛዝ የቅዝቃዜ ዕቃዎች ይዟል ነገር ግን የበረዶ አሰር አልተጨመረም።', or: 'Ajajiin kun mi\'oota qabaa qaba garuu akkorii qorichoo hin ida\'amne.' },
+    coldItemsDetected: { en: 'Cold items detected', am: 'የቅዝቃዜ ዕቃዎች ተገኝተዋል', or: 'Meeshalee Qabaa Argame' },
+    orderContainsColdItems: { en: 'This order contains cold items but ice packs have not been added.', am: 'ይህ ትዕዛዝ የቅዝቃዜ ዕቃዎች ይዟል ነገር ግን የበረዶ አሰር አልተጨመረም።', or: 'Ajajiin kun meeshalee qabaa qaba garuu akkorii qorichoo hin ida\'amne.' },
     continueAnyway: { en: 'Do you want to continue anyway?', am: 'ሆኖም መቀጠል ይፈልጋሉ?', or: 'Ammas itti fufuu barbaaddanii?' },
 
     // Missing Protective Materials Modal
     missingProtectiveMaterials: { en: 'Missing Protective Materials', am: 'የመከላከያ ቁሳቁሶች አልተገኙም', or: 'Odeeffannoo Ittisaan Hin Argamne' },
-    fragileItemsDetected: { en: 'Fragile items detected', am: 'የሚሰባበሩ ዕቃዎች ተገኝተዋል', or: 'Mi\'oota Rakkisaa Argame' },
-    orderContainsFragileItems: { en: 'This order contains fragile items but no protective materials (bubble wrap or air pillows) have been selected.', am: 'ይህ ትዕዛዝ የሚሰባበሩ ዕቃዎች ይዟል ነገር ግን የመከላከያ ቁሳቁሶች (ቡብል ራፕ ወይም አየር ማረፊያዎች) አልተመረጡም።', or: 'Ajajiin kun mi\'oota rakkisaa qaba garuu odeeffannoon ittisaan (haguugoo bubbulaa yookaan rakkisaa hawaa) hin filatamne.' },
+    fragileItemsDetected: { en: 'Fragile items detected', am: 'የሚሰባበሩ ዕቃዎች ተገኝተዋል', or: 'Meeshalee Rakkisaa Argame' },
+    orderContainsFragileItems: { en: 'This order contains fragile items but no protective materials (bubble wrap or air pillows) have been selected.', am: 'ይህ ትዕዛዝ የሚሰባበሩ ዕቃዎች ይዟል ነገር ግን የመከላከያ ቁሳቁሶች (ቡብል ራፕ ወይም አየር ማረፊያዎች) አልተመረጡም።', or: 'Ajajiin kun meeshalee rakkisaa qaba garuu odeeffannoon ittisaan (haguugoo bubbulaa yookaan rakkisaa hawaa) hin filatamne.' },
 
     // Bulk Distribution Modal
     bulkDistributionTitle: { en: 'Bulk Distribution', am: 'ጅምላ ስርጭት', or: 'Qo\'annoo Gurguddoo' },

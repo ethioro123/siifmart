@@ -2,11 +2,8 @@ import React, { useState } from 'react';
 import { X, Calendar, User, Box, Printer, FileText, Package, Truck, ArrowRight, ScanBarcode } from 'lucide-react';
 import { PurchaseOrder, WMSJob } from '../../../types';
 import { useFulfillment } from '../FulfillmentContext';
-import { motion, AnimatePresence } from 'framer-motion';
 import Badge from '../../shared/Badge';
 import { formatDateTime } from '../../../utils/formatting';
-import { generateUnifiedBatchLabelsHTML } from '../../../utils/labels/ProductLabelGenerator';
-import { LabelSize, LabelFormat } from '../../../utils/labels/types';
 import { getSellUnit } from '../../../utils/units';
 
 interface ReceiveDetailsModalProps {
@@ -15,6 +12,7 @@ interface ReceiveDetailsModalProps {
     resolveOrderRef: (ref: string) => string;
     setReprintItem: (item: any) => void;
     sites: any[];
+    t: (key: string) => string;
 }
 
 export const ReceiveDetailsModal: React.FC<ReceiveDetailsModalProps> = ({
@@ -22,7 +20,8 @@ export const ReceiveDetailsModal: React.FC<ReceiveDetailsModalProps> = ({
     onClose,
     resolveOrderRef,
     setReprintItem,
-    sites
+    sites,
+    t
 }) => {
     const { addNotification, isSubmitting, setIsSubmitting, employees } = useFulfillment();
     const [printingId, setPrintingId] = useState<string | null>(null);
@@ -117,7 +116,7 @@ export const ReceiveDetailsModal: React.FC<ReceiveDetailsModalProps> = ({
                             <Calendar size={18} />
                         </div>
                         <div>
-                            <p className="text-[10px] text-stone-400 dark:text-stone-500 uppercase font-black tracking-widest leading-none mb-1.5">Date</p>
+                            <p className="text-[10px] text-stone-400 dark:text-stone-500 uppercase font-black tracking-widest leading-none mb-1.5">{t('warehouse.date')}</p>
                             <p className="text-xs text-slate-900 dark:text-zinc-200 font-mono tracking-tighter font-black">{formatDateTime(data.date, { showTime: true })}</p>
                         </div>
                     </div>
@@ -126,7 +125,7 @@ export const ReceiveDetailsModal: React.FC<ReceiveDetailsModalProps> = ({
                             <User size={18} />
                         </div>
                         <div>
-                            <p className="text-[10px] text-stone-400 dark:text-stone-500 uppercase font-black tracking-widest leading-none mb-1.5">Processed By</p>
+                            <p className="text-[10px] text-stone-400 dark:text-stone-500 uppercase font-black tracking-widest leading-none mb-1.5">{t('warehouse.processedBy')}</p>
                             <p className="text-xs text-slate-900 dark:text-zinc-200 font-black uppercase break-words leading-tight">
                                 {data.user.name} {data.user.displayId && <span className="text-slate-400 dark:text-[#A9CBA2]/60 font-normal lowercase">({data.user.displayId})</span>}
                             </p>
@@ -137,7 +136,7 @@ export const ReceiveDetailsModal: React.FC<ReceiveDetailsModalProps> = ({
                             <ArrowRight size={18} />
                         </div>
                         <div>
-                            <p className="text-[10px] text-[#2C5E3B]/60 dark:text-[#A9CBA2]/60 uppercase font-black tracking-widest leading-none mb-1.5">Destination Site</p>
+                            <p className="text-[10px] text-[#2C5E3B]/60 dark:text-[#A9CBA2]/60 uppercase font-black tracking-widest leading-none mb-1.5">{t('warehouse.destinationSite')}</p>
                             <p className="text-xs text-[#2C5E3B] dark:text-[#A9CBA2] font-black uppercase break-words leading-tight">{destDisplay}</p>
                         </div>
                     </div>
@@ -146,7 +145,7 @@ export const ReceiveDetailsModal: React.FC<ReceiveDetailsModalProps> = ({
                 {/* Line Items */}
                 <div className="flex-1 overflow-y-auto p-4 md:p-6 custom-scrollbar bg-[#FAF8F5]/30 dark:bg-[#18201B]/30">
                     <h4 className="text-[10px] font-black text-slate-500 dark:text-gray-500 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
-                        <Package size={12} className="text-slate-400" /> Items Received
+                        <Package size={12} className="text-slate-400" /> {t('warehouse.itemsReceived')}
                     </h4>
                     <div className="space-y-3">
                         {data.items.map((item: any, idx: number) => (
@@ -202,7 +201,7 @@ export const ReceiveDetailsModal: React.FC<ReceiveDetailsModalProps> = ({
 
                                 <div className="flex items-center gap-3 md:gap-6 flex-shrink-0 ml-2">
                                     <div className="text-right">
-                                        <p className="text-[9px] text-slate-400 dark:text-zinc-600 uppercase font-black tracking-widest mb-1.5">Quantity</p>
+                                        <p className="text-[9px] text-slate-400 dark:text-zinc-600 uppercase font-black tracking-widest mb-1.5">{t('warehouse.quantityToReceive')}</p>
                                         <p className="text-lg font-black text-[#2C5E3B] dark:text-[#A9CBA2] tabular-nums font-mono leading-none">
                                             {(() => {
                                                 const baseQty = item.receivedQty || item.quantity || item.expectedQty || 0;
@@ -235,7 +234,7 @@ export const ReceiveDetailsModal: React.FC<ReceiveDetailsModalProps> = ({
                                     <button
                                         onClick={() => handleOpenReprint(item)}
                                         className="woody-btn-primary rounded-lg p-2.5 md:p-3 active:scale-95 text-[#FAF8F5] dark:text-[#1E3B24] flex items-center justify-center"
-                                        title="Print Label"
+                                        title={t('warehouse.reprintLabel')}
                                     >
                                         <Printer size={18} />
                                     </button>
@@ -251,7 +250,7 @@ export const ReceiveDetailsModal: React.FC<ReceiveDetailsModalProps> = ({
                         onClick={onClose}
                         className="woody-btn-secondary w-full md:w-auto px-10 py-3.5 text-[10px] uppercase tracking-widest font-black"
                     >
-                        Dismiss Manifest
+                        {t('warehouse.dismiss')}
                     </button>
                 </div>
             </div>

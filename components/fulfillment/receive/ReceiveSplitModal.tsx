@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { X, Trash2, Plus, History, Box, AlertCircle, Check, ScanBarcode, ArrowRight, ChevronRight } from 'lucide-react';
+import React, { useState } from 'react';
+import { X, Trash2, Plus, Box, Check, ScanBarcode, ChevronRight } from 'lucide-react';
 import { Product, PurchaseOrder, WMSJob } from '../../../types';
 import Badge from '../../shared/Badge';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -10,7 +10,6 @@ interface ReceiveSplitModalProps {
     splitReceivingPO: PurchaseOrder;
     splitVariants: Array<{
         id: string;
-        // Restored fields required by receivePOSplit
         sku: string;
         skuType: 'existing' | 'new';
         productId?: string;
@@ -27,13 +26,14 @@ interface ReceiveSplitModalProps {
     setIsSplitReceiving: (val: boolean) => void;
     setSplitReceivingItem: (val: any) => void;
     setSplitReceivingPO: (val: any) => void;
-    allProducts: Product[]; // Kept for interface compat but unused
+    allProducts: Product[];
     receivePOSplit: (poId: string, lineItemId: string, variants: any[], locationId?: string, user?: { name: string; email: string }) => Promise<void>;
     handlePrintBatch: (items: any[]) => Promise<void>;
     setReprintItem: (item: any) => void;
     isSubmitting: boolean;
     setIsSubmitting: (val: boolean) => void;
     jobs: WMSJob[];
+    t: (key: string) => string;
 }
 
 export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
@@ -49,10 +49,10 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
     setReprintItem,
     isSubmitting,
     setIsSubmitting,
-    jobs
+    jobs,
+    t
 }) => {
-    const { user } = useStore(); // Get current user
-    const [showHistory, setShowHistory] = useState(false);
+    const { user } = useStore();
     const [barcodeInput, setBarcodeInput] = useState<Record<string, string>>({});
 
     const handleAddBarcode = (variantId: string) => {
@@ -125,7 +125,7 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
                                 </p>
                                 <span className="w-1 h-1 rounded-full bg-slate-200 dark:bg-gray-600" />
                                 <p className="text-sm font-black text-slate-500 dark:text-gray-400 uppercase tracking-widest">
-                                    Supplier: <span className="text-slate-900 dark:text-white">{splitReceivingPO.supplierName}</span>
+                                    {t('warehouse.supplier')}: <span className="text-slate-900 dark:text-white">{splitReceivingPO.supplierName}</span>
                                 </p>
                             </div>
                         </div>
@@ -152,7 +152,7 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
                     </div>
 
                     <div className="flex flex-col">
-                        <span className="text-[10px] uppercase tracking-[0.2em] font-black text-slate-400 dark:text-zinc-500 mb-1">Expected</span>
+                        <span className="text-[10px] uppercase tracking-[0.2em] font-black text-slate-400 dark:text-zinc-500 mb-1">{t('warehouse.expectedQty')}</span>
                         <span className="text-2xl md:text-4xl font-black text-slate-900 dark:text-white tabular-nums drop-shadow-sm font-mono">{splitReceivingItem.quantity}</span>
                     </div>
 
@@ -160,7 +160,7 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
 
                     <div className="flex flex-col">
                         <span className="text-[10px] uppercase tracking-[0.2em] font-black mb-1 text-slate-500 dark:text-zinc-500">
-                            Received
+                            {t('warehouse.receivedQty')}
                         </span>
                         <div className="flex items-baseline gap-1.5">
                             <span className={`text-2xl md:text-4xl font-black tabular-nums drop-shadow-sm font-mono ${remaining === 0 ? 'text-[#2C5E3B] dark:text-[#A9CBA2]' : 'text-stone-400 dark:text-stone-600'}`}>
@@ -183,7 +183,7 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
                             <div className="w-4 h-4 md:w-5 md:h-5 rounded-full border-2 border-slate-200 dark:border-gray-500 border-t-slate-900 dark:border-t-white animate-spin" />
                         )}
                         <p className={`text-sm md:text-lg font-black tabular-nums font-mono ${remaining === 0 ? 'text-[#2C5E3B] dark:text-[#A9CBA2]' : 'text-slate-700 dark:text-white'}`}>
-                            {remaining === 0 ? 'Matched' : remaining > 0 ? `${remaining} Left` : `${Math.abs(remaining)} Over`}
+                            {remaining === 0 ? t('warehouse.matched') : remaining > 0 ? `${remaining} ${t('warehouse.left')}` : `${Math.abs(remaining)} ${t('warehouse.over')}`}
                         </p>
                     </div>
                 </div>
@@ -206,7 +206,7 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
                                         {/* Qty & Condition */}
                                         <div className="flex-1 grid grid-cols-2 gap-3 md:gap-6 w-full">
                                             <div className="space-y-1.5 md:space-y-2">
-                                                <label className="text-[10px] font-black text-slate-500 dark:text-gray-500 uppercase tracking-widest pl-1">Quantity</label>
+                                                <label className="text-[10px] font-black text-slate-500 dark:text-gray-500 uppercase tracking-widest pl-1">{t('warehouse.quantityToReceive')}</label>
                                                 <div className="relative group/input">
                                                     <input
                                                         type="number"
@@ -220,7 +220,7 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
                                                 </div>
                                             </div>
                                             <div className="space-y-1.5 md:space-y-2">
-                                                <label className="text-[10px] font-black text-slate-500 dark:text-gray-500 uppercase tracking-widest pl-1">Condition</label>
+                                                <label className="text-[10px] font-black text-slate-500 dark:text-gray-500 uppercase tracking-widest pl-1">{t('warehouse.condition')}</label>
                                                 <div className="relative group/select">
                                                     <select
                                                         value={variant.condition || 'Good'}
@@ -228,10 +228,10 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
                                                         className="woody-input text-xs md:text-sm font-black uppercase tracking-widest cursor-pointer py-3.5 md:py-4.5 pr-8 appearance-none"
                                                         aria-label="Condition"
                                                     >
-                                                        <option value="Good">Good Condition</option>
-                                                        <option value="Damaged">Damaged / Defective</option>
-                                                        <option value="Expired">Expired Stock</option>
-                                                        <option value="Missing Parts">Missing Parts</option>
+                                                        <option value="Good">{t('warehouse.conditionGood')}</option>
+                                                        <option value="Damaged">{t('warehouse.conditionDamaged')}</option>
+                                                        <option value="Expired">{t('warehouse.conditionExpired')}</option>
+                                                        <option value="Missing Parts">{t('warehouse.conditionMissing')}</option>
                                                     </select>
                                                     <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
                                                         <ChevronRight className="rotate-90" size={16} />
@@ -243,7 +243,7 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
                                         {/* Batch / Expiry */}
                                         <div className="flex-1 grid grid-cols-2 gap-3 md:gap-4 w-full">
                                             <div className="space-y-1.5 md:space-y-2">
-                                                <label className="text-[10px] font-black text-slate-500 dark:text-gray-500 uppercase tracking-widest pl-1">Expiry Date</label>
+                                                <label className="text-[10px] font-black text-slate-500 dark:text-gray-500 uppercase tracking-widest pl-1">{t('warehouse.expiryDate')}</label>
                                                 <input
                                                     type="date"
                                                     value={variant.expiryDate || ''}
@@ -267,7 +267,7 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
                                         {/* Barcodes */}
                                         <div className="flex-[1.5] space-y-3 w-full md:min-w-[300px]">
                                             <label className="text-[10px] font-black text-zinc-500 dark:text-gray-500 uppercase tracking-widest pl-1 flex items-center gap-2">
-                                                <ScanBarcode size={12} className="text-zinc-400" /> Barcodes
+                                                <ScanBarcode size={12} className="text-zinc-400" /> {t('warehouse.barcodes')}
                                             </label>
 
                                             <div className="flex gap-2">
@@ -282,7 +282,7 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
                                                                 handleAddBarcode(variant.id);
                                                             }
                                                         }}
-                                                        placeholder="Scan barcode..."
+                                                        placeholder={t('warehouse.scanBarcodePlaceholder')}
                                                         className="woody-input pl-10 font-mono py-2"
                                                         aria-label="New Barcode Input"
                                                     />
@@ -300,7 +300,7 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
                                             <div className="flex flex-wrap gap-2 min-h-[32px]">
                                                 {variant.barcode && (
                                                     <Badge variant="neutral" className="bg-[#FAF8F5]/85 dark:bg-[#1C2620]/30 border-[#E2DCCE]/60 dark:border-[#A9CBA2]/[0.06] text-stone-400 dark:text-[#A9CBA2]/60 font-mono text-[10px] pl-2 pr-3 py-1">
-                                                        {variant.barcode} <span className="opacity-50 ml-2 text-[8px] uppercase tracking-wider">Primary</span>
+                                                        {variant.barcode} <span className="opacity-50 ml-2 text-[8px] uppercase tracking-wider">{t('warehouse.primary')}</span>
                                                     </Badge>
                                                 )}
                                                 {(variant.barcodes || []).map(code => (
@@ -329,7 +329,7 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
                                                 <button
                                                     onClick={() => setSplitVariants(prev => prev.filter(v => v.id !== variant.id))}
                                                     className="p-3 bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-500/20 rounded-xl transition-all border border-red-200 dark:border-red-500/20 shadow-sm"
-                                                    title="Remove Variant"
+                                                    title={t('warehouse.removeScan')}
                                                     aria-label="Remove split"
                                                 >
                                                     <Trash2 size={18} />
@@ -355,7 +355,7 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
                                     skuType: 'existing',
                                     productId: splitReceivingItem.productId,
                                     productName: splitReceivingItem.productName,
-                                    batchNumber: newBatch // Auto-generate on add
+                                    batchNumber: newBatch
                                 }]);
                             }}
                             className="w-full py-6 border-2 border-dashed border-[#E2DCCE] dark:border-emerald-950/30 hover:border-[#2C5E3B] dark:hover:border-[#A9CBA2] rounded-2xl text-[#2C4D35]/60 dark:text-[#A9CBA2]/60 hover:text-[#1E3F27] dark:hover:text-white transition-all flex items-center justify-center gap-3 group hover:bg-[#FAF8F5]/40 dark:hover:bg-[#1C2620]/20"
@@ -363,7 +363,7 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
                             <div className="p-2 bg-white/80 dark:bg-[#1C2620]/30 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-full group-hover:bg-[#2C5E3B] dark:hover:bg-[#A9CBA2] group-hover:scale-110 transition-all shadow-sm group-hover:shadow-[#2C5E3B]/30">
                                 <Plus size={20} className="group-hover:text-white dark:group-hover:text-[#1E3B24]" />
                             </div>
-                            <span className="font-black uppercase tracking-[0.2em] text-[10px]">Add Another Split (Condition / Batch)</span>
+                            <span className="font-black uppercase tracking-[0.2em] text-[10px]">{t('warehouse.addAnotherSplit')}</span>
                         </button>
                     </div>
                 </div>
@@ -374,14 +374,13 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
                         onClick={() => { setIsSplitReceiving(false); setSplitReceivingItem(null); setSplitReceivingPO(null); setSplitVariants([]); }}
                         className="woody-btn-secondary px-4 md:px-8 py-3 md:py-4 text-[10px] uppercase tracking-widest font-black"
                     >
-                        Cancel
+                        {t('warehouse.cancel')}
                     </button>
                     <button
                         disabled={isSubmitting || totalScanned < 1}
                         onClick={async () => {
                             if (isSubmitting || totalScanned < 1) return;
 
-                            // Filter out variants with 0 quantity and ensure at least one is valid
                             const processedVariants = splitVariants.filter(v => (v.quantity || 0) > 0).map(v => {
                                 let updatedVariant = { ...v };
                                 const pendingBarcode = (barcodeInput[v.id] || '').trim();
@@ -422,16 +421,14 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
                                     splitReceivingPO.id,
                                     splitReceivingItem.productId || splitReceivingItem.id,
                                     processedVariants,
-                                    undefined, // locationId
+                                    undefined,
                                     user ? { name: user.name, email: user.email || '' } : undefined
                                 );
 
-                                // Instead of auto-printing, set up the reprint item so user can print from the reprint modal
                                 const firstVariant = processedVariants[0];
                                 const reprintSku = firstVariant?.sku || splitReceivingItem.sku || 'UNKNOWN';
                                 const reprintName = firstVariant?.productName || splitReceivingItem.productName || 'Unknown Product';
 
-                                // Open the reprint modal with the received item's data
                                 setReprintItem({
                                     sku: reprintSku,
                                     name: reprintName,
@@ -457,11 +454,11 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
                             }`}
                     >
                         {isSubmitting ? (
-                            <>Processing...</>
+                            <>{t('warehouse.processingStatus')}...</>
                         ) : (
                             <>
                                 <Check size={20} />
-                                Confirm Receive
+                                {t('warehouse.confirmReceipt')}
                             </>
                         )}
                     </button>

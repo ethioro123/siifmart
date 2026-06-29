@@ -422,6 +422,7 @@ export const ReceiveTab: React.FC = () => {
                         wmsJobsService={wmsJobsService}
                         jobs={jobs}
                         sites={sites}
+                        t={t}
                     />
                 </div>
             )}
@@ -443,6 +444,7 @@ export const ReceiveTab: React.FC = () => {
                     isSubmitting={isSubmitting}
                     setIsSubmitting={setIsSubmitting}
                     jobs={jobs}
+                    t={t}
                 />
             )}
 
@@ -458,6 +460,7 @@ export const ReceiveTab: React.FC = () => {
                     addNotification={addNotification}
                     refreshData={refreshData}
                     isSubmitting={isSubmitting}
+                    t={t}
                 />
             )}
 
@@ -474,6 +477,7 @@ export const ReceiveTab: React.FC = () => {
                     setReprintFormat={setReprintFormat}
                     reprintOptions={reprintOptions}
                     setReprintOptions={setReprintOptions}
+                    t={t}
                 />
             )}
             {/* Review PO Modal */}
@@ -494,6 +498,7 @@ export const ReceiveTab: React.FC = () => {
                         }
                     }}
                     isSubmitting={isSubmitting}
+                    t={t}
                 />
             )}
 
@@ -508,6 +513,7 @@ export const ReceiveTab: React.FC = () => {
                     resolveOrderRef={resolveOrderRef}
                     setReprintItem={setReprintItem}
                     sites={sites}
+                    t={t}
                 />
             )}
         </div>

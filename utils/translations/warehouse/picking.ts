@@ -25,15 +25,15 @@ export const picking: TranslationBlock = {
 
     // Pick
     pickJobs: { en: 'Pick Jobs', am: 'የመምረጫ ስራዎች', or: 'Hojiiwwan Filannoo' },
-    itemsToPick: { en: 'Items to Pick', am: 'ለመምረጥ ዕቃዎች', or: 'Mi\'oota Filachuu' },
+    itemsToPick: { en: 'Items to Pick', am: 'ለመምረጥ ዕቃዎች', or: 'Meeshalee Filachuu' },
 
     // Picking Section
     pickAllAdmin: { en: 'Pick All (Admin)', am: 'ሁሉንም ዝርዝ (አስተዳዳሪ)', or: 'Hunda Filadhu (Bulchiinsa)' },
     goToLocation: { en: '📍 GO TO LOCATION', am: '📍 ወደ ቦታ ይሂዱ', or: '📍 Gara Bakkaa Deemi' },
     pickItem: { en: 'Pick {qty}x {name}', am: '{qty}x {name} ዝርዝ', or: '{qty}x {name} Fili' },
     noLocationAssigned: { en: 'No Location Assigned', am: 'ቦታ አልተመደበም', or: 'Bakka hin ramadame' },
-    checkInventoryRecords: { en: 'Check inventory records for this item', am: 'ለዚህ ዕቃ የእቃ ምዝግብ ይፈትሹ', or: 'Mi\'a kanaaf galmee meeshaalee mirkaneessi' },
-    thisLocationHasItems: { en: '📦 This location has existing items', am: '📦 ይህ ቦታ አሁን ያሉ ዕቃዎች አሉት', or: '📦 Bakka kana keessatti mi\'oota jiran' },
+    checkInventoryRecords: { en: 'Check inventory records for this item', am: 'ለዚህ ዕቃ የእቃ ምዝግብ ይፈትሹ', or: 'Meesha kanaaf galmee meeshaalee mirkaneessi' },
+    thisLocationHasItems: { en: '📦 This location has existing items', am: '📦 ይህ ቦታ አሁን ያሉ ዕቃዎች አሉት', or: '📦 Bakka kana keessatti meeshaleen jiran' },
     pickFromLocation: { en: 'Pick From Location', am: 'ከዚህ ቦታ ይውሰዱ', or: 'Bakka Kanaa Fili' },
     shortPick: { en: 'SHORT PICK', am: 'አጭር ምረጥ', or: 'FILANNOO GABABAA' },
 };

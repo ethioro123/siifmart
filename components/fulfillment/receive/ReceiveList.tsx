@@ -3,10 +3,8 @@ import { Package, Layers, CheckCircle, Printer, Plus, Loader2 } from 'lucide-rea
 import { PurchaseOrder, WMSJob, Product } from '../../../types';
 import { ProgressBar } from '../../shared/ProgressBar';
 import Pagination from '../../shared/Pagination';
-import { Protected } from '../../Protected';
 import { formatPOItemDescription } from '../../procurement/utils';
 import { getSellUnit } from '../../../utils/units';
-
 import { hasPermission } from '../../../utils/permissions';
 
 interface ReceiveListProps {
@@ -66,8 +64,8 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                     <Package size={48} className="text-slate-300 dark:text-zinc-700" />
                 </div>
                 <div>
-                    <p className="text-slate-900 dark:text-white font-black uppercase tracking-[0.2em] text-sm">{t('warehouse.noApprovedManifests') || 'No Active Manifests'}</p>
-                    <p className="text-slate-500 dark:text-zinc-500 font-black uppercase tracking-widest text-[9px] mt-2">{t('warehouse.approvedManifestsWillAppear') || 'Approved manifests will appear here in real-time'}</p>
+                    <p className="text-slate-900 dark:text-white font-black uppercase tracking-[0.2em] text-sm">{t('warehouse.noApprovedManifests')}</p>
+                    <p className="text-slate-500 dark:text-zinc-500 font-black uppercase tracking-widest text-[9px] mt-2">{t('warehouse.approvedManifestsWillAppear')}</p>
                 </div>
             </div>
         );
@@ -124,12 +122,12 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                                         <div className="flex items-center gap-3 mt-1.5 flex-wrap">
                                             <span className="text-[10px] text-stone-500 dark:text-stone-400 font-black uppercase tracking-widest font-mono">#{po.po_number || po.id.slice(0, 8)}</span>
                                             <span className="w-1 h-1 rounded-full bg-stone-300 dark:bg-stone-800" />
-                                            <span className="text-[10px] text-[#1E3F27] dark:text-[#EAE5D9] font-black uppercase tracking-widest">{po.lineItems?.length || 0} Line Items</span>
+                                            <span className="text-[10px] text-[#1E3F27] dark:text-[#EAE5D9] font-black uppercase tracking-widest">{po.lineItems?.length || 0} {t('warehouse.itemPlural')}</span>
                                         </div>
                                     </div>
                                 </div>
                                 <div className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] border shadow-sm transition-all ${allItemsReceived ? 'text-[#1E3F27] dark:text-[#EAE5D9] border-[#2C5E3B]/40 dark:border-[#A9CBA2]/30 bg-white/50 dark:bg-white/10' : 'text-stone-400 dark:text-stone-500 border-stone-200 dark:border-white/5 bg-stone-50/50 dark:bg-black/20 group-hover:border-[#2C5E3B]/40 dark:group-hover:border-[#A9CBA2]/30'}`}>
-                                    {allItemsReceived ? '✓ Authenticated' : 'Awaiting Processing'}
+                                    {allItemsReceived ? `✓ ${t('warehouse.authenticated')}` : t('warehouse.awaitingProcessing')}
                                 </div>
                             </div>
 
@@ -196,8 +194,8 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                                                 </div>
                                                 <div className="space-y-2">
                                                     <div className="flex justify-between items-center px-1">
-                                                        <span className="text-[8px] font-black text-stone-400 uppercase tracking-widest">Inbound Velocity</span>
-                                                        <span className={`text-[8px] font-black uppercase tracking-widest ${isComplete ? 'text-stone-400' : 'text-[#2C5E3B] dark:text-[#A9CBA2]'}`}>{isComplete ? '100% COMPLETE' : `${Math.round((receivedQty / item.quantity) * 100)}% RECEIVED`}</span>
+                                                        <span className="text-[8px] font-black text-stone-400 uppercase tracking-widest">{t('warehouse.inboundVelocity')}</span>
+                                                        <span className={`text-[8px] font-black uppercase tracking-widest ${isComplete ? 'text-stone-400' : 'text-[#2C5E3B] dark:text-[#A9CBA2]'}`}>{isComplete ? t('warehouse.completePercent') : `${Math.round((receivedQty / item.quantity) * 100)}${t('warehouse.receivedPercent')}`}</span>
                                                     </div>
                                                     <ProgressBar
                                                         progress={(receivedQty / item.quantity) * 100}
@@ -215,7 +213,7 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                                                             category: product?.category,
                                                             expiry: ''
                                                         })} className="w-full woody-btn-secondary h-10 text-[10px] font-black uppercase tracking-widest rounded-xl flex items-center justify-center gap-2 transition-all shadow-sm">
-                                                            <Printer size={14} className="text-[#4D6E56] dark:text-zinc-500" /> Reprint Label
+                                                            <Printer size={14} className="text-[#4D6E56] dark:text-zinc-500" /> {t('warehouse.reprintLabel')}
                                                         </button>
                                                     ) : (
                                                         isAllowedToReceive ? (
@@ -255,13 +253,13 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                                                                     <Loader2 size={16} className="animate-spin" />
                                                                 ) : (
                                                                     <>
-                                                                        <Plus size={16} /> Receive Item
+                                                                        <Plus size={16} /> {t('warehouse.receiveAction')} {t('warehouse.itemSingular')}
                                                                     </>
                                                                 )}
                                                             </button>
                                                         ) : (
                                                             <div className="w-full py-3 px-4 text-stone-500 dark:text-zinc-550 border border-dashed border-stone-200 dark:border-white/5 rounded-xl text-[10px] font-black uppercase tracking-widest text-center bg-stone-50/50 dark:bg-black/20">
-                                                                Access Restricted
+                                                                {t('warehouse.accessRestricted')}
                                                             </div>
                                                         )
                                                     )
@@ -280,8 +278,8 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                                                 <CheckCircle size={20} className="text-white dark:text-[#A9CBA2]" />
                                             </div>
                                             <div>
-                                                <p className="text-[10px] font-black text-[#1E3F27] dark:text-white uppercase tracking-[0.2em] leading-none mb-1">Inbound Verified</p>
-                                                <p className="text-[9px] font-black text-stone-500 dark:text-stone-400 uppercase tracking-widest">Awaiting final manifest authentication</p>
+                                                <p className="text-[10px] font-black text-[#1E3F27] dark:text-white uppercase tracking-[0.2em] leading-none mb-1">{t('warehouse.inboundVerified')}</p>
+                                                <p className="text-[9px] font-black text-stone-500 dark:text-stone-400 uppercase tracking-widest">{t('warehouse.awaitingFinalManifest')}</p>
                                             </div>
                                         </div>
                                         <button
@@ -292,7 +290,7 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                                                 <Loader2 size={18} className="animate-spin" />
                                             ) : (
                                                 <>
-                                                    Authenticate Manifest
+                                                    {t('warehouse.authenticateManifest')}
                                                     <CheckCircle size={16} />
                                                 </>
                                             )}

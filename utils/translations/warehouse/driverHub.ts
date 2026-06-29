@@ -22,7 +22,7 @@ export const driverHub: TranslationBlock = {
     // Job Details
     customer: { en: 'Customer', am: 'ደንበኛ', or: 'Maamila' },
     address: { en: 'Address', am: 'አድራሻ', or: 'Teessoo' },
-    items: { en: 'Items', am: 'ዕቃዎች', or: 'Mi\'oota' },
+    items: { en: 'Items', am: 'ዕቃዎች', or: 'Meeshalee' },
     notes: { en: 'Delivery Notes', am: 'የማድረስ ማስታወሻዎች', or: 'Yaadannoo Ergaa' },
     priority: { en: 'Priority', am: 'ቅድሚያ', or: 'Dursa' },
     estimatedTime: { en: 'Est. Time', am: 'የተገመት ጊዜ', or: 'Yeroo Tilmaamame' },
@@ -109,7 +109,7 @@ export const driverHub: TranslationBlock = {
     acceptJob: { en: 'ACCEPT JOB', am: 'ስራ ተቀበል', or: 'HOJII FUDHADHU' },
     unknownDriver: { en: 'Unknown Driver', am: 'ያልታወቀ አሽከርካሪ', or: 'Konkolaachisaa Hin Beekamne' },
     unknownHub: { en: 'Unknown Hub', am: 'ያልታወቀ ማዕከል', or: 'Wiirtuu Hin Beekamne' },
-    itemCount: { en: 'Item Count', am: 'የዕቃ ብዛት', or: 'Baay\'ina Mi\'aa' },
+    itemCount: { en: 'Item Count', am: 'የዕቃ ብዛት', or: 'Baay\'ina Meeshaa' },
     noLogData: { en: 'No Log Data Found', am: 'ምንም የምዝግብ ማስታወሻ አልተገኘም', or: 'Daataan Galmee Hin Argamne' },
     archiveEmpty: { en: 'Archive contains no matching relay records', am: 'ማህደሩ ምንም የሚዛመዱ መዛግብት የለውም', or: 'Kuusaan galmee walgahu hin qabu' },
     readyToScan: { en: 'Ready to Scan', am: 'ለመቃኘት ዝግጁ', or: 'Iskaaniif Qophaa\'aa' },

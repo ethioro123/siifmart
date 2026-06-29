@@ -9,6 +9,7 @@ interface ReceiveReviewModalProps {
     onClose: () => void;
     onFinalize: () => void;
     isSubmitting: boolean;
+    t: (key: string) => string;
 }
 
 export const ReceiveReviewModal: React.FC<ReceiveReviewModalProps> = ({
@@ -16,7 +17,8 @@ export const ReceiveReviewModal: React.FC<ReceiveReviewModalProps> = ({
     jobs,
     onClose,
     onFinalize,
-    isSubmitting
+    isSubmitting,
+    t
 }) => {
     const { allProducts } = useFulfillment();
 
@@ -77,7 +79,7 @@ export const ReceiveReviewModal: React.FC<ReceiveReviewModalProps> = ({
                     <div>
                         <h3 className="text-base md:text-xl font-black text-slate-900 dark:text-white flex items-center gap-2 md:gap-3 uppercase tracking-tight">
                             <FileText className="text-[#2C5E3B] dark:text-[#A9CBA2]" size={20} />
-                            Finalize Manifest
+                            {t('warehouse.finalizeManifest')}
                         </h3>
                         <p className="text-[10px] text-slate-500 dark:text-zinc-500 font-black uppercase tracking-widest mt-1.5 font-mono">
                             Manifest #{po.poNumber} • <span className="text-[#2C5E3B] dark:text-[#A9CBA2]">{po.supplierName}</span>
@@ -94,11 +96,11 @@ export const ReceiveReviewModal: React.FC<ReceiveReviewModalProps> = ({
                     {/* Summary Stats */}
                     <div className="grid grid-cols-2 gap-3 md:gap-4">
                         <div className="p-3 md:p-5 glass-panel-pushed text-center shadow-sm">
-                            <p className="text-[10px] text-slate-400 dark:text-zinc-500 uppercase font-black tracking-widest mb-1.5">Total Ordered</p>
+                            <p className="text-[10px] text-slate-400 dark:text-zinc-500 uppercase font-black tracking-widest mb-1.5">{t('warehouse.totalOrdered')}</p>
                             <p className="text-xl md:text-2xl font-black text-slate-900 dark:text-white uppercase tabular-nums font-mono leading-none">{stats.totalExpected}</p>
                         </div>
                         <div className={`p-3 md:p-5 rounded-xl md:rounded-2xl border text-center transition-all shadow-sm ${isFullyReceived ? 'bg-[#2C5E3B] dark:bg-[#EAE5D9] border-[#2C5E3B] dark:border-[#EAE5D9]' : 'glass-panel-pushed'}`}>
-                            <p className={`text-[10px] uppercase font-black tracking-widest mb-1.5 ${isFullyReceived ? 'text-[#FAF8F5]/80 dark:text-[#1E3B24]/80' : 'text-slate-400 dark:text-zinc-500'}`}>Total Received</p>
+                            <p className={`text-[10px] uppercase font-black tracking-widest mb-1.5 ${isFullyReceived ? 'text-[#FAF8F5]/80 dark:text-[#1E3B24]/80' : 'text-slate-400 dark:text-zinc-500'}`}>{t('warehouse.totalReceived')}</p>
                             <p className={`text-xl md:text-2xl font-black tabular-nums font-mono leading-none ${isFullyReceived ? 'text-[#FAF8F5] dark:text-[#1E3B24] drop-shadow-sm' : 'text-slate-900 dark:text-white'}`}>{stats.totalReceived}</p>
                         </div>
                     </div>
@@ -107,10 +109,10 @@ export const ReceiveReviewModal: React.FC<ReceiveReviewModalProps> = ({
                         <div className="p-4 md:p-5 bg-amber-50 dark:bg-amber-500/5 border border-amber-200/50 dark:border-amber-500/20 rounded-2xl flex gap-3 shadow-sm border-l-4 border-l-amber-500">
                             <AlertTriangle className="text-amber-600 dark:text-amber-400 shrink-0" size={20} />
                             <div>
-                                <h4 className="text-sm font-black text-amber-900 dark:text-amber-200 uppercase tracking-tight">Discrepancy Detected</h4>
+                                <h4 className="text-sm font-black text-amber-900 dark:text-amber-200 uppercase tracking-tight">{t('warehouse.discrepancyDetected')}</h4>
                                 <p className="text-[10px] text-amber-700/80 dark:text-amber-500/80 mt-1 uppercase tracking-widest font-black leading-relaxed">
-                                    Finalizing with {stats.totalExpected - stats.totalReceived} missing items.
-                                    Marked as <span className="text-amber-900 dark:text-amber-100 underline decoration-amber-500/30">Partial Receipt</span>.
+                                    Finalizing with {stats.totalExpected - stats.totalReceived} {t('warehouse.missingItems')}.
+                                    Marked as <span className="text-amber-900 dark:text-amber-100 underline decoration-amber-500/30">{t('warehouse.partialReceipt')}</span>.
                                 </p>
                             </div>
                         </div>
@@ -120,10 +122,10 @@ export const ReceiveReviewModal: React.FC<ReceiveReviewModalProps> = ({
                         <table className="w-full text-sm text-left">
                             <thead className="bg-[#FAF8F5]/80 dark:bg-[#1C2620]/60 text-[#2C5E3B]/60 dark:text-[#A9CBA2]/60 font-black uppercase tracking-[0.2em] text-[8px]">
                                 <tr>
-                                    <th className="p-3 md:p-4">Product Attributes</th>
-                                    <th className="p-3 md:p-4 text-center">Req</th>
-                                    <th className="p-3 md:p-4 text-center">Rec</th>
-                                    <th className="p-3 md:p-4 text-right">Status</th>
+                                    <th className="p-3 md:p-4">{t('warehouse.productAttributes')}</th>
+                                    <th className="p-3 md:p-4 text-center">{t('warehouse.req')}</th>
+                                    <th className="p-3 md:p-4 text-center">{t('warehouse.rec')}</th>
+                                    <th className="p-3 md:p-4 text-right">{t('warehouse.status')}</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-[#E2DCCE]/30 dark:divide-[#A9CBA2]/[0.04]">
@@ -158,17 +160,17 @@ export const ReceiveReviewModal: React.FC<ReceiveReviewModalProps> = ({
                         className="woody-btn-secondary w-full md:w-auto px-10 py-3.5 text-[10px] uppercase tracking-widest font-black order-2 md:order-1"
                         disabled={isSubmitting}
                     >
-                        Dismiss
+                        {t('warehouse.dismiss')}
                     </button>
                     <button
                         onClick={onFinalize}
                         disabled={isSubmitting}
                         className="woody-btn-primary w-full md:w-auto px-10 py-3.5 text-[10px] uppercase tracking-widest flex items-center justify-center gap-3 order-1 md:order-2"
                     >
-                        {isSubmitting ? 'Processing...' : (
+                        {isSubmitting ? `${t('warehouse.processingStatus')}...` : (
                             <>
                                 <CheckCircle size={14} />
-                                {isFullyReceived ? 'Finalize Manifest' : 'Confirm Partial Receipt'}
+                                {isFullyReceived ? t('warehouse.finalizeManifest') : t('warehouse.confirmPartialReceipt')}
                             </>
                         )}
                     </button>

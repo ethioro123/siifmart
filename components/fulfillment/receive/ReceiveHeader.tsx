@@ -56,7 +56,7 @@ export const ReceiveHeader: React.FC<ReceiveHeaderProps> = ({
                             ref={scanInputRef}
                             autoFocus
                             type="text"
-                            placeholder="Scan barcode or enter SKU..."
+                            placeholder={t('warehouse.scanBarcodeOrSku')}
                             className="w-full h-12 pl-12 pr-4 bg-white/90 dark:bg-black/25 border border-[#E2DCCE] dark:border-emerald-950/20 hover:border-[#CFC6B4] dark:hover:border-emerald-900/15 rounded-xl text-[#1E3F27] dark:text-[#EAE5D9] font-mono text-sm focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:ring-4 focus:ring-[#2C5E3B]/10 dark:focus:ring-[#A9CBA2]/10 focus:outline-none transition-all placeholder:text-stone-400 dark:placeholder:text-stone-500 shadow-sm"
                             onKeyDown={(e) => {
                                 if (e.key === 'Enter') {
@@ -82,8 +82,8 @@ export const ReceiveHeader: React.FC<ReceiveHeaderProps> = ({
                             <Loader2 size={16} className="animate-spin" />
                         ) : (
                             <>
-                                <span className="hidden sm:inline">Submit</span>
-                                <span className="sm:hidden">Go</span>
+                                <span className="hidden sm:inline">{t('warehouse.submitScan')}</span>
+                                <span className="sm:hidden">{t('warehouse.goScan')}</span>
                             </>
                         )}
                     </button>
@@ -100,9 +100,9 @@ export const ReceiveHeader: React.FC<ReceiveHeaderProps> = ({
                                     <AlertTriangle size={18} className="text-amber-600 dark:text-amber-400" />
                                 </div>
                                 <div className="flex flex-col">
-                                    <span className="text-[10px] font-black text-slate-500 dark:text-zinc-500 uppercase tracking-[0.2em] leading-none mb-1">Unresolved Barcodes</span>
+                                    <span className="text-[10px] font-black text-slate-500 dark:text-zinc-500 uppercase tracking-[0.2em] leading-none mb-1">{t('warehouse.unresolvedBarcodes')}</span>
                                     <span className="inline-flex items-center gap-2">
-                                        <span className="text-sm font-black text-slate-900 dark:text-white uppercase drop-shadow-sm">Scan Diagnostics</span>
+                                        <span className="text-sm font-black text-slate-900 dark:text-white uppercase drop-shadow-sm">{t('warehouse.scanDiagnostics')}</span>
                                         <span className="px-2 py-0.5 bg-slate-100 dark:bg-white/10 text-slate-900 dark:text-white text-[10px] font-black rounded border border-slate-200 dark:border-white/10 shadow-sm">{unresolvedScans.length}</span>
                                     </span>
                                 </div>
@@ -111,7 +111,7 @@ export const ReceiveHeader: React.FC<ReceiveHeaderProps> = ({
                                 onClick={() => setUnresolvedScans([])}
                                 className="text-xs text-slate-500 dark:text-gray-500 hover:text-slate-900 dark:hover:text-white font-black uppercase tracking-widest transition-all hover:underline"
                             >
-                                Clear All
+                                {t('warehouse.clearAllScans')}
                             </button>
                         </div>
                         <div className="flex flex-wrap gap-2">
@@ -133,7 +133,7 @@ export const ReceiveHeader: React.FC<ReceiveHeaderProps> = ({
                                 >
                                     <div className="flex flex-col">
                                         <span className="text-[10px] font-black text-slate-900 dark:text-white uppercase tracking-widest font-mono">{scan.barcode}</span>
-                                        <span className="text-[9px] text-slate-500 dark:text-zinc-500 font-black uppercase tracking-tighter mt-1 bg-slate-100 dark:bg-white/5 px-1.5 rounded self-start">Qty: {scan.qty}</span>
+                                        <span className="text-[9px] text-slate-500 dark:text-zinc-500 font-black uppercase tracking-tighter mt-1 bg-slate-100 dark:bg-white/5 px-1.5 rounded self-start">{t('warehouse.qtyLabel')} {scan.qty}</span>
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <button
@@ -142,8 +142,8 @@ export const ReceiveHeader: React.FC<ReceiveHeaderProps> = ({
                                                 // Decrease logic would go here if implemented in main ReceiveTab
                                             }}
                                             className="w-8 h-8 rounded-lg bg-slate-50 dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 flex items-center justify-center transition-all text-slate-900 dark:text-white border border-slate-200 dark:border-white/10"
-                                            title="Decrease Quantity"
-                                            aria-label={`Decrease quantity for ${scan.barcode}`}
+                                            title={t('warehouse.decreaseQuantity')}
+                                            aria-label={`${t('warehouse.decreaseQuantity')} ${scan.barcode}`}
                                         >
                                             <Minus size={14} />
                                         </button>
@@ -156,8 +156,8 @@ export const ReceiveHeader: React.FC<ReceiveHeaderProps> = ({
                                                 // Increase logic
                                             }}
                                             className="w-8 h-8 rounded-lg bg-slate-50 dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 flex items-center justify-center transition-all text-slate-900 dark:text-white border border-slate-200 dark:border-white/10"
-                                            title="Increase Quantity"
-                                            aria-label={`Increase quantity for ${scan.barcode}`}
+                                            title={t('warehouse.increaseQuantity')}
+                                            aria-label={`${t('warehouse.increaseQuantity')} ${scan.barcode}`}
                                         >
                                             <Plus size={14} />
                                         </button>
@@ -168,7 +168,7 @@ export const ReceiveHeader: React.FC<ReceiveHeaderProps> = ({
                                             setUnresolvedScans(prev => prev.filter((_, i) => i !== idx));
                                         }}
                                         className="p-1.5 hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg transition-colors group/close"
-                                        title="Remove"
+                                        title={t('warehouse.removeScan')}
                                     >
                                         <X size={14} className="text-slate-400 dark:text-gray-600 group-hover/close:text-red-500" />
                                     </button>
@@ -204,13 +204,13 @@ export const ReceiveHeader: React.FC<ReceiveHeaderProps> = ({
                                 onClick={() => setViewMode('Process')}
                                 className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${viewMode === 'Process' ? 'bg-[#2C5E3B] dark:bg-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24] shadow-md' : 'text-stone-500 dark:text-stone-400 hover:text-[#2C5E3B] dark:hover:text-[#A9CBA2]'}`}
                             >
-                                Process
+                                {t('warehouse.process')}
                             </button>
                             <button
                                 onClick={() => setViewMode('History')}
                                 className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${viewMode === 'History' ? 'bg-[#2C5E3B] dark:bg-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24] shadow-md' : 'text-stone-500 dark:text-stone-400 hover:text-[#2C5E3B] dark:hover:text-[#A9CBA2]'}`}
                             >
-                                History
+                                {t('warehouse.history')}
                             </button>
                         </div>
 
@@ -222,7 +222,7 @@ export const ReceiveHeader: React.FC<ReceiveHeaderProps> = ({
                                     </div>
                                     <input
                                         type="text"
-                                        placeholder="Search Manifest / Supplier..."
+                                        placeholder={t('warehouse.searchManifestSupplier')}
                                         value={receiveSearch}
                                         onChange={(e) => setReceiveSearch(e.target.value)}
                                         className="w-full sm:w-64 bg-white/90 dark:bg-black/25 border border-[#E2DCCE] dark:border-emerald-950/20 hover:border-[#CFC6B4] dark:hover:border-emerald-900/15 rounded-xl py-2.5 pl-10 pr-10 text-xs font-black uppercase tracking-widest text-[#1E3F27] dark:text-[#EAE5D9] placeholder-stone-400 dark:placeholder-stone-500 focus:outline-none focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:ring-4 focus:ring-[#2C5E3B]/10 dark:focus:ring-[#A9CBA2]/10 transition-all shadow-sm"
@@ -235,7 +235,7 @@ export const ReceiveHeader: React.FC<ReceiveHeaderProps> = ({
                                 </div>
                                 <div className="hidden md:flex gap-3">
                                     <div className="flex-1 sm:flex-none px-4 py-2 bg-stone-100/40 dark:bg-black/20 border border-[#E2DCCE]/30 dark:border-[#A9CBA2]/[0.04] rounded-xl flex flex-col justify-center">
-                                        <p className="text-[9px] font-black text-stone-500 dark:text-stone-400 uppercase tracking-widest mb-0.5">Pending Manifests</p>
+                                        <p className="text-[9px] font-black text-stone-500 dark:text-stone-400 uppercase tracking-widest mb-0.5">{t('warehouse.pendingManifests')}</p>
                                         <p className="text-xl font-black text-[#1E3F27] dark:text-[#EAE5D9] tabular-nums drop-shadow-sm font-mono leading-none">
                                             {orders.filter(o => o.status === 'Approved').reduce((sum, o) => sum + (o.lineItems?.length || 0), 0)}
                                         </p>

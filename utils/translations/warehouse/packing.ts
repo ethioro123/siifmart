@@ -3,7 +3,7 @@ import { TranslationBlock } from '../types';
 export const packing: TranslationBlock = {
     // Pack
     packJobs: { en: 'Pack Jobs', am: 'የማሸጊያ ስራዎች', or: 'Hojiiwwan Saamuu' },
-    itemsToPack: { en: 'Items to Pack', am: 'ለማሸግ ዕቃዎች', or: 'Mi\'oota Saamuu' },
+    itemsToPack: { en: 'Items to Pack', am: 'ለማሸግ ዕቃዎች', or: 'Meeshalee Saamuu' },
     boxSize: { en: 'Box Size', am: 'የሳጥን መጠን', or: 'Hanga Saanduqaa' },
     small: { en: 'Small', am: 'ትንሽ', or: 'Xiqqaa' },
     medium: { en: 'Medium', am: 'መካከለኛ', or: 'Giddugaleessa' },
