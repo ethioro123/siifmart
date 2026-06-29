@@ -156,7 +156,7 @@ export const PutawayJobModal: React.FC<PutawayJobModalProps> = ({
                         <div className="w-full h-3 bg-stone-150 dark:bg-white/5 rounded-full overflow-hidden border border-stone-200 dark:border-white/10 mt-3 shadow-inner">
                             <div
                                 className={`h-full transition-all duration-1000 ease-out relative ${progressPercent >= 100 ? 'bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.4)]' : 'bg-[#2C5E3B] dark:bg-[#A9CBA2] shadow-[0_0_15px_rgba(44,94,59,0.4)]'}`}
-                                style={{ width: `${progressPercent}%` }}
+                                ref={(el) => { if (el) el.style.width = `${progressPercent}%`; }}
                             />
                         </div>
                     </div>
