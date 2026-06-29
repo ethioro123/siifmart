@@ -2,39 +2,39 @@ import { TranslationBlock } from './types';
 
 export const pos: TranslationBlock = {
     // Header & Navigation
-    payNow: { en: 'Pay Now', am: 'አሁን ክፈል', or: 'Amma Kaffali' },
-    clearCart: { en: 'Clear Cart', am: 'ጋሪውን አጽዳ', or: 'Gaarii Haqi' },
+    payNow: { en: 'Pay Now', am: 'አሁን ክፈል', or: 'Amma Kaffal' },
+    clearCart: { en: 'Clear Cart', am: 'ጋሪውን አጽዳ', or: 'Kaartii Haqi' },
     clear: { en: 'Clear', am: 'አጽዳ', or: 'Haqi' },
-    openDrawer: { en: 'Open Drawer', am: 'ሳጥን ክፈት', or: 'Saanduqa Qarshii Bani' },
+    openDrawer: { en: 'Open Drawer', am: 'ሳጥን ክፈት', or: 'Kaaza Qarshii Bani' },
     closeShift: { en: 'Close Shift', am: 'ፈረቃ ዝጋ', or: 'Shiftii Cufi' },
-    reprintLast: { en: 'Reprint Last', am: 'መጨረሻውን እንደገና አትም', or: 'Nagahee Dhumaa Maxxansi' },
-    returns: { en: 'Returns', am: 'ምላሾች', or: 'Deebii Gurgurtaa' },
-    miscItem: { en: 'Misc Item', am: 'የተለያየ ዕቃ', or: 'Mi\'oota Adda Addaa' },
-    exitDashboard: { en: 'Exit to Dashboard', am: 'ወደ ዳሽቦርድ ውጣ', or: 'Gara Wiirtuutti Deebi\'i' },
+    reprintLast: { en: 'Reprint Last', am: 'መጨረሻውን እንደገና አትም', or: 'Nagahee Maxxansi' },
+    returns: { en: 'Returns', am: 'ምላሾች', or: 'Gurgurtaa Deebifame' },
+    miscItem: { en: 'Misc Item', am: 'የተለያየ ዕቃ', or: 'Oomisha Addaa' },
+    exitDashboard: { en: 'Exit to Dashboard', am: 'ወደ ዳሽቦርድ ውጣ', or: 'Gara Wiirtuutti Ba\'i' },
     summary: { en: 'Summary', am: 'ማጠቃለያ', or: 'Gabaasa Gurgurtaa' },
     cashTray: { en: 'Cash Tray', am: 'የገንዘብ መሳቢያ', or: 'Kaaza Qarshii' },
     verifyShift: { en: 'Verify Shift', am: 'ፈረቃን አረጋግጥ', or: 'Shiftii Mirkaneessi' },
-    searchPlaceholder: { en: 'Search products...', am: 'ምርቶችን ፈልግ...', or: 'Barbaadi...' },
+    searchPlaceholder: { en: 'Search products...', am: 'ምርቶችን ፈልግ...', or: 'Oomisha Barbaadi...' },
     cashInDrawer: { en: 'Cash in Drawer', am: 'በመሳቢያ ውስጥ ያለ ገንዘብ', or: 'Qarshii Kaaza Keessaa' },
-    personalSales: { en: 'Personal Sales', am: 'የግል ሽያጭ', or: 'Gurgurtaa Tee Dhuunfaa' },
+    personalSales: { en: 'Personal Sales', am: 'የግል ሽያጭ', or: 'Gurgurtaa Kee' },
     todayShift: { en: 'Today\'s Shift', am: 'የዛሬ ፈረቃ', or: 'Shiftii Har\'aa' },
-    transactions: { en: 'Transactions', am: 'ልውውጦች', or: 'Daldala Gurgurtaa' },
+    transactions: { en: 'Transactions', am: 'ልውውጦች', or: 'Gurgurtaalee' },
 
     // Cart & Totals
     subtotal: { en: 'Subtotal', am: 'ንዑስ ድምር', or: 'Ida\'ama Duraa' },
     tax: { en: 'Tax', am: 'ግብር', or: 'Gibira (Taaksii)' },
-    discount: { en: 'Discount', am: 'ቅናሽ', or: 'Gadi-lakkisa (Hir\'ifama)' },
+    discount: { en: 'Discount', am: 'ቅናሽ', or: 'Hir\'ifama (Hifsa)' },
     walkInCustomer: { en: 'Walk-in Customer', am: 'የዘፈቀደ ደንበኛ', or: 'Maamila Darbaa' },
     drawer: { en: 'Cash in Drawer', am: 'የገንዘብ ሳጥን', or: 'Kaaza Qarshii' },
-    paymentMethods: { en: 'Payment Methods', am: 'የክፍያ ዘዴዎች', or: 'Kaffaltiiwwan' },
+    paymentMethods: { en: 'Payment Methods', am: 'የክፍያ ዘዴዎች', or: 'Akkaataa Kaffaltii' },
     today: { en: 'TODAY', am: 'ዛሬ', or: 'GUYYAA HAR\'AA' },
-    cartEmpty: { en: 'Cart is empty', am: 'ጋሪው ባዶ ነው', or: 'Gaariin duwwaa dha' },
+    cartEmpty: { en: 'Cart is empty', am: 'ጋሪው ባዶ ነው', or: 'Kaartiin duwwaa dha' },
 
     // Payment
     cash: { en: 'Cash', am: 'ጥሬ ገንዘብ', or: 'Qarshii Callaa' },
     card: { en: 'Card', am: 'ካርድ', or: 'Kaardii' },
-    mobile: { en: 'Mobile', am: 'ሞባይል', or: 'Mobaayila (Zaad/E-Birr)' },
-    amountTendered: { en: 'Amount Tendered', am: 'የተከፈለ መጠን', or: 'Qarshii Fudhatame' },
+    mobile: { en: 'Mobile', am: 'ሞባይል', or: 'Kaffaltii Bilbilaa' },
+    amountTendered: { en: 'Amount Tendered', am: 'የተከፈለ መጠን', or: 'Qarshii Kenname' },
     changeDue: { en: 'Change Due', am: 'የሚመለስ', or: 'Deebii (Baqiyyaa)' },
     viewOrder: { en: 'View Order', am: 'ትዕዛዝ ይመልከቱ', or: 'Gurgurtaa Ilaali' },
     initializePayment: { en: 'Initialize Payment', am: 'ክፍያ ጀምር', or: 'Kaffaltii Jalqabi' },
@@ -42,12 +42,12 @@ export const pos: TranslationBlock = {
     totalAmountDue: { en: 'Total Amount Due', am: 'ጠቅላላ የሚከፈል', or: 'Waliigala Kaffalamu' },
     completeSale: { en: 'Complete Sale', am: 'ሽያጩን ጨርስ', or: 'Gurgurtaa Fixi' },
     paymentSuccess: { en: 'Payment Success', am: 'ክፍያ ተሳክቷል', or: 'Kaffaltiin Mirkanaa\'eera' },
-    transactionCompleted: { en: 'Transaction Completed Successfully', am: 'ልውውጡ በተሳካ ሁኔታ ተጠናቋል', or: 'Gurgurtaa milkaa\'inaan xumurameera' },
-    transactionVerified: { en: 'Transaction Verified', am: 'ልውውጡ ተረጋግጧል', or: 'Gurgurtaa mirkanaa\'eera' },
+    transactionCompleted: { en: 'Transaction Completed Successfully', am: 'ልውውጡ በተሳካ ሁኔታ ተጠናቋል', or: 'Gurgurtaan milkaa\'inaan xumurameera' },
+    transactionVerified: { en: 'Transaction Verified', am: 'ልውውጡ ተረጋግጧል', or: 'Gurgurtaan mirkanaa\'eera' },
     totalPaid: { en: 'Total Paid', am: 'ጠቅላላ የተከፈለ', or: 'Waliigala Kaffalame' },
     receiptId: { en: 'Receipt ID', or: 'Lakk Nagahee' },
-    method: { en: 'Method', or: 'Mala' },
-    digitalCopy: { en: 'Digital Copy', am: 'ዲጂታል ቅጂ', or: 'Kooppii Diijitaalaa' },
+    method: { en: 'Method', or: 'Akkaataa' },
+    digitalCopy: { en: 'Digital Copy', am: 'ዲጂታል ቅጂ', or: 'Kooppii Nagahee' },
     newOrder: { en: 'New Order', am: 'አዲስ ትዕዛዝ', or: 'Gurgurtaa Haaraa' },
 
     // Receipt
@@ -57,12 +57,12 @@ export const pos: TranslationBlock = {
 
     // Messages
     productNotFound: { en: 'Product not found', am: 'ምርቱ አልተገኘም', or: 'Oomishni hin argamne' },
-    stockLimitReached: { en: 'Stock limit reached!', am: 'የአቅም ገደብ ተደርሷል!', or: 'Koreen meeshaa dhumateera!' },
+    stockLimitReached: { en: 'Stock limit reached!', am: 'የአቅም ገደብ ተደርሷል!', or: 'Baay\'inni meeshaa dhumateera!' },
     orderHeld: { en: 'Order Placed on Hold', am: 'ትዕዛዝ በመጠባበቅ ላይ', or: 'Gurgurtaa Tursiifameera' },
     shiftClosed: { en: 'Shift Closed Successfully', am: 'ፈረቃ በተሳካ ሁኔታ ተዘግቷል', or: 'Shiftiin Milkaa\'inaan Cufameera' },
 
     // Hold/Recall
-    holdCart: { en: 'Hold Cart', am: 'ጋሪ አቆይ', or: 'Gaarii Tursi' },
+    holdCart: { en: 'Hold Cart', am: 'ጋሪ አቆይ', or: 'Kaartii Tursi' },
     holdOrder: { en: 'Hold Order', am: 'ትዕዛዝ አቆይ', or: 'Gurgurtaa Tursi' },
     recallOrder: { en: 'Recall Held Order', am: 'የታቀፈውን ትዕዛዝ መልስ', or: 'Gurgurtaa Tursiifame Deebisi' },
     noHeldOrders: { en: 'No held orders found.', am: 'ምንም የታቀፉ ትዕዛዞች አልተገኙም።', or: 'Gurgurtaan tursiifame hin jiru.' },
@@ -70,10 +70,10 @@ export const pos: TranslationBlock = {
     // Products & Search
     noProductsAvailable: { en: 'No Products Available', am: 'ምንም ምርቶች የሉም', or: 'Oomishaaleen hin jiran' },
     productsWillAppear: { en: 'Products will only appear here after they have been scanned and confirmed as received.', am: 'ምርቶች ከተቀበሉ እና ከተረጋገጡ በኋላ ብቻ እዚህ ይታያሉ።', or: 'Oomishaaleen erga galanii booda asitti mul\'atu.' },
-    goToPOSCommand: { en: 'Go to POS Command Center to receive items', am: 'ዕቃዎችን ለመቀበል ወደ POS ትዕዛዝ ማዕከል ይሂዱ', or: 'Gara Wiirtuu POS deemi' },
+    goToPOSCommand: { en: 'Go to POS Command Center to receive items', am: 'ዕቃዎችን ለመቀበል ወደ POS ትዕዛዝ ማዕከል ይሂዱ', or: 'Gara Wiirtuu POS Deemi' },
     sale: { en: 'SALE', am: 'ሽያጭ', or: 'GURGURTAA' },
     left: { en: 'left', am: 'ቀረ', or: 'hafe' },
-    searchProducts: { en: 'Search products by name, SKU or barcode...', am: 'ምርቶችን በስም፣ በSKU ወይም በባርኮድ ፈልግ...', or: 'Barbaadi (Maqaa, SKU ykn Baarkoodii)...' },
+    searchProducts: { en: 'Search products by name, SKU or barcode...', am: 'ምርቶችን በስም፣ በSKU ወይም በባርኮድ ፈልግ...', or: 'Oomisha Barbaadi (Maqaa, SKU ykn Baarkoodii)...' },
 
     // Discounts
     applyDiscount: { en: 'Apply Discount', am: 'ቅናሽ ተግብር', or: 'Hir\'ifama Galchi' },
@@ -105,7 +105,7 @@ export const pos: TranslationBlock = {
     startCashCount: { en: 'Start Cash Count', am: 'የገንዘብ ቆጠራ ጀምር', or: 'Qarshii Lakkaa\'uu Jalqabi' },
     cashTrayInstruction: { en: 'Enter the exact quantity of each bill in your drawer. The system matches these against your digital records.', am: 'በሳጥንዎ ውስጥ ያለውን የእያንዳንዱን ኖት ትክክለኛ ብዛት ያስገቡ። ሲስተሙ እነዚህን ከዲጂታል መዝገቦችዎ ጋር ያዛምዳል።', or: 'Qarshii kaaza keessa jiru lakkofsaan galchi.' },
     totalCounted: { en: 'Total Counted Cash', am: 'ጠቅላላ የተቆጠረ ገንዘብ', or: 'Waliigala Qarshii Lakkaa\'ame' },
-    shiftBalanced: { en: 'Reconciliation Perfect', am: 'ማስታረቅ ተሳክቷል', or: 'Herregni Shiftii Qajeelaa dha' },
+    shiftBalanced: { en: 'Reconciliation Perfect', am: 'ማስታረቅ ተሳክቷል', or: 'Shiftiin Qajeelaa dha' },
     cashSurplus: { en: 'Cash Surplus', am: 'የገንዘብ ብልጫ', or: 'Qarshii Dabalate' },
     cashShortage: { en: 'Cash Shortage', am: 'የገንዘብ ጉድለት', or: 'Qarshii Hir\'ate' },
     varianceReason: { en: 'Reason for Variance (Required if any)', am: 'የልዩነት ምክንያት (ካለ ያስፈልጋል)', or: 'Sababa Garaagarummaa' },
