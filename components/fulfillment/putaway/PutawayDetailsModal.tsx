@@ -11,6 +11,7 @@ interface PutawayDetailsModalProps {
     resolveOrderRef: (ref?: string) => string;
     employees: any[];
     sites?: any[];
+    t: (key: string) => string;
 }
 
 export const PutawayDetailsModal: React.FC<PutawayDetailsModalProps> = ({
@@ -18,7 +19,8 @@ export const PutawayDetailsModal: React.FC<PutawayDetailsModalProps> = ({
     onClose,
     resolveOrderRef,
     employees,
-    sites = []
+    sites = [],
+    t
 }) => {
     // Resolve User Name
     const userId = selectedItem.completedBy || selectedItem.assignedTo;
@@ -35,7 +37,7 @@ export const PutawayDetailsModal: React.FC<PutawayDetailsModalProps> = ({
     const data = {
         id: selectedItem.id,
         reference: formatJobId(selectedItem),
-        title: selectedItem.type === 'REPLENISH' ? 'Stock Replenishment' : 'Inventory Putaway',
+        title: selectedItem.type === 'REPLENISH' ? t('warehouse.tabs.replenish') : t('warehouse.putaway.putaway'),
         status: selectedItem.status,
         date: selectedItem.updatedAt || selectedItem.createdAt || new Date().toISOString(),
         user: userName,
@@ -61,16 +63,16 @@ export const PutawayDetailsModal: React.FC<PutawayDetailsModalProps> = ({
                             <div className="flex items-center gap-3 mb-2">
                                 <h3 className="text-xl md:text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tight font-mono leading-none">#{data.reference}</h3>
                                 <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border transition-all ${data.status === 'Completed' ? 'bg-emerald-50 dark:bg-emerald-500/20 border-emerald-200 dark:border-emerald-500/40 text-emerald-700 dark:text-emerald-400 shadow-emerald-500/5' : 'bg-gray-100 dark:bg-white/5 border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-400'}`}>
-                                    {data.status}
+                                    {data.status === 'Completed' ? t('warehouse.completed') : data.status === 'Pending' ? t('warehouse.pending') : t('warehouse.inProgress')}
                                 </span>
                             </div>
                             <p className="text-gray-500 dark:text-gray-400 text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2.5 italic">
                                 <span className="w-1.5 h-1.5 rounded-full bg-[#2C5E3B] dark:bg-[#A9CBA2] animate-pulse" />
-                                {data.title} MISSION
+                                {data.title}
                             </p>
                         </div>
                     </div>
-                    <button onClick={onClose} className="p-2.5 hover:bg-gray-100 dark:hover:bg-white/10 rounded-xl text-gray-400 dark:text-gray-600 hover:text-gray-900 dark:hover:text-white transition-all shadow-sm active:scale-90" aria-label="Dismiss Details">
+                    <button onClick={onClose} className="p-2.5 hover:bg-gray-100 dark:hover:bg-white/10 rounded-xl text-gray-400 dark:text-gray-600 hover:text-gray-900 dark:hover:text-white transition-all shadow-sm active:scale-90" aria-label={t('warehouse.dismiss')}>
                         <X size={20} />
                     </button>
                 </div>
@@ -78,16 +80,16 @@ export const PutawayDetailsModal: React.FC<PutawayDetailsModalProps> = ({
                 {/* Metadata Grid */}
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-px bg-[#E2DCCE]/60 dark:bg-white/10 border-b border-[#E2DCCE]/45 dark:border-white/5 relative z-10">
                     {[
-                        { label: 'Timestamp', icon: <Calendar size={18} />, value: formatDateTime(data.date), mono: true },
-                        { label: 'Authorized By', icon: <User size={18} />, value: `${data.user} (${displayId})`, mono: false },
-                        { label: 'Operational Hub', icon: <MapPin size={18} />, value: data.site ? `${data.site.name} (${data.site.code || data.site.id})` : 'UNLISTED SITE', mono: false }
+                        { label: t('warehouse.date'), icon: <Calendar size={18} />, value: formatDateTime(data.date), mono: true },
+                        { label: t('warehouse.assignedTo'), icon: <User size={18} />, value: `${data.user} (${displayId})`, mono: false },
+                        { label: t('warehouse.putaway.hubTitle'), icon: <MapPin size={18} />, value: data.site ? `${data.site.name} (${data.site.code || data.site.id})` : 'UNLISTED SITE', mono: false }
                     ].map((item, i) => (
                         <div key={i} className="bg-white dark:bg-black p-5 flex items-center gap-4 transition-colors group hover:bg-[#FAF8F5] dark:hover:bg-white/[0.02]">
                             <div className="hidden md:flex p-2.5 bg-[#FAF8F5] dark:bg-white/5 rounded-xl text-gray-400 dark:text-gray-500 group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] transition-colors border border-[#E2DCCE]/60 dark:border-white/5 shadow-inner">
                                 {item.icon}
                             </div>
                             <div className="min-w-0">
-                                <p className="text-[9px] text-gray-400 dark:text-gray-500 uppercase font-black tracking-widest leading-none mb-1.5">{item.label}</p>
+                                <p className="text-[9px] text-gray-400 dark:text-gray-555 uppercase font-black tracking-widest leading-none mb-1.5">{item.label}</p>
                                 <p className={`text-[11px] text-gray-900 dark:text-gray-200 font-black uppercase truncate leading-tight ${item.mono ? 'font-mono tracking-tighter' : ''}`}>{item.value}</p>
                             </div>
                         </div>
@@ -97,9 +99,9 @@ export const PutawayDetailsModal: React.FC<PutawayDetailsModalProps> = ({
                 {/* Line Items Container */}
                 <div className="flex-1 overflow-y-auto p-6 md:p-8 custom-scrollbar bg-gray-50/30 dark:bg-black/40 relative z-10">
                     <div className="flex items-center justify-between mb-6">
-                        <h4 className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.3em]">Operational Payload Manifest</h4>
+                        <h4 className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.3em]">{t('warehouse.putaway.jobDetails')}</h4>
                         <div className="flex items-center gap-2 text-[9px] font-black text-[#2C5E3B] dark:text-[#A9CBA2] uppercase tracking-widest bg-[#2C5E3B]/10 dark:bg-white/5 px-3 py-1 rounded-full border border-[#2C5E3B]/20 dark:border-white/10">
-                            <Box size={10} /> {data.items.length} Units
+                            <Box size={10} /> {data.items.length} {t('warehouse.itemPlural')}
                         </div>
                     </div>
                     
@@ -113,7 +115,7 @@ export const PutawayDetailsModal: React.FC<PutawayDetailsModalProps> = ({
                                     <div className="min-w-0">
                                         <p className="text-gray-900 dark:text-white font-black uppercase tracking-tight text-sm md:text-base leading-tight mb-2 truncate group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] transition-colors">{item.name || 'Unnamed Specimen'}</p>
                                         <div className="flex flex-wrap items-center gap-4">
-                                            <span className="text-[9px] text-gray-550 dark:text-gray-400 font-black font-mono tracking-widest bg-gray-100 dark:bg-white/5 px-2.5 py-1 rounded-lg border border-gray-200 dark:border-white/5 uppercase">
+                                            <span className="text-[9px] text-gray-555 dark:text-gray-400 font-black font-mono tracking-widest bg-gray-100 dark:bg-white/5 px-2.5 py-1 rounded-lg border border-gray-200 dark:border-white/5 uppercase">
                                                 SKU: {item.sku}
                                             </span>
                                             <div className="flex items-center gap-2 px-2.5 py-1 bg-[#2C5E3B]/10 dark:bg-white/5 text-[#2C5E3B] dark:text-[#A9CBA2] border border-[#2C5E3B]/20 dark:border-white/10 rounded-lg">
@@ -127,7 +129,7 @@ export const PutawayDetailsModal: React.FC<PutawayDetailsModalProps> = ({
                                 </div>
 
                                 <div className="text-right flex-shrink-0 ml-4">
-                                    <p className="text-[9px] text-gray-400 dark:text-gray-500 uppercase font-black tracking-widest mb-1.5 leading-none">Registered Units</p>
+                                    <p className="text-[9px] text-gray-400 dark:text-gray-555 uppercase font-black tracking-widest mb-1.5 leading-none">{t('warehouse.expectedAbbr')} {t('warehouse.qty')}</p>
                                     <p className="text-2xl font-black text-gray-900 dark:text-[#A9CBA2] tabular-nums font-mono leading-none">
                                         {item.pickedQty ?? item.expectedQty ?? 0}
                                     </p>
@@ -143,7 +145,7 @@ export const PutawayDetailsModal: React.FC<PutawayDetailsModalProps> = ({
                         onClick={onClose}
                         className="woody-btn-primary w-full md:w-auto px-10 py-4 text-[10px] tracking-[0.25em]"
                     >
-                        Terminate View Interface
+                        {t('warehouse.dismiss')}
                     </button>
                 </div>
             </div>

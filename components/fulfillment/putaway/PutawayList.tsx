@@ -23,6 +23,7 @@ interface PutawayListProps {
     setIsSubmitting: (val: boolean) => void;
     handleStartJob: (job: WMSJob) => void;
     onShowDetails: (job: WMSJob) => void;
+    t: (key: string) => string;
 }
 
 export const PutawayList: React.FC<PutawayListProps> = ({
@@ -40,13 +41,14 @@ export const PutawayList: React.FC<PutawayListProps> = ({
     isSubmitting,
     setIsSubmitting,
     handleStartJob,
-    onShowDetails
+    onShowDetails,
+    t
 }) => {
     const { deleteJob } = useFulfillment();
 
     const handleDelete = async (e: React.MouseEvent, jobId: string) => {
         e.stopPropagation();
-        if (window.confirm('Are you sure you want to permanently delete this job?')) {
+        if (window.confirm(t('warehouse.putaway.deleteJobConfirm'))) {
             await deleteJob(jobId);
         }
     };
@@ -58,8 +60,8 @@ export const PutawayList: React.FC<PutawayListProps> = ({
                     <Box size={48} className="text-gray-300 dark:text-gray-600" />
                 </div>
                 <div>
-                    <p className="text-gray-900 dark:text-white font-black uppercase tracking-[0.2em] text-sm">No Jobs Found</p>
-                    <p className="text-gray-500 dark:text-gray-500 font-black uppercase tracking-widest text-[9px] mt-2">No jobs found matching your filters.</p>
+                    <p className="text-gray-900 dark:text-white font-black uppercase tracking-[0.2em] text-sm">{t('warehouse.putaway.noJobsFound')}</p>
+                    <p className="text-gray-500 dark:text-gray-500 font-black uppercase tracking-widest text-[9px] mt-2">{t('warehouse.putaway.noJobsMatchingFilters')}</p>
                 </div>
             </div>
         );
@@ -94,7 +96,7 @@ export const PutawayList: React.FC<PutawayListProps> = ({
                                             <span className="bg-red-500 text-white text-[8px] font-black px-2 py-0.5 rounded-lg uppercase animate-pulse shadow-lg shadow-red-500/20">!</span>
                                         )}
                                     </div>
-                                    <p className="text-[10px] text-slate-500 dark:text-zinc-500 font-black uppercase tracking-widest mt-1">{job.items} Inventory Items</p>
+                                    <p className="text-[10px] text-slate-500 dark:text-zinc-500 font-black uppercase tracking-widest mt-1">{job.items} {t('warehouse.putaway.inventoryItems')}</p>
                                 </div>
                                 <div className="p-2 bg-stone-50 dark:bg-white/5 rounded-lg border border-[#E2DCCE]/30 dark:border-white/5">
                                     <ChevronRight size={18} className="text-slate-400 dark:text-zinc-600 flex-shrink-0" />
@@ -120,7 +122,7 @@ export const PutawayList: React.FC<PutawayListProps> = ({
                                             <div className="flex items-center gap-1.5 px-2.5 py-1 bg-stone-50 dark:bg-white/5 rounded-lg border border-stone-100 dark:border-white/5">
                                                 <div className="w-1.5 h-1.5 rounded-full bg-[#2C5E3B] dark:bg-[#A9CBA2] shadow-[0_0_8px_rgba(44,94,59,0.4)]" />
                                                 <span className="text-[9px] text-gray-550 dark:text-gray-450 font-black uppercase tracking-widest">
-                                                    {job.items} Items
+                                                    {job.items} {t('warehouse.items')}
                                                 </span>
                                             </div>
                                             <div className="flex items-center gap-1.5 px-2.5 py-1 bg-stone-50 dark:bg-white/5 rounded-lg border border-stone-100 dark:border-white/5">
@@ -128,7 +130,7 @@ export const PutawayList: React.FC<PutawayListProps> = ({
                                                 <span className="text-[9px] text-gray-550 dark:text-gray-450 font-black uppercase tracking-widest truncate max-w-[120px]">
                                                     {(() => {
                                                         const loc = (job as any).zone || job.location;
-                                                        if (!loc) return 'UNASSIGNED';
+                                                        if (!loc) return t('warehouse.putaway.unassigned');
                                                         if (loc.toLowerCase().startsWith('zone')) return loc.toUpperCase();
                                                         return `ZONE ${loc}`.toUpperCase();
                                                     })()}
@@ -137,7 +139,7 @@ export const PutawayList: React.FC<PutawayListProps> = ({
                                             {isCritical && (
                                                 <div className="flex items-center gap-1.5 px-2.5 py-1 bg-red-500 text-white text-[9px] font-black rounded-lg uppercase tracking-wider animate-pulse shadow-lg shadow-red-500/20">
                                                     <Zap size={10} className="fill-current" />
-                                                    Critical
+                                                    {t('warehouse.priority')}
                                                 </div>
                                             )}
                                         </div>
@@ -150,7 +152,7 @@ export const PutawayList: React.FC<PutawayListProps> = ({
                                                     ? 'bg-[#2C5E3B] dark:bg-[#EAE5D9] border-[#2C5E3B] dark:border-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24] scale-110'
                                                     : 'bg-white/80 dark:bg-[#18201B]/70 border border-[#E2DCCE] dark:border-emerald-950/20 text-[#2C4D35] dark:text-[#A9CBA2] hover:text-[#1E3F27] dark:hover:text-white'
                                                     }`}
-                                                aria-label="Assign User"
+                                                aria-label={t('warehouse.putaway.assignUser')}
                                             >
                                                 <UserIcon size={16} />
                                             </button>
@@ -160,7 +162,7 @@ export const PutawayList: React.FC<PutawayListProps> = ({
                                                 onClick={(e) => handleDelete(e, job.id)}
                                                 disabled={isSubmitting}
                                                 className="w-10 h-10 rounded-xl border bg-white/80 dark:bg-[#18201B]/70 border-[#E2DCCE] dark:border-emerald-950/20 text-rose-500 hover:text-white hover:bg-rose-500 hover:border-rose-500 transition-all flex items-center justify-center disabled:opacity-50 shadow-md"
-                                                title="Delete Job"
+                                                title={t('warehouse.putaway.deleteJobConfirm')}
                                             >
                                                 <Trash2 size={16} />
                                             </button>
@@ -170,8 +172,8 @@ export const PutawayList: React.FC<PutawayListProps> = ({
 
                                 <div className="space-y-5 relative z-10">
                                     <div className="flex justify-between items-center px-1">
-                                        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 dark:text-gray-500">Processing Status</p>
-                                        <p className={`text-[10px] font-black uppercase tracking-[0.2em] ${progress === 100 ? 'text-emerald-600 dark:text-emerald-400' : 'text-[#2C5E3B] dark:text-[#A9CBA2]'}`}>{Math.round(progress)}% COMPLETED</p>
+                                        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 dark:text-gray-500">{t('warehouse.putaway.progress')}</p>
+                                        <p className={`text-[10px] font-black uppercase tracking-[0.2em] ${progress === 100 ? 'text-emerald-600 dark:text-emerald-400' : 'text-[#2C5E3B] dark:text-[#A9CBA2]'}`}>{Math.round(progress)}% {t('warehouse.putaway.percentComplete')}</p>
                                     </div>
 
                                     <div className="w-full h-2 bg-stone-100 dark:bg-white/5 rounded-full overflow-hidden shadow-inner border border-stone-200/50 dark:border-white/5">
@@ -195,7 +197,7 @@ export const PutawayList: React.FC<PutawayListProps> = ({
                                                                 <span className="text-xs font-black text-white dark:text-[#1E3B24]">{displayInitial}</span>
                                                             </div>
                                                             <div>
-                                                                <p className="text-[8px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-0.5">Assigned To</p>
+                                                                <p className="text-[8px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-0.5">{t('warehouse.assignedTo')}</p>
                                                                 <p className="text-[10px] font-black text-gray-900 dark:text-white uppercase truncate max-w-[120px]">{displayName}</p>
                                                             </div>
                                                         </>
@@ -207,8 +209,8 @@ export const PutawayList: React.FC<PutawayListProps> = ({
                                                         <User size={18} className="text-gray-400 dark:text-gray-600" />
                                                     </div>
                                                     <div>
-                                                        <p className="text-[8px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-0.5">Assigned To</p>
-                                                        <p className="text-[10px] font-black text-stone-400 dark:text-gray-800 uppercase italic">Unassigned</p>
+                                                        <p className="text-[8px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-0.5">{t('warehouse.assignedTo')}</p>
+                                                        <p className="text-[10px] font-black text-stone-400 dark:text-gray-800 uppercase italic">{t('warehouse.putaway.unassigned')}</p>
                                                     </div>
                                                 </div>
                                             )}
@@ -242,7 +244,7 @@ export const PutawayList: React.FC<PutawayListProps> = ({
                                             <Loader2 size={20} className="animate-spin" />
                                         ) : (
                                             <>
-                                                View Job Details
+                                                {t('warehouse.putaway.storeReceivedGoods')}
                                                 <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
                                             </>
                                         )}

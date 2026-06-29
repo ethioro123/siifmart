@@ -12,6 +12,7 @@ interface PutawayHistoryProps {
     setSelectedJob: (job: any) => void;
     setIsDetailsOpen: (open: boolean) => void;
     employees: any[];
+    t: (key: string) => string;
 }
 
 const ITEMS_PER_PAGE = 12;
@@ -22,7 +23,8 @@ export const PutawayHistory: React.FC<PutawayHistoryProps> = ({
     resolveOrderRef,
     setSelectedJob,
     setIsDetailsOpen,
-    employees
+    employees,
+    t
 }) => {
     const [search, setSearch] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
@@ -65,17 +67,17 @@ export const PutawayHistory: React.FC<PutawayHistoryProps> = ({
                     if ((unitDef.category === 'weight' || unitDef.category === 'volume') && sizeNum > 0) {
                         displayQty = `${baseQty} × ${sizeNum}${unitDef.shortLabel.toLowerCase()}`;
                     } else {
-                        displayQty = `${baseQty}${unitDef.code !== 'UNIT' ? ' ' + unitDef.shortLabel.toUpperCase() : ' units'}`;
+                        displayQty = `${baseQty}${unitDef.code !== 'UNIT' ? ' ' + unitDef.shortLabel.toUpperCase() : ' ' + t('warehouse.itemPlural')}`;
                     }
                 } else {
-                    displayQty = `${j.items || 1} units`;
+                    displayQty = `${j.items || 1} ${t('warehouse.itemPlural')}`;
                 }
 
                 return {
                     id: j.id,
                     reference: formatJobId(j),
                     type: j.type === 'REPLENISH' ? 'REPLENISH' : 'PUTAWAY',
-                    actionType: j.type === 'REPLENISH' ? 'Stock Replenishment' : 'Inventory Putaway',
+                    actionType: j.type === 'REPLENISH' ? t('warehouse.tabs.replenish') : t('warehouse.putaway.putaway'),
                     status: j.status,
                     subtitle: item?.name || 'Unknown Product',
                     date: j.completedAt || j.updatedAt || j.createdAt || new Date().toISOString(),
@@ -101,7 +103,7 @@ export const PutawayHistory: React.FC<PutawayHistoryProps> = ({
                 item.location.toLowerCase().includes(q)
             );
         });
-    }, [historicalJobs, search, employees]);
+    }, [historicalJobs, search, employees, t]);
 
     const totalPages = Math.ceil(filteredHistory.length / perPage);
     const paginatedHistory = useMemo(() => {
@@ -141,13 +143,13 @@ export const PutawayHistory: React.FC<PutawayHistoryProps> = ({
                     <div className="p-2.5 bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 rounded-2xl border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20 group-hover/history:bg-[#2C5E3B]/20 dark:group-hover:bg-[#A9CBA2]/25 transition-all shadow-sm">
                         <HistoryIcon size={20} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
                     </div>
-                    Job History
+                    {t('warehouse.putaway.history')}
                 </h4>
                 <div className="relative w-full sm:w-80 group">
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-500 group-focus-within:text-[#2C5E3B] dark:group-focus-within:text-[#A9CBA2] transition-colors z-10" size={18} />
                     <input
                         type="text"
-                        placeholder="Search history..."
+                        placeholder={`${t('warehouse.searchHistoryPlaceholder')}`}
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         className="woody-input w-full pl-12 pr-4 py-3.5 text-[10px] uppercase tracking-[0.2em] font-black"
@@ -176,11 +178,11 @@ export const PutawayHistory: React.FC<PutawayHistoryProps> = ({
                                             <div className={`p-2 rounded-xl transition-colors shadow-sm ${item.type === 'REPLENISH' ? 'bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-200/50 dark:border-amber-500/30' : 'bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/20 text-[#2C5E3B] dark:text-[#A9CBA2] border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/30'}`}>
                                                 <PackageCheck size={16} />
                                             </div>
-                                            <span className="text-[9px] uppercase tracking-widest font-black text-gray-400 dark:text-gray-550">
+                                            <span className="text-[9px] uppercase tracking-widest font-black text-gray-400 dark:text-gray-555">
                                                 {item.actionType}
                                             </span>
                                         </div>
-                                        <span className="text-[9px] font-black text-gray-400 dark:text-gray-550 group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] transition-colors uppercase tracking-widest font-mono italic">
+                                        <span className="text-[9px] font-black text-gray-400 dark:text-gray-555 group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] transition-colors uppercase tracking-widest font-mono italic">
                                             {getRelativeTime(item.date)}
                                         </span>
                                     </div>
@@ -209,9 +211,9 @@ export const PutawayHistory: React.FC<PutawayHistoryProps> = ({
                                                 <span className="text-[10px] font-black text-gray-900 dark:text-[#A9CBA2]">{(item.resolvedUser?.name || 'S').charAt(0).toUpperCase()}</span>
                                             </div>
                                             <div className="flex flex-col">
-                                                <span className="text-[8px] font-black text-gray-400 dark:text-gray-550 uppercase tracking-widest leading-none mb-0.5">OPERATOR</span>
+                                                <span className="text-[8px] font-black text-gray-400 dark:text-gray-555 uppercase tracking-widest leading-none mb-0.5">{t('warehouse.putaway.worker')}</span>
                                                 <span className="text-[10px] font-black text-gray-900 dark:text-gray-300 uppercase tracking-tight leading-none">
-                                                    {item.resolvedUser?.name.split(' ')[0]} <span className="text-gray-400 dark:text-gray-550 font-bold lowercase">({item.resolvedUser?.displayId})</span>
+                                                    {item.resolvedUser?.name.split(' ')[0]} <span className="text-gray-400 dark:text-gray-555 font-bold lowercase">({item.resolvedUser?.displayId})</span>
                                                 </span>
                                             </div>
                                         </div>
@@ -232,8 +234,7 @@ export const PutawayHistory: React.FC<PutawayHistoryProps> = ({
                     <div className="p-6 bg-white dark:bg-gray-900 rounded-3xl mb-4 border border-gray-100 dark:border-white/10 shadow-xl">
                         <HistoryIcon size={40} className="text-gray-200 dark:text-gray-800" />
                     </div>
-                    <h3 className="text-lg font-black text-gray-900 dark:text-white mb-1 uppercase tracking-widest">No History Found</h3>
-                    <p className="text-gray-400 dark:text-gray-600 text-[10px] uppercase tracking-[0.3em] font-black italic">No past records found</p>
+                    <h3 className="text-lg font-black text-gray-900 dark:text-white mb-1 uppercase tracking-widest">{t('warehouse.noHistoryFound')}</h3>
                 </div>
             )}
         </div>

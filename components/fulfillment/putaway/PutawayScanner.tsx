@@ -24,6 +24,7 @@ interface PutawayScannerProps {
     allProducts: Product[];
     activeSiteId?: string;
     expectedPrefix?: string;
+    t: (key: string) => string;
 }
 
 export const PutawayScanner: React.FC<PutawayScannerProps> = ({
@@ -38,7 +39,8 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
     occupants = [],
     allProducts,
     activeSiteId,
-    expectedPrefix
+    expectedPrefix,
+    t
 }) => {
     const [step, setStep] = useState<'LOCATION' | 'ITEM'>('LOCATION');
     const [inputVal, setInputVal] = useState('');
@@ -227,16 +229,16 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
             {/* Top Bar */}
             <div className="p-4 bg-[#FAF8F5] dark:bg-[#1C2620]/80 border-b border-[#E2DCCE]/60 dark:border-white/10 flex justify-between items-center">
                 <div className="flex items-center gap-3">
-                    <button onClick={onClose} className="p-2 -ml-2 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-all shadow-sm active:scale-95" aria-label="Close Scanner">
+                    <button onClick={onClose} className="p-2 -ml-2 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-all shadow-sm active:scale-95" aria-label={t('warehouse.dismiss')}>
                         <X size={24} />
                     </button>
                     <div>
-                        <h3 className="font-black text-gray-900 dark:text-white text-lg uppercase tracking-tight">{step === 'LOCATION' ? 'Scan Location' : 'Confirm Item'}</h3>
+                        <h3 className="font-black text-gray-900 dark:text-white text-lg uppercase tracking-tight">{step === 'LOCATION' ? t('warehouse.scanLocation') : t('warehouse.scanSkuToConfirm')}</h3>
                         <p className="text-[10px] text-[#2C5E3B] dark:text-[#A9CBA2] font-black uppercase tracking-widest mt-0.5">JOB: {formatJobId(job)}</p>
                     </div>
                 </div>
                 <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-black uppercase tracking-widest bg-[#E2DCCE]/30 dark:bg-white/10 px-3 py-1.5 rounded-full text-slate-750 dark:text-gray-300 border border-[#E2DCCE]/60 dark:border-white/10">
+                    <span className="text-[10px] font-black uppercase tracking-widest bg-[#E2DCCE]/30 dark:bg-white/10 px-3 py-1.5 rounded-full text-slate-755 dark:text-gray-300 border border-[#E2DCCE]/60 dark:border-white/10">
                         STEP {step === 'LOCATION' ? '1' : '2'}
                     </span>
                 </div>
@@ -268,7 +270,7 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
                     </div>
 
                     <h1 className={`text-4xl md:text-5xl font-black text-gray-900 dark:text-white text-center uppercase tracking-tight mb-4 z-10 transition-all duration-700 ${isStrictlyValid ? 'text-[#2C5E3B] dark:text-[#A9CBA2] scale-105' : showError ? 'text-rose-500' : ''}`}>
-                        {showSuccess ? 'Success!' : showError ? 'Error' : step === 'LOCATION' ? (isStrictlyValid ? 'Location Found' : 'Scan Location') : 'Verify Item'}
+                        {showSuccess ? 'Success!' : showError ? 'Error' : step === 'LOCATION' ? (isStrictlyValid ? t('warehouse.putaway.confirmLocation') : t('warehouse.scanLocation')) : t('warehouse.scanSkuToConfirm')}
                     </h1>
 
                     {showSuccess ? (
@@ -312,7 +314,7 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
                                 <div className="mt-8 p-5 rounded-2xl bg-amber-50 dark:bg-amber-500/5 border-2 border-amber-100 dark:border-amber-500/20 text-left animate-in slide-in-from-top-4 duration-700 shadow-lg shadow-amber-500/5">
                                     <div className="flex items-center gap-3 mb-4 border-b border-amber-200 dark:border-amber-500/10 pb-3">
                                         <Box size={16} className="text-amber-500" />
-                                        <span className="text-[10px] font-black uppercase text-amber-600 dark:text-amber-500/80 tracking-widest">Existing Stock Alert ({currentOccupants.length})</span>
+                                        <span className="text-[10px] font-black uppercase text-amber-600 dark:text-amber-500/80 tracking-widest">{t('warehouse.putaway.locationOccupants')} ({currentOccupants.length})</span>
                                     </div>
                                     <div className="space-y-4">
                                         {currentOccupants.slice(0, 2).map((occ: Product) => (
@@ -343,7 +345,7 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
                                 
                                 {currentOccupants.length > 0 && (
                                     <div className="mt-4 space-y-4 pt-6 border-t-2 border-emerald-400/20 text-left">
-                                        <span className="text-[10px] font-black uppercase text-emerald-600 dark:text-emerald-400/60 tracking-widest block mb-1">Items at Location ({currentOccupants.length})</span>
+                                        <span className="text-[10px] font-black uppercase text-emerald-600 dark:text-emerald-400/60 tracking-widest block mb-1">{t('warehouse.putaway.locationOccupants')} ({currentOccupants.length})</span>
                                         {currentOccupants.slice(0, 3).map((occ: Product) => (
                                             <div key={occ.id} className="flex items-center gap-3">
                                                 <div className="w-7 h-7 rounded-lg bg-emerald-100 dark:bg-white/5 border border-emerald-200 dark:border-white/10 flex items-center justify-center shrink-0">

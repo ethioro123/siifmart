@@ -69,7 +69,8 @@ export const PutawayTab: React.FC<PutawayTabProps> = ({
         addNotification,
         activeSite,
         zones,
-        putawayStock
+        putawayStock,
+        t
     } = useFulfillment();
 
     // --- SORTED/FILTERED PUTAWAY JOBS ---
@@ -464,6 +465,7 @@ export const PutawayTab: React.FC<PutawayTabProps> = ({
                 isSubmitting={isSubmitting}
                 viewMode={viewMode}
                 setViewMode={setViewMode}
+                t={t}
             />
 
             {/* MAIN CONTENT AREA */}
@@ -486,6 +488,7 @@ export const PutawayTab: React.FC<PutawayTabProps> = ({
                             setIsSubmitting={setIsSubmitting}
                             handleStartJob={handleStartJob}
                             onShowDetails={handleShowDetails}
+                            t={t}
                         />
                     ) : (
                         <div className="col-span-full">
@@ -495,6 +498,7 @@ export const PutawayTab: React.FC<PutawayTabProps> = ({
                                 setSelectedJob={setSelectedJob}
                                 setIsDetailsOpen={setIsDetailsOpen}
                                 employees={employees}
+                                t={t}
                             />
                         </div>
                     )}
@@ -516,6 +520,7 @@ export const PutawayTab: React.FC<PutawayTabProps> = ({
                     onScanLocation={onScanLocationWrapper}
                     onScanItem={onScanItemWrapper}
                     isProcessing={isSubmitting}
+                    t={t}
                 />
             )}
 
@@ -537,6 +542,7 @@ export const PutawayTab: React.FC<PutawayTabProps> = ({
                     currentItem={currentItem}
                     resolveOrderRef={resolveOrderRef}
                     employees={employees}
+                    t={t}
                 />
             )}
 
@@ -550,6 +556,7 @@ export const PutawayTab: React.FC<PutawayTabProps> = ({
                     }}
                     resolveOrderRef={resolveOrderRef}
                     employees={employees}
+                    t={t}
                 />
             )}
         </div>
