@@ -226,6 +226,9 @@ export const PickAmendModal: React.FC<PickAmendModalProps> = ({
                                                         max={line.required * 2}
                                                         value={line.amended}
                                                         onChange={e => handleAmendChange(i, e.target.value)}
+                                                        aria-label="Amended quantity"
+                                                        title="Amended quantity"
+                                                        placeholder="0"
                                                         className={`w-16 text-center text-sm font-black font-mono border rounded-lg px-2 py-1 focus:outline-none transition-all ${isOver
                                                             ? 'border-red-400 bg-red-50 dark:bg-red-900/10 text-red-600 dark:text-red-400'
                                                             : 'border-amber-300 dark:border-amber-500/30 bg-white dark:bg-black/40 text-amber-700 dark:text-amber-300 focus:border-amber-500'
