@@ -173,6 +173,7 @@ export const FulfillmentContent: React.FC = () => {
                     isSubmitting={isSubmitting}
                     setIsSubmitting={setIsSubmitting}
                     refreshData={refreshData}
+                    refreshJobs={refreshJobs}
                     setSelectedJob={setSelectedJob}
                     setIsDetailsOpen={setIsDetailsOpen}
                     isDetailsOpen={isDetailsOpen}

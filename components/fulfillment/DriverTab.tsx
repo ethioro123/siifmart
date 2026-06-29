@@ -34,6 +34,7 @@ interface DriverTabProps {
     isSubmitting: boolean;
     setIsSubmitting: (val: boolean) => void;
     refreshData: () => Promise<void>;
+    refreshJobs?: () => void;
     setSelectedJob: (job: WMSJob | null) => void;
     setIsDetailsOpen: (isOpen: boolean) => void;
     isDetailsOpen: boolean;
@@ -57,6 +58,7 @@ export const DriverTab: React.FC<DriverTabProps> = ({
     isSubmitting,
     setIsSubmitting,
     refreshData,
+    refreshJobs,
     setSelectedJob,
     setIsDetailsOpen,
     isDetailsOpen,
@@ -306,6 +308,7 @@ export const DriverTab: React.FC<DriverTabProps> = ({
                             setProcessingJobIds={setProcessingJobIds}
                             wmsJobsService={wmsJobsService}
                             refreshData={refreshData}
+                            refreshJobs={refreshJobs}
                             addNotification={addNotification}
                             adjustStockMutation={adjustStockMutation}
                             addProduct={addProduct}

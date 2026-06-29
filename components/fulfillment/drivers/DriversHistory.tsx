@@ -40,46 +40,69 @@ export const DriversHistory: React.FC<DriversHistoryProps> = ({
     const paginatedHistory = useMemo(() => filteredHistory.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE), [filteredHistory, currentPage]);
 
     return (
-        <div className="bg-white dark:bg-[#0a0a0b] border-2 border-gray-100 dark:border-white/10 rounded-[2rem] lg:rounded-[3rem] p-6 lg:p-12 shadow-xl relative overflow-hidden group/log mb-10 transition-all">
+        <div className="bg-white dark:bg-[#0a0a0b] border-2 border-gray-100 dark:border-white/10 rounded-[1.5rem] sm:rounded-[2rem] lg:rounded-[3rem] p-4 sm:p-6 lg:p-12 shadow-xl relative overflow-hidden group/log mb-6 sm:mb-10 transition-all">
             <div className="absolute inset-0 bg-[linear-gradient(rgba(240,240,240,0)_50%,rgba(0,0,0,0.02)_50%),linear-gradient(90deg,rgba(0,0,0,0.01),rgba(0,0,0,0.01),rgba(0,0,0,0.01))] z-0 pointer-events-none bg-[length:100%_4px,3px_100%] opacity-40 dark:opacity-20" />
             
-            <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-8 mb-12 relative z-10">
-                <div className="flex items-center gap-6">
-                    <div className="p-5 bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 rounded-2xl border-2 border-[#2C5E3B]/10 dark:border-[#A9CBA2]/20 shadow-sm"><HistoryIcon size={28} className="text-[#2C5E3B] dark:text-[#A9CBA2]" /></div>
-                    <div><h4 className="text-3xl font-black text-gray-900 dark:text-white uppercase tracking-tighter italic">{t('warehouse.driverHub.jobHistory')}</h4><div className="flex items-center gap-2.5 mt-1.5"><div className="w-2 h-2 rounded-full bg-[#A9CBA2] animate-pulse" /><p className="text-gray-400 dark:text-gray-500 text-[10px] uppercase font-bold tracking-[0.25em]">{t('warehouse.driverHub.pastAssignments')}</p></div></div>
+            <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 sm:gap-8 mb-6 sm:mb-12 relative z-10">
+                <div className="flex items-center gap-4 sm:gap-6">
+                    <div className="p-3.5 sm:p-5 bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 rounded-2xl border-2 border-[#2C5E3B]/10 dark:border-[#A9CBA2]/20 shadow-sm">
+                        <HistoryIcon size={20} className="text-[#2C5E3B] dark:text-[#A9CBA2] sm:w-[28px] sm:h-[28px]" />
+                    </div>
+                    <div>
+                        <h4 className="text-xl sm:text-3xl font-black text-gray-900 dark:text-white uppercase tracking-tighter italic">{t('warehouse.driverHub.jobHistory')}</h4>
+                        <div className="flex items-center gap-2 mt-1 sm:mt-1.5">
+                            <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-[#A9CBA2] animate-pulse" />
+                            <p className="text-gray-400 dark:text-gray-505 text-[9px] sm:text-[10px] uppercase font-bold tracking-[0.2em] sm:tracking-[0.25em]">{t('warehouse.driverHub.pastAssignments')}</p>
+                        </div>
+                    </div>
                 </div>
                 <div className="relative w-full xl:w-[450px] group">
-                    <div className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#2C5E3B] transition-colors pointer-events-none"><Search size={20} /></div>
-                    <input type="text" placeholder={t('warehouse.driverHub.searchHistory')} aria-label={t('warehouse.driverHub.searchHistory')} title={t('warehouse.driverHub.searchHistory')} value={searchQuery} onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }} className="w-full bg-gray-50 dark:bg-black/60 border-2 border-gray-100 dark:border-white/10 rounded-[1.5rem] pl-16 pr-8 py-5 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-[#2C5E3B]/50 transition-all font-mono uppercase tracking-[0.15em] placeholder:text-gray-400 dark:placeholder:text-gray-805 shadow-inner" />
+                    <div className="absolute left-4 sm:left-6 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#2C5E3B] transition-colors pointer-events-none">
+                        <Search size={18} className="sm:w-[20px] sm:h-[20px]" />
+                    </div>
+                    <input type="text" placeholder={t('warehouse.driverHub.searchHistory')} aria-label={t('warehouse.driverHub.searchHistory')} title={t('warehouse.driverHub.searchHistory')} value={searchQuery} onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }} className="w-full bg-gray-50 dark:bg-black/60 border-2 border-gray-100 dark:border-white/10 rounded-[1.2rem] sm:rounded-[1.5rem] pl-12 sm:pl-16 pr-4 sm:pr-8 py-3 sm:py-5 text-xs sm:text-sm text-gray-900 dark:text-white focus:outline-none focus:border-[#2C5E3B]/50 transition-all font-mono uppercase tracking-[0.1em] sm:tracking-[0.15em] placeholder:text-gray-400 dark:placeholder:text-gray-805 shadow-inner" />
                 </div>
             </div>
-
-            <div className="relative z-10 space-y-5">
+ 
+            <div className="relative z-10 space-y-4">
                 {paginatedHistory.length > 0 ? (
-                    <div className="space-y-4">
+                    <div className="space-y-3 sm:space-y-4">
                         {paginatedHistory.map((job: any) => {
                             const destSite = sites.find(s => s.id === job.destSiteId);
                             return (
-                                <div key={job.id} onClick={() => { setSelectedJob(job); setIsDetailsOpen(true); }} className="flex flex-col md:flex-row items-center gap-5 md:gap-8 bg-gray-50/50 dark:bg-white/[0.03] hover:bg-gray-100 dark:hover:bg-white/[0.06] border-2 border-gray-50 dark:border-white/5 hover:border-[#2C5E3B]/30 rounded-[1.5rem] lg:rounded-[2rem] p-5 lg:p-7 transition-all group/item cursor-pointer shadow-sm hover:shadow-[#2C5E3B]/5">
-                                    <div className="w-full md:w-40 flex flex-col justify-center">
-                                        <span className="text-[11px] font-black text-[#2C5E3B] dark:text-[#A9CBA2]/50 group-hover/item:text-[#2C5E3B] dark:group-hover/item:text-[#A9CBA2] transition-colors uppercase tracking-widest">{formatJobId(job)}</span>
-                                        <p className="text-[10px] text-gray-400 dark:text-gray-600 font-bold mt-1.5 uppercase tracking-wider italic">{formatDateTime(job.updatedAt || job.createdAt)}</p>
+                                <div key={job.id} onClick={() => { setSelectedJob(job); setIsDetailsOpen(true); }} className="flex flex-col md:flex-row items-start md:items-center gap-4 md:gap-8 bg-gray-50/50 dark:bg-white/[0.03] hover:bg-gray-100 dark:hover:bg-white/[0.06] border-2 border-gray-50 dark:border-white/5 hover:border-[#2C5E3B]/30 rounded-[1.2rem] sm:rounded-[1.5rem] lg:rounded-[2rem] p-4 sm:p-5 lg:p-7 transition-all group/item cursor-pointer shadow-sm hover:shadow-[#2C5E3B]/5 w-full">
+                                    <div className="w-full md:w-40 flex flex-col justify-center shrink-0">
+                                        <span className="text-[10px] sm:text-[11px] font-black text-[#2C5E3B] dark:text-[#A9CBA2]/50 group-hover/item:text-[#2C5E3B] dark:group-hover/item:text-[#A9CBA2] transition-colors uppercase tracking-wider sm:tracking-widest">{formatJobId(job)}</span>
+                                        <p className="text-[9px] sm:text-[10px] text-gray-400 dark:text-gray-600 font-bold mt-1 uppercase tracking-wider italic">{formatDateTime(job.updatedAt || job.createdAt)}</p>
                                     </div>
-                                    <div className="h-12 w-px bg-gray-200 dark:bg-white/5 hidden md:block" />
-                                    <div className="flex-1 flex items-center gap-5 min-w-0 w-full">
-                                        <div className="p-4 bg-white dark:bg-black/40 rounded-2xl border-2 border-gray-100 dark:border-white/5 shadow-sm group-hover/item:border-[#2C5E3B]/20 transition-all"><Package size={22} className="text-gray-300 dark:text-gray-505 group-hover/item:text-[#2C5E3B] dark:group-hover/item:text-white transition-colors" /></div>
+                                    <div className="h-px md:h-12 w-full md:w-px bg-gray-250 dark:bg-white/5" />
+                                    <div className="flex-1 flex items-center gap-3 sm:gap-5 min-w-0 w-full">
+                                        <div className="p-3 sm:p-4 bg-white dark:bg-black/40 rounded-xl sm:rounded-2xl border-2 border-gray-100 dark:border-white/5 shadow-sm group-hover/item:border-[#2C5E3B]/20 transition-all shrink-0">
+                                            <Package size={18} className="text-gray-300 dark:text-gray-505 group-hover/item:text-[#2C5E3B] dark:group-hover/item:text-white transition-colors sm:w-[22px] sm:h-[22px]" />
+                                        </div>
                                         <div className="min-w-0">
-                                            <p className="text-[10px] text-gray-400 dark:text-gray-500 font-black uppercase tracking-widest mb-1.5 italic">{t('warehouse.driverHub.destination')}</p>
-                                            <h6 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tight truncate underline decoration-[#A9CBA2]/10 group-hover/item:decoration-[#A9CBA2]/30 decoration-2 underline-offset-4">{destSite?.name || t('warehouse.driverHub.customer')}</h6>
+                                            <p className="text-[8px] sm:text-[10px] text-gray-400 dark:text-gray-500 font-black uppercase tracking-widest mb-1 italic">{t('warehouse.driverHub.destination')}</p>
+                                            <h6 className="text-base sm:text-xl font-black text-gray-900 dark:text-white uppercase tracking-tight truncate underline decoration-[#A9CBA2]/10 group-hover/item:decoration-[#A9CBA2]/30 decoration-2 underline-offset-4">{destSite?.name || t('warehouse.driverHub.customer')}</h6>
                                         </div>
                                     </div>
-                                    <div className="flex items-center gap-5 md:gap-10 w-full md:w-auto justify-between md:justify-end border-t md:border-t-0 border-gray-100 dark:border-white/5 pt-5 md:pt-0 mt-2 md:mt-0">
-                                        <div className="text-right">
-                                            <p className="text-gray-400 dark:text-gray-500 text-[10px] font-black uppercase tracking-widest mb-1 italic">{t('warehouse.driverHub.totalItems')}</p>
-                                            <div className="flex items-center gap-2.5 justify-end"><span className="text-gray-900 dark:text-white font-black text-2xl tracking-tighter">{job.items || 0}</span><span className="text-[10px] text-gray-300 dark:text-gray-600 font-black uppercase tracking-widest">{t('warehouse.driverHub.units')}</span></div>
+                                    <div className="flex flex-wrap items-center gap-3 sm:gap-5 md:gap-10 w-full md:w-auto justify-between md:justify-end border-t md:border-t-0 border-gray-100 dark:border-white/5 pt-3 sm:pt-4 md:pt-0 mt-1 md:mt-0">
+                                        <div className="text-left md:text-right">
+                                            <p className="text-gray-400 dark:text-gray-550 text-[8px] sm:text-[10px] font-black uppercase tracking-widest mb-0.5 italic">{t('warehouse.driverHub.totalItems')}</p>
+                                            <div className="flex items-center gap-1.5 md:gap-2.5 justify-start md:justify-end">
+                                                <span className="text-gray-900 dark:text-white font-black text-xl sm:text-2xl tracking-tighter">{job.items || 0}</span>
+                                                <span className="text-[9px] sm:text-[10px] text-gray-300 dark:text-gray-600 font-black uppercase tracking-widest">{t('warehouse.driverHub.units')}</span>
+                                            </div>
                                         </div>
-                                        <div className="flex items-center gap-3 bg-green-50 dark:bg-green-500/5 px-5 py-2.5 rounded-2xl border-2 border-green-100 dark:border-green-500/10 shadow-sm"><div className="w-2.5 h-2.5 rounded-full bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.4)]" /><span className="text-[10px] text-green-700 dark:text-green-400 uppercase font-black tracking-widest italic">{t('warehouse.driverHub.delivered')}</span></div>
-                                        {job.status === 'Completed' && <button onClick={(e) => { e.stopPropagation(); setReturnJob(job); }} className="flex items-center gap-2 bg-amber-50 dark:bg-amber-500/5 hover:bg-amber-100 dark:hover:bg-amber-500/15 px-5 py-2.5 rounded-2xl border-2 border-amber-100 dark:border-amber-500/10 hover:border-amber-400 dark:hover:border-amber-500/30 transition-all text-amber-700 dark:text-amber-400 shadow-sm group/btn active:scale-95"><Undo2 size={14} className="group-hover/btn:-rotate-45 transition-transform" /><span className="text-[10px] font-black uppercase tracking-widest">{t('warehouse.driverHub.return')}</span></button>}
+                                        <div className="flex items-center gap-2 sm:gap-3 bg-green-50 dark:bg-green-500/5 px-3 py-1.5 sm:px-5 sm:py-2.5 rounded-xl sm:rounded-2xl border-2 border-green-100 dark:border-green-500/10 shadow-sm">
+                                            <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.4)]" />
+                                            <span className="text-[9px] sm:text-[10px] text-green-700 dark:text-green-400 uppercase font-black tracking-widest italic">{t('warehouse.driverHub.delivered')}</span>
+                                        </div>
+                                        {job.status === 'Completed' && (
+                                            <button onClick={(e) => { e.stopPropagation(); setReturnJob(job); }} className="flex items-center gap-1.5 sm:gap-2 bg-amber-50 dark:bg-amber-500/5 hover:bg-amber-100 dark:hover:bg-amber-500/15 px-3 py-1.5 sm:px-5 sm:py-2.5 rounded-xl sm:rounded-2xl border-2 border-amber-100 dark:border-amber-500/10 hover:border-amber-400 dark:hover:border-amber-500/30 transition-all text-amber-700 dark:text-amber-400 shadow-sm group/btn active:scale-95">
+                                                <Undo2 size={12} className="group-hover/btn:-rotate-45 transition-transform sm:w-[14px] sm:h-[14px]" />
+                                                <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest">{t('warehouse.driverHub.return')}</span>
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
                             );

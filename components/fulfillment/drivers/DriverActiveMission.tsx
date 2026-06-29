@@ -11,12 +11,12 @@ interface DriverActiveMissionProps {
     user: User | null; sites: Site[]; jobs: WMSJob[]; products: Product[];
     setSelectedJob: (job: WMSJob | null) => void; setIsDetailsOpen: (val: boolean) => void;
     processingJobIds: Set<string>; setProcessingJobIds: React.Dispatch<React.SetStateAction<Set<string>>>;
-    wmsJobsService: any; refreshData: () => Promise<void>; addNotification: (type: string, message: string) => void;
+    wmsJobsService: any; refreshData: () => Promise<void>; refreshJobs?: () => void; addNotification: (type: string, message: string) => void;
     adjustStockMutation: any; addProduct: any; globalSearch: string;
 }
 
 export const DriverActiveMission: React.FC<DriverActiveMissionProps> = ({
-    t, filteredJobs, employees, user, sites, jobs, products, setSelectedJob, setIsDetailsOpen, processingJobIds, setProcessingJobIds, wmsJobsService, refreshData, addNotification, adjustStockMutation, addProduct, globalSearch
+    t, filteredJobs, employees, user, sites, jobs, products, setSelectedJob, setIsDetailsOpen, processingJobIds, setProcessingJobIds, wmsJobsService, refreshData, refreshJobs, addNotification, adjustStockMutation, addProduct, globalSearch
 }) => {
     const [currentPage, setCurrentPage] = useState(1);
     const ITEMS_PER_PAGE = 5;
@@ -130,48 +130,24 @@ export const DriverActiveMission: React.FC<DriverActiveMissionProps> = ({
                                             return <div />;
                                         })()}
 
-                                        <div className="flex items-center gap-1.5 shrink-0">
+                                        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 shrink-0">
                                             {(job.transferStatus === 'In-Transit' || job.transferStatus === 'Shipped') && (
                                                 <button onClick={(e) => { e.stopPropagation(); if (destSite?.address) window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(destSite.address)}`, '_blank'); else addNotification('info', t('warehouse.driverHub.addressPending')); }} className="px-3 py-1.5 bg-gray-200 dark:bg-white/10 hover:bg-gray-300 dark:hover:bg-white/20 rounded-lg text-[9px] font-black text-gray-900 dark:text-white uppercase flex items-center justify-center gap-1.5 transition-all shadow-sm active:scale-95">
                                                     <Navigation size={11} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />{t('warehouse.driverHub.nav')}
                                                 </button>
                                             )}
                                             {(job.transferStatus === 'In-Transit' || job.transferStatus === 'Shipped') ? (
-                                                <>
-                                                    {/* Partial Delivery */}
-                                                    <button
-                                                        onClick={(e) => { e.stopPropagation(); setPartialDeliveryJob(job); }}
-                                                        className="px-3 py-1.5 bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 rounded-lg text-[9px] font-black text-amber-600 dark:text-amber-400 uppercase flex items-center justify-center gap-1.5 transition-all shadow-sm active:scale-95"
-                                                    >
-                                                        <AlertTriangle size={11} /> {t('warehouse.driverHub.partial')}
-                                                    </button>
-                                                    {/* Full Delivery */}
-                                                    <button disabled={processingJobIds.has(job.id)} onClick={async (e) => {
-                                                        e.stopPropagation(); setProcessingJobIds(prev => new Set(prev).add(job.id));
-                                                        try {
-                                                            await wmsJobsService.update(job.id, { status: 'Completed', transferStatus: 'Delivered', deliveredAt: new Date().toISOString(), receivedBy: user?.name || t('warehouse.driverFallback') } as any);
-                                                            if (job.orderRef) { const parentJob = jobs.find(j => j.id === job.orderRef); if (parentJob) await wmsJobsService.update(parentJob.id, { status: 'Completed', transferStatus: 'Delivered' } as any); }
-                                                            const destSiteId = job.destSiteId || (job as any).dest_site_id; const lineItems = job.lineItems || (job as any).line_items || [];
-                                                            for (const item of lineItems) {
-                                                                const qty = item.receivedQty || item.quantity || item.expectedQty || item.pickedQty || 0;
-                                                                if (qty > 0 && destSiteId) {
-                                                                    const templateProduct = products.find(p => p.sku === item.sku || p.id === item.productId);
-                                                                    const unit = templateProduct?.unit || item.unit;
-                                                                    const isWeightVol = isWeightBased(unit) || isVolumeBased(unit);
-                                                                    const sizeNum = templateProduct?.size ? parseFloat(templateProduct.size as string) : 0;
-                                                                    const finalQty = (isWeightVol && sizeNum > 0) ? (qty * sizeNum) : qty;
-                                                                    const destProduct = products.find(p => (p.sku === item.sku || p.id === item.productId || p.productId === item.productId) && (p.siteId === destSiteId || p.site_id === destSiteId));
-                                                                    if (destProduct) await adjustStockMutation.mutateAsync({ productId: destProduct.id, productName: destProduct.name || item.name || 'Product', productSku: destProduct.sku || item.sku || '', siteId: destSiteId, quantity: finalQty, type: 'IN', reason: `Delivery: ${formatJobId(job)}`, canApprove: true });
-                                                                    else if (templateProduct) await addProduct({ name: item.name || templateProduct?.name || 'Product', sku: item.sku || templateProduct?.sku, price: templateProduct?.price || 0, costPrice: (templateProduct as any)?.costPrice || 0, stock: finalQty, unit: templateProduct?.unit || 'pcs', siteId: destSiteId, category: templateProduct?.category || 'Uncategorized', productId: templateProduct?.productId || templateProduct?.id } as any);
-                                                                }
-                                                            }
-                                                            await refreshData(); addNotification('success', t('warehouse.driverHub.deliveryCompleteMsg'));
-                                                        } catch (err) { addNotification('alert', t('warehouse.driverHub.errorCompleting')); } finally { setProcessingJobIds(prev => { const next = new Set(prev); next.delete(job.id); return next; }); }
-                                                    }} className="px-4 py-1.5 bg-[#224429] dark:bg-[#EAE5D9] hover:bg-[#1B3520] dark:hover:bg-[#DFD9CA] text-[#FAF8F5] dark:text-[#1E3B24] rounded-lg text-[9px] font-black uppercase flex items-center justify-center gap-1.5 disabled:opacity-50 shadow-md active:scale-95 transition-all">
-                                                        {processingJobIds.has(job.id) ? <RefreshCw className="animate-spin" size={11} /> : <CheckCircle size={11} />} {t('warehouse.driverHub.delivered').toUpperCase()}
-                                                    </button>
-                                                </>
-                                            ) : <div className="py-1.5 px-3 bg-green-500/10 border border-green-500/20 rounded-lg text-[9px] font-black text-green-600 dark:text-green-400 uppercase flex items-center justify-center gap-1.5 italic tracking-widest"><CheckCircle size={11} /> {t('warehouse.driverHub.completedCaps') || 'Success'}</div>}
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); setPartialDeliveryJob(job); }}
+                                                    className="px-4 py-1.5 bg-[#224429] dark:bg-[#EAE5D9] hover:bg-[#1B3520] dark:hover:bg-[#DFD9CA] text-[#FAF8F5] dark:text-[#1E3B24] rounded-lg text-[9px] font-black uppercase flex items-center justify-center gap-1.5 shadow-md active:scale-95 transition-all"
+                                                >
+                                                    <CheckCircle size={11} /> {(t('warehouse.driverHub.completeDeliveryBtn') || 'Complete Delivery').toUpperCase()}
+                                                </button>
+                                            ) : (
+                                                <div className="py-1.5 px-3 bg-green-500/10 border border-green-500/20 rounded-lg text-[9px] font-black text-green-600 dark:text-green-400 uppercase flex items-center justify-center gap-1.5 italic tracking-widest">
+                                                    <CheckCircle size={11} /> {t('warehouse.driverHub.completedCaps') || 'Success'}
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
@@ -197,6 +173,7 @@ export const DriverActiveMission: React.FC<DriverActiveMissionProps> = ({
                     addProduct={addProduct}
                     addNotification={addNotification as any}
                     refreshData={refreshData}
+                    refreshJobs={refreshJobs}
                     jobs={jobs}
                 />
             )}
