@@ -419,7 +419,7 @@ export const POSProductGrid: React.FC = () => {
                                     }
                                 }}
                                 disabled={product.stock === 0}
-                                className={`text-left bg-white/70 dark:bg-[#18201B]/30 border border-[#E2DCCE] dark:border-emerald-950/10 rounded-2xl p-4 hover:border-[#2C5E3B]/40 dark:hover:border-[#A9CBA2]/30 hover:bg-white dark:hover:bg-[#18201B]/50 transition-all duration-300 group relative overflow-hidden flex flex-col h-full active:scale-[0.98] shadow-sm hover:shadow-md ${product.stock === 0 ? 'opacity-35 grayscale cursor-not-allowed' : ''}`}
+                                className={`text-left bg-white/70 dark:bg-[#18201B]/30 border rounded-2xl p-4 hover:bg-white dark:hover:bg-[#18201B]/50 transition-all duration-300 group relative overflow-hidden flex flex-col h-full active:scale-[0.98] shadow-sm hover:shadow-md ${product.stock <= 0 ? 'border-red-600/80 dark:border-red-500/60 opacity-60 cursor-not-allowed' : 'border-[#E2DCCE] dark:border-emerald-950/10 hover:border-[#2C5E3B]/40 dark:hover:border-[#A9CBA2]/30'}`}
                             >
                                 <div className="aspect-square rounded-xl bg-[#F4F0E6] dark:bg-black/35 mb-4 overflow-hidden relative border border-[#E2DCCE]/40 dark:border-white/5 flex items-center justify-center">
                                     {product.image && !product.image.includes('placeholder.com') ? (
@@ -455,15 +455,21 @@ export const POSProductGrid: React.FC = () => {
                                          
                                          let colorClasses = 'bg-white/80 dark:bg-black/50 text-[#4D6E56] dark:text-gray-300 border-[#E2DCCE]/60 dark:border-white/10';
                                          if (isOutOfStock) {
-                                             colorClasses = 'bg-red-500/15 text-red-500 border-red-500/35';
+                                             colorClasses = 'bg-red-600 dark:bg-red-700 text-white border-transparent shadow-none';
                                          } else if (isLowStock) {
                                              colorClasses = 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/35';
                                          }
 
                                          return (
-                                             <div className={`absolute top-2.5 right-2.5 px-2 py-0.5 rounded-lg text-[9px] font-bold tracking-wider backdrop-blur-md border shadow-sm flex items-center gap-1 ${colorClasses}`}>
-                                                 {product.stock.toLocaleString(undefined, { maximumFractionDigits: getSellUnit(product.unit).category === 'count' ? 0 : 2 })}
-                                                 <span className="text-[7px] opacity-70 uppercase">{getSellUnit(product.unit).shortLabel}</span>
+                                             <div className={`absolute top-2.5 right-2.5 px-2 py-0.5 rounded-lg text-[9px] font-extrabold tracking-wider backdrop-blur-md border shadow-sm flex items-center gap-1 ${colorClasses}`}>
+                                                 {isOutOfStock ? (
+                                                     <span>{t('common.outOfStock')}</span>
+                                                 ) : (
+                                                     <>
+                                                         {product.stock.toLocaleString(undefined, { maximumFractionDigits: getSellUnit(product.unit).category === 'count' ? 0 : 2 })}
+                                                         <span className="text-[7px] opacity-70 uppercase">{getSellUnit(product.unit).shortLabel}</span>
+                                                     </>
+                                                 )}
                                              </div>
                                          );
                                       })()}
@@ -475,11 +481,7 @@ export const POSProductGrid: React.FC = () => {
                                     )}
 
                                     {product.stock <= 0 && (
-                                        <div className="absolute inset-0 bg-black/55 flex items-center justify-center z-10">
-                                            <span className="bg-red-600 text-white font-extrabold text-[9px] uppercase tracking-wider px-2.5 py-1 rounded-lg">
-                                                {t('common.outOfStock')}
-                                            </span>
-                                        </div>
+                                        <div className="absolute inset-0 bg-transparent flex items-center justify-center z-10" />
                                     )}
                                 </div>
 
@@ -496,15 +498,9 @@ export const POSProductGrid: React.FC = () => {
                                                 <p className="text-[#2C5E3B] dark:text-[#A9CBA2] font-black text-base tracking-tight">{CURRENCY_SYMBOL} {product.price}{product.unit && getSellUnit(product.unit).code !== 'UNIT' ? <span className="text-[8px] text-[#4D6E56]/60 dark:text-gray-500 font-bold">/{getSellUnit(product.unit).shortLabel}</span> : null}</p>
                                             )}
                                         </div>
-                                         {product.stock <= 0 ? (
-                                             <span className="text-[9px] font-black text-red-600 dark:text-red-500 uppercase tracking-wider">
-                                                 {t('common.outOfStock')}
-                                             </span>
-                                         ) : (
-                                             <div className="w-8 h-8 rounded-xl bg-[#2C5E3B]/10 dark:bg-white/5 border border-[#2C5E3B]/20 dark:border-white/10 flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:bg-[#2C5E3B]/20 dark:group-hover:bg-white/10">
-                                                 <Plus size={14} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
-                                             </div>
-                                         )}
+                                         <div className="w-8 h-8 rounded-xl bg-[#2C5E3B]/10 dark:bg-white/5 border border-[#2C5E3B]/20 dark:border-white/10 flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:bg-[#2C5E3B]/20 dark:group-hover:bg-white/10">
+                                             <Plus size={14} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
+                                         </div>
                                     </div>
                                 </div>
                             </button>
