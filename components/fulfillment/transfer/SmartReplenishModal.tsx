@@ -152,8 +152,8 @@ export const SmartReplenishModal: React.FC<SmartReplenishModalProps> = ({
             const isWarehouseType = sourceSiteObj && (
                 sourceSiteObj.type === 'Warehouse' || 
                 sourceSiteObj.type === 'Distribution Center' || 
-                sourceSiteObj.type === 'Storage & Fulfillment' || 
-                sourceSiteObj.type === 'Regional Hub'
+                (sourceSiteObj.type as any) === 'Storage & Fulfillment' || 
+                (sourceSiteObj.type as any) === 'Regional Hub'
             );
             if (!isWarehouseType) return false;
 

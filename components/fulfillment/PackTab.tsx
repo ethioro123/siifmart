@@ -37,7 +37,8 @@ export const PackTab: React.FC = () => {
         generateTrackingNumber,
         t,
         setEarnedPoints,
-        setShowPointsPopup
+        setShowPointsPopup,
+        refreshData
     } = useFulfillment();
 
     const getLabelQtyAndUnit = (item: any, product?: any) => {

@@ -549,7 +549,7 @@ export const POSCommandProvider: React.FC<{ children: React.ReactNode }> = ({ ch
                 return i.receivedQty !== rawExpected;
             });
             setReceivingSummary({
-                orderRef: transfer.orderRef || transferId,
+                orderRef: transfer.orderRef || selectedId,
                 jobNumber: transfer.jobNumber || (transfer as any).job_number,
                 items: transferReceivingItems.map(i => ({
                     sku: i.sku,

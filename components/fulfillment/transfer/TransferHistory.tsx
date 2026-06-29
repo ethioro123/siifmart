@@ -41,7 +41,7 @@ export const TransferHistory: React.FC<TransferHistoryProps> = ({
 
             return t.status === 'Completed' ||
                 t.status === 'Cancelled' ||
-                t.status === 'Received' ||
+                (t.status as any) === 'Received' ||
                 t.transferStatus === 'Received' ||
                 t.transferStatus === 'Delivered' ||
                 effStatus === 'Received' ||

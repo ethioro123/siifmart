@@ -526,7 +526,7 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
         user_name: user,
         module
       });
-      setSystemLogs(prev => [newLog, ...prev]);
+      setSystemLogs(prev => [newLog as SystemLog, ...prev]);
     } catch (error) {
       console.error('Failed to log system event:', error);
     }
