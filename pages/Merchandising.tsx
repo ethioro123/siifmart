@@ -1990,9 +1990,13 @@ export default function Pricing() {
                       onChange={(e) => setNewRule({ ...newRule, targetCategory: e.target.value })}
                       aria-label="Target Category"
                    >
-                      {Object.keys(GROCERY_CATEGORIES).map(cat => (
-                         <option key={cat} value={cat} className="bg-white dark:bg-[#1E2822]">{cat}</option>
-                      ))}
+                       {Object.entries(GROCERY_CATEGORIES).map(([group, items]) => (
+                          <optgroup key={group} label={group} className="bg-stone-100 dark:bg-[#1E2822] text-stone-900 dark:text-stone-300">
+                             {items.map(c => (
+                                <option key={c} value={c} className="bg-white dark:bg-[#1E2822] text-stone-900 dark:text-stone-100">{c}</option>
+                             ))}
+                          </optgroup>
+                       ))}
                    </select>
                 </div>
                 <div className="grid grid-cols-2 gap-4">

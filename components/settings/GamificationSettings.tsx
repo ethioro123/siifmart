@@ -377,7 +377,7 @@ export default function GamificationSettings() {
     };
 
     // Get all categories from constants
-    const allCategories = ['all', ...Object.keys(GROCERY_CATEGORIES)];
+    const allCategories = ['all', ...Object.values(GROCERY_CATEGORIES).flat()];
 
     // Get color class
     const getColorClass = (colorValue: string) => {
@@ -1789,8 +1789,12 @@ export default function GamificationSettings() {
                                 className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-yellow-500 focus:outline-none"
                             >
                                 <option value="all">All Categories</option>
-                                {Object.keys(GROCERY_CATEGORIES).map(cat => (
-                                    <option key={cat} value={cat}>{cat}</option>
+                                {Object.entries(GROCERY_CATEGORIES).map(([group, items]) => (
+                                    <optgroup key={group} label={group} className="bg-gray-900 text-gray-300">
+                                        {items.map(c => (
+                                            <option key={c} value={c} className="bg-black text-white">{c}</option>
+                                        ))}
+                                    </optgroup>
                                 ))}
                             </select>
                         </div>

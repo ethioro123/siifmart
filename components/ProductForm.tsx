@@ -104,7 +104,16 @@ export function ProductForm({ initialData, onSubmit, onCancel, isSubmitting, isR
                                     <FormGroup label="Product Name *" icon={Package} error={errors.name?.message as string}><input {...register('name')} className={`form-input ${errors.name ? 'border-red-500' : ''}`} placeholder="e.g. Zero Sugar Can 330ml" /></FormGroup>
                                 </div>
                                 <div className="col-span-2 md:col-span-1 space-y-5">
-                                    <FormGroup label="Category *" icon={Layers}><select {...register('category')} className="form-input appearance-none cursor-pointer"><option value="">Select Category...</option>{categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}</select></FormGroup>
+                                    <FormGroup label="Category *" icon={Layers}>
+                                        <select {...register('category')} className="form-input appearance-none cursor-pointer">
+                                            <option value="">Select Category...</option>
+                                            {Object.entries(GROCERY_CATEGORIES).map(([group, items]) => (
+                                                <optgroup key={group} label={group} className="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-300">
+                                                    {items.map(c => <option key={c} value={c} className="bg-white dark:bg-gray-900 text-gray-900 dark:text-white">{c}</option>)}
+                                                </optgroup>
+                                            ))}
+                                        </select>
+                                    </FormGroup>
                                     <div className="grid grid-cols-2 gap-4">
                                         <FormGroup label="Size / Vol" icon={Scale}><input {...register('size')} className="form-input" placeholder="500" /></FormGroup>
                                         <FormGroup label="Unit"><select {...register('unit')} className="form-input appearance-none">{COMMON_UNITS.map(u => <option key={u} value={u}>{u}</option>)}</select></FormGroup>

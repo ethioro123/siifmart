@@ -6,27 +6,58 @@ import { Product, SaleRecord, User, WarehouseZone, StockMovement, WMSJob, Suppli
 // Used by: Inventory, Procurement, Merchandising
 // ═══════════════════════════════════════════════════════════════
 export const GROCERY_CATEGORIES: Record<string, string[]> = {
-  'Fresh Produce': ['Fruits', 'Vegetables', 'Herbs & Spices', 'Organic Produce', 'Salad Mixes', 'Exotic Fruits'],
-  'Meat & Seafood': ['Fresh Meat', 'Poultry', 'Seafood', 'Deli Meats', 'Frozen Meat', 'Sausages & Bacon'],
-  'Dairy & Eggs': ['Milk', 'Cheese', 'Yogurt', 'Butter & Margarine', 'Eggs', 'Cream', 'Plant-Based Dairy'],
-  'Bakery': ['Bread', 'Pastries', 'Cakes', 'Cookies', 'Donuts', 'Tortillas & Wraps', 'Buns & Rolls'],
-  'Beverages': ['Soft Drinks', 'Juices', 'Water', 'Coffee & Tea', 'Energy Drinks', 'Sports Drinks'],
-  'Pantry Staples': ['Rice & Grains', 'Pasta', 'Flour & Baking', 'Cooking Oil', 'Canned Goods', 'Sauces & Condiments', 'Spices & Seasonings', 'Jams & Spreads'],
-  'Snacks & Sweets': ['Chips & Crisps', 'Chocolate', 'Candy', 'Nuts & Seeds', 'Popcorn', 'Biscuits', 'Crackers', 'Dried Fruit'],
-  'Frozen Foods': ['Ice Cream', 'Frozen Vegetables', 'Frozen Meals', 'Frozen Pizza', 'Frozen Desserts', 'Frozen Fruit'],
-  'Health & Wellness': ['Vitamins & Supplements', 'First Aid', 'Personal Care', 'Baby Products', 'Pharmacy', 'Sports Nutrition'],
-  'Household': ['Cleaning Supplies', 'Paper Products', 'Laundry', 'Kitchen Supplies', 'Air Fresheners', 'Pest Control'],
-  'Personal Care': ['Bath & Body', 'Hair Care', 'Oral Care', 'Cosmetics', 'Hygiene Products', 'Shaving & Grooming'],
-  'Pet Supplies': ['Pet Food', 'Pet Treats', 'Pet Accessories', 'Pet Grooming'],
-  'International Foods': ['Asian Foods', 'Mediterranean', 'Latin American', 'African Foods', 'Indian Foods', 'European Foods'],
-  'Organic & Natural': ['Organic Produce', 'Natural Foods', 'Gluten-Free', 'Vegan Products', 'Superfoods'],
-  'Baby & Kids': ['Baby Food', 'Diapers', 'Baby Care', 'Kids Snacks', 'Toys', 'Baby Gear'],
-  'Office & Stationery': ['Office Supplies', 'School Supplies', 'Writing Materials', 'Paper', 'Ink & Toner', 'Office Furniture'],
-  'Electronics': ['Phone Accessories', 'Batteries', 'Small Electronics', 'Computers', 'Peripherals', 'Cables & Chargers'],
-  'Home & Garden': ['Gardening', 'Home Decor', 'Tools', 'Lighting', 'Hardware', 'Outdoor Living'],
-  'Automotive': ['Car Care', 'Fluids', 'Accessories', 'Tools'],
-  'Industrial': ['Safety Gear', 'Packaging Materials', 'Warehouse Supplies', 'Maintenance'],
-  'Other': ['Miscellaneous', 'General Merchandise', 'Seasonal']
+  'Fresh Food & Deli': [
+    'Fruit & Vegetables',
+    'Dairy, Eggs & Fridge',
+    'Meat & Poultry',
+    'Seafood',
+    'Bakery & Bread',
+    'Deli & Prepared Meals'
+  ],
+  'Pantry & Groceries': [
+    'Snacks & Confectionery',
+    'Baking & Dessert Needs',
+    'Grains, Pasta & Rice',
+    'Sauces, Oils & Condiments',
+    'Canned Food & Soups',
+    'Breakfast & Cereals',
+    'Tea, Coffee & Cocoa',
+    'Drinks & Beverages'
+  ],
+  'Frozen Food': [
+    'Frozen Meals & Sides',
+    'Frozen Vegetables & Fruit',
+    'Ice Cream & Desserts'
+  ],
+  'Baby & Toddler': [
+    'Baby Food & Formula',
+    'Nappies, Wipes & Toiletries'
+  ],
+  'Health & Beauty': [
+    'Dental & Oral Care',
+    'Hair & Body Care',
+    'Cosmetics & Skin Care',
+    'Vitamins & Supplements',
+    'Pharmacy & First Aid'
+  ],
+  'Household & Cleaning': [
+    'Laundry & Dishwashing',
+    'Cleaning Products & Tools',
+    'Tissues, Paper & Foils',
+    'Pest Control & Garden Care'
+  ],
+  'Pet Supplies': [
+    'Dog Food & Accessories',
+    'Cat Food & Accessories',
+    'Small Pet Supplies'
+  ],
+  'General Merchandise & Apparel': [
+    'Stationery, Office & Books',
+    'Electronics & Batteries',
+    'Homewares, Kitchen & Dining',
+    'Clothing & Accessories',
+    'Toys & Recreation'
+  ]
 };
 
 export const COMMON_UNITS = [
