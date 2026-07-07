@@ -1,7 +1,7 @@
 // Default fallback for useData() when called outside DataProvider
 // This prevents crashes during initial render or provider setup
 
-import { DataContextType } from './DataContext';
+import { DataContextType } from './DataContextTypes';
 import { DEFAULT_CONFIG } from './DataContextDefaults';
 
 export const DATA_CONTEXT_FALLBACK: DataContextType = {

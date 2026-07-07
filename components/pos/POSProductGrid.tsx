@@ -8,6 +8,7 @@ import Button from '../shared/Button';
 import { CURRENCY_SYMBOL } from '../../constants';
 import { formatCompactNumber } from '../../utils/formatting';
 import { getSellUnit } from '../../utils/units';
+import { Product } from '../../types';
 import {
     ArrowLeft, Search, ArrowRight, X, Link, ShoppingBag,
     RefreshCw, WifiOff, CloudOff, CheckCircle, Trophy, Box, Package, Plus, Filter, RotateCcw
@@ -64,8 +65,8 @@ export const POSProductGrid: React.FC = () => {
     const ITEMS_PER_PAGE = 24;
 
     const availableBrands = useMemo(() => {
-        const brandsSet = new Set(products.map(p => p.brand).filter((b): b is string => !!b));
-        return Array.from(brandsSet).sort();
+        const brandsSet = new Set((products as Product[]).map((p: Product) => p.brand).filter((b: any): b is string => !!b));
+        return Array.from(brandsSet).sort() as string[];
     }, [products]);
 
     const activeFiltersCount = useMemo(() => {
