@@ -83,13 +83,13 @@ export const ReceivingPendingList: React.FC = () => {
                         value={orderRefScanInput}
                         onChange={(e) => setOrderRefScanInput(e.target.value)}
                         onKeyDown={(e) => {
-                            if (e.key === 'Enter') handleScanOrderRef();
+                            if (e.key === 'Enter') handleScanOrderRef(orderRefScanInput);
                         }}
                         placeholder={t('posCommand.scanBarcodePlaceholder')}
                         className="w-full bg-white dark:bg-black/45 border border-[#E2DCCE] dark:border-white/10 rounded-xl px-4 py-3 text-[#1E3F27] dark:text-white font-mono outline-none transition-all placeholder:text-[#4D6E56]/40 dark:placeholder:text-gray-600 focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:ring-1 focus:ring-[#2C5E3B]"
                     />
                     <button
-                        onClick={handleScanOrderRef}
+                        onClick={() => handleScanOrderRef(orderRefScanInput)}
                         className="absolute right-2 top-2 px-4 py-1.5 bg-[#224429] dark:bg-[#2C5E3B] hover:bg-[#1B3520] text-white font-bold rounded-lg text-xs transition-colors shadow-sm cursor-pointer"
                     >
                         {t('common.verify') || 'Verify'}
