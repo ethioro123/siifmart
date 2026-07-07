@@ -16,6 +16,7 @@ export const PricingProductsTable: React.FC = () => {
         currentPage,
         itemsPerPage,
         editingId,
+        setEditingId,
         editForm,
         setEditForm,
         getMargin,
@@ -300,7 +301,7 @@ export const PricingProductsTable: React.FC = () => {
                                     {isEditing ? (
                                         <div className="flex justify-end gap-2">
                                             <button
-                                                onClick={handleSavePrice}
+                                                onClick={() => handleSavePrice(p.id)}
                                                 className="p-1.5 bg-green-500/10 text-green-600 dark:text-green-400 hover:bg-green-500/20 rounded-lg transition-all"
                                                 title="Save Changes"
                                                 aria-label="Save Changes"
