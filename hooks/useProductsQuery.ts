@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { productsService } from '../services/supabase.service';
 import { ProductSchema } from '../schemas/inventory.schema';
 import { Product } from '../types';
+import { logger } from '../utils/logger';
 
 interface UseProductsOptions {
     siteId?: string;
@@ -25,7 +26,7 @@ export function useProductsQuery(options: UseProductsOptions = {}) {
             return data.map(raw => {
                 const result = ProductSchema.safeParse(raw);
                 if (!result.success) {
-                    console.warn('⚠️ Product Schema Validation Failed:', {
+                    logger.warn('useProductsQuery', '⚠️ Product Schema Validation Failed:', {
                         id: raw.id,
                         errors: result.error.format()
                     });

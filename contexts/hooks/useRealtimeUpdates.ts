@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { realtimeService } from '../../services/realtime.service';
 import type { Product, SaleRecord, Customer, PurchaseOrder } from '../../types';
+import { logger } from '../../utils/logger';
 
 interface UseRealtimeUpdatesProps {
   activeSiteId: string;
@@ -22,7 +23,7 @@ export function useRealtimeUpdates({
   useEffect(() => {
     if (!activeSiteId) return;
 
-    console.log(`📡 Subscribing to real-time updates for site: ${activeSiteId}`);
+    logger.debug('useRealtimeUpdates', `📡 Subscribing to real-time updates for site: ${activeSiteId}`);
 
     const subscriptions = realtimeService.subscribeToSite(activeSiteId, {
       onProductChange: (event, payload) => {
@@ -85,7 +86,7 @@ export function useRealtimeUpdates({
     });
 
     return () => {
-      console.log('Unsubscribing from real-time updates...');
+      logger.debug('useRealtimeUpdates', 'Unsubscribing from real-time updates...');
       realtimeService.unsubscribeAll(subscriptions);
     };
   }, [activeSiteId, setProducts, setAllProducts, setSales, setCustomers, setOrders]);

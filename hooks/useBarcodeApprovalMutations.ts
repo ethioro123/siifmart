@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { barcodeApprovalsService } from '../services/supabase.service';
 import { useData } from '../contexts/DataContext';
+import { logger } from '../utils/logger';
 
 export function useApproveBarcodeMutation() {
     const queryClient = useQueryClient();
@@ -16,7 +17,7 @@ export function useApproveBarcodeMutation() {
             addNotification('success', 'Barcode mapping approved');
         },
         onError: (error: any) => {
-            console.error('Approve barcode failed:', error);
+            logger.error('useBarcodeApprovalMutations', 'Approve barcode failed:', error);
             addNotification('alert', error.message || 'Failed to approve barcode mapping');
         }
     });
@@ -36,7 +37,7 @@ export function useRejectBarcodeMutation() {
             addNotification('success', 'Barcode mapping rejected and reverted');
         },
         onError: (error: any) => {
-            console.error('Reject barcode failed:', error);
+            logger.error('useBarcodeApprovalMutations', 'Reject barcode failed:', error);
             addNotification('alert', error.message || 'Failed to reject barcode mapping');
         }
     });

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Employee, UserRole } from '../types';
 import { systemLogsService } from '../services/local-logs.service';
 import { imageStorageService } from '../services/imageStorage.service';
+import { logger } from '../utils/logger';
 
 interface UseEmployeeActionsProps {
    user: any;
@@ -82,7 +83,7 @@ export function useEmployeeActions({
                newAvatarUrl = uploadResult.url;
             }
          } catch (storageError) {
-            console.warn('📷 Storage service unavailable:', storageError);
+            logger.warn('useEmployeeActions', '📷 Storage service unavailable:');
          }
 
          if (employeeToUpdate) {
@@ -153,7 +154,7 @@ export function useEmployeeActions({
          setEmployeeToDelete(null);
          setDeleteInput('');
       } catch (error) {
-         console.error('Error deleting employee:', error);
+         logger.error('useEmployeeActions', 'Error deleting employee:', error);
          addNotification('alert', 'Failed to delete employee');
       }
    };

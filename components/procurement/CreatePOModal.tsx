@@ -13,6 +13,7 @@ import { POItemForm } from './POItemForm';
 import { POSupplierLogistics } from './POSupplierLogistics';
 import { POItemsTable } from './POItemsTable';
 import { POTotalsSummary } from './POTotalsSummary';
+import { logger } from '../../utils/logger';
 
 
 interface CreatePOModalProps {
@@ -39,11 +40,11 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
     const [localSuppliers, setLocalSuppliers] = useState<Supplier[]>([]);
     useEffect(() => {
         if (isOpen && contextSuppliers.length === 0 && localSuppliers.length === 0) {
-            console.log('⚡ Suppliers empty from context, fetching directly...');
+            logger.debug('CreatePOModal', '⚡ Suppliers empty from context, fetching directly...');
             suppliersService.getAll(1000).then(res => {
-                console.log('⚡ Direct supplier fetch returned:', res.data.length, 'suppliers');
+                logger.debug('CreatePOModal', '⚡ Direct supplier fetch returned:');
                 setLocalSuppliers(res.data);
-            }).catch(err => console.error('⚡ Direct supplier fetch failed:', err));
+            }).catch(err => logger.error('CreatePOModal', 'Direct supplier fetch failed', err as Error));
         }
     }, [isOpen, contextSuppliers.length]);
 
@@ -230,7 +231,7 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
                     });
                     vendorId = newSupplier.id;
                 } catch (err) {
-                    console.error("Failed to create manual supplier:", err);
+                    logger.error('CreatePOModal', "Failed to create manual supplier:", err);
                     showToast("Failed to create manual supplier record.", 'error');
                     setIsSubmitting(false);
                     return;
@@ -320,7 +321,7 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
             onClose();
 
         } catch (error) {
-            console.error(error);
+            logger.error('CreatePOModal', 'caught error', error as Error);
             showToast("Failed to save Purchase Order.", 'error');
         } finally {
             setIsSubmitting(false);

@@ -12,6 +12,7 @@ import { PutawayDetailsModal } from './putaway/PutawayDetailsModal';
 import { useStore } from '../../contexts/CentralStore';
 import { normalizeLocation, parseLocation } from '../../utils/locationTracking';
 import { extractSitePrefix, extractPrefixFromBarcode } from '../../utils/locationEncoder';
+import { logger } from '../../utils/logger';
 
 interface PutawayTabProps {
     filteredJobs: WMSJob[];
@@ -251,7 +252,7 @@ export const PutawayTab: React.FC<PutawayTabProps> = ({
     const handleScanItem = async (barcode: string) => {
         if (!selectedJob || !currentItem) return;
         if (isSubmitting || isSubmittingRef.current) {
-            console.warn("⚠️ Already submitting putaway. Ignoring duplicate scan.");
+            logger.warn('PutawayTab', "⚠️ Already submitting putaway. Ignoring duplicate scan.");
             return;
         }
 
@@ -342,10 +343,10 @@ export const PutawayTab: React.FC<PutawayTabProps> = ({
                 (i.productId === currentItem.productId || i.sku === currentItem.sku) &&
                 i.status !== 'Picked' && i.status !== 'Completed'
             );
-            console.log('📍 [PUTAWAY] itemIndex:', itemIndex, 'of', selectedJob.lineItems.length, 'items');
+            logger.debug('PutawayTab', '📍 [PUTAWAY] itemIndex:');
 
             if (itemIndex === -1) {
-                console.error('❌ [PUTAWAY] Could not find current item in lineItems!', currentItem);
+                logger.error('PutawayTab', '❌ [PUTAWAY] Could not find current item in lineItems!', currentItem);
                 addNotification('alert', 'Error: item not found in job');
                 return;
             }
@@ -360,10 +361,10 @@ export const PutawayTab: React.FC<PutawayTabProps> = ({
 
             // 4. Auto-Complete: If all items are done, complete the job automatically
             const allDone = nextItems.every(i => !i || i.status === 'Picked' || i.status === 'Short' || i.status === 'Completed');
-            console.log('📍 [PUTAWAY] allDone:', allDone, 'statuses:', nextItems.map(i => i?.status));
+            logger.debug('PutawayTab', '📍 [PUTAWAY] allDone');
 
             if (allDone) {
-                console.log('🏁 [PUTAWAY] Auto-completing job', selectedJob.id);
+                logger.debug('PutawayTab', '🏁 [PUTAWAY] Auto-completing job');
                 await completeJob(selectedJob.id, user?.id || 'Driver', false, nextItems, putawayTimestamp);
                 addNotification('success', 'All items put away — Job completed!');
                 setIsScannerOpen(false);
@@ -373,7 +374,7 @@ export const PutawayTab: React.FC<PutawayTabProps> = ({
             }
 
         } catch (e) {
-            console.error('❌ [PUTAWAY] Error:', e);
+            logger.error('PutawayTab', '❌ [PUTAWAY] Error:', e);
             addNotification('alert', 'Error processing putaway');
             throw e;
         } finally {
@@ -442,7 +443,7 @@ export const PutawayTab: React.FC<PutawayTabProps> = ({
             setJobForModal(null);
             setSelectedJob(null);
         } catch (e) {
-            console.error(e);
+            logger.error('PutawayTab', 'caught error', e as Error);
         } finally {
             setIsSubmitting(false);
         }

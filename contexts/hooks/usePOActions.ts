@@ -1,6 +1,7 @@
 import { useCallback } from 'react';
 import type { PurchaseOrder, Site, SystemLog } from '../../types';
 import { purchaseOrdersService } from '../../services/supabase.service';
+import { logger } from '../../utils/logger';
 
 interface UsePOActionsDeps {
     activeSite: Site | undefined;
@@ -18,7 +19,7 @@ export function usePOActions(deps: UsePOActionsDeps) {
         try {
             const items = po.lineItems || [];
 
-            console.log('Creating PO with data:', po);
+            logger.debug('usePOActions', 'Creating PO with data:');
 
             const newPO = await purchaseOrdersService.create({
                 ...po,
@@ -41,9 +42,9 @@ export function usePOActions(deps: UsePOActionsDeps) {
             }
             return newPO;
         } catch (error) {
-            console.error('Error creating PO:', error);
-            console.error('Error details:', JSON.stringify(error, null, 2));
-            console.error('PO data that failed:', JSON.stringify(po, null, 2));
+            logger.error('usePOActions', 'Error creating PO:', error as Error);
+            logger.error('usePOActions', 'Error details', new Error(JSON.stringify(error)));
+            logger.error('usePOActions', 'PO data that failed', new Error(JSON.stringify(po)));
 
             const localPO: PurchaseOrder = {
                 ...po,
@@ -64,7 +65,7 @@ export function usePOActions(deps: UsePOActionsDeps) {
             setAllOrders(prev => prev.map(o => o.id === po.id ? po : o));
             addNotification('success', `PO ${po.id} updated`);
         } catch (error) {
-            console.error(error);
+            logger.error('usePOActions', 'caught error', error as Error);;
             addNotification('alert', 'Failed to update PO');
         }
     }, [addNotification]);
@@ -76,7 +77,7 @@ export function usePOActions(deps: UsePOActionsDeps) {
             setAllOrders(prev => prev.filter(o => o.id !== poId));
             addNotification('success', 'PO deleted');
         } catch (error) {
-            console.error(error);
+            logger.error('usePOActions', 'caught error', error as Error);;
             addNotification('alert', 'Failed to delete PO');
         }
     }, [addNotification]);

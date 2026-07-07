@@ -1,6 +1,7 @@
 import { useEffect, useRef, useCallback, useState } from 'react';
 import { useData } from '../contexts/DataContext';
 import { APP_CONFIG } from '../config/app.config';
+import { logger } from '../utils/logger';
 
 /**
  * Data Refresh Hook (Enhanced)
@@ -34,7 +35,7 @@ export function useDataRefresh(intervalMinutes?: number) {
             await refreshData();
             retryCountRef.current = 0; // Reset retry count on success
         } catch (error) {
-            console.error('Data refresh failed:', error);
+            logger.error('useDataRefresh', 'Data refresh failed:', error);
 
             // Exponential backoff retry
             if (retryCountRef.current < APP_CONFIG.DATA_REFRESH_MAX_RETRIES) {
@@ -46,7 +47,7 @@ export function useDataRefresh(intervalMinutes?: number) {
                     await refresh();
                 }, delay);
             } else {
-                console.error('Max retries reached, giving up');
+                logger.error('useDataRefresh', 'retry', new Error('Max retries reached, giving up'));
                 retryCountRef.current = 0;
             }
         } finally {

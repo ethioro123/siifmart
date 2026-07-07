@@ -3,6 +3,7 @@ import { Plus, Trash2, Package, X, RefreshCw, AlertTriangle } from 'lucide-react
 import { Product, PendingInventoryChange, User } from '../../../types';
 import { formatCompactNumber } from '../../../utils/formatting';
 import { CURRENCY_SYMBOL } from '../../../constants';
+import { logger } from '../../../utils/logger';
 
 interface WasteLogProps {
     products: Product[];
@@ -202,7 +203,7 @@ export const WasteLog: React.FC<WasteLogProps> = ({
                                     setWasteBasket([]);
                                     addNotification('success', 'Waste adjustment requests submitted for approval');
                                 } catch (e) {
-                                    console.error('Failed to submit waste disposal:', e);
+                                    logger.error('WasteLog', 'Failed to submit waste disposal:', e);
                                     addNotification('alert', 'Failed to submit waste disposal requests');
                                 } finally {
                                     setIsDisposingWaste(false);

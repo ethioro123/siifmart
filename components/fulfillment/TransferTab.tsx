@@ -16,6 +16,7 @@ import { TransferJobDetails } from './transfer/TransferJobDetails';
 import { QRScanner } from '../QRScanner';
 import { DiscrepancyResolutionModal } from './DiscrepancyResolutionModal';
 import { formatJobId } from '../../utils/jobIdFormatter';
+import { logger } from '../../utils/logger';
 // import { generatePackLabelHTML } from '../../utils/labels/PackLabelGenerator'; // Not used in this file anymore?
 
 interface TransferTabProps {
@@ -136,7 +137,7 @@ export const TransferTab: React.FC<TransferTabProps> = ({
                 await wmsJobsService.update(selectedJob.id, { location });
                 if (selectedJob) setSelectedJob({ ...selectedJob, location });
             } catch (err) {
-                console.error('Failed to update job location:', err);
+                logger.error('TransferTab', 'Failed to update job location:', err);
             }
         }
 
@@ -254,7 +255,7 @@ export const TransferTab: React.FC<TransferTabProps> = ({
                 }
             }
         } catch (err) {
-            console.error('Scan Error:', err);
+            logger.error('TransferTab', 'Scan Error:', err);
             addNotification('error', 'Failed to process scan');
             setIsProcessingScan(false);
             setIsSubmitting(false);

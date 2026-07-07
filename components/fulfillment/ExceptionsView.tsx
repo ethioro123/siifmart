@@ -6,6 +6,7 @@ import {
 import { User, WMSJob } from '../../types';
 import { wmsJobsService } from '../../services/supabase.service';
 import Button from '../../components/shared/Button';
+import { logger } from '../../utils/logger';
 
 interface ExceptionsViewProps {
     currentUser: User | null;
@@ -33,7 +34,7 @@ export function ExceptionsView({ currentUser, activeSite, onResolve }: Exception
             flatItems.sort((a, b) => new Date(b.job.createdAt || 0).getTime() - new Date(a.job.createdAt || 0).getTime());
             setDiscrepancies(flatItems);
         } catch (err) {
-            console.error(err);
+            logger.error('ExceptionsView', 'caught error', err as Error);
         } finally {
             setLoading(false);
         }

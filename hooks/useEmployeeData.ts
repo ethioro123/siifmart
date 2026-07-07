@@ -3,6 +3,7 @@ import { Employee, UserRole } from '../types';
 import { employeesService } from '../services/supabase.service';
 import { canViewAllSites, hasPermission } from '../utils/permissions';
 import { getRoleHierarchy } from '../utils/roles';
+import { logger } from '../utils/logger';
 
 interface UseEmployeeDataProps {
    user: any;
@@ -66,7 +67,7 @@ export function useEmployeeData({
             setTotalCount(count);
             setTotalPages(Math.ceil(count / ITEMS_PER_PAGE));
          } catch (error) {
-            console.error('Failed to fetch employees:', error);
+            logger.error('useEmployeeData', 'Failed to fetch employees:', error);
          } finally {
             setIsLoadingEmployees(false);
          }

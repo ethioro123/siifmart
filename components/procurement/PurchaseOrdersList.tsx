@@ -8,6 +8,7 @@ import { ViewPOModal } from './ViewPOModal';
 import { useData } from '../../contexts/DataContext';
 import { useStore } from '../../contexts/CentralStore';
 import { purchaseOrdersService } from '../../services/supabase.service';
+import { logger } from '../../utils/logger';
 
 interface PurchaseOrdersListProps {
     orders: PurchaseOrder[];
@@ -69,7 +70,7 @@ export const PurchaseOrdersList: React.FC<PurchaseOrdersListProps> = ({
             setSelectedPOIds([]);
             onRefresh();
         } catch (e) {
-            console.error("Bulk approve failed", e);
+            logger.error('PurchaseOrdersList', "Bulk approve failed", e);
             showToast("Bulk approve failed", 'error');
         } finally {
             setIsBulkApproving(false);
@@ -101,7 +102,7 @@ export const PurchaseOrdersList: React.FC<PurchaseOrdersListProps> = ({
             showToast(`PO ${formatPONumber(po)} Approved`, 'success');
             onRefresh();
         } catch (e) {
-            console.error("Approve failed", e);
+            logger.error('PurchaseOrdersList', "Approve failed", e);
             showToast("Approve failed", 'error');
         }
     };

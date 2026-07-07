@@ -15,6 +15,7 @@ import { BonusTierModal } from './gamification/BonusTierModal';
 import { POSRoleModal } from './gamification/POSRoleModal';
 import { PointRuleModal } from './gamification/PointRuleModal';
 import { WarehouseRuleModal } from './gamification/WarehouseRuleModal';
+import { logger } from '../../utils/logger';
 
 const TIER_COLORS = [
     { value: 'gray', label: 'Gray', class: 'from-gray-400 to-gray-500' },
@@ -110,7 +111,7 @@ export default function GamificationSettings() {
 
             showToast('Gamification settings saved successfully!', 'success');
         } catch (error) {
-            console.error('Save error:', error);
+            logger.error('GamificationSettings', 'Save error:', error);
             showToast('Failed to save settings', 'error');
         } finally {
             setIsSaving(false);

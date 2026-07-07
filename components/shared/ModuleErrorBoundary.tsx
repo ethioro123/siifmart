@@ -60,11 +60,12 @@ export function ModuleErrorBoundary({ moduleName, onError, children }: ModuleErr
       FallbackComponent={(props: FallbackProps) => (
         <ModuleErrorFallback {...props} moduleName={moduleName} />
       )}
-      onError={(error: Error, info) => {
-        logger.error(moduleName, 'render', error, {
+      onError={(error: unknown, info) => {
+        const errObj = error instanceof Error ? error : new Error(String(error));
+        logger.error(moduleName, 'render', errObj, {
           componentStack: info.componentStack ?? undefined,
         });
-        onError?.(error, info);
+        onError?.(errObj, info);
       }}
       onReset={() => {
         // Module-level reset: don't navigate away, just re-render the module

@@ -1,6 +1,7 @@
 import { useCallback } from 'react';
 import type { Customer, SystemLog } from '../../types';
 import { customersService } from '../../services/supabase.service';
+import { logger } from '../../utils/logger';
 
 interface UseCustomerActionsDeps {
     queries: any; // useDataQueries result
@@ -17,7 +18,7 @@ export function useCustomerActions(deps: UseCustomerActionsDeps) {
             await queries.customers.refetch();
             addNotification('success', 'Customer added');
         } catch (error) {
-            console.error('Failed to add customer:', error);
+            logger.error('useCustomerActions', 'Failed to add customer:', error);
             addNotification('alert', 'Failed to add customer');
         }
     }, [queries.customers, addNotification]);
@@ -28,7 +29,7 @@ export function useCustomerActions(deps: UseCustomerActionsDeps) {
             await queries.customers.refetch();
             addNotification('success', 'Customer updated');
         } catch (error) {
-            console.error('Failed to update customer:', error);
+            logger.error('useCustomerActions', 'Failed to update customer:', error);
             addNotification('alert', 'Failed to update customer');
         }
     }, [queries.customers, addNotification]);
@@ -39,7 +40,7 @@ export function useCustomerActions(deps: UseCustomerActionsDeps) {
             await queries.customers.refetch();
             addNotification('success', 'Customer deleted');
         } catch (error) {
-            console.error('Failed to delete customer:', error);
+            logger.error('useCustomerActions', 'Failed to delete customer:', error);
             addNotification('alert', 'Failed to delete customer');
         }
     }, [queries.customers, addNotification]);

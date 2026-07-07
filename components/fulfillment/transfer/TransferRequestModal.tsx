@@ -7,6 +7,7 @@ import { getSellUnit } from '../../../utils/units';
 import { useData } from '../../../contexts/DataContext';
 import { logisticsZonesService } from '../../../services/supabase.service';
 import { useLanguage } from '../../../contexts/LanguageContext';
+import { logger } from '../../../utils/logger';
 
 interface TransferRequestModalProps {
     isOpen: boolean;
@@ -63,7 +64,7 @@ export const TransferRequestModal: React.FC<TransferRequestModalProps> = ({
                     const zones = await logisticsZonesService.getAll();
                     setLogisticsZones(zones);
                 } catch (err) {
-                    console.error('Failed to fetch logistics zones:', err);
+                    logger.error('TransferRequestModal', 'Failed to fetch logistics zones:', err);
                 }
             };
             fetchZones();
@@ -160,7 +161,7 @@ export const TransferRequestModal: React.FC<TransferRequestModalProps> = ({
             onClose();
             refreshData();
         } catch (error: any) {
-            console.error('Failed to create transfer:', error);
+            logger.error('TransferRequestModal', 'Failed to create transfer:', error);
             const msg = error?.message || error?.details || JSON.stringify(error);
             addNotification('alert', `Failed to create transfer: ${msg} `);
         } finally {

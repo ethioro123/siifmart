@@ -12,6 +12,7 @@ import { wmsJobsService, discrepancyService } from '../../services/supabase.serv
 import { formatJobId } from '../../utils/jobIdFormatter';
 import Modal from '../../components/Modal';
 import Button from '../../components/shared/Button';
+import { logger } from '../../utils/logger';
 
 interface DiscrepancyResolutionModalProps {
     isOpen: boolean;
@@ -241,7 +242,7 @@ export function DiscrepancyResolutionModal({
             onClose();
             alert('Discrepancy resolution submitted successfully!');
         } catch (err) {
-            console.error(err);
+            logger.error('DiscrepancyResolutionModal', 'caught error', err as Error);
             alert('Failed to submit resolution. Please try again.');
         } finally {
             setIsSubmitting(false);

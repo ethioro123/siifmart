@@ -10,6 +10,7 @@ import { formatCompactNumber } from '../../utils/formatting';
 import { formatDateTime } from '../../utils/formatting';
 import { formatPONumber } from '../../utils/jobIdFormatter';
 import { formatPOItemDescription } from './utils';
+import { logger } from '../../utils/logger';
 
 interface ViewPOModalProps {
     isOpen: boolean;
@@ -54,7 +55,7 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
             onSuccess();
             onClose();
         } catch (error) {
-            console.error('Error approving PO:', error);
+            logger.error('ViewPOModal', 'Error approving PO:', error);
             showToast('Failed to approve PO', 'error');
         } finally {
             setIsSubmitting(false);
@@ -77,7 +78,7 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
             onSuccess();
             onClose();
         } catch (error) {
-            console.error('Error rejecting PO:', error);
+            logger.error('ViewPOModal', 'Error rejecting PO:', error);
             showToast('Failed to reject PO', 'error');
         } finally {
             setIsSubmitting(false);
@@ -93,7 +94,7 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
             onSuccess();
             onClose();
         } catch (error) {
-            console.error('Error deleting PO:', error);
+            logger.error('ViewPOModal', 'Error deleting PO:', error);
             showToast('Failed to delete PO', 'error');
         }
     };

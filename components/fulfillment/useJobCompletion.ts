@@ -10,6 +10,7 @@ import {
     jobAssignmentsService
 } from '../../services/supabase.service';
 import { QueryClient } from '@tanstack/react-query';
+import { logger } from '../../utils/logger';
 
 // Helper for translations
 const getTranslation = (path: string): string => {
@@ -57,12 +58,12 @@ export const useJobCompletion = (deps: UseJobCompletionDeps) => {
 
     const completeJob = useCallback(async (jobId: string, employeeName: string, skipValidation = false, optimisticLineItems?: any[], timestamp?: string) => {
         let pointsResult = null;
-        const stage = (name: string) => console.log(`[ST-PACK] 🕒 Stage: ${name} (Job: ${jobId})`);
+        const stage = (name: string) => logger.debug('useJobCompletion', `[ST-PACK] 🕒 Stage: ${name} (Job: ${jobId})`);
         console.time(`completeJob-${jobId}`);
 
         try {
             stage('Start');
-            console.log(`🏁 completeJob called for: ${jobId} (skipValidation: ${skipValidation})`);
+            logger.debug('useJobCompletion', `🏁 completeJob called for: ${jobId} (skipValidation: ${skipValidation})`);
             let job = jobs.find(j => j.id === jobId);
 
             // Fix: For PUTAWAY, if location is missing in local state (race condition), fetch fresh from DB
@@ -71,15 +72,15 @@ export const useJobCompletion = (deps: UseJobCompletionDeps) => {
                     const freshJob = await wmsJobsService.getById(jobId);
                     if (freshJob) {
                         job = freshJob;
-                        console.log(`🔄 Refreshed job ${jobId} from DB to get location: ${freshJob.location}`);
+                        logger.debug('useJobCompletion', `🔄 Refreshed job ${jobId} from DB to get location: ${freshJob.location}`);
                     }
                 } catch (e) {
-                    console.error('Failed to refresh job from DB', e);
+                    logger.error('useJobCompletion', 'Failed to refresh job from DB', e);
                 }
             }
 
             if (!job) {
-                console.error(`❌ Job ${jobId} not found in local state`);
+                logger.error('useJobCompletion', `❌ Job ${jobId} not found in local state`, new Error(String(`❌ Job ${jobId} not found in local state`)));
                 return;
             }
 
@@ -93,10 +94,10 @@ export const useJobCompletion = (deps: UseJobCompletionDeps) => {
                 );
 
                 if (!allItemsProcessed) {
-                    console.warn(`⚠️ Job ${jobId} has unprocessed items, not completing yet (Checked ${itemsToValidate.length} items)`);
+                    logger.warn('useJobCompletion', `⚠️ Job ${jobId} has unprocessed items, not completing yet (Checked ${itemsToValidate.length} items)`);
                     itemsToValidate.forEach((i: any) => {
                         if (i.status !== 'Picked' && i.status !== 'Short' && i.status !== 'Discontinued' && i.status !== 'Completed') {
-                            console.warn(`   ❌ Blocking Item: ${i.name} [${i.status}]`);
+                            logger.warn('useJobCompletion', `   ❌ Blocking Item: ${i.name} [${i.status}]`);
                         }
                     });
                     return;
@@ -106,7 +107,7 @@ export const useJobCompletion = (deps: UseJobCompletionDeps) => {
             stage('DB Update WMS Job');
 
             const completedByValue = user?.id || employeeName;
-            console.log(`📝 [completeJob] completedBy will be saved as: "${completedByValue}" (user.id: ${user?.id}, user.name: ${user?.name}, fallback: ${employeeName})`);
+            logger.debug('useJobCompletion', `📝 [completeJob] completedBy will be saved as: "${completedByValue}" (user.id: ${user?.id}, user.name: ${user?.name}, fallback: ${employeeName})`);
 
             // CRITICAL FIX: When skipValidation=true (Force Complete), update lineItems to 'Picked' in DB
             if (skipValidation && itemsToValidate && itemsToValidate.length > 0) {
@@ -115,7 +116,7 @@ export const useJobCompletion = (deps: UseJobCompletionDeps) => {
                     status: (item.status === 'Short' ? 'Short' : 'Picked') as JobItem['status'],
                     pickedQty: item.pickedQty !== undefined && item.pickedQty !== null ? item.pickedQty : (item.expectedQty || 0)
                 }));
-                console.log(`🔧 Force Complete: Updating ${forcedLineItems.length} lineItems to 'Picked' status in DB`);
+                logger.debug('useJobCompletion', `🔧 Force Complete: Updating ${forcedLineItems.length} lineItems to 'Picked' status in DB`);
                 await wmsJobsService.update(jobId, {
                     status: 'Completed',
                     lineItems: forcedLineItems,
@@ -135,7 +136,7 @@ export const useJobCompletion = (deps: UseJobCompletionDeps) => {
                     completedAt: timestamp || new Date().toISOString()
                 });
             }
-            console.log(`💾 Database updated for job ${jobId}`);
+            logger.debug('useJobCompletion', `💾 Database updated for job ${jobId}`);
 
             // CLEANUP: Update assignment record to 'Completed' so it drops from active workload matrix
             try {
@@ -161,10 +162,10 @@ export const useJobCompletion = (deps: UseJobCompletionDeps) => {
                             completedAt: timestamp || new Date().toISOString()
                         } : a
                     ));
-                    console.log(`✅ Job assignment ${assignment.id} marked Completed`);
+                    logger.debug('useJobCompletion', `✅ Job assignment ${assignment.id} marked Completed`);
                 }
             } catch (assignError) {
-                console.error(`⚠️ Failed to complete job assignment for job ${jobId}:`, assignError);
+                logger.error('useJobCompletion', `⚠️ Failed to complete job assignment for job ${jobId}:`, assignError);
             }
 
             stage('Local State Update');
@@ -197,19 +198,19 @@ export const useJobCompletion = (deps: UseJobCompletionDeps) => {
                 employeeId: user?.employeeId || (employees.find((e: any) => e.id === user?.id || e.name === user?.name || e.name === employeeName)?.id)
             };
 
-            console.log('📣 Dispatching fulfillment:job-completed event', eventPayload);
+            logger.debug('useJobCompletion', '📣 Dispatching fulfillment:job-completed event', eventPayload);
             window.dispatchEvent(new CustomEvent('fulfillment:job-completed', { detail: eventPayload }));
 
             // PUTAWAY LOGIC
             if (job.type === 'PUTAWAY') {
-                console.log(`📦 DEBUG: Putaway Logic Triggered for Job ${job.id}`);
-                console.log(`   - Location: ${job.location || 'MISSING'}`);
-                console.log(`   - Items: ${job.lineItems?.length || 0}`);
+                logger.debug('useJobCompletion', `📦 DEBUG: Putaway Logic Triggered for Job ${job.id}`);
+                logger.debug('useJobCompletion', `   - Location: ${job.location || 'MISSING'}`);
+                logger.debug('useJobCompletion', `   - Items: ${job.lineItems?.length || 0}`);
 
                 if (job.location) {
-                    console.log('ℹ️ Bulk Putaway Update skipped in favor of granular item scanning/relocation.');
+                    logger.debug('useJobCompletion', 'ℹ️ Bulk Putaway Update skipped in favor of granular item scanning/relocation.');
                 } else {
-                    console.log('ℹ️ Job has no target location. Relying on individual item scans.');
+                    logger.debug('useJobCompletion', 'ℹ️ Job has no target location. Relying on individual item scans.');
                 }
 
                 // CHECK IF ALL PUTAWAY JOBS FOR THIS PO ARE COMPLETE
@@ -223,7 +224,7 @@ export const useJobCompletion = (deps: UseJobCompletionDeps) => {
                         allPutawayJobsForPO.every(j => j.status === 'Completed');
 
                     if (allPutawayJobsComplete) {
-                        console.log(`✅ All PUTAWAY jobs for PO ${job.orderRef} are complete. Updating PO status to 'Received'...`);
+                        logger.debug('useJobCompletion', `✅ All PUTAWAY jobs for PO ${job.orderRef} are complete. Updating PO status to 'Received'...`);
 
                         const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(job.orderRef || '');
 
@@ -236,15 +237,15 @@ export const useJobCompletion = (deps: UseJobCompletionDeps) => {
                                     addNotification('success', getTranslation('warehouse.poFullyReceived').replace('{id}', updatedPo.poNumber || job!.orderRef || ''));
                                 }
                             } catch (err) {
-                                console.error(`❌ Failed to update PO status for ${job.orderRef}:`, err);
+                                logger.error('useJobCompletion', `❌ Failed to update PO status for ${job.orderRef}:`, err);
                             }
                         } else {
-                            console.log(`ℹ️ PO Ref ${job.orderRef} is not a UUID. Attempting lookup by PO Number...`);
+                            logger.debug('useJobCompletion', `ℹ️ PO Ref ${job.orderRef} is not a UUID. Attempting lookup by PO Number...`);
                             const poByNumber = allOrders.find(o => o.poNumber === job!.orderRef || o.po_number === job!.orderRef);
 
                             if (poByNumber && poByNumber.id) {
                                 try {
-                                    console.log(`✅ Found PO UUID ${poByNumber.id} for ref ${job.orderRef}. Updating status...`);
+                                    logger.debug('useJobCompletion', `✅ Found PO UUID ${poByNumber.id} for ref ${job.orderRef}. Updating status...`);
                                     const updatedPo = await purchaseOrdersService.receive(poByNumber.id, false);
                                     if (updatedPo) {
                                         setOrders(prev => prev.map(o => o.id === poByNumber.id ? updatedPo : o));
@@ -252,10 +253,10 @@ export const useJobCompletion = (deps: UseJobCompletionDeps) => {
                                         addNotification('success', `PO ${updatedPo.poNumber} fully received!`);
                                     }
                                 } catch (err) {
-                                    console.error(`❌ Failed to update PO status by number ${job.orderRef}:`, err);
+                                    logger.error('useJobCompletion', `❌ Failed to update PO status by number ${job.orderRef}:`, err);
                                 }
                             } else {
-                                console.warn(`⚠️ PO ID ${job.orderRef} is not a valid UUID and not found in local orders. Skipping backend update.`);
+                                logger.warn('useJobCompletion', `⚠️ PO ID ${job.orderRef} is not a valid UUID and not found in local orders. Skipping backend update.`);
                                 setOrders(prev => prev.map(o => o.id === job!.orderRef ? { ...o, status: 'Received' } : o));
                                 setAllOrders(prev => prev.map(o => o.id === job!.orderRef ? { ...o, status: 'Received' } : o));
                                 addNotification('success', getTranslation('warehouse.poReceivedLocalOnly').replace('{id}', job.orderRef || ''));
@@ -282,7 +283,7 @@ export const useJobCompletion = (deps: UseJobCompletionDeps) => {
                 if (packItems.length > 0) {
                     const existingPackJob = jobs.find(j => j.orderRef === job!.orderRef && j.type === 'PACK' && j.status !== 'Cancelled');
                     if (existingPackJob) {
-                        console.warn(`⚠️ PACK job already exists for ${job.orderRef}. Skipping creation.`);
+                        logger.warn('useJobCompletion', `⚠️ PACK job already exists for ${job.orderRef}. Skipping creation.`);
                     } else {
                         const packJob = await wmsJobsService.create({
                             siteId: job.siteId,
@@ -302,7 +303,7 @@ export const useJobCompletion = (deps: UseJobCompletionDeps) => {
                         setJobs(prev => prev.find(j => j.id === packJob.id) ? prev : [packJob, ...prev]);
                     }
                 } else {
-                    console.warn(`⚠️ Skipped creation of PACK job for ${job.orderRef} because no items were picked.`);
+                    logger.warn('useJobCompletion', `⚠️ Skipped creation of PACK job for ${job.orderRef} because no items were picked.`);
                 }
 
                 const sale = sales.find(s => s.id === job!.orderRef);
@@ -373,7 +374,7 @@ export const useJobCompletion = (deps: UseJobCompletionDeps) => {
                     const existingDispatchJob = jobs.find(j => j.orderRef === job!.orderRef && j.type === 'DISPATCH' && j.status !== 'Cancelled');
 
                     if (existingDispatchJob) {
-                        console.warn(`⚠️ DISPATCH job already exists for ${job.orderRef}. Skipping creation.`);
+                        logger.warn('useJobCompletion', `⚠️ DISPATCH job already exists for ${job.orderRef}. Skipping creation.`);
                     } else {
                         const dispatchJob = await wmsJobsService.create({
                             siteId: job.siteId,
@@ -395,7 +396,7 @@ export const useJobCompletion = (deps: UseJobCompletionDeps) => {
                         setJobs(prev => prev.find(j => j.id === dispatchJob.id) ? prev : [dispatchJob, ...prev]);
                     }
                 } else {
-                    console.warn(`⚠️ Skipped creation of DISPATCH job for ${job.orderRef} because no items were packed.`);
+                    logger.warn('useJobCompletion', `⚠️ Skipped creation of DISPATCH job for ${job.orderRef} because no items were packed.`);
                 }
 
                 if (sale) {
@@ -428,7 +429,7 @@ export const useJobCompletion = (deps: UseJobCompletionDeps) => {
             console.timeEnd(`completeJob-${jobId}`);
             return pointsResult;
         } catch (error) {
-            console.error(`❌ completeJob failed for ${jobId}:`, error);
+            logger.error('useJobCompletion', `❌ completeJob failed for ${jobId}:`, error);
             console.timeEnd(`completeJob-${jobId}`);
             addNotification('alert', getTranslation('warehouse.jobCompleteFailed'));
             throw error;

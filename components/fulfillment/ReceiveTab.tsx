@@ -12,6 +12,7 @@ import { ReceiveReviewModal } from './receive/ReceiveReviewModal';
 import { ReceiveReprintModal } from './receive/ReceiveReprintModal';
 import { ReceiveDetailsModal } from './receive/ReceiveDetailsModal';
 import { inventoryRequestsService } from '../../services/supabase.service';
+import { logger } from '../../utils/logger';
 
 export const ReceiveTab: React.FC = () => {
     const {
@@ -344,7 +345,7 @@ export const ReceiveTab: React.FC = () => {
                 addNotification('alert', 'Popup blocked. Allow popups to print.');
             }
         } catch (e) {
-            console.error(e);
+            logger.error('ReceiveTab', 'caught error', e as Error);
             addNotification('alert', 'Failed to generate labels');
         } finally {
             setIsSubmitting(false);
@@ -353,7 +354,7 @@ export const ReceiveTab: React.FC = () => {
 
     const handleReprintLabels = async () => {
         if (!reprintItem || isSubmitting) return;
-        console.log('🔍 REPRINT_ITEM:', JSON.stringify(reprintItem));
+        logger.debug('ReceiveTab', '🔍 REPRINT_ITEM');
         await handlePrintBatch([reprintItem]);
         setReprintItem(null);
     };

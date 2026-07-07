@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { posDB } from '../services/db/pos.db';
 import { salesService } from '../services/supabase.service';
 import { supabase } from '../lib/supabase';
+import { logger } from '../utils/logger';
 
 export type SyncStatus = 'synced' | 'syncing' | 'offline' | 'error' | 'pending';
 
@@ -29,7 +30,7 @@ export const usePosSync = (onSyncComplete?: (count: number) => void) => {
             }
             // Otherwise log only once (not on every interval)
             if (Math.random() < 0.1) { // 10% sampling to reduce spam
-                console.warn('POS sync queue check failed:', err?.message);
+                logger.warn('usePosSync', 'POS sync queue check failed:');
             }
         }
     }, []);
@@ -78,10 +79,10 @@ export const usePosSync = (onSyncComplete?: (count: number) => void) => {
                                         p_sale_date: salePayload.date || new Date().toISOString()
                                     });
                                     if (rpcErr) {
-                                        console.warn(`⚠️ Atomic stock decrement failed for ${item.name || item.id} (non-blocking):`, rpcErr.message);
+                                        logger.warn('usePosSync', `⚠️ Atomic stock decrement failed for ${item.name || item.id} (non-blocking):`);
                                     }
                                 } catch (stockErr) {
-                                    console.warn(`⚠️ Stock decrement failed for ${item.name || item.id} during sync (non-blocking):`, stockErr);
+                                    logger.warn('usePosSync', `⚠️ Stock decrement failed for ${item.name || item.id} during sync (non-blocking):`);
                                 }
                             }
                         }
@@ -92,23 +93,23 @@ export const usePosSync = (onSyncComplete?: (count: number) => void) => {
                     successfulSyncs++;
 
                 } catch (err: any) {
-                    console.error(`Failed to sync POS op ${op.id}`, err);
+                    logger.error('usePosSync', `Failed to sync POS op ${op.id}`, err);
 
                     // If it's a constraint violation (corrupted data), remove it from queue
                     if (err?.code === '23502' || err?.message?.includes('violates not-null constraint')) {
-                        console.warn(`⚠️ Removing corrupted sync entry ${op.id} - data integrity issue`);
+                        logger.warn('usePosSync', `⚠️ Removing corrupted sync entry ${op.id} - data integrity issue`);
                         if (op.id) await posDB.removeOperation(op.id);
                         // Don't count corrupted data drops as "successful syncs" for the UI alert
                     }
                     // If it's a duplicate key error (sale already synced previously), treat as success
                     else if (err?.code === '23505' || err?.message?.includes('duplicate key')) {
-                        console.warn(`✅ Removing duplicate sync entry ${op.id} - sale already exists in database`);
+                        logger.warn('usePosSync', `✅ Removing duplicate sync entry ${op.id} - sale already exists in database`);
                         if (op.id) await posDB.removeOperation(op.id);
                         successfulSyncs++;
                     }
                     // If it's an RLS violation (sale was partially created by a previous attempt), remove the stuck entry
                     else if (err?.code === '42501' || err?.message?.includes('row-level security')) {
-                        console.warn(`✅ Removing stuck sync entry ${op.id} - RLS conflict (sale likely already exists)`);
+                        logger.warn('usePosSync', `✅ Removing stuck sync entry ${op.id} - RLS conflict (sale likely already exists)`);
                         if (op.id) await posDB.removeOperation(op.id);
                         successfulSyncs++;
                     }
@@ -130,7 +131,7 @@ export const usePosSync = (onSyncComplete?: (count: number) => void) => {
                 setSyncStatus('synced');
                 return;
             }
-            console.error('Core POS sync process failed:', err);
+            logger.error('usePosSync', 'Core POS sync process failed', err as Error);
             setSyncStatus('error');
         }
     }, []);

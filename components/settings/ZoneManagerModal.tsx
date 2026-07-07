@@ -2,6 +2,7 @@ import React from 'react';
 import { Shield, Loader2, Save, Plus, Code, Trash2 } from 'lucide-react';
 import Modal from '../Modal';
 import { User, SystemConfig } from '../../types';
+import { logger } from '../../utils/logger';
 
 interface ZoneManagerModalProps {
   isOpen: boolean;
@@ -60,7 +61,7 @@ export function ZoneManagerModal({
                 await updateSettings({ enforceRegionalZoning: !settings.enforceRegionalZoning }, user?.name || 'Admin');
                 addNotification('success', 'Regional zoning enforcement status updated');
               } catch (error) {
-                console.error(error);
+                logger.error('ZoneManagerModal', 'caught error', error as Error);
                 addNotification('alert', 'Failed to update regional zoning enforcement');
               }
             }}

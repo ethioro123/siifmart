@@ -10,6 +10,7 @@ import { WMSJob } from '../../../../types';
 import { generatePackLabelHTML } from '../../../../utils/labels/PackLabelGenerator';
 import { isWeightBased, isVolumeBased } from '../../../../utils/units';
 import { wmsJobsService, inventoryRequestsService } from '../../../../services/supabase.service';
+import { logger } from '../../../../utils/logger';
 
 interface PackModalsContainerProps {
     selectedPackJob: WMSJob | null;
@@ -196,7 +197,7 @@ export const PackModalsContainer: React.FC<PackModalsContainerProps> = ({
 
             addNotification('success', 'Label ready to print!');
         } catch (err) {
-            console.error(err);
+            logger.error('PackModalsContainer', 'caught error', err as Error);
             addNotification('alert', 'Failed to generate label');
         } finally {
             setIsSubmitting(false);
@@ -258,7 +259,7 @@ export const PackModalsContainer: React.FC<PackModalsContainerProps> = ({
 
             addNotification('success', 'Label ready to print!');
         } catch (err) {
-            console.error(err);
+            logger.error('PackModalsContainer', 'caught error', err as Error);
             addNotification('alert', 'Failed to generate label');
         } finally {
             setIsSubmitting(false);
@@ -324,7 +325,7 @@ export const PackModalsContainer: React.FC<PackModalsContainerProps> = ({
 
             addNotification('success', `Label printed for ${item.name || item.sku}`);
         } catch (err) {
-            console.error(err);
+            logger.error('PackModalsContainer', 'caught error', err as Error);
             addNotification('alert', 'Failed to generate item label');
         } finally {
             setIsSubmitting(false);

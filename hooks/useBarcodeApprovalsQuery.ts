@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { barcodeApprovalsService } from '../services/supabase.service';
 import { BarcodeApprovalSchema } from '../schemas/inventory.schema';
 import { BarcodeApproval } from '../types';
+import { logger } from '../utils/logger';
 
 interface UseBarcodeApprovalsOptions {
     siteId?: string;
@@ -24,7 +25,7 @@ export function useBarcodeApprovalsQuery(options: UseBarcodeApprovalsOptions = {
             return data.map(raw => {
                 const result = BarcodeApprovalSchema.safeParse(raw);
                 if (!result.success) {
-                    console.warn('⚠️ Barcode Approval Schema Validation Failed:', {
+                    logger.warn('useBarcodeApprovalsQuery', '⚠️ Barcode Approval Schema Validation Failed:', {
                         id: raw.id,
                         errors: result.error.format()
                     });

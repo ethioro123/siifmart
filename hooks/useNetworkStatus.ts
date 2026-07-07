@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { logger } from '../utils/logger';
 
 /**
  * Network Status Hook
@@ -21,7 +22,7 @@ export function useNetworkStatus() {
         };
 
         const handleOffline = () => {
-            console.warn('Network: Offline');
+            logger.warn('useNetworkStatus', 'Network: Offline');
             setIsOnline(false);
             setWasOffline(true);
         };

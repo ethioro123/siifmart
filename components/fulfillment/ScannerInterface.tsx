@@ -15,6 +15,7 @@ import { useFulfillment } from './FulfillmentContext';
 import { playBeep } from '../../utils/audioUtils';
 import { useScanOnly } from '../../hooks/useScanOnly';
 import { getExpiryStatus } from '../../utils/formatting';
+import { logger } from '../../utils/logger';
 
 // Helper component for metrics
 const MetricBadge = ({ label, value, color }: { label: string; value: string | number; color: string }) => (
@@ -200,7 +201,7 @@ export const ScannerInterface: React.FC = () => {
         if (selectedJob?.type === 'PUTAWAY') {
             // Deprecated: Putaway now uses dedicated PutawayScanner.
             // But if for some reason it routes here, just allow it or log warning.
-            console.warn("Putaway should not use ScannerInterface");
+            logger.warn('ScannerInterface', "Putaway should not use ScannerInterface");
             return;
         } else {
             // PICK/COUNT
@@ -341,7 +342,7 @@ export const ScannerInterface: React.FC = () => {
                 }
 
             } catch (err) {
-                console.error(err);
+                logger.error('ScannerInterface', 'caught error', err as Error);
                 playBeep('error');
                 addNotification('alert', 'Error processing scan');
             } finally {

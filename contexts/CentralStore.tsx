@@ -11,6 +11,7 @@ import { systemLogsService as dbSystemLogsService } from '../services/supabase.s
 import { APP_CONFIG } from '../config/app.config';
 import Toast from '../components/Toast';
 import { usePresence } from '../services/realtime.service';
+import { logger } from '../utils/logger';
 
 interface User {
   id: string;
@@ -65,7 +66,7 @@ const fetchLoginLocation = async (): Promise<string> => {
     });
     return `GPS: ${pos.coords.latitude.toFixed(4)}, ${pos.coords.longitude.toFixed(4)}`;
   } catch (geoErr: any) {
-    console.error('Browser GPS geolocation failed:', geoErr);
+    logger.error('CentralStore', 'Browser GPS geolocation failed:', geoErr);
     
     let errMsg = 'Location permission is required to access the system. Please grant location permissions in your browser settings.';
     if (geoErr.code === geoErr.TIMEOUT) {
@@ -113,7 +114,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     const SYNC_TIMEOUT_MS = 5000; // 5 seconds max for profile sync
 
     try {
-      console.log('CentralStore: Syncing user profile from database...');
+      logger.debug('CentralStore', 'CentralStore: Syncing user profile from database...');
 
       // Race between profile fetch and timeout
       const profilePromise = authService.getCurrentAuthUser();
@@ -124,7 +125,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       const profile = await Promise.race([profilePromise, timeoutPromise]);
 
       if (profile) {
-        console.log('CentralStore: Profile found in DB, syncing state...');
+        logger.debug('CentralStore', 'CentralStore: Profile found in DB, syncing state...');
         const rawRole = profile.role;
         const rawNormalized = rawRole.toLowerCase().trim().replace(/[\s-]/g, '_');
         
@@ -139,7 +140,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           try {
             location = sessionStorage.getItem('siifmart_login_location') || undefined;
           } catch (e) {
-            console.warn('sessionStorage is disabled in this environment', e);
+            logger.warn('CentralStore', 'sessionStorage is disabled in this environment');
           }
         }
 
@@ -153,7 +154,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         try {
           sessionStorage.setItem('siifmart_login_location', location);
         } catch (e) {
-          console.warn('Could not cache session location', e);
+          logger.warn('CentralStore', 'Could not cache session location');
         }
 
         // Save last login GPS, timestamp, device, and login history to Supabase
@@ -196,7 +197,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
               loginHistory: updatedHistory
             });
           } catch (updateErr) {
-            console.error('Failed to update employee login history and details:', updateErr);
+            logger.error('CentralStore', 'Failed to update employee login history and details:', updateErr);
           }
         }
 
@@ -228,19 +229,19 @@ export function StoreProvider({ children }: { children: ReactNode }) {
               action: 'USER_LOGIN',
               details: `Logged in from location: ${location}`,
               module: 'Security'
-            }).catch(dbErr => console.error('Non-blocking DB logging failure:', dbErr));
+            }).catch(dbErr => logger.error('CentralStore', 'Non-blocking DB logging failure', dbErr as Error));
           } catch (err) {
-            console.error('Failed to log USER_LOGIN to database:', err);
+            logger.error('CentralStore', 'Failed to log USER_LOGIN to database:', err);
           }
         }
       } else {
-        console.warn('CentralStore: No profile returned, user may need to re-login');
+        logger.warn('CentralStore', 'CentralStore: No profile returned, user may need to re-login');
       }
     } catch (error: any) {
       if (error?.message === 'Profile sync timeout') {
-        console.warn('⚠️ CentralStore: Profile sync timed out after 5s - continuing without blocking');
+        logger.warn('CentralStore', '⚠️ CentralStore: Profile sync timed out after 5s - continuing without blocking');
       } else {
-        console.error('CentralStore: Sync failed', error);
+        logger.error('CentralStore', 'CentralStore: Sync failed', error);
         // Force logout if strict location check throws error during sync lifecycle
         if (error?.message?.includes('Location tracking failed')) {
           await authService.signOut();
@@ -261,12 +262,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     // Listen for auth changes
     const { data: { subscription } } = authService.onAuthStateChange(
       async (event, session) => {
-        console.log('Auth state changed:', event);
+        logger.debug('CentralStore', 'Auth state changed:');
         if (event === 'SIGNED_IN' && session?.user) {
           try {
             await syncUserProfile();
           } catch (e) {
-            console.error('Auto sign-in profile sync failed due to geolocation lock:', e);
+            logger.error('CentralStore', 'Auto sign-in profile sync failed due to geolocation lock:', e);
           }
         } else if (event === 'SIGNED_OUT') {
           setUser(null);
@@ -286,7 +287,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   // DISABLED - refresh function not available
   // useEffect(() => {
   //   if (wasOffline && isOnline) {
-  //     console.log('Network reconnected - refreshing data');
+  //     logger.debug('CentralStore', 'Network reconnected - refreshing data');
   //     refresh();
   //   }
   // }, [isOnline, wasOffline, refresh]);
@@ -320,20 +321,20 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           const msg = error.message.toLowerCase();
           if (msg.includes('fetch') || msg.includes('network') || msg.includes('failed')) {
             if (!isServerDown) { // Only log on state change
-              console.warn('⚠️ Connection to server lost.');
+              logger.warn('CentralStore', '⚠️ Connection to server lost.');
             }
             setIsServerDown(true);
           } else {
             // Other errors (auth, etc) mean the server IS reachable
-            if (isServerDown) console.log('✅ Connection to server restored.');
+            if (isServerDown) logger.debug('CentralStore', '✅ Connection to server restored.');
             setIsServerDown(false);
           }
         } else {
-          if (isServerDown) console.log('✅ Connection to server restored.');
+          if (isServerDown) logger.debug('CentralStore', '✅ Connection to server restored.');
           setIsServerDown(false);
         }
       } catch (e) {
-        console.error('CRITICAL: Health check exception!', e);
+        logger.error('CentralStore', 'CRITICAL: Health check exception!', e);
         setIsServerDown(true);
       }
     };
@@ -348,7 +349,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const checkSession = async () => {
     // FAIL-SAFE: Ensure loading is ALWAYS set to false within 10 seconds
     const failSafeTimeout = setTimeout(() => {
-      console.warn('⚠️ CentralStore: Session check fail-safe triggered after 10s');
+      logger.warn('CentralStore', '⚠️ CentralStore: Session check fail-safe triggered after 10s');
       setLoading(false);
     }, 10000);
 
@@ -358,7 +359,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         await syncUserProfile();
       }
     } catch (error) {
-      console.error('Session check failed:', error);
+      logger.error('CentralStore', 'Session check failed:', error);
     } finally {
       clearTimeout(failSafeTimeout);
       setLoading(false);
@@ -368,18 +369,18 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   // --- Actions ---
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
-      console.log('CentralStore: Attempting login...');
+      logger.debug('CentralStore', 'CentralStore: Attempting login...');
 
       // 1. MUST capture location first (throws if fails)
       const location = await fetchLoginLocation();
-      console.log('CentralStore: Location captured successfully:', location);
+      logger.debug('CentralStore', 'CentralStore: Location captured successfully:');
 
       const result = await authService.signIn(email, password);
-      console.log('CentralStore: Sign in successful!');
+      logger.debug('CentralStore', 'CentralStore: Sign in successful!');
 
       if (result?.user) {
         await syncUserProfile(location);
-        console.log('CentralStore: Login complete!');
+        logger.debug('CentralStore', 'CentralStore: Login complete!');
         // Force navigate to root to trigger role-based redirects in App.tsx
         window.location.hash = '#/';
         return true;
@@ -387,7 +388,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
       return false;
     } catch (error: any) {
-      console.error('Login failed:', error);
+      logger.error('CentralStore', 'Login failed:', error);
       // Re-throw so that LoginPage can display the specific error message
       throw error;
     }
@@ -441,14 +442,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   // Update current user's avatar in local state
   const updateUserAvatar = (newAvatar: string) => {
-    console.log('📷 CentralStore.updateUserAvatar called');
-    console.log('📷 Current user:', user?.name, user?.id);
-    console.log('📷 New avatar (first 100 chars):', newAvatar?.substring(0, 100));
+    logger.debug('CentralStore', '📷 CentralStore.updateUserAvatar called');
+    logger.debug('CentralStore', '📷 Current user:');
+    logger.debug('CentralStore', '📷 New avatar (first 100 chars)');
     if (user) {
       const updatedUser = { ...user, avatar: newAvatar };
-      console.log('📷 Setting updated user state');
+      logger.debug('CentralStore', '📷 Setting updated user state');
       setUser(updatedUser);
-      console.log('📷 User state updated successfully');
+      logger.debug('CentralStore', '📷 User state updated successfully');
     }
   };
 

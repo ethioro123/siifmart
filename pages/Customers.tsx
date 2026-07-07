@@ -9,6 +9,7 @@ import { Customer } from '../types';
 import Modal from '../components/Modal';
 import { useData } from '../contexts/DataContext';
 import { Protected, ProtectedButton } from '../components/Protected';
+import { logger } from '../utils/logger';
 
 export default function Customers() {
    const { customers, addCustomer, updateCustomer, deleteCustomer, addNotification } = useData();
@@ -59,7 +60,7 @@ export default function Customers() {
          setIsAddModalOpen(false);
          setNewCustomer({});
       } catch (error) {
-         console.error("Failed to save customer:", error);
+         logger.error('Customers', "Failed to save customer:", error);
          addNotification('alert', "Failed to save customer.");
       } finally {
          setIsSubmitting(false);
@@ -98,7 +99,7 @@ export default function Customers() {
          setCustomerToDelete(null);
          setDeleteInput('');
       } catch (error) {
-         console.error("Failed to delete customer:", error);
+         logger.error('Customers', "Failed to delete customer:", error);
          addNotification('alert', "Failed to delete customer.");
       } finally {
          setIsSubmitting(false);

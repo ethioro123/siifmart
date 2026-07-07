@@ -7,6 +7,7 @@ import Button from '../../shared/Button';
 import { WarehouseZone, WMSJob } from '../../../types'; // Assuming WMSJob exists
 import { warehouseZonesService } from '../../../services/supabase.service';
 import Modal from '../../../components/Modal'; // Correct path for Modal
+import { logger } from '../../../utils/logger';
 
 interface ZoneOperationsManagerProps {
     zones: WarehouseZone[];
@@ -61,7 +62,7 @@ export const ZoneOperationsManager: React.FC<ZoneOperationsManagerProps> = ({
             onZoneUpdate();
             addNotification('success', `Zone ${zone.name} ${!zone.isLocked ? 'Locked' : 'Unlocked'}`);
         } catch (err) {
-            console.error(err);
+            logger.error('ZoneOperationsManager', 'caught error', err as Error);
             addNotification('alert', 'Failed to toggle lock');
         } finally {
             setIsProcessing(null);
@@ -79,7 +80,7 @@ export const ZoneOperationsManager: React.FC<ZoneOperationsManagerProps> = ({
             onZoneUpdate();
             addNotification('success', `Updated rules for ${zone.name}`);
         } catch (err) {
-            console.error(err);
+            logger.error('ZoneOperationsManager', 'caught error', err as Error);
             addNotification('alert', 'Failed to update rule');
         } finally {
             setIsProcessing(null);
@@ -106,7 +107,7 @@ export const ZoneOperationsManager: React.FC<ZoneOperationsManagerProps> = ({
             onZoneUpdate();
             addNotification('success', `Zone ${zone.name} deleted`);
         } catch (err) {
-            console.error(err);
+            logger.error('ZoneOperationsManager', 'caught error', err as Error);
             addNotification('alert', 'Failed to delete zone');
         } finally {
             setIsProcessing(null);
@@ -135,7 +136,7 @@ export const ZoneOperationsManager: React.FC<ZoneOperationsManagerProps> = ({
             setNewZoneName('');
             setNewZoneCapacity(100);
         } catch (err) {
-            console.error(err);
+            logger.error('ZoneOperationsManager', 'caught error', err as Error);
             addNotification('alert', 'Failed to create zone');
         } finally {
             setIsProcessing(null);

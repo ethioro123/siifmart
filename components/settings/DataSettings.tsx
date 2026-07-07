@@ -5,6 +5,7 @@ import {
 import { useStore } from '../../contexts/CentralStore';
 import { useData } from '../../contexts/DataContext';
 import { generateQuarterlyReport } from '../../utils/reportGenerator';
+import { logger } from '../../utils/logger';
 
 export default function DataSettings() {
     const { showToast } = useStore();
@@ -96,7 +97,7 @@ export default function DataSettings() {
                 }
 
             } catch (err) {
-                console.error(err);
+                logger.error('DataSettings', 'caught error', err as Error);
                 showToast('Failed to retrieve archive data', 'error');
             } finally {
                 setIsGenerating(false);

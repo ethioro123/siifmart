@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Camera, X, AlertCircle } from 'lucide-react';
 // @ts-ignore - jsqr doesn't have types
 import jsQR from 'jsqr';
+import { logger } from '../utils/logger';
 
 interface QRScannerProps {
     onScan: (data: string) => void;
@@ -64,13 +65,13 @@ export const QRScanner: React.FC<QRScannerProps> = ({
                     } catch (playErr: any) {
                         // "The play() request was interrupted by a new load request" is common and safe to ignore
                         if (playErr.name !== 'AbortError') {
-                            console.error('Video play error:', playErr);
+                            logger.error('QRScanner', 'Video play error:', playErr);
                         }
                     }
                 }
             } catch (err) {
                 if (mounted) {
-                    console.error('Camera access error:', err);
+                    logger.error('QRScanner', 'Camera access error:', err);
                     setError('Unable to access camera. Please check permissions.');
                 }
             }

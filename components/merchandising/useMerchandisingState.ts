@@ -4,6 +4,7 @@ import { MOCK_PRICING_RULES } from '../../constants';
 import type { Product, Promotion, PricingRule } from '../../types';
 import type { MerchandisingContextType, MerchandisingTab } from './MerchandisingContext';
 import { useMerchandisingFilters } from './hooks/useMerchandisingFilters';
+import { logger } from '../../utils/logger';
 
 const getMargin = (price: number, cost: number) => {
    if (!price || !cost) return 0;
@@ -107,7 +108,7 @@ export const useMerchandisingState = (): MerchandisingContextType => {
          setIsPromoModalOpen(false);
          setNewPromo({ type: 'PERCENTAGE' });
       } catch (error) {
-         console.error('Failed to create promotion:', error);
+         logger.error('useMerchandisingState', 'Failed to create promotion:', error as Error);
          addNotification('alert', 'Failed to launch promotion campaign');
       } finally {
          setIsSubmitting(false);
@@ -153,7 +154,7 @@ export const useMerchandisingState = (): MerchandisingContextType => {
          }
          setEditingId(null);
       } catch (error) {
-         console.error("Error saving price:", error);
+         logger.error('useMerchandisingState', "Error saving price:", error);
          addNotification('alert', 'Failed to save price');
       } finally {
          setIsSubmitting(false);
@@ -186,7 +187,7 @@ export const useMerchandisingState = (): MerchandisingContextType => {
          setIsBulkDiscountModalOpen(false);
          setBulkDiscountValue('');
       } catch (e) {
-         console.error(e);
+         logger.error('useMerchandisingState', 'caught error', e as Error);
          addNotification('alert', 'Failed to apply bulk discount');
       } finally {
          setIsSubmitting(false);
@@ -219,7 +220,7 @@ export const useMerchandisingState = (): MerchandisingContextType => {
          addNotification('success', `Optimized ${count} prices to end in ${target}.`);
          if (selectedIds.size > 0) setSelectedIds(new Set());
       } catch (e) {
-         console.error(e);
+         logger.error('useMerchandisingState', 'caught error', e as Error);
          addNotification('alert', 'Failed to update prices');
       } finally {
          setIsSubmitting(false);
@@ -264,7 +265,7 @@ export const useMerchandisingState = (): MerchandisingContextType => {
          await Promise.all(updates);
          addNotification('info', `Rule Executed: Updated ${updatedCount} products in category '${rule.targetCategory}'`);
       } catch (e) {
-         console.error(e);
+         logger.error('useMerchandisingState', 'caught error', e as Error);
          addNotification('alert', 'Failed to run pricing rule');
       } finally {
          setIsSubmitting(false);

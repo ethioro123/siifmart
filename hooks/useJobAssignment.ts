@@ -1,5 +1,6 @@
 import { useCallback } from 'react';
 import { User, WMSJob } from '../types';
+import { logger } from '../utils/logger';
 
 interface UseJobAssignmentProps {
     user: User | null;
@@ -23,7 +24,7 @@ export const useJobAssignment = ({
                 addNotification('success', t('warehouse.jobAssignedToYou').replace('{name}', user.name));
                 return true;
             } catch (e) {
-                console.error('Failed to auto-assign job', e);
+                logger.error('useJobAssignment', 'Failed to auto-assign job', e);
                 return false;
             }
         }

@@ -43,11 +43,11 @@ export interface DataContextType {
   setAllSales: React.Dispatch<React.SetStateAction<SaleRecord[]>>;
 
   // Actions
-  updateSettings: (settings: Partial<SystemConfig>, user: string) => void;
+  updateSettings: (settings: Partial<SystemConfig>, user: string) => Promise<void>;
   setActiveSite: (id: string) => void;
-  addSite: (site: Site, user: string) => void;
-  updateSite: (site: Site, user: string) => void;
-  deleteSite: (id: string, user: string) => void;
+  addSite: (site: Site, user: string) => Promise<void>;
+  updateSite: (site: Site, user: string) => Promise<void>;
+  deleteSite: (id: string, user: string) => Promise<void>;
   getTaxForSite: (siteId?: string) => { name: string, rate: number, compound: boolean }[];
 
   addProduct: (product: Product) => Promise<Product | undefined>;
@@ -69,18 +69,18 @@ export interface DataContextType {
   triggerSync: () => void;
   posCheckQueue: () => Promise<void>;
 
-  addSupplier: (supplier: Supplier) => void;
-  adjustStock: (productId: string, qty: number, type: 'IN' | 'OUT', reason: string, user: string) => void;
+  addSupplier: (supplier: Supplier) => Promise<void>;
+  adjustStock: (productId: string, qty: number, type: 'IN' | 'OUT', reason: string, user: string) => Promise<void>;
 
   // Finance Actions
-  addExpense: (expense: ExpenseRecord) => void;
-  deleteExpense: (id: string) => void;
-  processPayroll: (siteId: string, user: string) => void;
+  addExpense: (expense: ExpenseRecord) => Promise<void>;
+  deleteExpense: (id: string) => Promise<void>;
+  processPayroll: (siteId: string, user: string) => Promise<void>;
 
   // HR Actions
-  addEmployee: (employee: Employee, user?: string) => void;
-  updateEmployee: (employee: Employee, user: string) => void;
-  deleteEmployee: (id: string, user: string) => void;
+  addEmployee: (employee: Employee, user?: string) => Promise<Employee | undefined>;
+  updateEmployee: (employee: Employee, user: string) => Promise<void>;
+  deleteEmployee: (id: string, user: string) => Promise<void>;
 
   // Gamification Actions (POS - Team)
   storePoints: StorePoints[];

@@ -13,6 +13,7 @@ import { ZoneStats } from './components/ZoneStats';
 import { ZoneCard } from './components/ZoneCard';
 import { ZoneCreateModal } from './components/ZoneCreateModal';
 import { ZoneEditModal } from './components/ZoneEditModal';
+import { logger } from '../../utils/logger';
 
 interface ZoneWithProducts extends WarehouseZone {
     assignedProducts: Product[];
@@ -56,7 +57,7 @@ export const InventoryZones: React.FC = () => {
             });
             setZones(enriched);
         } catch (err) {
-            console.error(err);
+            logger.error('InventoryZones', 'caught error', err as Error);
             showToast('Failed to load zones', 'error');
         } finally {
             setIsLoading(false);
@@ -110,7 +111,7 @@ export const InventoryZones: React.FC = () => {
             queryClient.invalidateQueries({ queryKey: ['zones'] });
             await fetchZones();
         } catch (err) {
-            console.error(err);
+            logger.error('InventoryZones', 'caught error', err as Error);
             showToast('Failed to initialize default zones', 'error');
         } finally {
             setIsLoading(false);

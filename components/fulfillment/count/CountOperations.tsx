@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { RotateCcw, Search, AlertTriangle, Package, CheckCircle, ArrowRight, RefreshCw } from 'lucide-react';
 import { Product, PendingInventoryChange, User } from '../../../types';
 import { useLanguage } from '../../../contexts/LanguageContext';
+import { logger } from '../../../utils/logger';
 
 interface CountOperationsProps {
     products: Product[];
@@ -277,7 +278,7 @@ export const CountOperations: React.FC<CountOperationsProps> = ({
                                                         setCountSessionItems(newItems);
                                                         addNotification('success', t('warehouse.varianceRequestSubmitted'));
                                                     } catch (e) {
-                                                        console.error('Failed to approve variance:', e);
+                                                        logger.error('CountOperations', 'Failed to approve variance:', e);
                                                         addNotification('alert', t('warehouse.failedVarianceSubmit'));
                                                     } finally {
                                                         setApprovingVariance(null);

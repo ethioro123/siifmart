@@ -22,6 +22,7 @@ import DashboardFlowDynamics from '../components/wms-dashboard/DashboardFlowDyna
 import ZoneOccupancyCard from '../components/wms-dashboard/ZoneOccupancyCard';
 import DashboardLeaderboard from '../components/wms-dashboard/DashboardLeaderboard';
 import DashboardStreamMonitor from '../components/wms-dashboard/DashboardStreamMonitor';
+import { logger } from '../utils/logger';
 
 export default function WMSDashboard() {
   const navigate = useNavigate();
@@ -77,7 +78,7 @@ export default function WMSDashboard() {
         if (fmRes.status === 'fulfilled') setFinancialMetrics(fmRes.value);
 
       } catch (e: any) {
-        console.error("Dashboard metrics fetch failed:", e);
+        logger.error('WMSDashboard', "Dashboard metrics fetch failed:", e);
       } finally {
         setRefreshing(false);
       }

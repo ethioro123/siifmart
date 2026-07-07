@@ -1,6 +1,7 @@
 import { useCallback } from 'react';
 import type { Employee, ShiftRecord, Site, SystemLog } from '../../types';
 import { employeesService } from '../../services/supabase.service';
+import { logger } from '../../utils/logger';
 
 interface UseEmployeeActionsDeps {
     activeSite: Site | undefined;
@@ -25,7 +26,7 @@ export function useEmployeeActions(deps: UseEmployeeActionsDeps) {
             addNotification('success', `Employee ${employee.name} added`);
             return newEmployee;
         } catch (error: any) {
-            console.error('addEmployee error:', error);
+            logger.error('useEmployeeActions', 'addEmployee error:', error as Error);
             const errorMessage = error?.message || 'Failed to add employee';
             addNotification('alert', `Failed to add employee: ${errorMessage}`);
             throw error;
@@ -38,7 +39,7 @@ export function useEmployeeActions(deps: UseEmployeeActionsDeps) {
             setEmployees(prev => prev.map(e => e.id === employee.id ? employee : e));
             addNotification('success', 'Employee updated');
         } catch (error) {
-            console.error(error);
+            logger.error('useEmployeeActions', 'caught error', error as Error);
             addNotification('alert', 'Failed to update employee');
         }
     }, [addNotification]);
@@ -49,7 +50,7 @@ export function useEmployeeActions(deps: UseEmployeeActionsDeps) {
             setEmployees(prev => prev.filter(e => e.id !== id));
             addNotification('success', 'Employee deleted');
         } catch (error) {
-            console.error(error);
+            logger.error('useEmployeeActions', 'caught error', error as Error);
             addNotification('alert', 'Failed to delete employee');
         }
     }, [addNotification]);
@@ -75,7 +76,7 @@ export function useEmployeeActions(deps: UseEmployeeActionsDeps) {
             addNotification('success', 'Shift started');
             logSystemEvent('Start Shift', `Started shift for ${cashierId}`, cashierId, 'HR');
         } catch (error) {
-            console.error('Failed to start shift:', error);
+            logger.error('useEmployeeActions', 'Failed to start shift:', error as Error);
             addNotification('alert', 'Failed to start shift');
         }
     }, [activeSiteId, employees, addNotification, logSystemEvent]);
@@ -86,7 +87,7 @@ export function useEmployeeActions(deps: UseEmployeeActionsDeps) {
             addNotification('success', 'Shift closed');
             logSystemEvent('Close Shift', `Closed shift ${shift.id}`, shift.cashierId, 'HR');
         } catch (error) {
-            console.error('Failed to close shift:', error);
+            logger.error('useEmployeeActions', 'Failed to close shift:', error as Error);
             addNotification('alert', 'Failed to close shift');
         }
     }, [addNotification, logSystemEvent]);

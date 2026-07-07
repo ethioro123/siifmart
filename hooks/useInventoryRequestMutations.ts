@@ -7,6 +7,7 @@ import {
 import { useData } from '../contexts/DataContext';
 import { useStore } from '../contexts/CentralStore';
 import { PendingInventoryChange, Product } from '../types';
+import { logger } from '../utils/logger';
 
 // For putaway job - we need to see where it comes from. 
 // In Inventory.tsx it seems it's available in scope (maybe from DataContext or defined in Inventory.tsx)
@@ -94,7 +95,7 @@ export function useApproveInventoryRequestMutation(createPutawayJob?: Function) 
             );
         },
         onError: (error: any) => {
-            console.error('Approval failed:', error);
+            logger.error('useInventoryRequestMutations', 'Approval failed:', error);
             addNotification('alert', `Failed to approve request: ${error?.message || 'Unknown error'}`);
         }
     });
@@ -130,7 +131,7 @@ export function useRejectInventoryRequestMutation() {
             );
         },
         onError: (error: any) => {
-            console.error('Rejection failed:', error);
+            logger.error('useInventoryRequestMutations', 'Rejection failed:', error);
             addNotification('alert', 'Failed to reject request');
         }
     });
@@ -158,7 +159,7 @@ export function useBulkCleanupRequestsMutation() {
             addNotification('success', `Successfully cleared ${data.length} requests.`);
         },
         onError: (error: any) => {
-            console.error('Cleanup failed:', error);
+            logger.error('useInventoryRequestMutations', 'Cleanup failed:', error);
             addNotification('alert', 'Failed to clear all requests');
         }
     });

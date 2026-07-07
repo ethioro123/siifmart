@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import { User, WMSJob } from '../../../types';
 import Button from '../../shared/Button';
+import { logger } from '../../../utils/logger';
 
 interface IncidentReportModalProps {
     t: (key: string) => string;
@@ -61,7 +62,7 @@ export const IncidentReportModal: React.FC<IncidentReportModalProps> = ({
                 setDescription('');
             }, 2000);
         } catch (err) {
-            console.error(err);
+            logger.error('IncidentReportModal', 'caught error', err as Error);
         } finally {
             setIsSubmitting(false);
         }

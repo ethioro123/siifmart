@@ -6,6 +6,7 @@ import { Product } from '../types';
 import { supabase } from '../lib/supabase';
 import { productsService, barcodeApprovalsService } from '../services/supabase.service';
 import { useStore } from '../contexts/CentralStore';
+import { logger } from '../utils/logger';
 
 interface UnknownBarcodeModalProps {
     isOpen: boolean;
@@ -150,7 +151,7 @@ export default function UnknownBarcodeModal({
                 videoRef.current.srcObject = stream;
             }
         } catch (err) {
-            console.error('Camera access failed:', err);
+            logger.error('UnknownBarcodeModal', 'Camera access failed:', err);
             alert('Could not access camera. Please check permissions.');
             setCaptureMode('idle');
         }
@@ -182,7 +183,7 @@ export default function UnknownBarcodeModal({
                     stopCamera();
                     setCaptureMode('idle');
                 } catch (err) {
-                    console.error('Snapshot processing failed:', err);
+                    logger.error('UnknownBarcodeModal', 'Snapshot processing failed:', err);
                 } finally {
                     setIsCompressing(false);
                 }
@@ -202,7 +203,7 @@ export default function UnknownBarcodeModal({
                 try {
                     processedFile = await compressImage(originalFile);
                 } catch (compressionError) {
-                    console.warn('Image compression failed (likely unsupported format), using original file.', compressionError);
+                    logger.warn('UnknownBarcodeModal', 'Image compression failed (likely unsupported format), using original file.');
                     // Fallback to original file
                     processedFile = originalFile;
                 }
@@ -216,7 +217,7 @@ export default function UnknownBarcodeModal({
                 setImagePreview(URL.createObjectURL(processedFile));
                 setCaptureMode('idle');
             } catch (err) {
-                console.error('Image processing failed:', err);
+                logger.error('UnknownBarcodeModal', 'Image processing failed:', err);
                 alert('Failed to process image.');
             } finally {
                 setIsCompressing(false);
@@ -242,7 +243,7 @@ export default function UnknownBarcodeModal({
                 try {
                     evidenceUrl = await barcodeApprovalsService.uploadEvidence(imageFile);
                 } catch (uploadErr) {
-                    console.error('Failed to upload evidence:', uploadErr);
+                    logger.error('UnknownBarcodeModal', 'Failed to upload evidence:', uploadErr);
                     // Decide: Fail hard limit or soft warn? Soft warn for now to keep selling.
                 }
             }
@@ -260,7 +261,7 @@ export default function UnknownBarcodeModal({
                         resolution_time: resolutionTimeSeconds
                     });
                 } catch (auditErr) {
-                    console.error('Failed to create audit record:', auditErr);
+                    logger.error('UnknownBarcodeModal', 'Failed to create audit record:', auditErr);
                 }
             }
 
@@ -279,7 +280,7 @@ export default function UnknownBarcodeModal({
 
             onClose();
         } catch (error: any) {
-            console.error('Mapping failed:', error);
+            logger.error('UnknownBarcodeModal', 'Mapping failed:', error);
             alert(`Failed to map barcode: ${error.message || 'Unknown error'}`);
         } finally {
             setIsUploading(false);

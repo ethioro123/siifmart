@@ -3,13 +3,14 @@ import { createClient } from '@supabase/supabase-js';
 import { Employee, UserRole } from '../types';
 import { autoSelectSiteForRole, getRecommendedDepartment, validateRoleSiteAssignment, getRoleLocationDescription, canRoleBeAtSiteType } from '../utils/roleSegregation';
 import { SYSTEM_ROLES } from '../utils/roles';
+import { logger } from '../utils/logger';
 
 interface UseEmployeeWizardProps {
    user: any;
    employees: Employee[];
    sites: any[];
    activeSite: any;
-   addEmployee: (emp: Employee) => void | Promise<void>;
+   addEmployee: (emp: Employee, user?: string) => Promise<any> | void;
    addNotification: (type: 'success' | 'alert' | 'info', message: string) => void;
 }
 
@@ -248,7 +249,7 @@ export function useEmployeeWizard({
          addNotification('success', `✅ Employee Profile Created!\n\n${newEmpData.firstName} has been onboarded successfully.`);
          return null;
       } catch (error: any) {
-         console.error('Failed to create employee:', error);
+         logger.error('useEmployeeWizard', 'Failed to create employee:', error);
          addNotification('alert', `Failed to onboard employee: ${error.message || 'Unknown error'}`);
          return error.message || 'Unknown error';
       }

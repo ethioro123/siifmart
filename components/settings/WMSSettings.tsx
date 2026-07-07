@@ -11,6 +11,7 @@ import { FulfillmentStrategy } from '../../types';
 import { sitesService, warehouseZonesService } from '../../services/supabase.service';
 import { formatDateTime } from '../../utils/formatting';
 import { BarcodeGenerator } from './BarcodeGenerator';
+import { logger } from '../../utils/logger';
 
 // --- SUB-COMPONENTS ---
 const SectionHeader = ({ title, desc }: { title: string, desc: string }) => (
@@ -168,7 +169,7 @@ export default function WMSSettings() {
             await updateSettings(data as any, user?.name || 'Admin');
             addNotification('success', `${section.charAt(0).toUpperCase() + section.slice(1)} settings saved`);
         } catch (err) {
-            console.error(err);
+            logger.error('WMSSettings', 'caught error', err as Error);
             addNotification('alert', `Failed to save ${section} settings`);
         } finally {
             setIsSaving(null);
@@ -188,7 +189,7 @@ export default function WMSSettings() {
             addNotification('success', 'Fulfillment strategy updated');
             refreshData();
         } catch (error) {
-            console.error(error);
+            logger.error('WMSSettings', 'caught error', error as Error);
             addNotification('alert', 'Failed to update strategy');
         } finally {
             setIsSaving(null);
@@ -202,7 +203,7 @@ export default function WMSSettings() {
             addNotification('success', 'Fulfillment node status updated');
             refreshData();
         } catch (error) {
-            console.error(error);
+            logger.error('WMSSettings', 'caught error', error as Error);
             addNotification('alert', 'Failed to update node status');
         } finally {
             setIsSaving(null);
@@ -225,7 +226,7 @@ export default function WMSSettings() {
             addNotification('success', 'Zone priority updated');
             refreshData();
         } catch (error) {
-            console.error(error);
+            logger.error('WMSSettings', 'caught error', error as Error);
             addNotification('alert', 'Failed to update zone priority');
         } finally {
             setIsSaving(null);
@@ -242,7 +243,7 @@ export default function WMSSettings() {
         try {
             await releaseOrder(saleId);
         } catch (error) {
-            console.error(error);
+            logger.error('WMSSettings', 'caught error', error as Error);
         } finally {
             setIsSaving(null);
         }

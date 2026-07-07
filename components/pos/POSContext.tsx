@@ -20,6 +20,7 @@ import { usePOSTransferActions } from './hooks/usePOSTransferActions';
 import { usePOSHoldRecallActions } from './hooks/usePOSHoldRecallActions';
 import { usePOSProductFilters } from './hooks/usePOSProductFilters';
 import { POSContextType } from './types';
+import { logger } from '../../utils/logger';
 
 const POSContext = createContext<POSContextType | undefined>(undefined);
 
@@ -204,7 +205,7 @@ export const POSProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
                 const results = await customersService.search(customerSearchTerm);
                 setServerCustomerResults(results);
             } catch (err) {
-                console.error("Customer search failed", err);
+                logger.error('POSContext', 'Customer search failed', err as Error);
             } finally {
                 setIsSearchingCustomerServer(false);
             }
@@ -371,7 +372,7 @@ export const POSProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
                     addNotification('success', `Added ${sp.name} (Found via server)`);
                     return true;
                 }
-            } catch (err) { console.error(err); }
+            } catch (err) { logger.error('POSContext', 'caught error', err as Error); }
 
             if (barcode.trim().length > 0) {
                 setUnknownBarcode(barcode);

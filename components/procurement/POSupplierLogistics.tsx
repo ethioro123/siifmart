@@ -1,6 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { Supplier, Site } from '../../types';
 import { Truck, MapPin, ChevronDown, ChevronUp, Check, Info, X } from 'lucide-react';
+import { logger } from '../../utils/logger';
 
 interface POSupplierLogisticsProps {
     // Supplier State
@@ -39,7 +40,7 @@ export const POSupplierLogistics: React.FC<POSupplierLogisticsProps> = ({
     expectedDate, setExpectedDate,
     poPriority, setPoPriority
 }) => {
-    console.log("allSuppliers in POSupplierLogistics:", allSuppliers);
+    logger.debug('POSupplierLogistics', 'allSuppliers in POSupplierLogistics');
 
     const siteDropdownRef = useRef<HTMLDivElement>(null);
 

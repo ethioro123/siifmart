@@ -5,6 +5,7 @@ import { formatJobId } from '../../../utils/jobIdFormatter';
 import { getSellUnit } from '../../../utils/units';
 import { supabase } from '../../../lib/supabase';
 import { useLanguage } from '../../../contexts/LanguageContext';
+import { logger } from '../../../utils/logger';
 
 interface TransferReceivingProps {
     activeTransferJob: WMSJob;
@@ -61,7 +62,7 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
                     }
                 }
             } catch (err) {
-                console.warn('⚠️ Failed to complete child DISPATCH job:', err);
+                logger.warn('TransferReceiving', '⚠️ Failed to complete child DISPATCH job:');
             }
 
             // Also complete the transfers table record if exists
@@ -81,7 +82,7 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
                     }
                 }
             } catch (err) {
-                console.warn('⚠️ Failed to complete transfers table record:', err);
+                logger.warn('TransferReceiving', '⚠️ Failed to complete transfers table record:');
             }
 
             // Process stock adjustments
@@ -107,7 +108,7 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
             setTransferReceiveItems([]);
             refreshData();
         } catch (err) {
-            console.error('Failed to receive transfer:', err);
+            logger.error('TransferReceiving', 'Failed to receive transfer:', err);
             addNotification('alert', 'Failed to receive items');
         }
     };

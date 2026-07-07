@@ -254,7 +254,9 @@ export default function App() {
             {/* Admin Dashboard - CEO Only */}
             <Route path="/admin" element={
               <ProtectedRoute module="admin">
-                <CentralOperations />
+                <ModuleErrorBoundary moduleName="Central Operations">
+                  <CentralOperations />
+                </ModuleErrorBoundary>
               </ProtectedRoute>
             } />
 
@@ -279,7 +281,9 @@ export default function App() {
             {/* Sales History - Managers, Admins, Auditors */}
             <Route path="/sales" element={
               <ProtectedRoute module="sales">
-                <SalesHistory />
+                <ModuleErrorBoundary moduleName="Sales History">
+                  <SalesHistory />
+                </ModuleErrorBoundary>
               </ProtectedRoute>
             } />
 
@@ -295,7 +299,9 @@ export default function App() {
             {/* Network Inventory - All authenticated users can view */}
             <Route path="/network-inventory" element={
               <ProtectedRoute module="inventory">
-                <NetworkView />
+                <ModuleErrorBoundary moduleName="Network View">
+                  <NetworkView />
+                </ModuleErrorBoundary>
               </ProtectedRoute>
             } />
 
@@ -311,21 +317,27 @@ export default function App() {
             {/* WMS Dashboard */}
             <Route path="/wms-dashboard" element={
               <ProtectedRoute module="warehouse">
-                <WMSDashboard />
+                <ModuleErrorBoundary moduleName="WMS Dashboard">
+                  <WMSDashboard />
+                </ModuleErrorBoundary>
               </ProtectedRoute>
             } />
 
             {/* Procurement - WMS, Managers, Admins */}
             <Route path="/procurement" element={
               <ProtectedRoute module="procurement">
-                <Procurement />
+                <ModuleErrorBoundary moduleName="Procurement">
+                  <Procurement />
+                </ModuleErrorBoundary>
               </ProtectedRoute>
             } />
 
             {/* Pricing - Managers, Admins */}
             <Route path="/pricing" element={
               <ProtectedRoute module="pricing">
-                <Merchandising />
+                <ModuleErrorBoundary moduleName="Merchandising">
+                  <Merchandising />
+                </ModuleErrorBoundary>
               </ProtectedRoute>
             } />
 
@@ -341,7 +353,9 @@ export default function App() {
             {/* Customers - POS, Managers, Admins */}
             <Route path="/customers" element={
               <ProtectedRoute module="customers">
-                <Customers />
+                <ModuleErrorBoundary moduleName="Customers">
+                  <Customers />
+                </ModuleErrorBoundary>
               </ProtectedRoute>
             } />
 
@@ -358,35 +372,45 @@ export default function App() {
             {/* Roadmap/Brainstorm Canvas - CEO ONLY */}
             <Route path="/roadmap" element={
               <ProtectedRoute module="admin">
-                <Roadmap />
+                <ModuleErrorBoundary moduleName="Roadmap">
+                  <Roadmap />
+                </ModuleErrorBoundary>
               </ProtectedRoute>
             } />
 
             {/* Employees - HR, Managers, Admins */}
             <Route path="/employees" element={
               <ProtectedRoute module="employees">
-                <Employees />
+                <ModuleErrorBoundary moduleName="Employees">
+                  <Employees />
+                </ModuleErrorBoundary>
               </ProtectedRoute>
             } />
 
             {/* My Profile - All authenticated users */}
             <Route path="/profile" element={
               <ProtectedRoute module="profile">
-                <Profile />
+                <ModuleErrorBoundary moduleName="Profile">
+                  <Profile />
+                </ModuleErrorBoundary>
               </ProtectedRoute>
             } />
 
             {/* Migration Panel - CEO Only */}
             <Route path="/migration" element={
               <ProtectedRoute module="settings">
-                <MigrationPanel />
+                <ModuleErrorBoundary moduleName="Migration">
+                  <MigrationPanel />
+                </ModuleErrorBoundary>
               </ProtectedRoute>
             } />
 
             {/* Location Selection - CEO Only (for Context Switching) */}
             <Route path="/location-select" element={
               <ProtectedRoute module="admin">
-                <LocationSelect />
+                <ModuleErrorBoundary moduleName="Location Select">
+                  <LocationSelect />
+                </ModuleErrorBoundary>
               </ProtectedRoute>
             } />
 

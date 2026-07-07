@@ -7,6 +7,8 @@ import {
     purchaseOrdersService,
     productsService
 } from '../../services/supabase.service';
+import { logger } from '../../utils/logger';
+
 
 // ─── Utility ────────────────────────────────────────────────────────────────
 
@@ -122,7 +124,7 @@ export const useReceiving = (deps: UseReceivingDeps) => {
                 ? receivedItems.filter(item => item.received > 0)
                 : po.lineItems.map((item, index) => ({ index, received: item.quantity })); // Default: Receive all
 
-            console.log(`📦 Creating PUTAWAY jobs for ${itemsToProcess.length} items from PO ${po.poNumber}`);
+            logger.debug('useReceiving', `📦 Creating PUTAWAY jobs for ${itemsToProcess.length} items from PO ${po.poNumber}`);
 
             const jobPromises = itemsToProcess.map(async (item, index) => {
                 // Find line item in PO
@@ -200,7 +202,7 @@ export const useReceiving = (deps: UseReceivingDeps) => {
                             setAllProducts?.(prev => [created, ...prev]);
                         }
                     } catch (err) {
-                        console.error("Failed to create placeholder product in receivePO:", err);
+                        logger.error('useReceiving', 'Failed to create placeholder product in receivePO', err as Error);
                         throw err;
                     }
                 }
@@ -259,7 +261,7 @@ export const useReceiving = (deps: UseReceivingDeps) => {
 
             return newJobs;
         } catch (error: any) {
-            console.error('Error receiving PO:', error);
+            logger.error('useReceiving', 'Error receiving PO', error as Error);
             addNotification('alert', error.message || 'Failed to receive PO');
             throw error;
         }
@@ -281,7 +283,7 @@ export const useReceiving = (deps: UseReceivingDeps) => {
             // Find the line item
             const itemIndex = po.lineItems?.findIndex(i => i.productId === itemId || i.sku === itemId || i.id === itemId);
             if (itemIndex === undefined || itemIndex === -1) {
-                console.error("Item not found in PO:", itemId);
+                logger.error('useReceiving', `Item not found in PO: ${itemId}`, new Error(`Item ${itemId} not found`));
                 return;
             }
             const item = po.lineItems![itemIndex];
@@ -349,7 +351,7 @@ export const useReceiving = (deps: UseReceivingDeps) => {
                             }
                         }
                     } catch (err) {
-                        console.error("Failed to create new product during receive:", err);
+                        logger.error('useReceiving', 'Failed to create new product during receive', err as Error);
                         throw err;
                     }
                 }
@@ -375,13 +377,13 @@ export const useReceiving = (deps: UseReceivingDeps) => {
                                 existingProduct = await productsService.getById(prodId);
                             }
                         } catch (e) {
-                            console.warn("Could not fetch product by ID from DB in receivePOSplit:", e);
+                            logger.warn('useReceiving', 'Could not fetch product by ID from DB in receivePOSplit');
                         }
                         if (!existingProduct && prodSku) {
                             try {
                                 existingProduct = await productsService.getBySKU(prodSku) || undefined;
                             } catch (e) {
-                                console.warn("Could not fetch product by SKU from DB in receivePOSplit:", e);
+                                logger.warn('useReceiving', 'Could not fetch product by SKU from DB in receivePOSplit');
                             }
                         }
                     }
@@ -475,7 +477,7 @@ export const useReceiving = (deps: UseReceivingDeps) => {
                                 setAllProducts?.(prev => [created, ...prev]);
                             }
                         } catch (err) {
-                            console.error("Failed to create placeholder product in receivePOSplit:", err);
+                            logger.error('useReceiving', 'Failed to create placeholder product in receivePOSplit', err as Error);
                             throw err;
                         }
                     }
@@ -534,7 +536,7 @@ export const useReceiving = (deps: UseReceivingDeps) => {
                 setAllOrders(prev => prev.map(o => o.id === poId ? updatedPO : o));
             }
         } catch (e: any) {
-            console.error(e);
+            logger.error('useReceiving', 'caught error', e as Error);
             addNotification('alert', e.message || "Failed to split receive");
             throw e;
         }
@@ -584,7 +586,7 @@ export const useReceiving = (deps: UseReceivingDeps) => {
 
             addNotification('success', `PO #${po.poNumber || po.po_number} finalized as ${status}`);
         } catch (error) {
-            console.error('Finalize PO Error:', error);
+            logger.error('useReceiving', 'Finalize PO Error', error as Error);
             addNotification('alert', 'Failed to finalize PO');
             throw error;
         }

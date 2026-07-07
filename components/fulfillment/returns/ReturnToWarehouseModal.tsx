@@ -3,6 +3,7 @@ import { X, Package, Undo2, AlertTriangle, CheckCircle, Loader2 } from 'lucide-r
 import { WMSJob, Product } from '../../../types';
 import { formatJobId } from '../../../utils/jobIdFormatter';
 import { useLanguage } from '../../../contexts/LanguageContext';
+import { logger } from '../../../utils/logger';
 
 interface ReturnToWarehouseModalProps {
     job: WMSJob;
@@ -153,7 +154,7 @@ export const ReturnToWarehouseModal: React.FC<ReturnToWarehouseModalProps> = ({
                         addNotification('info', `${activeDownstream.length} active job(s) cancelled due to return`);
                     }
                 } catch (markErr: any) {
-                    console.error('Failed to mark job items as returned:', markErr);
+                    logger.error('ReturnToWarehouseModal', 'Failed to mark job items as returned:', markErr);
                     // Non-blocking — the inventory request was still created
                 }
             }

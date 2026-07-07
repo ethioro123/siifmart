@@ -12,6 +12,7 @@ import { DeleteSiteModal } from './DeleteSiteModal';
 import { ZoneManagerModal } from './ZoneManagerModal';
 import { SiteCard } from './SiteCard';
 import { generateLocationBarcodesCSV } from './locationBarcodeHelper';
+import { logger } from '../../utils/logger';
 
 const SectionHeader = ({ title, desc }: { title: string, desc: string }) => (
     <div className="mb-6 pb-4 border-b border-white/5">
@@ -66,7 +67,7 @@ export default function LocationSettings() {
             const data = await logisticsZonesService.getAll();
             setLogisticsZones(data);
         } catch (error) {
-            console.error('Failed to load logistics zones:', error);
+            logger.error('LocationSettings', 'Failed to load logistics zones:', error);
         } finally {
             setIsLoadingZones(false);
         }
@@ -129,7 +130,7 @@ export default function LocationSettings() {
             setIsSiteModalOpen(false);
             setNewSite({});
         } catch (error: any) {
-            console.error('❌ Error saving site:', error);
+            logger.error('LocationSettings', '❌ Error saving site:', error);
             const errorMsg = error?.message || error?.details || 'Failed to save location. Please try again.';
             addNotification('alert', `Error: ${errorMsg}`);
         } finally {
@@ -162,7 +163,7 @@ export default function LocationSettings() {
             setSiteToDelete(null);
             setDeleteConfirmText('');
         } catch (error) {
-            console.error('Error deleting site:', error);
+            logger.error('LocationSettings', 'Error deleting site:', error);
             addNotification('alert', 'Failed to delete location');
         } finally {
             setIsDeleting(false);

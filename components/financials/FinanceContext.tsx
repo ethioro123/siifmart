@@ -14,7 +14,7 @@ export interface FinanceContextType {
     addExpense: (expense: ExpenseRecord) => Promise<void>;
     deleteExpense: (id: string) => Promise<void>;
     processPayroll: (siteId: string, processedBy: string) => Promise<void>;
-    activeSite: Site | null;
+    activeSite: Site | null | undefined;
     addNotification: (type: any, message: string) => void;
     settings: any;
     sites: Site[];

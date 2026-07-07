@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { WorkerPoints, PointsTransaction, WorkerBonusShare, POINTS_CONFIG } from '../types';
 import { workerPointsService, pointsTransactionsService } from '../services/supabase.service';
 import { useData } from './DataContext';
+import { logger } from '../utils/logger';
 
 interface GamificationContextType {
     workerPoints: WorkerPoints[];
@@ -26,7 +27,7 @@ export const GamificationProvider = ({ children }: { children: ReactNode }) => {
                 const data = await workerPointsService.getAll(activeSiteId);
                 setWorkerPoints(data);
             } catch (error) {
-                console.error("Failed to load points", error);
+                logger.error('GamificationContext', "Failed to load points", error);
             }
         };
 
@@ -36,11 +37,11 @@ export const GamificationProvider = ({ children }: { children: ReactNode }) => {
     // Listen for fulfillment events (Decoupled Logic)
     useEffect(() => {
         const handleJobCompletion = (event: CustomEvent) => {
-            console.log('🏆 Gamification: Job Completion Event Received', event.detail);
+            logger.debug('GamificationContext', '🏆 Gamification: Job Completion Event Received', event.detail);
             const { job, userId, employeeId } = event.detail;
 
             if (!employeeId) {
-                console.warn('⚠️ No employeeId provided for gamification event');
+                logger.warn('GamificationContext', '⚠️ No employeeId provided for gamification event');
                 return;
             }
 
@@ -157,7 +158,7 @@ export const GamificationProvider = ({ children }: { children: ReactNode }) => {
             });
 
         } catch (error) {
-            console.error('Failed to award points', error);
+            logger.error('GamificationContext', 'Failed to award points', error);
             addNotification('alert', 'Failed to update points');
         }
     };

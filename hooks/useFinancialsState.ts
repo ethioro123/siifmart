@@ -7,6 +7,7 @@ import { useData } from '../contexts/DataContext';
 import { generateQuarterlyReport } from '../utils/reportGenerator';
 import { DateRangeOption } from '../hooks/useDateFilter';
 import { CURRENCY_SYMBOL } from '../constants';
+import { logger } from '../utils/logger';
 
 const EXPENSES_PER_PAGE = 20;
 
@@ -112,7 +113,7 @@ export function useFinancialsState() {
                setLocalExpenses(data);
                setTotalExpensesCount(count);
             } catch (error) {
-               console.error('Failed to fetch expenses', error);
+               logger.error('useFinancialsState', 'Failed to fetch expenses', error as Error);
             } finally {
                setExpensesLoading(false);
             }
@@ -153,7 +154,7 @@ export function useFinancialsState() {
             );
             setServerFinancials(data);
          } catch (err) {
-            console.error("Error fetching financial metrics:", err);
+            logger.error('useFinancialsState', "Error fetching financial metrics:", err);
          }
       };
 
@@ -410,7 +411,7 @@ export function useFinancialsState() {
          setIsAddExpenseOpen(false);
          setNewExpData({ category: 'Other', status: 'Pending', date: new Date().toISOString().split('T')[0] });
       } catch (error) {
-         console.error(error);
+         logger.error('useFinancialsState', 'caught error', error as Error);
       } finally {
          setIsSubmitting(false);
       }
@@ -436,7 +437,7 @@ export function useFinancialsState() {
          setExpenseToDelete(null);
          setDeleteInput('');
       } catch (error) {
-         console.error(error);
+         logger.error('useFinancialsState', 'caught error', error as Error);
       } finally {
          setIsSubmitting(false);
       }
@@ -481,7 +482,7 @@ export function useFinancialsState() {
          await processPayroll(activeSite?.id || 'SITE-001', user?.name || 'Admin');
          setIsPayrollModalOpen(false);
       } catch (error) {
-         console.error(error);
+         logger.error('useFinancialsState', 'caught error', error as Error);
       } finally {
          setIsSubmitting(false);
       }

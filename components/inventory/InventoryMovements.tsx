@@ -7,6 +7,7 @@ import { useStore } from '../../contexts/CentralStore';
 import { useData } from '../../contexts/DataContext';
 import { getSellUnit } from '../../utils/units';
 import { Site, StockMovement } from '../../types';
+import { logger } from '../../utils/logger';
 
 interface InventoryMovementsProps {
     sites: Site[];
@@ -71,7 +72,7 @@ export const InventoryMovements: React.FC<InventoryMovementsProps> = ({
                 setLocalMovements(data);
                 setTotalMovementsCount(count);
             } catch (error) {
-                console.error('Failed to fetch movements', error);
+                logger.error('InventoryMovements', 'Failed to fetch movements', error);
                 addNotification('alert', 'Failed to load movements');
             } finally {
                 setMovementsLoading(false);

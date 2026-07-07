@@ -7,6 +7,7 @@ import {
     transfersService
 } from '../../services/supabase.service';
 import { supabase } from '../../lib/supabase';
+import { logger } from '../../utils/logger';
 
 // ─── Hook Dependencies ──────────────────────────────────────────────────────
 
@@ -35,7 +36,7 @@ export const useTransfers = (deps: UseTransfersDeps) => {
 
         try {
             const created = await transfersService.create(transfer);
-            console.log('✅ Transfer created in DB:', created);
+            logger.debug('useTransfers', '✅ Transfer created in DB');
 
             const enriched = {
                 ...created,
@@ -46,7 +47,7 @@ export const useTransfers = (deps: UseTransfersDeps) => {
             setTransfers(prev => [enriched, ...prev]);
             addNotification('success', 'Transfer request created');
         } catch (error) {
-            console.error('Failed to create transfer:', error);
+            logger.error('useTransfers', 'Failed to create transfer', error as Error);
             addNotification('alert', 'Failed to create transfer request');
         }
     }, [sites, setTransfers, addNotification]);
@@ -58,7 +59,7 @@ export const useTransfers = (deps: UseTransfersDeps) => {
             addNotification('success', 'Transfer marked as shipped');
             logSystemEvent('Transfer Shipped', `Transfer ${id} shipped`, user, 'Inventory');
         } catch (error) {
-            console.error(error);
+            logger.error('useTransfers', 'caught error', error as Error);
             addNotification('alert', 'Failed to update transfer');
         }
     }, [setTransfers, addNotification, logSystemEvent]);
@@ -68,7 +69,7 @@ export const useTransfers = (deps: UseTransfersDeps) => {
             const transfer = transfers.find(t => t.id === id);
             if (!transfer) return;
 
-            console.log(`📦 Receiving transfer ${id} with quantities:`, receivedQuantities);
+            logger.debug('useTransfers', `📦 Receiving transfer ${id} with quantities`);
 
             if (transfer.items && transfer.items.length > 0) {
                 const receivedItemsMap = receivedQuantities || {};
@@ -106,10 +107,10 @@ export const useTransfers = (deps: UseTransfersDeps) => {
                     try {
                         const createdJob = await wmsJobsService.create(putawayJob as any);
                         setJobs(prev => [createdJob, ...prev]);
-                        console.log(`✅ Auto-created Putaway Job for Transfer ${id}:`, createdJob.id);
+                        logger.debug('useTransfers', `✅ Auto-created Putaway Job for Transfer ${id}: ${createdJob.id}`);
                         addNotification('success', 'Putaway job created for received transfer');
                     } catch (e) {
-                        console.error("Failed to create Putaway Job for transfer:", e);
+                        logger.error('useTransfers', 'Failed to create Putaway Job for transfer', e as Error);
                     }
                 }
             }
@@ -148,7 +149,7 @@ export const useTransfers = (deps: UseTransfersDeps) => {
                     }));
                 }
             } catch (jobErr) {
-                console.warn('⚠️ Failed to complete associated WMS jobs during POS receive:', jobErr);
+                logger.warn('useTransfers', '⚠️ Failed to complete associated WMS jobs during POS receive');
             }
 
             await transfersService.update(id, { status: 'Completed', receivedAt: timestampStr });
@@ -156,7 +157,7 @@ export const useTransfers = (deps: UseTransfersDeps) => {
             addNotification('success', 'Transfer received successfully');
             logSystemEvent('Transfer Received', `Transfer ${id} received`, user, 'Inventory');
         } catch (error) {
-            console.error(error);
+            logger.error('useTransfers', 'caught error', error as Error);
             addNotification('alert', 'Failed to receive transfer');
         }
     }, [transfers, setJobs, setTransfers, addNotification, logSystemEvent]);
@@ -167,7 +168,7 @@ export const useTransfers = (deps: UseTransfersDeps) => {
             setTransfers(prev => prev.map(t => t.id === id ? { ...t, ...updates } : t));
             addNotification('success', 'Transfer updated');
         } catch (error) {
-            console.error(error);
+            logger.error('useTransfers', 'caught error', error as Error);
             addNotification('alert', 'Failed to update transfer');
         }
     }, [setTransfers, addNotification]);

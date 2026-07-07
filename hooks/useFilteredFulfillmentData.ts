@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { User, Site, WMSJob, Product } from '../types';
 import { filterBySite } from '../utils/locationAccess';
+import { logger } from '../utils/logger';
 
 interface UseFilteredFulfillmentDataProps {
     jobs: WMSJob[];
@@ -21,10 +22,10 @@ export const useFilteredFulfillmentData = ({
 }: UseFilteredFulfillmentDataProps) => {
 
     const filteredJobs = useMemo(() => {
-        console.log('--- useFilteredFulfillmentData: Jobs ---');
-        console.log('user:', user?.name, 'role:', user?.role, 'siteId:', user?.siteId);
-        console.log('activeSite:', activeSite?.name, 'id:', activeSite?.id, 'type:', activeSite?.type);
-        console.log('total jobs before filter:', jobs.length);
+        logger.debug('useFilteredFulfillmentData', '--- useFilteredFulfillmentData: Jobs ---');
+        logger.debug('useFilteredFulfillmentData', 'user:');
+        logger.debug('useFilteredFulfillmentData', 'activeSite:');
+        logger.debug('useFilteredFulfillmentData', 'total jobs before filter:');
 
         // ONLY the CEO (super_admin) can override their site view using the activeSite selector.
         // All other roles are strictly restricted to their assigned warehouse (siteId).
@@ -33,7 +34,7 @@ export const useFilteredFulfillmentData = ({
             ? activeSite.id
             : fallbackSiteId;
 
-        console.log('Computed siteToFilterBy:', siteToFilterBy);
+        logger.debug('useFilteredFulfillmentData', 'Computed siteToFilterBy:');
 
         // Use filterBySite which handles role-based multi-site logic
         const currentEmployee1 = employees.find(e => 
@@ -53,22 +54,12 @@ export const useFilteredFulfillmentData = ({
         const driverJobsInRaw = jobs.filter(j => j.type === 'DISPATCH' || j.type === 'TRANSFER' || j.type === 'DRIVER');
         const driverJobsAfterSite = siteFiltered.filter(j => j.type === 'DISPATCH' || j.type === 'TRANSFER' || j.type === 'DRIVER');
         const driverJobsExplicit = explicitlyAssigned.filter(j => j.type === 'DISPATCH' || j.type === 'TRANSFER' || j.type === 'DRIVER');
-        console.log('🔍 [useFilteredFulfillmentData] Driver pipeline:', {
-            rawDriverJobs: driverJobsInRaw.length,
-            afterSiteFilter: driverJobsAfterSite.length,
-            explicitlyReinjected: driverJobsExplicit.length,
-            resolvedEmployeeId: employeeId1,
-            matchedEmployee: currentEmployee1 ? { id: currentEmployee1.id, name: currentEmployee1.name } : 'NONE',
-            siteToFilterBy,
-        });
+        logger.debug('useFilteredFulfillmentData', '🔍 [useFilteredFulfillmentData] Driver pipeline:');
         if (driverJobsInRaw.length > 0) {
-            console.log('🔍 [useFilteredFulfillmentData] Raw driver jobs detail:', driverJobsInRaw.map(j => ({
-                id: j.id?.slice(-6), type: j.type, status: j.status,
-                assignedTo: j.assignedTo, siteId: j.siteId, destSiteId: j.destSiteId
-            })));
+            logger.debug('useFilteredFulfillmentData', '🔍 Raw driver jobs detail (see console for details)');
         }
 
-        console.log('After filterBySite + explicitlyAssigned (baseFiltered):', baseFiltered.length);
+        logger.debug('useFilteredFulfillmentData', 'After filterBySite + explicitlyAssigned (baseFiltered):');
 
         // --- ROLE-BASED VISIBILITY RESTRICTION ---
         // Dispatchers and Warehouse Managers (and elevated roles) can see ALL jobs for the site.
@@ -94,7 +85,7 @@ export const useFilteredFulfillmentData = ({
                 return isAssignedToMe;
             });
             const driverJobsAfterRole = roleFiltered.filter(j => j.type === 'DISPATCH' || j.type === 'TRANSFER' || j.type === 'DRIVER');
-            console.log(`Role [${user.role}] restricted to ${roleFiltered.length} assigned jobs (${driverJobsAfterRole.length} driver jobs) for employee ${employeeId}.`);
+            logger.debug('useFilteredFulfillmentData', `Role [${user.role}] restricted to ${roleFiltered.length} assigned jobs (${driverJobsAfterRole.length} driver jobs) for employee ${employeeId}.`);
         }
 
         // If a super_admin has selected a specific site, prune to exactly that site for operational clarity
@@ -104,7 +95,7 @@ export const useFilteredFulfillmentData = ({
                 const destSiteId = j.destSiteId || j.dest_site_id;
                 return siteId === activeSite.id || destSiteId === activeSite.id;
             });
-            console.log('After super_admin specific site pruning:', pruned.length);
+            logger.debug('useFilteredFulfillmentData', 'After super_admin specific site pruning:');
             return pruned;
         }
         return roleFiltered;

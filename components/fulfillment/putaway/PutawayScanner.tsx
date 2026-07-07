@@ -6,6 +6,7 @@ import { normalizeLocation } from '../../../utils/locationTracking';
 import { formatJobId } from '../../../utils/jobIdFormatter';
 import { decodeLocation, isLocationBarcode, extractPrefixFromBarcode } from '../../../utils/locationEncoder';
 import { useScanOnly } from '../../../hooks/useScanOnly';
+import { logger } from '../../../utils/logger';
 
 interface PutawayScannerProps {
     job: WMSJob;
@@ -216,7 +217,7 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
                 }, 2000);
             }
         } catch (err) {
-            console.error("Scan failed:", err);
+            logger.error('PutawayScanner', "Scan failed:", err);
             setInputVal('');
             setAwaitingOccupancyConfirmation(false);
         } finally {

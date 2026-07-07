@@ -13,6 +13,7 @@ import Modal from '../Modal';
 import { SectionHeader, InputGroup, RadioCard, ToggleRow } from './finance/FinanceInputControls';
 import { TaxZoneCard } from './finance/TaxZoneCard';
 import { FinanceModals } from './finance/FinanceModals';
+import { logger } from '../../utils/logger';
 
 export default function FinanceSettings() {
     const { user } = useStore();
@@ -92,7 +93,7 @@ export default function FinanceSettings() {
             await updateSettings(data, user?.name || 'Admin');
             addNotification('success', `${section.charAt(0).toUpperCase() + section.slice(1)} finance settings saved!`);
         } catch (err) {
-            console.error(`Failed to save ${section} settings:`, err);
+            logger.error('FinanceSettings', `Failed to save ${section} settings:`, err);
             addNotification('alert', `Failed to save ${section} settings.`);
         } finally {
             if (section !== 'currency') setSaving(false);
@@ -148,7 +149,7 @@ export default function FinanceSettings() {
             await updateSettings({ taxJurisdictions: taxZones }, user?.name || 'Admin');
             addNotification('success', 'Tax jurisdictions saved successfully.');
         } catch (err) {
-            console.error('Failed to save jurisdictions:', err);
+            logger.error('FinanceSettings', 'Failed to save jurisdictions:', err);
             addNotification('alert', 'Failed to save jurisdictions.');
         } finally {
             setIsSavingJurisdictions(false);

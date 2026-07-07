@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { WMSJob, Product, Site, User } from '../../../../types';
 import { getSellUnit } from '../../../../utils/units';
 import { logisticsZonesService } from '../../../../services/supabase.service';
+import { logger } from '../../../../utils/logger';
 
 interface UseSmartReplenishStateProps {
     isOpen: boolean;
@@ -63,7 +64,7 @@ export const useSmartReplenishState = ({
                     const zones = await logisticsZonesService.getAll();
                     setLogisticsZones(zones);
                 } catch (err) {
-                    console.error('Failed to fetch logistics zones:', err);
+                    logger.error('useSmartReplenishState', 'Failed to fetch logistics zones:', err);
                 }
             };
             fetchZones();
@@ -122,7 +123,7 @@ export const useSmartReplenishState = ({
             const drafts = allJobs.filter((j: WMSJob) => j.type === 'TRANSFER' && j.transferStatus === 'Draft' && j.status === 'Pending');
             setDbDraftJobs(drafts);
         } catch (err) {
-            console.error('Dist Hub Analysis Failed', err);
+            logger.error('useSmartReplenishState', 'Dist Hub Analysis Failed', err);
             addNotification('alert', 'Network analysis failed');
         } finally {
             setDistHubLoading(false);
@@ -301,7 +302,7 @@ export const useSmartReplenishState = ({
             addNotification('success', 'Manifest draft updated');
             await fetchDistHubData();
         } catch (err) {
-            console.error('Failed to add to draft:', err);
+            logger.error('useSmartReplenishState', 'Failed to add to draft:', err);
             addNotification('alert', 'Failed to update manifest draft');
         } finally {
             setDistHubLoading(false);
@@ -328,7 +329,7 @@ export const useSmartReplenishState = ({
             }
             await fetchDistHubData();
         } catch (err) {
-            console.error('Failed to remove item from draft:', err);
+            logger.error('useSmartReplenishState', 'Failed to remove item from draft:', err);
             addNotification('alert', 'Failed to remove item from draft');
         } finally {
             setDistHubLoading(false);
@@ -365,7 +366,7 @@ export const useSmartReplenishState = ({
             addNotification('success', 'Quantity updated');
             await fetchDistHubData();
         } catch (err) {
-            console.error('Failed to update draft item quantity:', err);
+            logger.error('useSmartReplenishState', 'Failed to update draft item quantity:', err);
             addNotification('alert', 'Failed to update quantity');
         } finally {
             setDistHubLoading(false);
@@ -425,7 +426,7 @@ export const useSmartReplenishState = ({
             onClose();
             refreshData();
         } catch (err) {
-            console.error('Failed to submit transfers:', err);
+            logger.error('useSmartReplenishState', 'Failed to submit transfers:', err);
             addNotification('alert', 'Error authorizing replenishment deployments');
         } finally {
             setDistHubLoading(false);

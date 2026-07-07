@@ -7,6 +7,7 @@ import {
     jobAssignmentsService
 } from '../../services/supabase.service';
 import { QueryClient } from '@tanstack/react-query';
+import { logger } from '../../utils/logger';
 
 // Helper for translations (mirrors the one in FulfillmentDataProvider)
 const getTranslation = (path: string): string => {
@@ -101,7 +102,7 @@ export const useJobActions = (deps: UseJobActionsDeps) => {
                 const createdAssignment = await jobAssignmentsService.create(assignment);
                 setJobAssignments(prev => [createdAssignment, ...prev]);
             } catch (assignError) {
-                console.warn('Failed to create job assignment record (likely permissions), proceeding with job update:', assignError);
+                logger.warn('useJobActions', 'Failed to create job assignment record (likely permissions), proceeding with job update:');
             }
 
             const updatedJob = await wmsJobsService.update(jobId, {
@@ -114,7 +115,7 @@ export const useJobActions = (deps: UseJobActionsDeps) => {
             queryClient.invalidateQueries({ queryKey: ['jobs'] });
             addNotification('success', getTranslation('warehouse.jobAssigned').replace('{name}', employee.name));
         } catch (error) {
-            console.error('Failed to assign job:', error);
+            logger.error('useJobActions', 'Failed to assign job:', error);
             addNotification('alert', getTranslation('warehouse.jobAssignFailed'));
         }
     }, [jobs, jobAssignments, employees, setJobs, setJobAssignments, addNotification, queryClient]);
@@ -133,7 +134,7 @@ export const useJobActions = (deps: UseJobActionsDeps) => {
                     await jobAssignmentsService.update(assignment.id, { status: 'Cancelled' });
                     setJobAssignments(prev => prev.map(a => a.id === assignment.id ? { ...a, status: 'Cancelled' } : a));
                 } catch (err) {
-                    console.warn('Failed to cancel assignment record:', err);
+                    logger.warn('useJobActions', 'Failed to cancel assignment record:');
                 }
             }
 
@@ -147,17 +148,17 @@ export const useJobActions = (deps: UseJobActionsDeps) => {
             queryClient.invalidateQueries({ queryKey: ['jobs'] });
             addNotification('success', 'Job unassigned and returned to queue');
         } catch (error) {
-            console.error('Failed to unassign job:', error);
+            logger.error('useJobActions', 'Failed to unassign job:', error);
             addNotification('alert', 'Failed to unassign job');
         }
     }, [jobs, jobAssignments, setJobs, setJobAssignments, addNotification, queryClient]);
 
     const updateJobItem = useCallback(async (jobId: string, itemId: number, status: JobItem['status'], qty: number, location?: string) => {
-        console.log(`📝 [updateJobItem] Job=${jobId}, ItemIdx=${itemId}, Status=${status}, Qty=${qty}, Location=${location}`);
+        logger.debug('useJobActions', `📝 [updateJobItem] Job=${jobId}, ItemIdx=${itemId}, Status=${status}, Qty=${qty}, Location=${location}`);
         try {
             const job = jobs.find(j => j.id === jobId);
             if (!job) {
-                console.error(`❌ [updateJobItem] Job ${jobId} not found in local state!`);
+                logger.error('useJobActions', `❌ [updateJobItem] Job ${jobId} not found in local state!`, new Error(String(`❌ [updateJobItem] Job ${jobId} not found in local state!`)));
                 addNotification('alert', getTranslation('warehouse.jobNotFoundRefresh'));
                 return;
             }
@@ -171,16 +172,16 @@ export const useJobActions = (deps: UseJobActionsDeps) => {
                     pickedQty: qty,
                     location: location || updatedLineItems[itemId].location
                 };
-                console.log(`📝 [updateJobItem] Updated item ${itemId}: ${oldStatus} -> ${status}, loc=${updatedLineItems[itemId].location}`);
+                logger.debug('useJobActions', `📝 [updateJobItem] Updated item ${itemId}: ${oldStatus} -> ${status}, loc=${updatedLineItems[itemId].location}`);
             } else {
-                console.error(`❌ [updateJobItem] Item at index ${itemId} not found in job ${jobId}`);
+                logger.error('useJobActions', `❌ [updateJobItem] Item at index ${itemId} not found in job ${jobId}`, new Error(String(`❌ [updateJobItem] Item at index ${itemId} not found in job ${jobId}`)));
                 return;
             }
 
             const jobUpdates: Partial<WMSJob> = { lineItems: updatedLineItems };
             if (job.type === 'PUTAWAY' && location) {
                 jobUpdates.location = location;
-                console.log(`📦 [updateJobItem] Updating job-level location to: ${location} (PUTAWAY)`);
+                logger.debug('useJobActions', `📦 [updateJobItem] Updating job-level location to: ${location} (PUTAWAY)`);
             }
 
             setJobs(prev => prev.map(j => j.id === jobId ? { ...j, ...jobUpdates } : j));
@@ -188,10 +189,10 @@ export const useJobActions = (deps: UseJobActionsDeps) => {
             const result = await wmsJobsService.update(jobId, jobUpdates);
             queryClient.invalidateQueries({ queryKey: ['jobs'] });
 
-            console.log(`✅ [updateJobItem] DB update successful. Items count:`, result?.lineItems?.length || 0);
+            logger.debug('useJobActions', `✅ [updateJobItem] DB update successful. Items count:`, result?.lineItems?.length || 0);
             addNotification('success', 'Item updated');
         } catch (error) {
-            console.error(`❌ [updateJobItem] FAILED:`, error);
+            logger.error('useJobActions', `❌ [updateJobItem] FAILED:`, error);
             addNotification('alert', getTranslation('warehouse.failedToUpdateJobItem'));
         }
     }, [jobs, setJobs, addNotification, queryClient]);
@@ -203,7 +204,7 @@ export const useJobActions = (deps: UseJobActionsDeps) => {
             await wmsJobsService.update(jobId, { status });
             queryClient.invalidateQueries({ queryKey: ['jobs'] });
         } catch (e) {
-            console.error('Failed to update job status in DB (keeping local)', e);
+            logger.error('useJobActions', 'Failed to update job status in DB', e);
         }
     }, [setJobs, queryClient]);
 
@@ -277,7 +278,7 @@ export const useJobActions = (deps: UseJobActionsDeps) => {
                 addNotification('info', 'No matching staff found for pending jobs');
             }
         } catch (error) {
-            console.error('Auto-assign failed:', error);
+            logger.error('useJobActions', 'Auto-assign failed:', error);
             addNotification('alert', 'Auto-assignment failed');
         }
     }, [jobs, employees, jobAssignments, assignJob, addNotification]);
@@ -288,7 +289,7 @@ export const useJobActions = (deps: UseJobActionsDeps) => {
             setJobs(prev => prev.map(j => j.id === id ? { ...j, ...updates } : j));
             addNotification('success', 'Job updated');
         } catch (error) {
-            console.error(error);
+            logger.error('useJobActions', 'caught error', error as Error);
             addNotification('alert', 'Failed to update job');
         }
     }, [setJobs, addNotification]);
@@ -314,7 +315,7 @@ export const useJobActions = (deps: UseJobActionsDeps) => {
 
             addNotification('success', `Unassigned ${count} auto-assigned jobs`);
         } catch (error) {
-            console.error('Auto-unassign failed:', error);
+            logger.error('useJobActions', 'Auto-unassign failed:', error);
             addNotification('alert', 'Auto-unassign failed');
         }
     }, [jobs, unassignJob, addNotification]);

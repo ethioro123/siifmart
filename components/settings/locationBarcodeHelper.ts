@@ -1,5 +1,6 @@
 import { Site } from '../../types';
 import { encodeLocation, extractSitePrefix } from '../../utils/locationEncoder';
+import { logger } from '../../utils/logger';
 
 export const generateLocationBarcodesCSV = async (
   site: Partial<Site> & { barcodePrefix?: string },
@@ -48,7 +49,7 @@ export const generateLocationBarcodesCSV = async (
 
     addNotification('success', `Generated ${rows.length - 1} barcodes for ${site.name}`);
   } catch (error) {
-    console.error('Barcode generation failed:', error);
+    logger.error('locationBarcodeHelper', 'Barcode generation failed:', error);
     addNotification('alert', 'Failed to generate barcodes');
   } finally {
     setIsGenerating(false);

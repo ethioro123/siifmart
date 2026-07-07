@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { TRANSLATIONS, Language } from '../utils/translations';
 import { useData } from './DataContext';
+import { logger } from '../utils/logger';
 
 interface LanguageContextType {
     language: Language;
@@ -17,7 +18,7 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
             const saved = localStorage.getItem('siifmart_language') as Language;
             return saved || 'en';
         } catch (e) {
-            console.warn('LocalStorage read failed for language settings', e);
+            logger.warn('LanguageContext', 'LocalStorage read failed for language settings');
             return 'en';
         }
     });
@@ -27,7 +28,7 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
         try {
             localStorage.setItem('siifmart_language', language);
         } catch (e) {
-            console.warn('LocalStorage write failed for language settings', e);
+            logger.warn('LanguageContext', 'LocalStorage write failed for language settings');
         }
 
         // Update document dir for RTL if needed
@@ -44,7 +45,7 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
 
         for (const key of keys) {
             if (current[key] === undefined) {
-                console.warn(`Translation missing for key: ${path} in language: ${language}`);
+                logger.warn('LanguageContext', `Translation missing for key: ${path} in language: ${language}`);
                 return path; // Fallback to key
             }
             current = current[key];

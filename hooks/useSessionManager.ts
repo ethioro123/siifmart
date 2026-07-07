@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { authService } from '../services/auth.service';
 import { APP_CONFIG } from '../config/app.config';
+import { logger } from '../utils/logger';
 
 /**
  * Session Manager Hook (Enhanced)
@@ -43,7 +44,7 @@ export function useSessionManager(onSessionWarning?: (minutesLeft: number) => vo
                     // Warn user if session expires in less than 5 minutes
                     if (timeUntilExpiry < APP_CONFIG.SESSION_EXPIRY_WARNING_TIME && !hasWarned) {
                         const minutesLeft = Math.floor(timeUntilExpiry / 60000);
-                        console.warn(`Session expires in ${minutesLeft} minutes`);
+                        logger.warn('useSessionManager', `Session expires in ${minutesLeft} minutes`);
                         setHasWarned(true);
                         onSessionWarning?.(minutesLeft);
                     }
@@ -54,7 +55,7 @@ export function useSessionManager(onSessionWarning?: (minutesLeft: number) => vo
                     }
                 }
             } catch (error) {
-                console.error('Session check failed:', error);
+                logger.error('useSessionManager', 'Session check failed:', error);
             }
         };
 

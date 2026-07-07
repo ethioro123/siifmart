@@ -31,6 +31,7 @@ import { SitePerformance } from '../components/dashboard/types';
 import { useDateFilter, DateRangeOption } from '../hooks/useDateFilter';
 import DateRangeSelector from '../components/DateRangeSelector';
 import FiscalYearDeck from '../components/FiscalYearDeck';
+import { logger } from '../utils/logger';
 
 export default function CentralOperations() {
     const { sites, employees, allSales, allOrders, allProducts, systemLogs, storePoints } = useData();
@@ -62,7 +63,7 @@ export default function CentralOperations() {
                 const finData = await productsService.getFinancialMetrics(undefined, startStr, endStr);
                 setServerFinancials(finData);
             } catch (err) {
-                console.error('Failed to load server metrics:', err);
+                logger.error('CentralOperations', 'Failed to load server metrics:', err);
             }
         };
         fetchMetrics();
@@ -99,7 +100,7 @@ export default function CentralOperations() {
                 undefined
             ) as DashboardMetrics;
         } catch (err) {
-            console.error("Error calculating metrics:", err);
+            logger.error('CentralOperations', "Error calculating metrics:", err);
             return {
                 totalNetworkRevenue: 0,
                 netProfit: 0,

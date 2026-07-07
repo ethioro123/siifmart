@@ -7,6 +7,7 @@ import {
 } from '../../services/supabase.service';
 import { supabase } from '../../lib/supabase';
 import { QueryClient } from '@tanstack/react-query';
+import { logger } from '../../utils/logger';
 
 // Helper for translations
 const getTranslation = (path: string): string => {
@@ -43,10 +44,10 @@ export const useJobMaintenance = (deps: UseJobMaintenanceDeps) => {
 
     const resetJob = useCallback(async (jobId: string) => {
         try {
-            console.log('🔄 Resetting job:', jobId);
+            logger.debug('useJobMaintenance', `🔄 Resetting job: ${jobId}`);
             const job = jobs.find(j => j.id === jobId);
             if (!job) {
-                console.error('❌ Job not found for reset:', jobId);
+                logger.error('useJobMaintenance', `❌ Job not found for reset: ${jobId}`, new Error(`Job ${jobId} not found`));
                 return;
             }
 
@@ -63,7 +64,7 @@ export const useJobMaintenance = (deps: UseJobMaintenanceDeps) => {
                 items_count: job.items
             };
 
-            console.log('💾 Sending reset updates to DB:', dbUpdates);
+            logger.debug('useJobMaintenance', '💾 Sending reset updates to DB');
 
             const { data, error } = await supabase
                 .from('wms_jobs')
@@ -73,11 +74,11 @@ export const useJobMaintenance = (deps: UseJobMaintenanceDeps) => {
                 .single();
 
             if (error) {
-                console.error('❌ DB Update failed:', error);
+                logger.error('useJobMaintenance', '❌ DB Update failed', error as Error);
                 throw error;
             }
 
-            console.log('✅ DB Update successful:', data);
+            logger.debug('useJobMaintenance', '✅ DB Update successful');
 
             const updatedJobLocal = {
                 ...job,
@@ -90,13 +91,13 @@ export const useJobMaintenance = (deps: UseJobMaintenanceDeps) => {
             queryClient.invalidateQueries({ queryKey: ['jobs'] });
             addNotification('success', getTranslation('warehouse.jobResetSuccess'));
         } catch (error) {
-            console.error('Failed to reset job:', error);
+            logger.error('useJobMaintenance', 'Failed to reset job', error as Error);
             addNotification('alert', 'Failed to reset job: ' + (error as any).message);
         }
     }, [jobs, setJobs, addNotification, queryClient]);
 
     const fixBrokenJobs = useCallback(async () => {
-        console.log('Running Fix Broken Jobs...');
+        logger.debug('useJobMaintenance', 'Running Fix Broken Jobs...');
         let fixedPOs = 0;
         let fixedNumbers = 0;
 
@@ -107,7 +108,7 @@ export const useJobMaintenance = (deps: UseJobMaintenanceDeps) => {
             const hasValidJobs = poJobs.some(j => j.lineItems && j.lineItems.length > 0);
 
             if (!hasValidJobs) {
-                console.log(`Fixing PO ${po.id} - No valid jobs found`);
+                logger.debug('useJobMaintenance', `Fixing PO ${po.id} - No valid jobs found`);
 
                 for (const j of poJobs) {
                     await wmsJobsService.delete(j.id);
@@ -142,7 +143,7 @@ export const useJobMaintenance = (deps: UseJobMaintenanceDeps) => {
                         try {
                             const created = await wmsJobsService.create(newJob);
                             return created;
-                        } catch (e) { console.error(e); return newJob; }
+                        } catch (e) { logger.error('useJobMaintenance', 'caught error', e as Error); return newJob; }
                     });
 
                     const newJobs = await Promise.all(jobPromises);
@@ -161,12 +162,12 @@ export const useJobMaintenance = (deps: UseJobMaintenanceDeps) => {
             const parent = jobs.find(j => (j.id === child.orderRef || j.jobNumber === child.orderRef));
 
             if (parent && parent.jobNumber && child.jobNumber !== parent.jobNumber) {
-                console.log(`🔧 Syncing Job Number: ${child.type} ${child.id.slice(-4)} -> ${parent.jobNumber}`);
+                logger.debug('useJobMaintenance', `🔧 Syncing Job Number: ${child.type} ${child.id.slice(-4)} -> ${parent.jobNumber}`);
                 try {
                     await wmsJobsService.update(child.id, { jobNumber: parent.jobNumber });
                     fixedNumbers++;
                 } catch (e) {
-                    console.error(`Failed to sync job ${child.id}:`, e);
+                    logger.error('useJobMaintenance', `Failed to sync job ${child.id}`, e as Error);
                 }
             }
         }
@@ -181,7 +182,7 @@ export const useJobMaintenance = (deps: UseJobMaintenanceDeps) => {
         for (const job of orphanedReceiveJobs) {
             const po = orders.find(o => o.id === job.orderRef);
             if (!po || po.status !== 'Approved') {
-                console.log(`🔧 Syncing Ghost RECEIVE Job: ${job.id}`);
+                logger.debug('useJobMaintenance', `🔧 Syncing Ghost RECEIVE Job: ${job.id}`);
                 try {
                     await wmsJobsService.update(job.id, { 
                         status: 'Completed',
@@ -198,7 +199,7 @@ export const useJobMaintenance = (deps: UseJobMaintenanceDeps) => {
                     
                     fixedGhosts++;
                 } catch (e) {
-                    console.error(`Failed to sync ghost job ${job.id}:`, e);
+                    logger.error('useJobMaintenance', `Failed to sync ghost job ${job.id}`, e as Error);
                 }
             }
         }
@@ -214,13 +215,13 @@ export const useJobMaintenance = (deps: UseJobMaintenanceDeps) => {
     const createPutawayJob = useCallback(async (product: Product, quantity: number, user: string, source: string = 'Inventory') => {
         try {
             if (quantity <= 0) {
-                console.log('📦 Skipping putaway job - no stock to put away');
+                logger.debug('useJobMaintenance', '📦 Skipping putaway job - no stock to put away');
                 return undefined;
             }
 
             const targetSiteId = product.siteId || product.site_id || activeSite?.id;
             if (!targetSiteId) {
-                console.error('❌ Cannot create putaway job - no site ID');
+                logger.error('useJobMaintenance', '❌ Cannot create putaway job - no site ID', new Error('No site ID'));
                 return undefined;
             }
 
@@ -255,11 +256,11 @@ export const useJobMaintenance = (deps: UseJobMaintenanceDeps) => {
                     createdAt: new Date().toISOString(),
                     requestedBy: user
                 });
-                console.log('✅ Inventory PUTAWAY job created:', createdJob.id);
+                logger.debug('useJobMaintenance', `✅ Inventory PUTAWAY job created: ${createdJob.id}`);
                 setJobs(prev => [createdJob, ...prev]);
                 return createdJob;
             } catch (error) {
-                console.error('❌ Failed to create putaway job in DB:', error);
+                logger.error('useJobMaintenance', '❌ Failed to create putaway job in DB', error as Error);
                 const fallbackJob: WMSJob = {
                     id: crypto.randomUUID(),
                     siteId: targetSiteId,
@@ -279,7 +280,7 @@ export const useJobMaintenance = (deps: UseJobMaintenanceDeps) => {
                 return fallbackJob;
             }
         } catch (error) {
-            console.error('Error creating putaway job:', error);
+            logger.error('useJobMaintenance', 'Error creating putaway job', error as Error);
             return undefined;
         }
     }, [activeSite, setJobs]);
@@ -295,7 +296,7 @@ export const useJobMaintenance = (deps: UseJobMaintenanceDeps) => {
             addNotification('success', 'Job deleted');
             queryClient.invalidateQueries({ queryKey: ['wms_jobs'] });
         } catch (error) {
-            console.error(error);
+            logger.error('useJobMaintenance', 'caught error', error as Error);
             addNotification('alert', 'Failed to delete job');
         }
     }, [setJobs, addNotification, queryClient, user]);

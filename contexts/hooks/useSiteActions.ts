@@ -1,6 +1,7 @@
 import { useCallback } from 'react';
 import type { Site, SystemConfig, SystemLog } from '../../types';
 import { sitesService, systemConfigService } from '../../services/supabase.service';
+import { logger } from '../../utils/logger';
 
 interface UseSiteActionsDeps {
     sites: Site[];
@@ -24,7 +25,7 @@ export function useSiteActions(deps: UseSiteActionsDeps) {
                     localStorage.setItem('siifmart_system_config', JSON.stringify(updated));
                 }
             } catch (e) {
-                console.error('Failed to save settings to localStorage', e);
+                logger.error('useSiteActions', 'Failed to save settings to localStorage', e as Error);
             }
             return updated;
         });
@@ -33,7 +34,7 @@ export function useSiteActions(deps: UseSiteActionsDeps) {
             await systemConfigService.updateSettings(newSettings, user);
             logSystemEvent('Settings Updated', 'System configuration changed', user, 'Settings');
         } catch (error) {
-            console.error('❌ Failed to persist settings to database:', error);
+            logger.error('useSiteActions', 'Failed to persist settings to database', error as Error);
             addNotification('alert', 'Failed to save settings to server. Changes kept locally.');
         }
     }, []);
@@ -60,7 +61,7 @@ export function useSiteActions(deps: UseSiteActionsDeps) {
             logSystemEvent('Site Added', `New site created: ${site.name}`, user, 'Sites');
             addNotification('success', `Site ${site.name} created successfully`);
         } catch (error) {
-            console.error(error);
+            logger.error('useSiteActions', 'caught error', error as Error);
             addNotification('alert', 'Failed to create site');
         }
     }, []);
@@ -71,7 +72,7 @@ export function useSiteActions(deps: UseSiteActionsDeps) {
             setSites(prev => prev.map(s => s.id === site.id ? updated : s));
             logSystemEvent('Site Updated', `Site updated: ${site.name}`, user, 'Sites');
         } catch (error) {
-            console.error(error);
+            logger.error('useSiteActions', 'caught error', error as Error);
             addNotification('alert', 'Failed to update site');
         }
     }, []);
@@ -82,7 +83,7 @@ export function useSiteActions(deps: UseSiteActionsDeps) {
             setSites(prev => prev.filter(s => s.id !== id));
             logSystemEvent('Site Deleted', `Site deleted: ${id}`, user, 'Sites');
         } catch (error) {
-            console.error(error);
+            logger.error('useSiteActions', 'caught error', error as Error);
             addNotification('alert', 'Failed to delete site');
         }
     }, []);

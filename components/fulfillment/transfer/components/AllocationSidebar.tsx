@@ -4,6 +4,7 @@ import {
 } from 'lucide-react';
 import { getSellUnit } from '../../../../utils/units';
 import { Site, Product, User } from '../../../../types';
+import { logger } from '../../../../utils/logger';
 
 interface AllocationSidebarProps {
     distHubSelectedSku: string;
@@ -246,7 +247,7 @@ export const AllocationSidebar = ({
                                                         addNotification('success', 'Draft manifest deleted');
                                                         await fetchDistHubData();
                                                     } catch (err) {
-                                                        console.error(err);
+                                                        logger.error('AllocationSidebar', 'caught error', err as Error);
                                                     } finally {
                                                         setDistHubLoading(false);
                                                     }

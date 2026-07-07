@@ -28,6 +28,7 @@ import { formatDateTime, formatRelativeTime } from '../utils/formatting';
 import { FulfillmentContent } from '../components/fulfillment/FulfillmentContent';
 import { useFilteredFulfillmentData } from '../hooks/useFilteredFulfillmentData';
 import { useFulfillmentActions } from '../hooks/useFulfillmentActions';
+import { logger } from '../utils/logger';
 
 
 type OpTab = 'DOCKS' | 'RECEIVE' | 'PUTAWAY' | 'PICK' | 'PACK' | 'REPLENISH' | 'COUNT' | 'WASTE' | 'RETURNS' | 'ASSIGN' | 'TRANSFER' | 'DRIVER';
@@ -258,18 +259,18 @@ export default function WarehouseOperations() {
     const putawayStock = async (params: { sku: string, location: string, quantity: number, siteId: string, type: 'IN' | 'TRANSFER', expiryDate?: string, batchNumber?: string, sourceProductId?: string, timestamp?: string, size?: string, brand?: string, unit?: string, packQuantity?: number, category?: string, retailPrice?: number, customAttributes?: any, description?: string, minStock?: number, maxStock?: number }) => {
         try {
             const ts = params.timestamp || new Date().toISOString();
-            console.log('📦 putawayStock called:', params, 'using timestamp:', ts);
+            logger.debug('Fulfillment', '📦 putawayStock called:');
 
             // 1. Check if product exists at destination
             let destProduct = await productsService.getBySkuAndLocation(params.sku, params.location, params.siteId);
             let destProductId = destProduct?.id;
 
             if (destProduct) {
-                console.log(`✅ Found existing product at ${params.location} (ID: ${destProduct.id}). Updating stock...`);
+                logger.debug('Fulfillment', `✅ Found existing product at ${params.location} (ID: ${destProduct.id}). Updating stock...`);
                 // Update existing
                 await productsService.adjustStock(destProduct.id, params.quantity, 'IN', `Putaway to ${params.location}`, user?.name || 'System', params.expiryDate, params.batchNumber, ts);
             } else {
-                console.log(`ℹ️ No product found at ${params.location}. Creating or recycling record...`);
+                logger.debug('Fulfillment', `ℹ️ No product found at ${params.location}. Creating or recycling record...`);
                 // Create new
                 // Need source details. Use sourceProductId if available, or fetch by SKU.
                 let sourceProduct: any;
@@ -286,7 +287,7 @@ export default function WarehouseOperations() {
                 if (!sourceProduct && params.sourceProductId) {
                     const poItem = orders?.flatMap(o => o.lineItems || []).find(i => i.id === params.sourceProductId || i.productId === params.sourceProductId);
                     if (poItem) {
-                        console.log(`ℹ️ Found PO Item matching ID. Creating initial product definition for ${params.sku}`);
+                        logger.debug('Fulfillment', `ℹ️ Found PO Item matching ID. Creating initial product definition for ${params.sku}`);
                         sourceProduct = {
                             name: poItem.productName || params.sku,
                             sku: poItem.sku || params.sku,
@@ -319,7 +320,7 @@ export default function WarehouseOperations() {
                 const isPlaceholder = (sourceProduct.location === 'On Order' || !sourceProduct.location) && sourceProduct.stock === 0;
 
                 if (isPlaceholder && params.sourceProductId === sourceProduct.id) {
-                    console.log(`♻️ Recycling placeholder product ${sourceProduct.id} from '${sourceProduct.location}' to '${params.location}'`);
+                    logger.debug('Fulfillment', `♻️ Recycling placeholder product ${sourceProduct.id} from '${sourceProduct.location}' to '${params.location}'`);
 
                     // Update the existing placeholder to be the real record
                     const updated = await productsService.update(sourceProduct.id, {
@@ -404,7 +405,7 @@ export default function WarehouseOperations() {
                     try {
                         const created = await productsService.create(newProductPayload);
                         destProductId = created.id;
-                        console.log(`✅ Created new product record at ${params.location}`);
+                        logger.debug('Fulfillment', `✅ Created new product record at ${params.location}`);
 
                         // [FIX] Log Movement for New Location Record
                         await stockMovementsService.create({
@@ -421,11 +422,11 @@ export default function WarehouseOperations() {
                     } catch (err: any) {
                         // [SAFETY] Handle Unique Constraint Violation (Race condition or hidden record)
                         if (err.code === '23505') {
-                            console.warn(`⚠️ Product creation collision (already exists) at ${params.location}. Recovering...`);
+                            logger.warn('Fulfillment', `⚠️ Product creation collision (already exists) at ${params.location}. Recovering...`);
                             // Fetch the existing record that caused the collision
                             const existing = await productsService.getBySkuAndLocation(params.sku, params.location, params.siteId);
                             if (existing) {
-                                console.log(`🔄 Recovered: Found existing product ${existing.id}. Updating stock...`);
+                                logger.debug('Fulfillment', `🔄 Recovered: Found existing product ${existing.id}. Updating stock...`);
                                 destProductId = existing.id;
                                 // Force status to active and update stock
                                 await productsService.update(existing.id, { status: 'active', updated_at: ts } as any);
@@ -444,15 +445,15 @@ export default function WarehouseOperations() {
             // [CLEANUP] Evict old tenants: If we put a new product here, ensure old 0-stock products don't claim this location
             try {
                 await productsService.clearLocationForEmptyProducts(params.location, params.siteId, params.sku);
-                console.log(`🧹 Location ${params.location} cleanup complete (evicted 0-stock ghosts)`);
+                logger.debug('Fulfillment', `🧹 Location ${params.location} cleanup complete (evicted 0-stock ghosts)`);
             } catch (cleanupErr) {
-                console.warn('⚠️ Manual cleanup of old location tenants failed (non-critical)', cleanupErr);
+                logger.warn('Fulfillment', '⚠️ Manual cleanup of old location tenants failed (non-critical)');
             }
 
             addNotification('success', `Stock putaway to ${params.location}`);
             refreshData(); // Refresh to show new location
         } catch (e) {
-            console.error('❌ putawayStock failed:', e);
+            logger.error('Fulfillment', '❌ putawayStock failed:', e);
             addNotification('alert', 'Putaway failed');
             throw e;
         }

@@ -11,6 +11,7 @@ import { ReceiptPreview } from './ReceiptPreview';
 import { POSStationTab } from './POSStationTab';
 import { POSConnectivityTab } from './POSConnectivityTab';
 import { POSIdentityTab } from './POSIdentityTab';
+import { logger } from '../../utils/logger';
 
 export default function POSSettings() {
     const { user } = useStore();
@@ -137,7 +138,7 @@ export default function POSSettings() {
             await updateSettings(data as Partial<SystemConfig>, user?.name || 'Admin');
             addNotification('success', `${section.charAt(0).toUpperCase() + section.slice(1)} settings saved successfully!`);
         } catch (err) {
-            console.error(`Failed to save ${section} settings:`, err);
+            logger.error('POSSettings', `Failed to save ${section} settings:`, err);
             addNotification('alert', `Failed to save ${section} settings.`);
         } finally {
             setSaving(false);

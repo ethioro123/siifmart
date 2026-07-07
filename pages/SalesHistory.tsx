@@ -18,6 +18,7 @@ import { SalesAnalyticsRibbon } from './sales-history/components/SalesAnalyticsR
 import { SalesToolbar } from './sales-history/components/SalesToolbar';
 import { SalesDetailModal } from './sales-history/components/SalesDetailModal';
 import { triggerReceiptPrint } from './sales-history/utils/receiptPrinter';
+import { logger } from '../utils/logger';
 
 // Pagination Config
 const ITEMS_PER_PAGE = 20;
@@ -82,7 +83,7 @@ export default function SalesHistory() {
          setSales(data);
          setTotalCount(count);
       } catch (error) {
-         console.warn('Network fetch failed or offline, falling back to local data:', error);
+         logger.warn('SalesHistory', 'Network fetch failed or offline, falling back to local data:');
 
          // Fallback to local allSales filtering
          let filtered = [...(allSales || [])];

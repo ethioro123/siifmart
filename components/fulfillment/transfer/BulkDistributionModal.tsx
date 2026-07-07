@@ -6,6 +6,7 @@ import { formatJobId } from '../../../utils/jobIdFormatter';
 import { getSellUnit } from '../../../utils/units';
 import { useData } from '../../../contexts/DataContext';
 import { logisticsZonesService } from '../../../services/supabase.service';
+import { logger } from '../../../utils/logger';
 
 interface BulkDistributionModalProps {
     isOpen: boolean;
@@ -62,7 +63,7 @@ export const BulkDistributionModal: React.FC<BulkDistributionModalProps> = ({
                     const zones = await logisticsZonesService.getAll();
                     setLogisticsZones(zones);
                 } catch (err) {
-                    console.error('Failed to fetch logistics zones:', err);
+                    logger.error('BulkDistributionModal', 'Failed to fetch logistics zones:', err);
                 }
             };
             fetchZones();
@@ -261,7 +262,7 @@ export const BulkDistributionModal: React.FC<BulkDistributionModalProps> = ({
             setWaveProducts([]);
             refreshData();
         } catch (e) {
-            console.error(e);
+            logger.error('BulkDistributionModal', 'caught error', e as Error);
             addNotification('alert', 'Failed to create distribution jobs');
         }
     };

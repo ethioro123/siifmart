@@ -4,6 +4,7 @@ import Cropper from 'react-easy-crop';
 import { Area } from 'react-easy-crop';
 import Modal from './Modal';
 import { Check, X, AlertTriangle, RefreshCw } from 'lucide-react';
+import { logger } from '../utils/logger';
 
 interface ImageCropperProps {
     imageSrc: string;
@@ -78,10 +79,10 @@ const ImageCropper: React.FC<ImageCropperProps> = ({ imageSrc, onCropComplete, o
                 onCropComplete(croppedImage);
             } else {
                 setImageLoadError('Failed to create cropped image. Please try again.');
-                console.error('✂️ getCroppedImg returned null');
+                logger.error('ImageCropper', '✂️ getCroppedImg returned null', new Error(String('✂️ getCroppedImg returned null')));
             }
         } catch (e) {
-            console.error('✂️ Error creating cropped image:', e);
+            logger.error('ImageCropper', '✂️ Error creating cropped image:', e);
             setImageLoadError('Error processing image. The format may not be supported.');
         }
     };

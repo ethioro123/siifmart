@@ -2,6 +2,7 @@ import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useStore } from '../contexts/CentralStore';
 import { canAccessModule, hasPermission, PERMISSIONS } from '../utils/permissions';
+import { logger } from '../utils/logger';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -32,14 +33,14 @@ export function ProtectedRoute({
   // 2. Check module access
   if (module && !canAccessModule(user.role, module)) {
     const dashboardRoute = getDashboardRoute(user.role);
-    console.warn(`User ${user.name} (${user.role}) attempted to access module: ${module}`);
+    logger.warn('ProtectedRoute', `User ${user.name} (${user.role}) attempted to access module: ${module}`);
     return <Navigate to={redirectTo || dashboardRoute} replace />;
   }
 
   // 3. Check specific permission
   if (permission && !hasPermission(user.role, permission)) {
     const dashboardRoute = getDashboardRoute(user.role);
-    console.warn(`User ${user.name} (${user.role}) lacks permission: ${permission}`);
+    logger.warn('ProtectedRoute', `User ${user.name} (${user.role}) lacks permission: ${permission}`);
     return <Navigate to={redirectTo || dashboardRoute} replace />;
   }
 

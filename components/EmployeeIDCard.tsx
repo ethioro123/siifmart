@@ -5,6 +5,7 @@ import QRCode from 'qrcode';
 import { X, Printer, Shield, MapPin, Building, CreditCard } from 'lucide-react';
 import Logo from './Logo';
 import { formatRole } from '../utils/formatting';
+import { logger } from '../utils/logger';
 
 interface EmployeeIDCardProps {
     employee: Employee;
@@ -68,7 +69,7 @@ export default function EmployeeIDCard({ employee, siteCode, onClose }: Employee
                 });
                 setQrCodeUrl(url);
             } catch (err) {
-                console.error('Error generating QR code', err);
+                logger.error('EmployeeIDCard', 'Error generating QR code', err);
             }
         };
         generateQR();

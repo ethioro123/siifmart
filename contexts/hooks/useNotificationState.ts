@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { Notification, User } from '../../types';
+import { logger } from '../../utils/logger';
 
 interface UseNotificationStateProps {
   user: User | undefined;
@@ -15,7 +16,7 @@ export function useNotificationState({ user }: UseNotificationStateProps) {
         setNotifications(JSON.parse(savedNotifs));
       }
     } catch (e) {
-      console.error('Failed to load notifications', e);
+      logger.error('useNotificationState', 'Failed to load notifications', e);
     }
   }, []);
 
@@ -24,7 +25,7 @@ export function useNotificationState({ user }: UseNotificationStateProps) {
     try {
       localStorage.setItem('siifmart_notifications', JSON.stringify(notifications));
     } catch (e) {
-      console.warn('Failed to save notifications to localStorage', e);
+      logger.warn('useNotificationState', 'Failed to save notifications to localStorage');
     }
   }, [notifications]);
 

@@ -32,6 +32,7 @@ import LabelPrintModal from '../components/LabelPrintModal';
 import { filterBySite } from '../utils/locationAccess';
 // Constants
 import { CURRENCY_SYMBOL } from '../constants';
+import { logger } from '../utils/logger';
 
 type Tab = 'overview' | 'stock' | 'zones' | 'movements' | 'pending' | 'barcode_audit';
 
@@ -94,7 +95,7 @@ export default function Inventory() {
             const requests = await inventoryRequestsService.getAll(activeSite?.id);
             setPendingChanges(requests.filter(r => r.status === 'pending'));
         } catch (err) {
-            console.error('Failed to load pending requests:', err);
+            logger.error('Inventory', 'Failed to load pending requests:', err);
         }
     }, [activeSite?.id]);
 
@@ -143,7 +144,7 @@ export default function Inventory() {
             setLocalProducts(data || []);
             setTotalProductCount(count || 0);
         } catch (error) {
-            console.error('Failed to fetch products', error);
+            logger.error('Inventory', 'Failed to fetch products', error);
             addNotification('alert', 'Failed to load products');
         } finally {
             setProductsLoading(false);
@@ -170,7 +171,7 @@ export default function Inventory() {
                     const metrics = await productsService.getMetrics(metricSiteId);
                     setServerMetrics(metrics);
                 } catch (err) {
-                    console.error('Failed inventory metrics:', err);
+                    logger.error('Inventory', 'Failed inventory metrics:', err);
                 }
             }
         };
@@ -479,7 +480,7 @@ export default function Inventory() {
                                 fetchProducts();
                                 refreshData();
                             } catch (error: any) {
-                                console.error('Failed to save product:', error);
+                                logger.error('Inventory', 'Failed to save product:', error);
                                 addNotification('alert', error.message || 'Failed to save product');
                             }
                         }}

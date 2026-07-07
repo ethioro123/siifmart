@@ -3,6 +3,7 @@ import { productsService, inventoryRequestsService } from '../services/supabase.
 import { useData } from '../contexts/DataContext';
 import { useStore } from '../contexts/CentralStore';
 import { PendingInventoryChange } from '../types';
+import { logger } from '../utils/logger';
 
 interface AdjustStockParams {
     productId: string;
@@ -69,7 +70,7 @@ export function useAdjustStockMutation() {
             }
         },
         onError: (error: any) => {
-            console.error('Stock adjustment failed:', error);
+            logger.error('useAdjustStockMutation', 'Stock adjustment failed:', error);
             addNotification('alert', error.message || 'Failed to process adjustment');
         }
     });

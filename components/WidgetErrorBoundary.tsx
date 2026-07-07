@@ -1,5 +1,6 @@
 import React, { ErrorInfo, ReactNode } from 'react';
 import { AlertTriangle, RotateCcw } from 'lucide-react';
+import { logger } from '../utils/logger';
 
 interface Props {
     children: ReactNode;
@@ -27,7 +28,7 @@ export default class WidgetErrorBoundary extends React.Component<Props, State> {
     }
 
     componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-        console.error('Widget crashing:', error, errorInfo);
+        logger.error('WidgetErrorBoundary', 'Widget crashing:', error);
     }
 
     private handleRetry = () => {

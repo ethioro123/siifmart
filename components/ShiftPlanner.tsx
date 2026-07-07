@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Employee, UserRole } from '../types';
 import { Sun, Moon, Sunset, XCircle, Save, ChevronLeft, ChevronRight, Shield, Briefcase, Package, User, ShoppingBag, Truck } from 'lucide-react';
 import { formatDateTime, formatRole } from '../utils/formatting';
+import { logger } from '../utils/logger';
 
 interface ShiftPlannerProps {
     employees: Employee[];
@@ -35,7 +36,7 @@ const ShiftPlanner: React.FC<ShiftPlannerProps> = ({ employees, canEdit = false,
             try {
                 return JSON.parse(saved);
             } catch (e) {
-                console.error('Failed to parse saved schedule', e);
+                logger.error('ShiftPlanner', 'Failed to parse saved schedule', e);
             }
         }
 

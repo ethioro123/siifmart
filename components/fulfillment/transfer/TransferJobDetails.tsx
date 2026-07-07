@@ -6,6 +6,7 @@ import { getSellUnit } from '../../../utils/units';
 import { supabase } from '../../../lib/supabase';
 import { productsService } from '../../../services/products.service';
 import { useLanguage } from '../../../contexts/LanguageContext';
+import { logger } from '../../../utils/logger';
 
 interface TransferJobDetailsProps {
     selectedJob: WMSJob | null; setSelectedJob: (job: WMSJob | null) => void;
@@ -59,7 +60,7 @@ export const TransferJobDetails: React.FC<TransferJobDetailsProps> = ({
                 .or(`order_ref.eq.${selectedJob.id},order_ref.eq.${selectedJob.jobNumber}`);
 
             if (checkError) {
-                console.error('Failed to check child pick jobs:', checkError);
+                logger.error('TransferJobDetails', 'Failed to check child pick jobs:', checkError);
             }
 
             const isPickCompleted = childPickJobs?.some((j: any) => j.status === 'Completed');
@@ -76,7 +77,7 @@ export const TransferJobDetails: React.FC<TransferJobDetailsProps> = ({
                 .or(`order_ref.eq.${selectedJob.id},order_ref.eq.${selectedJob.jobNumber}`);
 
             if (deleteChildrenError) {
-                console.error('Failed to delete child jobs:', deleteChildrenError);
+                logger.error('TransferJobDetails', 'Failed to delete child jobs:', deleteChildrenError);
             }
 
             // Delete the main transfer job
@@ -89,7 +90,7 @@ export const TransferJobDetails: React.FC<TransferJobDetailsProps> = ({
                 const product = products.find(p => p.id === item.productId || p.sku === item.sku);
                 if (product) {
                     productsService.handleAutoReplenish(product).catch(err => {
-                        console.error('Failed to restart auto-replenish for', product.sku, err);
+                        logger.error('TransferJobDetails', 'Failed to restart auto-replenish for', product.sku, err);
                     });
                 }
             }
@@ -98,7 +99,7 @@ export const TransferJobDetails: React.FC<TransferJobDetailsProps> = ({
             setSelectedJob(null);
         } catch (e: any) {
             addNotification('alert', 'Failed to delete manifest');
-            console.error(e);
+            logger.error('TransferJobDetails', e, new Error(String(e)));
         } finally {
             setLoading(null);
         }

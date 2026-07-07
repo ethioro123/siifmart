@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { StaffSchedule } from '../types';
 import { schedulesService } from '../services/supabase.service';
 import { useData } from './DataContext';
+import { logger } from '../utils/logger';
 
 interface RosterContextType {
     schedules: StaffSchedule[];
@@ -25,7 +26,7 @@ export const RosterProvider = ({ children }: { children: ReactNode }) => {
                 const data = await schedulesService.getAll(activeSiteId);
                 setSchedules(data);
             } catch (error) {
-                console.error("Failed to load schedules", error);
+                logger.error('RosterContext', 'Failed to load schedules', error as Error);
             }
         };
 
@@ -38,7 +39,7 @@ export const RosterProvider = ({ children }: { children: ReactNode }) => {
             setSchedules(prev => [...prev, schedule]);
             addNotification('success', 'Shift added');
         } catch (error) {
-            console.error(error);
+            logger.error('RosterContext', 'caught error', error as Error);
             addNotification('alert', 'Failed to add shift');
         }
     };
@@ -49,7 +50,7 @@ export const RosterProvider = ({ children }: { children: ReactNode }) => {
             setSchedules(prev => prev.map(s => s.id === id ? { ...s, ...updates } : s));
             addNotification('success', 'Shift updated');
         } catch (error) {
-            console.error(error);
+            logger.error('RosterContext', 'caught error', error as Error);
             addNotification('alert', 'Failed to update shift');
         }
     };
@@ -60,7 +61,7 @@ export const RosterProvider = ({ children }: { children: ReactNode }) => {
             setSchedules(prev => prev.filter(s => s.id !== id));
             addNotification('success', 'Shift deleted');
         } catch (error) {
-            console.error(error);
+            logger.error('RosterContext', 'caught error', error as Error);
             addNotification('alert', 'Failed to delete shift');
         }
     };

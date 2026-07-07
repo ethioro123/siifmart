@@ -4,6 +4,7 @@ import { useData } from '../../contexts/DataContext';
 import { useStore } from '../../contexts/CentralStore';
 import Logo from '../Logo';
 import Button from '../shared/Button';
+import { logger } from '../../utils/logger';
 
 // --- SUB-COMPONENTS ---
 const SectionHeader = ({ title, desc }: { title: string, desc: string }) => (
@@ -156,7 +157,7 @@ export default function GeneralSettings() {
             setSaved(true);
             setTimeout(() => setSaved(false), 3000);
         } catch (err) {
-            console.error(`Failed to save ${section} settings:`, err);
+            logger.error('GeneralSettings', `Failed to save ${section} settings:`, err);
             addNotification('alert', `Failed to save ${section} settings.`);
         } finally {
             setSaving(false);
@@ -184,7 +185,7 @@ export default function GeneralSettings() {
                 setBranding(prev => ({ ...prev, logoUrl: publicUrl }));
                 addNotification('success', 'Logo uploaded! Click Save to apply permanently.');
             } catch (err) {
-                console.error('Logo upload failed:', err);
+                logger.error('GeneralSettings', 'Logo upload failed:', err);
                 addNotification('alert', 'Failed to upload logo.');
             }
         };

@@ -12,6 +12,7 @@ import { ReturnToWarehouseModal } from './returns/ReturnToWarehouseModal';
 import { inventoryRequestsService } from '../../services/supabase.service';
 import { FulfillmentSuccessScreen } from './FulfillmentSuccessScreen';
 import { isWeightBased, isVolumeBased } from '../../utils/units';
+import { logger } from '../../utils/logger';
 
 const PICK_ITEMS_PER_PAGE = 12;
 
@@ -120,7 +121,7 @@ export const PickTab: React.FC = () => {
 
         const itemIndex = selectedJob.lineItems?.findIndex((i: any) => i === currentScannerItem) ?? -1;
         if (itemIndex === -1) {
-            console.error("Scanner item not found in job line items");
+            logger.error('PickTab', "Scanner item not found in job line items", new Error(String("Scanner item not found in job line items")));
             throw new Error("Scanner item reference lost");
         }
 

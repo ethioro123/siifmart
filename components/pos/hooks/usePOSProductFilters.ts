@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Product, TransferRecord, Site } from '../../../types';
 import { productsService } from '../../../services/supabase.service';
+import { logger } from '../../../utils/logger';
 
 interface UsePOSProductFiltersProps {
     products: Product[];
@@ -108,7 +109,7 @@ export const usePOSProductFilters = ({
                 const results = await productsService.search(searchTerm, activeSite?.id);
                 setServerSearchResults(results);
             } catch (err) {
-                console.error("Product search failed", err);
+                logger.error('usePOSProductFilters', "Product search failed", err);
             } finally {
                 setIsSearchingServer(false);
             }

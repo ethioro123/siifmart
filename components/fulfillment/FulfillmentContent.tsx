@@ -23,6 +23,7 @@ import { purchaseOrdersService } from '../../services/supabase.service'; // Need
 import { productsService } from '../../services/supabase.service'; // Needed for TransferTab
 import { inventoryRequestsService } from '../../services/supabase.service'; // Needed for CountTab, ReturnsTab
 import { generatePackLabelHTML } from '../../utils/labels/PackLabelGenerator'; // Needed for DocksTab
+import { logger } from '../../utils/logger';
 
 const TAB_PERMISSIONS: Record<OpTab, string[]> = {
     RECEIVE: ['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher', 'inventory_specialist', 'picker', 'packer', 'driver', 'receiver', 'logistics_manager', 'inventory_manager'],
@@ -330,7 +331,7 @@ export const FulfillmentContent: React.FC = () => {
                             return await relocateProduct(params.productId, params.locationId, params.user);
                         }}
                         logSystemEvent={logSystemEvent}
-                        playBeep={(type: string) => console.log(`Beep: ${type}`)}
+                        playBeep={(type: string) => logger.debug('FulfillmentContent', `Beep: ${type}`)}
                         fixBrokenJobs={fixBrokenJobs}
                     />
                 )

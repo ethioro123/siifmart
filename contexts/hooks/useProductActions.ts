@@ -2,6 +2,7 @@ import { useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import type { Product, Site, SystemLog } from '../../types';
 import { productsService } from '../../services/supabase.service';
+import { logger } from '../../utils/logger';
 
 interface UseProductActionsDeps {
     activeSite: Site | undefined;
@@ -23,7 +24,7 @@ export function useProductActions(deps: UseProductActionsDeps) {
     const queryClient = useQueryClient();
 
     const addProduct = useCallback(async (product: Product): Promise<Product | undefined> => {
-        console.log('🧪 DataContext: addProduct called with:', product);
+        logger.debug('useProductActions', '🧪 DataContext: addProduct called with:');
         const targetSiteId = product.siteId || product.site_id || activeSite?.id;
         try {
             if (!activeSite?.id) {
@@ -32,7 +33,7 @@ export function useProductActions(deps: UseProductActionsDeps) {
             }
 
             if (!product.price || product.price <= 0) {
-                console.warn(`Creating product "${product.name}" with invalid price: ${product.price}. Proceeding anyway.`);
+                logger.warn('useProductActions', `Creating product "${product.name}" with invalid price: ${product.price}. Proceeding anyway.`);
             }
 
             const targetSite = sites.find(s => s.id === targetSiteId);
@@ -50,7 +51,7 @@ export function useProductActions(deps: UseProductActionsDeps) {
             }
 
             if (!product.costPrice) {
-                console.warn(`Product "${product.name}" created without cost price. Profit margins cannot be calculated.`);
+                logger.warn('useProductActions', `Product "${product.name}" created without cost price. Profit margins cannot be calculated.`);
             }
 
             const newProduct = await productsService.create({
@@ -58,11 +59,11 @@ export function useProductActions(deps: UseProductActionsDeps) {
                 site_id: targetSiteId
             });
 
-            console.log('🧪 DataContext: Product created in DB:', newProduct);
+            logger.debug('useProductActions', '🧪 DataContext: Product created in DB:');
 
             setProducts(prev => {
                 const next = [...prev, newProduct];
-                console.log('🧪 DataContext: Local products updated. Count:', next.length);
+                logger.debug('useProductActions', '🧪 DataContext: Local products updated. Count:');
                 return next;
             });
             setAllProducts(prev => [...prev, newProduct]);
@@ -75,10 +76,10 @@ export function useProductActions(deps: UseProductActionsDeps) {
             logSystemEvent('Product Added', `Product "${product.name}" (SKU: ${product.sku}) created in site ${targetSiteId}`, user?.name || 'System', 'Inventory');
             return newProduct;
         } catch (error: any) {
-            console.error('Error adding product:', error);
+            logger.error('useProductActions', 'Error adding product:', error as Error);
 
             if (error?.code === '23505' || error?.message?.includes('unique constraints') || error?.status === 409) {
-                console.warn(`Product with SKU "${product.sku}" already exists. Fetching existing record...`);
+                logger.warn('useProductActions', `Product with SKU "${product.sku}" already exists. Fetching existing record...`);
                 try {
                     const existing = await productsService.getBySKU(product.sku, targetSiteId);
                     if (existing) {
@@ -91,7 +92,7 @@ export function useProductActions(deps: UseProductActionsDeps) {
                         return existing;
                     }
                 } catch (fetchErr) {
-                    console.error('Failed to recover existing product:', fetchErr);
+                    logger.error('useProductActions', 'Failed to recover existing product:', fetchErr);
                 }
                 addNotification('alert', `Duplicate SKU! A product with SKU "${product.sku}" already exists but could not be retrieved.`);
             } else {
@@ -143,7 +144,7 @@ export function useProductActions(deps: UseProductActionsDeps) {
             logSystemEvent('Product Updated', `Product "${product.name || updated.name}" updated`, updatedBy || user?.name || 'System', 'Inventory');
             return updated;
         } catch (error: any) {
-            console.error(error);
+            logger.error('useProductActions', 'caught error', error as Error);;
             addNotification('alert', error.message || 'Failed to update product');
             throw error;
         }
@@ -167,7 +168,7 @@ export function useProductActions(deps: UseProductActionsDeps) {
             addNotification('success', `Synchronized prices for SKU ${sku} across ${updatedProducts.length} locations`);
             logSystemEvent('Global Price Sync', `SKU ${sku} prices updated network-wide`, user?.name || 'System', 'Inventory');
         } catch (error: any) {
-            console.error('Global Price Sync Error:', error);
+            logger.error('useProductActions', 'Global Price Sync Error:', error as Error);
             addNotification('alert', error.message || 'Failed to synchronize prices globally');
             throw error;
         }
@@ -180,7 +181,7 @@ export function useProductActions(deps: UseProductActionsDeps) {
             addNotification('success', 'Product and related records deleted permanently');
             logSystemEvent('Product Deleted', `Product with ID ${id} and all related records deleted permanently`, user?.name || 'System', 'Inventory');
         } catch (error) {
-            console.error(error);
+            logger.error('useProductActions', 'caught error', error as Error);;
             addNotification('alert', 'Failed to delete product');
             throw error;
         }
@@ -192,7 +193,7 @@ export function useProductActions(deps: UseProductActionsDeps) {
             const currentLocations = product?.location ? product.location.split(',').map(l => l.trim()) : [];
 
             if (currentLocations.includes(newLocation.trim())) {
-                console.log(`📍 Product ${productId} already assigned to location ${newLocation}. Skipping append.`);
+                logger.debug('useProductActions', `📍 Product ${productId} already assigned to location ${newLocation}. Skipping append.`);
                 return;
             }
 
@@ -201,7 +202,7 @@ export function useProductActions(deps: UseProductActionsDeps) {
             queryClient.invalidateQueries({ queryKey: ['products'] });
             logSystemEvent('Product Relocated', `Product ${productId} added to location ${newLocation}`, user, 'Inventory');
         } catch (error) {
-            console.error(error);
+            logger.error('useProductActions', 'caught error', error as Error);;
             addNotification('alert', 'Failed to relocate product');
         }
     }, [allProducts, queryClient, logSystemEvent, addNotification]);
@@ -215,7 +216,7 @@ export function useProductActions(deps: UseProductActionsDeps) {
                 return;
             }
 
-            console.log(`🧹 Found ${hqProducts.length} products in HQ. Removing...`);
+            logger.debug('useProductActions', `🧹 Found ${hqProducts.length} products in HQ. Removing...`);
 
             const deletePromises = hqProducts.map(product => productsService.delete(product.id));
             await Promise.all(deletePromises);
@@ -226,7 +227,7 @@ export function useProductActions(deps: UseProductActionsDeps) {
             addNotification('success', `✅ Removed ${hqProducts.length} products from HQ. Database cleaned!`);
             logSystemEvent('Data Cleanup', `Removed ${hqProducts.length} HQ products`, 'System', 'Inventory');
         } catch (error) {
-            console.error('Failed to cleanup HQ products:', error);
+            logger.error('useProductActions', 'Failed to cleanup HQ products:', error as Error);
             addNotification('alert', 'Failed to cleanup HQ products');
         }
     }, [allProducts, addNotification, logSystemEvent]);
@@ -242,7 +243,7 @@ export function useProductActions(deps: UseProductActionsDeps) {
                 return;
             }
 
-            console.log(`🧹 Found ${corruptedProducts.length} products with corrupted locations. Cleaning...`);
+            logger.debug('useProductActions', `🧹 Found ${corruptedProducts.length} products with corrupted locations. Cleaning...`);
 
             const extractValidLocation = (location: string): string => {
                 const match = location.match(/([A-Z])-(\d{1,2})-(\d{1,2})/);
@@ -258,7 +259,7 @@ export function useProductActions(deps: UseProductActionsDeps) {
                 if (cleanLocation && cleanLocation !== product.location) {
                     await productsService.update(product.id, { location: cleanLocation });
                     fixedCount++;
-                    console.log(`✅ Fixed: "${product.location}" → "${cleanLocation}" for ${product.name}`);
+                    logger.debug('useProductActions', `✅ Fixed: "${product.location}" → "${cleanLocation}" for ${product.name}`);
                 }
             }
 
@@ -267,7 +268,7 @@ export function useProductActions(deps: UseProductActionsDeps) {
             addNotification('success', `✅ Fixed ${fixedCount} corrupted locations!`);
             logSystemEvent('Data Cleanup', `Fixed ${fixedCount} corrupted product locations`, 'System', 'Inventory');
         } catch (error) {
-            console.error('Failed to cleanup corrupted locations:', error);
+            logger.error('useProductActions', 'Failed to cleanup corrupted locations:', error as Error);
             addNotification('alert', 'Failed to cleanup corrupted locations');
         }
     }, [allProducts, addNotification, logSystemEvent, queryClient]);

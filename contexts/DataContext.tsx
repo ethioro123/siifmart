@@ -32,13 +32,14 @@ import { useLoadingProgress } from './hooks/useLoadingProgress';
 const isUUID = (id: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
 
 import { TRANSLATIONS, Language } from '../utils/translations';
+import { logger } from '../utils/logger';
 
 const getTranslation = (path: string): string => {
   let lang: Language = 'en';
   try {
     lang = (localStorage.getItem('siifmart_language') as Language) || 'en';
   } catch (e) {
-    console.warn('Failed to read language settings from localStorage in getTranslation', e);
+    logger.warn('DataContext', 'Failed to read language settings from localStorage in getTranslation');
   }
   const keys = path.split('.');
   let current: any = TRANSLATIONS;
@@ -71,7 +72,7 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
         }
       }
     } catch (e) {
-      console.error('Failed to load settings from localStorage', e);
+      logger.error('DataContext', 'Failed to load settings from localStorage', e);
     }
     return DEFAULT_CONFIG;
   });
@@ -225,7 +226,7 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
       });
       setSystemLogs(prev => [newLog as SystemLog, ...prev]);
     } catch (error) {
-      console.error('Failed to log system event:', error);
+      logger.error('DataContext', 'Failed to log system event:', error);
     }
   }, []);
 
@@ -472,7 +473,7 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
 export const useData = () => {
   const context = useContext(DataContext);
   if (context === undefined) {
-    console.warn('useData called outside DataProvider - returning safe defaults');
+    logger.warn('DataContext', 'useData called outside DataProvider - returning safe defaults');
     return DATA_CONTEXT_FALLBACK;
   }
   return context;

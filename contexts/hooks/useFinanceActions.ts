@@ -4,6 +4,7 @@ import type { ExpenseRecord, Employee, Product, Supplier, SystemLog } from '../.
 import { productsService, suppliersService } from '../../services/supabase.service';
 import { supabase } from '../../lib/supabase';
 import { CURRENCY_SYMBOL } from '../../constants';
+import { logger } from '../../utils/logger';
 
 interface UseFinanceActionsDeps {
     activeSiteId: string;
@@ -39,7 +40,7 @@ export function useFinanceActions(deps: UseFinanceActionsDeps) {
             addNotification('success', `Supplier ${supplier.name} added`);
             logSystemEvent('Add Supplier', `Added supplier ${supplier.name}`, 'System', 'Inventory');
         } catch (error) {
-            console.error('Failed to add supplier:', error);
+            logger.error('useFinanceActions', 'Failed to add supplier:', error);
             addNotification('alert', 'Failed to add supplier');
         }
     }, [addNotification, logSystemEvent, queryClient]);
@@ -76,19 +77,19 @@ export function useFinanceActions(deps: UseFinanceActionsDeps) {
                     };
 
                     await supabase.from('stock_movements').insert([dbMovement]);
-                    console.log(`✅ Stock movement recorded: ${qty} ${type} for ${product.name} (Site: ${dbMovement.site_id})`);
+                    logger.debug('useFinanceActions', `✅ Stock movement recorded: ${qty} ${type} for ${product.name} (Site: ${dbMovement.site_id})`);
                 } catch (movementError) {
-                    console.error('❌ Failed to log stock movement to DB:', movementError);
+                    logger.error('useFinanceActions', '❌ Failed to log stock movement to DB:', movementError);
                 }
             } else {
-                console.error(`❌ adjustStock failed: Product ${productId} not found in products or allProducts`);
+                logger.error('useFinanceActions', `❌ adjustStock failed: Product ${productId} not found in products or allProducts`, new Error(String(`❌ adjustStock failed: Product ${productId} not found in products or allProducts`)));
             }
 
             addNotification('success', 'Stock adjusted successfully');
             logSystemEvent('Adjust Stock', `${type} ${qty} for ${productId}: ${reason}`, user, 'Inventory');
 
         } catch (error) {
-            console.error('Failed to adjust stock:', error);
+            logger.error('useFinanceActions', 'Failed to adjust stock:', error);
             addNotification('alert', 'Failed to adjust stock');
             queries.refetchAll();
         }
@@ -99,7 +100,7 @@ export function useFinanceActions(deps: UseFinanceActionsDeps) {
             setExpenses(prev => [expense, ...prev]);
             addNotification('success', 'Expense recorded');
         } catch (error) {
-            console.error('Failed to add expense:', error);
+            logger.error('useFinanceActions', 'Failed to add expense:', error);
             addNotification('alert', 'Failed to add expense');
         }
     }, [addNotification]);
@@ -109,7 +110,7 @@ export function useFinanceActions(deps: UseFinanceActionsDeps) {
             setExpenses(prev => prev.filter(e => e.id !== id));
             addNotification('info', 'Expense deleted');
         } catch (error) {
-            console.error('Failed to delete expense:', error);
+            logger.error('useFinanceActions', 'Failed to delete expense:', error);
             addNotification('alert', 'Failed to delete expense');
         }
     }, [addNotification]);
@@ -140,7 +141,7 @@ export function useFinanceActions(deps: UseFinanceActionsDeps) {
             addNotification('success', `Payroll processed: ${CURRENCY_SYMBOL}${totalSalary.toLocaleString()}`);
             logSystemEvent('Payroll', `Processed payroll for ${activeEmployees.length} employees`, user, 'Finance');
         } catch (error) {
-            console.error('Payroll failed:', error);
+            logger.error('useFinanceActions', 'Payroll failed:', error);
             addNotification('alert', 'Failed to process payroll');
         }
     }, [employees, addExpense, addNotification, logSystemEvent]);

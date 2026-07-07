@@ -3,6 +3,7 @@ import { productsService, inventoryRequestsService } from '../services/supabase.
 import { useData } from '../contexts/DataContext';
 import { useStore } from '../contexts/CentralStore';
 import { PendingInventoryChange } from '../types';
+import { logger } from '../utils/logger';
 
 interface DeleteProductParams {
     productId: string;
@@ -57,7 +58,7 @@ export function useDeleteProductMutation() {
             }
         },
         onError: (error: any) => {
-            console.error('Delete product failed:', error);
+            logger.error('useDeleteProductMutation', 'Delete product failed:', error);
 
             // Handle foreign key constraint violation
             if (error?.code === '23503' || error?.message?.includes('foreign key constraint') || error?.message?.includes('still referenced')) {

@@ -11,6 +11,7 @@ import { SupplierManagement } from '../components/procurement/SupplierManagement
 import { CreatePOModal } from '../components/procurement/CreatePOModal';
 import { Protected } from '../components/Protected';
 import { formatDateTime } from '../utils/formatting';
+import { logger } from '../utils/logger';
 
 export default function Procurement() {
     const { user } = useStore();
@@ -137,7 +138,7 @@ export default function Procurement() {
                 setTotalSuppliersCount(res.count);
             }
         } catch (err) {
-            console.error("Error fetching procurement data", err);
+            logger.error('Procurement', "Error fetching procurement data", err);
         } finally {
             setLoading(false);
         }

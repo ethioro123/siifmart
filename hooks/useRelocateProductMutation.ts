@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { productsService } from '../services/supabase.service';
 import { useData } from '../contexts/DataContext';
+import { logger } from '../utils/logger';
 
 interface RelocateProductParams {
     productId: string;
@@ -35,7 +36,7 @@ export function useRelocateProductMutation() {
             );
         },
         onError: (error: any) => {
-            console.error('Relocate product failed:', error);
+            logger.error('useRelocateProductMutation', 'Relocate product failed:', error);
             addNotification('alert', 'Failed to relocate product');
         }
     });

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { isWeightBased, isVolumeBased } from '../../../utils/units';
+import { logger } from '../../../utils/logger';
 
 interface UsePOSReceivingProps {
     user: any;
@@ -270,7 +271,7 @@ export const usePOSReceiving = ({
                     lineItems: updatedLineItems
                 } as any);
             } catch (updateErr: any) {
-                console.error(`Failed to update TRANSFER job ${targetTransferId}:`, updateErr);
+                logger.error('usePOSReceiving', `Failed to update TRANSFER job ${targetTransferId}:`, updateErr);
                 throw updateErr;
             }
 
@@ -288,7 +289,7 @@ export const usePOSReceiving = ({
                         receivedBy: receiverName
                     } as any);
                 } catch (dErr) {
-                    console.warn('Failed to update DISPATCH job:', dErr);
+                    logger.warn('usePOSReceiving', 'Failed to update DISPATCH job:');
                 }
             }
 
@@ -302,7 +303,7 @@ export const usePOSReceiving = ({
                         lineItems: updatedLineItems
                     } as any);
                 } catch (pErr) {
-                    console.warn('Failed to update parent TRANSFER job:', pErr);
+                    logger.warn('usePOSReceiving', 'Failed to update parent TRANSFER job:');
                 }
             }
 
@@ -345,7 +346,7 @@ export const usePOSReceiving = ({
                                     productId: templateProduct?.productId || templateProduct?.id
                                 } as any);
                             } catch (err) {
-                                console.error('Failed to auto-create product:', err);
+                                logger.error('usePOSReceiving', 'Failed to auto-create product:', err);
                                 failedItems.push(item.sku || item.name);
                             }
                         }
@@ -385,7 +386,7 @@ export const usePOSReceiving = ({
             addNotification('success', t('posCommand.shipmentReceivedSuccess'));
             setSelectedTransferForReceiving(null);
         } catch (err: any) {
-            console.error('Error confirming receipt:', err);
+            logger.error('usePOSReceiving', 'Error confirming receipt:', err);
             addNotification('alert', `${t('posCommand.failedToFinalize')} ${err.message}`);
         } finally {
             setIsConfirmingReceive(false);
@@ -461,7 +462,7 @@ export const usePOSReceiving = ({
             await refreshData();
             addNotification('success', `${t('posCommand.repairComplete')} ${repairCount} missing records.`);
         } catch (err: any) {
-            console.error('Repair failed:', err);
+            logger.error('usePOSReceiving', 'Repair failed:', err);
             addNotification('alert', `${t('posCommand.repairFailed')} ${err.message}`);
         }
     };

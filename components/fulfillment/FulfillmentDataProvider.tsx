@@ -28,6 +28,7 @@ import { useJobActions } from './useJobActions';
 import { useJobCompletion } from './useJobCompletion';
 import { useJobMaintenance } from './useJobMaintenance';
 import { useTransfers } from './useTransfers';
+import { logger } from '../../utils/logger';
 
 // convertToSellableUnits is now imported from ./useReceiving
 
@@ -181,7 +182,7 @@ export const FulfillmentDataProvider = ({ children }: { children: ReactNode }) =
                 setBarcodeApprovals(loadedApprovals);
 
             } catch (error) {
-                console.error("Failed to load fulfillment data", error);
+                logger.error('FulfillmentDataProvider', "Failed to load fulfillment data", error);
                 addNotification('alert', 'Failed to load fulfillment data');
             }
         };
@@ -214,7 +215,7 @@ export const FulfillmentDataProvider = ({ children }: { children: ReactNode }) =
     useEffect(() => {
         if (!activeSiteId) return;
 
-        console.log(`📡 [Fulfillment] Subscribing to real-time updates for site: ${activeSiteId}`);
+        logger.debug('FulfillmentDataProvider', `📡 [Fulfillment] Subscribing to real-time updates for site: ${activeSiteId}`);
 
         const subscriptions = realtimeService.subscribeToSite(activeSiteId, {
             onWMSJobChange: (event, payload) => {
@@ -288,7 +289,7 @@ export const FulfillmentDataProvider = ({ children }: { children: ReactNode }) =
         });
 
         return () => {
-            console.log('Unsubscribing from fulfillment real-time updates...');
+            logger.debug('FulfillmentDataProvider', 'Unsubscribing from fulfillment real-time updates...');
             realtimeService.unsubscribeAll(subscriptions);
         };
     }, [activeSiteId]);
@@ -311,14 +312,14 @@ export const FulfillmentDataProvider = ({ children }: { children: ReactNode }) =
                 const po = orders.find(o => o.id === job.orderRef);
                 // If PO is missing or status is no longer 'Approved', map it as ghost job
                 if (!po || po.status !== 'Approved') {
-                    console.log(`🧹 [Auto-Cleanup] Completing orphaned ghost job: ${job.jobNumber} (${job.id})`);
+                    logger.debug('FulfillmentDataProvider', `🧹 [Auto-Cleanup] Completing orphaned ghost job: ${job.jobNumber} (${job.id})`);
                     cleanupCount++;
                     
                     wmsJobsService.update(job.id, { 
                         status: 'Completed',
                         completed_at: new Date().toISOString(),
                         completed_by: user?.id || 'System Auto-Cleanup'
-                    } as any).catch(e => console.error('Failed to auto-cleanup ghost job:', e));
+                    } as any).catch(e => logger.error('FulfillmentDataProvider', 'Failed to auto-cleanup ghost job:', e as Error));
 
                     setJobs(prev => prev.map(j => j.id === job.id ? { 
                         ...j, 
@@ -329,7 +330,7 @@ export const FulfillmentDataProvider = ({ children }: { children: ReactNode }) =
                 }
             }
             if (cleanupCount > 0) {
-                console.log(`✅ [Auto-Cleanup] Successfully cleared ${cleanupCount} ghost jobs.`);
+                logger.debug('FulfillmentDataProvider', `✅ [Auto-Cleanup] Successfully cleared ${cleanupCount} ghost jobs.`);
             }
         }
     }, [jobs, orders, user]);
@@ -379,7 +380,7 @@ export const FulfillmentDataProvider = ({ children }: { children: ReactNode }) =
             addNotification('success', 'Barcode approved');
             refreshInfo();
         } catch (e) {
-            console.error(e);
+            logger.error('FulfillmentDataProvider', 'caught error', e as Error);
             addNotification('alert', 'Failed to approve barcode');
         }
     };
@@ -390,7 +391,7 @@ export const FulfillmentDataProvider = ({ children }: { children: ReactNode }) =
             setBarcodeApprovals(prev => prev.filter(b => b.id !== id));
             addNotification('success', 'Barcode rejected');
         } catch (e) {
-            console.error(e);
+            logger.error('FulfillmentDataProvider', 'caught error', e as Error);
             addNotification('alert', 'Failed to reject barcode');
         }
     };

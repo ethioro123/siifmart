@@ -10,6 +10,7 @@ import { generatePackLabelHTML } from '../utils/labels/PackLabelGenerator';
 import { useLanguage } from '../contexts/LanguageContext';
 import { isWeightBased, isVolumeBased } from '../utils/units';
 import Button from './shared/Button';
+import { logger } from '../utils/logger';
 
 interface OutboundJobModalProps {
     isOpen: boolean;
@@ -135,7 +136,7 @@ export const OutboundJobModal: React.FC<OutboundJobModalProps> = ({
                 printWindow.document.close();
             }
         } catch (error) {
-            console.error("Label generation failed", error);
+            logger.error('OutboundJobModal', "Label generation failed", error);
         } finally {
             setIsSubmitting(false);
         }

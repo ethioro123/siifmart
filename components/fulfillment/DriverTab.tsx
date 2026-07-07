@@ -22,6 +22,7 @@ import { OutboundJobModal } from '../OutboundJobModal';
 import { IncidentReportModal } from './drivers/IncidentReportModal';
 import { authService } from '../../services/auth.service';
 import { tasksService } from '../../services/tasks.service';
+import { logger } from '../../utils/logger';
 
 interface DriverTabProps {
     filteredJobs: WMSJob[];
@@ -149,7 +150,7 @@ export const DriverTab: React.FC<DriverTabProps> = ({
             await refreshData();
             addNotification('success', 'Shipment updated.');
         } catch (err) {
-            console.error(err);
+            logger.error('DriverTab', 'caught error', err as Error);
             addNotification('alert', 'Update failed.');
         }
     };

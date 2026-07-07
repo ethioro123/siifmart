@@ -4,6 +4,7 @@ import { Product, PurchaseOrder, WMSJob } from '../../../types';
 import Badge from '../../shared/Badge';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useStore } from '../../../contexts/CentralStore';
+import { logger } from '../../../utils/logger';
 
 interface ReceiveSplitModalProps {
     splitReceivingItem: any;
@@ -444,7 +445,7 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
                                 setSplitReceivingPO(null);
                                 setSplitVariants([]);
                             } catch (error: any) {
-                                console.error('Split error:', error);
+                                logger.error('ReceiveSplitModal', 'Split error:', error);
                                 alert(error.message || 'Failed to receive split: an unexpected error occurred.');
                             } finally {
                                 setIsSubmitting(false);

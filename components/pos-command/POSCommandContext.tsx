@@ -10,6 +10,7 @@ import { formatJobId } from '../../utils/jobIdFormatter';
 
 // Hooks
 import { usePOSReceiving } from './hooks/usePOSReceiving';
+import { logger } from '../../utils/logger';
 
 // Define the shape of the Context
 interface POSCommandContextType {
@@ -251,7 +252,7 @@ export const POSCommandProvider: React.FC<{ children: React.ReactNode }> = ({ ch
             logout();
             navigate('/');
         } catch (error) {
-            console.error('Shift closure error:', error);
+            logger.error('POSCommandContext', 'Shift closure error:', error);
             addNotification('alert', t('posCommand.shiftClosedError'));
         } finally {
             setIsSubmittingShift(false);

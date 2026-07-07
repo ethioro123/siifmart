@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { DollarSign, ChevronDown, Percent } from 'lucide-react';
 import { getGroupedUnits, getSellUnit } from '../../utils/units';
+import { logger } from '../../utils/logger';
 
 /* ─────────── UNIT CONVERSION (size type → sell unit) ────────── */
 
@@ -70,7 +71,7 @@ const computeCostPerSellUnit = (
 
     // Can only convert within same category
     if (!sizeCategory || sizeCategory !== sellCategory) {
-        console.warn(`   ⚠️ Category mismatch or unknown: "${sizeCategory}" vs "${sellCategory}". Cannot compute cost per sell unit.`);
+        logger.warn('SellingAttributes', `   ⚠️ Category mismatch or unknown: "${sizeCategory}" vs "${sellCategory}". Cannot compute cost per sell unit.`);
         return null;
     }
 

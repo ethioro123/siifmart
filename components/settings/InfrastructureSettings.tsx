@@ -3,6 +3,7 @@ import { Printer, Scale, Scan, Wifi, Bluetooth, Usb, Plus, Settings2, RefreshCw,
 import { useData } from '../../contexts/DataContext';
 import { useStore } from '../../contexts/CentralStore';
 import Button from '../shared/Button';
+import { logger } from '../../utils/logger';
 
 // --- SUB-COMPONENTS ---
 const SectionHeader = ({ title, desc }: { title: string, desc: string }) => (
@@ -92,7 +93,7 @@ export default function InfrastructureSettings() {
             await updateSettings(hardware, user?.name || 'Admin');
             addNotification('success', 'Hardware configuration saved successfully!');
         } catch (err) {
-            console.error('Failed to save hardware settings:', err);
+            logger.error('InfrastructureSettings', 'Failed to save hardware settings:', err);
             addNotification('alert', 'Failed to save hardware settings.');
         } finally {
             setIsSaving(false);

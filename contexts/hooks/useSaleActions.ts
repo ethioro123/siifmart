@@ -6,6 +6,7 @@ import type {
 import { customersService, productsService, salesService } from '../../services/supabase.service';
 import { posDB } from '../../services/db/pos.db';
 import { CURRENCY_SYMBOL } from '../../constants';
+import { logger } from '../../utils/logger';
 
 interface UseSaleActionsDeps {
     activeSite: Site | undefined;
@@ -167,7 +168,7 @@ export function useSaleActions(deps: UseSaleActionsDeps) {
                         setCustomers(prev => prev.map(c => c.id === customerId ? { ...c, loyaltyPoints: newLoyaltyPoints, totalSpent: (c.totalSpent || 0) + total, lastVisit: new Date().toISOString() } : c));
                     }
                 } catch (e) {
-                    console.error("Loyalty update failed", e);
+                    logger.error('useSaleActions', "Loyalty update failed", e);
                 }
             }
 
@@ -178,7 +179,7 @@ export function useSaleActions(deps: UseSaleActionsDeps) {
                     const newStock = Math.max(0, product.stock - item.quantity);
                     const newStatus = newStock === 0 ? 'out_of_stock' : newStock < settings.lowStockThreshold ? 'low_stock' : 'active';
 
-                    console.log('📦 Stock update:', { productId: item.id, name: product.name, oldStock: product.stock, newStock, newStatus });
+                    logger.debug('useSaleActions', '📦 Stock update:', { productId: item.id, name: product.name, oldStock: product.stock, newStock, newStatus });
 
                     setProducts(prev => prev.map(p =>
                         p.id === item.id ? { ...p, stock: newStock, status: newStatus as any } : p
@@ -188,10 +189,10 @@ export function useSaleActions(deps: UseSaleActionsDeps) {
                         try {
                             await productsService.update(item.id, { stock: newStock, status: newStatus });
                         } catch (e) {
-                            console.error('Stock update failed (will retry)', e);
+                            logger.error('useSaleActions', 'Stock update failed (will retry)', e);
                         }
                     } else {
-                        console.warn('⚠️ Offline: Transfer stock update skipped (Strict Online Mode)');
+                        logger.warn('useSaleActions', '⚠️ Offline: Transfer stock update skipped (Strict Online Mode)');
                     }
 
                     if (newStock <= settings.lowStockThreshold && newStock > 0) {
@@ -206,7 +207,7 @@ export function useSaleActions(deps: UseSaleActionsDeps) {
             return { saleId, pointsResult };
 
         } catch (error) {
-            console.error("Process Sale Failed:", error);
+            logger.error('useSaleActions', "Process Sale Failed:", error);
             addNotification('alert', 'Failed to process sale');
             throw error;
         }
@@ -248,7 +249,7 @@ export function useSaleActions(deps: UseSaleActionsDeps) {
 
             addNotification('success', `Return of ${CURRENCY_SYMBOL}${totalRefund.toFixed(2)} processed for sale ${saleId.substring(0, 8)}...`);
         } catch (error: any) {
-            console.error('processReturn failed:', error);
+            logger.error('useSaleActions', 'processReturn failed:', error);
             addNotification('alert', `Return failed: ${error?.message || 'Unknown error'}`);
         }
     }, [addNotification, setProducts, setSales, setAllSales, deps.products, deps.settings]);
@@ -262,7 +263,7 @@ export function useSaleActions(deps: UseSaleActionsDeps) {
             setAllSales(prev => prev.map(s => s.id === saleId ? { ...s, fulfillmentStatus: 'Delivered' } : s));
             addNotification('success', 'Order marked as delivered');
         } catch (error: any) {
-            console.error('releaseOrder failed:', error);
+            logger.error('useSaleActions', 'releaseOrder failed:', error);
             addNotification('alert', `Failed to release order: ${error?.message || 'Unknown error'}`);
         }
     }, [addNotification, setSales, setAllSales]);

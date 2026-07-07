@@ -11,6 +11,7 @@ import { brainstormService } from '../services/supabase.service';
 import { KnowledgeEntry, DEPARTMENTS, ENTRY_TYPES, STATUSES, mapDBToLocal } from '../components/roadmap/RoadmapTypes';
 import { RoadmapDetailView } from '../components/roadmap/RoadmapDetailView';
 import { RoadmapCreateModal } from '../components/roadmap/RoadmapCreateModal';
+import { logger } from '../utils/logger';
 
 export default function Roadmap() {
   const { addNotification } = useData();
@@ -55,7 +56,7 @@ export default function Roadmap() {
           setEntries(data.map(mapDBToLocal));
         }
       } catch (error) {
-        console.warn('Failed to load knowledge base:', error);
+        logger.warn('Roadmap', 'Failed to load knowledge base:');
         if (isMounted) {
           setEntries([]);
         }
@@ -95,7 +96,7 @@ export default function Roadmap() {
       setIsCreating(false);
       addNotification('success', 'Entry saved!');
     } catch (error) {
-      console.error('Failed to create entry:', error);
+      logger.error('Roadmap', 'Failed to create entry:', error);
       addNotification('alert', 'Failed to save entry');
     } finally {
       setIsSaving(false);
@@ -119,7 +120,7 @@ export default function Roadmap() {
       setIsEditing(false);
       addNotification('success', 'Entry updated!');
     } catch (error) {
-      console.error('Failed to update entry:', error);
+      logger.error('Roadmap', 'Failed to update entry:', error);
       addNotification('alert', 'Failed to update entry');
     } finally {
       setIsSaving(false);
@@ -135,7 +136,7 @@ export default function Roadmap() {
       setSelectedEntry(null);
       addNotification('info', 'Entry deleted');
     } catch (error) {
-      console.error('Failed to delete entry:', error);
+      logger.error('Roadmap', 'Failed to delete entry:', error);
       addNotification('alert', 'Failed to delete entry');
     } finally {
       setIsSaving(false);

@@ -3,6 +3,7 @@ import { Users as UsersIcon, Search, User as UserIcon, ChevronDown, Plus } from 
 import { Employee, WMSJob } from '../../../types';
 import { Protected } from '../../Protected';
 import { useFulfillment } from '../FulfillmentContext';
+import { logger } from '../../../utils/logger';
 
 interface AssignAvailableWorkersProps {
     filteredEmployees: Employee[];
@@ -222,7 +223,7 @@ export const AssignAvailableWorkers: React.FC<AssignAvailableWorkersProps> = ({
                                                                   setSelectedJob(null);
                                                                   await refreshData();
                                                               } catch (error) {
-                                                                  console.error('Failed to assign job:', error);
+                                                                  logger.error('AssignAvailableWorkers', 'Failed to assign job:', error);
                                                                   addNotification('alert', 'Failed to assign job');
                                                               } finally {
                                                                   setIsSubmitting(false);

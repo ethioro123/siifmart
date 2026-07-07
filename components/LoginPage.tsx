@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Lock, Mail, Sun, Moon, AlertCircle, Loader, Eye, EyeOff, ArrowLeft, CheckCircle, LayoutDashboard } from 'lucide-react';
 import { useStore } from '../contexts/CentralStore';
 import { authService } from '../services/auth.service';
+import { logger } from '../utils/logger';
 
 type Mode = 'login' | 'forgot';
 
@@ -32,7 +33,7 @@ export default function LoginPage() {
         setSuccess('Password reset email sent! Check your inbox.');
       }
     } catch (err: any) {
-      console.error('Auth error:', err);
+      logger.error('LoginPage', 'Auth error:', err);
       setError(err.message || 'Authentication failed. Please try again.');
     } finally {
       setLoading(false);

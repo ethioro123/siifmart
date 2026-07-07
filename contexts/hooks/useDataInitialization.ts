@@ -3,6 +3,7 @@ import { sitesService, systemConfigService, productsService, salesService, purch
 import { setGlobalTimezone } from '../../utils/formatting';
 import { DEFAULT_CONFIG } from '../DataContextDefaults';
 import type { User, Site, SystemConfig, Product, SaleRecord, PurchaseOrder, Employee, Supplier } from '../../types';
+import { logger } from '../../utils/logger';
 
 interface UseDataInitializationProps {
   user: User | undefined;
@@ -60,7 +61,7 @@ export function useDataInitialization({
       const userSite = sites.find(s => s.id === user.siteId);
 
       if (!userSite) {
-        console.error(`❌ User's siteId "${user.siteId}" not found in sites list!`);
+        logger.error('useDataInitialization', `❌ User's siteId "${user.siteId}" not found in sites list!`, new Error(String(`❌ User's siteId "${user.siteId}" not found in sites list!`)));
         return;
       }
 
@@ -79,14 +80,14 @@ export function useDataInitialization({
       try {
         localStorage.setItem('siifmart_sites_cache', JSON.stringify(loadedSites));
       } catch (e) {
-        console.warn('Failed to cache sites', e);
+        logger.warn('useDataInitialization', 'Failed to cache sites');
       }
 
       if (loadedSites.length === 0) {
         addNotification('info', 'No operational sites were found in the database.');
       }
     } catch (error: any) {
-      console.error('❌ Failed to load sites:', error);
+      logger.error('useDataInitialization', '❌ Failed to load sites:', error);
       let cached = null;
       try {
         cached = localStorage.getItem('siifmart_sites_cache');
@@ -112,7 +113,7 @@ export function useDataInitialization({
       const loadedSettings = await systemConfigService.getSettings();
       setSettings(loadedSettings);
     } catch (error: any) {
-      console.error('❌ Failed to load system settings:', error?.message || error);
+      logger.error('useDataInitialization', '❌ Failed to load system settings:', error?.message || error);
       try {
         const saved = localStorage.getItem('siifmart_system_config');
         if (saved) {
@@ -142,7 +143,7 @@ export function useDataInitialization({
         setIsDataInitialLoading(false);
       }
     } catch (error) {
-      console.error('❌ Failed to load global data:', error);
+      logger.error('useDataInitialization', '❌ Failed to load global data:', error);
       if (!activeSiteId) {
         setLoadError('Failed to load global data. Check connection.');
         setIsDataInitialLoading(false);
@@ -168,7 +169,7 @@ export function useDataInitialization({
 
     const quickTimeout = setTimeout(() => {
       if (isDataInitialLoading) {
-        console.warn('⚡ 5s fail-safe triggered - Unblocking UI for authenticated user');
+        logger.warn('useDataInitialization', '⚡ 5s fail-safe triggered - Unblocking UI for authenticated user');
         setIsDataInitialLoading(false);
       }
     }, 5000);
