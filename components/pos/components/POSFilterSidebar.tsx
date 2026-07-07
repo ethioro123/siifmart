@@ -154,15 +154,15 @@ export const POSFilterSidebar: React.FC<POSFilterSidebarProps> = ({
                                             key={brand}
                                             onClick={() => toggleBrand(brand)}
                                             role="button"
-                                            className="w-full flex items-center gap-3 py-1.5 hover:bg-stone-50/50 dark:hover:bg-white/5 px-2 rounded-xl text-left cursor-pointer"
+                                            className="w-full flex items-center gap-3 py-1.5 hover:bg-stone-50/50 dark:hover:bg-white/5 px-2 rounded-xl text-left cursor-pointer select-none"
                                         >
-                                            <input
-                                                type="checkbox"
-                                                readOnly
-                                                checked={isChecked}
-                                                aria-label={`Filter by brand: ${brand}`}
-                                                className="w-4 h-4 border border-white/20 rounded bg-white/5 text-[#2C5E3B] focus:ring-0 pointer-events-none"
-                                            />
+                                            <div className={`w-4 h-4 border border-stone-350 dark:border-white/20 rounded flex items-center justify-center transition-all flex-shrink-0 ${isChecked ? 'bg-[#2C5E3B] dark:bg-[#A9CBA2] border-transparent' : 'bg-white/5'}`}>
+                                                {isChecked && (
+                                                    <svg className="w-2.5 h-2.5 text-white dark:text-stone-900" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3.5}>
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                                    </svg>
+                                                )}
+                                            </div>
                                             <span className="text-xs font-bold text-stone-700 dark:text-stone-300">{brand}</span>
                                         </div>
                                     );
