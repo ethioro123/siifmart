@@ -101,7 +101,7 @@ export const ZoneCard: React.FC<ZoneCardProps> = ({
                 <div className="w-full bg-stone-250 dark:bg-black/45 h-3 rounded-full overflow-hidden border border-[#E2DCCE]/50 dark:border-white/5 relative">
                     <div
                         className={`h-full transition-all duration-1000 ${progressColorClass}`}
-                        style={{ width: `${Math.min(100, usagePercent)}%` }}
+                        ref={(el) => { if (el) el.style.width = `${Math.min(100, usagePercent)}%`; }}
                     />
                 </div>
                 <div className="flex justify-between text-[10px] text-stone-400 dark:text-gray-550 font-mono font-bold">

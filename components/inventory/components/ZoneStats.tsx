@@ -44,7 +44,7 @@ export const ZoneStats: React.FC<ZoneStatsProps> = ({
                 <div className="w-full bg-stone-250 dark:bg-black/45 h-2.5 rounded-full mt-2.5 overflow-hidden border border-[#E2DCCE]/50 dark:border-white/5 relative">
                     <div 
                         className={`h-full transition-all duration-1000 ${totalUtilization > 90 ? 'bg-red-500' : totalUtilization > 70 ? 'bg-amber-500' : 'bg-[#2C5E3B]'}`}
-                        style={{ width: `${Math.min(100, totalUtilization)}%` }}
+                        ref={(el) => { if (el) el.style.width = `${Math.min(100, totalUtilization)}%`; }}
                     />
                 </div>
             </div>
