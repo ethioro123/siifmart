@@ -398,8 +398,8 @@ input {
   .backdrop-blur-lg,
   .backdrop-blur-xl,
   .backdrop-blur-2xl {
-    backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
   }
 }
 
