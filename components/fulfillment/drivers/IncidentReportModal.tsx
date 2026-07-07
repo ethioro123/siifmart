@@ -75,7 +75,7 @@ export const IncidentReportModal: React.FC<IncidentReportModalProps> = ({
                 <div className="p-4 sm:p-6 border-b border-white/5 flex justify-between items-center bg-gradient-to-r from-red-500/5 to-transparent shrink-0">
                     <div className="flex items-center gap-3">
                         <div className="p-2 bg-red-500/20 rounded-xl border border-red-500/30 shrink-0">
-                            <AlertTriangle className="text-red-400" size={18} className="sm:w-[20px] sm:h-[20px]" />
+                            <AlertTriangle className="text-red-400 sm:w-[20px] sm:h-[20px]" size={18} />
                         </div>
                         <div>
                             <h2 className="text-xs sm:text-sm font-black text-white uppercase tracking-widest">{t('warehouse.driverHub.reportIncident')}</h2>
@@ -91,7 +91,7 @@ export const IncidentReportModal: React.FC<IncidentReportModalProps> = ({
                     {isSuccess ? (
                         <div className="py-10 flex flex-col items-center text-center animate-in zoom-in-95">
                             <div className="w-14 h-14 sm:w-16 sm:h-16 bg-green-500/20 rounded-full flex items-center justify-center border border-green-500/30 mb-4">
-                                <CheckCircle className="text-green-400" size={28} className="sm:w-[32px] sm:h-[32px]" />
+                                <CheckCircle className="text-green-400 sm:w-[32px] sm:h-[32px]" size={28} />
                             </div>
                             <h3 className="text-white font-black uppercase tracking-widest text-xs sm:text-sm mb-1">{t('warehouse.driverHub.reportLogged')}</h3>
                             <p className="text-gray-500 text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.2em]">{t('warehouse.driverHub.mgmtNotified')}</p>

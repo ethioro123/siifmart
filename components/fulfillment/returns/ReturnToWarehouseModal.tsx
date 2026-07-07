@@ -196,7 +196,7 @@ export const ReturnToWarehouseModal: React.FC<ReturnToWarehouseModalProps> = ({
                     {step === 'done' ? (
                         <div className="flex flex-col items-center justify-center py-8 sm:py-12 space-y-6">
                             <div className="w-20 h-20 sm:w-24 sm:h-24 bg-green-500/10 rounded-full flex items-center justify-center border border-green-500/20 shadow-[0_0_30px_rgba(34,197,94,0.2)]">
-                                <CheckCircle className="text-green-500" size={32} className="sm:w-[40px] sm:h-[40px]" />
+                                <CheckCircle className="text-green-500 sm:w-[40px] sm:h-[40px]" size={32} />
                             </div>
                             <div className="text-center space-y-2">
                                 <h3 className="text-lg sm:text-xl font-black text-white uppercase">{t('warehouse.driverHub.jobCompletedSuccess') || 'Return Submitted'}</h3>
@@ -218,7 +218,7 @@ export const ReturnToWarehouseModal: React.FC<ReturnToWarehouseModalProps> = ({
                         <>
                             {/* Confirm Step */}
                             <div className="flex items-center gap-3 bg-amber-500/10 border border-amber-500/20 rounded-xl sm:rounded-2xl p-3 sm:p-4">
-                                <AlertTriangle className="text-amber-400 shrink-0" size={18} className="sm:w-[20px] sm:h-[20px]" />
+                                <AlertTriangle className="text-amber-400 shrink-0 sm:w-[20px] sm:h-[20px]" size={18} />
                                 <p className="text-amber-300 text-xs sm:text-sm font-bold leading-snug">
                                     This will create <span className="text-white">{selectedItems.length}</span> pending stock adjustment(s) requiring {returnType === 'procurement' ? 'procurement manager / super admin' : 'warehouse manager'} approval.
                                 </p>
