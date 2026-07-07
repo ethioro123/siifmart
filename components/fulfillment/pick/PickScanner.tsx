@@ -8,6 +8,10 @@ import { decodeLocation, isLocationBarcode, extractPrefixFromBarcode } from '../
 import { useScanOnly } from '../../../hooks/useScanOnly';
 import { isWeightBased, isVolumeBased, getSellUnit } from '../../../utils/units';
 import { useLanguage } from '../../../contexts/LanguageContext';
+import { PickScannerPickedList } from './components/PickScannerPickedList';
+import { PickScannerSummary } from './components/PickScannerSummary';
+import { PickScannerInstructionPanel } from './components/PickScannerInstructionPanel';
+
 
 const normalizeSku = (s: string) => s.replace(/[-\/\s]/g, '').toUpperCase();
 
@@ -340,104 +344,24 @@ export const PickScanner: React.FC<PickScannerProps> = ({
                             <p className="text-red-600 dark:text-red-500 text-xl font-bold uppercase tracking-widest">{errorMsg}</p>
                         </div>
                     ) : !currentItem ? (
-                        <div className="text-center z-10 mb-8 bg-green-50 dark:bg-green-500/10 border-2 border-green-500/50 p-6 rounded-2xl shadow-[0_0_30px_rgba(34,197,94,0.1)] w-full max-w-md">
-                            <p className="text-green-700 dark:text-green-400 text-lg font-bold uppercase tracking-widest mb-4">{t('warehouse.picking.allItemsPicked')}</p>
-
-                            <div className="bg-white dark:bg-black/40 rounded-xl p-4 mb-4 text-left max-h-48 overflow-y-auto border border-gray-200 dark:border-green-500/20 shadow-inner dark:shadow-none">
-                                <h4 className="text-gray-500 dark:text-gray-400 text-xs font-bold uppercase tracking-widest mb-3 border-b border-gray-200 dark:border-white/10 pb-2">{t('warehouse.picking.missionSummary')}</h4>
-                                <div className="flex flex-col gap-3">
-                                    {job.lineItems?.map((item: any, idx: number) => (
-                                        <div key={idx} className="flex justify-between items-start">
-                                            <div>
-                                                <p className="text-gray-900 dark:text-[#EAE5D9] text-sm font-bold line-clamp-1">{item.name}</p>
-                                                <p className="text-[#2C5E3B] dark:text-[#A9CBA2] text-xs font-mono">{item.sku}</p>
-                                            </div>
-                                            {(() => {
-                                                let expected = item.expectedQty || item.quantity || 1;
-                                                let picked = item.pickedQty || item.quantity || 1;
-
-                                                const measureQty = getItemMeasureQty(item);
-                                                if (measureQty) {
-                                                    const prod = getProduct(item);
-                                                    const unitDef = prod?.unit ? prod.unit : '';
-                                                    const sizeNum = prod?.size ? parseFloat(prod.size as string) : 0;
-                                                    const displayPickedCases = picked <= expected ? picked : (sizeNum > 0 ? picked / sizeNum : picked);
-                                                    return <span className="text-gray-900 dark:text-white font-bold">{displayPickedCases} x {sizeNum} / {expected} x {sizeNum} <span className="text-[9px] lowercase opacity-80 pl-0.5">{unitDef}</span></span>;
-                                                }
-
-                                                return <span className="text-gray-900 dark:text-white font-bold">{picked} / {expected}</span>;
-                                            })()}
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-
-                            <p className="text-gray-600 dark:text-white text-sm opacity-80 max-w-[200px] mx-auto">{t('warehouse.picking.finalizeMissionInfo')}</p>
-                        </div>
-                    ) : step === 'LOCATION' ? (
-                        <div className="text-center z-10 mb-8">
-                            <div className="text-center mb-8 relative">
-                                <p className="text-gray-500 dark:text-gray-400 text-sm font-medium uppercase tracking-widest mb-2">
-                                    {t('warehouse.picking.goToSourceBay')}
-                                </p>
-
-                                <div className={`relative inline-block px-8 py-4 rounded-xl border-2 transition-all duration-300 bg-[#2C5E3B]/5 dark:bg-[#2C5E3B]/10 border-[#2C5E3B] text-[#2C5E3B] dark:text-[#A9CBA2] shadow-[0_0_30px_rgba(44,94,59,0.2)]`}>
-                                    <p className={`font-mono font-black tracking-widest ${isLocationBarcode(inputVal.trim().toUpperCase()) ? 'text-4xl md:text-7xl text-[#2C5E3B] dark:text-[#A9CBA2]' : ((currentProduct?.location?.length || 0) > 10 ? 'text-xl md:text-2xl' : 'text-3xl md:text-5xl')}`}>
-                                        {isLocationBarcode(inputVal.trim().toUpperCase())
-                                            ? decodeLocation(inputVal.trim().toUpperCase())
-                                            : (normalizeLocation(inputVal) || currentProduct?.location || t('warehouse.picking.unknownBay'))}
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    ) : step === 'QUANTITY' ? (
-                        <div className="text-center z-10 mb-8">
-                            <p className="text-amber-600 dark:text-amber-400 text-lg uppercase tracking-widest font-bold">{t('warehouse.picking.shortPickEnterQty')}</p>
-                            <p className="text-gray-900 dark:text-[#EAE5D9] text-2xl font-black mt-2">{currentItem?.name}</p>
-                            <p className="text-[#2C5E3B] dark:text-[#A9CBA2] font-mono text-xl">{currentItem?.sku}</p>
-                            <p className="text-gray-550 text-sm mt-2">{t('warehouse.expected')}: <span className="text-gray-900 dark:text-white font-bold">
-                                {(() => {
-                                    let expected = currentItem?.expectedQty || 1;
-                                    const measureQty = getItemMeasureQty(currentItem);
-                                    if (measureQty) {
-                                        const unitDef = currentProduct?.unit ? currentProduct.unit : '';
-                                        const sizeNum = currentProduct?.size ? parseFloat(currentProduct.size as string) : 0;
-                                        return <>{expected} x {sizeNum} <span className="text-xs uppercase text-gray-500 dark:text-gray-400">{unitDef}</span></>;
-                                    }
-                                    return expected;
-                                })()}
-                            </span></p>
-                        </div>
+                        <PickScannerSummary
+                            job={job}
+                            getProduct={getProduct}
+                            getItemMeasureQty={getItemMeasureQty}
+                            t={t}
+                        />
                     ) : (
-                        <div className="text-center z-10 mb-8">
-                            <p className="text-gray-500 dark:text-gray-400 text-lg">{isItemMatched ? t('warehouse.picking.confirmItemPick') : t('warehouse.picking.scanProductToPick')}</p>
-                            <p className={`text-2xl font-bold mt-2 transition-colors ${isItemMatched ? 'text-green-600 dark:text-green-400' : 'text-gray-900 dark:text-white'}`}>
-                                {currentItem?.name}
-                            </p>
-                            <p className="text-[#2C5E3B] dark:text-[#A9CBA2] font-mono text-xl mt-1">{currentItem?.sku}</p>
-                            <p className="text-gray-555 text-xs mt-1">{t('warehouse.expected')}: <span className="font-bold text-gray-900 dark:text-white">{(() => {
-                                let expected = currentItem?.expectedQty || 1;
-                                const measureQty = getItemMeasureQty(currentItem);
-                                if (measureQty) {
-                                    const unitDef = currentProduct?.unit ? currentProduct.unit : '';
-                                    const sizeNum = currentProduct?.size ? parseFloat(currentProduct.size as string) : 0;
-                                    return <>{expected} x {sizeNum} <span className="text-[10px] uppercase text-gray-505">{(unitDef as string)}</span></>;
-                                }
-                                return expected;
-                            })()}</span></p>
-                            {!isItemMatched && (currentItem?.expectedQty || 1) > 0 && (
-                                <button
-                                    type="button"
-                                    onClick={() => setShortPickMode(!shortPickMode)}
-                                    className={`mt-3 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border ${shortPickMode
-                                        ? 'bg-amber-100 dark:bg-amber-500/20 border-amber-300 dark:border-amber-500/40 text-amber-700 dark:text-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.15)]'
-                                        : 'bg-gray-100 dark:bg-white/5 border-gray-200 dark:border-white/10 text-gray-655 dark:text-gray-500 hover:text-amber-600 dark:hover:text-amber-400 hover:border-amber-300 dark:hover:border-amber-500/30'
-                                        }`}
-                                >
-                                    {shortPickMode ? t('warehouse.picking.shortPickModeOn') : `⚠ ${t('warehouse.shortPick')}`}
-                                </button>
-                            )}
-                        </div>
+                        <PickScannerInstructionPanel
+                            step={step}
+                            inputVal={inputVal}
+                            currentItem={currentItem}
+                            currentProduct={currentProduct}
+                            isItemMatched={isItemMatched}
+                            shortPickMode={shortPickMode}
+                            setShortPickMode={setShortPickMode}
+                            getItemMeasureQty={getItemMeasureQty}
+                            t={t}
+                        />
                     )}
 
 
@@ -551,51 +475,16 @@ export const PickScanner: React.FC<PickScannerProps> = ({
                                 <CheckCircle size={24} />
                             )}
                             {isProcessing ? t('warehouse.picking.validating') : !currentItem ? t('warehouse.completed') : step === 'QUANTITY' ? t('warehouse.picking.confirmPick') : isItemMatched ? t('warehouse.picking.completePick') : t('warehouse.picking.confirmScan')}
-                        </button>
+                    </button>
                     </form>
 
                     {/* PICKED SO FAR */}
-                    {(() => {
-                        const pickedItems = job.lineItems?.filter((i: any) => i.status === 'Picked' || i.status === 'Completed') || [];
-                        if (pickedItems.length === 0) return null;
-                        return (
-                            <div className="w-full max-w-md mt-6 z-10 transition-colors">
-                                <div className="flex items-center justify-between mb-2 px-1">
-                                    <h4 className="text-[10px] font-black text-gray-505 uppercase tracking-[0.3em] flex items-center gap-2">
-                                        <CheckCircle size={10} className="text-green-500" />
-                                        {t('warehouse.picking')}
-                                    </h4>
-                                    <span className="text-[10px] font-mono font-black text-green-600 dark:text-green-500/60 bg-green-100 dark:bg-green-500/10 px-2 py-0.5 rounded-full border border-green-200 dark:border-green-500/20">
-                                        {pickedItems.length}/{job.lineItems?.length || 0}
-                                    </span>
-                                </div>
-                                <div className="bg-white dark:bg-white/[0.03] border border-gray-200 dark:border-white/10 rounded-2xl overflow-hidden divide-y divide-gray-100 dark:divide-white/5 shadow-sm dark:shadow-none">
-                                    {pickedItems.map((item: any, idx: number) => (
-                                        <div key={idx} className="flex items-center justify-between px-4 py-3">
-                                            <div className="flex-1 min-w-0 mr-3">
-                                                <p className="text-gray-900 dark:text-white text-sm font-bold truncate">{item.name}</p>
-                                                <p className="text-gray-500 text-[10px] font-mono">{item.sku}</p>
-                                            </div>
-                                            <span className="bg-green-50 dark:bg-green-500/15 text-green-600 dark:text-green-400 text-xs font-mono font-black px-2 py-1 rounded-lg border border-green-200 dark:border-green-500/20 whitespace-nowrap">
-                                                {(() => {
-                                                    let expected = item.expectedQty || 1;
-                                                    let picked = item.pickedQty || 0;
-                                                    const measureQty = getItemMeasureQty(item);
-                                                    if (measureQty) {
-                                                        const prod = getProduct(item);
-                                                        const sizeNum = prod?.size ? parseFloat(prod.size as string) : 0;
-                                                        const displayPickedCases = picked <= expected ? picked : (sizeNum > 0 ? picked / sizeNum : picked);
-                                                        return <>{displayPickedCases} x {sizeNum} / {expected} x {sizeNum}</>;
-                                                    }
-                                                    return <>{picked} / {expected}</>;
-                                                })()}
-                                            </span>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        );
-                    })()}
+                    <PickScannerPickedList
+                        job={job}
+                        getProduct={getProduct}
+                        getItemMeasureQty={getItemMeasureQty}
+                        t={t}
+                    />
 
                     <p className="mt-8 text-gray-550 text-[10px] font-mono font-bold uppercase tracking-widest z-10 text-center opacity-60">
                         {t('warehouse.picking.checksumVerifiedInfo')}
