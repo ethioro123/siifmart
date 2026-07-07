@@ -67,7 +67,6 @@ export const authService = {
 
         if (error) throw error;
 
-        // Create employee record
         if (data.user) {
             await employeesService.create({
                 id: data.user.id,
@@ -84,7 +83,6 @@ export const authService = {
                 performanceScore: 0
             });
 
-            // Log account creation
             systemLogsService.logSecurity('ACCOUNT_CREATED', `Created account for ${name} (${role})`, {
                 id: data.user.id,
                 name,
@@ -99,15 +97,10 @@ export const authService = {
      * Sign in with email/username and password
      */
     async signIn(identifier: string, password: string) {
-
         let email = identifier;
-
-        // Check if identifier is an email
         const isEmail = identifier.includes('@');
 
         if (!isEmail) {
-
-            // Try standard lookup first
             let { data: employee, error } = await supabase
                 .from('employees')
                 .select('email')
@@ -122,18 +115,13 @@ export const authService = {
             email = employee.email;
         }
 
-        const { data, error } = await supabase.auth.signInWithPassword({
-            email,
-            password
-        });
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
         if (error) {
             console.error('AuthService: Sign in error', error);
             throw error;
         }
 
-
-        // Log the signin
         if (data.user) {
             try {
                 systemLogsService.logSecurity('LOGIN', `User logged in from ${identifier}`, {
@@ -152,7 +140,6 @@ export const authService = {
      * Sign out current user
      */
     async signOut() {
-        // Log logout before signing out
         try {
             const user = await this.getCurrentUser();
             if (user) {
@@ -169,31 +156,21 @@ export const authService = {
         if (error) throw error;
     },
 
-    /**
-     * Get current session
-     */
     async getSession(): Promise<Session | null> {
         const { data: { session } } = await supabase.auth.getSession();
         return session;
     },
 
-    /**
-     * Get current user
-     */
     async getCurrentUser(): Promise<User | null> {
         const { data: { user } } = await supabase.auth.getUser();
         return user;
     },
 
-    /**
-     * Get current auth user with employee data
-     */
     async getCurrentAuthUser(): Promise<UserProfile | null> {
         try {
             const user = await this.getCurrentUser();
             if (!user) return null;
 
-            // Get employee data
             const employee = await employeesService.getByEmail(user.email!);
 
             return {
@@ -210,43 +187,23 @@ export const authService = {
         }
     },
 
-    /**
-     * Update user password
-     */
     async updatePassword(newPassword: string) {
-        const { error } = await supabase.auth.updateUser({
-            password: newPassword
-        });
-
+        const { error } = await supabase.auth.updateUser({ password: newPassword });
         if (error) throw error;
-
-        // Log password change
         this.logSecurityEvent('PASSWORD_CHANGED', 'User changed their password');
     },
 
-    /**
-     * Update user metadata
-     */
     async updateUserMetadata(metadata: Record<string, any>) {
-        const { data, error } = await supabase.auth.updateUser({
-            data: metadata
-        });
-
+        const { data, error } = await supabase.auth.updateUser({ data: metadata });
         if (error) throw error;
-
         return data;
     },
 
-    /**
-     * Reset password via email
-     */
     async resetPassword(email: string) {
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
             redirectTo: `${window.location.origin}/reset-password`
         });
-
         if (error) throw error;
-
         systemLogsService.logSecurity('PASSWORD_RESET_REQUEST', `Password reset requested for ${email}`);
     },
 
@@ -258,16 +215,11 @@ export const authService = {
         const { data, error } = await supabase.functions.invoke('admin-reset-password', {
             body: { userId, newPassword }
         });
-
         if (error) throw error;
         if (data?.error) throw new Error(data.error);
-
         return data;
     },
 
-    /**
-     * Subscribe to auth state changes
-     */
     onAuthStateChange(callback: (event: string, session: Session | null) => void) {
         return supabase.auth.onAuthStateChange(callback);
     },
@@ -276,58 +228,36 @@ export const authService = {
     // PERMISSION HELPERS
     // ============================================================================
 
-    /**
-     * Check if user has required role
-     */
     hasRole(userRole: UserRole, requiredRoles: UserRole[]): boolean {
         return requiredRoles.includes(userRole);
     },
 
-    /**
-     * Check if user is admin level (L1 or L2)
-     */
     isAdmin(userRole: UserRole): boolean {
         const adminRoles: UserRole[] = [
             'super_admin',
             'regional_manager', 'operations_manager', 'finance_manager',
             'hr_manager', 'procurement_manager', 'supply_chain_manager',
-            // Legacy
             'admin', 'hr'
         ];
         return adminRoles.includes(userRole);
     },
 
-    /**
-     * Check if user has a specific permission
-     */
     checkPermission(userRole: UserRole, permission: Permission): boolean {
         return hasPermission(userRole, permission);
     },
 
-    /**
-     * Check if user has all specified permissions
-     */
     checkAllPermissions(userRole: UserRole, permissions: Permission[]): boolean {
         return hasAllPermissions(userRole, permissions);
     },
 
-    /**
-     * Check if user has any of the specified permissions
-     */
     checkAnyPermission(userRole: UserRole, permissions: Permission[]): boolean {
         return hasAnyPermission(userRole, permissions);
     },
 
-    /**
-     * Get all permissions for a role
-     */
     getUserPermissions(userRole: UserRole): Permission[] {
         return getRolePermissions(userRole);
     },
 
-    /**
-     * Check for separation of duties violations
-     */
     validateSeparationOfDuties(userRole: UserRole): Permission[] {
         const violations = checkSoDViolations(userRole);
         if (violations.length > 0) {
@@ -336,23 +266,14 @@ export const authService = {
         return violations;
     },
 
-    /**
-     * Check if user can approve a workflow
-     */
     canApproveWorkflow(userRole: UserRole, workflowName: string, amount?: number): boolean {
         return canApprove(userRole, workflowName, amount);
     },
 
-    /**
-     * Get list of approvers for a workflow
-     */
     getWorkflowApprovers(workflowName: string, amount?: number): UserRole[] {
         return getRequiredApprovers(workflowName, amount);
     },
 
-    /**
-     * Log a security event
-     */
     async logSecurityEvent(action: string, details: string, severity: 'INFO' | 'WARNING' | 'ERROR' | 'CRITICAL' = 'INFO') {
         const user = await this.getCurrentAuthUser();
         if (user) {
@@ -366,252 +287,7 @@ export const authService = {
 };
 
 // ============================================================================
-// ROLE-BASED ACCESS CONTROL
+// RE-EXPORTS (backwards compatibility — consumers can still import from here)
 // ============================================================================
-
-export const ROLE_PERMISSIONS: Record<string, string[]> = {
-    // ═══ LEVEL 1 - EXECUTIVE ═══
-    super_admin: ['*'], // CEO / Owner - Full Access to EVERYTHING
-
-    // ═══ LEVEL 2 - REGIONAL/DIRECTORS ═══
-    regional_manager: [
-        'dashboard', 'pos', 'inventory', 'warehouse', 'sales', 'customers', 'employees', 'finance', 'procurement', 'settings', 'profile'
-    ],
-    operations_manager: [
-        'dashboard', 'pos', 'inventory', 'warehouse', 'sales', 'customers', 'employees', 'finance', 'procurement', 'settings', 'profile'
-    ],
-    finance_manager: [
-        'dashboard', 'finance', 'sales', 'procurement', 'employees', 'profile'
-    ],
-    hr_manager: [
-        'dashboard', 'employees', 'finance', 'profile'
-    ],
-    procurement_manager: [
-        'dashboard', 'procurement', 'inventory', 'warehouse', 'finance', 'profile'
-    ],
-    supply_chain_manager: [
-        'dashboard', 'inventory', 'warehouse', 'procurement', 'finance', 'profile'
-    ],
-
-    // ═══ LEVEL 3 - SITE MANAGERS ═══
-    store_manager: [
-        'dashboard', 'pos', 'inventory', 'procurement', 'sales', 'customers', 'employees', 'profile'
-    ],
-    warehouse_manager: [
-        'dashboard', 'inventory', 'warehouse', 'procurement', 'employees', 'profile'
-    ],
-    dispatch_manager: [
-        'dashboard', 'warehouse', 'inventory', 'employees', 'profile'
-    ],
-    assistant_manager: [
-        'dashboard', 'pos', 'inventory', 'sales', 'customers', 'profile'
-    ],
-    shift_lead: [
-        'dashboard', 'pos', 'inventory', 'customers', 'profile'
-    ],
-
-    // ═══ LEVEL 4 - STAFF ═══
-    cashier: [
-        'dashboard', 'pos', 'profile'
-    ],
-    sales_associate: [
-        'dashboard', 'pos', 'customers', 'inventory', 'profile'
-    ],
-    stock_clerk: [
-        'dashboard', 'inventory', 'profile'
-    ],
-    picker: [
-        'dashboard', 'warehouse', 'inventory', 'profile'
-    ],
-    packer: [
-        'dashboard', 'warehouse', 'inventory', 'profile'
-    ],
-    receiver: [
-        'dashboard', 'warehouse', 'inventory', 'profile'
-    ],
-    driver: [
-        'dashboard', 'warehouse', 'inventory', 'profile'
-    ],
-    forklift_operator: [
-        'dashboard', 'warehouse', 'inventory', 'profile'
-    ],
-    inventory_specialist: [
-        'dashboard', 'inventory', 'warehouse', 'profile'
-    ],
-    customer_service: [
-        'dashboard', 'customers', 'sales', 'profile'
-    ],
-    auditor: [
-        'dashboard', 'sales', 'inventory', 'finance', 'profile'
-    ],
-    it_support: [
-        'dashboard', 'settings', 'employees', 'profile'
-    ],
-    buyer: [
-        'dashboard', 'procurement', 'profile'
-    ],
-    demand_planner: [
-        'dashboard', 'inventory', 'procurement', 'sales', 'profile'
-    ],
-    inventory_manager: [
-        'dashboard', 'inventory', 'warehouse', 'profile'
-    ],
-    logistics_manager: [
-        'dashboard', 'warehouse', 'inventory', 'employees', 'profile'
-    ],
-    security_manager: [
-        'dashboard', 'settings', 'employees', 'profile'
-    ],
-
-    // ═══ LEGACY ROLES (backwards compatibility) ═══
-    // admin: stripped to read-only — no active users should have this role.
-    // Use super_admin (CEO) or regional_manager instead.
-    admin: [
-        'dashboard', 'profile'
-    ],
-    manager: [
-        'dashboard', 'pos', 'inventory', 'sales', 'customers', 'pricing', 'profile'
-    ],
-    hr: [
-        'dashboard', 'employees', 'finance', 'profile'
-    ],
-    pos: [
-        'dashboard', 'pos', 'customers', 'inventory', 'profile'
-    ],
-    dispatcher: [
-        'dashboard', 'inventory', 'warehouse', 'profile'
-    ],
-    cs_manager: [
-        'dashboard', 'customers', 'sales', 'profile'
-    ],
-    store_supervisor: [
-        'dashboard', 'pos', 'inventory', 'sales', 'customers', 'profile'
-    ],
-    returns_clerk: [
-        'dashboard', 'warehouse', 'inventory', 'customers', 'profile'
-    ],
-    merchandiser: [
-        'dashboard', 'inventory', 'pricing', 'profile'
-    ],
-    loss_prevention: [
-        'dashboard', 'inventory', 'sales', 'profile'
-    ],
-    accountant: [
-        'dashboard', 'finance', 'sales', 'profile'
-    ],
-    data_analyst: [
-        'dashboard', 'sales', 'inventory', 'finance', 'profile'
-    ],
-    training_coordinator: [
-        'dashboard', 'employees', 'profile'
-    ]
-};
-
-export function canAccessRoute(userRole: UserRole, route: string): boolean {
-    const permissions = ROLE_PERMISSIONS[userRole];
-
-    // CEO has access to everything
-    if (permissions.includes('*')) return true;
-
-    // Check if route is in permissions
-    return permissions.some(permission =>
-        route.toLowerCase().includes(permission.toLowerCase())
-    );
-}
-
-/**
- * Get available sections filtered by site type
- * Prevents warehouse workers at stores from seeing warehouse sections and vice versa
- */
-export function getAvailableSections(userRole: UserRole, siteType?: string): string[] {
-    const basePermissions = ROLE_PERMISSIONS[userRole];
-
-    // CEO always gets all permissions
-    if (basePermissions.includes('*')) return basePermissions;
-
-    // If no site type provided, return base permissions
-    if (!siteType) return basePermissions;
-
-    // Filter out warehouse sections if user is at a Store
-    if (siteType === 'Store' || siteType === 'Dark Store') {
-        return basePermissions.filter(p =>
-            p !== 'warehouse' && p !== 'procurement'
-        );
-    }
-
-    // Filter out POS sections if user is at a Warehouse
-    if (siteType === 'Warehouse' || siteType === 'Distribution Center') {
-        return basePermissions.filter(p => p !== 'pos');
-    }
-
-    return basePermissions;
-}
-
-/**
- * Check if user can access a specific site
- * Enforces site-level data isolation
- */
-export function canAccessSite(userRole: UserRole, userSiteId: string, targetSiteId: string): boolean {
-    // CEO can access all sites
-    if (userRole === 'super_admin') return true;
-
-    // Level 2 roles + super_admin can access all sites
-    /**
-     * ============================================================================
-     * 🛑 CRITICAL DIRECTIVE FOR FUTURE AI ASSISTANTS 🛑
-     * ============================================================================
-     * DO NOT MODIFY THIS LIST TO ADD ANY OTHER ROLES!
-     * MULTI-SITE ACCESS (SWITCHING SITES) IS STRICTLY RESTRICTED TO THE CEO.
-     * NO WORKER, NOT EVEN HIGH-LEVEL POSITIONS OR REGIONAL MANAGERS, ARE ALLOWED
-     * MULTI-SITE ACCESS EXCEPT THE CEO. 
-     * THIS IS A HARD SECURITY REQUIREMENT BY THE OWNER.
-     * ============================================================================
-     */
-    const multiSiteRoles: UserRole[] = [
-        'super_admin',
-    ];
-    if (multiSiteRoles.includes(userRole)) return true;
-
-    // All other roles can only access their assigned site
-    return userSiteId === targetSiteId;
-}
-
-// ============================================================================
-// SESSION MANAGEMENT
-// ============================================================================
-
-export const sessionService = {
-    /**
-     * Store session in localStorage (backup)
-     */
-    storeSession(session: Session) {
-        localStorage.setItem('siif_session', JSON.stringify(session));
-    },
-
-    /**
-     * Get stored session
-     */
-    getStoredSession(): Session | null {
-        const stored = localStorage.getItem('siif_session');
-        return stored ? JSON.parse(stored) : null;
-    },
-
-    /**
-     * Clear stored session
-     */
-    clearSession() {
-        localStorage.removeItem('siif_session');
-    },
-
-    /**
-     * Check if session is valid
-     */
-    isSessionValid(session: Session): boolean {
-        if (!session) return false;
-
-        const expiresAt = session.expires_at;
-        if (!expiresAt) return false;
-
-        return new Date(expiresAt * 1000) > new Date();
-    }
-};
+export { ROLE_PERMISSIONS, canAccessRoute, getAvailableSections, canAccessSite } from './auth.rbac';
+export { sessionService } from './auth.session';
