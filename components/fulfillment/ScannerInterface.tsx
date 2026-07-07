@@ -16,6 +16,9 @@ import { playBeep } from '../../utils/audioUtils';
 import { useScanOnly } from '../../hooks/useScanOnly';
 import { getExpiryStatus } from '../../utils/formatting';
 import { logger } from '../../utils/logger';
+import { ScannerJobList } from './components/ScannerJobList';
+import { ScannerNavStep } from './components/ScannerNavStep';
+import { ScannerScanStep } from './components/ScannerScanStep';
 
 // Helper component for metrics
 const MetricBadge = ({ label, value, color }: { label: string; value: string | number; color: string }) => (
@@ -360,58 +363,15 @@ export const ScannerInterface: React.FC = () => {
     // 1. Job Selection List (if no job selected)
     if (!selectedJob || showScannerList) {
         return (
-            <div className="fixed inset-0 z-50 bg-[#18201B] flex flex-col">
-                <div className="p-4 bg-[#1E2822] border-b border-[#E2DCCE]/10 dark:border-emerald-950/20 flex justify-between items-center">
-                    <h2 className="text-xl font-bold text-[#EAE5D9] uppercase tracking-wider">{t('warehouse.selectJob')}</h2>
-                    <button onClick={() => setIsScannerMode(false)} aria-label="Close Scanner" className="text-stone-400 hover:text-white transition-colors">
-                        <X size={24} />
-                    </button>
-                </div>
-                <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                    {/* Render Filtered Jobs */}
-                    {myScannerJobs.length === 0 ? (
-                        <div className="text-center text-stone-500 mt-20">
-                            <Package size={48} className="mx-auto mb-4 opacity-50 text-[#A9CBA2]" />
-                            <p>{t('warehouse.noJobsAvailable')}</p>
-                        </div>
-                    ) : (
-                        myScannerJobs.map((job: any) => (
-                            <div
-                                key={job.id}
-                                onClick={() => {
-                                    setSelectedJob(job);
-                                    setScannerStep('NAV');
-                                }}
-                                className="glass-panel p-4 hover:border-[#CFC6B4] dark:hover:border-[#A9CBA2]/25 cursor-pointer group"
-                            >
-                                <div className="flex justify-between items-start mb-2">
-                                    <div>
-                                        <div className="flex items-center gap-2">
-                                            <span className="px-2 py-0.5 rounded bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 text-[#2C5E3B] dark:text-[#A9CBA2] border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20 font-bold text-xs uppercase">
-                                                {job.type}
-                                            </span>
-                                            <span className="text-stone-850 dark:text-[#EAE5D9] font-mono font-bold text-lg">{formatJobId(job)}</span>
-                                        </div>
-                                        <p className="text-xs text-stone-400 dark:text-stone-500 mt-1">To: {job.assignedTo || 'Unassigned'}</p>
-                                    </div>
-                                    <div className="text-right">
-                                        <span className={`text-xs font-bold px-2 py-1 rounded ${job.priority === 'High' || job.priority === 'Critical' ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 'bg-[#2C5E3B]/20 text-[#2C5E3B] dark:bg-[#A9CBA2]/20 dark:text-[#A9CBA2] border border-[#2C5E3B]/30 dark:border-[#A9CBA2]/30'} `}>
-                                            {job.priority}
-                                        </span>
-                                        <div className="mt-2 text-stone-550 text-xs">
-                                            {job.items || job.lineItems?.length} items
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="mt-2 pt-2 border-t border-[#E2DCCE]/30 dark:border-emerald-950/20 flex justify-between items-center">
-                                    <span className="text-xs text-stone-500">{job.sourceSiteId ? `From: ${sites.find(s => s.id === job.sourceSiteId)?.name} ` : ''}</span>
-                                    <ChevronRight size={16} className="text-stone-400 dark:text-stone-500 group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] transition-colors" />
-                                </div>
-                            </div>
-                        ))
-                    )}
-                </div>
-            </div>
+            <ScannerJobList
+                myScannerJobs={myScannerJobs}
+                sites={sites}
+                formatJobId={formatJobId}
+                setSelectedJob={setSelectedJob}
+                setScannerStep={setScannerStep}
+                setIsScannerMode={setIsScannerMode}
+                t={t}
+            />
         );
     }
 
@@ -471,98 +431,31 @@ export const ScannerInterface: React.FC = () => {
 
                 {/* --- NAV STEP (Location) --- */}
                 {scannerStep === 'NAV' && (
-                    <div className="w-full max-w-2xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                        <div className="text-center space-y-4">
-                            <div className="w-20 h-20 bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 rounded-full flex items-center justify-center mx-auto border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20">
-                                <MapIcon size={40} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
-                            </div>
-                            <h1 className="text-4xl font-black text-[#EAE5D9] tracking-tight uppercase italic">
-                                {selectedJob.type === 'PUTAWAY' ? t('warehouse.selectStorage') : t('warehouse.locateItem')}
-                            </h1>
-                            <p className="text-stone-400 text-lg">
-                                {t('warehouse.goToLocation')}: <span className="text-[#2C5E3B] dark:text-[#A9CBA2] font-mono font-bold text-2xl">{currentProduct?.location || 'Unknown'}</span>
-                            </p>
-                        </div>
-
-                        {/* Location Input */}
-                        <div className="relative group/input max-w-md mx-auto">
-                            <input
-                                ref={locationInputRef}
-                                aria-label="Location Scanner Input"
-                                type="text"
-                                placeholder="Scan Location Barcode"
-                                value={locationSearch}
-                                onChange={(e) => setLocationSearch(e.target.value.toUpperCase())}
-                                onKeyDown={(e) => {
-                                    scanOnlyHandlers.onKeyDown(e);
-                                    if (e.key === 'Enter') handleLocationScan(locationSearch);
-                                }}
-                                onPaste={scanOnlyHandlers.onPaste}
-                                className="woody-input py-6 px-8 text-3xl font-mono text-center uppercase"
-                                autoFocus
-                            />
-                            <button
-                                onClick={() => handleLocationScan(locationSearch)}
-                                className="mt-4 woody-btn-primary w-full py-4 text-lg font-bold"
-                            >
-                                {t('warehouse.confirmLocation')}
-                            </button>
-                        </div>
-                    </div>
+                    <ScannerNavStep
+                        t={t}
+                        selectedJob={selectedJob}
+                        currentProduct={currentProduct}
+                        locationInputRef={locationInputRef}
+                        locationSearch={locationSearch}
+                        setLocationSearch={setLocationSearch}
+                        scanOnlyHandlers={scanOnlyHandlers}
+                        handleLocationScan={handleLocationScan}
+                    />
                 )}
 
                 {/* --- SCAN STEP (Item) --- */}
                 {scannerStep === 'SCAN' && (
-                    <div className="w-full max-w-md mx-auto space-y-6 pb-24 md:pb-0 px-4 md:px-0">
-                        <div className="flex flex-col items-center justify-center space-y-4">
-                            <div className="relative inline-block shrink-0 w-32 h-32 md:w-48 md:h-48 rounded-3xl border border-[#E2DCCE]/30 dark:border-[#A9CBA2]/10 bg-[#1C2620]/60 overflow-hidden flex items-center justify-center">
-                                {currentItem.image && !currentItem.image.includes('placeholder') ? (
-                                    <img src={currentItem.image} className="w-full h-full object-cover" alt={currentItem.name} />
-                                ) : (
-                                    <Package size={48} className="text-stone-500" />
-                                )}
-                            </div>
-                            <div>
-                                <h2 className="text-xl md:text-2xl font-bold text-[#EAE5D9] text-center">{currentItem.name}</h2>
-                                <p className="text-center text-stone-400 font-mono mt-1">{currentItem.sku}</p>
-                            </div>
-                        </div>
-
-                        <div className="flex justify-center gap-4">
-                            <MetricBadge label="Qty" value={currentItem.expectedQty} color="border-[#2C5E3B]/30 text-[#2C5E3B] dark:text-[#A9CBA2] bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10" />
-                            <MetricBadge label="Stock" value={currentProduct?.stock || 0} color="border-stone-500 text-stone-450 bg-stone-100/10 dark:bg-white/5" />
-                        </div>
-
-                        {/* Scanner Input */}
-                        <div className="glass-panel p-4">
-                            <div className="flex items-center gap-2 mb-2">
-                                <Scan className="text-[#2C5E3B] dark:text-[#A9CBA2]" size={20} />
-                                <p className="text-xs text-[#2C5E3B] dark:text-[#A9CBA2] uppercase font-bold">{t('warehouse.scanProductBarcode')}</p>
-                            </div>
-                            <input
-                                ref={itemInputRef}
-                                aria-label="Item Scanner Input"
-                                type="text"
-                                value={scannedItem}
-                                onChange={(e) => setScannedItem(e.target.value)}
-                                onKeyDown={(e) => {
-                                    scanOnlyItemHandlers.onKeyDown(e);
-                                    if (e.key === 'Enter') handleItemScan();
-                                }}
-                                onPaste={scanOnlyItemHandlers.onPaste}
-                                className="woody-input font-mono text-lg text-center"
-                                autoFocus
-                            />
-                            <button
-                                disabled={isProcessingScan}
-                                onClick={() => handleItemScan()}
-                                className="w-full mt-4 woody-btn-primary py-4 text-xl flex items-center justify-center gap-2"
-                            >
-                                {isProcessingScan ? <RefreshCw className="animate-spin" /> : <CheckCircle />}
-                                {t('warehouse.confirm')}
-                            </button>
-                        </div>
-                    </div>
+                    <ScannerScanStep
+                        currentItem={currentItem}
+                        currentProduct={currentProduct}
+                        t={t}
+                        itemInputRef={itemInputRef}
+                        scannedItem={scannedItem}
+                        setScannedItem={setScannedItem}
+                        scanOnlyItemHandlers={scanOnlyItemHandlers}
+                        handleItemScan={handleItemScan}
+                        isProcessingScan={isProcessingScan}
+                    />
                 )}
             </div>
         </div>
