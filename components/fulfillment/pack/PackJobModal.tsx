@@ -418,6 +418,8 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
                                                         >-</button>
                                                         <input
                                                             type="number"
+                                                            inputMode="decimal"
+                                                            pattern="[0-9]*"
                                                             aria-label="Confirm Quantity"
                                                             title="Confirm Quantity"
                                                             value={confirmQty}

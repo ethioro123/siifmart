@@ -11,7 +11,7 @@ import {
     User,
     Activity
 } from 'lucide-react';
-import { systemLogsService, LogEntry, LogCategory, LogSeverity } from '../services/systemLogs.service';
+import { systemLogsService, LogEntry, LogCategory, LogSeverity } from '../services/local-logs.service';
 import { formatDateTime } from '../utils/formatting';
 import { authService } from '../services/auth.service';
 

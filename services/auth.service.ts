@@ -6,7 +6,7 @@
 import { supabase } from '../lib/supabase';
 import type { User, Session } from '@supabase/supabase-js';
 import { employeesService } from './supabase.service';
-import { systemLogsService } from './systemLogs.service';
+import { systemLogsService } from './local-logs.service';
 import {
     hasPermission,
     hasAllPermissions,

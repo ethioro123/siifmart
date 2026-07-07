@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Employee, UserRole } from '../types';
-import { systemLogsService } from '../services/systemLogs.service';
+import { systemLogsService } from '../services/local-logs.service';
 import { imageStorageService } from '../services/imageStorage.service';
 
 interface UseEmployeeActionsProps {

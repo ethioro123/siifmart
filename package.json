@@ -12,7 +12,8 @@
     "preview": "vite preview",
     "test": "vitest",
     "test:ui": "vitest --ui",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "lint:size": "bash scripts/check-file-size.sh"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

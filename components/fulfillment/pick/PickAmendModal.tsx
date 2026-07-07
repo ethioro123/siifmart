@@ -220,6 +220,8 @@ export const PickAmendModal: React.FC<PickAmendModalProps> = ({
                                                     <p className="text-[8px] font-black text-amber-500 uppercase tracking-widest">{t('warehouse.picking.correctTo')}</p>
                                                     <input
                                                         type="number"
+                                                        inputMode="decimal"
+                                                        pattern="[0-9]*"
                                                         min={0}
                                                         max={line.required * 2}
                                                         value={line.amended}

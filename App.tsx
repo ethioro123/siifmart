@@ -7,6 +7,7 @@ import './utils/clearSession'; // Make clearSession available globally
 import LoginPage from './components/LoginPage';
 import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
+import { ModuleErrorBoundary } from './components/shared';
 
 // Lazy-loaded Pages
 const POSTerminal = lazy(() => import('./pages/POSTerminal'));
@@ -260,14 +261,18 @@ export default function App() {
             {/* POS - Cashiers, Managers, Admins */}
             <Route path="/pos" element={
               <ProtectedRoute module="pos">
-                <POSTerminal />
+                <ModuleErrorBoundary moduleName="POS">
+                  <POSTerminal />
+                </ModuleErrorBoundary>
               </ProtectedRoute>
             } />
 
             {/* POS Command Center - Store staff only, NOT super_admin */}
             <Route path="/pos-dashboard" element={
               <ProtectedRoute module="pos">
-                <POSCommand />
+                <ModuleErrorBoundary moduleName="POS Command">
+                  <POSCommand />
+                </ModuleErrorBoundary>
               </ProtectedRoute>
             } />
 
@@ -281,7 +286,9 @@ export default function App() {
             {/* Inventory - WMS, Managers, Admins, Auditors */}
             <Route path="/inventory" element={
               <ProtectedRoute module="inventory">
-                <Inventory />
+                <ModuleErrorBoundary moduleName="Inventory">
+                  <Inventory />
+                </ModuleErrorBoundary>
               </ProtectedRoute>
             } />
 
@@ -295,7 +302,9 @@ export default function App() {
             {/* Warehouse Operations - WMS, Pickers, Drivers, Admins */}
             <Route path="/wms-ops" element={
               <ProtectedRoute module="warehouse">
-                <Fulfillment />
+                <ModuleErrorBoundary moduleName="Fulfillment">
+                  <Fulfillment />
+                </ModuleErrorBoundary>
               </ProtectedRoute>
             } />
 
@@ -323,7 +332,9 @@ export default function App() {
             {/* Finance - HR, Admins, Auditors */}
             <Route path="/finance" element={
               <ProtectedRoute module="finance">
-                <Financials />
+                <ModuleErrorBoundary moduleName="Financials">
+                  <Financials />
+                </ModuleErrorBoundary>
               </ProtectedRoute>
             } />
 
@@ -338,7 +349,9 @@ export default function App() {
             {/* Settings - HR, Admins */}
             <Route path="/settings" element={
               <ProtectedRoute module="settings">
-                <SettingsPage />
+                <ModuleErrorBoundary moduleName="Settings">
+                  <SettingsPage />
+                </ModuleErrorBoundary>
               </ProtectedRoute>
             } />
 

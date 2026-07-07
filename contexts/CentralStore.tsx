@@ -3,10 +3,10 @@ import { authService } from '../services/auth.service';
 import { UserRole } from '../types';
 import { employeesService } from '../services/employees.service';
 
-import { useSessionManager } from '../utils/useSessionManager';
-import { useDataRefresh } from '../utils/useDataRefresh';
-import { useNetworkStatus } from '../utils/useNetworkStatus';
-import { systemLogsService } from '../services/systemLogs.service';
+import { useSessionManager } from '../hooks/useSessionManager';
+import { useDataRefresh } from '../hooks/useDataRefresh';
+import { useNetworkStatus } from '../hooks/useNetworkStatus';
+import { systemLogsService } from '../services/local-logs.service';
 import { systemLogsService as dbSystemLogsService } from '../services/supabase.service';
 import { APP_CONFIG } from '../config/app.config';
 import Toast from '../components/Toast';
