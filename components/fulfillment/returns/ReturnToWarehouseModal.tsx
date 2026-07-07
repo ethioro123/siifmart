@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { X, Package, Undo2, AlertTriangle, CheckCircle, Loader2 } from 'lucide-react';
 import { WMSJob, Product } from '../../../types';
 import { formatJobId } from '../../../utils/jobIdFormatter';
+import { useLanguage } from '../../../contexts/LanguageContext';
 
 interface ReturnToWarehouseModalProps {
     job: WMSJob;
@@ -48,6 +49,7 @@ export const ReturnToWarehouseModal: React.FC<ReturnToWarehouseModalProps> = ({
     jobs = [],
     returnType = 'warehouse'
 }) => {
+    const { t } = useLanguage();
     const [step, setStep] = useState<'select' | 'confirm' | 'done'>('select');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
