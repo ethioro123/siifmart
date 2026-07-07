@@ -9,6 +9,8 @@ import { formatJobId } from '../../../utils/jobIdFormatter';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { ProgressBar } from '../../shared/ProgressBar';
 import { isWeightBased, isVolumeBased } from '../../../utils/units';
+import { PackJobMaterialsPanel } from './components/PackJobMaterialsPanel';
+import { PackJobHeader } from './components/PackJobHeader';
 
 interface PackJobModalProps {
     isOpen: boolean;
@@ -27,6 +29,28 @@ interface PackJobModalProps {
     onPrintItemLabel?: (item: any, product?: any, boxSize?: string) => void;
     onFlagDiscrepancy?: () => void;
 }
+
+const getProductHelper = (item: any, job: WMSJob, products: Product[]) => {
+    const targetSiteId = job.siteId || (job as any).site_id;
+    return products.find(p => (p.id === item.productId || p.sku === item.sku) && (p.siteId === targetSiteId || p.site_id === targetSiteId));
+};
+
+const getItemMeasureQtyHelper = (item: any, job: WMSJob, products: Product[], product?: any) => {
+    if ((item as any).requestedMeasureQty !== undefined && (item as any).requestedMeasureQty !== null) {
+        return (item as any).requestedMeasureQty;
+    }
+    const prod = product || getProductHelper(item, job, products);
+    if (prod) {
+        const unit = prod.unit;
+        const isWeightVol = isWeightBased(unit) || isVolumeBased(unit);
+        const sizeNum = prod.size ? parseFloat(prod.size as string) : 0;
+        if (isWeightVol && sizeNum > 0) {
+            const expected = item.expectedQty || (item as any).quantity || 0;
+            return expected * sizeNum;
+        }
+    }
+    return null;
+};
 
 export const PackJobModal: React.FC<PackJobModalProps> = ({
     isOpen,
@@ -48,10 +72,7 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
     const { t } = useLanguage();
 
     const [boxSize, setBoxSize] = useState<'Small' | 'Medium' | 'Large' | 'Extra Large'>('Medium');
-    const [packingMaterials, setPackingMaterials] = useState({
-        bubbleWrap: false,
-        fragileStickers: false
-    });
+    const [packingMaterials, setPackingMaterials] = useState({ bubbleWrap: false, fragileStickers: false });
     const [hasIcePack, setHasIcePack] = useState(false);
 
     // Item-level Scanning State (must be before early return to satisfy React hooks rules)
@@ -70,29 +91,9 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
 
     if (!isOpen) return null;
 
-    const getProduct = (item: any) => {
-        const targetSiteId = job.siteId || (job as any).site_id;
-        return products.find(p => (p.id === item.productId || p.sku === item.sku) && (p.siteId === targetSiteId || p.site_id === targetSiteId));
-    };
+    const getProduct = (item: any) => getProductHelper(item, job, products);
+    const getItemMeasureQty = (item: any, product?: any) => getItemMeasureQtyHelper(item, job, products, product);
 
-    const getItemMeasureQty = (item: any, product?: any) => {
-        if ((item as any).requestedMeasureQty !== undefined && (item as any).requestedMeasureQty !== null) {
-            return (item as any).requestedMeasureQty;
-        }
-        const prod = product || getProduct(item);
-        if (prod) {
-            const unit = prod.unit;
-            const isWeightVol = isWeightBased(unit) || isVolumeBased(unit);
-            const sizeNum = prod.size ? parseFloat(prod.size as string) : 0;
-            if (isWeightVol && sizeNum > 0) {
-                const expected = item.expectedQty || (item as any).quantity || 0;
-                return expected * sizeNum;
-            }
-        }
-        return null;
-    };
-
-    const sourceSite = sites.find(s => s.id === job.sourceSiteId || s.id === (job as any).site_id);
     const destSite = job.destSiteId ? sites.find(s => s.id === job.destSiteId) : undefined;
     const totalItems = job.lineItems?.length || 0;
     const completedItems = job.lineItems?.filter(i => {
@@ -104,13 +105,10 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
     const progressPercent = totalItems > 0 ? (completedItems / totalItems) * 100 : 0;
     const isFullyPacked = completedItems === totalItems && totalItems > 0;
 
-    const hasColdItems = job.lineItems?.some(item => {
-        const product = getProduct(item);
-        return product?.category === 'Frozen' || product?.category === 'Dairy';
-    });
+    const hasColdItems = job.lineItems?.some(item => ['Frozen', 'Dairy'].includes(getProduct(item)?.category || ''));
     const hasFragileItems = job.lineItems?.some(item => {
-        const product = getProduct(item);
-        return product && ['Electronics', 'Glass', 'Beverages'].some(cat => product.category.includes(cat));
+        const cat = getProduct(item)?.category || '';
+        return ['Electronics', 'Glass', 'Beverages'].some(f => cat.includes(f));
     });
 
     const handleScanItem = (e: React.FormEvent) => {
@@ -180,53 +178,13 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
             <div className="bg-white dark:bg-[#0a0a0a] w-full max-w-5xl min-h-[70dvh] max-h-[95dvh] md:min-h-0 md:max-h-[90vh] rounded-[2rem] border border-[#E2DCCE]/60 dark:border-white/10 shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
 
                 {/* Header */}
-                <div className="relative p-4 md:p-6 border-b border-[#E2DCCE]/60 dark:border-white/10 bg-[#FAF8F5]/50 dark:bg-black/40 overflow-hidden shrink-0">
-                    <div className="absolute -top-10 -right-10 w-40 h-40 bg-[#2C5E3B]/10 blur-[80px] rounded-full pointer-events-none hidden md:block" />
-                    <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-[#A9CBA2]/10 blur-[80px] rounded-full pointer-events-none hidden md:block" />
-
-                    <div className="relative flex justify-between items-start">
-                        <div className="flex items-center gap-3 md:gap-4">
-                            <div className={`w-10 h-10 md:w-14 md:h-14 rounded-xl md:rounded-2xl border flex items-center justify-center shadow-sm shrink-0 ${isFullyPacked ? 'bg-green-50 dark:bg-green-500/20 border-green-200 dark:border-green-500/30 text-green-600 dark:text-green-400' : 'bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/25 border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20 text-[#2C5E3B] dark:text-[#A9CBA2]'}`}>
-                                {isFullyPacked ? <ShieldCheck size={20} className="md:w-7 md:h-7" /> : <Archive size={20} className="md:w-7 md:h-7" />}
-                            </div>
-                            <div>
-                                <div className="flex items-center gap-2 mb-0.5 md:mb-1">
-                                    <h2 className="text-lg md:text-2xl font-black text-gray-900 dark:text-white tracking-tight uppercase italic leading-none">
-                                        {isFullyPacked ? t('warehouse.completed') : t('warehouse.packJobTitle')}
-                                    </h2>
-                                    <span className="px-2.5 py-1 rounded-xl bg-gray-150 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-[10px] md:text-xs font-mono text-gray-600 dark:text-gray-400">
-                                        #{formatJobId(job)}
-                                    </span>
-                                </div>
-                                <div className="hidden md:flex items-center gap-4 text-xs font-medium text-gray-500 dark:text-gray-400">
-                                    <span className={`px-2.5 py-1 rounded-xl text-[10px] uppercase font-black tracking-widest border ${job.priority === 'Critical' ? 'border-red-200 dark:border-red-500/30 text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/10 shadow-[0_0_15px_rgba(239,68,68,0.05)]' :
-                                        job.priority === 'High' ? 'border-amber-200 dark:border-amber-500/30 text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10' :
-                                            'border-gray-200 dark:border-white/10 text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-white/5'
-                                        }`}>
-                                        {job.priority}
-                                    </span>
-                                    <span className="flex items-center gap-1.5 text-gray-700 dark:text-gray-400">
-                                        <MapPin size={12} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
-                                        <span className="break-words leading-tight">
-                                            {destSite ? (
-                                                <>
-                                                    {destSite.name} <span className="text-gray-500 dark:text-zinc-650 font-normal lowercase">({destSite.code || destSite.id})</span>
-                                                </>
-                                            ) : ((job as any).customerName || 'Customer')}
-                                        </span>
-                                    </span>
-                                    <span className="flex items-center gap-1.5 text-gray-500">
-                                        <Clock size={12} className="text-gray-400" />
-                                        {new Date(job.createdAt || (job as any).date || '').toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                        <button onClick={onClose} aria-label={t('warehouse.dismiss')} className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-xl text-gray-400 dark:text-gray-550 hover:text-gray-900 dark:hover:text-white transition-all">
-                            <X size={18} className="md:w-6 md:h-6" />
-                        </button>
-                    </div>
-                </div>
+                <PackJobHeader
+                    isFullyPacked={isFullyPacked}
+                    job={job}
+                    destSite={destSite}
+                    onClose={onClose}
+                    t={t}
+                />
 
                 {/* Content */}
                 <div className="flex-1 min-h-0 flex flex-col dark:bg-[radial-gradient(circle_at_50%_0%,rgba(44,94,59,0.03),transparent)] bg-stone-50 dark:bg-black/10">
@@ -451,89 +409,22 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
                                 );
                             })}
                             </div>
-                        </div>
-
-                        {/* Right Col: Details & Action */}
-                        <div className="w-full lg:w-80 flex flex-col gap-4 shrink-0 p-4 lg:p-6 border-t lg:border-t-0 border-[#E2DCCE]/60 dark:border-white/10 bg-stone-50 dark:bg-black/10">
-                            {/* Progress */}
-                            <div className="bg-white dark:bg-white/[0.02] border border-[#E2DCCE]/60 dark:border-white/10 rounded-2xl p-5">
-                                <div className="flex justify-between items-end mb-2">
-                                    <span className="text-[10px] text-gray-500 font-black uppercase tracking-widest block">{t('warehouse.putaway.progress')}</span>
-                                    <span className="text-xl font-mono font-black text-gray-900 dark:text-white leading-none">{Math.round(progressPercent)}%</span>
-                                </div>
-                                <ProgressBar
-                                    progress={progressPercent}
-                                    containerClassName="h-2 bg-gray-200 dark:bg-white/5 rounded-full overflow-hidden"
-                                    fillClassName={`h-full transition-all duration-300 ${isFullyPacked ? 'bg-green-500' : 'bg-[#2C5E3B] dark:bg-[#A9CBA2]'}`}
-                                />
-                            </div>
-
-                            {/* Shipping Info */}
-                            <div className="bg-white dark:bg-white/[0.02] border border-[#E2DCCE]/60 dark:border-white/10 rounded-2xl p-5 flex flex-col gap-3">
-                                <span className="text-[10px] text-gray-550 font-black uppercase tracking-widest block">{t('warehouse.packing.shipping')}</span>
-
-                                <div className="flex items-center gap-3">
-                                    <Truck size={14} className="text-[#2C5E3B] dark:text-[#A9CBA2] shrink-0 w-4 h-4" />
-                                    <div className="min-w-0">
-                                        <span className="text-[9px] text-gray-500 font-black uppercase tracking-widest block truncate">{t('warehouse.to')}</span>
-                                        <span className="text-gray-900 dark:text-white text-sm font-bold break-words leading-tight block">
-                                            {destSite ? (
-                                                <>
-                                                    {destSite.name} <span className="text-gray-500 dark:text-zinc-650 font-normal lowercase">({destSite.code || destSite.id})</span>
-                                                </>
-                                            ) : ((job as any).customerName || 'Customer')}
-                                        </span>
-                                    </div>
-                                </div>
-                                
-                                <div className="flex items-center gap-3">
-                                    <Info size={14} className="text-[#2C5E3B] dark:text-[#A9CBA2] shrink-0 w-4 h-4" />
-                                    <div className="min-w-0">
-                                        <span className="text-[9px] text-gray-550 font-black uppercase tracking-widest block truncate">{t('warehouse.putaway.jobDetails')}</span>
-                                        <span className="text-gray-900 dark:text-white text-sm font-bold font-mono truncate block">{formatJobId(job)}</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Packing Options */}
-                            <div className="bg-white dark:bg-white/[0.02] border border-[#E2DCCE]/60 dark:border-white/10 rounded-2xl p-5 flex flex-col gap-4">
-                                <span className="text-[10px] text-gray-550 font-black uppercase tracking-widest block">{t('warehouse.packingOptions')}</span>
-
-                                <div>
-                                    <label className="text-[9px] text-gray-500 font-black uppercase tracking-widest block mb-2">{t('warehouse.boxSize')}</label>
-                                    <select title="Box Size" aria-label="Select Box Size" value={boxSize} onChange={(e) => setBoxSize(e.target.value as any)} className="w-full bg-white/90 dark:bg-black/25 border border-[#E2DCCE] dark:border-white/10 hover:border-[#CFC6B4] dark:hover:border-white/20 text-[#1E3F27] dark:text-[#EAE5D9] rounded-xl p-3 text-sm outline-none focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:bg-white dark:focus:bg-zinc-900 transition-all focus:ring-4 focus:ring-[#2C5E3B]/10 dark:focus:ring-[#A9CBA2]/10">
-                                        <option value="Small">{t('warehouse.boxSmall')}</option>
-                                        <option value="Medium">{t('warehouse.boxMedium')}</option>
-                                        <option value="Large">{t('warehouse.boxLarge')}</option>
-                                        <option value="Extra Large">{t('warehouse.boxXL')}</option>
-                                    </select>
-                                </div>
-
-                                {hasFragileItems && (
-                                    <div className="pt-2 border-t border-[#E2DCCE]/60 dark:border-white/10">
-                                        <p className="text-[9px] text-red-650 dark:text-red-400 font-black uppercase tracking-widest mb-2 flex items-center gap-1"><AlertTriangle size={10} /> {t('warehouse.packing.fragile')}</p>
-                                        <label className="flex items-center gap-3 mb-2 cursor-pointer group">
-                                            <input type="checkbox" aria-label="Bubble Wrap" title="Bubble Wrap" checked={packingMaterials.bubbleWrap} onChange={e => setPackingMaterials({ ...packingMaterials, bubbleWrap: e.target.checked })} className="w-4 h-4 rounded border-[#E2DCCE] dark:border-white/20 text-[#2C5E3B] dark:text-[#A9CBA2] focus:ring-[#2C5E3B] dark:focus:ring-[#A9CBA2] focus:ring-offset-white dark:focus:ring-offset-black bg-white dark:bg-black/40" />
-                                            <span className="text-sm text-gray-700 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">{t('warehouse.packing.bubbleWrap')}</span>
-                                        </label>
-                                        <label className="flex items-center gap-3 cursor-pointer group">
-                                            <input type="checkbox" aria-label="Fragile Stickers" title="Fragile Stickers" checked={packingMaterials.fragileStickers} onChange={e => setPackingMaterials({ ...packingMaterials, fragileStickers: e.target.checked })} className="w-4 h-4 rounded border-[#E2DCCE] dark:border-white/20 text-[#2C5E3B] dark:text-[#A9CBA2] focus:ring-[#2C5E3B] dark:focus:ring-[#A9CBA2] focus:ring-offset-white dark:focus:ring-offset-black bg-white dark:bg-black/40" />
-                                            <span className="text-sm text-gray-700 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">{t('warehouse.packing.stickers')}</span>
-                                        </label>
-                                    </div>
-                                )}
-
-                                {hasColdItems && (
-                                    <div className="pt-2 border-t border-[#E2DCCE]/60 dark:border-white/10">
-                                        <p className="text-[9px] text-[#2C5E3B] dark:text-[#A9CBA2] font-black uppercase tracking-widest mb-2 flex items-center gap-1"><Snowflake size={10} /> {t('warehouse.packing.coldChain')}</p>
-                                        <label className="flex items-center gap-3 cursor-pointer group">
-                                            <input type="checkbox" aria-label="Ice Packs" title="Ice Packs" checked={hasIcePack} onChange={e => setHasIcePack(e.target.checked)} className="w-4 h-4 rounded border-[#E2DCCE] dark:border-white/20 text-[#2C5E3B] dark:text-[#A9CBA2] focus:ring-[#2C5E3B] dark:focus:ring-[#A9CBA2] focus:ring-offset-white dark:focus:ring-offset-black bg-white dark:bg-black/40" />
-                                            <span className="text-sm text-gray-700 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">{t('warehouse.packing.icePacks')}</span>
-                                        </label>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
+                        </div>                        {/* Right Col: Details & Action */}
+                        <PackJobMaterialsPanel
+                            progressPercent={progressPercent}
+                            isFullyPacked={isFullyPacked}
+                            destSite={destSite}
+                            job={job}
+                            boxSize={boxSize}
+                            setBoxSize={setBoxSize}
+                            hasFragileItems={hasFragileItems}
+                            packingMaterials={packingMaterials}
+                            setPackingMaterials={setPackingMaterials}
+                            hasColdItems={hasColdItems}
+                            hasIcePack={hasIcePack}
+                            setHasIcePack={setHasIcePack}
+                            t={t}
+                        />
                     </div>
                 </div>
 
