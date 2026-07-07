@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     ArrowLeft, Search, ArrowRight, X, Link, ShoppingBag,
-    RefreshCw, WifiOff, CloudOff, CheckCircle, Trophy
+    RefreshCw, WifiOff, CloudOff, CheckCircle, Trophy, SlidersHorizontal
 } from 'lucide-react';
 import { usePOS } from '../POSContext';
 import { useData } from '../../../contexts/DataContext';
@@ -213,4 +213,3 @@ export const POSHeader: React.FC<POSHeaderProps> = ({ setIsFilterPanelOpen, acti
         </div>
     );
 };
-import { SlidersHorizontal } from 'lucide-react';

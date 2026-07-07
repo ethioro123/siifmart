@@ -150,20 +150,21 @@ export const POSFilterSidebar: React.FC<POSFilterSidebarProps> = ({
                                 {availableBrands.map(brand => {
                                     const isChecked = selectedBrands.includes(brand);
                                     return (
-                                        <button
+                                        <div
                                             key={brand}
                                             onClick={() => toggleBrand(brand)}
-                                            className="w-full flex items-center gap-3 py-1.5 hover:bg-stone-50/50 dark:hover:bg-white/5 px-2 rounded-xl text-left"
+                                            role="button"
+                                            className="w-full flex items-center gap-3 py-1.5 hover:bg-stone-50/50 dark:hover:bg-white/5 px-2 rounded-xl text-left cursor-pointer"
                                         >
                                             <input
                                                 type="checkbox"
                                                 readOnly
                                                 checked={isChecked}
                                                 aria-label={`Filter by brand: ${brand}`}
-                                                className="w-4 h-4 border border-white/20 rounded bg-white/5 text-[#2C5E3B] focus:ring-0 cursor-pointer pointer-events-none"
+                                                className="w-4 h-4 border border-white/20 rounded bg-white/5 text-[#2C5E3B] focus:ring-0 pointer-events-none"
                                             />
                                             <span className="text-xs font-bold text-stone-700 dark:text-stone-300">{brand}</span>
-                                        </button>
+                                        </div>
                                     );
                                 })}
                             </div>
@@ -197,7 +198,7 @@ export const POSFilterSidebar: React.FC<POSFilterSidebarProps> = ({
                         <label className="text-xs font-black uppercase tracking-wider text-[#4D6E56] dark:text-[#7A9E83]">Stock Availability</label>
                         <select
                             value={stockStatusFilter}
-                            onChange={(e) => setStockStatusFilter(e.target.value)}
+                            onChange={(e) => setStockStatusFilter(e.target.value as any)}
                             aria-label="Stock Availability Selector"
                             className="w-full bg-white dark:bg-white/5 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-xl px-4 py-2.5 text-xs font-bold text-[#1E3F27] dark:text-white outline-none cursor-pointer"
                         >
