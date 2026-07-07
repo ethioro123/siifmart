@@ -68,6 +68,14 @@ export const POItemForm: React.FC<POItemFormProps> = ({
     // Validation State
     const [errors, setErrors] = useState<Record<string, string>>({});
 
+    const caseSize = parseInt(customAttributes.packaging?.caseSize) || 0;
+    const packQty = parseInt(customAttributes.packaging?.packQty) || 1;
+    const hasCases = caseSize > 1;
+    const hasPacks = packQty > 1 && !hasCases;
+    const unitSuffix = hasCases ? '(cases)' : hasPacks ? '(packs)' : '';
+    const totalUnits = currentQty * (hasCases ? caseSize * packQty : hasPacks ? packQty : 1);
+    const showConversion = currentQty > 0 && (hasCases || hasPacks);
+
     // Populate form when editing
     useEffect(() => {
         if (editingItem) {
@@ -123,7 +131,6 @@ export const POItemForm: React.FC<POItemFormProps> = ({
             resetForm();
         }
     }, [editingItem]);
-
     const resetForm = () => {
         setProductType('catalog');
         setCurrentProductToAdd('');
@@ -412,37 +419,26 @@ export const POItemForm: React.FC<POItemFormProps> = ({
 
                 {/* ─── ORDER ROW (Buying: Qty + Cost) + Submit ── */}
                 <div className="grid grid-cols-12 gap-4 relative z-10 pt-4 border-t border-gray-100 dark:border-white/5">
-                    {(() => {
-                        const caseSize = parseInt(customAttributes.packaging?.caseSize) || 0;
-                        const packQty = parseInt(customAttributes.packaging?.packQty) || 1;
-                        const hasCases = caseSize > 1;
-                        const hasPacks = packQty > 1 && !hasCases;
-                        const unitSuffix = hasCases ? '(cases)' : hasPacks ? '(packs)' : '';
-                        const totalUnits = currentQty * (hasCases ? caseSize * packQty : hasPacks ? packQty : 1);
-                        const showConversion = currentQty > 0 && (hasCases || hasPacks);
-                        return (
-                            <div className="col-span-4 space-y-1">
-                                <label className="text-[10px] text-gray-500 uppercase tracking-widest font-bold ml-1 block">
-                                    Order Qty {unitSuffix && <span className="text-[#2C5E3B]/70 dark:text-[#A9CBA2]/70 normal-case">{unitSuffix}</span>} <span className="text-red-500">*</span>
-                                </label>
-                                <input
-                                    type="number"
-                                    step="1"
-                                    min="1"
-                                    className={`w-full bg-white dark:bg-black/40 border ${errors.qty ? 'border-red-500/50' : 'border-gray-200 dark:border-white/10'} rounded-lg px-4 py-3 text-sm text-gray-900 dark:text-white font-mono focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:ring-2 focus:ring-[#2C5E3B]/10 dark:focus:ring-[#A9CBA2]/10 text-center font-black shadow-sm`}
-                                    value={currentQty || ''}
-                                    onChange={e => { const val = parseInt(e.target.value) || 0; setCurrentQty(val); if (errors.qty) setErrors({ ...errors, qty: '' }); }}
-                                    placeholder="0"
-                                />
-                                {showConversion && (
-                                    <span className="text-[9px] text-[#2C5E3B]/60 dark:text-[#A9CBA2]/60 block text-center">
-                                        = {totalUnits.toLocaleString()} sellable units
-                                    </span>
-                                )}
-                                {errors.qty && <span className="text-[9px] text-red-500 block text-center">{errors.qty}</span>}
-                            </div>
-                        );
-                    })()}
+                    <div className="col-span-4 space-y-1">
+                        <label className="text-[10px] text-gray-500 uppercase tracking-widest font-bold ml-1 block">
+                            Order Qty {unitSuffix && <span className="text-[#2C5E3B]/70 dark:text-[#A9CBA2]/70 normal-case">{unitSuffix}</span>} <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                            type="number"
+                            step="1"
+                            min="1"
+                            className={`w-full bg-white dark:bg-black/40 border ${errors.qty ? 'border-red-500/50' : 'border-gray-200 dark:border-white/10'} rounded-lg px-4 py-3 text-sm text-gray-900 dark:text-white font-mono focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:ring-2 focus:ring-[#2C5E3B]/10 dark:focus:ring-[#A9CBA2]/10 text-center font-black shadow-sm`}
+                            value={currentQty || ''}
+                            onChange={e => { const val = parseInt(e.target.value) || 0; setCurrentQty(val); if (errors.qty) setErrors({ ...errors, qty: '' }); }}
+                            placeholder="0"
+                        />
+                        {showConversion && (
+                            <span className="text-[9px] text-[#2C5E3B]/60 dark:text-[#A9CBA2]/60 block text-center">
+                                = {totalUnits.toLocaleString()} sellable units
+                            </span>
+                        )}
+                        {errors.qty && <span className="text-[9px] text-red-500 block text-center">{errors.qty}</span>}
+                    </div>
                     <div className="col-span-4 space-y-1">
                         <label className="text-[10px] text-gray-500 uppercase tracking-widest font-bold ml-1 block">Unit Cost <span className="text-red-500">*</span></label>
                         <input
