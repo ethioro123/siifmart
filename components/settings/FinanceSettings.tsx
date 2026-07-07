@@ -1,194 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import {
     DollarSign, PieChart, CreditCard, Landmark, Calculator,
-    AlertTriangle, Calendar, Percent, Coins, ArrowRightLeft,
-    Save, Globe, MapPin, Plus, Trash2, Layers, ShieldCheck,
-    ShieldCheck as ShieldIcon, CheckCircle2
+    Calendar, Percent, Coins, ArrowRightLeft,
+    Save, Globe, MapPin, Plus, Layers, ShieldCheck, CheckCircle2
 } from 'lucide-react';
 import { useData } from '../../contexts/DataContext';
 import { useStore } from '../../contexts/CentralStore';
 import Button from '../shared/Button';
 import Modal from '../Modal';
 
-// --- SUB-COMPONENTS ---
-const SectionHeader = ({ title, desc }: { title: string, desc: string }) => (
-    <div className="mb-6 pb-4 border-b border-white/5">
-        <h3 className="text-xl font-bold text-white">{title}</h3>
-        <p className="text-sm text-gray-400 mt-1">{desc}</p>
-    </div>
-);
-
-const InputGroup = ({ label, value, onChange, placeholder, sub, icon: Icon, type = "text", prefix }: any) => (
-    <div className="group">
-        <label className="text-xs text-gray-400 font-bold uppercase tracking-wide mb-2 block group-hover:text-cyber-primary transition-colors flex items-center gap-2">
-            {Icon && <Icon size={14} />} {label}
-        </label>
-        <div className="relative">
-            {prefix && (
-                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold text-sm pointer-events-none">
-                    {prefix}
-                </div>
-            )}
-            <input
-                type={type}
-                value={value || ''}
-                onChange={onChange}
-                placeholder={placeholder}
-                className={`w-full bg-black/40 border border-white/10 rounded-xl py-3 text-white text-sm focus:border-cyber-primary focus:ring-1 focus:ring-cyber-primary/50 outline-none transition-all placeholder:text-gray-600 ${prefix ? 'pl-10 pr-4' : 'px-4'}`}
-            />
-            {sub && <p className="text-[10px] text-gray-500 mt-2 ml-1">{sub}</p>}
-        </div>
-    </div>
-);
-
-const RadioCard = ({ options, value, onChange }: any) => (
-    <div className="grid grid-cols-2 gap-3">
-        {options.map((opt: any) => (
-            <button
-                key={opt.value}
-                type="button"
-                onClick={() => onChange(opt.value)}
-                className={`p-4 rounded-xl border text-left transition-all ${value === opt.value
-                    ? 'bg-cyber-primary/10 border-cyber-primary text-white'
-                    : 'bg-black/40 border-white/10 text-gray-400 hover:bg-white/5'
-                    }`}
-            >
-                <div className="flex items-center gap-2 mb-1">
-                    {opt.icon && <opt.icon size={16} className={value === opt.value ? 'text-cyber-primary' : 'text-gray-500'} />}
-                    <span className="font-bold text-sm">{opt.label}</span>
-                </div>
-                <p className="text-[10px] opacity-70">{opt.desc}</p>
-            </button>
-        ))}
-    </div>
-);
-
-const ToggleRow = ({ label, sub, checked, onChange }: any) => (
-    <div className="flex items-start justify-between p-3 bg-black/20 rounded-xl border border-white/5 hover:border-white/10 transition-colors">
-        <div className="space-y-1">
-            <p className="text-sm font-bold text-gray-200">{label}</p>
-            <p className="text-[10px] text-gray-500">{sub}</p>
-        </div>
-        <div
-            onClick={onChange}
-            className={`w-11 h-6 shrink-0 rounded-full p-1 cursor-pointer transition-colors relative ${checked ? 'bg-cyber-primary' : 'bg-white/10'
-                }`}
-        >
-            <div className={`w-4 h-4 bg-black rounded-full shadow-md transition-transform transform ${checked ? 'translate-x-5' : 'translate-x-0'
-                }`} />
-        </div>
-    </div>
-);
-
-const TaxZoneCard = ({ zone, onDelete, onAddRule, onDeleteRule, sites, onAssignSite, onUnassignSite }: any) => {
-    const assignedSites = sites.filter((s: any) => s.taxJurisdictionId === zone.id);
-    const availableSites = sites.filter((s: any) => !s.taxJurisdictionId);
-
-    // Calculate effective tax rate (simple sum, compound is additive for display)
-    const effectiveRate = zone.rules.reduce((sum: number, r: any) => sum + (r.rate || 0), 0);
-
-    return (
-        <div className="bg-black/40 border border-white/10 rounded-xl p-4 hover:border-white/20 transition-all group">
-            <div className="flex justify-between items-start mb-4">
-                <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-cyber-primary/10 flex items-center justify-center text-cyber-primary">
-                        <Globe size={18} />
-                    </div>
-                    <div>
-                        <h4 className="font-bold text-white">{zone.name}</h4>
-                        <div className="flex items-center gap-2 mt-1">
-                            <span className="text-[10px] uppercase tracking-wide text-gray-500 bg-white/5 px-2 py-0.5 rounded">{zone.type}</span>
-                            {zone.rules.length > 0 && (
-                                <span className="text-[10px] font-mono font-bold text-cyber-primary bg-cyber-primary/10 px-2 py-0.5 rounded">
-                                    {effectiveRate.toFixed(1)}% Total
-                                </span>
-                            )}
-                        </div>
-                    </div>
-                </div>
-                <button onClick={onDelete} title="Delete Jurisdiction" className="text-gray-600 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all">
-                    <Trash2 size={16} />
-                </button>
-            </div>
-
-            {/* Assigned Sites */}
-            <div className="mb-4">
-                <p className="text-[10px] text-gray-500 uppercase font-black mb-2 flex items-center gap-1">
-                    <MapPin size={10} /> Assigned Sites ({assignedSites.length})
-                </p>
-                <div className="flex flex-wrap gap-2">
-                    {assignedSites.length === 0 && (
-                        <span className="text-[10px] text-yellow-500/70 italic">No sites assigned</span>
-                    )}
-                    {assignedSites.map((s: any) => (
-                        <div key={s.id} className="flex items-center gap-1.5 bg-cyber-primary/5 border border-cyber-primary/20 rounded-full px-2 py-1 group/site">
-                            <span className="text-[10px] text-cyber-primary font-bold">{s.name}</span>
-                            <button
-                                onClick={() => onUnassignSite(s.id)}
-                                title={`Unassign ${s.name} from jurisdiction`}
-                                className="text-cyber-primary/40 hover:text-red-400 transition-colors"
-                            >
-                                <Plus size={10} className="rotate-45" />
-                            </button>
-                        </div>
-                    ))}
-                    {availableSites.length > 0 && (
-                        <select
-                            title="Assign site to this jurisdiction"
-                            onChange={(e) => {
-                                if (e.target.value) {
-                                    onAssignSite(e.target.value, zone.id);
-                                    e.target.value = "";
-                                }
-                            }}
-                            className="bg-transparent border border-dashed border-white/10 rounded-full px-2 py-0.5 text-[10px] text-gray-500 hover:border-cyber-primary/30 outline-none cursor-pointer"
-                        >
-                            <option value="">+ Assign Site</option>
-                            {availableSites.map((s: any) => (
-                                <option key={s.id} value={s.id}>{s.name}</option>
-                            ))}
-                        </select>
-                    )}
-                </div>
-            </div>
-
-            <div className="space-y-2">
-                <p className="text-[10px] text-gray-500 uppercase font-black flex items-center gap-1">
-                    <Percent size={10} /> Tax Rules ({zone.rules.length})
-                </p>
-                {zone.rules.length === 0 && (
-                    <p className="text-[10px] text-gray-600 italic py-2">No rules defined yet</p>
-                )}
-                {zone.rules.map((rule: any, idx: number) => (
-                    <div key={idx} className="flex justify-between items-center p-2 bg-white/5 rounded-lg border border-white/5 hover:border-white/10 group/rule">
-                        <div className="flex items-center gap-2">
-                            {rule.compound ? <Layers size={14} className="text-purple-400" /> : <Percent size={14} className="text-cyber-primary" />}
-                            <span className="text-xs text-gray-300">{rule.name}</span>
-                            {rule.compound && <span className="text-[8px] text-purple-400 uppercase">compound</span>}
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <span className="text-sm font-mono font-bold text-white">{rule.rate}%</span>
-                            <button
-                                onClick={() => onDeleteRule(zone.id, idx)}
-                                title="Delete Rule"
-                                className="text-gray-600 hover:text-red-400 opacity-0 group-hover/rule:opacity-100 transition-all"
-                            >
-                                <Trash2 size={12} />
-                            </button>
-                        </div>
-                    </div>
-                ))}
-                <button
-                    onClick={onAddRule}
-                    title="Add Tax Rule"
-                    className="w-full py-2 border border-dashed border-white/10 rounded-lg text-xs text-gray-500 hover:text-cyber-primary hover:border-cyber-primary/30 transition-colors flex items-center justify-center gap-1"
-                >
-                    <Plus size={12} /> Add Rule
-                </button>
-            </div>
-        </div>
-    );
-};
+// Subcomponents
+import { SectionHeader, InputGroup, RadioCard, ToggleRow } from './finance/FinanceInputControls';
+import { TaxZoneCard } from './finance/TaxZoneCard';
+import { FinanceModals } from './finance/FinanceModals';
 
 export default function FinanceSettings() {
     const { user } = useStore();
@@ -199,7 +23,7 @@ export default function FinanceSettings() {
         fiscalYearStart: string;
         accountingMethod: 'accrual' | 'cash';
         taxInclusive: boolean;
-        taxRate: number; // Unified from previous defaultVatRate/taxRate
+        taxRate: number;
         withholdingTax: number;
     }>({
         fiscalYearStart: '',
@@ -220,7 +44,6 @@ export default function FinanceSettings() {
         { code: 'EUR', rate: 132.8 }
     ]);
 
-    // Mock state for complex tax rules -> now synced from settings
     const [taxZones, setTaxZones] = useState<any[]>([]);
 
     const [isSavingPolicy, setIsSavingPolicy] = useState(false);
@@ -229,7 +52,7 @@ export default function FinanceSettings() {
 
     // Modal States
     const [isAddingZone, setIsAddingZone] = useState(false);
-    const [activeZoneId, setActiveZoneId] = useState<number | null>(null);
+    const [activeZoneId, setActiveZoneId] = useState<string | null>(null);
     const [newZone, setNewZone] = useState({ name: '', type: 'Region' });
     const [newRule, setNewRule] = useState({ name: '', rate: 0, compound: false });
 
@@ -259,7 +82,7 @@ export default function FinanceSettings() {
 
     const handleSaveSection = async (section: 'policy' | 'limits' | 'currency') => {
         const setSaving = section === 'policy' ? setIsSavingPolicy :
-            section === 'limits' ? setIsSavingLimits : (v: boolean) => { }; // No saving state for currency yet but we can add it if needed
+            section === 'limits' ? setIsSavingLimits : (v: boolean) => { };
 
         const data = section === 'policy' ? policy :
             section === 'limits' ? limits : { exchangeRates };
@@ -342,8 +165,6 @@ export default function FinanceSettings() {
             addNotification('alert', 'Failed to update site assignment.');
         }
     };
-
-    // Currency list removed from here and moved to state
 
     return (
         <div className="w-full max-w-full space-y-6 animate-in fade-in slide-in-from-right-4">
@@ -643,74 +464,18 @@ export default function FinanceSettings() {
             </div>
 
             {/* MODALS */}
-            <Modal
-                isOpen={isAddingZone}
-                onClose={() => setIsAddingZone(false)}
-                title="Add New Jurisdiction"
-                footer={(
-                    <div className="flex gap-3 justify-end">
-                        <Button variant="ghost" onClick={() => setIsAddingZone(false)}>Cancel</Button>
-                        <Button variant="primary" onClick={handleAddZone} disabled={!newZone.name}>Add Jurisdiction</Button>
-                    </div>
-                )}
-            >
-                <div className="space-y-4">
-                    <InputGroup
-                        label="Jurisdiction Name"
-                        placeholder="e.g. Oromia Region"
-                        value={newZone.name}
-                        onChange={(e: any) => setNewZone(prev => ({ ...prev, name: e.target.value }))}
-                        icon={Globe}
-                    />
-                    <div className="space-y-2">
-                        <label className="text-xs text-gray-400 font-bold uppercase tracking-wide">Type</label>
-                        <RadioCard
-                            value={newZone.type}
-                            onChange={(val: string) => setNewZone(prev => ({ ...prev, type: val }))}
-                            options={[
-                                { value: 'National', label: 'National', icon: Landmark },
-                                { value: 'Region', label: 'Region', icon: MapPin },
-                            ]}
-                        />
-                    </div>
-                </div>
-            </Modal>
-
-            <Modal
-                isOpen={activeZoneId !== null}
-                onClose={() => setActiveZoneId(null)}
-                title="Add Tax Rule"
-                footer={(
-                    <div className="flex gap-3 justify-end">
-                        <Button variant="ghost" onClick={() => setActiveZoneId(null)}>Cancel</Button>
-                        <Button variant="primary" onClick={handleAddRule} disabled={!newRule.name}>Add Rule</Button>
-                    </div>
-                )}
-            >
-                <div className="space-y-4">
-                    <InputGroup
-                        label="Rule Name"
-                        placeholder="e.g. Sales Tax"
-                        value={newRule.name}
-                        onChange={(e: any) => setNewRule(prev => ({ ...prev, name: e.target.value }))}
-                        icon={Layers}
-                    />
-                    <InputGroup
-                        label="Tax Rate (%)"
-                        type="number"
-                        value={newRule.rate}
-                        onChange={(e: any) => setNewRule(prev => ({ ...prev, rate: parseFloat(e.target.value) || 0 }))}
-                        icon={Percent}
-                        prefix="%"
-                    />
-                    <ToggleRow
-                        label="Compound Tax"
-                        sub="Apply this tax on top of previous taxes"
-                        checked={newRule.compound}
-                        onChange={() => setNewRule(prev => ({ ...prev, compound: !prev.compound }))}
-                    />
-                </div>
-            </Modal>
+            <FinanceModals
+                isAddingZone={isAddingZone}
+                setIsAddingZone={setIsAddingZone}
+                handleAddZone={handleAddZone}
+                newZone={newZone}
+                setNewZone={setNewZone}
+                activeZoneId={activeZoneId}
+                setActiveZoneId={setActiveZoneId}
+                handleAddRule={handleAddRule}
+                newRule={newRule}
+                setNewRule={setNewRule}
+            />
         </div>
     );
 }
