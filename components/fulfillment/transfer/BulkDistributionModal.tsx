@@ -7,6 +7,8 @@ import { getSellUnit } from '../../../utils/units';
 import { useData } from '../../../contexts/DataContext';
 import { logisticsZonesService } from '../../../services/supabase.service';
 import { logger } from '../../../utils/logger';
+import { SingleProductAllocation } from './components/SingleProductAllocation';
+import { WaveDistributionAllocations } from './components/WaveDistributionAllocations';
 
 interface BulkDistributionModalProps {
     isOpen: boolean;
@@ -346,231 +348,52 @@ export const BulkDistributionModal: React.FC<BulkDistributionModalProps> = ({
                         </div>
 
                         {isCrossZone && settings?.enforceRegionalZoning && user?.role === 'super_admin' && (
-                            <div className="bg-yellow-500/10 border border-yellow-500/30 text-yellow-400 p-4 rounded-xl flex items-start gap-3 animate-pulse">
-                                <AlertTriangle className="shrink-0 mt-0.5 text-yellow-400" size={18} />
-                                <div>
-                                    <h4 className="font-bold text-sm text-yellow-400">⚠️ Cross-Zone Allocation Override</h4>
-                                    <p className="text-xs mt-1 text-yellow-500/90 leading-relaxed">
-                                        You are distributing stock from <span className="font-bold text-white">{getZoneName(sourceSiteObj?.logisticsZoneId)}</span> to stores in different Logistics Zones: {crossZoneStores.map(s => `${s.name} (${getZoneName(s.logisticsZoneId)})`).join(', ')}. As CEO, you are authorized to override this restriction.
-                                    </p>
-                                </div>
-                            </div>
+                             <div className="bg-yellow-500/10 border border-yellow-500/30 text-yellow-400 p-4 rounded-xl flex items-start gap-3 animate-pulse">
+                                 <AlertTriangle className="shrink-0 mt-0.5 text-yellow-400" size={18} />
+                                 <div>
+                                     <h4 className="font-bold text-sm text-yellow-400">⚠️ Cross-Zone Allocation Override</h4>
+                                     <p className="text-xs mt-1 text-yellow-500/90 leading-relaxed">
+                                         You are distributing stock from <span className="font-bold text-white">{getZoneName(sourceSiteObj?.logisticsZoneId)}</span> to stores in different Logistics Zones: {crossZoneStores.map(s => `${s.name} (${getZoneName(s.logisticsZoneId)})`).join(', ')}. As CEO, you are authorized to override this restriction.
+                                     </p>
+                                 </div>
+                             </div>
                         )}
 
                         {/* Single Mode Content */}
                         {bulkDistributionMode === 'single' && (
-                            <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-300">
-                                <div>
-                                    <label className="block text-xs font-bold text-gray-400 uppercase mb-2">Select Product to Distribute</label>
-                                    {isSearchingProduct ? (
-                                        <div className="mt-2">
-                                            <ProductSelector
-                                                products={allProducts}
-                                                onSelect={(product) => {
-                                                    setBulkDistributionProductId(product.id);
-                                                    const warehouseId = bulkDistributionSourceSite || activeSite?.id;
-                                                    const stores = sites.filter(s => {
-                                                        if (s.type !== 'Store') return false;
-
-                                                        if (settings?.enforceRegionalZoning) {
-                                                            if (user?.role !== 'super_admin' && sourceSiteObj) {
-                                                                return (s.logisticsZoneId || '') === (sourceSiteObj.logisticsZoneId || '');
-                                                            }
-                                                        }
-                                                        return true;
-                                                    });
-                                                    setBulkDistributionAllocations(stores.map(s => ({ storeId: s.id, quantity: 0 })));
-                                                    setIsSearchingProduct(false);
-                                                }}
-                                                onCancel={() => setIsSearchingProduct(false)}
-                                            />
-                                        </div>
-                                    ) : (
-                                        <div onClick={() => setIsSearchingProduct(true)} className="cursor-pointer">
-                                            <div className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white flex justify-between items-center hover:border-blue-500/50 transition-colors">
-                                                <span>
-                                                    {bulkDistributionProductId
-                                                        ? products.find(p => p.id === bulkDistributionProductId)?.name
-                                                        : "Select Product to Distribute..."}
-                                                </span>
-                                                <Search size={14} className="text-gray-500" />
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-
-                                {bulkDistributionProductId && (
-                                    <div className="bg-black/20 rounded-xl border border-white/5 overflow-hidden">
-                                        <div className="p-3 bg-white/5 border-b border-white/5 font-bold text-xs text-white uppercase tracking-wider flex justify-between items-center">
-                                            <span>Store Allocation</span>
-                                            <div className="flex items-center gap-3">
-                                                {(() => {
-                                                    const prod = allProducts.find(p => p.id === bulkDistributionProductId);
-                                                    const sourceStockItem = allProducts.find(p => p.sku === prod?.sku && p.siteId === bulkDistributionSourceSite);
-                                                    const rawStock = sourceStockItem?.stock || 0;
-                                                    const unitDef = getSellUnit(sourceStockItem?.unit || prod?.unit || '');
-                                                    const sizeNum = parseFloat(sourceStockItem?.size || prod?.size || '0');
-                                                    const isWeightVol = unitDef.category === 'weight' || unitDef.category === 'volume';
-                                                    const displayStock = isWeightVol && sizeNum > 0 ? rawStock * sizeNum : rawStock;
-                                                    const totalAllocated = bulkDistributionAllocations.reduce((acc, curr) => acc + curr.quantity, 0);
-                                                    const displayRemaining = displayStock - (isWeightVol && sizeNum > 0 ? totalAllocated * sizeNum : totalAllocated);
-                                                    const unitLabel = unitDef.code !== 'UNIT' ? ` ${unitDef.shortLabel}` : '';
-                                                    const isWarning = displayRemaining < 0;
-                                                    return (
-                                                        <span className={`text-[10px] px-2 py-0.5 rounded flex items-center gap-1 ${isWarning ? 'bg-red-500/10 text-red-400' : 'bg-green-500/10 text-green-400'}`}>
-                                                            Stock: {displayStock.toLocaleString()}{unitLabel} ➔ Rem: {displayRemaining.toLocaleString()}{unitLabel}
-                                                        </span>
-                                                    );
-                                                })()}
-                                                <span className="text-gray-400">Total: {bulkDistributionAllocations.reduce((acc, curr) => acc + curr.quantity, 0)} Units</span>
-                                            </div>
-                                        </div>
-                                        <div className="divide-y divide-white/5 max-h-[300px] overflow-y-auto custom-scrollbar">
-                                            {bulkDistributionAllocations.length === 0 ? (
-                                                <div className="p-6 text-center text-red-400 font-bold text-xs uppercase tracking-wider">
-                                                    ⚠️ No stores have this warehouse configured as a replenishment source.
-                                                </div>
-                                            ) : (
-                                                bulkDistributionAllocations.map(alloc => {
-                                                    const site = sites.find(s => s.id === alloc.storeId);
-                                                    return (
-                                                        <div key={alloc.storeId} className="p-3 flex items-center justify-between hover:bg-white/[0.02]">
-                                                            <span className="text-sm text-gray-300">{site?.name}</span>
-                                                            <input
-                                                                type="number"
-                                                                min="0"
-                                                                value={alloc.quantity}
-                                                                onChange={(e) => {
-                                                                    const newAllocs = [...bulkDistributionAllocations];
-                                                                    const target = newAllocs.find(a => a.storeId === alloc.storeId);
-                                                                    if (target) target.quantity = parseInt(e.target.value) || 0;
-                                                                    setBulkDistributionAllocations(newAllocs);
-                                                                }}
-                                                                className="w-20 bg-black/40 border border-white/10 rounded px-2 py-1 text-right text-white focus:border-blue-500 focus:outline-none"
-                                                                aria-label={`Quantity for ${site?.name}`}
-                                                            />
-                                                        </div>
-                                                    );
-                                                })
-                                            )}
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
+                            <SingleProductAllocation
+                                isSearchingProduct={isSearchingProduct}
+                                setIsSearchingProduct={setIsSearchingProduct}
+                                allProducts={allProducts}
+                                products={products}
+                                bulkDistributionProductId={bulkDistributionProductId}
+                                setBulkDistributionProductId={setBulkDistributionProductId}
+                                bulkDistributionSourceSite={bulkDistributionSourceSite}
+                                activeSite={activeSite}
+                                sites={sites}
+                                settings={settings}
+                                user={user}
+                                sourceSiteObj={sourceSiteObj}
+                                bulkDistributionAllocations={bulkDistributionAllocations}
+                                setBulkDistributionAllocations={setBulkDistributionAllocations}
+                            />
                         )}
 
                         {/* Wave Mode Content */}
                         {bulkDistributionMode === 'wave' && (
-                            <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-300">
-                                <div className="bg-[#2C5E3B]/10 border border-[#2C5E3B]/20 rounded-xl p-4 flex items-start gap-3">
-                                    <AlertOctagon className="text-[#A9CBA2] shrink-0" size={20} />
-                                    <div>
-                                        <h4 className="font-bold text-[#A9CBA2] text-sm">Wave Distribution Mode</h4>
-                                        <p className="text-xs text-[#A9CBA2]/80 mt-1">Add multiple products to build a distribution wave. Each product can have unique store allocations.</p>
-                                    </div>
-                                </div>
-
-                                {isSearchingProduct ? (
-                                    <div className="mt-2">
-                                        <ProductSelector
-                                            products={allProducts}
-                                            onSelect={(product) => {
-                                                const warehouseId = bulkDistributionSourceSite || activeSite?.id;
-                                                let stores = sites.filter(s => {
-                                                    if (s.type !== 'Store') return false;
-
-                                                    if (settings?.enforceRegionalZoning) {
-                                                        if (user?.role !== 'super_admin' && sourceSiteObj) {
-                                                            return (s.logisticsZoneId || '') === (sourceSiteObj.logisticsZoneId || '');
-                                                        }
-                                                    }
-                                                    return true;
-                                                });
-                                                setWaveProducts([...waveProducts, {
-                                                    productId: product.id,
-                                                    allocations: stores.map(s => ({ storeId: s.id, quantity: 0 }))
-                                                }]);
-                                                setIsSearchingProduct(false);
-                                            }}
-                                            onCancel={() => setIsSearchingProduct(false)}
-                                        />
-                                    </div>
-                                ) : (
-                                    <button
-                                        onClick={() => setIsSearchingProduct(true)}
-                                        className="w-full py-3 border border-dashed border-white/20 rounded-xl hover:bg-white/5 hover:border-white/40 text-gray-400 hover:text-white transition-all text-sm font-bold"
-                                    >
-                                        + Add Product to Wave
-                                    </button>
-                                )}
-
-                                <div className="space-y-4">
-                                    {waveProducts.map((wp, idx) => {
-                                        const prod = allProducts.find(p => p.id === wp.productId);
-                                        return (
-                                            <div key={idx} className="bg-black/20 border border-white/10 rounded-xl overflow-hidden">
-                                                <div className="p-3 bg-white/5 flex justify-between items-center">
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="font-bold text-white text-sm">{prod?.name}</div>
-                                                        {(() => {
-                                                            const sourceStockItem = allProducts.find(p => p.sku === prod?.sku && p.siteId === bulkDistributionSourceSite);
-                                                            const rawStock = sourceStockItem?.stock || 0;
-                                                            const unitDef = getSellUnit(sourceStockItem?.unit || prod?.unit || '');
-                                                            const sizeNum = parseFloat(sourceStockItem?.size || prod?.size || '0');
-                                                            const isWeightVol = unitDef.category === 'weight' || unitDef.category === 'volume';
-                                                            const displayStock = isWeightVol && sizeNum > 0 ? rawStock * sizeNum : rawStock;
-                                                            const totalAllocated = wp.allocations.reduce((acc, curr) => acc + curr.quantity, 0);
-                                                            const displayRemaining = displayStock - (isWeightVol && sizeNum > 0 ? totalAllocated * sizeNum : totalAllocated);
-                                                            const unitLabel = unitDef.code !== 'UNIT' ? ` ${unitDef.shortLabel}` : '';
-                                                            const isWarning = displayRemaining < 0;
-                                                            return (
-                                                                <span className={`text-[10px] font-bold px-2 py-0.5 rounded flex items-center gap-1 ${isWarning ? 'bg-red-500/10 text-red-400' : 'bg-green-500/10 text-green-400'}`}>
-                                                                    Stock: {displayStock.toLocaleString()}{unitLabel} ➔ Rem: {displayRemaining.toLocaleString()}{unitLabel}
-                                                                </span>
-                                                            );
-                                                        })()}
-                                                    </div>
-                                                    <button onClick={() => {
-                                                        const newWp = [...waveProducts];
-                                                        newWp.splice(idx, 1);
-                                                        setWaveProducts(newWp);
-                                                    }} className="text-red-400 hover:text-red-300" aria-label={`Remove ${prod?.name} from wave`}><X size={16} /></button>
-                                                </div>
-                                                <div className="p-3 grid grid-cols-2 sm:grid-cols-3 gap-2">
-                                                    {wp.allocations.length === 0 ? (
-                                                        <div className="col-span-full p-4 text-center text-red-400 font-bold text-[10px] uppercase tracking-wider">
-                                                            ⚠️ No stores have this warehouse configured as a replenishment source.
-                                                        </div>
-                                                    ) : (
-                                                        wp.allocations.map(alloc => {
-                                                            const site = sites.find(s => s.id === alloc.storeId);
-                                                            return (
-                                                                <div key={alloc.storeId} className="flex items-center justify-between text-xs bg-black/40 p-2 rounded">
-                                                                    <span className="text-gray-400 truncate max-w-[80px]">{site?.name}</span>
-                                                                    <input
-                                                                        type="number"
-                                                                        className="w-12 bg-transparent border-b border-white/20 text-right text-white focus:outline-none focus:border-blue-500"
-                                                                        value={alloc.quantity}
-                                                                        onChange={(e) => {
-                                                                            const newWp = [...waveProducts];
-                                                                            const targetIndex = newWp[idx].allocations.findIndex(a => a.storeId === alloc.storeId);
-                                                                            if (targetIndex !== -1) {
-                                                                                newWp[idx].allocations[targetIndex].quantity = parseInt(e.target.value) || 0;
-                                                                                setWaveProducts(newWp);
-                                                                            }
-                                                                        }}
-                                                                        aria-label={`Quantity for ${site?.name}`}
-                                                                    />
-                                                                </div>
-                                                            );
-                                                        })
-                                                    )}
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            </div>
+                            <WaveDistributionAllocations
+                                isSearchingProduct={isSearchingProduct}
+                                setIsSearchingProduct={setIsSearchingProduct}
+                                allProducts={allProducts}
+                                bulkDistributionSourceSite={bulkDistributionSourceSite}
+                                activeSite={activeSite}
+                                sites={sites}
+                                settings={settings}
+                                user={user}
+                                sourceSiteObj={sourceSiteObj}
+                                waveProducts={waveProducts}
+                                setWaveProducts={setWaveProducts}
+                            />
                         )}
                     </div>
 
