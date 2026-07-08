@@ -2,7 +2,6 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { authService } from '../services/auth.service';
 import { UserRole } from '../types';
 import { employeesService } from '../services/employees.service';
-
 import { useSessionManager } from '../hooks/useSessionManager';
 import { useDataRefresh } from '../hooks/useDataRefresh';
 import { useNetworkStatus } from '../hooks/useNetworkStatus';
@@ -12,7 +11,6 @@ import { APP_CONFIG } from '../config/app.config';
 import Toast from '../components/Toast';
 import { usePresence } from '../services/realtime.service';
 import { logger } from '../utils/logger';
-
 interface User {
   id: string;
   name: string;
@@ -24,14 +22,12 @@ interface User {
   email?: string;
   loginLocation?: string;
 }
-
 interface ToastMessage {
   id: string;
   message: string;
   type: 'info' | 'warning' | 'error' | 'success';
   duration?: number;
 }
-
 interface StoreContextType {
   user: User | null;
   originalUser?: User | null; // For Ghost Mode

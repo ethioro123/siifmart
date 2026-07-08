@@ -5,7 +5,7 @@ describe('ProductSchema Validation', () => {
     it('should validate a correct product object', () => {
         const validProduct = {
             id: 'prod_123',
-            siteId: 'site_1',
+            siteId: 'd3b07384-d113-49cd-a5d6-8c50e29b1d34',
             name: 'Energy Drink',
             category: 'Beverages',
             price: 2.50,
