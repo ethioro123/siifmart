@@ -154,7 +154,7 @@ export const TransferJobDetails: React.FC<TransferJobDetailsProps> = ({
                                 </div>
                             </div>
                         </div>
-                        <button onClick={() => setSelectedJob(null)} aria-label={t('warehouse.dismiss')} className="p-3 bg-stone-150 dark:bg-white/5 hover:bg-stone-200 dark:hover:bg-white/10 border border-stone-250 dark:border-white/10 rounded-2xl text-gray-550 hover:text-gray-900 dark:hover:text-white transition-all">
+                        <button onClick={() => setSelectedJob(null)} aria-label={t('warehouse.dismiss')} className="p-3 bg-stone-100 dark:bg-white/5 hover:bg-stone-200 dark:hover:bg-white/10 border border-stone-200 dark:border-white/10 rounded-2xl text-gray-500 hover:text-gray-900 dark:hover:text-white transition-all">
                             <X size={20} />
                         </button>
                     </div>
@@ -169,7 +169,7 @@ export const TransferJobDetails: React.FC<TransferJobDetailsProps> = ({
                     <div>
                         <div className="flex items-center justify-between mb-6">
                             <h3 className="font-black text-[#2C5E3B] dark:text-[#A9CBA2] flex items-center gap-3 text-xs uppercase tracking-[0.3em]"><Package size={16} /> {t('warehouse.transferRequest')}</h3>
-                            <span className="text-[10px] font-black text-gray-500 bg-stone-100 dark:bg-white/5 px-3 py-1.5 rounded-xl border border-stone-250 dark:border-white/5 uppercase tracking-widest">{totalItems} {t('warehouse.itemPlural')}</span>
+                            <span className="text-[10px] font-black text-gray-500 bg-stone-100 dark:bg-white/5 px-3 py-1.5 rounded-xl border border-stone-200 dark:border-white/5 uppercase tracking-widest">{totalItems} {t('warehouse.itemPlural')}</span>
                         </div>
                         <div className="space-y-4">
                             {selectedJob.lineItems?.map((item: any, idx: number) => {
@@ -188,7 +188,7 @@ export const TransferJobDetails: React.FC<TransferJobDetailsProps> = ({
                                             </div>
                                             <div>
                                                 <h4 className="text-gray-900 dark:text-white font-black tracking-tight mb-1 group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] transition-colors uppercase text-sm">{item.name || item.productName || product?.name || 'Unknown'}</h4>
-                                                <span className="text-[10px] font-mono font-black text-gray-550 dark:text-gray-400 bg-stone-200/50 dark:bg-black/40 px-2 py-0.5 rounded border border-stone-300/30 dark:border-white/5 uppercase tracking-tighter">{itemSku}</span>
+                                                <span className="text-[10px] font-mono font-black text-gray-500 dark:text-gray-400 bg-stone-200/50 dark:bg-black/40 px-2 py-0.5 rounded border border-stone-300/30 dark:border-white/5 uppercase tracking-tighter">{itemSku}</span>
                                             </div>
                                         </div>
                                         <div className="flex flex-col items-end gap-3 min-w-[170px]">
@@ -206,7 +206,7 @@ export const TransferJobDetails: React.FC<TransferJobDetailsProps> = ({
                                                 </div>
                                                 {showReceived && (
                                                     <div className="text-right">
-                                                        <span className={`text-[9px] font-black uppercase tracking-[0.2em] block mb-1 ${hasDiscrepancy ? 'text-red-600/60' : 'text-green-600/60'}`}>{t('warehouse.received')}</span>
+                                                        <span className={`text-[9px] font-black uppercase tracking-[0.2em] block mb-1 ${hasDiscrepancy ? 'text-red-650/60' : 'text-green-600/60'}`}>{t('warehouse.received')}</span>
                                                         <QtyDisplay qty={item.receivedQty} unit={itemUnit} isMeasure={isWeightVol} color={hasDiscrepancy ? 'red' : 'green'} t={t} />
                                                     </div>
                                                 )}
@@ -232,22 +232,22 @@ export const TransferJobDetails: React.FC<TransferJobDetailsProps> = ({
                             {(() => {
                                 const s = sites.find(x => x.id === selectedJob.sourceSiteId);
                                 return s ? (
-                                    <span className="px-2.5 py-1.5 rounded-xl bg-stone-100 dark:bg-white/5 border border-stone-250 dark:border-white/10 text-gray-900 dark:text-gray-300 font-black tracking-wide font-mono text-[10px] uppercase shadow-sm">
-                                        {s.name} <span className="text-gray-400 dark:text-gray-650 font-normal">({s.code || s.id})</span>
+                                    <span className="px-2.5 py-1.5 rounded-xl bg-stone-100 dark:bg-white/5 border border-stone-200 dark:border-white/10 text-gray-900 dark:text-gray-300 font-black tracking-wide font-mono text-[10px] uppercase tracking-wider shadow-sm">
+                                        {s.name} <span className="text-gray-400 dark:text-gray-600 font-normal">({s.code || s.id})</span>
                                     </span>
                                 ) : (
-                                    <span className="px-2.5 py-1.5 rounded-xl bg-stone-100 dark:bg-white/5 border border-stone-250 dark:border-white/10 font-mono text-[10px]">{selectedJob.sourceSiteId}</span>
+                                    <span className="px-2.5 py-1.5 rounded-xl bg-stone-100 dark:bg-white/5 border border-stone-200 dark:border-white/10 font-mono text-[10px]">{selectedJob.sourceSiteId}</span>
                                 );
                             })()}
                             <ArrowRight size={14} className="text-[#2C5E3B] dark:text-[#A9CBA2] shrink-0" />
                             {(() => {
                                 const s = sites.find(x => x.id === selectedJob.destSiteId);
                                 return s ? (
-                                    <span className="px-2.5 py-1.5 rounded-xl bg-stone-100 dark:bg-white/5 border border-stone-250 dark:border-white/10 text-gray-900 dark:text-gray-300 font-black tracking-wide font-mono text-[10px] uppercase shadow-sm">
-                                        {s.name} <span className="text-gray-400 dark:text-gray-650 font-normal">({s.code || s.id})</span>
+                                    <span className="px-2.5 py-1.5 rounded-xl bg-stone-100 dark:bg-white/5 border border-stone-200 dark:border-white/10 text-gray-900 dark:text-gray-300 font-black tracking-wide font-mono text-[10px] uppercase tracking-wider shadow-sm">
+                                        {s.name} <span className="text-gray-400 dark:text-gray-600 font-normal">({s.code || s.id})</span>
                                     </span>
                                 ) : (
-                                    <span className="px-2.5 py-1.5 rounded-xl bg-stone-100 dark:bg-white/5 border border-stone-250 dark:border-white/10 font-mono text-[10px]">{selectedJob.destSiteId}</span>
+                                    <span className="px-2.5 py-1.5 rounded-xl bg-stone-100 dark:bg-white/5 border border-stone-200 dark:border-white/10 font-mono text-[10px]">{selectedJob.destSiteId}</span>
                                 );
                             })()}
                         </div>
@@ -259,17 +259,17 @@ export const TransferJobDetails: React.FC<TransferJobDetailsProps> = ({
                             </button>
                         )}
                         {['Requested', 'Picking'].includes(transferStatus) && isManager && (
-                            <button onClick={handleReject} disabled={loading !== null} className="btn-secondary border-red-500/20 text-red-500 hover:bg-red-500/10">
+                            <button onClick={handleReject} disabled={loading !== null} className="btn-secondary border-red-500/20 text-red-550 hover:bg-red-500/10">
                                 {loading === 'reject' ? <Loader2 size={18} className="animate-spin" /> : <XCircle size={18} />} Reject
                             </button>
                         )}
                         {['Requested', 'Approved', 'Picking'].includes(transferStatus) && isManager && (
-                            <button onClick={handleDelete} disabled={loading !== null} className="btn-secondary border-red-500/20 text-red-500 hover:bg-red-500/10">
+                            <button onClick={handleDelete} disabled={loading !== null} className="btn-secondary border-red-500/20 text-red-550 hover:bg-red-500/10">
                                 {loading === 'delete' ? <Loader2 size={18} className="animate-spin" /> : <Trash2 size={18} />} Delete Manifest
                             </button>
                         )}
                         {(transferStatus === 'In-Transit' || transferStatus === 'Shipped') && selectedJob.destSiteId === activeSite?.id && (
-                            <button onClick={() => { setActiveTransferJob(selectedJob); setTransferReceiveItems(selectedJob.lineItems || []); setTransferReceiveMode(true); setSelectedJob(null); }} className="btn-primary bg-green-650 hover:bg-green-600 shadow-green-500/20">
+                            <button onClick={() => { setActiveTransferJob(selectedJob); setTransferReceiveItems(selectedJob.lineItems || []); setTransferReceiveMode(true); setSelectedJob(null); }} className="btn-primary bg-green-600 hover:bg-green-500 shadow-green-500/20">
                                 <Package size={18} /> {t('warehouse.received')}
                             </button>
                         )}
@@ -285,9 +285,9 @@ export const TransferJobDetails: React.FC<TransferJobDetailsProps> = ({
 };
 
 const DashboardStat = ({ label, value, icon: Icon, color }: any) => (
-    <div className="bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 p-5 rounded-[2rem] flex items-center justify-between group hover:border-[#2C5E3B]/20 transition-all">
+    <div className="bg-stone-50 dark:bg-white/5 border border-stone-200 dark:border-white/5 p-5 rounded-[2rem] flex items-center justify-between group hover:border-[#2C5E3B]/20 dark:hover:border-[#2C5E3B]/40 transition-all shadow-sm">
         <div><span className="text-[10px] text-gray-400 dark:text-gray-500 font-black uppercase tracking-[0.2em] block mb-1">{label}</span><span className="text-base font-black text-gray-900 dark:text-white tracking-tight">{value}</span></div>
-        <div className={`w-12 h-12 rounded-2xl border flex items-center justify-center ${color === 'red' ? 'bg-red-500/10 border-red-500/20 text-red-500' : color === 'green' ? 'bg-green-500/10 border-green-500/20 text-green-500' : 'bg-gray-200 dark:bg-white/5 border-gray-300 dark:border-white/10 text-gray-400 dark:text-gray-600'}`}><Icon size={22} /></div>
+        <div className={`w-12 h-12 rounded-2xl border flex items-center justify-center ${color === 'red' ? 'bg-red-500/10 border-red-500/20 text-red-500' : color === 'green' ? 'bg-green-500/10 border-green-500/20 text-green-500' : 'bg-stone-100 dark:bg-white/5 border-stone-200 dark:border-white/10 text-[#2C5E3B] dark:text-[#A9CBA2]'}`}><Icon size={22} /></div>
     </div>
 );
 
