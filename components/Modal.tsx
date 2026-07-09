@@ -63,22 +63,22 @@ export default function Modal({
       />
 
       {/* Modal Content */}
-      <div className={`relative w-full ${isSide ? 'h-full max-w-md rounded-l-3xl rounded-r-none animate-in slide-in-from-right duration-300' : `${sizeClasses[size]} rounded-2xl animate-in fade-in zoom-in duration-200`} bg-cyber-dark dark:bg-cyber-dark border border-gray-200 dark:border-white/10 shadow-2xl dark:shadow-[0_0_50px_rgba(0,0,0,0.5)] transform transition-all flex flex-col ${isSide ? 'max-h-full' : 'max-h-[90vh]'} print:max-w-none print:w-full print:max-h-none print:shadow-none print:border-none print:rounded-none print:bg-white`}>
+      <div className={`relative w-full ${isSide ? 'h-full max-w-md rounded-l-3xl rounded-r-none animate-in slide-in-from-right duration-300' : `${sizeClasses[size]} rounded-2xl animate-in fade-in zoom-in duration-200`} bg-[#F7F3ED]/95 dark:bg-[#1E2822]/95 backdrop-blur-2xl border border-[#E2DCCE] dark:border-emerald-950/20 shadow-2xl dark:shadow-[0_32px_96px_-12px_rgba(5,8,6,0.65)] transform transition-all flex flex-col ${isSide ? 'max-h-full' : 'max-h-[90vh]'} print:max-w-none print:w-full print:max-h-none print:shadow-none print:border-none print:rounded-none print:bg-white`}>
 
         {/* Glow Effect */}
-        <div className={`absolute -inset-[1px] bg-gradient-to-r from-transparent via-cyber-primary/20 to-transparent ${isSide ? 'rounded-l-3xl' : 'rounded-2xl'} blur-sm -z-10 pointer-events-none print:hidden`} />
+        <div className={`absolute -inset-[1px] bg-gradient-to-r from-transparent via-[#2C5E3B]/20 to-transparent dark:via-[#A9CBA2]/10 ${isSide ? 'rounded-l-3xl' : 'rounded-2xl'} blur-sm -z-10 pointer-events-none print:hidden`} />
 
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-100 dark:border-white/5 shrink-0 print:hidden">
-          <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+        <div className="flex items-center justify-between p-6 border-b border-[#E2DCCE] dark:border-emerald-950/20 shrink-0 print:hidden">
+          <h3 className="text-lg font-extrabold text-[#1E3F27] dark:text-[#EAE5D9] flex items-center gap-2 uppercase tracking-tight">
             {title}
           </h3>
           <button
             onClick={onClose}
             aria-label="Close"
-            className="p-2 rounded-full bg-gray-100 dark:bg-white/5 text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-white/10 transition-colors"
+            className="p-2 rounded-xl bg-[#E2DCCE]/40 dark:bg-white/5 text-[#2C5E3B] dark:text-[#A9CBA2] hover:text-[#1E3F27] dark:hover:text-white hover:bg-[#E2DCCE]/60 dark:hover:bg-white/10 transition-colors"
           >
-            <X size={20} />
+            <X size={18} />
           </button>
         </div>
 
@@ -89,7 +89,7 @@ export default function Modal({
 
         {/* Footer */}
         {footer && (
-          <div className="p-6 border-t border-gray-100 dark:border-white/5 shrink-0">
+          <div className="p-6 border-t border-[#E2DCCE] dark:border-emerald-950/20 shrink-0">
             {footer}
           </div>
         )}

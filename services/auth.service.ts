@@ -46,6 +46,8 @@ export interface UserProfile {
     name: string;
     siteId?: string;
     avatar_url?: string;
+    employeeId?: string;
+    code?: string;
 }
 
 // ============================================================================
@@ -179,7 +181,9 @@ export const authService = {
                 name: employee.name,
                 role: employee.role as UserRole,
                 siteId: employee.siteId || employee.site_id,
-                avatar_url: employee.avatar
+                avatar_url: employee.avatar,
+                employeeId: employee.id,
+                code: employee.code
             };
         } catch (error) {
             console.warn('AuthService: Error getting auth user', error);

@@ -22,6 +22,7 @@ export const warehouse: TranslationBlock = {
     picking,
     ...packing,
     packing,
+    ...putaway,
     putaway,
     ...modals,
     ...auxiliary,

@@ -266,7 +266,7 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
   // CUSTOM HOOKS - Domain-specific actions
   // ══════════════════════════════════════════════════════════════
 
-  const gamificationActions = useGamificationActions({ sites, storePoints, setStorePoints });
+  const gamificationActions = useGamificationActions({ sites, storePoints, setStorePoints, settings });
 
   const siteActions = useSiteActions({
     sites, activeSiteId, settings, setSites, setSettings, setActiveSiteId,

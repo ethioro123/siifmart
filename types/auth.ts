@@ -30,6 +30,8 @@ export interface User {
   title: string;
   siteId?: string;
   email?: string;
+  employeeId?: string;
+  code?: string;
 }
 
 export interface StoreContextType {

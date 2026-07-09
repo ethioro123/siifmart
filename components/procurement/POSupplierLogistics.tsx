@@ -165,8 +165,30 @@ export const POSupplierLogistics: React.FC<POSupplierLogisticsProps> = ({
 
                             {/* Dropdown Menu */}
                             {isSiteDropdownOpen && (
-                                <div className="absolute z-50 w-full mt-2 bg-white dark:bg-[#0d0d0d] border border-gray-200 dark:border-white/10 rounded-xl shadow-2xl backdrop-blur-2xl max-h-60 overflow-y-auto custom-scrollbar p-2 ring-1 ring-black/5 dark:ring-white/10">
-                                    <div className="text-[9px] text-gray-400 dark:text-gray-500 uppercase font-black p-2 pb-1 tracking-tighter">Available Warehouses</div>
+                                <div className="absolute z-50 w-full mt-2 bg-white dark:bg-[#1E2822] border border-[#E2DCCE] dark:border-emerald-950/20 rounded-xl shadow-2xl backdrop-blur-2xl max-h-60 overflow-y-auto custom-scrollbar p-2 ring-1 ring-black/5 dark:ring-white/10">
+                                    <div className="flex justify-between items-center px-2 py-1.5 border-b border-gray-100 dark:border-white/5 mb-1.5">
+                                        <div className="text-[9px] text-gray-400 dark:text-gray-500 uppercase font-black tracking-tighter">Available Warehouses</div>
+                                        <div className="flex gap-2">
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    const warehouseIds = sites.filter(s => s.type === 'Warehouse' || s.type === 'Distribution Center').map(s => s.id);
+                                                    setDestinationSiteIds(warehouseIds);
+                                                }}
+                                                className="text-[9px] text-[#2C5E3B] dark:text-[#A9CBA2] font-black uppercase hover:underline cursor-pointer"
+                                            >
+                                                Select All
+                                            </button>
+                                            <span className="text-[9px] text-gray-300 dark:text-gray-700">|</span>
+                                            <button
+                                                type="button"
+                                                onClick={() => setDestinationSiteIds([])}
+                                                className="text-[9px] text-red-500 dark:text-red-400 font-black uppercase hover:underline cursor-pointer"
+                                            >
+                                                Clear
+                                            </button>
+                                        </div>
+                                    </div>
                                     {sites.filter(s => s.type === 'Warehouse' || s.type === 'Distribution Center').map(s => (
                                         <div
                                             key={s.id}

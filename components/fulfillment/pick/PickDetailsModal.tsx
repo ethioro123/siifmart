@@ -33,9 +33,27 @@ export const PickDetailsModal: React.FC<PickDetailsModalProps> = ({
 
     // Resolve User Name
     const userId = selectedItem.completedBy || selectedItem.assignedTo;
-    const userObj = employees.find(e => e.id === userId);
-    // Use code if available, otherwise fallback to short UUID
-    const displayId = userObj?.code || (userId ? userId.slice(0, 5).toUpperCase() : '');
+    const isUUID = (str: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
+    let userObj = employees.find(e => 
+        e.id === userId || 
+        (e.name && userId && e.name.toLowerCase() === userId.toLowerCase()) || 
+        (e.email && userId && e.email.toLowerCase() === userId.toLowerCase()) ||
+        (e.code && userId && e.code.toLowerCase() === userId.toLowerCase())
+    );
+    if (!userObj && user && userId && (
+        userId.toLowerCase() === user.id?.toLowerCase() || 
+        userId.toLowerCase() === user.email?.toLowerCase() || 
+        userId.toLowerCase() === user.name?.toLowerCase() || 
+        userId.toLowerCase() === user.employeeId?.toLowerCase()
+    )) {
+        userObj = employees.find(e => 
+            (e.email && user.email && e.email.toLowerCase() === user.email.toLowerCase()) || 
+            (e.name && user.name && e.name.toLowerCase() === user.name.toLowerCase()) || 
+            e.id === user.employeeId
+        );
+    }
+    // Use code if available, otherwise fallback to full ID unless it's a UUID
+    const displayId = userObj?.code || (userId ? (isUUID(userId) ? userId.slice(0, 8).toUpperCase() : userId) : '');
 
     const userName = userObj ? userObj.name : (userId ? t('warehouse.picking.unknownUser') : t('warehouse.picking.systemUser'));
     const userDisplayId = displayId;
@@ -79,43 +97,43 @@ export const PickDetailsModal: React.FC<PickDetailsModalProps> = ({
         destSite: sites.find(s => s.id === (selectedItem.destSiteId || (selectedItem as any).dest_site_id)),
         userDisplay: (
             <>
-                {userName} <span className="text-zinc-550 dark:text-zinc-655 font-normal lowercase">({userDisplayId})</span>
+                {userName} <span className="text-zinc-550 dark:text-zinc-655 font-normal">({userDisplayId})</span>
             </>
         )
     };
 
     const sourceDisplay = data.sourceSite ? (
         <>
-            {data.sourceSite.name} <span className="text-emerald-600/50 dark:text-emerald-400/50 font-normal lowercase">({data.sourceSite.code || data.sourceSite.id})</span>
+            {data.sourceSite.name} <span className="text-emerald-600/50 dark:text-emerald-400/50 font-normal">({data.sourceSite.code || data.sourceSite.id})</span>
         </>
     ) : t('warehouse.unknownSite');
 
     const destDisplay = data.destSite ? (
         <>
-            {data.destSite.name} <span className="text-[#2C5E3B]/50 dark:text-[#A9CBA2]/50 font-normal lowercase">({data.destSite.code || data.destSite.id})</span>
+            {data.destSite.name} <span className="text-[#2C5E3B]/50 dark:text-[#A9CBA2]/50 font-normal">({data.destSite.code || data.destSite.id})</span>
         </>
     ) : t('warehouse.picking.internalOrUnknown');
 
     return (
         <>
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[200] p-4 animate-in fade-in duration-200">
-            <div className="bg-white dark:bg-black border-2 border-zinc-900 dark:border-white/10 rounded-3xl w-full max-w-4xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden relative">
+        <div className="fixed inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center z-[200] p-4 animate-in fade-in duration-200">
+            <div className="bg-[#FAF8F5]/95 dark:bg-[#1C2620]/95 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-3xl w-full max-w-4xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden relative">
 
                 {/* 🌿 Modal Ambient Glow - Forest Green Theme for Pick */}
-                <div className="absolute -top-24 -right-24 w-64 h-64 bg-[#2C5E3B]/5 dark:bg-[#2C5E3B]/10 blur-[100px] rounded-full pointer-events-none" />
-                <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-[#A9CBA2]/5 dark:bg-[#A9CBA2]/10 blur-[100px] rounded-full pointer-events-none" />
+                <div className="absolute -top-24 -right-24 w-64 h-64 bg-[#2C5E3B]/10 dark:bg-[#2C5E3B]/20 blur-[100px] rounded-full pointer-events-none" />
+                <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-[#A9CBA2]/10 dark:bg-[#A9CBA2]/25 blur-[100px] rounded-full pointer-events-none" />
 
                 {/* Header */}
-                <div className="p-6 border-b border-zinc-200 dark:border-white/10 flex justify-between items-start bg-zinc-50/80 dark:bg-zinc-950/50 backdrop-blur-sm">
+                <div className="p-6 border-b border-[#E2DCCE]/60 dark:border-emerald-950/20 flex justify-between items-start bg-[#FAF8F5]/30 dark:bg-[#1C2620]/30 backdrop-blur-sm">
                     <div className="flex gap-4 relative z-10">
-                        <div className="p-3 rounded-xl border border-zinc-300 dark:border-[#2C5E3B]/30 bg-zinc-100 dark:bg-[#2C5E3B]/10 text-zinc-950 dark:text-[#A9CBA2] shadow-md dark:shadow-[#2C5E3B]/20 transition-all duration-500">
+                        <div className="p-3 rounded-xl border border-[#E2DCCE]/20 dark:border-[#A9CBA2]/20 bg-[#2C5E3B]/15 dark:bg-[#A9CBA2]/15 text-[#2C5E3B] dark:text-[#A9CBA2] shadow-sm transition-all duration-500">
                             <Package size={24} />
                         </div>
                         <div>
                             <div className="flex items-center gap-2 mb-1">
-                                <h3 className="text-xl font-black text-zinc-950 dark:text-zinc-100 uppercase tracking-tight font-mono">{data.reference}</h3>
+                                <h3 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tight font-mono">{data.reference}</h3>
                                 <div className="flex gap-2">
-                                    <span className={`px-2 py-0.5 rounded text-[9px] font-mono border ${(data.status || '').toLowerCase() === 'completed' ? 'bg-green-500/10 border-green-500/20 text-green-600 dark:text-green-400' : 'bg-red-500/10 border-red-500/20 text-red-600 dark:text-red-400'}`}>
+                                    <span className={`px-2 py-0.5 rounded text-[9px] font-mono border ${(data.status || '').toLowerCase() === 'completed' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400' : 'bg-red-500/10 border-red-500/20 text-red-600 dark:text-red-400'}`}>
                                         {data.status}
                                     </span>
                                     {itemsArray.some(li => (li.returnedQty || 0) > 0) && (
@@ -125,60 +143,60 @@ export const PickDetailsModal: React.FC<PickDetailsModalProps> = ({
                                     )}
                                 </div>
                             </div>
-                            <p className="text-zinc-600 dark:text-zinc-550 text-[10px] font-black uppercase tracking-widest flex items-center gap-2 mt-1">
-                                <Box size={12} className="text-zinc-955 dark:text-zinc-400" />
+                            <p className="text-[#4D6E56] dark:text-[#7A9E83] text-[10px] font-black uppercase tracking-widest flex items-center gap-2 mt-1">
+                                <Box size={12} className="text-[#2C5E3B]/60 dark:text-[#A9CBA2]/60" />
                                 {data.title}
                             </p>
                         </div>
                     </div>
-                    <button onClick={onClose} className="p-2 hover:bg-zinc-100 dark:hover:bg-white/10 rounded-lg text-zinc-600 dark:text-zinc-650 hover:text-zinc-900 dark:hover:text-zinc-200 transition-colors" aria-label={t('warehouse.dismiss')}>
+                    <button onClick={onClose} className="p-2.5 rounded-xl bg-[#E2DCCE]/40 dark:bg-white/5 text-[#2C5E3B] dark:text-[#A9CBA2] hover:text-[#1E3F27] dark:hover:text-white hover:bg-[#E2DCCE]/60 dark:hover:bg-white/10 transition-colors" aria-label={t('warehouse.dismiss')}>
                         <X size={20} />
                     </button>
                 </div>
 
                 {/* Metadata Grid */}
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-zinc-200 dark:bg-zinc-900 border-b border-zinc-200 dark:border-white/10">
-                    <div className="bg-white dark:bg-black p-4 flex items-center gap-3">
-                        <div className="p-2 bg-zinc-50 dark:bg-white/5 rounded-lg text-zinc-900 dark:text-zinc-400">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-[#E2DCCE]/60 dark:bg-emerald-950/20 border-b border-[#E2DCCE]/60 dark:border-emerald-950/20">
+                    <div className="bg-white/40 dark:bg-[#1C2620]/40 p-4 flex items-center gap-3">
+                        <div className="p-2 bg-[#FAF8F5]/85 dark:bg-[#1C2620]/30 rounded-lg text-[#2C5E3B] dark:text-[#A9CBA2] border border-[#E2DCCE]/30 dark:border-white/5">
                             <Calendar size={18} />
                         </div>
                         <div>
-                            <p className="text-[10px] text-zinc-405 dark:text-zinc-500 uppercase font-black tracking-widest leading-none mb-1">{t('warehouse.timeSort')}</p>
-                            <p className="text-xs text-zinc-950 dark:text-zinc-200 font-mono tracking-tighter">{formatDateTime(data.date, { showTime: true })}</p>
+                            <p className="text-[10px] text-stone-400 dark:text-stone-500 uppercase font-black tracking-widest leading-none mb-1">{t('warehouse.timeSort')}</p>
+                            <p className="text-xs text-slate-900 dark:text-zinc-200 font-mono tracking-tighter">{formatDateTime(data.date, { showTime: true })}</p>
                         </div>
                     </div>
-                    <div className="bg-white dark:bg-black p-4 flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-zinc-100 dark:bg-[#2C5E3B]/20 flex items-center justify-center border border-zinc-300 dark:border-[#2C5E3B]/40 shadow-inner">
-                            <span className="text-[10px] font-black text-zinc-950 dark:text-[#A9CBA2]">{(data.user || 'S').charAt(0).toUpperCase()}</span>
+                    <div className="bg-white/40 dark:bg-[#1C2620]/40 p-4 flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-[#FAF8F5]/85 dark:bg-[#2C5E3B]/25 flex items-center justify-center border border-[#E2DCCE]/60 dark:border-[#2C5E3B]/45 shadow-inner">
+                            <span className="text-[10px] font-black text-[#2C5E3B] dark:text-[#A9CBA2]">{(data.user || 'S').charAt(0).toUpperCase()}</span>
                         </div>
                         <div>
-                            <p className="text-[10px] text-zinc-405 dark:text-zinc-500 uppercase font-black tracking-widest leading-none mb-1">{t('warehouse.putaway.jobDetails').split(' ')[0]}</p>
-                            <p className="text-xs text-zinc-950 dark:text-zinc-200 font-black uppercase break-words leading-tight">{data.userDisplay}</p>
+                            <p className="text-[10px] text-stone-400 dark:text-stone-500 uppercase font-black tracking-widest leading-none mb-1">{t('warehouse.putaway.jobDetails').split(' ')[0]}</p>
+                            <p className="text-xs text-slate-900 dark:text-zinc-200 font-black uppercase break-words leading-tight">{data.userDisplay}</p>
                         </div>
                     </div>
-                    <div className="bg-white dark:bg-black p-4 flex items-center gap-3">
-                        <div className="p-2 bg-zinc-50 dark:bg-white/5 rounded-lg text-emerald-600 dark:text-emerald-400">
+                    <div className="bg-white/40 dark:bg-[#1C2620]/40 p-4 flex items-center gap-3">
+                        <div className="p-2 bg-emerald-50/10 dark:bg-emerald-500/20 rounded-lg text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 dark:border-emerald-500/30">
                             <MapPin size={18} />
                         </div>
                         <div>
-                            <p className="text-[10px] text-zinc-405 dark:text-zinc-500 uppercase font-black tracking-widest leading-none mb-1">{t('warehouse.from')}</p>
+                            <p className="text-[10px] text-stone-400 dark:text-stone-500 uppercase font-black tracking-widest leading-none mb-1">{t('warehouse.from')}</p>
                             <p className="text-xs text-emerald-600 dark:text-emerald-400 font-black uppercase break-words leading-tight">{sourceDisplay}</p>
                         </div>
                     </div>
-                    <div className="bg-white dark:bg-black p-4 flex items-center gap-3">
-                        <div className="p-2 bg-zinc-50 dark:bg-white/5 rounded-lg text-[#2C5E3B] dark:text-[#A9CBA2]">
+                    <div className="bg-white/40 dark:bg-[#1C2620]/40 p-4 flex items-center gap-3">
+                        <div className="p-2 bg-[#2C5E3B]/10 dark:bg-[#2C5E3B]/20 rounded-lg text-[#2C5E3B] dark:text-[#A9CBA2] border border-[#2C5E3B]/20 dark:border-white/5">
                             <ArrowRight size={18} />
                         </div>
                         <div>
-                            <p className="text-[10px] text-zinc-405 dark:text-zinc-500 uppercase font-black tracking-widest leading-none mb-1">{t('warehouse.to')}</p>
+                            <p className="text-[10px] text-stone-400 dark:text-stone-500 uppercase font-black tracking-widest leading-none mb-1">{t('warehouse.to')}</p>
                             <p className="text-xs text-[#2C5E3B] dark:text-[#A9CBA2] font-black uppercase break-words leading-tight">{destDisplay}</p>
                         </div>
                     </div>
                 </div>
 
                 {/* Line Items */}
-                <div className="flex-1 overflow-y-auto p-6 custom-scrollbar bg-white dark:bg-black/50">
-                    <h4 className="text-[10px] font-black text-zinc-600 dark:text-gray-500 uppercase tracking-[0.2em] mb-4">{t('warehouse.itemsToPick')}</h4>
+                <div className="flex-1 overflow-y-auto p-6 custom-scrollbar bg-[#FAF8F5]/30 dark:bg-[#18201B]/30">
+                    <h4 className="text-[10px] font-black text-slate-500 dark:text-gray-500 uppercase tracking-[0.2em] mb-4">{t('warehouse.itemsToPick')}</h4>
                     <div className="space-y-3">
                         {data.items.map((item: any, idx: number) => {
                             const isShortPicked = item.orderedQty && item.orderedQty > (item.expectedQty || 1);
@@ -191,20 +209,20 @@ export const PickDetailsModal: React.FC<PickDetailsModalProps> = ({
                             );
 
                             return (
-                                <div key={idx} className="bg-zinc-50/50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl p-4 flex items-center justify-between group hover:bg-zinc-100 dark:hover:bg-white/[0.07] transition-all">
+                                <div key={idx} className="bg-white/85 dark:bg-[#1C2620]/50 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-xl p-4 flex items-center justify-between group hover:bg-[#FAF8F5]/60 dark:hover:bg-[#1C2620]/80 transition-all shadow-sm">
                                     <div className="flex items-center gap-4">
-                                        <div className="w-10 h-10 bg-zinc-100 dark:bg-black/40 rounded-lg border border-zinc-200 dark:border-white/10 flex items-center justify-center text-zinc-650 dark:text-zinc-600 font-black text-xs shrink-0">
-                                            {idx + 1}
+                                        <div className="w-10 h-10 bg-[#FAF8F5]/80 dark:bg-[#1C2620]/30 rounded-lg border border-[#E2DCCE]/60 dark:border-[#A9CBA2]/[0.06] flex items-center justify-center text-[#2C5E3B]/60 dark:text-[#A9CBA2]/60 font-black text-xs shrink-0 font-mono">
+                                            {String(idx + 1).padStart(2, '0')}
                                         </div>
                                         <div>
-                                            <p className="text-zinc-950 dark:text-zinc-100 font-black uppercase tracking-tight break-words leading-tight">{item.name || item.product?.name || productInfo?.name || t('warehouse.picking.unknownItem')}</p>
+                                            <p className="text-slate-900 dark:text-white font-black uppercase tracking-tight break-words leading-tight">{item.name || item.product?.name || productInfo?.name || t('warehouse.picking.unknownItem')}</p>
                                             <div className="flex flex-wrap items-center gap-2 mt-2">
-                                                <span className="text-[10px] text-zinc-555 dark:text-zinc-400 font-mono tracking-widest bg-zinc-100 dark:bg-white/5 px-2 py-0.5 rounded uppercase border border-zinc-200 dark:border-white/10">
+                                                <span className="text-[10px] text-[#2C5E3B] dark:text-[#A9CBA2] font-mono tracking-widest bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 px-2 py-0.5 rounded uppercase border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20">
                                                     {item.sku || item.product?.sku || productInfo?.sku}
                                                 </span>
 
                                                 {(productInfo?.brand || (item as any).brand) && (
-                                                    <span className="text-[10px] text-zinc-650 dark:text-zinc-400 font-black uppercase tracking-widest bg-zinc-100 dark:bg-white/5 px-2 py-0.5 rounded border border-dashed border-zinc-300 dark:border-white/10">
+                                                    <span className="text-[10px] text-[#4D6E56] dark:text-[#7A9E83] font-black uppercase tracking-widest bg-stone-100 dark:bg-white/5 px-2 py-0.5 rounded border border-dashed border-[#E2DCCE] dark:border-[#A9CBA2]/20">
                                                         {productInfo?.brand || (item as any).brand}
                                                     </span>
                                                 )}
@@ -216,7 +234,7 @@ export const PickDetailsModal: React.FC<PickDetailsModalProps> = ({
                                                 )}
 
                                                 {productInfo?.size && (
-                                                    <span className="text-[10px] text-zinc-650 dark:text-zinc-400 font-black uppercase tracking-widest bg-zinc-100 dark:bg-white/5 px-2 py-0.5 rounded border border-zinc-200 dark:border-white/10">
+                                                    <span className="text-[10px] text-[#4D6E56] dark:text-[#7A9E83] font-black uppercase tracking-widest bg-stone-100 dark:bg-white/5 px-2 py-0.5 rounded border border-[#E2DCCE] dark:border-[#A9CBA2]/20">
                                                         {formatProductSize(productInfo)}
                                                     </span>
                                                 )}

@@ -41,9 +41,14 @@ const computeCostPerSellUnit = (
 
     if (!sellCategory) return null;
 
-    // Handle count-based selling units: bypass physical size
+    // Handle count-based selling units: bypass physical size.
+    // Mirrors the formula in POItemForm and useReceiving:
+    //   hasCases = caseSize >= 1 (any explicit case layer, even 1 pack/case)
+    //   hasPacks = packQty > 1 and no case layer
     if (sellCategory === 'count') {
-        const packagingUnits = (caseSize > 1) ? (caseSize * packQty) : (packQty > 1 ? packQty : 1);
+        const hasCases = caseSize >= 1;
+        const hasPacks = packQty > 1 && !hasCases;
+        const packagingUnits = hasCases ? (caseSize * packQty) : (hasPacks ? packQty : 1);
         let sellUnitsInPackage = packagingUnits;
         if (su === 'DOZEN') {
             sellUnitsInPackage = packagingUnits / 12;
@@ -75,8 +80,10 @@ const computeCostPerSellUnit = (
         return null;
     }
 
-    // Calculate how many items are in the package
-    const itemsPerPurchaseUnit = (caseSize > 1) ? (caseSize * packQty) : (packQty > 1 ? packQty : 1);
+    // Calculate how many items are in the package (weight/volume path)
+    const hasCases = caseSize >= 1;
+    const hasPacks = packQty > 1 && !hasCases;
+    const itemsPerPurchaseUnit = hasCases ? (caseSize * packQty) : (hasPacks ? packQty : 1);
     const totalPhysicalInBase = sizeInBase * itemsPerPurchaseUnit;
 
     const sellUnitsInPackage = totalPhysicalInBase / sellInBase;

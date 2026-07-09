@@ -113,11 +113,14 @@ export const PickJobModal: React.FC<PickJobModalProps> = ({
     const progressPercent = totalItems > 0 ? (completedItems / totalItems) * 100 : 0;
 
     return (
-        <div className="fixed inset-0 z-[150] flex items-center justify-center p-2 md:p-4 bg-black/40 dark:bg-black/80 backdrop-blur-sm">
-            <div className="bg-white dark:bg-[#0a0a0a] w-full max-w-4xl max-h-[95vh] md:max-h-[90vh] rounded-3xl border border-[#E2DCCE]/60 dark:border-white/10 shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-[150] flex items-center justify-center p-2 md:p-4 bg-black/60 dark:bg-black/80 backdrop-blur-sm">
+            <div className="bg-[#FAF8F5]/95 dark:bg-[#1C2620]/95 w-full max-w-4xl max-h-[95vh] md:max-h-[90vh] rounded-3xl border border-[#E2DCCE] dark:border-emerald-950/20 shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200 relative">
+                {/* Visual Flair */}
+                <div className="hidden md:block absolute -top-32 -right-32 w-96 h-96 bg-[#2C5E3B]/10 dark:bg-[#2C5E3B]/20 blur-[100px] rounded-full pointer-events-none" />
+                <div className="hidden md:block absolute -bottom-32 -left-32 w-96 h-96 bg-[#A9CBA2]/10 dark:bg-[#A9CBA2]/25 blur-[100px] rounded-full pointer-events-none" />
 
                 {/* Header */}
-                <div className="relative p-3 md:p-6 border-b border-[#E2DCCE]/60 dark:border-white/10 bg-[#FAF8F5]/50 dark:bg-black/40 overflow-hidden shrink-0">
+                <div className="relative p-3 md:p-6 border-b border-[#E2DCCE]/60 dark:border-[#2C5E3B]/10 bg-[#FAF8F5]/30 dark:bg-[#1C2620]/30 backdrop-blur-md overflow-hidden shrink-0 z-10">
                     <div className="absolute -top-10 -right-10 w-40 h-40 bg-[#2C5E3B]/10 blur-[80px] rounded-full pointer-events-none" />
                     <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-[#A9CBA2]/10 blur-[80px] rounded-full pointer-events-none" />
 
@@ -309,7 +312,7 @@ export const PickJobModal: React.FC<PickJobModalProps> = ({
                 </div>
 
                 {/* Footer */}
-                <div className="p-3 md:p-6 border-t border-[#E2DCCE]/60 dark:border-white/10 bg-[#FAF8F5]/50 dark:bg-black/40 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 md:gap-4 shrink-0">
+                <div className="p-3 md:p-6 border-t border-[#E2DCCE]/60 dark:border-emerald-950/20 bg-[#FAF8F5]/50 dark:bg-zinc-950/40 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 md:gap-4 shrink-0 relative z-20">
                     <div className="hidden md:flex items-center gap-4">
                         <div className="flex flex-col">
                             <span className="text-[10px] text-gray-550 font-black uppercase tracking-widest">{t('warehouse.putaway.jobDetails').split(' ')[0]} {t('warehouse.assignedTo') || 'Assigned'}</span>

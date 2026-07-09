@@ -6,6 +6,8 @@ import { formatJobId } from '../../../utils/jobIdFormatter';
 import { formatProductSize, isWeightBased, isVolumeBased } from '../../../utils/units';
 import { useLanguage } from '../../../contexts/LanguageContext';
 
+import { useStore } from '../../../contexts/CentralStore';
+
 interface PackDetailsModalProps {
     selectedItem: WMSJob;
     onClose: () => void;
@@ -28,11 +30,30 @@ export const PackDetailsModal: React.FC<PackDetailsModalProps> = ({
     onReprintLabel
 }) => {
     const { t } = useLanguage();
+    const { user } = useStore();
     // Resolve User Name
     const userId = selectedItem.completedBy || selectedItem.assignedTo;
-    const userObj = employees.find(e => e.id === userId);
-    // Use code if available, otherwise fallback to short UUID
-    const displayId = userObj?.code || (userId ? userId.slice(0, 5).toUpperCase() : '');
+    const isUUID = (str: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
+    let userObj = employees.find(e => 
+        e.id === userId || 
+        (e.name && userId && e.name.toLowerCase() === userId.toLowerCase()) || 
+        (e.email && userId && e.email.toLowerCase() === userId.toLowerCase()) ||
+        (e.code && userId && e.code.toLowerCase() === userId.toLowerCase())
+    );
+    if (!userObj && user && userId && (
+        userId.toLowerCase() === user.id?.toLowerCase() || 
+        userId.toLowerCase() === user.email?.toLowerCase() || 
+        userId.toLowerCase() === user.name?.toLowerCase() || 
+        userId.toLowerCase() === user.employeeId?.toLowerCase()
+    )) {
+        userObj = employees.find(e => 
+            (e.email && user.email && e.email.toLowerCase() === user.email.toLowerCase()) || 
+            (e.name && user.name && e.name.toLowerCase() === user.name.toLowerCase()) || 
+            e.id === user.employeeId
+        );
+    }
+    // Use code if available, otherwise fallback to full ID unless it's a UUID
+    const displayId = userObj?.code || (userId ? (isUUID(userId) ? userId.slice(0, 8).toUpperCase() : userId) : '');
 
     const userName = userObj ? userObj.name : (userId ? 'Unknown' : 'System');
     const userDisplayId = displayId;
@@ -87,23 +108,23 @@ export const PackDetailsModal: React.FC<PackDetailsModalProps> = ({
     };
 
     return (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[200] p-0 md:p-4 animate-in fade-in duration-200">
-            <div className="bg-white dark:bg-black border-0 md:border-2 border-zinc-900 dark:border-white/10 w-full max-w-4xl h-[100dvh] md:h-auto md:max-h-[90vh] md:rounded-3xl shadow-2xl flex flex-col overflow-hidden relative">
+        <div className="fixed inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center z-[200] p-0 md:p-4 animate-in fade-in duration-200">
+            <div className="bg-[#FAF8F5]/95 dark:bg-[#1C2620]/95 border-0 md:border border-[#E2DCCE] dark:border-emerald-950/20 w-full max-w-4xl h-[100dvh] md:h-auto md:max-h-[90vh] md:rounded-3xl shadow-2xl flex flex-col overflow-hidden relative">
                 {/* 🌟 Modal Ambient Glow - Cyan Theme for Pack */}
-                <div className="absolute -top-24 -right-24 w-64 h-64 bg-[#2C5E3B]/5 dark:bg-[#2C5E3B]/10 blur-[100px] rounded-full pointer-events-none" />
-                <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-teal-500/5 dark:bg-teal-500/10 blur-[100px] rounded-full pointer-events-none" />
+                <div className="absolute -top-24 -right-24 w-64 h-64 bg-[#2C5E3B]/10 dark:bg-[#2C5E3B]/20 blur-[100px] rounded-full pointer-events-none" />
+                <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-teal-500/10 dark:bg-teal-550/5 blur-[100px] rounded-full pointer-events-none" />
 
                 {/* Header */}
-                <div className="p-3 md:p-6 border-b border-zinc-200 dark:border-white/10 flex justify-between items-start bg-zinc-50/80 dark:bg-zinc-950/50 backdrop-blur-sm shrink-0">
+                <div className="p-3 md:p-6 border-b border-[#E2DCCE]/60 dark:border-emerald-950/20 flex justify-between items-start bg-[#FAF8F5]/30 dark:bg-[#1C2620]/30 backdrop-blur-sm shrink-0">
                     <div className="flex gap-3 md:gap-4 relative z-10">
-                        <div className="p-2 md:p-3 rounded-lg md:rounded-xl border border-zinc-300 dark:border-[#A9CBA2]/20 bg-zinc-100 dark:bg-[#2C5E3B]/10 text-zinc-955 dark:text-[#A9CBA2] shadow-md dark:shadow-[#2C5E3B]/20 transition-all duration-500">
+                        <div className="p-2 md:p-3 rounded-lg md:rounded-xl border border-[#E2DCCE]/25 dark:border-[#A9CBA2]/20 bg-[#2C5E3B]/15 dark:bg-[#A9CBA2]/15 text-[#2C5E3B] dark:text-[#A9CBA2] shadow-sm transition-all duration-500">
                             <Archive size={20} className="md:w-6 md:h-6" />
                         </div>
                         <div>
                             <div className="flex items-center gap-2 mb-0.5 md:mb-1">
-                                <h3 className="text-lg md:text-xl font-black text-zinc-955 dark:text-zinc-100 uppercase tracking-tight font-mono leading-none">{data.reference}</h3>
+                                <h3 className="text-lg md:text-xl font-black text-slate-900 dark:text-white uppercase tracking-tight font-mono leading-none">{data.reference}</h3>
                                 <div className="flex gap-1 md:gap-2">
-                                    <span className={`px-1.5 md:px-2 py-0.5 rounded text-[8px] md:text-[9px] font-mono border ${data.status === 'Completed' ? 'bg-green-500/10 border-green-500/20 text-green-600 dark:text-green-400' : 'bg-zinc-100 border-zinc-200 text-zinc-600 dark:bg-white/5 dark:border-white/10 dark:text-zinc-400'}`}>
+                                    <span className={`px-1.5 md:px-2 py-0.5 rounded text-[8px] md:text-[9px] font-mono border ${data.status === 'Completed' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400' : 'bg-red-500/10 border-red-500/20 text-red-600 dark:text-red-400'}`}>
                                         {data.status}
                                     </span>
                                     {itemsArray.some(li => (li.returnedQty || 0) > 0) && (
@@ -113,76 +134,77 @@ export const PackDetailsModal: React.FC<PackDetailsModalProps> = ({
                                     )}
                                 </div>
                             </div>
-                            <p className="text-zinc-600 dark:text-zinc-550 text-[9px] md:text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 md:gap-2 md:mt-1">
-                                <Box size={10} className="md:w-3 md:h-3 text-zinc-955 dark:text-zinc-400" />
+                            <p className="text-[#4D6E56] dark:text-[#7A9E83] text-[9px] md:text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 md:gap-2 md:mt-1">
+                                <Box size={10} className="md:w-3 md:h-3 text-[#2C5E3B]/60 dark:text-[#A9CBA2]/60" />
                                 {data.title}
                             </p>
                         </div>
                     </div>
-                    <button onClick={onClose} className="p-1.5 md:p-2 hover:bg-zinc-100 dark:hover:bg-white/10 rounded-lg text-gray-405 dark:text-gray-500 hover:text-gray-900 dark:hover:text-gray-200 transition-colors" aria-label={t('warehouse.dismiss')}>
+                    <button onClick={onClose} className="p-2 md:p-2.5 rounded-xl bg-[#E2DCCE]/40 dark:bg-white/5 text-[#2C5E3B] dark:text-[#A9CBA2] hover:text-[#1E3F27] dark:hover:text-white hover:bg-[#E2DCCE]/60 dark:hover:bg-white/10 transition-colors" aria-label={t('warehouse.dismiss')}>
                         <X size={18} className="md:w-5 md:h-5" />
                     </button>
                 </div>
 
                 {/* Metadata Grid */}
-                <div className="grid grid-cols-2 lg:grid-cols-5 gap-px bg-zinc-200 dark:bg-zinc-900 border-b border-zinc-200 dark:border-white/10 shrink-0">
-                    <div className="bg-white dark:bg-black p-3 md:p-4 flex items-center gap-2 md:gap-3 lg:col-span-1">
-                        <div className="p-1.5 md:p-2 bg-zinc-50 dark:bg-white/5 rounded-lg text-zinc-900 dark:text-zinc-400">
+                <div className="grid grid-cols-2 lg:grid-cols-5 gap-px bg-[#E2DCCE]/60 dark:bg-emerald-950/20 border-b border-[#E2DCCE]/60 dark:border-emerald-950/20 shrink-0">
+                    <div className="bg-white/40 dark:bg-[#1C2620]/40 p-3 md:p-4 flex items-center gap-2 md:gap-3 lg:col-span-1">
+                        <div className="p-1.5 md:p-2 bg-[#FAF8F5]/85 dark:bg-[#1C2620]/30 rounded-lg text-[#2C5E3B] dark:text-[#A9CBA2] border border-[#E2DCCE]/30 dark:border-white/5">
                             <Calendar size={14} className="md:w-[18px] md:h-[18px]" />
                         </div>
                         <div className="min-w-0">
-                            <p className="text-[8px] md:text-[10px] text-zinc-405 dark:text-zinc-500 uppercase font-black tracking-widest leading-none mb-0.5 md:mb-1 truncate">{t('warehouse.completed')}</p>
-                            <p className="text-[10px] md:text-xs text-zinc-955 dark:text-zinc-200 font-mono tracking-tighter truncate">{formatDateTime(data.date, { showTime: true })}</p>
+                            <p className="text-[8px] md:text-[10px] text-stone-400 dark:text-stone-500 uppercase font-black tracking-widest leading-none mb-0.5 md:mb-1 truncate">{t('warehouse.completed')}</p>
+                            <p className="text-[10px] md:text-xs text-slate-900 dark:text-zinc-200 font-mono tracking-tighter truncate">{formatDateTime(data.date, { showTime: true })}</p>
                         </div>
                     </div>
                     
-                    <div className="bg-white dark:bg-black p-3 md:p-4 flex items-center gap-2 md:gap-3 border-l border-zinc-100 dark:border-white/5 lg:col-span-1">
-                            <div className="w-6 h-6 md:w-8 md:h-8 shrink-0 rounded-full bg-zinc-100 dark:bg-[#2C5E3B]/20 flex items-center justify-center border border-zinc-300 dark:border-[#A9CBA2]/30 shadow-inner">
-                                <span className="text-[8px] md:text-[10px] font-black text-zinc-955 dark:text-[#A9CBA2]">{(data.userName || 'S').charAt(0).toUpperCase()}</span>
+                    <div className="bg-white/40 dark:bg-[#1C2620]/40 p-3 md:p-4 flex items-center gap-2 md:gap-3 lg:col-span-1">
+                        <div className="w-6 h-6 md:w-8 md:h-8 shrink-0 rounded-full bg-[#FAF8F5]/85 dark:bg-[#2C5E3B]/25 flex items-center justify-center border border-[#E2DCCE]/60 dark:border-[#2C5E3B]/45 shadow-inner">
+                            <span className="text-[8px] md:text-[10px] font-black text-[#2C5E3B] dark:text-[#A9CBA2]">{(data.userName || 'S').charAt(0).toUpperCase()}</span>
                         </div>
                         <div className="min-w-0">
-                            <p className="text-[8px] md:text-[10px] text-zinc-405 dark:text-zinc-500 uppercase font-black tracking-widest leading-none mb-0.5 md:mb-1 truncate">{t('warehouse.putaway.jobDetails').split(' ')[0]}</p>
-                            <p className="text-[10px] md:text-xs text-zinc-955 dark:text-zinc-200 font-black uppercase break-words leading-tight">
-                                {data.userName} <span className="text-gray-500 dark:text-gray-600 font-normal lowercase">({data.userDisplayId})</span>
+                            <p className="text-[8px] md:text-[10px] text-stone-400 dark:text-stone-500 uppercase font-black tracking-widest leading-none mb-0.5 md:mb-1 truncate">{t('warehouse.putaway.jobDetails').split(' ')[0]}</p>
+                            <p className="text-[10px] md:text-xs text-slate-900 dark:text-zinc-200 font-black uppercase break-words leading-tight">
+                                {data.userName} <span className="text-stone-400 dark:text-stone-500 font-normal">({data.userDisplayId})</span>
                             </p>
                         </div>
                     </div>
 
-                    <div className="bg-white dark:bg-black p-3 md:p-4 flex items-center gap-2 md:gap-3 col-span-2 lg:col-span-1 border-t lg:border-t-0 border-zinc-100 dark:border-white/5 lg:border-l">
-                        <div className="p-1.5 md:p-2 bg-zinc-50 dark:bg-white/5 rounded-lg text-[#2C5E3B] dark:text-[#A9CBA2] shrink-0">
+                    <div className="bg-white/40 dark:bg-[#1C2620]/40 p-3 md:p-4 flex items-center gap-2 md:gap-3 col-span-2 lg:col-span-1">
+                        <div className="p-1.5 md:p-2 bg-[#FAF8F5]/85 dark:bg-[#1C2620]/30 rounded-lg text-[#2C5E3B] dark:text-[#A9CBA2] border border-[#E2DCCE]/30 dark:border-white/5 shrink-0">
                             <Printer size={14} className="md:w-[18px] md:h-[18px]" />
                         </div>
                         <div className="min-w-0">
-                            <p className="text-[8px] md:text-[10px] text-zinc-405 dark:text-zinc-500 uppercase font-black tracking-widest leading-none mb-0.5 md:mb-1 truncate">{t('warehouse.labelSize').split(' ')[0]}</p>
+                            <p className="text-[8px] md:text-[10px] text-stone-400 dark:text-stone-500 uppercase font-black tracking-widest leading-none mb-0.5 md:mb-1 truncate">{t('warehouse.labelSize').split(' ')[0]}</p>
                             <p className="text-[10px] md:text-xs text-[#2C5E3B] dark:text-[#A9CBA2] font-mono tracking-tight font-black truncate">{data.trackingNumber}</p>
                         </div>
                     </div>
 
-                    <div className="bg-white dark:bg-black p-3 md:p-4 flex items-center gap-2 md:gap-3 border-t lg:border-t-0 border-r lg:border-r-0 border-zinc-100 dark:border-white/5 lg:col-span-1 lg:border-l">
-                        <div className="p-1.5 md:p-2 bg-zinc-50 dark:bg-white/5 rounded-lg text-zinc-900 dark:text-zinc-400 shrink-0">
+                    <div className="bg-white/40 dark:bg-[#1C2620]/40 p-3 md:p-4 flex items-center gap-2 md:gap-3 lg:col-span-1">
+                        <div className="p-1.5 md:p-2 bg-[#FAF8F5]/85 dark:bg-[#1C2620]/30 rounded-lg text-[#2C5E3B] dark:text-[#A9CBA2] border border-[#E2DCCE]/30 dark:border-white/5 shrink-0">
                             <MapPin size={14} className="md:w-[18px] md:h-[18px]" />
                         </div>
                         <div className="min-w-0">
-                            <p className="text-[8px] md:text-[10px] text-zinc-405 dark:text-zinc-500 uppercase font-black tracking-widest leading-none mb-0.5 md:mb-1 truncate">{t('warehouse.from')}</p>
-                            <p className="text-[10px] md:text-xs text-zinc-955 dark:text-zinc-200 font-black uppercase break-words leading-tight">
+                            <p className="text-[8px] md:text-[10px] text-stone-400 dark:text-stone-500 uppercase font-black tracking-widest leading-none mb-0.5 md:mb-1 truncate">{t('warehouse.from')}</p>
+                            <p className="text-[10px] md:text-xs text-slate-900 dark:text-zinc-200 font-black uppercase break-words leading-tight">
                                 {data.sourceSite ? (
                                     <>
-                                        {data.sourceSite.name} <span className="text-zinc-505 dark:text-zinc-600 font-normal lowercase">({data.sourceSite.code || data.sourceSite.id})</span>
+                                        {data.sourceSite.name} <span className="text-stone-400 dark:text-stone-500 font-normal lowercase">({data.sourceSite.code || data.sourceSite.id})</span>
                                     </>
                                 ) : t('warehouse.packing.unknownSource')}
                             </p>
                         </div>
                     </div>
-                    <div className="bg-white dark:bg-black p-3 md:p-4 flex items-center gap-2 md:gap-3 border-t lg:border-t-0 border-zinc-100 dark:border-white/5 lg:col-span-1 lg:border-l">
-                        <div className="p-1.5 md:p-2 bg-zinc-50 dark:bg-white/5 rounded-lg text-zinc-900 dark:text-zinc-400 shrink-0">
+                    
+                    <div className="bg-white/40 dark:bg-[#1C2620]/40 p-3 md:p-4 flex items-center gap-2 md:gap-3 lg:col-span-1">
+                        <div className="p-1.5 md:p-2 bg-[#FAF8F5]/85 dark:bg-[#1C2620]/30 rounded-lg text-[#2C5E3B] dark:text-[#A9CBA2] border border-[#E2DCCE]/30 dark:border-white/5 shrink-0">
                             <ArrowRight size={14} className="md:w-[18px] md:h-[18px]" />
                         </div>
                         <div className="min-w-0">
-                            <p className="text-[8px] md:text-[10px] text-zinc-405 dark:text-zinc-500 uppercase font-black tracking-widest leading-none mb-0.5 md:mb-1 truncate">{t('warehouse.to')}</p>
-                            <p className="text-[10px] md:text-xs text-zinc-955 dark:text-zinc-200 font-black uppercase break-words leading-tight">
+                            <p className="text-[8px] md:text-[10px] text-stone-400 dark:text-stone-500 uppercase font-black tracking-widest leading-none mb-0.5 md:mb-1 truncate">{t('warehouse.to')}</p>
+                            <p className="text-[10px] md:text-xs text-slate-900 dark:text-zinc-200 font-black uppercase break-words leading-tight">
                                 {data.destSite ? (
                                     <>
-                                        {data.destSite.name} <span className="text-zinc-505 dark:text-zinc-600 font-normal lowercase">({data.destSite.code || data.destSite.id})</span>
+                                        {data.destSite.name} <span className="text-stone-400 dark:text-stone-500 font-normal lowercase">({data.destSite.code || data.destSite.id})</span>
                                     </>
                                 ) : t('warehouse.packing.unknownDestination')}
                             </p>
@@ -191,8 +213,8 @@ export const PackDetailsModal: React.FC<PackDetailsModalProps> = ({
                 </div>
 
                 {/* Line Items */}
-                <div className="flex-1 overflow-y-auto p-3 md:p-6 custom-scrollbar bg-white dark:bg-black/50">
-                    <h4 className="text-[9px] md:text-[10px] font-black text-zinc-600 dark:text-gray-500 uppercase tracking-[0.2em] mb-2 md:mb-4">{t('warehouse.picking')}</h4>
+                <div className="flex-1 overflow-y-auto p-3 md:p-6 custom-scrollbar bg-[#FAF8F5]/30 dark:bg-[#18201B]/30">
+                    <h4 className="text-[9px] md:text-[10px] font-black text-slate-500 dark:text-gray-500 uppercase tracking-[0.2em] mb-2 md:mb-4">{t('warehouse.picking')}</h4>
                     <div className="space-y-2 md:space-y-3">
                         {itemsArray.map((item: any, idx: number) => {
                             const isShortPicked = item.orderedQty && item.orderedQty > (item.expectedQty || item.quantity || 1);
@@ -205,32 +227,32 @@ export const PackDetailsModal: React.FC<PackDetailsModalProps> = ({
                             );
 
                             return (
-                                <div key={idx} className="bg-zinc-50/50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl p-2.5 md:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 group hover:bg-zinc-100 dark:hover:bg-white/[0.07] transition-all">
+                                <div key={idx} className="bg-white/85 dark:bg-[#1C2620]/50 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-xl p-2.5 md:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 group hover:bg-[#FAF8F5]/60 dark:hover:bg-[#1C2620]/80 transition-all shadow-sm">
                                     <div className="flex flex-row items-center gap-3 md:gap-4 min-w-0">
-                                        <div className="w-8 h-8 md:w-10 md:h-10 bg-zinc-100 dark:bg-black/40 rounded-lg border border-zinc-200 dark:border-white/10 flex items-center justify-center text-zinc-600 dark:text-zinc-600 font-black text-[10px] md:text-xs shrink-0 mt-0.5 sm:mt-0 self-start sm:self-center">
-                                            {idx + 1}
+                                        <div className="w-8 h-8 md:w-10 md:h-10 bg-[#FAF8F5]/80 dark:bg-[#1C2620]/30 rounded-lg border border-[#E2DCCE]/60 dark:border-[#A9CBA2]/[0.06] flex items-center justify-center text-[#2C5E3B]/60 dark:text-[#A9CBA2]/60 font-black text-[10px] md:text-xs shrink-0 mt-0.5 sm:mt-0 self-start sm:self-center font-mono">
+                                            {String(idx + 1).padStart(2, '0')}
                                         </div>
                                         <div className="min-w-0 pr-2">
-                                            <p className="text-[11px] md:text-sm text-zinc-955 dark:text-zinc-100 font-black uppercase tracking-tight break-words leading-tight">{item.name || item.product?.name || productInfo?.name || 'Unknown Item'}</p>
+                                            <p className="text-[11px] md:text-sm text-slate-900 dark:text-white font-black uppercase tracking-tight break-words leading-tight">{item.name || item.product?.name || productInfo?.name || 'Unknown Item'}</p>
                                             <div className="flex flex-wrap items-center gap-1.5 md:gap-2 mt-1 md:mt-2">
-                                                <span className="text-[8px] md:text-[10px] text-zinc-505 dark:text-zinc-400 font-mono tracking-widest bg-zinc-100 dark:bg-white/5 px-1.5 md:px-2 py-0.5 rounded uppercase border border-zinc-200 dark:border-white/10 shrink-0">
+                                                <span className="text-[8px] md:text-[10px] text-[#2C5E3B] dark:text-[#A9CBA2] font-mono tracking-widest bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 px-1.5 md:px-2 py-0.5 rounded uppercase border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20 shrink-0">
                                                     {item.sku || item.product?.sku || productInfo?.sku}
                                                 </span>
 
                                                 {(productInfo?.brand || (item as any).brand) && (
-                                                    <span className="text-[8px] md:text-[10px] text-zinc-650 dark:text-zinc-400 font-black uppercase tracking-widest bg-zinc-100 dark:bg-white/5 px-1.5 md:px-2 py-0.5 rounded border border-dashed border-zinc-300 dark:border-white/10 shrink-0 hidden sm:inline-flex">
+                                                    <span className="text-[8px] md:text-[10px] text-[#4D6E56] dark:text-[#7A9E83] font-black uppercase tracking-widest bg-stone-100 dark:bg-white/5 px-1.5 md:px-2 py-0.5 rounded border border-dashed border-[#E2DCCE] dark:border-[#A9CBA2]/20 shrink-0 hidden sm:inline-flex">
                                                         {productInfo?.brand || (item as any).brand}
                                                     </span>
                                                 )}
 
                                                 {(productInfo?.category || item.category) && (
-                                                    <span className="text-[8px] md:text-[10px] text-[#2C5E3B] dark:text-[#A9CBA2] font-black uppercase tracking-widest border border-[#2C5E3B]/20 bg-[#2C5E3B]/5 px-1.5 md:px-2 py-0.5 rounded shadow-sm shrink-0">
+                                                    <span className="text-[8px] md:text-[10px] text-[#2C5E3B] dark:text-[#A9CBA2] font-black uppercase tracking-widest border border-[#2C5E3B]/20 bg-[#2C5E3B]/5 dark:bg-[#2C5E3B]/10 px-1.5 md:px-2 py-0.5 rounded shadow-sm shrink-0">
                                                         {productInfo?.category || item.category}
                                                     </span>
                                                 )}
 
                                                 {productInfo?.size && (
-                                                    <span className="text-[8px] md:text-[10px] text-zinc-650 dark:text-zinc-400 font-black uppercase tracking-widest bg-zinc-100 dark:bg-white/5 px-1.5 md:px-2 py-0.5 rounded border border-zinc-200 dark:border-white/10 shrink-0">
+                                                    <span className="text-[8px] md:text-[10px] text-[#4D6E56] dark:text-[#7A9E83] font-black uppercase tracking-widest bg-stone-100 dark:bg-white/5 px-1.5 md:px-2 py-0.5 rounded border border-[#E2DCCE] dark:border-[#A9CBA2]/20 shrink-0">
                                                         {formatProductSize(productInfo)}
                                                     </span>
                                                 )}

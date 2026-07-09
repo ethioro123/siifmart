@@ -39,6 +39,9 @@ export function useStaffProfile({
     const [confirmPasswordInput, setConfirmPasswordInput] = useState('');
     const [passwordInput, setPasswordInput] = useState('');
 
+    const [pendingImageSrc, setPendingImageSrc] = useState<string | null>(null);
+    const [isEditorOpen, setIsEditorOpen] = useState(false);
+
     const profilePhotoInputRef = useRef<HTMLInputElement>(null);
     const documentInputRef = useRef<HTMLInputElement>(null);
 
@@ -97,13 +100,22 @@ export function useStaffProfile({
         const file = e.target.files?.[0];
         if (!file) return;
         const reader = new FileReader();
-        reader.onloadend = async () => {
+        reader.onloadend = () => {
             const result = reader.result as string;
-            await updateEmployee({ ...employee, avatar: result }, user?.name || 'Admin');
-            if (user?.id === employee.id) updateUserAvatar(result);
-            addNotification('success', 'Profile photo updated successfully!');
+            setPendingImageSrc(result);
+            setIsEditorOpen(true);
         };
         reader.readAsDataURL(file);
+    };
+
+    const handleSaveEditedPhoto = async (croppedResult: string) => {
+        try {
+            await updateEmployee({ ...employee, avatar: croppedResult }, user?.name || 'Admin');
+            if (user?.id === employee.id) updateUserAvatar(croppedResult);
+            addNotification('success', 'Profile photo updated successfully!');
+        } catch (error: any) {
+            addNotification('alert', error.message || 'Failed to update profile photo');
+        }
     };
 
     return {
@@ -123,6 +135,9 @@ export function useStaffProfile({
         confirmPasswordInput, setConfirmPasswordInput,
         passwordInput, setPasswordInput,
         profilePhotoInputRef, documentInputRef,
-        handleAddTask, handleConfirmResetPassword, handleUpdatePassword, handleProfilePhotoSelect
+        pendingImageSrc, setPendingImageSrc,
+        isEditorOpen, setIsEditorOpen,
+        handleAddTask, handleConfirmResetPassword, handleUpdatePassword, handleProfilePhotoSelect,
+        handleSaveEditedPhoto
     };
 }

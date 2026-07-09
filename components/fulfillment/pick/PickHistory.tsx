@@ -50,15 +50,29 @@ export const PickHistory: React.FC<PickHistoryProps> = ({
                 (j.orderRef && (j.orderRef.toLowerCase().includes(search.toLowerCase()) || resolveOrderRef(j.orderRef).toLowerCase().includes(search.toLowerCase())))
             )
         ).map(j => {
-            // Resolve User - completedBy stores auth user ID, not employee record ID
             const userId = j.completedBy || j.assignedTo;
-            const userObj = employees?.find(e => e.id === userId || e.name === userId);
-            // Also check against the currently logged-in user (auth ID match)
-            const isCurrentUser = user && userId === user.id;
-            const resolvedName = userObj?.name || (isCurrentUser ? user.name : null);
-            const displayId = userObj?.code || (isCurrentUser ? (user.name?.slice(0, 3).toUpperCase() || '') : (userId && userId.length > 20 ? userId.slice(0, 5).toUpperCase() : userId));
+            const isUUID = (str: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
+            let userObj = employees?.find(e => 
+                e.id === userId || 
+                (e.name && userId && e.name.toLowerCase() === userId.toLowerCase()) || 
+                (e.email && userId && e.email.toLowerCase() === userId.toLowerCase()) ||
+                (e.code && userId && e.code.toLowerCase() === userId.toLowerCase())
+            );
+            if (!userObj && user && userId && (
+                userId.toLowerCase() === user.id?.toLowerCase() || 
+                userId.toLowerCase() === user.email?.toLowerCase() || 
+                userId.toLowerCase() === user.name?.toLowerCase() || 
+                userId.toLowerCase() === user.employeeId?.toLowerCase()
+            )) {
+                userObj = employees?.find(e => 
+                    (e.email && user.email && e.email.toLowerCase() === user.email.toLowerCase()) || 
+                    (e.name && user.name && e.name.toLowerCase() === user.name.toLowerCase()) || 
+                    e.id === user.employeeId
+                );
+            }
+            const displayId = userObj?.code || (userId ? (isUUID(userId) ? userId.slice(0, 8).toUpperCase() : userId) : '');
             const resolvedUser = {
-                name: resolvedName || (userId ? t('warehouse.picking.unknownUser') : t('warehouse.picking.systemUser')),
+                name: userObj?.name || (userId ? userId : t('warehouse.picking.systemUser')),
                 displayId: displayId || ''
             };
 
@@ -147,7 +161,7 @@ export const PickHistory: React.FC<PickHistoryProps> = ({
                                                 <div className="flex items-center gap-2 text-[10px] text-zinc-550 dark:text-gray-400 font-bold uppercase tracking-widest">
                                                     <span className="flex items-center gap-1">
                                                         <User size={10} />
-                                                        {((job as any).user || t('warehouse.picking.systemUser')).split(' ')[0]}
+                                                        {job.resolvedUser?.name} {job.resolvedUser?.displayId && `(${job.resolvedUser.displayId})`}
                                                     </span>
                                                     <span className="w-1.5 h-1.5 rounded-full bg-zinc-300 dark:bg-gray-600" />
                                                     <span className="flex items-center gap-1">
@@ -165,7 +179,7 @@ export const PickHistory: React.FC<PickHistoryProps> = ({
                                             animate={{ opacity: 1, y: 0 }}
                                             transition={{ delay: index * 0.05 }}
                                             onClick={() => { setSelectedJob(job); setIsDetailsOpen(true); }}
-                                            className="hidden md:block group relative bg-[#FAF8F5]/30 dark:bg-black/60 hover:bg-stone-50 dark:hover:bg-black border-2 border-[#E2DCCE]/60 dark:border-white/5 hover:border-[#2C5E3B]/30 dark:hover:border-[#A9CBA2]/30 rounded-2xl p-5 transition-all duration-300 cursor-pointer overflow-hidden shadow-sm"
+                                            className="hidden md:block group relative bg-[#FAF8F5]/80 dark:bg-[#1C2620]/60 hover:bg-[#FAF8F5] dark:hover:bg-[#1C2620] border border-[#E2DCCE]/60 dark:border-[#A9CBA2]/[0.06] hover:border-[#2C5E3B]/30 dark:hover:border-[#A9CBA2]/30 rounded-[2rem] p-5 transition-all duration-500 cursor-pointer overflow-hidden shadow-sm hover:shadow-xl active:scale-[0.98]"
                                         >
                                         {/* Hover Glow */}
                                         <div className="absolute inset-0 bg-zinc-900/5 dark:bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
@@ -190,7 +204,7 @@ export const PickHistory: React.FC<PickHistoryProps> = ({
                                         </div>
 
                                         <div className="relative mb-4">
-                                            <h5 className="text-zinc-900 dark:text-zinc-200 font-black text-sm truncate pr-2 group-hover:text-black dark:group-hover:text-zinc-100 transition-colors uppercase tracking-tight">
+                                            <h5 className="text-gray-900 dark:text-white font-black text-sm truncate pr-2 group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] transition-colors uppercase tracking-tight leading-tight">
                                                 {formattedId}
                                             </h5>
                                             <div className="flex items-center gap-1.5 mt-2 transition-colors">
@@ -213,18 +227,18 @@ export const PickHistory: React.FC<PickHistoryProps> = ({
 
                                         <div className="relative flex items-center justify-between border-t border-[#E2DCCE]/60 dark:border-white/5 pt-3 mt-auto">
                                             <div className="flex items-center gap-2">
-                                                <div className="w-6 h-6 rounded-full bg-stone-100 dark:bg-stone-800 flex items-center justify-center border border-[#E2DCCE]/60 dark:border-white/10 shadow-inner group-hover/history:scale-110 transition-transform">
+                                                <div className="w-6 h-6 rounded-full bg-stone-100 dark:bg-white/5 flex items-center justify-center border border-stone-200 dark:border-white/10 shadow-inner group-hover/history:scale-110 transition-transform">
                                                     <span className="text-[9px] font-black text-[#2C5E3B] dark:text-[#A9CBA2]">{(job.resolvedUser?.name || 'S').charAt(0).toUpperCase()}</span>
                                                 </div>
                                                 <div className="flex flex-col">
-                                                    <span className="text-[9px] font-black text-zinc-500 dark:text-zinc-655 uppercase tracking-widest leading-tight">{t('warehouse.picking.by')}</span>
-                                                    <span className="text-[9px] font-black text-zinc-905 dark:text-zinc-400 uppercase tracking-wider leading-tight">
-                                                        {job.resolvedUser?.name} <span className="text-zinc-550 dark:text-zinc-655 font-normal lowercase">({job.resolvedUser?.displayId})</span>
+                                                    <span className="text-[9px] font-black text-gray-400 dark:text-gray-600 uppercase tracking-widest leading-tight">{t('warehouse.picking.by')}</span>
+                                                    <span className="text-[9px] font-black text-gray-900 dark:text-gray-300 uppercase tracking-wider leading-tight">
+                                                        {job.resolvedUser?.name} <span className="text-gray-450 dark:text-gray-600 font-normal">({job.resolvedUser?.displayId})</span>
                                                     </span>
                                                 </div>
                                             </div>
 
-                                            <div className="flex items-center gap-2">
+                                            <div className="flex items-center gap-2 bg-stone-50 dark:bg-white/5 px-2 py-1 rounded-lg border border-stone-200 dark:border-white/5 group-hover:border-[#2C5E3B]/20 transition-all shadow-inner">
                                                 {(job.status || '').toLowerCase() === 'completed' && (
                                                     <button
                                                         onClick={(e) => { e.stopPropagation(); setReturnJob(job); }}

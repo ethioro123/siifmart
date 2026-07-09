@@ -9,7 +9,7 @@ import { systemLogsService } from '../services/local-logs.service';
 import { systemLogsService as dbSystemLogsService } from '../services/supabase.service';
 import { APP_CONFIG } from '../config/app.config';
 import Toast from '../components/Toast';
-import { usePresence } from '../services/realtime.service';
+import { usePresence } from '../hooks/useRealtime';
 import { logger } from '../utils/logger';
 interface User {
   id: string;
@@ -19,6 +19,7 @@ interface User {
   title: string;
   siteId?: string;
   employeeId?: string;
+  code?: string;
   email?: string;
   loginLocation?: string;
 }
@@ -204,7 +205,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           avatar: profile.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.name)}&background=0D8ABC&color=fff`,
           title: rawRole.charAt(0).toUpperCase() + rawRole.slice(1),
           siteId: profile.siteId,
-          employeeId: profile.id,
+          employeeId: (profile as any).employeeId || profile.id,
+          code: (profile as any).code || '',
           email: profile.email,
           loginLocation: location
         });

@@ -19,7 +19,7 @@ export const PackJobHeader: React.FC<PackJobHeaderProps> = ({
     t,
 }) => {
     return (
-        <div className="relative p-4 md:p-6 border-b border-[#E2DCCE]/60 dark:border-white/10 bg-[#FAF8F5]/50 dark:bg-black/40 overflow-hidden shrink-0">
+        <div className="relative p-4 md:p-6 border-b border-[#E2DCCE]/60 dark:border-[#2C5E3B]/10 bg-[#FAF8F5]/30 dark:bg-[#1C2620]/30 backdrop-blur-md overflow-hidden shrink-0 z-10">
             <div className="absolute -top-10 -right-10 w-40 h-40 bg-[#2C5E3B]/10 blur-[80px] rounded-full pointer-events-none hidden md:block" />
             <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-[#A9CBA2]/10 blur-[80px] rounded-full pointer-events-none hidden md:block" />
 

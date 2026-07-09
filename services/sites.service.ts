@@ -147,58 +147,50 @@ export const sitesService = {
     },
 
     async update(id: string, updates: Partial<Site>) {
-        const dbUpdates: any = { ...updates };
-        const fieldsToRemove = ['id', 'created_at', 'updated_at', 'code', 'replenishmentSourceIds'];
-        fieldsToRemove.forEach(field => delete dbUpdates[field]);
+        // ALLOWLIST approach: only send known DB columns to Supabase.
+        // Never spread the full Site object — camelCase-only fields cause 400 errors.
+        const dbUpdates: Record<string, unknown> = {};
 
-        if (updates.terminalCount !== undefined) {
-            dbUpdates.terminal_count = updates.terminalCount;
-            delete dbUpdates.terminalCount;
+        // Fields with identical names in TypeScript and the DB:
+        const directFields: (keyof Site)[] = [
+            'name', 'type', 'address', 'contact', 'status',
+            'manager', 'capacity', 'language', 'latitude', 'longitude', 'region',
+        ];
+        for (const field of directFields) {
+            if (updates[field] !== undefined) dbUpdates[field] = updates[field];
         }
-        if (updates.bonusEnabled !== undefined) {
-            dbUpdates.bonus_enabled = updates.bonusEnabled;
-            delete dbUpdates.bonusEnabled;
-        }
-        if (updates.warehouseBonusEnabled !== undefined) {
-            dbUpdates.warehouse_bonus_enabled = updates.warehouseBonusEnabled;
-            delete dbUpdates.warehouseBonusEnabled;
-        }
-        delete dbUpdates.zoneCount;
-        delete dbUpdates.aisleCount;
-        delete dbUpdates.binCount;
 
-        if (updates.taxJurisdictionId !== undefined) {
-            dbUpdates.tax_jurisdiction_id = updates.taxJurisdictionId;
-            delete dbUpdates.taxJurisdictionId;
-        }
-        if (updates.fulfillmentStrategy !== undefined) {
-            dbUpdates.fulfillment_strategy = updates.fulfillmentStrategy;
-            delete dbUpdates.fulfillmentStrategy;
-        }
-        if (updates.isFulfillmentNode !== undefined) {
-            dbUpdates.is_fulfillment_node = updates.isFulfillmentNode;
-            delete dbUpdates.isFulfillmentNode;
-        }
-        if (updates.logisticsZoneId !== undefined) {
-            dbUpdates.logistics_zone_id = updates.logisticsZoneId;
-            delete dbUpdates.logisticsZoneId;
+        // Fields requiring camelCase → snake_case mapping:
+        const fieldMap: [keyof Site, string][] = [
+            ['terminalCount', 'terminal_count'],
+            ['bonusEnabled', 'bonus_enabled'],
+            ['warehouseBonusEnabled', 'warehouse_bonus_enabled'],
+            ['taxJurisdictionId', 'tax_jurisdiction_id'],
+            ['fulfillmentStrategy', 'fulfillment_strategy'],
+            ['isFulfillmentNode', 'is_fulfillment_node'],
+            ['logisticsZoneId', 'logistics_zone_id'],
+            ['zoneCount', 'zone_count'],
+            ['aisleCount', 'aisle_count'],
+            ['binCount', 'bin_count'],
+        ];
+        for (const [tsKey, dbKey] of fieldMap) {
+            if (updates[tsKey] !== undefined) dbUpdates[dbKey] = updates[tsKey];
         }
 
         // Compute new source IDs from multi-source array (falling back to single-source)
-        const sourceIds: string[] =
+        const sourceIds: string[] | null =
             updates.replenishmentSourceIds !== undefined
                 ? updates.replenishmentSourceIds
                 : updates.replenishmentSourceId !== undefined
                     ? (updates.replenishmentSourceId ? [updates.replenishmentSourceId] : [])
-                    : null as any; // null sentinel = don't update
+                    : null; // null sentinel = don't update
 
         const shouldUpdateSources = sourceIds !== null;
 
-        // Keep legacy field in sync
-        if (updates.replenishmentSourceId !== undefined || updates.replenishmentSourceIds !== undefined) {
-            dbUpdates.replenishment_source_id = (shouldUpdateSources && sourceIds.length > 0) ? sourceIds[0] : null;
+        // Keep legacy single-source field in sync
+        if (shouldUpdateSources) {
+            dbUpdates.replenishment_source_id = sourceIds.length > 0 ? sourceIds[0] : null;
         }
-        delete dbUpdates.replenishmentSourceId;
 
         const { data, error } = await supabase
             .from('sites')

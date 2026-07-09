@@ -66,6 +66,7 @@ export interface Site {
   replenishmentSourceId?: string; // ID of the warehouse/DC feeding this store (legacy single-source, kept for compatibility)
   replenishmentSourceIds?: string[]; // IDs of all warehouses/DCs feeding this store (many-to-many)
   logisticsZoneId?: string;
+  region?: string; // User-defined logistics zone name (e.g. Harar Zone, Addis Ababa Zone)
 }
 
 export interface LogisticsZone {

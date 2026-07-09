@@ -56,10 +56,10 @@ export const POItemsTable: React.FC<POItemsTableProps> = ({
     return (
         <div className="relative overflow-hidden rounded-xl p-[1px] group mt-6 transition-all duration-500">
             <div className="absolute inset-0 bg-gradient-to-br from-[#2C5E3B]/10 via-transparent to-amber-500/5 opacity-30"></div>
-            <div className="relative bg-white dark:bg-black/40 backdrop-blur-xl rounded-xl overflow-hidden border border-gray-200 dark:border-white/10 shadow-xl dark:shadow-2xl">
-                <table className="w-full text-left border-collapse">
+            <div className="relative bg-white dark:bg-black/40 backdrop-blur-xl rounded-xl overflow-x-auto border border-[#E2DCCE] dark:border-emerald-950/20 shadow-xl dark:shadow-2xl">
+                <table className="w-full text-left border-collapse min-w-[700px]">
                     <thead>
-                        <tr className="bg-gray-50/50 dark:bg-white/5 border-b border-gray-100 dark:border-white/5 text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-widest font-black">
+                        <tr className="bg-gray-50/50 dark:bg-white/5 border-b border-[#E2DCCE]/50 dark:border-emerald-950/20 text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-widest font-black">
                             <th className="p-4 pl-6">Product Details</th>
                             <th className="p-4 text-right w-24">Qty</th>
                             <th className="p-4 text-right w-32">Unit Cost</th>
@@ -67,9 +67,9 @@ export const POItemsTable: React.FC<POItemsTableProps> = ({
                             <th className="p-4 text-right pr-6 w-32">Actions</th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-100 dark:divide-white/5">
+                    <tbody className="divide-y divide-[#E2DCCE]/40 dark:divide-emerald-950/20">
                         {items.map((item, i) => (
-                            <tr key={i} className="hover:bg-blue-50/50 dark:hover:bg-white/[0.03] transition-all group/row">
+                            <tr key={i} className="hover:bg-[#2C5E3B]/5 dark:hover:bg-[#A9CBA2]/5 transition-all group/row">
                                 <td className="p-4 pl-6">
                                     <div className="flex items-center gap-4">
                                         <div className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-black/40 flex items-center justify-center border border-gray-200 dark:border-white/5 group-hover/row:border-[#2C5E3B]/30 dark:group-hover/row:border-[#A9CBA2]/30 group-hover/row:shadow-sm dark:group-hover/row:shadow-[0_0_10px_rgba(44,94,59,0.05)] transition-all">

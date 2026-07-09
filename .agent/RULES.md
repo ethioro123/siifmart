@@ -127,10 +127,13 @@ import { ROLES } from '../constants';
 <div style={{ width: `${percentage}%` }} />
 ```
 
-### Design Tokens
-- Primary: `bg-cyber-primary`, `text-cyber-primary`
-- Background: `bg-cyber-black`, `bg-cyber-dark`
-- Borders: `border-white/10`, `border-white/20`
+### Design Tokens (Sand / Emerald / Amber)
+- Primary Green: `#2C5E3B` (dark), `#A9CBA2` (light accent)
+- Sand/Warm: `#EAE5D9` (light bg), `#1E3F27` (dark text), `#E2DCCE` (light border)
+- Accent Amber: `amber-600` (light mode), `amber-500` (dark mode)
+- Dark Mode BG: `#18201B`, borders: `emerald-950/20`
+- Glassmorphism: `backdrop-blur-xl` with semi-transparent backgrounds
+- Light cards: `bg-white/85`, Dark cards: `bg-[#18201B]/65`
 
 ---
 
@@ -191,6 +194,39 @@ import Inventory from './pages/Inventory';
 
 ---
 
+## Service Field Mapping (CRITICAL)
+
+Supabase uses **snake_case** columns. TypeScript uses **camelCase** fields. Every service's `update()` method MUST use an **explicit allowlist** of DB columns — **never** spread the full TypeScript object.
+
+```typescript
+// ✅ Correct — allowlist approach (only known DB columns sent)
+const dbUpdates: Record<string, unknown> = {};
+const directFields: (keyof Site)[] = ['name', 'type', 'address', 'status'];
+for (const field of directFields) {
+    if (updates[field] !== undefined) dbUpdates[field] = updates[field];
+}
+const fieldMap: [keyof Site, string][] = [
+    ['terminalCount', 'terminal_count'],
+    ['bonusEnabled', 'bonus_enabled'],
+];
+for (const [tsKey, dbKey] of fieldMap) {
+    if (updates[tsKey] !== undefined) dbUpdates[dbKey] = updates[tsKey];
+}
+
+// ❌ DANGEROUS — unknown fields cause Supabase 400 Bad Request
+const dbUpdates = { ...updates };
+delete dbUpdates.id; // Denylist approach misses new fields!
+```
+
+### When Adding a New Column
+1. Create migration in `/migrations/` → run in Supabase
+2. Add field to interface in `/types/`
+3. Add to the `mapSiteRow()` or equivalent mapper (snake → camel)
+4. Add to the `update()` allowlist (camel → snake)
+5. If needed in `create()`, add to the insert object
+
+---
+
 ## Performance
 
 - All page components in `/pages/` MUST be lazy-loaded via `React.lazy()` in `App.tsx`
@@ -215,6 +251,31 @@ const filteredProducts = products.filter(p => p.category === selectedCategory);
 ```
 
 ---
+
+## Mobile-First: POS & WMS Modules (CRITICAL)
+
+POS and Fulfillment/WMS are deployed on **mobile phones and tablets** in stores and warehouses. All code touching these modules MUST be optimized for low-powered mobile browsers.
+
+### Animation & CSS Rules
+- **Only animate `transform` and `opacity`** — GPU-accelerated, won't cause jank
+- **Never animate** `width`, `height`, `margin`, `padding`, `box-shadow`, `border-radius`
+- **No `backdrop-blur`** on scrollable lists or re-rendered elements — use solid `bg-` colors
+- **No `transition-all`** — specify exact properties: `transition: transform 200ms, opacity 150ms`
+- **Max duration**: `200ms` interactive feedback, `300ms` page transitions
+- **No JS animation libraries** (Framer Motion, GSAP) in POS/WMS bundles
+
+### Touch & Interaction
+- **Touch targets**: Min **44×44px** for all buttons, toggles, interactive elements
+- **No hover-only actions**: `:hover` content MUST also be accessible via tap/long-press
+- **Debounce search** by ≥300ms — mobile keyboards fire rapid events
+- **Avoid dropdowns** in scanning flows — use large tappable cards/buttons
+
+### Performance Budget
+- **Virtualize** lists >30 items (`react-window` or `react-virtuoso`)
+- **Lazy-load all modals** — never eagerly import modal components in POS/WMS
+- **No heavy chart libraries** — defer visualization to Settings/HQ pages
+- **Defer non-critical work** with `requestAnimationFrame` or `setTimeout(fn, 0)`
+- **Test aesthetic changes on Slow 3G** (Chrome DevTools → Network) before merging
 
 ## Key Files Reference
 
@@ -245,10 +306,11 @@ const filteredProducts = products.filter(p => p.category === selectedCategory);
 4. Add module to `ProtectedRoute` permissions
 
 ### Adding a Database Column
-1. Create migration in `/migrations/`
-2. Run SQL in Supabase
-3. Update interface in `/types.ts`
-4. Update service mapper in the relevant `.service.ts`
+1. Create migration in `/migrations/` and run SQL in Supabase
+2. Update interface in `/types/` (or `/types.ts`)
+3. Update `mapRow()` in the relevant `.service.ts` (snake_case → camelCase read)
+4. Update `update()` allowlist in the same service (camelCase → snake_case write)
+5. If needed in `create()`, add to the insert object
 
 ### Adding a New Service
 1. **Check if a service already exists** for that domain — extend it instead of creating a duplicate
@@ -418,3 +480,6 @@ When editing or creating any file, the AI MUST:
 - ❌ Don't eagerly import pages — use `React.lazy()` in App.tsx
 - ❌ Don't add DB columns without a migration file
 - ❌ Don't silently swallow errors with empty catch blocks
+- ❌ Don't spread full objects into Supabase `update()` — use explicit allowlists
+- ❌ Don't add a TypeScript field without updating the service mapper (read) and allowlist (write)
+- ❌ Don't use the old `cyber-*` design tokens — use the sand/emerald/amber palette

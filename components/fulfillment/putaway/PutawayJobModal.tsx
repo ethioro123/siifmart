@@ -93,11 +93,14 @@ export const PutawayJobModal: React.FC<PutawayJobModalProps> = ({
     const progressPercent = totalItems > 0 ? (completedItems / totalItems) * 100 : 0;
 
     return (
-        <div className="fixed inset-0 z-[160] flex items-stretch md:items-center justify-center p-0 md:p-4 bg-gray-900/60 dark:bg-black/95 backdrop-blur-md animate-in fade-in duration-300">
-            <div className="bg-white dark:bg-[#0a0a0a] w-full md:max-w-5xl md:max-h-[92vh] md:rounded-[3rem] border-0 md:border-2 border-[#E2DCCE]/60 dark:border-white/10 shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-500">
+        <div className="fixed inset-0 z-[160] flex items-stretch md:items-center justify-center p-0 md:p-4 bg-black/60 dark:bg-black/80 backdrop-blur-sm animate-in fade-in duration-300">
+            <div className="bg-[#FAF8F5]/95 dark:bg-[#1C2620]/95 w-full md:max-w-5xl md:max-h-[92vh] md:rounded-3xl border border-[#E2DCCE] dark:border-emerald-950/20 shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-500 relative">
+                {/* Visual Flair */}
+                <div className="hidden md:block absolute -top-32 -right-32 w-96 h-96 bg-[#2C5E3B]/10 dark:bg-[#2C5E3B]/20 blur-[100px] rounded-full pointer-events-none" />
+                <div className="hidden md:block absolute -bottom-32 -left-32 w-96 h-96 bg-[#A9CBA2]/10 dark:bg-[#A9CBA2]/25 blur-[100px] rounded-full pointer-events-none" />
 
                 {/* Header Section */}
-                <div className="relative p-5 md:p-10 border-b border-[#E2DCCE]/60 dark:border-white/10 bg-[#FAF8F5]/50 dark:bg-black/40 overflow-hidden shrink-0">
+                <div className="relative p-5 md:p-10 border-b border-[#E2DCCE]/60 dark:border-[#2C5E3B]/10 bg-[#FAF8F5]/30 dark:bg-[#1C2620]/30 backdrop-blur-md overflow-hidden shrink-0 z-10">
                     <div className="relative flex justify-between items-start">
                         <div className="flex items-center gap-6">
                             <div className="hidden md:flex w-20 h-20 rounded-[2rem] bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/25 border-2 border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20 items-center justify-center text-[#2C5E3B] dark:text-[#A9CBA2] shadow-sm transition-all duration-700 active:scale-95">
@@ -283,7 +286,7 @@ export const PutawayJobModal: React.FC<PutawayJobModalProps> = ({
                 </div>
 
                 {/* Secure Footer Interface */}
-                <div className="p-6 md:p-10 border-t-2 border-[#E2DCCE]/60 dark:border-white/10 bg-[#FAF8F5]/50 dark:bg-black/60 flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-6 shrink-0 relative z-20">
+                <div className="p-6 md:p-10 border-t border-[#E2DCCE]/60 dark:border-emerald-950/20 bg-[#FAF8F5]/50 dark:bg-zinc-950/40 flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-6 shrink-0 relative z-20">
                     <div className="hidden md:flex items-center gap-5">
                         <div className="w-14 h-14 rounded-2xl bg-white dark:bg-white/5 border-2 border-gray-100 dark:border-white/10 flex items-center justify-center text-gray-300 dark:text-gray-755 shadow-inner group transition-all">
                             <UserIcon size={28} className="group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] transition-colors" />

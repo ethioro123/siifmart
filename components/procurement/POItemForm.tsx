@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { POItem, Product } from '../../types';
-import { Plus, Package, Save, Search, Check, Info, ChevronDown, ChevronRight } from 'lucide-react';
+import { Plus, Package, Save, Info, ChevronDown, ChevronRight } from 'lucide-react';
 import { useStore } from '../../contexts/CentralStore';
 import { generateSequentialSKU } from '../../utils/skuGenerator';
 import { getSellUnit } from '../../utils/units';
 import { ItemPreviewCard } from './ItemPreviewCard';
 import { BuyingAttributes } from './BuyingAttributes';
 import { SellingAttributes } from './SellingAttributes';
+import { CatalogSearch } from './CatalogSearch';
 
 interface POItemFormProps {
     products: Product[];
@@ -33,13 +34,7 @@ export const POItemForm: React.FC<POItemFormProps> = ({
     const [searchTerm, setSearchTerm] = useState('');
     const [isSearchOpen, setIsSearchOpen] = useState(false);
 
-    // Filter products
-    const filteredProducts = searchTerm
-        ? products.filter(p =>
-            p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            (p.sku && p.sku.toLowerCase().includes(searchTerm.toLowerCase()))
-        )
-        : products.slice(0, 50);
+    // Filter products for catalog search — handled inside CatalogSearch component
 
     // Custom Item Fields
     const [customItemName, setCustomItemName] = useState('');
@@ -70,11 +65,19 @@ export const POItemForm: React.FC<POItemFormProps> = ({
 
     const caseSize = parseInt(customAttributes.packaging?.caseSize) || 0;
     const packQty = parseInt(customAttributes.packaging?.packQty) || 1;
-    const hasCases = caseSize > 1;
+    // hasCases: caseSize >= 1 means the order unit IS a case (even 1 pack/case is still a case-level order)
+    const hasCases = caseSize >= 1 && caseSize > 0;
+    // hasPacks: only when there's no case layer — ordering loose packs directly
     const hasPacks = packQty > 1 && !hasCases;
-    const unitSuffix = hasCases ? '(cases)' : hasPacks ? '(packs)' : '';
-    const totalUnits = currentQty * (hasCases ? caseSize * packQty : hasPacks ? packQty : 1);
-    const showConversion = currentQty > 0 && (hasCases || hasPacks);
+    // Build a descriptive suffix so the user always knows exactly what they're ordering
+    const unitSuffix = hasCases
+        ? `(cases — ${caseSize} pack${caseSize !== 1 ? 's' : ''} × ${packQty} unit${packQty !== 1 ? 's' : ''})`
+        : hasPacks
+        ? `(packs of ${packQty})`
+        : '';
+    const unitsPerOrderUnit = hasCases ? caseSize * packQty : hasPacks ? packQty : 1;
+    const totalUnits = currentQty * unitsPerOrderUnit;
+    const showConversion = currentQty > 0 && unitsPerOrderUnit > 1;
 
     // Populate form when editing
     useEffect(() => {
@@ -328,59 +331,21 @@ export const POItemForm: React.FC<POItemFormProps> = ({
             {/* ─── Form Body ────────────────────────────── */}
             <div className="relative z-10 space-y-6">
                 {productType === 'catalog' ? (
-                    /* ═══ CATALOG SEARCH ═══════════════════════ */
-                    <div className="space-y-2">
-                        <label className="text-[10px] text-[#2C5E3B]/70 dark:text-[#A9CBA2]/70 uppercase tracking-widest font-black ml-1 block">Search Product</label>
-                        <div className="relative">
-                            <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" />
-                            <input
-                                type="text"
-                                className={`w-full bg-white dark:bg-black/40 border ${errors.search ? 'border-red-500/50' : 'border-gray-200 dark:border-white/10'} rounded-lg pl-10 pr-4 py-3 text-sm text-gray-900 dark:text-white focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:ring-2 focus:ring-[#2C5E3B]/10 dark:focus:ring-[#A9CBA2]/10 outline-none placeholder-gray-400 dark:placeholder-gray-700 font-bold transition-all shadow-sm`}
-                                placeholder="Type to search product..."
-                                value={searchTerm}
-                                onChange={(e) => {
-                                    setSearchTerm(e.target.value);
-                                    setIsSearchOpen(true);
-                                    if (!e.target.value) setCurrentProductToAdd('');
-                                    if (errors.search) setErrors({ ...errors, search: '' });
-                                }}
-                                onFocus={() => setIsSearchOpen(true)}
-                                onBlur={() => setIsSearchOpen(false)}
-                            />
-                            {errors.search && <span className="absolute right-3 top-3.5 text-[10px] text-red-500 font-black">{errors.search}</span>}
-                            {isSearchOpen && (
-                                <div className="absolute z-50 w-full mt-1 bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-white/20 rounded-lg shadow-2xl max-h-60 overflow-y-auto ring-1 ring-black/5 dark:ring-white/10">
-                                    {filteredProducts.length > 0 ? (
-                                        filteredProducts.map(p => (
-                                            <div
-                                                key={p.id}
-                                                onMouseDown={(e) => {
-                                                    e.preventDefault();
-                                                    setCurrentProductToAdd(p.id);
-                                                    setSearchTerm(p.name);
-                                                    setIsSearchOpen(false);
-                                                    if (p.costPrice) setCurrentCost(p.costPrice);
-                                                    if (p.price) setCurrentRetailPrice(p.price);
-                                                    if (p.unit) setCustomItemUnit(p.unit);
-                                                }}
-                                                className="px-4 py-3 hover:bg-gray-50 dark:hover:bg-white/10 cursor-pointer flex justify-between items-center group border-b border-gray-100 dark:border-white/5 last:border-0 transition-colors"
-                                            >
-                                                <div className="flex flex-col">
-                                                    <span className="text-sm text-gray-900 dark:text-white group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] transition-colors font-black">{p.name}</span>
-                                                    <span className="text-[10px] text-gray-500 dark:text-gray-500 font-bold uppercase tracking-tight">{p.sku || 'No SKU'}</span>
-                                                </div>
-                                                <div className="flex items-center gap-2">
-                                                    <span className="text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-white/5 px-1.5 py-0.5 rounded font-black">Stock: {p.stock}</span>
-                                                </div>
-                                            </div>
-                                        ))
-                                    ) : (
-                                        <div className="px-4 py-3 text-xs text-gray-500 dark:text-gray-500 text-center italic font-bold">No products found matching "{searchTerm}"</div>
-                                    )}
-                                </div>
-                            )}
-                        </div>
-                    </div>
+                    /* ═══ CATALOG SEARCH ═════════════════════ */
+                    <CatalogSearch
+                        products={products}
+                        searchTerm={searchTerm}
+                        setSearchTerm={setSearchTerm}
+                        isSearchOpen={isSearchOpen}
+                        setIsSearchOpen={setIsSearchOpen}
+                        currentProductToAdd={currentProductToAdd}
+                        setCurrentProductToAdd={setCurrentProductToAdd}
+                        setCurrentCost={setCurrentCost}
+                        setCurrentRetailPrice={setCurrentRetailPrice}
+                        setCustomItemUnit={setCustomItemUnit}
+                        errors={errors}
+                        setErrors={setErrors}
+                    />
                 ) : (
                     /* ═══ CUSTOM: TWO SIDE-BY-SIDE PANELS ═════ */
                     <div className="space-y-6">
@@ -421,7 +386,12 @@ export const POItemForm: React.FC<POItemFormProps> = ({
                 <div className="grid grid-cols-12 gap-4 relative z-10 pt-4 border-t border-gray-100 dark:border-white/5">
                     <div className="col-span-4 space-y-1">
                         <label className="text-[10px] text-gray-500 uppercase tracking-widest font-bold ml-1 block">
-                            Order Qty {unitSuffix && <span className="text-[#2C5E3B]/70 dark:text-[#A9CBA2]/70 normal-case">{unitSuffix}</span>} <span className="text-red-500">*</span>
+                            Order Qty{' '}
+                            {unitSuffix
+                                ? <span className="text-[#2C5E3B]/70 dark:text-[#A9CBA2]/70 normal-case font-bold text-[9px]">{unitSuffix}</span>
+                                : null
+                            }{' '}
+                            <span className="text-red-500">*</span>
                         </label>
                         <input
                             type="number"
@@ -440,7 +410,11 @@ export const POItemForm: React.FC<POItemFormProps> = ({
                         {errors.qty && <span className="text-[9px] text-red-500 block text-center">{errors.qty}</span>}
                     </div>
                     <div className="col-span-4 space-y-1">
-                        <label className="text-[10px] text-gray-500 uppercase tracking-widest font-bold ml-1 block">Unit Cost <span className="text-red-500">*</span></label>
+                        {/* Label clarifies WHAT the cost refers to: per case, per pack, or per unit */}
+                        <label className="text-[10px] text-gray-500 uppercase tracking-widest font-bold ml-1 block">
+                            Cost{hasCases ? ' / Case' : hasPacks ? ' / Pack' : ' / Unit'}{' '}
+                            <span className="text-red-500">*</span>
+                        </label>
                         <input
                             type="number"
                             className={`w-full bg-white dark:bg-black/40 border ${errors.cost ? 'border-red-500/50' : 'border-gray-200 dark:border-white/10'} rounded-lg px-4 py-3 text-sm text-gray-900 dark:text-white font-mono focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:ring-2 focus:ring-[#2C5E3B]/10 dark:focus:ring-[#A9CBA2]/10 text-center font-black shadow-sm`}
@@ -448,6 +422,12 @@ export const POItemForm: React.FC<POItemFormProps> = ({
                             onChange={e => { setCurrentCost(parseFloat(e.target.value) || 0); if (errors.cost) setErrors({ ...errors, cost: '' }); }}
                             placeholder="0.00"
                         />
+                        {/* Show cost per sellable unit when ordering in cases/packs */}
+                        {currentCost > 0 && unitsPerOrderUnit > 1 && (
+                            <span className="text-[9px] text-[#2C5E3B]/60 dark:text-[#A9CBA2]/60 block text-center">
+                                = {(currentCost / unitsPerOrderUnit).toFixed(2)} / unit
+                            </span>
+                        )}
                         {errors.cost && <span className="text-[9px] text-red-500 block text-center">{errors.cost}</span>}
                     </div>
                     {/* Margin indicator */}
@@ -457,14 +437,24 @@ export const POItemForm: React.FC<POItemFormProps> = ({
                                 Retail{customItemUnit && getSellUnit(customItemUnit).category !== 'count' ? ` /${getSellUnit(customItemUnit).shortLabel}` : ''} <span className="text-red-500">*</span>
                             </label>
                             <div className="relative">
-                                {currentRetailPrice > 0 && currentCost > 0 && (
-                                    <div className={`absolute left-2 top-1/2 -translate-y-1/2 text-[10px] font-bold px-1.5 py-0.5 rounded ${((currentRetailPrice - currentCost) / currentRetailPrice * 100) >= 40 ? 'bg-green-500/20 text-green-400 border border-green-500/30' :
-                                        ((currentRetailPrice - currentCost) / currentRetailPrice * 100) >= 20 ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30' :
-                                            'bg-red-500/20 text-red-400 border border-red-500/30'
-                                        }`}>
-                                        {parseFloat((((currentRetailPrice - currentCost) / currentRetailPrice) * 100).toFixed(2))}%
-                                    </div>
-                                )}
+                                {(() => {
+                                    // Use cost-per-sell-unit for margin calc, not raw currentCost (which is per case/pack)
+                                    const costPerUnit = unitsPerOrderUnit > 1
+                                        ? currentCost / unitsPerOrderUnit
+                                        : currentCost;
+                                    if (!currentRetailPrice || !costPerUnit) return null;
+                                    const marginPct = ((currentRetailPrice - costPerUnit) / currentRetailPrice) * 100;
+                                    const badgeClass = marginPct >= 40
+                                        ? 'bg-green-500/20 text-green-500 dark:text-green-400 border border-green-500/30'
+                                        : marginPct >= 20
+                                        ? 'bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30'
+                                        : 'bg-red-500/20 text-red-500 dark:text-red-400 border border-red-500/30';
+                                    return (
+                                        <div className={`absolute left-2 top-1/2 -translate-y-1/2 text-[10px] font-bold px-1.5 py-0.5 rounded ${badgeClass}`}>
+                                            {parseFloat(marginPct.toFixed(2))}%
+                                        </div>
+                                    );
+                                })()}
                                 <input
                                     type="number"
                                     className={`w-full bg-white dark:bg-black/40 border ${errors.retail ? 'border-red-500/50' : 'border-gray-200 dark:border-white/10'} rounded-lg py-3 text-sm text-gray-900 dark:text-white font-mono focus:border-green-500/50 dark:focus:border-green-400/50 text-center font-black shadow-sm ${currentRetailPrice > 0 && currentCost > 0 ? 'pl-14 pr-2' : 'px-4'}`}

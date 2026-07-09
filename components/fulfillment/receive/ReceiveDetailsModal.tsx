@@ -23,7 +23,7 @@ export const ReceiveDetailsModal: React.FC<ReceiveDetailsModalProps> = ({
     sites,
     t
 }) => {
-    const { addNotification, isSubmitting, setIsSubmitting, employees } = useFulfillment();
+    const { addNotification, isSubmitting, setIsSubmitting, employees, user } = useFulfillment();
     const [printingId, setPrintingId] = useState<string | null>(null);
 
     const isPO = (item: any): item is PurchaseOrder => {
@@ -32,8 +32,26 @@ export const ReceiveDetailsModal: React.FC<ReceiveDetailsModalProps> = ({
 
     const resolveUser = (userId?: string) => {
         if (!userId || userId === 'System') return { name: 'System', displayId: '' };
-        const userObj = employees.find(e => e.id === userId || e.name === userId);
-        const displayId = userObj?.code || (userId.length > 20 ? userId.slice(0, 5).toUpperCase() : userId);
+        const isUUID = (str: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
+        let userObj = employees.find(e => 
+            e.id === userId || 
+            (e.name && userId && e.name.toLowerCase() === userId.toLowerCase()) || 
+            (e.email && userId && e.email.toLowerCase() === userId.toLowerCase()) ||
+            (e.code && userId && e.code.toLowerCase() === userId.toLowerCase())
+        );
+        if (!userObj && user && userId && (
+            userId.toLowerCase() === user.id?.toLowerCase() || 
+            userId.toLowerCase() === user.email?.toLowerCase() || 
+            userId.toLowerCase() === user.name?.toLowerCase() || 
+            userId.toLowerCase() === user.employeeId?.toLowerCase()
+        )) {
+            userObj = employees.find(e => 
+                (e.email && user.email && e.email.toLowerCase() === user.email.toLowerCase()) || 
+                (e.name && user.name && e.name.toLowerCase() === user.name.toLowerCase()) || 
+                e.id === user.employeeId
+            );
+        }
+        const displayId = userObj?.code || (isUUID(userId) ? userId.slice(0, 8).toUpperCase() : userId);
         return {
             name: userObj ? userObj.name : userId,
             displayId: displayId
@@ -127,7 +145,7 @@ export const ReceiveDetailsModal: React.FC<ReceiveDetailsModalProps> = ({
                         <div>
                             <p className="text-[10px] text-stone-400 dark:text-stone-500 uppercase font-black tracking-widest leading-none mb-1.5">{t('warehouse.processedBy')}</p>
                             <p className="text-xs text-slate-900 dark:text-zinc-200 font-black uppercase break-words leading-tight">
-                                {data.user.name} {data.user.displayId && <span className="text-slate-400 dark:text-[#A9CBA2]/60 font-normal lowercase">({data.user.displayId})</span>}
+                                {data.user.name} {data.user.displayId && <span className="text-slate-400 dark:text-[#A9CBA2]/60 font-normal">({data.user.displayId})</span>}
                             </p>
                         </div>
                     </div>

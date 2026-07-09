@@ -6,6 +6,8 @@ import { formatJobId } from '../../../utils/jobIdFormatter';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getSellUnit } from '../../../utils/units';
 
+import { useStore } from '../../../contexts/CentralStore';
+
 interface PutawayHistoryProps {
     historicalJobs: WMSJob[];
     resolveOrderRef: (ref?: string) => string;
@@ -26,6 +28,7 @@ export const PutawayHistory: React.FC<PutawayHistoryProps> = ({
     employees,
     t
 }) => {
+    const { user } = useStore();
     const [search, setSearch] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [isMobile, setIsMobile] = useState(false);
@@ -46,8 +49,26 @@ export const PutawayHistory: React.FC<PutawayHistoryProps> = ({
             .map(j => {
                 const item = j.lineItems?.[0];
                 const userId = j.completedBy || j.assignedTo;
-                const userObj = employees.find(e => e.id === userId || e.name === userId || e.email === userId);
-                const displayId = userObj?.code || (userId ? userId.slice(-5).toUpperCase() : '');
+                const isUUID = (str: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
+                let userObj = employees.find(e => 
+                    e.id === userId || 
+                    (e.name && userId && e.name.toLowerCase() === userId.toLowerCase()) || 
+                    (e.email && userId && e.email.toLowerCase() === userId.toLowerCase()) ||
+                    (e.code && userId && e.code.toLowerCase() === userId.toLowerCase())
+                );
+                if (!userObj && user && userId && (
+                    userId.toLowerCase() === user.id?.toLowerCase() || 
+                    userId.toLowerCase() === user.email?.toLowerCase() || 
+                    userId.toLowerCase() === user.name?.toLowerCase() || 
+                    userId.toLowerCase() === user.employeeId?.toLowerCase()
+                )) {
+                    userObj = employees.find(e => 
+                        (e.email && user.email && e.email.toLowerCase() === user.email.toLowerCase()) || 
+                        (e.name && user.name && e.name.toLowerCase() === user.name.toLowerCase()) || 
+                        e.id === user.employeeId
+                    );
+                }
+                const displayId = userObj?.code || (userId ? (isUUID(userId) ? userId.slice(0, 8).toUpperCase() : userId) : '');
 
                 const resolvedUser = {
                     name: userObj?.name || (userId ? userId : 'System'),
@@ -215,7 +236,7 @@ export const PutawayHistory: React.FC<PutawayHistoryProps> = ({
                                             <div className="flex flex-col">
                                                 <span className="text-[8px] font-black text-gray-400 dark:text-gray-555 uppercase tracking-widest leading-none mb-0.5">{t('warehouse.putaway.worker')}</span>
                                                 <span className="text-[10px] font-black text-gray-900 dark:text-gray-300 uppercase tracking-tight leading-none">
-                                                    {item.resolvedUser?.name.split(' ')[0]} <span className="text-gray-400 dark:text-gray-555 font-bold lowercase">({item.resolvedUser?.displayId})</span>
+                                                    {item.resolvedUser?.name} <span className="text-gray-400 dark:text-gray-555 font-bold">({item.resolvedUser?.displayId})</span>
                                                 </span>
                                             </div>
                                         </div>

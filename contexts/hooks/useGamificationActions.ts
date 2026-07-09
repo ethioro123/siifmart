@@ -1,15 +1,17 @@
 import { useCallback } from 'react';
 import type { StorePoints, Site } from '../../types';
-import { POINTS_CONFIG } from '../../types';
+import { POINTS_CONFIG, DEFAULT_POS_ROLE_DISTRIBUTION, DEFAULT_POS_BONUS_TIERS } from '../../types';
+import { calculateStoreBonus } from '../../components/StoreBonusDisplay';
 
 interface UseGamificationActionsDeps {
     sites: Site[];
     storePoints: StorePoints[];
     setStorePoints: React.Dispatch<React.SetStateAction<StorePoints[]>>;
+    settings: any;
 }
 
 export function useGamificationActions(deps: UseGamificationActionsDeps) {
-    const { sites, storePoints, setStorePoints } = deps;
+    const { sites, storePoints, setStorePoints, settings } = deps;
 
     const getStorePoints = useCallback((siteId: string) => {
         return storePoints.find(sp => sp.siteId === siteId);
@@ -48,21 +50,36 @@ export function useGamificationActions(deps: UseGamificationActionsDeps) {
             }
         });
     }, [sites]);
-
     const calculateWorkerBonusShare = useCallback((siteId: string, employeeRole: string) => {
+        const site = sites.find(s => s.id === siteId);
+        if (!site) return undefined;
+
+        const storePointsData = storePoints.find(sp => sp.siteId === siteId);
+        const monthlyPoints = storePointsData?.monthlyPoints || 0;
+
+        const bonusTiers = settings?.posBonusTiers || DEFAULT_POS_BONUS_TIERS;
+        const roleDistribution = settings?.posRoleDistribution || DEFAULT_POS_ROLE_DISTRIBUTION;
+
+        // Calculate store bonus
+        const { bonus: storeBonus } = calculateStoreBonus(monthlyPoints, bonusTiers);
+
+        // Find role percentage share
+        const roleConfig = roleDistribution.find((r: any) =>
+            r.role.toLowerCase() === employeeRole.toLowerCase()
+        );
+        const rolePercentage = roleConfig ? roleConfig.percentage : 0;
+        const personalShare = (storeBonus * rolePercentage) / 100;
+
         return {
             employeeId: '',
             employeeName: '',
             role: employeeRole,
-            rolePercentage: 0,
-            storeBonus: 0,
-            personalShare: 0,
-            siteId,
-            eligible: true,
-            share: 0,
-            estimatedAmount: 0
+            rolePercentage,
+            storeBonus,
+            personalShare,
+            siteId
         };
-    }, []);
+    }, [sites, storePoints, settings]);
 
     const getStoreLeaderboard = useCallback(() => {
         return [...storePoints].sort((a, b) => b.totalPoints - a.totalPoints);

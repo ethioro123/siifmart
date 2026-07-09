@@ -79,8 +79,26 @@ export const ReceiveHistory: React.FC<ReceiveHistoryProps> = ({
         }).map(o => {
             // Resolve User Name
             const userId = o.approvedBy || o.createdBy;
-            const userObj = employees.find(e => e.id === userId || e.name === userId);
-            const displayId = userObj?.code || (userId && userId.length > 20 ? userId.slice(0, 5).toUpperCase() : userId);
+            const isUUID = (str: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
+            let userObj = employees.find(e => 
+                e.id === userId || 
+                (e.name && userId && e.name.toLowerCase() === userId.toLowerCase()) || 
+                (e.email && userId && e.email.toLowerCase() === userId.toLowerCase()) ||
+                (e.code && userId && e.code.toLowerCase() === userId.toLowerCase())
+            );
+            if (!userObj && user && userId && (
+                userId.toLowerCase() === user.id?.toLowerCase() || 
+                userId.toLowerCase() === user.email?.toLowerCase() || 
+                userId.toLowerCase() === user.name?.toLowerCase() || 
+                userId.toLowerCase() === user.employeeId?.toLowerCase()
+            )) {
+                userObj = employees.find(e => 
+                    (e.email && user.email && e.email.toLowerCase() === user.email.toLowerCase()) || 
+                    (e.name && user.name && e.name.toLowerCase() === user.name.toLowerCase()) || 
+                    e.id === user.employeeId
+                );
+            }
+            const displayId = userObj?.code || (userId ? (isUUID(userId) ? userId.slice(0, 8).toUpperCase() : userId) : '');
             const resolvedUser = {
                 name: userObj?.name || (userId ? userId : 'System'),
                 displayId: displayId || ''
@@ -131,8 +149,26 @@ export const ReceiveHistory: React.FC<ReceiveHistoryProps> = ({
         }).map(j => {
             // Resolve User Name
             const userId = j.completedBy || j.createdBy || j.assignedTo;
-            const userObj = employees.find(e => e.id === userId || e.name === userId);
-            const displayId = userObj?.code || (userId && userId.length > 20 ? userId.slice(0, 5).toUpperCase() : userId);
+            const isUUID = (str: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
+            let userObj = employees.find(e => 
+                e.id === userId || 
+                (e.name && userId && e.name.toLowerCase() === userId.toLowerCase()) || 
+                (e.email && userId && e.email.toLowerCase() === userId.toLowerCase()) ||
+                (e.code && userId && e.code.toLowerCase() === userId.toLowerCase())
+            );
+            if (!userObj && user && userId && (
+                userId.toLowerCase() === user.id?.toLowerCase() || 
+                userId.toLowerCase() === user.email?.toLowerCase() || 
+                userId.toLowerCase() === user.name?.toLowerCase() || 
+                userId.toLowerCase() === user.employeeId?.toLowerCase()
+            )) {
+                userObj = employees.find(e => 
+                    (e.email && user.email && e.email.toLowerCase() === user.email.toLowerCase()) || 
+                    (e.name && user.name && e.name.toLowerCase() === user.name.toLowerCase()) || 
+                    e.id === user.employeeId
+                );
+            }
+            const displayId = userObj?.code || (userId ? (isUUID(userId) ? userId.slice(0, 8).toUpperCase() : userId) : '');
             const resolvedUser = {
                 name: userObj?.name || (userId ? userId : 'System'),
                 displayId: displayId || ''
@@ -259,7 +295,7 @@ export const ReceiveHistory: React.FC<ReceiveHistoryProps> = ({
                                         setSelectedJob(item.rawData);
                                         setIsDetailsOpen(true);
                                     }}
-                                    className="group relative glass-panel hover:border-[#2C5E3B]/40 dark:hover:border-[#A9CBA2]/30 p-3 md:p-5 cursor-pointer overflow-hidden hover:shadow-[0_8px_30px_rgba(44,94,59,0.05)] dark:hover:shadow-[0_12px_48px_-8px_rgba(5,8,6,0.4)] transition-all duration-300"
+                                    className="group relative bg-[#FAF8F5]/80 dark:bg-[#1C2620]/60 hover:bg-[#FAF8F5] dark:hover:bg-[#1C2620] border border-[#E2DCCE]/60 dark:border-[#A9CBA2]/[0.06] hover:border-[#2C5E3B]/30 dark:hover:border-[#A9CBA2]/30 rounded-[2rem] p-3 md:p-5 transition-all duration-500 cursor-pointer overflow-hidden shadow-sm hover:shadow-xl active:scale-[0.98]"
                                 >
                                     {/* Hover Glow — hidden on mobile */}
                                     <div className="hidden md:block absolute inset-0 bg-stone-900/5 dark:bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
@@ -304,7 +340,7 @@ export const ReceiveHistory: React.FC<ReceiveHistoryProps> = ({
                                             <div className="flex flex-col">
                                                 <span className="text-[9px] font-black text-stone-400 dark:text-stone-500 uppercase tracking-widest leading-tight">By</span>
                                                 <span className="text-[9px] font-black text-[#1E3F27] dark:text-[#EAE5D9] uppercase tracking-wider leading-tight">
-                                                    {item.resolvedUser?.name} <span className="text-stone-400 dark:text-stone-500 font-normal lowercase">({item.resolvedUser?.displayId})</span>
+                                                    {item.resolvedUser?.name} <span className="text-stone-400 dark:text-stone-500 font-normal">({item.resolvedUser?.displayId})</span>
                                                 </span>
                                             </div>
                                         </div>

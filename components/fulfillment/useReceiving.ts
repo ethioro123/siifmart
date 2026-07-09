@@ -38,14 +38,19 @@ export const convertToSellableUnits = (orderQty: number, item: any): number => {
     const packQty = parseInt(attrs?.packaging?.packQty || '0');
     const caseSize = parseInt(attrs?.packaging?.caseSize || '0');
 
-    console.log(`📦 convertToSellableUnits: orderQty=${orderQty}, size=${sizeValue}, sizeType="${sizeType}", sellUnit="${sellUnit}", packQty=${packQty}, caseSize=${caseSize}`);
+    logger.info('useReceiving', `convertToSellableUnits: orderQty=${orderQty}, size=${sizeValue}, sizeType="${sizeType}", sellUnit="${sellUnit}", packQty=${packQty}, caseSize=${caseSize}`);
 
-    // Step 1: Handle pack/case multiplier (for count-based products)
-    if (packQty > 1 || caseSize > 1) {
-        const effectivePackQty = packQty > 1 ? packQty : 1;
-        const effectiveCaseSize = caseSize > 1 ? caseSize : 1;
+    // Step 1: Handle pack/case multiplier (for count-based products).
+    // Formula mirrors POItemForm and SellingAttributes:
+    //   hasCases = caseSize >= 1  (any explicit case layer, even 1 pack/case)
+    //   hasPacks = packQty > 1 and no case layer
+    const hasCases = caseSize >= 1;
+    const hasPacks = packQty > 1 && !hasCases;
+    const unitsPerOrderUnit = hasCases ? caseSize * packQty : hasPacks ? packQty : 1;
+
+    if (unitsPerOrderUnit > 1) {
         if (['UNIT', 'PACK', 'DOZEN'].includes(sellUnit) || !sellUnit) {
-            return orderQty * effectiveCaseSize * effectivePackQty;
+            return orderQty * unitsPerOrderUnit;
         }
     }
 
@@ -69,7 +74,7 @@ export const convertToSellableUnits = (orderQty: number, item: any): number => {
 
         if (sizeCategory && sizeCategory === sellCategory) {
             const sellUnitsPerPackage = sizeInBase / sellInBase;
-            console.log(`   ✅ Converted: ${orderQty} × ${sellUnitsPerPackage} = ${orderQty * sellUnitsPerPackage} ${sellUnit}`);
+            logger.info('useReceiving', `Converted: ${orderQty} × ${sellUnitsPerPackage} = ${orderQty * sellUnitsPerPackage} ${sellUnit}`);
             return orderQty * sellUnitsPerPackage;
         }
     }
@@ -161,12 +166,15 @@ export const useReceiving = (deps: UseReceivingDeps) => {
                     if (!existingProduct.unit && lineItem.unit) updates.unit = lineItem.unit;
                     if (!existingProduct.category && lineItem.category) updates.category = lineItem.category;
                     if ((!existingProduct.price || existingProduct.price === 0) && lineItem.retailPrice) updates.price = lineItem.retailPrice;
-                    if ((!existingProduct.costPrice || existingProduct.costPrice === 0) && lineItem.unitCost) updates.costPrice = lineItem.unitCost;
+                    if ((!existingProduct.costPrice || existingProduct.costPrice === 0) && lineItem.unitCost) {
+                        const unitsPerOrderUnit = convertToSellableUnits(1, lineItem);
+                        updates.costPrice = unitsPerOrderUnit > 0 ? (lineItem.unitCost / unitsPerOrderUnit) : lineItem.unitCost;
+                    }
                     if (!existingProduct.customAttributes && lineItem.customAttributes) updates.customAttributes = lineItem.customAttributes;
                     if (!existingProduct.description && lineItem.description) updates.description = lineItem.description;
                     if (!existingProduct.minStock && lineItem.minStock) updates.minStock = lineItem.minStock;
                     if (!existingProduct.maxStock && lineItem.maxStock) updates.maxStock = lineItem.maxStock;
-
+ 
                     if (Object.keys(updates).length > 0) {
                         const updated = await productsService.update(existingProduct.id, updates);
                         if (updated) {
@@ -184,7 +192,10 @@ export const useReceiving = (deps: UseReceivingDeps) => {
                             barcode: (lineItem as any).barcode || '',
                             barcodes: (lineItem as any).barcodes || [],
                             price: lineItem.retailPrice || 0,
-                            costPrice: lineItem.unitCost || 0,
+                            costPrice: (() => {
+                                const unitsPerOrderUnit = convertToSellableUnits(1, lineItem);
+                                return unitsPerOrderUnit > 0 ? (lineItem.unitCost / unitsPerOrderUnit) : (lineItem.unitCost || 0);
+                            })(),
                             category: lineItem.category || 'Uncategorized',
                             status: 'active',
                             stock: 0,

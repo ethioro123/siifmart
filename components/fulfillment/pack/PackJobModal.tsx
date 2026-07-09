@@ -174,8 +174,11 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
     };
 
     return (
-        <div className="fixed inset-0 z-[150] flex items-center justify-center p-2 md:p-4 bg-black/40 dark:bg-black/80 backdrop-blur-sm">
-            <div className="bg-white dark:bg-[#0a0a0a] w-full max-w-5xl min-h-[70dvh] max-h-[95dvh] md:min-h-0 md:max-h-[90vh] rounded-[2rem] border border-[#E2DCCE]/60 dark:border-white/10 shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-[150] flex items-center justify-center p-2 md:p-4 bg-black/60 dark:bg-black/80 backdrop-blur-sm">
+            <div className="bg-[#FAF8F5]/95 dark:bg-[#1C2620]/95 w-full max-w-5xl min-h-[70dvh] max-h-[95dvh] md:min-h-0 md:max-h-[90vh] rounded-3xl border border-[#E2DCCE] dark:border-emerald-950/20 shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200 relative">
+                {/* Visual Flair */}
+                <div className="hidden md:block absolute -top-32 -right-32 w-96 h-96 bg-[#2C5E3B]/10 dark:bg-[#2C5E3B]/20 blur-[100px] rounded-full pointer-events-none" />
+                <div className="hidden md:block absolute -bottom-32 -left-32 w-96 h-96 bg-[#A9CBA2]/10 dark:bg-[#A9CBA2]/25 blur-[100px] rounded-full pointer-events-none" />
 
                 {/* Header */}
                 <PackJobHeader
@@ -428,7 +431,7 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
                     </div>
                 </div>
 
-                <div className="p-4 md:p-6 border-t border-[#E2DCCE]/60 dark:border-white/10 bg-[#FAF8F5]/50 dark:bg-black/40 flex items-center justify-between gap-3 shrink-0">
+                <div className="p-4 md:p-6 border-t border-[#E2DCCE]/60 dark:border-emerald-950/20 bg-[#FAF8F5]/50 dark:bg-zinc-950/40 flex items-center justify-between gap-3 shrink-0 relative z-20">
                     <div className="flex items-center gap-2 md:gap-4 shrink-0">
                         <button
                             onClick={() => onPrintLabel(boxDetails)}
@@ -474,10 +477,7 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
                                     onCompleteJob(boxDetails);
                                 }}
                                 disabled={isSubmitting || !isFullyPacked}
-                                className={`flex-1 max-w-[150px] md:max-w-none md:flex-none justify-center px-5 py-3 md:px-8 md:py-3.5 rounded-xl md:rounded-2xl font-black text-xs md:text-sm uppercase tracking-widest shadow-md transition-all flex items-center gap-1.5 md:gap-3 active:scale-95 disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed ${isFullyPacked
-                                    ? 'bg-green-600 hover:bg-green-500 border border-green-400/50 text-white shadow-green-500/25'
-                                    : 'bg-[#2C5E3B] hover:bg-[#1B3520] dark:bg-[#EAE5D9] dark:hover:bg-[#DFD9CA] text-white dark:text-[#1E3B24] border border-[#2C5E3B]/20 dark:border-[#EAE5D9]/20 shadow-sm'
-                                    }`}
+                                className={`flex-1 max-w-[150px] md:max-w-none md:flex-none justify-center px-5 py-3 md:px-8 md:py-3.5 rounded-xl md:rounded-2xl font-black text-xs md:text-sm uppercase tracking-widest shadow-md transition-all flex items-center gap-1.5 md:gap-3 active:scale-95 disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed ${isFullyPacked ? 'bg-green-600 hover:bg-green-500 border border-green-400/50 text-white shadow-green-500/25' : 'bg-[#2C5E3B] hover:bg-[#1B3520] dark:bg-[#EAE5D9] dark:hover:bg-[#DFD9CA] text-white dark:text-[#1E3B24] border border-[#2C5E3B]/20 dark:border-[#EAE5D9]/20 shadow-sm'}`}
                             >
                                 {isSubmitting ? <Loader2 size={16} className="animate-spin md:w-[18px] md:h-[18px]" /> : (
                                     <>

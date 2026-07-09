@@ -5,6 +5,7 @@ import { usePOS } from '../POSContext';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { CURRENCY_SYMBOL } from '../../../constants';
 import { getSellUnit } from '../../../utils/units';
+import { formatPackBadge } from '../../procurement/utils';
 import { Product } from '../../../types';
 
 interface POSCatalogProps {
@@ -120,7 +121,15 @@ export const POSCatalog: React.FC<POSCatalogProps> = ({
                                 </div>
 
                                 <div className="flex-1 flex flex-col min-w-0">
-                                    <h3 className="font-extrabold text-[#1E3F27] dark:text-[#EAE5D9] text-xs md:text-sm line-clamp-2 min-h-[2.5rem] leading-tight mb-2 group-hover:text-[#2C5E3B] dark:group-hover:text-white transition-colors">{product.name}</h3>
+                                    <h3 className="font-extrabold text-[#1E3F27] dark:text-[#EAE5D9] text-xs md:text-sm line-clamp-2 min-h-[2.5rem] leading-tight mb-1 group-hover:text-[#2C5E3B] dark:group-hover:text-white transition-colors">{product.name}</h3>
+                                    {(() => {
+                                        const badge = formatPackBadge(product);
+                                        return badge ? (
+                                            <span className="inline-block mb-1.5 px-1.5 py-0.5 rounded bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400 text-[8px] font-black uppercase tracking-widest">
+                                                {badge}
+                                            </span>
+                                        ) : null;
+                                    })()}
                                     <div className="mt-auto pt-1.5 flex items-center justify-between border-t border-[#E2DCCE]/30 dark:border-white/5">
                                         <div className="flex items-baseline gap-1.5">
                                             {product.isOnSale && product.salePrice ? (

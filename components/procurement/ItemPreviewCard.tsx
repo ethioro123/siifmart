@@ -1,6 +1,7 @@
 import React from 'react';
 import { CURRENCY_SYMBOL } from '../../constants';
 import { Info } from 'lucide-react';
+import { formatPackBadge } from './utils';
 
 interface ItemPreviewCardProps {
     name: string;
@@ -118,25 +119,22 @@ export const ItemPreviewCard: React.FC<ItemPreviewCardProps> = ({
                         brand,
                         name,
                         customAttributes?.identity?.variant,
-                        // Weight/Size Logic
                         (() => {
                             const physicalWeight = customAttributes?.physical?.netWeight || size;
-                            const physicalType = customAttributes?.physical?.sizeType || customAttributes?.physical?.unit || 
+                            const physicalType = customAttributes?.physical?.sizeType || customAttributes?.physical?.unit ||
                                                  (unit && !['UNIT', 'PACK', 'DOZEN'].includes(unit.toUpperCase().trim()) ? unit : '');
                             return physicalWeight ? `${physicalWeight}${physicalType}` : '';
                         })(),
-                    ].filter(Boolean).join(' ') + (
-                            // Packaging Logic - Explicit "Pack of X" format
-                            (customAttributes?.packaging?.packQty && parseInt(customAttributes.packaging.packQty) > 1)
-                                ? ` – Pack of ${customAttributes.packaging.packQty}`
-                                : ''
-                        ) + (
-                            // Additional Packaging Details (Type/Level) - Optional, kept subtle if needed
-                            (customAttributes?.packaging?.packageType)
-                                ? ` (${customAttributes.packaging.packageType})`
-                                : ''
-                        )}
+                    ].filter(Boolean).join(' ')}
                 </p>
+                {(() => {
+                    const badge = formatPackBadge({ customAttributes });
+                    return badge ? (
+                        <span className="inline-block mt-1 px-1.5 py-0.5 rounded bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400 text-[9px] font-black uppercase tracking-widest">
+                            {badge}
+                        </span>
+                    ) : null;
+                })()}
                 {customAttributes?.descriptive?.keyFeatures && (
                     <p className="text-[10px] text-gray-500 mt-1 italic border-t border-white/5 pt-1">
                         Features: {customAttributes.descriptive.keyFeatures}

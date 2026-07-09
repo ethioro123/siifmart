@@ -22,26 +22,26 @@ export default function GamificationSettings() {
         <GamificationProvider value={contextValue}>
             <div className="w-full max-w-full space-y-6 animate-in fade-in slide-in-from-right-4">
                 {/* HEADER BANNER with SAVE BUTTON */}
-                <div className="p-4 bg-white/5 border border-white/10 rounded-xl flex items-center justify-between">
+                <div className="p-5 bg-white/85 dark:bg-[#18201B]/65 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-[24px] shadow-sm backdrop-blur-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-cyber-primary/10 flex items-center justify-center">
-                            <Trophy className="text-cyber-primary" size={20} />
+                        <div className="w-12 h-12 rounded-2xl bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 flex items-center justify-center shadow-inner">
+                            <Trophy className="text-[#2C5E3B] dark:text-[#A9CBA2]" size={22} />
                         </div>
                         <div>
-                            <h4 className="text-white font-bold">Gamification & Bonuses</h4>
-                            <p className="text-xs text-gray-400 mt-1">
-                                Configure bonuses for warehouse workers (individual) and POS staff (team-based).
+                            <h4 className="text-[#1E3F27] dark:text-[#EAE5D9] font-black text-lg select-none">Gamification & Bonuses</h4>
+                            <p className="text-xs text-[#4D6E56] dark:text-[#7A9E83] mt-1">
+                                Configure performance-based incentives for warehouse workers (individual) and POS staff (team-based).
                             </p>
                         </div>
                     </div>
                     <button
                         onClick={handleSave}
                         disabled={isSaving}
-                        className={`px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-all text-sm ${isSaving
-                            ? 'bg-gray-600/50 text-gray-400 cursor-not-allowed'
+                        className={`px-6 py-3 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all duration-300 text-sm shadow-sm select-none cursor-pointer transform hover:scale-[1.03] active:scale-95 ${isSaving
+                            ? 'bg-stone-300 dark:bg-[#18201B] text-stone-500 dark:text-stone-600 cursor-not-allowed border border-[#E2DCCE] dark:border-emerald-950/20'
                             : activeTab === 'warehouse'
-                                ? 'bg-gradient-to-r from-cyber-primary to-green-400 text-black hover:shadow-[0_0_30px_rgba(0,255,157,0.3)]'
-                                : 'bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:shadow-[0_0_30px_rgba(100,100,255,0.3)]'
+                                ? 'bg-[#2C5E3B] text-white hover:bg-[#1E3F27] dark:bg-[#A9CBA2] dark:text-[#0B0F0D] dark:hover:bg-white'
+                                : 'bg-amber-600 text-white hover:bg-amber-700 dark:bg-amber-500 dark:text-[#0B0F0D] dark:hover:bg-amber-400'
                             }`}
                     >
                         {isSaving ? (
@@ -52,60 +52,60 @@ export default function GamificationSettings() {
                         ) : (
                             <>
                                 <Save size={16} />
-                                Save All
+                                Save All Settings
                             </>
                         )}
                     </button>
                 </div>
 
                 {/* TABS: Warehouse vs POS */}
-                <div className="flex gap-1 bg-white/5 p-1 rounded-xl">
+                <div className="flex gap-2 bg-white/80 dark:bg-[#18201B]/55 p-1.5 rounded-2xl border border-[#E2DCCE] dark:border-emerald-950/20 backdrop-blur-xl shadow-sm">
                     <button
                         onClick={() => setActiveTab('warehouse')}
-                        className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-bold transition-all ${activeTab === 'warehouse'
-                            ? 'bg-cyber-primary text-black'
-                            : 'text-gray-400 hover:text-white hover:bg-white/5'
+                        className={`flex-1 flex items-center justify-center gap-2 px-4 py-3.5 rounded-xl font-bold transition-all duration-300 cursor-pointer ${activeTab === 'warehouse'
+                            ? 'bg-[#2C5E3B] text-white dark:bg-[#A9CBA2] dark:text-[#0B0F0D] shadow-sm'
+                            : 'text-[#4D6E56] dark:text-[#7A9E83] hover:text-[#1E3F27] dark:hover:text-[#EAE5D9] hover:bg-stone-200/50 dark:hover:bg-black/35'
                             }`}
                     >
                         <Trophy size={18} />
-                        Warehouse
+                        Warehouse Operations
                     </button>
                     <button
                         onClick={() => setActiveTab('pos')}
-                        className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-bold transition-all ${activeTab === 'pos'
-                            ? 'bg-blue-500 text-white'
-                            : 'text-gray-400 hover:text-white hover:bg-white/5'
+                        className={`flex-1 flex items-center justify-center gap-2 px-4 py-3.5 rounded-xl font-bold transition-all duration-300 cursor-pointer ${activeTab === 'pos'
+                            ? 'bg-amber-600 text-white dark:bg-amber-500 dark:text-[#0B0F0D] shadow-sm'
+                            : 'text-[#4D6E56] dark:text-[#7A9E83] hover:text-[#1E3F27] dark:hover:text-[#EAE5D9] hover:bg-stone-200/50 dark:hover:bg-black/35'
                             }`}
                     >
                         <ShoppingBag size={18} />
-                        POS Team
+                        POS Team Rewards
                     </button>
                 </div>
 
                 {activeTab === 'warehouse' && <WarehouseTab />}
                 {activeTab === 'pos' && <POSTab />}
 
-                {/* SAVE BUTTON */}
-                <div className="flex justify-end">
+                {/* BOTTOM SAVE BAR */}
+                <div className="flex justify-end pt-2">
                     <button
                         onClick={handleSave}
                         disabled={isSaving}
-                        className={`px-6 py-3 rounded-xl font-bold flex items-center gap-2 transition-all ${isSaving
-                            ? 'bg-gray-600/50 text-gray-400 cursor-not-allowed'
+                        className={`px-7 py-3.5 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all duration-300 shadow-sm cursor-pointer transform hover:scale-[1.03] active:scale-95 ${isSaving
+                            ? 'bg-stone-300 dark:bg-[#18201B] text-stone-500 dark:text-stone-600 cursor-not-allowed border border-[#E2DCCE] dark:border-emerald-950/20'
                             : activeTab === 'warehouse'
-                                ? 'bg-gradient-to-r from-cyber-primary to-green-400 text-black hover:shadow-[0_0_30px_rgba(0,255,157,0.3)]'
-                                : 'bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:shadow-[0_0_30px_rgba(100,100,255,0.3)]'
+                                ? 'bg-[#2C5E3B] text-white hover:bg-[#1E3F27] dark:bg-[#A9CBA2] dark:text-[#0B0F0D] dark:hover:bg-white'
+                                : 'bg-amber-600 text-white hover:bg-amber-700 dark:bg-amber-500 dark:text-[#0B0F0D] dark:hover:bg-amber-400'
                             }`}
                     >
                         {isSaving ? (
                             <>
                                 <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                                Saving...
+                                Saving Changes...
                             </>
                         ) : (
                             <>
                                 <Save size={18} />
-                                Save All Settings
+                                Commit Settings
                             </>
                         )}
                     </button>

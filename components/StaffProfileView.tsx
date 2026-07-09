@@ -21,6 +21,7 @@ import ResetPasswordModal from './staff-profile/modals/ResetPasswordModal';
 import SendMessageModal from './staff-profile/modals/SendMessageModal';
 import AdjustSalaryModal from './staff-profile/modals/AdjustSalaryModal';
 import EmployeeIDCard from './EmployeeIDCard';
+import ImageEditorModal from './ImageEditorModal';
 import { Employee } from '../types';
 
 interface StaffProfileViewProps {
@@ -88,6 +89,19 @@ export default function StaffProfileView(props: StaffProfileViewProps) {
             {profile.isPasswordModalOpen && <ResetPasswordModal isOpen={profile.isPasswordModalOpen} onClose={() => profile.setIsPasswordModalOpen(false)} employee={employee} showResetPassword={true} setShowResetPassword={() => {}} passwordInput={profile.passwordInput} setPasswordInput={profile.setPasswordInput} handleConfirmResetPassword={profile.handleConfirmResetPassword} isResetting={profile.isResetting} />}
             {profile.isSalaryModalOpen && <AdjustSalaryModal isOpen={profile.isSalaryModalOpen} onClose={() => profile.setIsSalaryModalOpen(false)} salaryInput={profile.salaryInput} setSalaryInput={profile.setSalaryInput} handleConfirmSalary={() => { updateEmployee({ ...employee, salary: parseFloat(profile.salaryInput) }, user?.name || 'Admin'); profile.setIsSalaryModalOpen(false); addNotification('success', 'Salary updated.'); }} />}
             {profile.idCardOpen && <EmployeeIDCard employee={employee} siteCode={sites.find(s => s.id === employee.siteId)?.code || 'HQ'} onClose={() => profile.setIdCardOpen(false)} />}
+            {profile.isEditorOpen && profile.pendingImageSrc && (
+                <ImageEditorModal
+                    isOpen={profile.isEditorOpen}
+                    imageSrc={profile.pendingImageSrc}
+                    onClose={() => {
+                        profile.setIsEditorOpen(false);
+                        profile.setPendingImageSrc(null);
+                    }}
+                    onSave={(croppedResult) => {
+                        profile.handleSaveEditedPhoto(croppedResult);
+                    }}
+                />
+            )}
         </div>
     );
 }

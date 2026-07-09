@@ -151,24 +151,48 @@ export const STORAGE_CONDITIONS = [
 ];
 export const formatPOItemDescription = (item: any) => {
     const physicalWeight = item.customAttributes?.physical?.netWeight || item.size;
-    const physicalType = item.customAttributes?.physical?.sizeType || item.customAttributes?.physical?.unit || 
+    const physicalType = item.customAttributes?.physical?.sizeType || item.customAttributes?.physical?.unit ||
                          (item.unit && !['UNIT', 'PACK', 'DOZEN'].includes(item.unit.toUpperCase().trim()) ? item.unit : '');
 
+    // NOTE: Pack/case info is intentionally NOT appended to the name string.
+    // Use formatPackBadge() to render pack size as a separate UI chip/badge.
     return [
-        // Only show brand if it's not already in the product name
         (item.brand && !item.productName.toLowerCase().startsWith(item.brand.toLowerCase())) ? item.brand : null,
         item.productName,
         item.customAttributes?.identity?.variant,
         physicalWeight ? `${physicalWeight}${physicalType}` : '',
-    ].filter(Boolean).join(' ') + (
-            (item.packQuantity && item.packQuantity > 1)
-                ? ` – Pack of ${item.packQuantity}`
-                : ''
-        ) + (
-            (item.customAttributes?.packaging?.packageType)
-                ? ` (${item.customAttributes.packaging.packageType})`
-                : ''
-        );
+    ].filter(Boolean).join(' ');
+};
+
+/**
+ * Returns a compact pack/case label for rendering as a badge/chip, e.g.:
+ *   "6 units/pack"        (pack only)
+ *   "4 packs/case"        (case, each pack = 1 unit)
+ *   "6 units × 4 packs"   (case with multi-unit packs)
+ * Returns null when there is no meaningful packaging hierarchy.
+ */
+export const formatPackBadge = (item: {
+    packQuantity?: number;
+    customAttributes?: any;
+}): string | null => {
+    const packQty = item.packQuantity ||
+        parseInt(item.customAttributes?.packaging?.packQty || '0') || 0;
+    const caseSize = parseInt(item.customAttributes?.packaging?.caseSize || '0') || 0;
+    const packageType = item.customAttributes?.packaging?.packageType || '';
+
+    if (caseSize >= 1 && packQty > 1) {
+        // Full case structure: e.g. "6 units × 4 packs/case"
+        return `${packQty} units × ${caseSize} packs${packageType ? ` (${packageType})` : ''}`;
+    }
+    if (caseSize >= 1) {
+        // Case with single units: e.g. "4 packs/case"
+        return `${caseSize} packs/case${packageType ? ` (${packageType})` : ''}`;
+    }
+    if (packQty > 1) {
+        // Pack only: e.g. "6 units/pack"
+        return `${packQty} units/pack${packageType ? ` (${packageType})` : ''}`;
+    }
+    return null;
 };
 
 /**
@@ -178,16 +202,14 @@ export const formatPOItemDescription = (item: any) => {
 export const formatProductDisplayName = (product: { name: string; brand?: string; size?: string; unit?: string; packQuantity?: number; customAttributes?: any }) => {
     const parts: string[] = [];
 
-    // Only show brand if it's not already in the product name
     if (product.brand && !product.name.toLowerCase().startsWith(product.brand.toLowerCase())) {
         parts.push(product.brand);
     }
 
     parts.push(product.name);
 
-    // Append size+unit if present and not already in the name
     const physicalWeight = product.customAttributes?.physical?.netWeight || product.size;
-    const physicalType = product.customAttributes?.physical?.sizeType || product.customAttributes?.physical?.unit || 
+    const physicalType = product.customAttributes?.physical?.sizeType || product.customAttributes?.physical?.unit ||
                          (product.unit && !['UNIT', 'PACK', 'DOZEN'].includes(product.unit.toUpperCase().trim()) ? product.unit : '');
 
     if (physicalWeight) {
@@ -199,11 +221,7 @@ export const formatProductDisplayName = (product: { name: string; brand?: string
         }
     }
 
-    let result = parts.filter(Boolean).join(' ');
-
-    if (product.packQuantity && product.packQuantity > 1) {
-        result += ` – Pack of ${product.packQuantity}`;
-    }
-
-    return result;
+    // NOTE: Pack/case info is intentionally NOT appended to the name string.
+    // Use formatPackBadge() to render pack size as a separate UI chip/badge.
+    return parts.filter(Boolean).join(' ');
 };

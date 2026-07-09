@@ -8,6 +8,7 @@ import DeleteEmployeeModal from './modals/DeleteEmployeeModal';
 import ApproveEmployeeModal from './modals/ApproveEmployeeModal';
 import ValidationWarningModal from './modals/ValidationWarningModal';
 import ImageCropper from '../ImageCropper';
+import ImageEditorModal from '../ImageEditorModal';
 import { Loader2 } from 'lucide-react';
 import { Employee, UserRole } from '../../types';
 
@@ -28,6 +29,11 @@ interface EmployeeModalsProps {
    isProcessingImage: boolean;
    processingStatus: string;
    user?: any;
+   isOnboardingEditorOpen: boolean;
+   setIsOnboardingEditorOpen: (open: boolean) => void;
+   pendingOnboardingImageSrc: string | null;
+   setPendingOnboardingImageSrc: (src: string | null) => void;
+   handleSaveOnboardingPhoto: (croppedImage: string) => void;
 }
 
 export default function EmployeeModals({
@@ -37,10 +43,28 @@ export default function EmployeeModals({
    terminateProps, deleteProps,
    approveProps, validationProps,
    cropperProps, isProcessingImage, processingStatus,
-   user
+   user,
+   isOnboardingEditorOpen,
+   setIsOnboardingEditorOpen,
+   pendingOnboardingImageSrc,
+   setPendingOnboardingImageSrc,
+   handleSaveOnboardingPhoto
 }: EmployeeModalsProps) {
    return (
       <>
+         {/* Image Editor for Onboarding */}
+         {isOnboardingEditorOpen && pendingOnboardingImageSrc && (
+            <ImageEditorModal
+               isOpen={isOnboardingEditorOpen}
+               imageSrc={pendingOnboardingImageSrc}
+               onClose={() => {
+                  setIsOnboardingEditorOpen(false);
+                  setPendingOnboardingImageSrc(null);
+               }}
+               onSave={handleSaveOnboardingPhoto}
+            />
+         )}
+
          {/* Image Processing Overlay */}
          {isProcessingImage && (
             <div className="fixed inset-0 bg-black/80 z-[10001] flex items-center justify-center">

@@ -432,6 +432,7 @@ export const PutawayTab: React.FC<PutawayTabProps> = ({
                     }}
                     resolveOrderRef={resolveOrderRef}
                     employees={employees}
+                    sites={sites}
                     t={t}
                 />
             )}

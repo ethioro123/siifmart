@@ -53,6 +53,33 @@
 | Blank screen | Runtime error | Browser console | Check for uncaught errors |
 | Styling broken | Tailwind class | `index.css` | Verify CSS variables |
 
+## Mobile Performance (POS / WMS)
+
+| Symptom | Likely Cause | Files to Check | Fix Pattern |
+|---------|-------------|----------------|-------------|
+| Page freezes after aesthetic update | `backdrop-blur` on scrollable/re-rendered elements | Component CSS classes | Replace `backdrop-blur-xl` with solid `bg-` color on lists, cards, modals |
+| Janky scrolling on mobile | `transition-all` or animating layout properties | Component CSS classes | Use `transition: transform 150ms, opacity 150ms` — never `transition-all` |
+| Buttons hard to tap | Touch targets too small | Component sizing classes | Ensure all interactive elements are ≥44×44px |
+| Slow initial load on mobile | Modals/charts eagerly imported | POS/Fulfillment page imports | Lazy-load modals with `React.lazy()`, defer chart libs |
+| UI unresponsive during search | Missing debounce on input | Search input `onChange` handler | Add `setTimeout` or `useDeferredValue` with ≥300ms delay |
+
+## Supabase API Errors
+
+| Symptom | Likely Cause | Files to Check | Fix Pattern |
+|---------|-------------|----------------|-------------|
+| PATCH/POST returns **400 Bad Request** | Sending unknown column names (camelCase fields not mapped to snake_case) | Relevant `.service.ts` `update()` method | Switch from `{ ...object }` spread to explicit allowlist. See RULES.md "Service Field Mapping" |
+| "column X does not exist" in logs | New TS field added but service mapper not updated | `.service.ts` mapper function, `update()` allowlist | Add the field to both the `mapRow()` (read) and `update()` allowlist (write) |
+| RLS blocking query | Policy mismatch | `/migrations/`, Supabase dashboard | Update RLS policy |
+| Insert returns 409 Conflict | Unique constraint violation | Migration that created the constraint | Check unique columns (code, site_number, barcode) |
+
+## Field Mapping Issues
+
+| Symptom | Likely Cause | Files to Check | Fix Pattern |
+|---------|-------------|----------------|-------------|
+| Field saves on create but not update | Missing from `update()` allowlist | `.service.ts` update method | Add `[tsField, db_field]` to the fieldMap array |
+| Field exists in DB but shows undefined in UI | Missing from `mapRow()` function | `.service.ts` mapper | Add `camelCase: row.snake_case` mapping |
+| Field updates silently dropped | Old denylist pattern misses it | `.service.ts` update method | Convert to allowlist pattern (see RULES.md) |
+
 ## Quick Diagnostic Commands
 
 ```bash

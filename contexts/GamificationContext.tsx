@@ -1,7 +1,8 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { WorkerPoints, PointsTransaction, WorkerBonusShare, POINTS_CONFIG } from '../types';
+import { WorkerPoints, PointsTransaction, WorkerBonusShare, POINTS_CONFIG, DEFAULT_POS_BONUS_TIERS, DEFAULT_POS_ROLE_DISTRIBUTION } from '../types';
 import { workerPointsService, pointsTransactionsService } from '../services/supabase.service';
 import { useData } from './DataContext';
+import { calculateStoreBonus } from '../components/StoreBonusDisplay';
 import { logger } from '../utils/logger';
 
 interface GamificationContextType {
@@ -15,7 +16,7 @@ interface GamificationContextType {
 const GamificationContext = createContext<GamificationContextType | undefined>(undefined);
 
 export const GamificationProvider = ({ children }: { children: ReactNode }) => {
-    const { activeSite, settings, addNotification } = useData();
+    const { activeSite, settings, addNotification, sites, getStorePoints } = useData();
     const activeSiteId = activeSite?.id;
     const [workerPoints, setWorkerPoints] = useState<WorkerPoints[]>([]);
 
@@ -185,10 +186,37 @@ export const GamificationProvider = ({ children }: { children: ReactNode }) => {
     };
 
     const calculateWorkerBonusShare = (siteId: string, employeeRole: string): WorkerBonusShare | undefined => {
-        // Validation logic for bonus eligibility
         if (!settings.bonusEnabled) return undefined;
-        // Simplified Logic: Just return a placeholder or implement fully if needed
-        return undefined;
+
+        const site = sites.find(s => s.id === siteId);
+        if (!site) return undefined;
+
+        // Fetch store points
+        const storePointsData = getStorePoints ? getStorePoints(siteId) : undefined;
+        const monthlyPoints = storePointsData?.monthlyPoints || 0;
+
+        const bonusTiers = settings.posBonusTiers || DEFAULT_POS_BONUS_TIERS;
+        const roleDistribution = settings.posRoleDistribution || DEFAULT_POS_ROLE_DISTRIBUTION;
+
+        // Calculate store bonus
+        const { bonus: storeBonus } = calculateStoreBonus(monthlyPoints, bonusTiers);
+
+        // Find role percentage share
+        const roleConfig = roleDistribution.find((r: any) =>
+            r.role.toLowerCase() === employeeRole.toLowerCase()
+        );
+        const rolePercentage = roleConfig ? roleConfig.percentage : 0;
+        const personalShare = (storeBonus * rolePercentage) / 100;
+
+        return {
+            employeeId: '',
+            employeeName: '',
+            role: employeeRole,
+            rolePercentage,
+            storeBonus,
+            personalShare,
+            siteId
+        };
     };
 
     return (

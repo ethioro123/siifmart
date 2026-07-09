@@ -29,21 +29,15 @@ import { InventoryPending } from '../components/inventory/InventoryPending';
 import { ProductForm } from '../components/ProductForm';
 import Modal from '../components/Modal';
 import LabelPrintModal from '../components/LabelPrintModal';
+import { AdjustStockModal } from '../components/inventory/modals/AdjustStockModal';
+import { DeleteProductConfirmModal } from '../components/inventory/modals/DeleteProductConfirmModal';
 import { filterBySite } from '../utils/locationAccess';
+import { useInventoryOverviewData } from '../hooks/useInventoryOverviewData';
 // Constants
 import { CURRENCY_SYMBOL } from '../constants';
 import { logger } from '../utils/logger';
 
 type Tab = 'overview' | 'stock' | 'zones' | 'movements' | 'pending' | 'barcode_audit';
-
-// Helper for ABC Analysis
-const getABCClass = (product: Product, totalValue: number) => {
-    const prodValue = product.price * product.stock;
-    const share = prodValue / totalValue;
-    if (share > 0.05) return 'A'; // High Value
-    if (share > 0.02) return 'B'; // Medium Value
-    return 'C'; // Low Value
-};
 
 export default function Inventory() {
     const { user, theme } = useStore();
@@ -184,38 +178,12 @@ export default function Inventory() {
     // Define permission helper
     const canApprove = user?.role === 'super_admin';
 
-    // Category chart: use server-side value-based aggregation across ALL products (not just the current page)
-    const categoryData = useMemo(() => {
-        if (serverMetrics?.category_stats?.length) {
-            return serverMetrics.category_stats.slice(0, 6);
-        }
-        // Fallback: count SKUs locally while server data loads
-        const data: Record<string, number> = {};
-        filteredProducts.forEach(p => { data[p.category] = (data[p.category] || 0) + 1; });
-        return Object.entries(data).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value).slice(0, 6);
-    }, [serverMetrics, filteredProducts]);
-
-    // ABC chart: use server-side classification across ALL products
-    const abcData = useMemo(() => {
-        const accent = theme === 'dark' ? '#A9CBA2' : '#2C5E3B';
-        if (serverMetrics?.abc_stats?.length) {
-            return serverMetrics.abc_stats.map((item: { name: string; value: number }, i: number) => ({
-                ...item,
-                color: i === 0 ? accent : i === 1 ? '#3b82f6' : '#f59e0b'
-            }));
-        }
-        // Fallback: classify locally
-        const data = { A: 0, B: 0, C: 0 };
-        filteredProducts.forEach(p => {
-            const grade = getABCClass(p, totalInventoryValueCost);
-            if (grade) data[grade]++;
-        });
-        return [
-            { name: 'Class A (High Value)', value: data.A, color: accent },
-            { name: 'Class B (Medium Value)', value: data.B, color: '#3b82f6' },
-            { name: 'Class C (Low Value)', value: data.C, color: '#f59e0b' },
-        ];
-    }, [serverMetrics, filteredProducts, totalInventoryValueCost, theme]);
+    const { categoryData, abcData } = useInventoryOverviewData({
+        theme,
+        serverMetrics,
+        filteredProducts,
+        totalInventoryValueCost
+    });
 
 
     // --- MODAL STATE ---
@@ -491,59 +459,28 @@ export default function Inventory() {
                 </div>
             </Modal>
 
-            <Modal isOpen={isAdjustModalOpen} onClose={() => { setIsAdjustModalOpen(false); setEditingProduct(null); }} title="Adjust Stock Level" size="md">
-                <div className="space-y-6">
-                    <div className="p-4 bg-gray-50 dark:bg-white/5 rounded-xl border border-gray-100 dark:border-white/10 flex items-center gap-4">
-                        <div className="w-16 h-16 rounded-lg bg-gray-200 dark:bg-black/20 overflow-hidden">
-                            {editingProduct?.image && <img src={editingProduct.image} alt="" className="w-full h-full object-cover" />}
-                        </div>
-                        <div>
-                            <h4 className="font-bold text-gray-900 dark:text-white">{editingProduct?.name}</h4>
-                            <p className="text-xs text-secondary font-mono mt-1">{editingProduct?.sku}</p>
-                            <div className="mt-2 text-xs font-bold text-[#2C5E3B] dark:text-[#A9CBA2] bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 px-2 py-0.5 rounded inline-block">Current Stock: {editingProduct?.stock}</div>
-                        </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                        <button onClick={() => setAdjustType('IN')} className={`p-4 rounded-xl border flex flex-col items-center gap-2 transition-all ${adjustType === 'IN' ? 'bg-[#2C5E3B]/10 border-[#2C5E3B] text-[#2C5E3B] dark:bg-[#A9CBA2]/10 dark:border-[#A9CBA2] dark:text-[#A9CBA2]' : 'border-gray-200 dark:border-white/10 text-stone-500'}`}>
-                            <div className="p-2 rounded-full bg-current bg-opacity-10"><Plus size={20} /></div>
-                            <span className="font-bold text-sm">Stock In (+)</span>
-                        </button>
-                        <button onClick={() => setAdjustType('OUT')} className={`p-4 rounded-xl border flex flex-col items-center gap-2 transition-all ${adjustType === 'OUT' ? 'bg-amber-500/10 border-amber-500 text-amber-600 dark:text-amber-400' : 'border-gray-200 dark:border-white/10 text-stone-500'}`}>
-                            <div className="p-2 rounded-full bg-current bg-opacity-10"><Minus size={20} /></div>
-                            <span className="font-bold text-sm">Stock Out (-)</span>
-                        </button>
-                    </div>
-                    <div>
-                        <label className="block text-xs font-bold uppercase text-stone-500 mb-1">Quantity</label>
-                        <input type="number" value={adjustQty} onChange={(e) => setAdjustQty(e.target.value)} className="w-full bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 text-lg font-bold outline-none focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:ring-4 focus:ring-[#2C5E3B]/10 dark:focus:ring-[#A9CBA2]/10 transition-all" placeholder="0" min="1" autoFocus />
-                    </div>
-                    <div>
-                        <label className="block text-xs font-bold uppercase text-stone-500 mb-1">Reason</label>
-                        <select aria-label="Adjustment Reason" value={adjustReason} onChange={(e) => setAdjustReason(e.target.value)} className="w-full bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm font-medium outline-none focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:ring-4 focus:ring-[#2C5E3B]/10 dark:focus:ring-[#A9CBA2]/10 transition-all">
-                            <option>Stock Correction</option><option>Damaged Goods</option><option>Received Shipment</option><option>Return</option><option>Other</option>
-                        </select>
-                    </div>
-                    <div className="flex justify-end gap-3 pt-2">
-                        <Button variant="ghost" onClick={() => setIsAdjustModalOpen(false)}>Cancel</Button>
-                        <Button variant={adjustType === 'IN' ? 'success' : 'danger'} onClick={handleAdjustStock} disabled={!adjustQty || parseInt(adjustQty) <= 0 || adjustStockMutation.isPending} loading={adjustStockMutation.isPending}>Confirm Adjustment</Button>
-                    </div>
-                </div>
-            </Modal>
+            <AdjustStockModal
+                isOpen={isAdjustModalOpen}
+                onClose={() => { setIsAdjustModalOpen(false); setEditingProduct(null); }}
+                product={editingProduct}
+                adjustType={adjustType}
+                setAdjustType={setAdjustType}
+                adjustQty={adjustQty}
+                setAdjustQty={setAdjustQty}
+                adjustReason={adjustReason}
+                setAdjustReason={setAdjustReason}
+                onConfirm={handleAdjustStock}
+                isSubmitting={adjustStockMutation.isPending}
+            />
 
-            <Modal isOpen={isDeleteModalOpen} onClose={() => { setIsDeleteModalOpen(false); setProductToDelete(null); }} title="Delete Product">
-                <div className="space-y-4">
-                    <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex gap-3 text-red-400">
-                        <AlertTriangle size={24} />
-                        <div><h4 className="font-bold">Permanent Deletion</h4><p className="text-sm mt-1">This cannot be undone.</p></div>
-                    </div>
-                    <p className="text-sm text-secondary">Type <span className="text-gray-900 dark:text-white font-mono font-bold">DELETE</span> to confirm:</p>
-                    <input type="text" value={deleteInput} onChange={(e) => setDeleteInput(e.target.value)} className="w-full bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl p-3 text-gray-900 dark:text-white font-mono focus:border-red-500/50 focus:ring-4 focus:ring-red-500/10 outline-none transition-all" placeholder="Type DELETE" />
-                    <div className="flex justify-end gap-3 mt-4">
-                        <Button variant="ghost" onClick={() => setIsDeleteModalOpen(false)}>Cancel</Button>
-                        <Button variant="danger" disabled={deleteInput !== 'DELETE' || deleteMutation.isPending} loading={deleteMutation.isPending} onClick={confirmDeleteProduct}>Delete Product</Button>
-                    </div>
-                </div>
-            </Modal>
+            <DeleteProductConfirmModal
+                isOpen={isDeleteModalOpen}
+                onClose={() => { setIsDeleteModalOpen(false); setProductToDelete(null); }}
+                deleteInput={deleteInput}
+                setDeleteInput={setDeleteInput}
+                onConfirm={confirmDeleteProduct}
+                isSubmitting={deleteMutation.isPending}
+            />
 
             <LabelPrintModal isOpen={isPrintHubOpen} onClose={() => setIsPrintHubOpen(false)} labels={labelsToPrint} onPrint={() => { setIsPrintHubOpen(false); setSelectedIds(new Set()); }} />
         </div>

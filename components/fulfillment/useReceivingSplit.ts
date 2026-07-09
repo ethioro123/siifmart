@@ -91,7 +91,10 @@ export const useReceivingSplit = (deps: UseReceivingSplitDeps) => {
                                 barcode: variant.barcode,
                                 barcodes: variant.barcodes || [],
                                 price: item.retailPrice || 0,
-                                costPrice: item.unitCost || 0,
+                                costPrice: (() => {
+                                    const unitsPerOrderUnit = convertToSellableUnits(1, item);
+                                    return unitsPerOrderUnit > 0 ? (item.unitCost / unitsPerOrderUnit) : (item.unitCost || 0);
+                                })(),
                                 category: item.category || 'Uncategorized',
                                 status: 'active',
                                 stock: 0,
@@ -161,7 +164,10 @@ export const useReceivingSplit = (deps: UseReceivingSplitDeps) => {
                         if (!existingProduct.unit && item.unit) updates.unit = item.unit;
                         if (!existingProduct.category && item.category) updates.category = item.category;
                         if ((!existingProduct.price || existingProduct.price === 0) && item.retailPrice) updates.price = item.retailPrice;
-                        if ((!existingProduct.costPrice || existingProduct.costPrice === 0) && item.unitCost) updates.costPrice = item.unitCost;
+                        if ((!existingProduct.costPrice || existingProduct.costPrice === 0) && item.unitCost) {
+                            const unitsPerOrderUnit = convertToSellableUnits(1, item);
+                            updates.costPrice = unitsPerOrderUnit > 0 ? (item.unitCost / unitsPerOrderUnit) : item.unitCost;
+                        }
                         if (!existingProduct.customAttributes && item.customAttributes) updates.customAttributes = item.customAttributes;
                         if (!existingProduct.description && item.description) updates.description = item.description;
                         if (!existingProduct.minStock && item.minStock) updates.minStock = item.minStock;
@@ -216,7 +222,10 @@ export const useReceivingSplit = (deps: UseReceivingSplitDeps) => {
                                 barcode: variant.barcode || (item as any).barcode || '',
                                 barcodes: variant.barcodes || (item as any).barcodes || [],
                                 price: item.retailPrice || 0,
-                                costPrice: item.unitCost || 0,
+                                costPrice: (() => {
+                                    const unitsPerOrderUnit = convertToSellableUnits(1, item);
+                                    return unitsPerOrderUnit > 0 ? (item.unitCost / unitsPerOrderUnit) : (item.unitCost || 0);
+                                })(),
                                 category: item.category || 'Uncategorized',
                                 status: 'active',
                                 stock: 0,

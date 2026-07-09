@@ -1,16 +1,7 @@
 import JsBarcode from 'jsbarcode';
 import { BARCODE_SIZES, BarcodeSize } from './barcodeConfig';
 
-/**
- * Generate barcode as Canvas (WORKS IN PRINT!)
- * Canvas renders as raster image, which prints reliably
- * 
- * OPTIMIZED FOR SMALL LABELS:
- * - Thin bars (width: 1)
- * - Tall height (80)
- * - Compact margins
- * - Small font
- */
+// Generate barcode as Canvas (optimized for small labels)
 export const generateBarcodeCanvas = (
     value: string,
     options?: {
@@ -60,9 +51,7 @@ export const generateBarcodeCanvas = (
     }
 };
 
-/**
- * Generate barcode as PNG Data URL (for embedding in HTML/printing)
- */
+// Generate barcode as PNG Data URL
 export const generateBarcodeImage = (
     value: string,
     options?: {
@@ -79,14 +68,7 @@ export const generateBarcodeImage = (
     return canvas.toDataURL('image/png');
 };
 
-/**
- * Generate printable barcode label HTML (FIXED - uses PNG images instead of SVG)
- * OPTIMIZED FOR TINY LABELS: 2" x 1" compact size
- */
-/**
- * Generate printable barcode label HTML (SVG for sharp printing)
- * OPTIMIZED FOR TINY LABELS: 2" x 1" compact size
- */
+// Generate printable barcode label HTML
 export const generateBarcodeLabelHTML = (
     value: string,
     label: string,

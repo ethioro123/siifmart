@@ -3,7 +3,7 @@ import { Package, Layers, CheckCircle, Printer, Plus, Loader2 } from 'lucide-rea
 import { PurchaseOrder, WMSJob, Product } from '../../../types';
 import { ProgressBar } from '../../shared/ProgressBar';
 import Pagination from '../../shared/Pagination';
-import { formatPOItemDescription } from '../../procurement/utils';
+import { formatPOItemDescription, formatPackBadge } from '../../procurement/utils';
 import { getSellUnit } from '../../../utils/units';
 import { hasPermission } from '../../../utils/permissions';
 
@@ -164,6 +164,14 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                                                 <div className="flex justify-between items-start gap-3">
                                                     <div className="flex-1 min-w-0">
                                                         <p className={`text-[11px] md:text-xs font-black uppercase tracking-tight truncate ${isComplete ? 'text-stone-400 dark:text-stone-500' : 'text-slate-900 dark:text-white'}`}>{formatPOItemDescription(item)}</p>
+                                                        {(() => {
+                                                            const badge = formatPackBadge(item);
+                                                            return badge ? (
+                                                                <span className="inline-block mt-1 px-1.5 py-0.5 rounded bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400 text-[9px] font-black uppercase tracking-widest">
+                                                                    {badge}
+                                                                </span>
+                                                            ) : null;
+                                                        })()}
                                                         <p className="text-[9px] text-stone-400 dark:text-stone-500 font-black uppercase tracking-[0.2em] mt-1.5 font-mono">
                                                             SKU: {jobSkuMap[item.productId || ''] || finalizedSkus[item.productId || ''] || product?.sku || item.sku || 'PENDING'}
                                                         </p>

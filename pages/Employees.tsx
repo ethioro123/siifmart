@@ -42,6 +42,9 @@ export default function Employees() {
    const [isTerminateModalOpen, setIsTerminateModalOpen] = useState(false);
    const fileInputRef = useRef<HTMLInputElement>(null);
 
+   const [pendingOnboardingImageSrc, setPendingOnboardingImageSrc] = useState<string | null>(null);
+   const [isOnboardingEditorOpen, setIsOnboardingEditorOpen] = useState(false);
+
    // --- HOOKS ---
    const { displayedEmployees, totalCount, totalPages, isLoadingEmployees, canViewAll, restricted } = useEmployeeData({
       user, activeSite, filterSite, filterRole, filterStatus, filterDepartment, searchTerm, currentPage, ITEMS_PER_PAGE: 20
@@ -50,6 +53,28 @@ export default function Employees() {
    const wizard = useEmployeeWizard({ user, employees, sites, activeSite, addEmployee, addNotification });
 
    // --- HANDLERS ---
+   const handlePhotoClick = () => {
+      fileInputRef.current?.click();
+   };
+
+   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onloadend = () => {
+         setPendingOnboardingImageSrc(reader.result as string);
+         setIsOnboardingEditorOpen(true);
+      };
+      reader.readAsDataURL(file);
+   };
+
+   const handleSaveOnboardingPhoto = (croppedResult: string) => {
+      wizard.setNewEmpData((prev: any) => ({ ...prev, avatar: croppedResult }));
+      setPendingOnboardingImageSrc(null);
+      setIsOnboardingEditorOpen(false);
+      addNotification('success', 'Profile photo adjusted for new recruit');
+   };
+
    const handleTerminate = async () => {
       if (!selectedEmployee || terminateInput !== "TERMINATE") return;
       await updateEmployee({ ...selectedEmployee, status: 'Terminated' }, user?.name || 'System');
@@ -61,7 +86,7 @@ export default function Employees() {
    const isPrivileged = ['super_admin', 'hr', 'hr_manager', 'admin'].includes(user?.role || '');
    if (!isPrivileged) {
       const self = employees.find(e => e.id === user?.id || (user?.email && e.email === user.email));
-      return self ? <div className="p-6 max-w-7xl mx-auto"><StaffProfileView employee={self} isOwnProfile={true} onRequestPhotoChange={() => fileInputRef.current?.click()} /></div> : 
+      return self ? <div className="p-6 max-w-7xl mx-auto"><StaffProfileView employee={self} isOwnProfile={true} /></div> : 
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center p-6"><Shield size={64} className="text-stone-400 dark:text-gray-600 mb-4" /><h2 className="text-2xl font-bold text-[#1E3F27] dark:text-[#EAE5D9] mb-2">Access Restricted</h2></div>;
    }
 
@@ -70,9 +95,10 @@ export default function Employees() {
          <input 
             type="file" 
             ref={fileInputRef} 
-            onChange={() => {}} 
+            onChange={handleFileChange} 
             className="hidden" 
             aria-label="Upload Employee Photo" 
+            accept="image/*"
          />
          
          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -117,7 +143,7 @@ export default function Employees() {
             isAddModalOpen={wizard.isAddModalOpen} 
             sites={sites}
             employees={employees}
-            wizardProps={wizard} 
+            wizardProps={{ ...wizard, handlePhotoClick, fileInputRef, handleFileChange }} 
             terminateProps={{ 
                isOpen: isTerminateModalOpen, 
                onClose: () => setIsTerminateModalOpen(false), 
@@ -145,6 +171,11 @@ export default function Employees() {
             isProcessingImage={actions.isProcessingImage} 
             processingStatus={actions.processingStatus} 
             user={user}
+            isOnboardingEditorOpen={isOnboardingEditorOpen}
+            setIsOnboardingEditorOpen={setIsOnboardingEditorOpen}
+            pendingOnboardingImageSrc={pendingOnboardingImageSrc}
+            setPendingOnboardingImageSrc={setPendingOnboardingImageSrc}
+            handleSaveOnboardingPhoto={handleSaveOnboardingPhoto}
          />
       </div>
    );

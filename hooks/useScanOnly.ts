@@ -1,5 +1,6 @@
 import { useRef, useCallback } from 'react';
 import { playBeep } from '../utils/audioUtils';
+import { useStore } from '../contexts/CentralStore';
 
 /**
  * useScanOnly — Enforces scan-only input on fulfillment barcode fields.
@@ -12,6 +13,8 @@ import { playBeep } from '../utils/audioUtils';
  * 2. Clear the input if typing speed is too slow (manual)
  * 3. Block paste operations
  * 4. Play error beep on rejection
+ * 
+ * Bypass: CEO (super_admin) and WMS Manager (warehouse_manager) are allowed manual entry.
  */
 export function useScanOnly(
     setInputVal: (val: string) => void,
@@ -22,12 +25,24 @@ export function useScanOnly(
         onReject?: (reason: string) => void;
     }
 ) {
+    const { user } = useStore();
     const threshold = options?.thresholdMs ?? 150;
     const lastKeyTime = useRef<number>(0);
     const charCount = useRef<number>(0);
     const firstKeyTime = useRef<number>(0);
 
+    const isBypassed = [
+        'super_admin',
+        'ceo',
+        'warehouse_manager',
+        'wms_manager',
+        'wms manager'
+    ].includes(user?.role?.toLowerCase() || '');
+
     const onKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+        // If bypassed (CEO or WMS Manager), do not restrict keyboard entry
+        if (isBypassed) return;
+
         const now = Date.now();
 
         // Always allow Enter (scanner sends Enter to submit)
@@ -72,13 +87,16 @@ export function useScanOnly(
             playBeep('error');
             options?.onReject?.('SCAN ONLY — NO MANUAL TYPING');
         }
-    }, [setInputVal, threshold, options?.onReject]);
+    }, [setInputVal, threshold, options?.onReject, isBypassed]);
 
     const onPaste = useCallback((e: React.ClipboardEvent<HTMLInputElement>) => {
+        // If bypassed, allow paste
+        if (isBypassed) return;
+
         e.preventDefault();
         playBeep('error');
         options?.onReject?.('PASTING NOT ALLOWED — PLEASE SCAN');
-    }, [options?.onReject]);
+    }, [options?.onReject, isBypassed]);
 
     // Reset all internal state — call this when transitioning between scan targets
     const reset = useCallback(() => {

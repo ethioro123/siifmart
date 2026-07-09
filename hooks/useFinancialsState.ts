@@ -1,6 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { ExpenseRecord, Employee, DEFAULT_POS_BONUS_TIERS, DEFAULT_POS_ROLE_DISTRIBUTION } from '../types';
-import { calculateStoreBonus } from '../components/StoreBonusDisplay';
+import { ExpenseRecord, Employee } from '../types';
 import { expensesService } from '../services/supabase.service';
 import { useStore } from '../contexts/CentralStore';
 import { useData } from '../contexts/DataContext';
@@ -8,6 +7,13 @@ import { generateQuarterlyReport } from '../utils/reportGenerator';
 import { DateRangeOption } from '../hooks/useDateFilter';
 import { CURRENCY_SYMBOL } from '../constants';
 import { logger } from '../utils/logger';
+import {
+   TAX_REGIONS,
+   getQuarterInfo,
+   getDateRangeLabels,
+   isWithinRange,
+   calculateEmployeeBonus
+} from './financialsHelpers';
 
 const EXPENSES_PER_PAGE = 20;
 
@@ -27,15 +33,7 @@ export function useFinancialsState() {
    const [isPayrollModalOpen, setIsPayrollModalOpen] = useState(false);
    const [selectedRegion, setSelectedRegion] = useState<any>('SYSTEM');
 
-   const TAX_REGIONS: any = {
-      'SYSTEM': { name: 'System Default', taxName: 'Tax', rate: 0, code: 'N/A' },
-      'ET': { name: 'Ethiopia', taxName: 'VAT', rate: 15, code: 'ETB' },
-      'KE': { name: 'Kenya', taxName: 'VAT', rate: 16, code: 'KES' },
-      'UG': { name: 'Uganda', taxName: 'VAT', rate: 18, code: 'UGX' },
-      'US': { name: 'USA (Avg)', taxName: 'Sales Tax', rate: 8.25, code: 'USD' },
-      'EU': { name: 'Europe (Avg)', taxName: 'VAT', rate: 20, code: 'EUR' },
-      'AE': { name: 'UAE', taxName: 'VAT', rate: 5, code: 'AED' },
-   };
+
 
    const currentTaxConfig = selectedRegion === 'SYSTEM'
       ? { ...TAX_REGIONS['SYSTEM'], rate: settings?.taxRate ?? 0 }
@@ -61,13 +59,7 @@ export function useFinancialsState() {
    const [payrollPage, setPayrollPage] = useState(1);
    const [payrollPerPage, setPayrollPerPage] = useState(10);
 
-   const getQuarterInfo = (d = new Date()) => {
-      const q = Math.floor(d.getMonth() / 3) + 1;
-      const year = d.getFullYear();
-      const start = new Date(year, (q - 1) * 3, 1);
-      const end = new Date(year, q * 3, 0);
-      return { q, year, start, end };
-   };
+
 
    useEffect(() => {
       if (activeTab === 'expenses') {
@@ -161,58 +153,8 @@ export function useFinancialsState() {
       fetchFinancials();
    }, [dateRange, activeSite?.id]);
 
-   const getDateRangeLabels = () => {
-      const { q, year, start, end } = getQuarterInfo();
-      switch (dateRange) {
-         case 'This Month':
-            return `Current Month (${new Date().toLocaleDateString('default', { month: 'short' })})`;
-         case 'Last Month':
-            return `Previous Month`;
-         case 'This Quarter':
-            return `Q${q} ${year} (${start.toLocaleDateString(undefined, { month: 'short' })} - ${end.toLocaleDateString(undefined, { month: 'short' })})`;
-         case 'This Year':
-            return `FY ${year}`;
-         case 'Last Year':
-            return `FY ${year - 1}`;
-         case 'All Time':
-         default:
-            return "All Available Data";
-      }
-   };
-
-   const isWithinRange = (dateString: string) => {
-      if (dateRange === 'All Time') return true;
-      const date = new Date(dateString);
-      const now = new Date();
-      const { q, year } = getQuarterInfo(now);
-      const start = new Date();
-      start.setHours(0, 0, 0, 0);
-
-      switch (dateRange) {
-         case 'This Month':
-            start.setDate(1);
-            return date >= start && date <= now;
-         case 'Last Month':
-            start.setMonth(now.getMonth() - 1);
-            start.setDate(1);
-            const endLM = new Date(now.getFullYear(), now.getMonth(), 0);
-            return date >= start && date <= endLM;
-         case 'This Quarter':
-            const qStart = new Date(year, (q - 1) * 3, 1);
-            const qEnd = new Date(now);
-            qEnd.setHours(23, 59, 59, 999);
-            return date >= qStart && date <= qEnd;
-         case 'This Year':
-            const yStart = new Date(year, 0, 1);
-            return date >= yStart;
-         case 'Last Year':
-            const lyStart = new Date(year - 1, 0, 1);
-            const lyEnd = new Date(year - 1, 11, 31);
-            return date >= lyStart && date <= lyEnd;
-         default:
-            return true;
-      }
-   };
+    const localGetDateRangeLabels = () => getDateRangeLabels(dateRange);
+    const localIsWithinRange = (dateString: string) => isWithinRange(dateString, dateRange);
 
    const getQuarterProgress = () => {
       const now = new Date();
@@ -222,8 +164,8 @@ export function useFinancialsState() {
       return Math.min(100, Math.max(0, (daysPassed / totalDays) * 100));
    };
 
-   const filteredExpenses = expenses.filter(e => isWithinRange(e.date));
-   const filteredSales = sales.filter(s => isWithinRange(s.created_at || new Date().toISOString()));
+   const filteredExpenses = expenses.filter(e => localIsWithinRange(e.date));
+   const filteredSales = sales.filter(s => localIsWithinRange(s.created_at || new Date().toISOString()));
 
    const expenseBreakdownData = useMemo(() => {
       if (serverFinancials?.expense_breakdown) {
@@ -349,25 +291,11 @@ export function useFinancialsState() {
    const totalSalaries = employees.reduce((sum, e) => sum + (e.salary || 0), 0);
    const totalOpEx = serverFinancials?.total_expenses ?? filteredExpenses.reduce((sum, e) => sum + e.amount, 0);
 
-   const calculateEmployeeBonus = (emp: Employee): number => {
-      const empSite = sites.find(s => s.id === emp.siteId || s.id === (emp as any).site_id);
-      if (!empSite) return 0;
-
-      const storePointsData = getStorePoints(empSite.id);
-      if (!storePointsData) return 0;
-
-      const bonusTiers = settings.posBonusTiers || DEFAULT_POS_BONUS_TIERS;
-      const roleDistribution = settings.posRoleDistribution || DEFAULT_POS_ROLE_DISTRIBUTION;
-
-      const storeBonus = calculateStoreBonus(storePointsData.monthlyPoints, bonusTiers);
-      const roleConfig = roleDistribution.find(r =>
-         r.role.toLowerCase() === emp.role.toLowerCase()
-      );
-
-      return roleConfig ? (storeBonus.bonus * roleConfig.percentage) / 100 : 0;
+   const localCalculateEmployeeBonus = (emp: Employee): number => {
+      return calculateEmployeeBonus(emp, sites, getStorePoints, settings);
    };
 
-   const totalBonuses = employees.reduce((sum, emp) => sum + calculateEmployeeBonus(emp), 0);
+   const totalBonuses = employees.reduce((sum, emp) => sum + localCalculateEmployeeBonus(emp), 0);
 
    const totalInventoryValue = allProducts
       .filter(p => (p.status || (p as any).status) !== 'archived')
@@ -506,6 +434,8 @@ export function useFinancialsState() {
       }, 1500);
    };
 
+   const localGetQuarterInfo = (d = new Date()) => getQuarterInfo(d);
+
    const handleGenerateReport = () => {
       const reportMetrics = {
          totalRevenue,
@@ -516,7 +446,7 @@ export function useFinancialsState() {
          totalSalaries,
          totalOpEx
       };
-      generateQuarterlyReport(reportMetrics, getDateRangeLabels(), 'Financials');
+      generateQuarterlyReport(reportMetrics, localGetDateRangeLabels(), 'Financials');
    };
 
    return {
@@ -530,10 +460,10 @@ export function useFinancialsState() {
       expenseBreakdownData, cashflowData, payrollSearch, setPayrollSearch, payrollRoleFilter, setPayrollRoleFilter,
       payrollSort, setPayrollSort, payrollSortDir, setPayrollSortDir, payrollPage, setPayrollPage, payrollPerPage,
       setPayrollPerPage, filteredEmployees, payrollTotalPages, payrollStartIndex, payrollEndIndex, paginatedEmployees,
-      getPayrollPageNumbers, uniqueRoles, totalRevenue, totalSalaries, totalOpEx, calculateEmployeeBonus, totalBonuses,
+      getPayrollPageNumbers, uniqueRoles, totalRevenue, totalSalaries, totalOpEx, calculateEmployeeBonus: localCalculateEmployeeBonus, totalBonuses,
       totalInventoryValue, totalExpenses, totalRefunds, estimatedTaxLiability, inputTaxCredit, netTaxPayable, netProfit,
-      profitMargin, forecastData, COLORS, TAX_REGIONS, EXPENSES_PER_PAGE, getQuarterProgress, getDateRangeLabels,
-      getQuarterInfo, handleAddExpense, handleDeleteExpense, handleConfirmDeleteExpense, handleExportPnL,
+      profitMargin, forecastData, COLORS, TAX_REGIONS, EXPENSES_PER_PAGE, getQuarterProgress, getDateRangeLabels: localGetDateRangeLabels,
+      getQuarterInfo: localGetQuarterInfo, handleAddExpense, handleDeleteExpense, handleConfirmDeleteExpense, handleExportPnL,
       handleProcessPayroll, handleConfirmPayroll, handleGenerateFiling, handleDownloadBankFile, handleGenerateReport
    };
 }

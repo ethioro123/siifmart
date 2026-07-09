@@ -371,10 +371,10 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
             size="4xl"
             footer={createPOFooter}
         >
-            <div className="relative space-y-8 pb-4">
+            <div className="relative space-y-8 pb-4 overflow-x-hidden">
                 {/* Decorative background accent */}
-                <div className="absolute -top-20 -right-20 w-64 h-64 bg-purpose-aurora/5 blur-[100px] rounded-full pointer-events-none"></div>
-                <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-[#2C5E3B]/5 blur-[100px] rounded-full pointer-events-none"></div>
+                <div className="absolute -top-20 -right-20 w-64 h-64 bg-[#2C5E3B]/5 dark:bg-[#1E3F27]/5 blur-[100px] rounded-full pointer-events-none animate-pulse-slow"></div>
+                <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-amber-600/5 dark:bg-amber-700/3 blur-[100px] rounded-full pointer-events-none animate-pulse-slow"></div>
 
                 {/* 1. Supplier & Logistics */}
                 <POSupplierLogistics
@@ -398,7 +398,7 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
                     setPoPriority={setPoPriority}
                 />
 
-                <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-white/5 to-transparent"></div>
+                <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-[#E2DCCE] dark:via-emerald-950/20 to-transparent"></div>
 
                 {/* 2. Add Item Form */}
                 <POItemForm
@@ -417,7 +417,7 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
                     onFullEdit={handleFullEdit}
                 />
 
-                <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-white/5 to-transparent"></div>
+                <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-[#E2DCCE] dark:via-emerald-950/20 to-transparent"></div>
 
                 {/* 4. Totals & Notes */}
                 <POTotalsSummary
