@@ -170,7 +170,7 @@ export const TransferJobDetails: React.FC<TransferJobDetailsProps> = ({
                         <div className="flex items-center justify-between mb-6">
                             <h3 className="font-black text-[#2C5E3B] dark:text-[#A9CBA2] flex items-center gap-3 text-xs uppercase tracking-[0.3em]"><Package size={16} /> {t('warehouse.transferRequest')}</h3>
                             <span className="text-[10px] font-black text-gray-500 bg-stone-100 dark:bg-white/5 px-3 py-1.5 rounded-xl border border-stone-200 dark:border-white/5 uppercase tracking-widest">{totalItems} {t('warehouse.itemPlural')}</span>
-                        </div>
+                                                </div>
                         <div className="space-y-4">
                             {selectedJob.lineItems?.map((item: any, idx: number) => {
                                 const product = products.find(p => p.id === item.productId || p.sku === item.sku); const itemQty = item.expectedQty || item.quantity || item.pickedQty || 0; const itemSku = item.sku || product?.sku || 'N/A';
@@ -179,7 +179,7 @@ export const TransferJobDetails: React.FC<TransferJobDetailsProps> = ({
                                 const showReceived = item.receivedQty !== undefined && ['Received', 'Delivered', 'Completed'].some(s => s === selectedJob.transferStatus || s === selectedJob.status);
                                 const hasDiscrepancy = showReceived && item.receivedQty !== expectedMeasure; const isDone = showReceived && !hasDiscrepancy;
                                 return (
-                                    <div key={idx} className={`group relative bg-stone-50 dark:bg-white/5 border ${isDone ? 'border-green-500/25 bg-green-500/[0.04]' : 'border-stone-200 dark:border-white/5'} rounded-[2rem] p-5 flex items-center justify-between hover:border-[#2C5E3B]/20 dark:hover:border-[#2C5E3B]/30 hover:scale-[1.005] transition-all duration-300 shadow-sm`}>
+                                    <div key={idx} className={`group relative bg-stone-50 dark:bg-white/5 border ${isDone ? 'border-green-500/25 bg-green-500/[0.04]' : 'border-stone-200 dark:border-white/5'} rounded-[2rem] p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-[#2C5E3B]/20 dark:hover:border-[#2C5E3B]/30 hover:scale-[1.005] transition-all duration-300 shadow-sm`}>
                                         <div className="flex items-center gap-6">
                                             <div className="relative w-16 h-16 rounded-2xl bg-white dark:bg-black/40 border border-stone-200 dark:border-white/10 flex items-center justify-center overflow-hidden shrink-0 shadow-sm">
                                                 {product?.image ? <img src={product.image} alt="" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" /> : <Box size={28} className="text-gray-300 dark:text-white/20" />}
@@ -191,12 +191,12 @@ export const TransferJobDetails: React.FC<TransferJobDetailsProps> = ({
                                                 <span className="text-[10px] font-mono font-black text-gray-500 dark:text-gray-400 bg-stone-200/50 dark:bg-black/40 px-2 py-0.5 rounded border border-stone-300/30 dark:border-white/5 uppercase tracking-tighter">{itemSku}</span>
                                             </div>
                                         </div>
-                                        <div className="flex flex-col items-end gap-3 min-w-[170px]">
-                                            <div className="flex items-center gap-8">
-                                                <div className="text-right">
+                                        <div className="flex flex-col sm:items-end gap-4 w-full sm:w-auto shrink-0">
+                                            <div className="flex items-center justify-between sm:justify-end gap-8 w-full sm:w-auto border-t border-stone-200/40 dark:border-white/5 pt-4 sm:pt-0 sm:border-t-0">
+                                                <div className="text-left sm:text-right">
                                                     <span className="text-[9px] text-gray-400 dark:text-gray-600 font-black uppercase tracking-[0.2em] block mb-1">{t('warehouse.expected')}</span>
                                                     {item.orderedQty && item.orderedQty > itemQty ? (
-                                                        <div className="flex flex-col items-end">
+                                                        <div className="flex flex-col sm:items-end">
                                                             <span className="text-[10px] font-mono font-bold text-red-500 line-through opacity-70 mb-0.5">{item.orderedQty}</span>
                                                             <QtyDisplay qty={itemQty} measure={isWeightVol ? item.requestedMeasureQty || itemQty * sizeNum : null} unit={itemUnit} t={t} />
                                                         </div>
@@ -206,13 +206,13 @@ export const TransferJobDetails: React.FC<TransferJobDetailsProps> = ({
                                                 </div>
                                                 {showReceived && (
                                                     <div className="text-right">
-                                                        <span className={`text-[9px] font-black uppercase tracking-[0.2em] block mb-1 ${hasDiscrepancy ? 'text-red-650/60' : 'text-green-600/60'}`}>{t('warehouse.received')}</span>
+                                                        <span className={`text-[9px] font-black uppercase tracking-[0.2em] block mb-1 ${hasDiscrepancy ? 'text-red-600/60 dark:text-red-400/60' : 'text-green-600/60'}`}>{t('warehouse.received')}</span>
                                                         <QtyDisplay qty={item.receivedQty} unit={itemUnit} isMeasure={isWeightVol} color={hasDiscrepancy ? 'red' : 'green'} t={t} />
                                                     </div>
                                                 )}
                                             </div>
                                             {hasDiscrepancy && onResolveDiscrepancy && (
-                                                <button onClick={(e) => { e.stopPropagation(); onResolveDiscrepancy(selectedJob, item, idx); }} className="px-4 py-2 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white border border-red-500/20 text-[10px] uppercase font-black tracking-widest rounded-xl transition-all flex items-center gap-2">
+                                                <button onClick={(e) => { e.stopPropagation(); onResolveDiscrepancy(selectedJob, item, idx); }} className="w-full sm:w-auto px-4 py-2.5 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white border border-red-500/20 text-[10px] uppercase font-black tracking-widest rounded-xl transition-all flex items-center justify-center gap-2">
                                                     <AlertTriangle size={12} /> Resolve Discrepancy
                                                 </button>
                                             )}
@@ -258,7 +258,7 @@ export const TransferJobDetails: React.FC<TransferJobDetailsProps> = ({
                             })()}
                         </div>
                     </div>
-                    <div className="flex items-center gap-3 flex-wrap">
+                    <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
                         {transferStatus === 'Requested' && isManager && (
                             <button onClick={handleApprove} disabled={loading !== null} className="btn-primary bg-[#2C5E3B] hover:bg-[#20452B] dark:bg-[#EAE5D9] dark:hover:bg-[#D8D2C4] text-white dark:text-[#1C2620]">
                                 {loading === 'approve' ? <Loader2 size={18} className="animate-spin" /> : <CheckCircle size={18} />} Approve
@@ -279,13 +279,13 @@ export const TransferJobDetails: React.FC<TransferJobDetailsProps> = ({
                                 <Package size={18} /> {t('warehouse.received')}
                             </button>
                         )}
-                        <button onClick={() => setSelectedJob(null)} className="px-7 py-3.5 rounded-2xl bg-stone-100 dark:bg-white/5 hover:bg-stone-200 dark:hover:bg-white/10 border border-stone-200 dark:border-white/10 text-gray-600 dark:text-gray-400 font-black text-xs uppercase tracking-widest transition-all">
+                        <button onClick={() => setSelectedJob(null)} className="w-full sm:w-auto px-7 py-3.5 rounded-2xl bg-stone-100 dark:bg-white/5 hover:bg-stone-200 dark:hover:bg-white/10 border border-stone-200 dark:border-white/10 text-gray-600 dark:text-gray-400 font-black text-xs uppercase tracking-widest transition-all flex items-center justify-center">
                             {t('warehouse.dismiss')}
                         </button>
                     </div>
                 </div>
             </div>
-            <style>{`.btn-primary { @apply px-8 py-3.5 rounded-2xl font-black text-xs uppercase tracking-widest transition-all flex items-center gap-3 active:scale-95 disabled:opacity-50 shadow-sm; } .btn-secondary { @apply px-8 py-3.5 bg-stone-100 dark:bg-white/5 border border-stone-200 dark:border-white/10 rounded-2xl font-black text-xs uppercase tracking-widest transition-all flex items-center gap-3 active:scale-95 disabled:opacity-50; }`}</style>
+            <style>{`.btn-primary { @apply w-full sm:w-auto justify-center px-8 py-3.5 rounded-2xl font-black text-xs uppercase tracking-widest transition-all flex items-center gap-3 active:scale-95 disabled:opacity-50 shadow-sm; } .btn-secondary { @apply w-full sm:w-auto justify-center px-8 py-3.5 bg-stone-100 dark:bg-white/5 border border-stone-200 dark:border-white/10 rounded-2xl font-black text-xs uppercase tracking-widest transition-all flex items-center gap-3 active:scale-95 disabled:opacity-50; }`}</style>
         </div>
     );
 };
