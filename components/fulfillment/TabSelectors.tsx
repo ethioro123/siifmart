@@ -58,7 +58,7 @@ export const MobileTabSelector: React.FC<TabSelectorProps> = ({
                             const isActive = activeTab === tab;
                             // Discrepancy Logic
                             const hasTransferDiscrepancies = tab === 'TRANSFER' && filteredJobs
-                                .filter(j => j.type === 'TRANSFER')
+                                .filter(j => j.type === 'TRANSFER' && ['Received', 'Delivered', 'Completed'].some(s => s === j.transferStatus || s === j.status))
                                 .some(j => (j.lineItems || []).some((item: any) =>
                                     item.receivedQty !== undefined &&
                                     item.receivedQty !== (item.requestedMeasureQty !== undefined ? item.requestedMeasureQty : item.expectedQty) &&
@@ -107,7 +107,7 @@ export const DesktopTabSelector: React.FC<DesktopTabSelectorProps> = ({
                 {visibleTabs.map((tab) => {
                     // Check for discrepancies in TRANSFER tab
                     const hasTransferDiscrepancies = tab === 'TRANSFER' && filteredJobs
-                        .filter(j => j.type === 'TRANSFER')
+                        .filter(j => j.type === 'TRANSFER' && ['Received', 'Delivered', 'Completed'].some(s => s === j.transferStatus || s === j.status))
                         .some(j => (j.lineItems || []).some((item: any) =>
                             item.receivedQty !== undefined &&
                             item.receivedQty !== (item.requestedMeasureQty !== undefined ? item.requestedMeasureQty : item.expectedQty) &&
@@ -115,6 +115,7 @@ export const DesktopTabSelector: React.FC<DesktopTabSelectorProps> = ({
                         ));
                     const discrepancyCount = tab === 'TRANSFER'
                         ? filteredJobs.filter(j => j.type === 'TRANSFER' &&
+                            ['Received', 'Delivered', 'Completed'].some(s => s === j.transferStatus || s === j.status) &&
                             (j.lineItems || []).some((item: any) =>
                                 item.receivedQty !== undefined &&
                                 item.receivedQty !== (item.requestedMeasureQty !== undefined ? item.requestedMeasureQty : item.expectedQty) &&

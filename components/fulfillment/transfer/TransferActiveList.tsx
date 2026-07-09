@@ -73,11 +73,12 @@ export const TransferActiveList: React.FC<TransferActiveListProps> = ({
     }, [filteredOngoingTransfers, transferCurrentPage]);
 
     const renderRow = (transfer: any) => {
-        const hasDisc = (transfer.lineItems || []).some((item: any) =>
-            item.receivedQty !== undefined &&
-            item.receivedQty !== (item.requestedMeasureQty !== undefined ? item.requestedMeasureQty : item.expectedQty) &&
-            !['Resolved', 'Completed'].includes(item.status)
-        );
+        const hasDisc = ['Received', 'Delivered', 'Completed'].some(s => s === transfer.transferStatus || s === transfer.status) &&
+            (transfer.lineItems || []).some((item: any) =>
+                item.receivedQty !== undefined &&
+                item.receivedQty !== (item.requestedMeasureQty !== undefined ? item.requestedMeasureQty : item.expectedQty) &&
+                !['Resolved', 'Completed'].includes(item.status)
+            );
 
         // Derive effective status: if a child DISPATCH job has progressed further, use that
         const childDispatch = filteredJobs.find(j =>

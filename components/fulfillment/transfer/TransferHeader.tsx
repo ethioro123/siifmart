@@ -89,11 +89,11 @@ export const TransferHeader: React.FC<TransferHeaderProps> = ({
                     <span className="text-gray-400">{t('warehouse.completed')}:</span>
                     <span className="font-bold text-white">{filteredJobs.filter(j => j.type === 'TRANSFER' && j.transferStatus === 'Received').length}</span>
                 </div>
-                {filteredJobs.filter(j => j.type === 'TRANSFER' && (j.lineItems || []).some((item: any) => item.receivedQty !== undefined && item.receivedQty !== (item.requestedMeasureQty !== undefined ? item.requestedMeasureQty : item.expectedQty) && !['Resolved', 'Completed'].includes(item.status))).length > 0 && (
+                {filteredJobs.filter(j => j.type === 'TRANSFER' && ['Received', 'Delivered', 'Completed'].some(s => s === j.transferStatus || s === j.status) && (j.lineItems || []).some((item: any) => item.receivedQty !== undefined && item.receivedQty !== (item.requestedMeasureQty !== undefined ? item.requestedMeasureQty : item.expectedQty) && !['Resolved', 'Completed'].includes(item.status))).length > 0 && (
                     <div className="flex items-center gap-2 text-red-400">
                         <span className="w-2 h-2 rounded-full bg-red-400 animate-pulse"></span>
                         <span>{t('warehouse.discrepancyCount')}:</span>
-                        <span className="font-bold">{filteredJobs.filter(j => j.type === 'TRANSFER' && (j.lineItems || []).some((item: any) => item.receivedQty !== undefined && item.receivedQty !== (item.requestedMeasureQty !== undefined ? item.requestedMeasureQty : item.expectedQty) && !['Resolved', 'Completed'].includes(item.status))).length}</span>
+                        <span className="font-bold">{filteredJobs.filter(j => j.type === 'TRANSFER' && ['Received', 'Delivered', 'Completed'].some(s => s === j.transferStatus || s === j.status) && (j.lineItems || []).some((item: any) => item.receivedQty !== undefined && item.receivedQty !== (item.requestedMeasureQty !== undefined ? item.requestedMeasureQty : item.expectedQty) && !['Resolved', 'Completed'].includes(item.status))).length}</span>
                     </div>
                 )}
             </div>
