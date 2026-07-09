@@ -225,29 +225,35 @@ export const TransferJobDetails: React.FC<TransferJobDetailsProps> = ({
                 </div>
 
                 {/* Footer */}
-                <div className="p-7 border-t border-[#E2DCCE]/60 dark:border-[#2C5E3B]/10 bg-[#FAF8F5]/50 dark:bg-zinc-950/40 flex items-center justify-between flex-wrap gap-6 shrink-0 z-10">
-                    <div className="flex flex-col">
-                        <span className="text-[10px] text-gray-400 dark:text-gray-500 font-black uppercase tracking-[0.3em] mb-1.5">Asset Routing</span>
-                        <div className="flex items-center gap-2.5 text-xs font-black text-gray-700 dark:text-gray-300">
+                <div className="p-6 md:p-8 border-t border-[#E2DCCE]/60 dark:border-[#2C5E3B]/10 bg-[#FAF8F5]/50 dark:bg-[#1C2620]/60 flex flex-col md:flex-row md:items-center justify-between gap-6 shrink-0 z-10">
+                    <div className="flex flex-col gap-2">
+                        <span className="text-[10px] text-[#2C5E3B] dark:text-[#A9CBA2] font-black uppercase tracking-[0.3em]">Asset Routing</span>
+                        <div className="flex flex-wrap items-center gap-3 text-xs font-bold text-gray-800 dark:text-gray-200">
                             {(() => {
                                 const s = sites.find(x => x.id === selectedJob.sourceSiteId);
                                 return s ? (
-                                    <span className="px-2.5 py-1.5 rounded-xl bg-stone-100 dark:bg-white/5 border border-stone-200 dark:border-white/10 text-gray-900 dark:text-gray-300 font-black tracking-wide font-mono text-[10px] uppercase tracking-wider shadow-sm">
-                                        {s.name} <span className="text-gray-400 dark:text-gray-600 font-normal">({s.code || s.id})</span>
+                                    <span className="px-3.5 py-2 rounded-xl bg-stone-100 dark:bg-white/5 border border-stone-200 dark:border-white/10 text-gray-900 dark:text-gray-200 font-bold text-[11px] shadow-sm flex items-center gap-2">
+                                        {s.name}
+                                        <span className="px-1.5 py-0.5 rounded bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 text-[#2C5E3B] dark:text-[#A9CBA2] font-mono text-[9px] font-black tracking-wider uppercase shrink-0">
+                                            {s.code || s.id}
+                                        </span>
                                     </span>
                                 ) : (
-                                    <span className="px-2.5 py-1.5 rounded-xl bg-stone-100 dark:bg-white/5 border border-stone-200 dark:border-white/10 font-mono text-[10px]">{selectedJob.sourceSiteId}</span>
+                                    <span className="px-3.5 py-2 rounded-xl bg-stone-100 dark:bg-white/5 border border-stone-200 dark:border-white/10 font-mono text-[10px]">{selectedJob.sourceSiteId}</span>
                                 );
                             })()}
-                            <ArrowRight size={14} className="text-[#2C5E3B] dark:text-[#A9CBA2] shrink-0" />
+                            <ArrowRight size={14} className="text-[#2C5E3B] dark:text-[#A9CBA2] shrink-0 animate-pulse" />
                             {(() => {
                                 const s = sites.find(x => x.id === selectedJob.destSiteId);
                                 return s ? (
-                                    <span className="px-2.5 py-1.5 rounded-xl bg-stone-100 dark:bg-white/5 border border-stone-200 dark:border-white/10 text-gray-900 dark:text-gray-300 font-black tracking-wide font-mono text-[10px] uppercase tracking-wider shadow-sm">
-                                        {s.name} <span className="text-gray-400 dark:text-gray-600 font-normal">({s.code || s.id})</span>
+                                    <span className="px-3.5 py-2 rounded-xl bg-stone-100 dark:bg-white/5 border border-stone-200 dark:border-white/10 text-gray-900 dark:text-gray-200 font-bold text-[11px] shadow-sm flex items-center gap-2">
+                                        {s.name}
+                                        <span className="px-1.5 py-0.5 rounded bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 text-[#2C5E3B] dark:text-[#A9CBA2] font-mono text-[9px] font-black tracking-wider uppercase shrink-0">
+                                            {s.code || s.id}
+                                        </span>
                                     </span>
                                 ) : (
-                                    <span className="px-2.5 py-1.5 rounded-xl bg-stone-100 dark:bg-white/5 border border-stone-200 dark:border-white/10 font-mono text-[10px]">{selectedJob.destSiteId}</span>
+                                    <span className="px-3.5 py-2 rounded-xl bg-stone-100 dark:bg-white/5 border border-stone-200 dark:border-white/10 font-mono text-[10px]">{selectedJob.destSiteId}</span>
                                 );
                             })()}
                         </div>
@@ -259,17 +265,17 @@ export const TransferJobDetails: React.FC<TransferJobDetailsProps> = ({
                             </button>
                         )}
                         {['Requested', 'Picking'].includes(transferStatus) && isManager && (
-                            <button onClick={handleReject} disabled={loading !== null} className="btn-secondary border-red-500/20 text-red-550 hover:bg-red-500/10">
+                            <button onClick={handleReject} disabled={loading !== null} className="btn-secondary border-red-500/20 text-red-600 hover:bg-red-500/10 dark:text-red-400 dark:hover:bg-red-500/20">
                                 {loading === 'reject' ? <Loader2 size={18} className="animate-spin" /> : <XCircle size={18} />} Reject
                             </button>
                         )}
                         {['Requested', 'Approved', 'Picking'].includes(transferStatus) && isManager && (
-                            <button onClick={handleDelete} disabled={loading !== null} className="btn-secondary border-red-500/20 text-red-550 hover:bg-red-500/10">
+                            <button onClick={handleDelete} disabled={loading !== null} className="btn-secondary border-red-500/20 text-red-600 hover:bg-red-500/10 dark:text-red-400 dark:hover:bg-red-500/20">
                                 {loading === 'delete' ? <Loader2 size={18} className="animate-spin" /> : <Trash2 size={18} />} Delete Manifest
                             </button>
                         )}
                         {(transferStatus === 'In-Transit' || transferStatus === 'Shipped') && selectedJob.destSiteId === activeSite?.id && (
-                            <button onClick={() => { setActiveTransferJob(selectedJob); setTransferReceiveItems(selectedJob.lineItems || []); setTransferReceiveMode(true); setSelectedJob(null); }} className="btn-primary bg-green-600 hover:bg-green-500 shadow-green-500/20">
+                            <button onClick={() => { setActiveTransferJob(selectedJob); setTransferReceiveItems(selectedJob.lineItems || []); setTransferReceiveMode(true); setSelectedJob(null); }} className="btn-primary bg-[#2C5E3B] hover:bg-[#20452B] dark:bg-[#EAE5D9] dark:hover:bg-[#D8D2C4] text-white dark:text-[#1C2620]">
                                 <Package size={18} /> {t('warehouse.received')}
                             </button>
                         )}
