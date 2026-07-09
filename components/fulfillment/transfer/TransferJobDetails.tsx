@@ -260,40 +260,39 @@ export const TransferJobDetails: React.FC<TransferJobDetailsProps> = ({
                     </div>
                     <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
                         {transferStatus === 'Requested' && isManager && (
-                            <button onClick={handleApprove} disabled={loading !== null} className="btn-primary bg-[#2C5E3B] hover:bg-[#20452B] dark:bg-[#EAE5D9] dark:hover:bg-[#D8D2C4] text-white dark:text-[#1C2620]">
+                            <button onClick={handleApprove} disabled={loading !== null} className="w-full sm:w-auto justify-center px-8 py-3.5 rounded-2xl font-black text-xs uppercase tracking-widest transition-all flex items-center gap-2.5 active:scale-95 disabled:opacity-50 shadow-sm bg-[#2C5E3B] hover:bg-[#20452B] dark:bg-[#EAE5D9] dark:hover:bg-[#D8D2C4] text-white dark:text-[#1C2620]">
                                 {loading === 'approve' ? <Loader2 size={18} className="animate-spin" /> : <CheckCircle size={18} />} Approve
                             </button>
                         )}
                         {['Requested', 'Picking'].includes(transferStatus) && isManager && (
-                            <button onClick={handleReject} disabled={loading !== null} className="btn-secondary border-red-500/20 text-red-600 hover:bg-red-500/10 dark:text-red-400 dark:hover:bg-red-500/20">
+                            <button onClick={handleReject} disabled={loading !== null} className="w-full sm:w-auto justify-center px-8 py-3.5 rounded-2xl font-black text-xs uppercase tracking-widest transition-all flex items-center gap-2.5 active:scale-95 disabled:opacity-50 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200/50 dark:bg-red-950/20 dark:hover:bg-red-950/40 dark:text-red-400 dark:border-red-500/20">
                                 {loading === 'reject' ? <Loader2 size={18} className="animate-spin" /> : <XCircle size={18} />} Reject
                             </button>
                         )}
                         {['Requested', 'Approved', 'Picking'].includes(transferStatus) && isManager && (
-                            <button onClick={handleDelete} disabled={loading !== null} className="btn-secondary border-red-500/20 text-red-600 hover:bg-red-500/10 dark:text-red-400 dark:hover:bg-red-500/20">
+                            <button onClick={handleDelete} disabled={loading !== null} className="w-full sm:w-auto justify-center px-8 py-3.5 rounded-2xl font-black text-xs uppercase tracking-widest transition-all flex items-center gap-2.5 active:scale-95 disabled:opacity-50 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200/50 dark:bg-red-950/20 dark:hover:bg-red-950/40 dark:text-red-400 dark:border-red-500/20">
                                 {loading === 'delete' ? <Loader2 size={18} className="animate-spin" /> : <Trash2 size={18} />} Delete Manifest
                             </button>
                         )}
                         {(transferStatus === 'In-Transit' || transferStatus === 'Shipped') && selectedJob.destSiteId === activeSite?.id && (
-                            <button onClick={() => { setActiveTransferJob(selectedJob); setTransferReceiveItems(selectedJob.lineItems || []); setTransferReceiveMode(true); setSelectedJob(null); }} className="btn-primary bg-[#2C5E3B] hover:bg-[#20452B] dark:bg-[#EAE5D9] dark:hover:bg-[#D8D2C4] text-white dark:text-[#1C2620]">
+                            <button onClick={() => { setActiveTransferJob(selectedJob); setTransferReceiveItems(selectedJob.lineItems || []); setTransferReceiveMode(true); setSelectedJob(null); }} className="w-full sm:w-auto justify-center px-8 py-3.5 rounded-2xl font-black text-xs uppercase tracking-widest transition-all flex items-center gap-2.5 active:scale-95 disabled:opacity-50 shadow-sm bg-[#2C5E3B] hover:bg-[#20452B] dark:bg-[#EAE5D9] dark:hover:bg-[#D8D2C4] text-white dark:text-[#1C2620]">
                                 <Package size={18} /> {t('warehouse.received')}
                             </button>
                         )}
-                        <button onClick={() => setSelectedJob(null)} className="w-full sm:w-auto px-7 py-3.5 rounded-2xl bg-stone-100 dark:bg-white/5 hover:bg-stone-200 dark:hover:bg-white/10 border border-stone-200 dark:border-white/10 text-gray-600 dark:text-gray-400 font-black text-xs uppercase tracking-widest transition-all flex items-center justify-center">
+                        <button onClick={() => setSelectedJob(null)} className="w-full sm:w-auto justify-center px-8 py-3.5 rounded-2xl font-black text-xs uppercase tracking-widest transition-all flex items-center gap-2.5 active:scale-95 disabled:opacity-50 border border-[#E2DCCE] dark:border-white/10 bg-stone-50 hover:bg-stone-100 dark:bg-white/5 dark:hover:bg-white/10 text-gray-700 dark:text-gray-300">
                             {t('warehouse.dismiss')}
                         </button>
                     </div>
                 </div>
             </div>
-            <style>{`.btn-primary { @apply w-full sm:w-auto justify-center px-8 py-3.5 rounded-2xl font-black text-xs uppercase tracking-widest transition-all flex items-center gap-3 active:scale-95 disabled:opacity-50 shadow-sm; } .btn-secondary { @apply w-full sm:w-auto justify-center px-8 py-3.5 bg-stone-100 dark:bg-white/5 border border-stone-200 dark:border-white/10 rounded-2xl font-black text-xs uppercase tracking-widest transition-all flex items-center gap-3 active:scale-95 disabled:opacity-50; }`}</style>
         </div>
     );
 };
 
 const DashboardStat = ({ label, value, icon: Icon, color }: any) => (
-    <div className="bg-stone-50 dark:bg-white/5 border border-stone-200 dark:border-white/5 p-5 rounded-[2rem] flex items-center justify-between group hover:border-[#2C5E3B]/20 dark:hover:border-[#2C5E3B]/40 transition-all shadow-sm">
+    <div className="bg-white/80 dark:bg-white/[0.02] border border-[#E2DCCE] dark:border-emerald-950/20 p-5 rounded-[2rem] flex items-center justify-between group hover:border-[#2C5E3B]/20 dark:hover:border-[#2C5E3B]/40 transition-all shadow-sm">
         <div><span className="text-[10px] text-gray-400 dark:text-gray-500 font-black uppercase tracking-[0.2em] block mb-1">{label}</span><span className="text-base font-black text-gray-900 dark:text-white tracking-tight">{value}</span></div>
-        <div className={`w-12 h-12 rounded-2xl border flex items-center justify-center ${color === 'red' ? 'bg-red-500/10 border-red-500/20 text-red-500' : color === 'green' ? 'bg-green-500/10 border-green-500/20 text-green-500' : 'bg-stone-100 dark:bg-white/5 border-stone-200 dark:border-white/10 text-[#2C5E3B] dark:text-[#A9CBA2]'}`}><Icon size={22} /></div>
+        <div className={`w-12 h-12 rounded-2xl border flex items-center justify-center ${color === 'red' ? 'bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-800/30 text-red-600' : color === 'green' ? 'bg-green-50 dark:bg-[#1C2620]/30 border-green-200 dark:border-green-800/30 text-green-600 dark:text-[#A9CBA2]' : 'bg-[#FAF8F5] dark:bg-[#1C2620]/30 border-[#E2DCCE]/60 dark:border-[#2C5E3B]/20 text-[#2C5E3B] dark:text-[#A9CBA2]'}`}><Icon size={22} /></div>
     </div>
 );
 
