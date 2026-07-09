@@ -123,37 +123,54 @@ export const TransferJobDetails: React.FC<TransferJobDetailsProps> = ({
     };
 
     return (
-        <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm transition-opacity duration-300">
-            <div className="bg-white dark:bg-[#0f0f11] w-full max-w-4xl max-h-[90vh] rounded-[2.5rem] border border-gray-200 dark:border-white/10 shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-300">
-                
+        <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-black/60 dark:bg-black/80 backdrop-blur-sm animate-in fade-in duration-300">
+            <div className="bg-[#FAF8F5]/95 dark:bg-[#1C2620]/95 w-full max-w-4xl max-h-[90vh] rounded-[2.5rem] border border-[#E2DCCE] dark:border-emerald-950/20 shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-500 relative">
+                {/* Visual Flair Glow Blobs */}
+                <div className="hidden md:block absolute -top-32 -right-32 w-96 h-96 bg-[#2C5E3B]/10 dark:bg-[#2C5E3B]/20 blur-[100px] rounded-full pointer-events-none" />
+                <div className="hidden md:block absolute -bottom-32 -left-32 w-96 h-96 bg-[#A9CBA2]/10 dark:bg-[#A9CBA2]/25 blur-[100px] rounded-full pointer-events-none" />
+
                 {/* Header */}
-                <div className="relative p-7 border-b border-gray-100 dark:border-white/10 bg-gray-50 dark:bg-black/40 overflow-hidden">
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-[#2C5E3B]/10 blur-[100px] rounded-full pointer-events-none" />
+                <div className="relative p-7 border-b border-[#E2DCCE]/60 dark:border-[#2C5E3B]/10 bg-[#FAF8F5]/30 dark:bg-[#1C2620]/30 backdrop-blur-md overflow-hidden shrink-0 z-10">
                     <div className="relative flex justify-between items-start">
                         <div className="flex items-center gap-5">
-                            <div className="w-16 h-16 rounded-[1.5rem] bg-[#2C5E3B]/10 dark:bg-[#2C5E3B]/20 border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20 flex items-center justify-center text-[#2C5E3B] dark:text-[#A9CBA2] shadow-xl"><Truck size={32} /></div>
+                            <div className="w-16 h-16 rounded-[1.5rem] bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/20 border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20 flex items-center justify-center text-[#2C5E3B] dark:text-[#A9CBA2] shadow-inner">
+                                <Truck size={32} />
+                            </div>
                             <div>
-                                <div className="flex items-center gap-4 mb-1.5"><h2 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight uppercase italic">{t('warehouse.transferDetails')}</h2><span className="px-2.5 py-1 rounded-xl bg-gray-200 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-[10px] font-mono font-black text-gray-500 uppercase">#{formatJobId(selectedJob)}</span></div>
-                                <div className="flex items-center gap-5 text-xs font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">
-                                    <span className="flex items-center gap-2 text-gray-900 dark:text-white"><span className={`w-2 h-2 rounded-full ${transferStatus === 'Received' ? 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.4)]' : 'bg-[#A9CBA2] animate-pulse shadow-[0_0_10px_rgba(169,203,162,0.4)]'}`} />{getLocalizedStatus(transferStatus)}</span>
+                                <div className="flex items-center gap-4 mb-1.5">
+                                    <h2 className="text-xl font-black text-gray-900 dark:text-white tracking-tight uppercase">{t('warehouse.transferDetails')}</h2>
+                                    <span className="px-2.5 py-1 rounded-xl bg-stone-200/50 dark:bg-white/5 border border-stone-300/30 dark:border-white/10 text-[10px] font-mono font-black text-[#2C5E3B] dark:text-[#A9CBA2] uppercase tracking-wider">#{formatJobId(selectedJob)}</span>
+                                </div>
+                                <div className="flex items-center gap-4 text-xs font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">
+                                    <span className="flex items-center gap-2 text-gray-900 dark:text-white">
+                                        <span className={`w-2 h-2 rounded-full ${transferStatus === 'Received' ? 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.4)]' : 'bg-amber-400 animate-pulse shadow-[0_0_10px_rgba(251,191,36,0.4)]'}`} />
+                                        {getLocalizedStatus(transferStatus)}
+                                    </span>
                                     <span className="text-gray-300 dark:text-gray-700">|</span>
-                                    <span className={`px-2.5 py-1 rounded-lg border ${selectedJob.priority === 'Critical' ? 'border-red-500/30 text-red-500 bg-red-500/10' : selectedJob.priority === 'High' ? 'border-amber-500/30 text-amber-600 bg-amber-500/10' : 'border-gray-200 dark:border-white/10 text-gray-400'}`}>{selectedJob.priority || 'Normal'} Priority</span>
+                                    <span className={`px-2 py-0.5 rounded border text-[10px] font-black ${selectedJob.priority === 'Critical' ? 'border-red-500/30 text-red-500 bg-red-500/10' : selectedJob.priority === 'High' ? 'border-amber-500/30 text-amber-600 bg-amber-500/10' : 'border-stone-200 dark:border-white/5 text-gray-500 dark:text-gray-400'}`}>
+                                        {selectedJob.priority || 'Normal'} Priority
+                                    </span>
                                     <span className="flex items-center gap-1.5 text-[10px] font-mono ml-auto"><Clock size={12} className="text-gray-400" />{new Date(selectedJob.createdAt || (selectedJob as any).date || '').toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</span>
                                 </div>
                             </div>
                         </div>
-                        <button onClick={() => setSelectedJob(null)} aria-label={t('warehouse.dismiss')} className="p-3 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 rounded-2xl text-gray-500 hover:text-gray-900 dark:hover:text-white transition-all"><X size={24} /></button>
+                        <button onClick={() => setSelectedJob(null)} aria-label={t('warehouse.dismiss')} className="p-3 bg-stone-150 dark:bg-white/5 hover:bg-stone-200 dark:hover:bg-white/10 border border-stone-250 dark:border-white/10 rounded-2xl text-gray-550 hover:text-gray-900 dark:hover:text-white transition-all">
+                            <X size={20} />
+                        </button>
                     </div>
                 </div>
 
-                <div className="flex-1 overflow-y-auto p-8 space-y-8 custom-scrollbar bg-white dark:bg-[#0f0f11]">
+                <div className="flex-1 overflow-y-auto p-8 space-y-8 custom-scrollbar bg-transparent z-10">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <DashboardStat label={t('warehouse.requested')} value={selectedJob.requestedBy || 'System'} icon={Info} />
                         {selectedJob.approvedBy && <DashboardStat label={transferStatus === 'Rejected' ? 'Rejected By' : 'Approved By'} value={selectedJob.approvedBy} icon={transferStatus === 'Rejected' ? XCircle : CheckCircle} color={transferStatus === 'Rejected' ? 'red' : 'green'} />}
                     </div>
 
                     <div>
-                        <div className="flex items-center justify-between mb-6"><h3 className="font-black text-gray-900 dark:text-white flex items-center gap-3 text-xs uppercase tracking-[0.3em]"><Package size={16} className="text-[#A9CBA2]" /> {t('warehouse.transferRequest')}</h3><span className="text-[10px] font-black text-gray-500 bg-gray-100 dark:bg-white/5 px-3 py-1.5 rounded-full border border-gray-200 dark:border-white/5 uppercase tracking-widest">{totalItems} {t('warehouse.itemPlural')}</span></div>
+                        <div className="flex items-center justify-between mb-6">
+                            <h3 className="font-black text-[#2C5E3B] dark:text-[#A9CBA2] flex items-center gap-3 text-xs uppercase tracking-[0.3em]"><Package size={16} /> {t('warehouse.transferRequest')}</h3>
+                            <span className="text-[10px] font-black text-gray-500 bg-stone-100 dark:bg-white/5 px-3 py-1.5 rounded-xl border border-stone-250 dark:border-white/5 uppercase tracking-widest">{totalItems} {t('warehouse.itemPlural')}</span>
+                        </div>
                         <div className="space-y-4">
                             {selectedJob.lineItems?.map((item: any, idx: number) => {
                                 const product = products.find(p => p.id === item.productId || p.sku === item.sku); const itemQty = item.expectedQty || item.quantity || item.pickedQty || 0; const itemSku = item.sku || product?.sku || 'N/A';
@@ -162,17 +179,43 @@ export const TransferJobDetails: React.FC<TransferJobDetailsProps> = ({
                                 const showReceived = item.receivedQty !== undefined && ['Received', 'Delivered', 'Completed'].some(s => s === selectedJob.transferStatus || s === selectedJob.status);
                                 const hasDiscrepancy = showReceived && item.receivedQty !== expectedMeasure; const isDone = showReceived && !hasDiscrepancy;
                                 return (
-                                    <div key={idx} className={`group relative bg-gray-50 dark:bg-white/[0.02] border ${isDone ? 'border-green-500/20 bg-green-50/50 dark:bg-green-500/[0.01]' : 'border-gray-200 dark:border-white/5'} rounded-[2rem] p-5 flex items-center justify-between hover:scale-[1.01] transition-all duration-300`}>
+                                    <div key={idx} className={`group relative bg-stone-50 dark:bg-white/5 border ${isDone ? 'border-green-500/25 bg-green-500/[0.04]' : 'border-stone-200 dark:border-white/5'} rounded-[2rem] p-5 flex items-center justify-between hover:border-[#2C5E3B]/20 dark:hover:border-[#2C5E3B]/30 hover:scale-[1.005] transition-all duration-300 shadow-sm`}>
                                         <div className="flex items-center gap-6">
-                                            <div className="relative w-16 h-16 rounded-2xl bg-white dark:bg-black/40 border border-gray-200 dark:border-white/10 flex items-center justify-center overflow-hidden shrink-0 shadow-sm">{product?.image ? <img src={product.image} alt="" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" /> : <Box size={28} className="text-gray-300 dark:text-white/20" />} {isDone && <div className="absolute inset-0 bg-green-500/10 backdrop-blur-[1px] flex items-center justify-center"><CheckCircle size={20} className="text-green-500" /></div>}{hasDiscrepancy && <div className="absolute inset-0 bg-red-500/10 backdrop-blur-[1px] flex items-center justify-center"><XCircle size={20} className="text-red-500" /></div>}</div>
-                                            <div><h4 className="text-gray-900 dark:text-white font-black tracking-tight mb-1 group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] transition-colors uppercase text-sm">{item.name || item.productName || product?.name || 'Unknown'}</h4><span className="text-[10px] font-mono font-black text-gray-500 bg-gray-200 dark:bg-black/40 px-2 py-0.5 rounded border border-gray-300 dark:border-white/5 uppercase tracking-tighter">{itemSku}</span></div>
+                                            <div className="relative w-16 h-16 rounded-2xl bg-white dark:bg-black/40 border border-stone-200 dark:border-white/10 flex items-center justify-center overflow-hidden shrink-0 shadow-sm">
+                                                {product?.image ? <img src={product.image} alt="" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" /> : <Box size={28} className="text-gray-300 dark:text-white/20" />}
+                                                {isDone && <div className="absolute inset-0 bg-green-500/10 backdrop-blur-[1px] flex items-center justify-center"><CheckCircle size={20} className="text-green-500" /></div>}
+                                                {hasDiscrepancy && <div className="absolute inset-0 bg-red-500/10 backdrop-blur-[1px] flex items-center justify-center"><XCircle size={20} className="text-red-500" /></div>}
+                                            </div>
+                                            <div>
+                                                <h4 className="text-gray-900 dark:text-white font-black tracking-tight mb-1 group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] transition-colors uppercase text-sm">{item.name || item.productName || product?.name || 'Unknown'}</h4>
+                                                <span className="text-[10px] font-mono font-black text-gray-550 dark:text-gray-400 bg-stone-200/50 dark:bg-black/40 px-2 py-0.5 rounded border border-stone-300/30 dark:border-white/5 uppercase tracking-tighter">{itemSku}</span>
+                                            </div>
                                         </div>
                                         <div className="flex flex-col items-end gap-3 min-w-[170px]">
                                             <div className="flex items-center gap-8">
-                                                <div className="text-right"><span className="text-[9px] text-gray-400 dark:text-gray-600 font-black uppercase tracking-[0.2em] block mb-1">{t('warehouse.expected')}</span>{item.orderedQty && item.orderedQty > itemQty ? <div className="flex flex-col items-end"><span className="text-[10px] font-mono font-bold text-red-500 line-through opacity-70 mb-0.5">{item.orderedQty}</span><QtyDisplay qty={itemQty} measure={isWeightVol ? item.requestedMeasureQty || itemQty * sizeNum : null} unit={itemUnit} t={t} /></div> : <QtyDisplay qty={itemQty} measure={isWeightVol ? item.requestedMeasureQty || itemQty * sizeNum : null} unit={itemUnit} t={t} />}</div>
-                                                {showReceived && <div className="text-right"><span className={`text-[9px] font-black uppercase tracking-[0.2em] block mb-1 ${hasDiscrepancy ? 'text-red-600/60' : 'text-green-600/60'}`}>{t('warehouse.received')}</span><QtyDisplay qty={item.receivedQty} unit={itemUnit} isMeasure={isWeightVol} color={hasDiscrepancy ? 'red' : 'green'} t={t} /></div>}
+                                                <div className="text-right">
+                                                    <span className="text-[9px] text-gray-400 dark:text-gray-600 font-black uppercase tracking-[0.2em] block mb-1">{t('warehouse.expected')}</span>
+                                                    {item.orderedQty && item.orderedQty > itemQty ? (
+                                                        <div className="flex flex-col items-end">
+                                                            <span className="text-[10px] font-mono font-bold text-red-500 line-through opacity-70 mb-0.5">{item.orderedQty}</span>
+                                                            <QtyDisplay qty={itemQty} measure={isWeightVol ? item.requestedMeasureQty || itemQty * sizeNum : null} unit={itemUnit} t={t} />
+                                                        </div>
+                                                    ) : (
+                                                        <QtyDisplay qty={itemQty} measure={isWeightVol ? item.requestedMeasureQty || itemQty * sizeNum : null} unit={itemUnit} t={t} />
+                                                    )}
+                                                </div>
+                                                {showReceived && (
+                                                    <div className="text-right">
+                                                        <span className={`text-[9px] font-black uppercase tracking-[0.2em] block mb-1 ${hasDiscrepancy ? 'text-red-600/60' : 'text-green-600/60'}`}>{t('warehouse.received')}</span>
+                                                        <QtyDisplay qty={item.receivedQty} unit={itemUnit} isMeasure={isWeightVol} color={hasDiscrepancy ? 'red' : 'green'} t={t} />
+                                                    </div>
+                                                )}
                                             </div>
-                                            {hasDiscrepancy && onResolveDiscrepancy && <button onClick={(e) => { e.stopPropagation(); onResolveDiscrepancy(selectedJob, item, idx); }} className="px-4 py-2 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white border border-red-500/20 text-[10px] uppercase font-black tracking-widest rounded-xl transition-all flex items-center gap-2"><AlertTriangle size={12} /> Resolve Discrepancy</button>}
+                                            {hasDiscrepancy && onResolveDiscrepancy && (
+                                                <button onClick={(e) => { e.stopPropagation(); onResolveDiscrepancy(selectedJob, item, idx); }} className="px-4 py-2 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white border border-red-500/20 text-[10px] uppercase font-black tracking-widest rounded-xl transition-all flex items-center gap-2">
+                                                    <AlertTriangle size={12} /> Resolve Discrepancy
+                                                </button>
+                                            )}
                                         </div>
                                     </div>
                                 );
@@ -182,25 +225,61 @@ export const TransferJobDetails: React.FC<TransferJobDetailsProps> = ({
                 </div>
 
                 {/* Footer */}
-                <div className="p-7 border-t border-gray-100 dark:border-white/10 bg-gray-50 dark:bg-black/40 flex items-center justify-between flex-wrap gap-6">
-                    <div className="flex flex-col"><span className="text-[10px] text-gray-400 dark:text-gray-500 font-black uppercase tracking-[0.3em] mb-1.5">Asset Routing</span>
-                        <div className="flex items-center gap-3 text-sm font-black text-gray-700 dark:text-gray-300 italic group">
-                            {(() => { const s = sites.find(x => x.id === selectedJob.sourceSiteId); return s ? <>{s.name} <span className="text-gray-400 dark:text-gray-600 font-mono text-[10px] ml-1">({s.code || s.id})</span></> : selectedJob.sourceSiteId; })()}
-                            <ArrowRight size={16} className="text-[#A9CBA2] animate-pulse-slow" /><div className="flex flex-col">
-                            {(() => { const s = sites.find(x => x.id === selectedJob.destSiteId); return s ? <>{s.name} <span className="text-gray-400 dark:text-gray-600 font-mono text-[10px] ml-1">({s.code || s.id})</span></> : selectedJob.destSiteId; })()}
-                            </div>
+                <div className="p-7 border-t border-[#E2DCCE]/60 dark:border-[#2C5E3B]/10 bg-[#FAF8F5]/50 dark:bg-zinc-950/40 flex items-center justify-between flex-wrap gap-6 shrink-0 z-10">
+                    <div className="flex flex-col">
+                        <span className="text-[10px] text-gray-400 dark:text-gray-500 font-black uppercase tracking-[0.3em] mb-1.5">Asset Routing</span>
+                        <div className="flex items-center gap-2.5 text-xs font-black text-gray-700 dark:text-gray-300">
+                            {(() => {
+                                const s = sites.find(x => x.id === selectedJob.sourceSiteId);
+                                return s ? (
+                                    <span className="px-2.5 py-1.5 rounded-xl bg-stone-100 dark:bg-white/5 border border-stone-250 dark:border-white/10 text-gray-900 dark:text-gray-300 font-black tracking-wide font-mono text-[10px] uppercase shadow-sm">
+                                        {s.name} <span className="text-gray-400 dark:text-gray-650 font-normal">({s.code || s.id})</span>
+                                    </span>
+                                ) : (
+                                    <span className="px-2.5 py-1.5 rounded-xl bg-stone-100 dark:bg-white/5 border border-stone-250 dark:border-white/10 font-mono text-[10px]">{selectedJob.sourceSiteId}</span>
+                                );
+                            })()}
+                            <ArrowRight size={14} className="text-[#2C5E3B] dark:text-[#A9CBA2] shrink-0" />
+                            {(() => {
+                                const s = sites.find(x => x.id === selectedJob.destSiteId);
+                                return s ? (
+                                    <span className="px-2.5 py-1.5 rounded-xl bg-stone-100 dark:bg-white/5 border border-stone-250 dark:border-white/10 text-gray-900 dark:text-gray-300 font-black tracking-wide font-mono text-[10px] uppercase shadow-sm">
+                                        {s.name} <span className="text-gray-400 dark:text-gray-650 font-normal">({s.code || s.id})</span>
+                                    </span>
+                                ) : (
+                                    <span className="px-2.5 py-1.5 rounded-xl bg-stone-100 dark:bg-white/5 border border-stone-250 dark:border-white/10 font-mono text-[10px]">{selectedJob.destSiteId}</span>
+                                );
+                            })()}
                         </div>
                     </div>
                     <div className="flex items-center gap-3 flex-wrap">
-                        {transferStatus === 'Requested' && isManager && <button onClick={handleApprove} disabled={loading !== null} className="btn-primary bg-[#2C5E3B] hover:bg-[#3a7a4d] shadow-[#2C5E3B]/20">{loading === 'approve' ? <Loader2 size={18} className="animate-spin" /> : <CheckCircle size={18} />} Approve</button>}
-                        {['Requested', 'Picking'].includes(transferStatus) && isManager && <button onClick={handleReject} disabled={loading !== null} className="btn-secondary border-red-500/20 text-red-500 hover:bg-red-500/10">{loading === 'reject' ? <Loader2 size={18} className="animate-spin" /> : <XCircle size={18} />} Reject</button>}
-                        {['Requested', 'Approved', 'Picking'].includes(transferStatus) && isManager && <button onClick={handleDelete} disabled={loading !== null} className="btn-secondary border-red-500/20 text-red-500 hover:bg-red-500/10">{loading === 'delete' ? <Loader2 size={18} className="animate-spin" /> : <Trash2 size={18} />} Delete Manifest</button>}
-                        {(transferStatus === 'In-Transit' || transferStatus === 'Shipped') && selectedJob.destSiteId === activeSite?.id && <button onClick={() => { setActiveTransferJob(selectedJob); setTransferReceiveItems(selectedJob.lineItems || []); setTransferReceiveMode(true); setSelectedJob(null); }} className="btn-primary bg-green-600 hover:bg-green-500 shadow-green-500/20"><Package size={18} /> {t('warehouse.received')}</button>}
-                        <button onClick={() => setSelectedJob(null)} className="px-7 py-3.5 rounded-2xl bg-gray-200 dark:bg-white/5 hover:bg-gray-300 dark:hover:bg-white/10 text-gray-600 dark:text-gray-400 font-black text-xs uppercase tracking-widest transition-all">{t('warehouse.dismiss')}</button>
+                        {transferStatus === 'Requested' && isManager && (
+                            <button onClick={handleApprove} disabled={loading !== null} className="btn-primary bg-[#2C5E3B] hover:bg-[#20452B] dark:bg-[#EAE5D9] dark:hover:bg-[#D8D2C4] text-white dark:text-[#1C2620]">
+                                {loading === 'approve' ? <Loader2 size={18} className="animate-spin" /> : <CheckCircle size={18} />} Approve
+                            </button>
+                        )}
+                        {['Requested', 'Picking'].includes(transferStatus) && isManager && (
+                            <button onClick={handleReject} disabled={loading !== null} className="btn-secondary border-red-500/20 text-red-500 hover:bg-red-500/10">
+                                {loading === 'reject' ? <Loader2 size={18} className="animate-spin" /> : <XCircle size={18} />} Reject
+                            </button>
+                        )}
+                        {['Requested', 'Approved', 'Picking'].includes(transferStatus) && isManager && (
+                            <button onClick={handleDelete} disabled={loading !== null} className="btn-secondary border-red-500/20 text-red-500 hover:bg-red-500/10">
+                                {loading === 'delete' ? <Loader2 size={18} className="animate-spin" /> : <Trash2 size={18} />} Delete Manifest
+                            </button>
+                        )}
+                        {(transferStatus === 'In-Transit' || transferStatus === 'Shipped') && selectedJob.destSiteId === activeSite?.id && (
+                            <button onClick={() => { setActiveTransferJob(selectedJob); setTransferReceiveItems(selectedJob.lineItems || []); setTransferReceiveMode(true); setSelectedJob(null); }} className="btn-primary bg-green-650 hover:bg-green-600 shadow-green-500/20">
+                                <Package size={18} /> {t('warehouse.received')}
+                            </button>
+                        )}
+                        <button onClick={() => setSelectedJob(null)} className="px-7 py-3.5 rounded-2xl bg-stone-100 dark:bg-white/5 hover:bg-stone-200 dark:hover:bg-white/10 border border-stone-200 dark:border-white/10 text-gray-600 dark:text-gray-400 font-black text-xs uppercase tracking-widest transition-all">
+                            {t('warehouse.dismiss')}
+                        </button>
                     </div>
                 </div>
             </div>
-            <style>{`.btn-primary { @apply px-8 py-3.5 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-2xl transition-all flex items-center gap-3 active:scale-95 disabled:opacity-50; } .btn-secondary { @apply px-8 py-3.5 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl font-black text-xs uppercase tracking-widest transition-all flex items-center gap-3 active:scale-95 disabled:opacity-50; }`}</style>
+            <style>{`.btn-primary { @apply px-8 py-3.5 rounded-2xl font-black text-xs uppercase tracking-widest transition-all flex items-center gap-3 active:scale-95 disabled:opacity-50 shadow-sm; } .btn-secondary { @apply px-8 py-3.5 bg-stone-100 dark:bg-white/5 border border-stone-200 dark:border-white/10 rounded-2xl font-black text-xs uppercase tracking-widest transition-all flex items-center gap-3 active:scale-95 disabled:opacity-50; }`}</style>
         </div>
     );
 };
