@@ -126,13 +126,13 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
                         </div>
                         <div className="flex bg-stone-100 dark:bg-black/40 p-1 rounded-xl border border-[#E2DCCE]/30 dark:border-[#A9CBA2]/[0.04] transition-colors">
                             <button
-                                onClick={() => setLabelMode('PRODUCT')}
+                                onClick={() => { setLabelMode('PRODUCT'); setLabelSize('MEDIUM'); }}
                                 className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${labelMode === 'PRODUCT' ? 'bg-[#2C5E3B] dark:bg-[#A9CBA2] text-white dark:text-[#18201B] shadow-sm' : 'text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white'}`}
                             >
                                 <Package size={14} className="inline mr-2" /> Products
                             </button>
                             <button
-                                onClick={() => setLabelMode('BAY')}
+                                onClick={() => { setLabelMode('BAY'); setLabelSize('BAY'); }}
                                 className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${labelMode === 'BAY' ? 'bg-[#2C5E3B] dark:bg-[#A9CBA2] text-white dark:text-[#18201B] shadow-sm' : 'text-stone-500 dark:text-stone-400 hover:text-white'}`}
                             >
                                 <Layout size={14} className="inline mr-2" /> Bays

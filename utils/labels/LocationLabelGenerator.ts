@@ -26,6 +26,7 @@ export const generateLocationLabelHTML = async (
         if (lower === 'small') return 'Small';
         if (lower === 'medium') return 'Medium';
         if (lower === 'large' || lower === 'xl') return 'Large';
+        if (lower === 'bay') return 'Bay';
         return 'Medium';
     };
 
@@ -45,6 +46,7 @@ export const generateLocationLabelHTML = async (
     const isMedium = validSize === 'Medium';
     const isLarge = validSize === 'Large';
     const isXL = validSize === 'XL';
+    const isBay = validSize === 'Bay';
 
     const labelItemsHTML = await Promise.all(items.map(async (item, idx) => {
         const pageInfo = items.length > 1
@@ -57,8 +59,8 @@ export const generateLocationLabelHTML = async (
 
         const barcodeObj = showBarcode ? generateBarcodeSVG(item.barcode, {
             format: 'CODE128',
-            width: isSmall ? 1.3 : isMedium ? 1.6 : 2.0,
-            height: isSmall ? 24 : isMedium ? 32 : 45,
+            width: isSmall ? 1.3 : isBay ? 1.5 : isMedium ? 1.6 : 2.0,
+            height: isSmall ? 24 : isBay ? 32 : isMedium ? 32 : 45,
             displayValue: false,
             margin: 0
         }) : '';
@@ -66,7 +68,7 @@ export const generateLocationLabelHTML = async (
         const qrData = JSON.stringify({ loc: item.humanLabel, code: item.barcode, zone: item.zone });
         const qrObj = showQR ? await generateQRCode({
             data: qrData,
-            size: isSmall ? 85 : isMedium ? 110 : 145
+            size: isSmall ? 85 : isBay ? 115 : isMedium ? 110 : 145
         }) : '';
 
         const parts = item.humanLabel.split('-');
@@ -76,7 +78,45 @@ export const generateLocationLabelHTML = async (
 
         let contentHTML = '';
 
-        if (isSmall) {
+        if (isBay) {
+            // BAY (4x2): Horizontal layout for wide aspect ratio
+            contentHTML = `
+                <div style="display:flex;align-items:center;height:100%;padding:10px 16px;background:#fff;color:#000;font-family:'Inter',sans-serif;border:4px solid #000;box-sizing:border-box;">
+                    <!-- Left Column: Big Location Title -->
+                    <div style="flex:1.2;display:flex;flex-direction:column;justify-content:center;padding-right:12px;border-right:2px solid #000;height:100%;">
+                        <div style="font-size:42px;font-weight:900;letter-spacing:1px;line-height:0.95;margin-bottom:6px;word-break:keep-all;">
+                            ${item.humanLabel}
+                        </div>
+                        <div style="display:flex;gap:8px;font-size:8px;font-weight:900;text-transform:uppercase;color:#555;letter-spacing:0.5px;">
+                            <span>Zone: <strong style="color:#000;">${partZone}</strong></span>
+                            <span>Aisle: <strong style="color:#000;">${partAisle}</strong></span>
+                            <span>Bay: <strong style="color:#000;">${partBay}</strong></span>
+                        </div>
+                        ${item.siteName ? `<div style="font-size:7px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#888;margin-top:6px;">${item.siteName}</div>` : ''}
+                    </div>
+
+                    <!-- Right Column: Codes -->
+                    <div style="flex:0.8;display:flex;flex-direction:column;align-items:center;justify-content:center;padding-left:12px;height:100%;">
+                        ${showQR ? `
+                            <div class="qr-container" style="width:1.15in;height:1.15in;display:flex;justify-content:center;align-items:center;">
+                                ${qrObj}
+                            </div>
+                        ` : ''}
+                        ${showBarcode ? `
+                            <div style="width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+                                <div class="barcode-container" style="width:100%;max-width:1.5in;display:flex;justify-content:center;">${barcodeObj}</div>
+                                <div style="font-family:'SF Mono', 'Fira Code', monospace;font-size:9px;font-weight:900;letter-spacing:1px;color:#000;margin-top:4px;text-align:center;">${item.barcode}</div>
+                            </div>
+                        ` : ''}
+                        ${!showBarcode && showQR ? `
+                            <div style="font-family:'SF Mono', 'Fira Code', monospace;font-size:8px;font-weight:800;letter-spacing:0.5px;color:#444;margin-top:4px;">
+                                ${item.barcode}
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+        } else if (isSmall) {
             // SMALL (2x1): Sharp, geometric
             contentHTML = `
                 <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:4px;background:#fff;color:#000;font-family:'Inter',sans-serif;border:1px solid #000;">
