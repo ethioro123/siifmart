@@ -6,6 +6,7 @@ import { X, Printer, Shield, MapPin, Building, CreditCard } from 'lucide-react';
 import Logo from './Logo';
 import { formatRole } from '../utils/formatting';
 import { logger } from '../utils/logger';
+import { printHtmlContent } from '../utils/printHelper';
 
 interface EmployeeIDCardProps {
     employee: Employee;
@@ -74,18 +75,11 @@ export default function EmployeeIDCard({ employee, siteCode, onClose }: Employee
         };
         generateQR();
     }, [employee]);
-
     const handlePrint = () => {
         const printContent = cardRef.current;
         if (!printContent) return;
 
-        const windowUrl = 'about:blank';
-        const uniqueName = new Date().getTime();
-        const windowName = 'Print' + uniqueName;
-        const printWindow = window.open(windowUrl, windowName, 'left=50000,top=50000,width=0,height=0');
-
-        if (printWindow) {
-            printWindow.document.write(`
+        const html = `
         <!DOCTYPE html>
         <html>
           <head>
@@ -110,14 +104,8 @@ export default function EmployeeIDCard({ employee, siteCode, onClose }: Employee
             </div>
           </body>
         </html>
-      `);
-            printWindow.document.close();
-            printWindow.focus();
-            setTimeout(() => {
-                printWindow.print();
-                printWindow.close();
-            }, 500);
-        }
+      `;
+        printHtmlContent(html);
     };
 
     const roleColor = ROLE_COLORS[employee.role] || '#00ff9d';

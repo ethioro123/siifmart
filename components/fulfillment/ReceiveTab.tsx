@@ -13,6 +13,7 @@ import { ReceiveReprintModal } from './receive/ReceiveReprintModal';
 import { ReceiveDetailsModal } from './receive/ReceiveDetailsModal';
 import { inventoryRequestsService } from '../../services/supabase.service';
 import { logger } from '../../utils/logger';
+import { printHtmlContent } from '../../utils/printHelper';
 import { useReceiveScan } from './receive/hooks/useReceiveScan';
 
 export const ReceiveTab: React.FC = () => {
@@ -172,13 +173,7 @@ export const ReceiveTab: React.FC = () => {
 
             const html = await generateUnifiedBatchLabelsHTML(labelsToPrint, printOptions);
 
-            const printWin = window.open('', '_blank');
-            if (printWin) {
-                printWin.document.write(html);
-                printWin.document.close();
-            } else {
-                addNotification('alert', 'Popup blocked. Allow popups to print.');
-            }
+            printHtmlContent(html);
         } catch (e) {
             logger.error('ReceiveTab', 'caught error', e as Error);
             addNotification('alert', 'Failed to generate labels');

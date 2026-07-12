@@ -4,6 +4,7 @@ import { isWeightBased, isVolumeBased } from '../../../../utils/units';
 import { generatePackLabelHTML } from '../../../../utils/labels/PackLabelGenerator';
 import { wmsJobsService } from '../../../../services/supabase.service';
 import { logger } from '../../../../utils/logger';
+import { printHtmlContent } from '../../../../utils/printHelper';
 
 interface UsePackLabelPrintDeps {
     products: Product[];
@@ -109,11 +110,7 @@ export const usePackLabelPrint = (deps: UsePackLabelPrintDeps) => {
                 printHTML += scriptTag;
             }
 
-            const printWindow = window.open('', '_blank');
-            if (printWindow) {
-                printWindow.document.write(printHTML);
-                printWindow.document.close();
-            }
+            printHtmlContent(printHTML);
 
             addNotification('success', 'Label ready to print!');
         } catch (err) {
@@ -171,11 +168,7 @@ export const usePackLabelPrint = (deps: UsePackLabelPrintDeps) => {
                 printHTML += scriptTag;
             }
 
-            const printWindow = window.open('', '_blank');
-            if (printWindow) {
-                printWindow.document.write(printHTML);
-                printWindow.document.close();
-            }
+            printHtmlContent(printHTML);
 
             addNotification('success', 'Label ready to print!');
         } catch (err) {
@@ -236,11 +229,7 @@ export const usePackLabelPrint = (deps: UsePackLabelPrintDeps) => {
                 printHTML += scriptTag;
             }
 
-            const printWindow = window.open('', '_blank');
-            if (printWindow) {
-                printWindow.document.write(printHTML);
-                printWindow.document.close();
-            }
+            printHtmlContent(printHTML);
 
             addNotification('success', `Label printed for ${item.name || item.sku}`);
         } catch (err) {

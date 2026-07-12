@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { X, Printer, Package, Settings } from 'lucide-react';
 import Barcode from 'react-barcode';
 import { Product } from '../types';
+import { printHtmlContent } from '../utils/printHelper';
 
 // Map internal barcode types to react-barcode formats
 const getBarcodeFormat = (type?: string): any => {
@@ -48,18 +49,10 @@ export default function LabelPrintModal({ isOpen, onClose, labels, onPrint }: La
     const config = LABEL_SIZES[labelSize];
 
     const handlePrint = () => {
-        // Create a new window for printing
-        const printWindow = window.open('', '_blank', 'width=800,height=600');
-        if (!printWindow) {
-            alert('Please allow popups for printing');
-            return;
-        }
-
         // Get all label HTML
         const labelContent = printRef.current?.innerHTML || '';
 
-        // Write the print document
-        printWindow.document.write(`
+        const html = `
             <!DOCTYPE html>
             <html>
             <head>
@@ -97,10 +90,6 @@ export default function LabelPrintModal({ isOpen, onClose, labels, onPrint }: La
                         background: white;
                     }
                     
-                    .label:last-child {
-                        page-break-after: auto;
-                    }
-                    
                     .label-header {
                         border-bottom: 0.2mm solid #000;
                         padding-bottom: 1mm;
@@ -108,99 +97,82 @@ export default function LabelPrintModal({ isOpen, onClose, labels, onPrint }: La
                     }
                     
                     .label-header h3 {
-                        font-size: ${config.fontSize}pt;
+                        font-size: 3.5mm;
                         font-weight: bold;
-                        margin: 0;
+                        text-align: center;
+                        white-space: nowrap;
                         overflow: hidden;
                         text-overflow: ellipsis;
-                        white-space: nowrap;
                     }
                     
-                    .label-header .category {
-                        font-size: ${config.fontSize - 2}pt;
-                        color: #666;
+                    .label-body {
+                        flex: 1;
+                        display: flex;
+                        flex-direction: column;
+                        justify-content: center;
+                        align-items: center;
+                        padding: 1mm 0;
+                    }
+                    
+                    .product-name {
+                        font-size: 2.8mm;
+                        font-weight: bold;
+                        text-align: center;
+                        margin-bottom: 1.5mm;
+                        display: -webkit-box;
+                        -webkit-line-clamp: 2;
+                        -webkit-box-orient: vertical;
+                        overflow: hidden;
                     }
                     
                     .barcode-container {
-                        flex: 1;
+                        width: 100%;
                         display: flex;
-                        align-items: center;
                         justify-content: center;
-                        border: 0.2mm solid #000;
-                        border-radius: 1mm;
-                        margin: 1mm 0;
-                        overflow: hidden;
-                        min-height: 0;
-                        max-height: ${config.barcodeHeight + 5}mm;
+                        align-items: center;
+                        margin-top: 1mm;
                     }
                     
                     .barcode-container svg {
                         max-width: 100%;
-                        max-height: ${config.barcodeHeight}mm;
-                        height: auto !important;
+                        height: auto;
                     }
                     
                     .label-footer {
-                        display: flex;
-                        justify-content: space-between;
                         border-top: 0.2mm solid #000;
                         padding-top: 1mm;
-                        font-size: ${config.fontSize - 2}pt;
+                        margin-top: 1mm;
+                        display: flex;
+                        justify-content: space-between;
+                        font-size: 2mm;
                         font-family: monospace;
                     }
                     
-                    /* Small label simplified layout */
+                    /* Size specific adjustments */
                     .label-small {
-                        text-align: center;
-                        justify-content: center;
-                        gap: 1mm;
+                        padding: 1mm;
                     }
-                    
-                    .label-small .name {
-                        font-size: ${config.fontSize}pt;
-                        font-weight: bold;
-                        overflow: hidden;
-                        text-overflow: ellipsis;
-                        white-space: nowrap;
+                    .label-small .label-header h3 {
+                        font-size: 2.8mm;
                     }
-                    
-                    .label-small .sku {
-                        font-size: ${config.fontSize - 2}pt;
-                        font-family: monospace;
+                    .label-small .product-name {
+                        font-size: 2.2mm;
+                        margin-bottom: 1mm;
                     }
                     
                     .label-small .barcode-container {
                         border: none;
                         margin: 0;
-                        flex: unset;
-                    }
-                    
-                    @media print {
-                        body {
-                            width: ${config.width}mm;
-                        }
-                        .label {
-                            border: 0.1mm solid #ccc;
-                        }
                     }
                 </style>
             </head>
             <body>
                 ${labelContent}
-                <script>
-                    window.onload = function() {
-                        setTimeout(function() {
-                            window.print();
-                            window.close();
-                        }, 250);
-                    };
-                </script>
             </body>
             </html>
-        `);
+        `;
 
-        printWindow.document.close();
-
+        printHtmlContent(html);
         onPrint();
     };
 

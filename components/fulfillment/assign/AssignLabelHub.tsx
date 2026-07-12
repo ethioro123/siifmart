@@ -5,6 +5,7 @@ import { generateLocationLabelHTML } from '../../../utils/labels/LocationLabelGe
 import { encodeLocation, extractSitePrefix } from '../../../utils/locationEncoder';
 import { Product, WarehouseZone, Site } from '../../../types';
 import { formatDateTime } from '../../../utils/formatting';
+import { printHtmlContent } from '../../../utils/printHelper';
 
 // Label size presets - Refined for WMS
 const LABEL_SIZES = {
@@ -104,12 +105,8 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
             printHTML += scriptTag;
         }
 
-        const printWindow = window.open('', '_blank');
-        if (printWindow) {
-            printWindow.document.write(printHTML);
-            printWindow.document.close();
-            addNotification('success', `Location label ${humanLabel} ready!`);
-        }
+        printHtmlContent(printHTML);
+        addNotification('success', `Location label ${humanLabel} ready!`);
     };    return (
         <div className="pb-12">
             {/* LEFT PANEL: PRINTING HUB */}
@@ -356,12 +353,8 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
                                                 printHTML += scriptTag;
                                             }
 
-                                            const printWindow = window.open('', '_blank');
-                                            if (printWindow) {
-                                                printWindow.document.write(printHTML);
-                                                printWindow.document.close();
-                                                addNotification('success', `${printQty} Product label${printQty > 1 ? 's' : ''} ready!`);
-                                            }
+                                            printHtmlContent(printHTML);
+                                            addNotification('success', `${printQty} Product label${printQty > 1 ? 's' : ''} ready!`);
                                         }}
                                         className={`flex-1 py-4 font-black rounded-2xl transition-all flex items-center justify-center gap-3 ${searchSku.trim()
                                             ? 'woody-btn-primary text-white dark:text-[#18201B] hover:scale-[1.02] active:scale-[0.98]'

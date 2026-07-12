@@ -2,6 +2,7 @@ import React from 'react';
 import { CartItem, PaymentMethod, SaleRecord, Customer, Site, SystemConfig, User } from '../../../types';
 import { formatDateTime } from '../../../utils/formatting';
 import { CURRENCY_SYMBOL } from '../../../constants';
+import { printHtmlContent } from '../../../utils/printHelper';
 
 interface UsePOSCheckoutActionsProps {
     cart: CartItem[];
@@ -296,21 +297,7 @@ export const usePOSCheckoutActions = ({
     }, [settings, activeSite, lastSale, user, selectedCustomer, setReceiptPreviewHTML, setIsReceiptPreviewOpen]);
 
     const handleConfirmPrint = React.useCallback(() => {
-        const printWindow = window.open('', 'ReceiptPrinterWindow', 'width=400,height=600');
-        if (printWindow) {
-            printWindow.document.write(receiptPreviewHTML);
-            printWindow.document.close();
-            printWindow.onload = () => {
-                printWindow.focus();
-                printWindow.print();
-            };
-            setTimeout(() => {
-                if (!printWindow.closed) {
-                    printWindow.focus();
-                    printWindow.print();
-                }
-            }, 500);
-        }
+        printHtmlContent(receiptPreviewHTML);
         setIsReceiptPreviewOpen(false);
         addNotification('success', 'Receipt sent to printer');
     }, [receiptPreviewHTML, setIsReceiptPreviewOpen, addNotification]);

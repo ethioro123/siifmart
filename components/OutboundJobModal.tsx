@@ -11,6 +11,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { isWeightBased, isVolumeBased } from '../utils/units';
 import Button from './shared/Button';
 import { logger } from '../utils/logger';
+import { printHtmlContent } from '../utils/printHelper';
 
 interface OutboundJobModalProps {
     isOpen: boolean;
@@ -130,11 +131,7 @@ export const OutboundJobModal: React.FC<OutboundJobModalProps> = ({
                 printHTML += scriptTag;
             }
 
-            const printWindow = window.open('', '_blank');
-            if (printWindow) {
-                printWindow.document.write(printHTML);
-                printWindow.document.close();
-            }
+            printHtmlContent(printHTML);
         } catch (error) {
             logger.error('OutboundJobModal', "Label generation failed", error);
         } finally {
