@@ -39,6 +39,20 @@ export const AssignPendingJobs: React.FC<AssignPendingJobsProps> = ({
     const { deleteJob } = useFulfillment();
     const { user } = useStore();
 
+    // Helper to check if a date matches today in local timezone
+    const isToday = (dateStr?: string) => {
+        if (!dateStr) return false;
+        const d = new Date(dateStr);
+        const today = new Date();
+        return d.getFullYear() === today.getFullYear() &&
+               d.getMonth() === today.getMonth() &&
+               d.getDate() === today.getDate();
+    };
+
+    // Filter lists to only include today's jobs for WMS stats and lists
+    const activeJobsToday = filteredJobs.filter(j => isToday(j.createdAt || j.created_at));
+    const historicalJobsToday = (historicalJobs || []).filter(j => isToday(j.completedAt || j.completed_at || j.createdAt || j.created_at));
+
     const handleDelete = async (e: React.MouseEvent, jobId: string) => {
         e.stopPropagation();
         if (window.confirm('Are you sure you want to permanently delete this job?')) {
@@ -51,7 +65,7 @@ export const AssignPendingJobs: React.FC<AssignPendingJobsProps> = ({
     const nonCompleted = ['pending', 'in-progress', 'assigned', 'accepted'];
 
     // 1. Get WMS active jobs matching current active filters
-    let currentWmsJobs = filteredJobs.filter(j => 
+    let currentWmsJobs = activeJobsToday.filter(j => 
         nonCompleted.includes(j.status?.toLowerCase() || '') &&
         j.type !== 'TRANSFER' &&
         wmsJobTypes.includes(j.type?.toUpperCase() || '')
@@ -75,7 +89,7 @@ export const AssignPendingJobs: React.FC<AssignPendingJobsProps> = ({
     }
 
     // 2. Get completed WMS jobs matching current active filters
-    let completedWmsJobs = (historicalJobs || []).filter(j => 
+    let completedWmsJobs = historicalJobsToday.filter(j => 
         j.status?.toLowerCase() === 'completed' && 
         j.type !== 'TRANSFER' &&
         wmsJobTypes.includes(j.type?.toUpperCase() || '')
@@ -113,7 +127,7 @@ export const AssignPendingJobs: React.FC<AssignPendingJobsProps> = ({
                     <span className="bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 text-[#2C5E3B] dark:text-[#A9CBA2] px-2 py-0.5 rounded-full border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20 ml-1">
                         {(() => {
                             const nonCompleted = ['pending', 'in-progress', 'assigned', 'accepted'];
-                            let filtered = filteredJobs.filter(j => 
+                            let filtered = activeJobsToday.filter(j => 
                                 nonCompleted.includes(j.status?.toLowerCase() || '') && 
                                 j.type !== 'TRANSFER' &&
                                 ['PICK', 'PACK', 'PUTAWAY', 'RECEIVE', 'COUNT', 'REPLENISH'].includes(j.type?.toUpperCase() || '')
@@ -134,7 +148,7 @@ export const AssignPendingJobs: React.FC<AssignPendingJobsProps> = ({
                         })()}
                     </span>
                 </div>
-                {!selectedJob && filteredJobs.filter(j => j.status?.toLowerCase() === 'pending').length > 0 && (
+                {!selectedJob && activeJobsToday.filter(j => j.status?.toLowerCase() === 'pending').length > 0 && (
                     <span className="text-[10px] text-[#2C5E3B] dark:text-[#A9CBA2] normal-case font-medium flex items-center gap-1">
                         <ArrowRight size={10} /> {t('warehouse.selectJobToAssign')}
                     </span>
@@ -163,7 +177,7 @@ export const AssignPendingJobs: React.FC<AssignPendingJobsProps> = ({
             <div className="flex-1 overflow-y-auto p-3 space-y-3 custom-scrollbar">
                 {(() => {
                     const nonCompleted = ['pending', 'in-progress', 'assigned', 'accepted'];
-                    let filtered = filteredJobs.filter(j => 
+                    let filtered = activeJobsToday.filter(j => 
                         nonCompleted.includes(j.status?.toLowerCase() || '') && 
                         j.type !== 'TRANSFER' &&
                         ['PICK', 'PACK', 'PUTAWAY', 'RECEIVE', 'COUNT', 'REPLENISH'].includes(j.type?.toUpperCase() || '')
@@ -374,7 +388,7 @@ export const AssignPendingJobs: React.FC<AssignPendingJobsProps> = ({
                 })()}
                 {(() => {
                     const nonCompleted = ['pending', 'in-progress', 'assigned', 'accepted'];
-                    let filtered = filteredJobs.filter(j => 
+                    let filtered = activeJobsToday.filter(j => 
                         nonCompleted.includes(j.status?.toLowerCase() || '') && 
                         j.type !== 'TRANSFER' &&
                         ['PICK', 'PACK', 'PUTAWAY', 'RECEIVE', 'COUNT', 'REPLENISH'].includes(j.type?.toUpperCase() || '')
