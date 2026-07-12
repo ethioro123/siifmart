@@ -156,9 +156,9 @@ export const AssignPendingJobs: React.FC<AssignPendingJobsProps> = ({
 
                         if (isAssigned) {
                             if (isSelected) {
-                                cardClass = 'bg-stone-200/60 dark:bg-zinc-800/60 border-stone-300 dark:border-zinc-700 border-l-4 border-l-stone-500 dark:border-l-zinc-500 shadow-sm';
+                                cardClass = 'bg-slate-200 dark:bg-zinc-700/80 border-slate-400 dark:border-zinc-650 border-l-4 border-l-slate-500 dark:border-l-zinc-500 shadow-sm';
                             } else {
-                                cardClass = 'bg-stone-100/50 dark:bg-[#1A1A1A]/40 border-stone-200/40 dark:border-zinc-800/20 border-l-4 border-l-stone-300 dark:border-l-zinc-700 hover:bg-stone-200/30 dark:hover:bg-zinc-800/20 cursor-pointer';
+                                cardClass = 'bg-slate-100 dark:bg-zinc-800/40 border-slate-200 dark:border-zinc-800/40 border-l-4 border-l-slate-450 dark:border-l-zinc-600 hover:bg-slate-200/50 dark:hover:bg-zinc-800/60 cursor-pointer';
                             }
                         } else {
                             if (isSelected) {
