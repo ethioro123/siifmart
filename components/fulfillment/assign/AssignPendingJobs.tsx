@@ -50,7 +50,7 @@ export const AssignPendingJobs: React.FC<AssignPendingJobsProps> = ({
     };
 
     // Filter lists to only include today's jobs for WMS stats and lists
-    const activeJobsToday = filteredJobs.filter(j => isToday(j.createdAt || j.created_at));
+    const activeJobsToday = filteredJobs;
     const historicalJobsToday = (historicalJobs || []).filter(j => isToday(j.completedAt || j.completed_at || j.createdAt || j.created_at));
 
     const handleDelete = async (e: React.MouseEvent, jobId: string) => {
