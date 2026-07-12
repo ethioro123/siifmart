@@ -8,13 +8,13 @@ type Mode = 'login' | 'forgot';
 
 const QUICK_ACCOUNTS = [
   { name: 'Shukri Kamal', role: 'CEO (Super Admin)', email: 'siif-0001@siifmart.com', password: 'Oromo123' },
-  { name: 'Abebe Yilma', role: 'Picker (Harar)', email: 'siif-0006@siifmart.com', password: 'Oromo123' },
-  { name: 'Firomsa Hasan', role: 'Packer (Harar)', email: 'siif-0033@siifmart.com', password: 'Oromo123' },
-  { name: 'Betelhem Bekele', role: 'Dispatcher (Harar)', email: 'siif-0005@siifmart.com', password: 'Oromo123' },
-  { name: 'Adam Ahmed', role: 'Receiver (Harar)', email: 'siif-0035@siifmart.com', password: 'Oromo123' },
-  { name: 'Ibsa Sufiyan', role: 'Driver (Harar)', email: 'siif-0032@siifmart.com', password: 'Oromo123' },
-  { name: 'Kamal Idriss', role: 'Warehouse Mgr (Harar)', email: 'siif-0034@siifmart.com', password: 'Oromo123' },
-  { name: 'Kebede Alemayehu', role: 'Warehouse Mgr (Harar)', email: 'siif-0028@siifmart.com', password: 'Oromo123' }
+  { name: 'Abebe Yilma', role: 'Picker (Harar)', email: 'siif-0006@siifmart.com', password: 'siif123' },
+  { name: 'Firomsa Hasan', role: 'Packer (Harar)', email: 'siif-0033@siifmart.com', password: 'siif123' },
+  { name: 'Betelhem Bekele', role: 'Dispatcher (Harar)', email: 'siif-0005@siifmart.com', password: 'siif123' },
+  { name: 'Adam Ahmed', role: 'Receiver (Harar)', email: 'siif-0035@siifmart.com', password: 'siif123' },
+  { name: 'Ibsa Sufiyan', role: 'Driver (Harar)', email: 'siif-0032@siifmart.com', password: 'siif123' },
+  { name: 'Kamal Idriss', role: 'Warehouse Mgr (Harar)', email: 'siif-0034@siifmart.com', password: 'siif123' },
+  { name: 'Kebede Alemayehu', role: 'Warehouse Mgr (Harar)', email: 'siif-0028@siifmart.com', password: 'siif123' }
 ];
 
 export default function LoginPage() {
