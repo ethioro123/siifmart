@@ -150,6 +150,24 @@ export const AssignPendingJobs: React.FC<AssignPendingJobsProps> = ({
                             })
                             .sort((a, b) => a.workload - b.workload)[0];
 
+                        const isAssigned = !!job.assignedTo || !['pending'].includes(job.status?.toLowerCase() || '');
+                        const isSelected = selectedJob?.id === job.id;
+                        let cardClass = '';
+
+                        if (isAssigned) {
+                            if (isSelected) {
+                                cardClass = 'bg-stone-100/80 dark:bg-white/5 border-stone-400/60 dark:border-white/20 opacity-80';
+                            } else {
+                                cardClass = 'bg-stone-50/60 dark:bg-black/20 border-stone-200/50 dark:border-white/5 opacity-50 hover:opacity-75 hover:border-stone-300 dark:hover:border-white/10 cursor-pointer';
+                            }
+                        } else {
+                            if (isSelected) {
+                                cardClass = 'bg-[#2C5E3B]/5 dark:bg-[#A9CBA2]/10 border-[#2C5E3B] dark:border-[#A9CBA2] shadow-sm scale-[1.01]';
+                            } else {
+                                cardClass = 'bg-white dark:bg-[#1C2620]/30 border-[#E2DCCE] dark:border-[#A9CBA2]/[0.04] hover:border-[#CFC6B4]/60 dark:hover:border-[#A9CBA2]/10 hover:bg-stone-50/50 dark:hover:bg-[#EAE5D9]/10 hover:scale-[1.01] cursor-pointer';
+                            }
+                        }
+
                         return (
                             <div
                                 key={job.id}
@@ -157,10 +175,7 @@ export const AssignPendingJobs: React.FC<AssignPendingJobsProps> = ({
                                     setSelectedJob(job);
                                     setIsDetailsOpen(false);
                                 }}
-                                className={`p-4 rounded-2xl border transition-all duration-300 ${selectedJob?.id === job.id
-                                    ? 'bg-[#2C5E3B]/5 dark:bg-[#A9CBA2]/10 border-[#2C5E3B] dark:border-[#A9CBA2] shadow-sm scale-[1.01]'
-                                    : 'bg-stone-50/50 dark:bg-[#1C2620]/30 border-[#E2DCCE]/30 dark:border-[#A9CBA2]/[0.04] hover:border-[#CFC6B4]/60 dark:hover:border-[#A9CBA2]/10 hover:bg-stone-100/50 dark:hover:bg-[#EAE5D9]/10 hover:scale-[1.01] cursor-pointer'
-                                    } `}
+                                className={`p-4 rounded-2xl border transition-all duration-300 ${cardClass}`}
                             >
                                 <div className="flex justify-between items-start mb-3">
                                     <div className="flex-1">
@@ -191,7 +206,7 @@ export const AssignPendingJobs: React.FC<AssignPendingJobsProps> = ({
                                                     <div className="w-4 h-4 rounded-md bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/20 border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/30 flex items-center justify-center text-[8px] font-black text-[#2C5E3B] dark:text-[#A9CBA2]">
                                                         {assignee.name?.charAt(0)}
                                                     </div>
-                                                    <span className="text-[9px] text-stone-500 dark:text-stone-400 font-bold">{assignee.name}</span>
+                                                    <span className="text-[9px] text-stone-550 dark:text-stone-400 font-bold">{assignee.name}</span>
                                                 </div>
                                             ) : null;
                                         })()}
@@ -205,7 +220,7 @@ export const AssignPendingJobs: React.FC<AssignPendingJobsProps> = ({
                                         </div>
                                     </div>
                                     <div className="flex gap-2">
-                                        {bestMatchEmployee && (
+                                        {!isAssigned && bestMatchEmployee && (
                                             <div className="flex items-center justify-center p-1.5 bg-green-100 dark:bg-green-500/20 rounded-lg border border-green-200 dark:border-green-500/30 shadow-md shadow-green-200/20 dark:shadow-[0_0_10px_rgba(34,197,94,0.2)] animate-pulse" title={`${t('warehouse.suggested')}: ${bestMatchEmployee.employee.name} `}>
                                                 <span className="text-[10px]">💡</span>
                                             </div>
