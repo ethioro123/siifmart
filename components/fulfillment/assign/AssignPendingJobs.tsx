@@ -46,21 +46,62 @@ export const AssignPendingJobs: React.FC<AssignPendingJobsProps> = ({
         }
     };
 
-    // Calculate dynamic counts based on relevant WMS Job types
+    // Calculate dynamic counts based on active WMS filters and status lists
     const wmsJobTypes = ['PICK', 'PACK', 'PUTAWAY', 'RECEIVE', 'COUNT', 'REPLENISH'];
-    const activeWmsJobs = filteredJobs.filter(j => 
+    const nonCompleted = ['pending', 'in-progress', 'assigned', 'accepted'];
+
+    // 1. Get WMS active jobs matching current active filters
+    let currentWmsJobs = filteredJobs.filter(j => 
+        nonCompleted.includes(j.status?.toLowerCase() || '') &&
         j.type !== 'TRANSFER' &&
         wmsJobTypes.includes(j.type?.toUpperCase() || '')
     );
-    const completedWmsJobs = (historicalJobs || []).filter(j => 
+
+    if (assignJobFilter !== 'ALL') {
+        currentWmsJobs = currentWmsJobs.filter(j => {
+            const jobType = j.type?.toUpperCase();
+            const filterType = assignJobFilter.toUpperCase();
+            if (filterType === 'DRIVER' || filterType === 'DISPATCH') {
+                return jobType === 'DRIVER' || jobType === 'DISPATCH';
+            }
+            return jobType === filterType;
+        });
+    }
+    if (dispatchPriorityFilter !== 'ALL') {
+        currentWmsJobs = currentWmsJobs.filter(j => j.priority?.toLowerCase() === dispatchPriorityFilter.toLowerCase());
+    }
+    if (dispatchSearch) {
+        currentWmsJobs = currentWmsJobs.filter(j => j.id.toLowerCase().includes(dispatchSearch.toLowerCase()));
+    }
+
+    // 2. Get completed WMS jobs matching current active filters
+    let completedWmsJobs = (historicalJobs || []).filter(j => 
         j.status?.toLowerCase() === 'completed' && 
         j.type !== 'TRANSFER' &&
         wmsJobTypes.includes(j.type?.toUpperCase() || '')
     );
 
-    const unassignedCount = activeWmsJobs.filter(j => !j.assignedTo && j.status?.toLowerCase() === 'pending').length;
-    const assignedCount = activeWmsJobs.filter(j => !!j.assignedTo || !['pending'].includes(j.status?.toLowerCase() || '')).length;
-    const uncompletedCount = activeWmsJobs.length;
+    if (assignJobFilter !== 'ALL') {
+        completedWmsJobs = completedWmsJobs.filter(j => {
+            const jobType = j.type?.toUpperCase();
+            const filterType = assignJobFilter.toUpperCase();
+            if (filterType === 'DRIVER' || filterType === 'DISPATCH') {
+                return jobType === 'DRIVER' || jobType === 'DISPATCH';
+            }
+            return jobType === filterType;
+        });
+    }
+    if (dispatchPriorityFilter !== 'ALL') {
+        completedWmsJobs = completedWmsJobs.filter(j => j.priority?.toLowerCase() === dispatchPriorityFilter.toLowerCase());
+    }
+    if (dispatchSearch) {
+        completedWmsJobs = completedWmsJobs.filter(j => j.id.toLowerCase().includes(dispatchSearch.toLowerCase()));
+    }
+
+    // 3. Extract correct metric values
+    const unassignedCount = currentWmsJobs.filter(j => !j.assignedTo && j.status?.toLowerCase() === 'pending').length;
+    const assignedCount = currentWmsJobs.filter(j => !!j.assignedTo || !['pending'].includes(j.status?.toLowerCase() || '')).length;
+    const uncompletedCount = currentWmsJobs.length;
     const completedCount = completedWmsJobs.length;
 
     return (
