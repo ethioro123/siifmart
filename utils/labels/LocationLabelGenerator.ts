@@ -63,7 +63,7 @@ export const generateLocationLabelHTML = async (
             margin: 0
         }) : '';
 
-        const qrData = JSON.stringify({ loc: item.humanLabel, code: item.barcode, zone: item.zone });
+        const qrData = item.barcode;
         const qrObj = showQR ? await generateQRCode({
             data: qrData,
             size: isSmall ? 85 : isMedium ? 90 : 130
