@@ -38,6 +38,7 @@ interface AssignTaskProps {
 
 export const AssignTask: React.FC<AssignTaskProps> = ({
     filteredJobs,
+    historicalJobs,
     employees,
     sites,
     isSubmitting,
