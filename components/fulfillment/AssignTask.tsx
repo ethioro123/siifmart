@@ -105,7 +105,7 @@ export const AssignTask: React.FC<AssignTaskProps> = ({
                 setIsAssignSortDropdownOpen={setIsAssignSortDropdownOpen}
             />
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[600px] md:h-96">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[1000px] lg:h-[768px]">
                 {/* Pending Jobs */}
                 <AssignPendingJobs
                     filteredJobs={filteredJobs}
