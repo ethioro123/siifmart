@@ -14,7 +14,6 @@ const LABEL_SIZES = {
     MEDIUM: { width: '3in', height: '2in', label: '3" x 2"' },
     LARGE: { width: '4in', height: '3in', label: '4" x 3"' },
     XL: { width: '4in', height: '6in', label: '4" x 6"' },
-    BAY: { width: '4in', height: '2in', label: 'Bay Label' },
 };
 
 interface AssignLabelHubProps {
