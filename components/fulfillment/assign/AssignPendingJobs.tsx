@@ -156,15 +156,15 @@ export const AssignPendingJobs: React.FC<AssignPendingJobsProps> = ({
 
                         if (isAssigned) {
                             if (isSelected) {
-                                cardClass = 'bg-stone-100/80 dark:bg-white/5 border-stone-400/60 dark:border-white/20 opacity-80';
+                                cardClass = 'bg-stone-200/60 dark:bg-zinc-800/60 border-stone-300 dark:border-zinc-700 border-l-4 border-l-stone-500 dark:border-l-zinc-500 shadow-sm';
                             } else {
-                                cardClass = 'bg-stone-50/60 dark:bg-black/20 border-stone-200/50 dark:border-white/5 opacity-50 hover:opacity-75 hover:border-stone-300 dark:hover:border-white/10 cursor-pointer';
+                                cardClass = 'bg-stone-100/50 dark:bg-[#1A1A1A]/40 border-stone-200/40 dark:border-zinc-800/20 border-l-4 border-l-stone-300 dark:border-l-zinc-700 hover:bg-stone-200/30 dark:hover:bg-zinc-800/20 cursor-pointer';
                             }
                         } else {
                             if (isSelected) {
-                                cardClass = 'bg-[#2C5E3B]/5 dark:bg-[#A9CBA2]/10 border-[#2C5E3B] dark:border-[#A9CBA2] shadow-sm scale-[1.01]';
+                                cardClass = 'bg-[#2C5E3B]/5 dark:bg-[#A9CBA2]/10 border-[#2C5E3B] dark:border-[#A9CBA2] border-l-4 border-l-[#2C5E3B] dark:border-l-[#A9CBA2] shadow-sm scale-[1.01]';
                             } else {
-                                cardClass = 'bg-white dark:bg-[#1C2620]/30 border-[#E2DCCE] dark:border-[#A9CBA2]/[0.04] hover:border-[#CFC6B4]/60 dark:hover:border-[#A9CBA2]/10 hover:bg-stone-50/50 dark:hover:bg-[#EAE5D9]/10 hover:scale-[1.01] cursor-pointer';
+                                cardClass = 'bg-[#FAFDFB] dark:bg-[#152319]/40 border-emerald-100 dark:border-[#2C5E3B]/10 border-l-4 border-l-[#2C5E3B] dark:border-l-[#A9CBA2] hover:border-emerald-250 dark:hover:border-[#A9CBA2]/20 hover:bg-emerald-50/20 dark:hover:bg-[#2C5E3B]/5 hover:scale-[1.01] cursor-pointer';
                             }
                         }
 
@@ -180,17 +180,23 @@ export const AssignPendingJobs: React.FC<AssignPendingJobsProps> = ({
                                 <div className="flex justify-between items-start mb-3">
                                     <div className="flex-1">
                                         <div className="flex items-center gap-2 mb-2">
-                                            <span className={`text-[9px] font-black px-2 py-0.5 rounded shadow-sm tracking-tighter uppercase ${job.type === 'PICK' ? 'bg-[#2C5E3B]/10 dark:bg-[#2C5E3B]/20 text-[#2C5E3B] dark:text-[#A9CBA2] border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20' :
-                                                job.type === 'PACK' ? 'bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-500/30' :
-                                                    job.type === 'RECEIVE' ? 'bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-500/30' :
-                                                        (job.type === 'DRIVER' || job.type === 'DISPATCH') ? 'bg-[#2C5E3B]/5 dark:bg-[#A9CBA2]/5 text-[#2C5E3B]/80 dark:text-[#A9CBA2]/80 border border-[#2C5E3B]/10 dark:border-[#A9CBA2]/10' :
-                                                            'bg-[#FAF8F5] dark:bg-[#1C2620]/40 text-[#2C5E3B] dark:text-[#A9CBA2] border border-[#E2DCCE] dark:border-[#A9CBA2]/10'} `}>
+                                            <span className={`text-[9px] font-black px-2 py-0.5 rounded shadow-sm tracking-tighter uppercase ${
+                                                isAssigned 
+                                                    ? 'bg-stone-200/60 dark:bg-zinc-800 text-stone-500 dark:text-zinc-400 border border-stone-300 dark:border-zinc-700' 
+                                                    : job.type === 'PICK' ? 'bg-[#2C5E3B]/10 dark:bg-[#2C5E3B]/20 text-[#2C5E3B] dark:text-[#A9CBA2] border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20' :
+                                                      job.type === 'PACK' ? 'bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-500/30' :
+                                                      job.type === 'RECEIVE' ? 'bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-500/30' :
+                                                      (job.type === 'DRIVER' || job.type === 'DISPATCH') ? 'bg-[#2C5E3B]/5 dark:bg-[#A9CBA2]/5 text-[#2C5E3B]/80 dark:text-[#A9CBA2]/80 border border-[#2C5E3B]/10 dark:border-[#A9CBA2]/10' :
+                                                      'bg-[#FAF8F5] dark:bg-[#1C2620]/40 text-[#2C5E3B] dark:text-[#A9CBA2] border border-[#E2DCCE] dark:border-[#A9CBA2]/10'} `}>
                                                 {job.type}
                                             </span>
-                                            <span className={`text-[9px] px-2 py-0.5 rounded font-black tracking-tighter uppercase border ${job.priority === 'Critical' ? 'bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-400 border-red-200 dark:border-red-500/30' :
-                                                job.priority === 'High' ? 'bg-orange-100 dark:bg-orange-500/20 text-orange-700 dark:text-orange-400 border-orange-200 dark:border-orange-500/30' :
-                                                    'bg-[#EAE5D9] dark:bg-[#2C5E3B]/10 text-[#2C5E3B] dark:text-[#A9CBA2]/60 border-[#E2DCCE] dark:border-[#A9CBA2]/10'
-                                                } `}>
+                                            <span className={`text-[9px] px-2 py-0.5 rounded font-black tracking-tighter uppercase border ${
+                                                isAssigned 
+                                                    ? 'bg-stone-200/40 dark:bg-zinc-800/40 text-stone-500 dark:text-zinc-500 border-stone-300/40 dark:border-zinc-700/60' 
+                                                    : job.priority === 'Critical' ? 'bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-400 border-red-200 dark:border-red-500/30' :
+                                                      job.priority === 'High' ? 'bg-orange-100 dark:bg-orange-500/20 text-orange-700 dark:text-orange-400 border-orange-200 dark:border-orange-500/30' :
+                                                      'bg-[#EAE5D9] dark:bg-[#2C5E3B]/10 text-[#2C5E3B] dark:text-[#A9CBA2]/60 border-[#E2DCCE] dark:border-[#A9CBA2]/10'
+                                            } `}>
                                                 {job.priority}
                                             </span>
                                             {job.status?.toLowerCase() !== 'pending' && (
