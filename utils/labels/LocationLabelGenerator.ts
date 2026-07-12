@@ -26,7 +26,6 @@ export const generateLocationLabelHTML = async (
         if (lower === 'small') return 'Small';
         if (lower === 'medium') return 'Medium';
         if (lower === 'large' || lower === 'xl') return 'Large';
-        if (lower === 'bay') return 'Bay';
         return 'Medium';
     };
 
@@ -46,7 +45,6 @@ export const generateLocationLabelHTML = async (
     const isMedium = validSize === 'Medium';
     const isLarge = validSize === 'Large';
     const isXL = validSize === 'XL';
-    const isBay = validSize === 'Bay';
 
     const labelItemsHTML = await Promise.all(items.map(async (item, idx) => {
         const pageInfo = items.length > 1
@@ -59,8 +57,8 @@ export const generateLocationLabelHTML = async (
 
         const barcodeObj = showBarcode ? generateBarcodeSVG(item.barcode, {
             format: 'CODE128',
-            width: isSmall ? 1.3 : isBay ? 1.5 : isMedium ? 1.6 : 2.0,
-            height: isSmall ? 24 : isBay ? 32 : isMedium ? 32 : 45,
+            width: isSmall ? 1.3 : isMedium ? 1.35 : 1.8,
+            height: isSmall ? 24 : isMedium ? 24 : 36,
             displayValue: false,
             margin: 0
         }) : '';
@@ -68,7 +66,7 @@ export const generateLocationLabelHTML = async (
         const qrData = JSON.stringify({ loc: item.humanLabel, code: item.barcode, zone: item.zone });
         const qrObj = showQR ? await generateQRCode({
             data: qrData,
-            size: isSmall ? 85 : isBay ? 115 : isMedium ? 110 : 145
+            size: isSmall ? 85 : isMedium ? 90 : 130
         }) : '';
 
         const parts = item.humanLabel.split('-');
@@ -78,45 +76,7 @@ export const generateLocationLabelHTML = async (
 
         let contentHTML = '';
 
-        if (isBay) {
-            // BAY (4x2): Horizontal layout for wide aspect ratio
-            contentHTML = `
-                <div style="display:flex;align-items:center;height:100%;padding:10px 16px;background:#fff;color:#000;font-family:'Inter',sans-serif;border:4px solid #000;box-sizing:border-box;">
-                    <!-- Left Column: Big Location Title -->
-                    <div style="flex:1.2;display:flex;flex-direction:column;justify-content:center;padding-right:12px;border-right:2px solid #000;height:100%;">
-                        <div style="font-size:42px;font-weight:900;letter-spacing:1px;line-height:0.95;margin-bottom:6px;word-break:keep-all;">
-                            ${item.humanLabel}
-                        </div>
-                        <div style="display:flex;gap:8px;font-size:8px;font-weight:900;text-transform:uppercase;color:#555;letter-spacing:0.5px;">
-                            <span>Zone: <strong style="color:#000;">${partZone}</strong></span>
-                            <span>Aisle: <strong style="color:#000;">${partAisle}</strong></span>
-                            <span>Bay: <strong style="color:#000;">${partBay}</strong></span>
-                        </div>
-                        ${item.siteName ? `<div style="font-size:7px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#888;margin-top:6px;">${item.siteName}</div>` : ''}
-                    </div>
-
-                    <!-- Right Column: Codes -->
-                    <div style="flex:0.8;display:flex;flex-direction:column;align-items:center;justify-content:center;padding-left:12px;height:100%;">
-                        ${showQR ? `
-                            <div class="qr-container" style="width:1.15in;height:1.15in;display:flex;justify-content:center;align-items:center;">
-                                ${qrObj}
-                            </div>
-                        ` : ''}
-                        ${showBarcode ? `
-                            <div style="width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;">
-                                <div class="barcode-container" style="width:100%;max-width:1.5in;display:flex;justify-content:center;">${barcodeObj}</div>
-                                <div style="font-family:'SF Mono', 'Fira Code', monospace;font-size:9px;font-weight:900;letter-spacing:1px;color:#000;margin-top:4px;text-align:center;">${item.barcode}</div>
-                            </div>
-                        ` : ''}
-                        ${!showBarcode && showQR ? `
-                            <div style="font-family:'SF Mono', 'Fira Code', monospace;font-size:8px;font-weight:800;letter-spacing:0.5px;color:#444;margin-top:4px;">
-                                ${item.barcode}
-                            </div>
-                        ` : ''}
-                    </div>
-                </div>
-            `;
-        } else if (isSmall) {
+        if (isSmall) {
             // SMALL (2x1): Sharp, geometric
             contentHTML = `
                 <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:4px;background:#fff;color:#000;font-family:'Inter',sans-serif;border:1px solid #000;">
@@ -135,52 +95,64 @@ export const generateLocationLabelHTML = async (
         } else if (isMedium) {
             // MEDIUM (3x2): Premium Futuristic Typography
             contentHTML = `
-                <div style="display:flex;flex-direction:column;height:100%;padding:13px;background:#fff;color:#000;font-family:'Inter',sans-serif;border:4px solid #000;position:relative;">
+                <div style="display:flex;flex-direction:column;height:100%;padding:8px;background:#fff;color:#000;font-family:'Inter',sans-serif;border:2px solid #000;position:relative;box-sizing:border-box;">
                     <!-- Top Bar -->
-                    <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:10px;border-bottom:3px solid #000;padding-bottom:8px;">
+                    <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:4px;border-bottom:2px solid #000;padding-bottom:4px;">
                         <div style="display:flex;flex-direction:column;">
-                            <div style="font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:3px;color:#666;">&nbsp;</div>
+                            <div style="font-size:8px;font-weight:900;text-transform:uppercase;letter-spacing:2px;color:#666;">LOCATION LABEL</div>
                         </div>
                         <div style="text-align:right;">
-                            <div style="font-size:13px;font-weight:900;letter-spacing:1px;background:#000;color:#fff;padding:3px 10px;display:inline-block;">ZONE: ${item.zone}</div>
+                            <div style="font-size:10px;font-weight:900;letter-spacing:1px;background:#000;color:#fff;padding:2px 6px;display:inline-block;">ZONE: ${item.zone}</div>
                         </div>
                     </div>
 
                     <!-- Hero Location -->
-                    <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;margin:8px 0;">
-                        <div style="display:flex;align-items:flex-start;gap:16px;margin-bottom:16px;">
+                    <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;margin:2px 0;">
+                        <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:2px;">
                             <div style="display:flex;flex-direction:column;align-items:center;">
-                                <div style="font-size:55px;font-weight:900;letter-spacing:4px;line-height:0.8;">${partZone}</div>
-                                <div style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:1px;margin-top:5px;color:#999;">ZONE</div>
+                                <div style="font-size:36px;font-weight:900;letter-spacing:2px;line-height:0.85;">${partZone}</div>
+                                <div style="font-size:7px;font-weight:900;text-transform:uppercase;letter-spacing:1px;margin-top:3px;color:#999;">ZONE</div>
                             </div>
-                            <div style="font-size:42px;font-weight:900;color:#eee;line-height:0.8;padding-top:3px;">-</div>
+                            <div style="font-size:28px;font-weight:900;color:#eee;line-height:0.85;padding-top:2px;">-</div>
                             <div style="display:flex;flex-direction:column;align-items:center;">
-                                <div style="font-size:55px;font-weight:900;letter-spacing:4px;line-height:0.8;">${partAisle}</div>
-                                <div style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:1px;margin-top:5px;color:#999;">AISLE</div>
+                                <div style="font-size:36px;font-weight:900;letter-spacing:2px;line-height:0.85;">${partAisle}</div>
+                                <div style="font-size:7px;font-weight:900;text-transform:uppercase;letter-spacing:1px;margin-top:3px;color:#999;">AISLE</div>
                             </div>
-                            <div style="font-size:42px;font-weight:900;color:#eee;line-height:0.8;padding-top:3px;">-</div>
+                            <div style="font-size:28px;font-weight:900;color:#eee;line-height:0.85;padding-top:2px;">-</div>
                             <div style="display:flex;flex-direction:column;align-items:center;">
-                                <div style="font-size:55px;font-weight:900;letter-spacing:4px;line-height:0.8;">${partBay}</div>
-                                <div style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:1px;margin-top:5px;color:#999;">BAY</div>
+                                <div style="font-size:36px;font-weight:900;letter-spacing:2px;line-height:0.85;">${partBay}</div>
+                                <div style="font-size:7px;font-weight:900;text-transform:uppercase;letter-spacing:1px;margin-top:3px;color:#999;">BAY</div>
                             </div>
                         </div>
                     </div>
 
                     <!-- Code Section -->
-                    <div style="display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:10px;">
-                        ${showQR ? `<div class="qr-container" style="width:1.1in;border:1px solid #000;padding:5px;">${qrObj}</div>` : ''}
-                        ${showBarcode ? `
-                            <div style="flex:1;max-width:2.86in;display:flex;flex-direction:column;align-items:center;">
+                    <div style="display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:4px;width:100%;">
+                        ${showQR && showBarcode ? `
+                            <div class="qr-container" style="width:0.8in;height:0.8in;border:1px solid #000;padding:3px;background:#fff;display:flex;align-items:center;justify-content:center;">${qrObj}</div>
+                            <div style="flex:1;max-width:2.0in;display:flex;flex-direction:column;align-items:center;justify-content:center;">
                                 <div class="barcode-container" style="display:flex;justify-content:center;width:100%;">${barcodeObj}</div>
-                                <div style="font-family:'SF Mono', 'Fira Code', monospace;font-size:12px;font-weight:900;letter-spacing:2px;color:#000;margin-top:6px;">${item.barcode}</div>
+                                <div style="font-family:'SF Mono', 'Fira Code', monospace;font-size:8px;font-weight:900;letter-spacing:1px;color:#000;margin-top:3px;text-align:center;">${item.barcode}</div>
+                            </div>
+                        ` : ''}
+                        ${showQR && !showBarcode ? `
+                            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;">
+                                <div class="qr-container" style="width:0.95in;height:0.95in;border:1px solid #000;padding:4px;background:#fff;display:flex;align-items:center;justify-content:center;">${qrObj}</div>
+                                <div style="font-family:'SF Mono', 'Fira Code', monospace;font-size:8px;font-weight:900;letter-spacing:1px;color:#000;margin-top:3px;">${item.barcode}</div>
+                            </div>
+                        ` : ''}
+                        ${showBarcode && !showQR ? `
+                            <div style="flex:1;max-width:2.4in;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+                                <div class="barcode-container" style="display:flex;justify-content:center;width:100%;">${barcodeObj}</div>
+                                <div style="font-family:'SF Mono', 'Fira Code', monospace;font-size:9px;font-weight:900;letter-spacing:1px;color:#000;margin-top:4px;text-align:center;">${item.barcode}</div>
                             </div>
                         ` : ''}
                     </div>
 
                     <!-- Footer -->
-                    <div style="display:flex;justify-content:space-between;align-items:center;padding-top:8px;border-top:1px solid #000;">
-                        <div style="font-size:10px;font-family:monospace;font-weight:700;letter-spacing:2px;">&nbsp;</div>
-                        ${item.siteName ? `<div style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:1.5px;text-align:right;">${item.siteName}</div>` : ''}
+                    <div style="display:flex;justify-content:space-between;align-items:center;padding-top:4px;border-top:1px solid #000;">
+                        <div style="font-size:8px;font-family:monospace;font-weight:700;letter-spacing:1.5px;color:#666;">WMS IDENT</div>
+                        ${item.siteName ? `<div style="font-size:7px;font-weight:900;text-transform:uppercase;letter-spacing:1px;text-align:right;">${item.siteName}</div>` : ''}
                     </div>
                 </div>
             `;
@@ -229,9 +201,12 @@ export const generateLocationLabelHTML = async (
                     <!-- Codes Area -->
                     <div style="display:flex;align-items:center;gap:26px;margin-bottom:13px;">
                         ${showQR ? `<div class="qr-container" style="width:1.60in;border:1px solid #000;padding:10px;background:#fff;">${qrObj}</div>` : ''}
-                        ${showBarcode ? `<div class="barcode-container" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;">
-                            <div style="display:flex;justify-content:center;width:100%;">${barcodeObj}</div>
-                        </div>` : ''}
+                        ${showBarcode ? `
+                            <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+                                <div class="barcode-container" style="display:flex;justify-content:center;width:100%;">${barcodeObj}</div>
+                                <div style="font-family:'SF Mono', 'Fira Code', monospace;font-size:14px;font-weight:900;letter-spacing:2px;color:#000;margin-top:6px;">${item.barcode}</div>
+                            </div>
+                        ` : ''}
                     </div>
 
                     <!-- Footer -->
