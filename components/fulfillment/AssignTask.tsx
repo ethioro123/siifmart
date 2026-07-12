@@ -108,6 +108,7 @@ export const AssignTask: React.FC<AssignTaskProps> = ({
                 {/* Pending Jobs */}
                 <AssignPendingJobs
                     filteredJobs={filteredJobs}
+                    historicalJobs={historicalJobs}
                     assignJobFilter={assignJobFilter}
                     dispatchPriorityFilter={dispatchPriorityFilter}
                     dispatchSearch={dispatchSearch}

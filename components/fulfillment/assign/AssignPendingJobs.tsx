@@ -7,6 +7,7 @@ import { useStore } from '../../../contexts/CentralStore';
 
 interface AssignPendingJobsProps {
     filteredJobs: WMSJob[];
+    historicalJobs: WMSJob[];
     assignJobFilter: string;
     dispatchPriorityFilter: string;
     dispatchSearch: string;
@@ -22,6 +23,7 @@ interface AssignPendingJobsProps {
 
 export const AssignPendingJobs: React.FC<AssignPendingJobsProps> = ({
     filteredJobs,
+    historicalJobs,
     assignJobFilter,
     dispatchPriorityFilter,
     dispatchSearch,
@@ -43,6 +45,23 @@ export const AssignPendingJobs: React.FC<AssignPendingJobsProps> = ({
             await deleteJob(jobId);
         }
     };
+
+    // Calculate dynamic counts based on relevant WMS Job types
+    const wmsJobTypes = ['PICK', 'PACK', 'PUTAWAY', 'RECEIVE', 'COUNT', 'REPLENISH'];
+    const activeWmsJobs = filteredJobs.filter(j => 
+        j.type !== 'TRANSFER' &&
+        wmsJobTypes.includes(j.type?.toUpperCase() || '')
+    );
+    const completedWmsJobs = (historicalJobs || []).filter(j => 
+        j.status?.toLowerCase() === 'completed' && 
+        j.type !== 'TRANSFER' &&
+        wmsJobTypes.includes(j.type?.toUpperCase() || '')
+    );
+
+    const unassignedCount = activeWmsJobs.filter(j => !j.assignedTo && j.status?.toLowerCase() === 'pending').length;
+    const assignedCount = activeWmsJobs.filter(j => !!j.assignedTo || !['pending'].includes(j.status?.toLowerCase() || '')).length;
+    const uncompletedCount = activeWmsJobs.length;
+    const completedCount = completedWmsJobs.length;
 
     return (
         <div className="glass-panel flex flex-col overflow-hidden">
@@ -79,6 +98,26 @@ export const AssignPendingJobs: React.FC<AssignPendingJobsProps> = ({
                         <ArrowRight size={10} /> {t('warehouse.selectJobToAssign')}
                     </span>
                 )}
+            </div>
+
+            {/* WMS Stats Summary Bar */}
+            <div className="p-3 border-b border-[#E2DCCE]/25 dark:border-[#A9CBA2]/[0.02] bg-stone-50/20 dark:bg-black/10 grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div className="bg-white/50 dark:bg-white/5 border border-[#E2DCCE]/40 dark:border-[#A9CBA2]/[0.02] rounded-xl p-2.5 flex flex-col shadow-sm">
+                    <span className="text-[9px] font-black text-stone-500 dark:text-stone-400 uppercase tracking-wider">Unassigned</span>
+                    <span className="text-base font-black text-[#2C5E3B] dark:text-[#A9CBA2] mt-0.5">{unassignedCount}</span>
+                </div>
+                <div className="bg-white/50 dark:bg-white/5 border border-[#E2DCCE]/40 dark:border-[#A9CBA2]/[0.02] rounded-xl p-2.5 flex flex-col shadow-sm">
+                    <span className="text-[9px] font-black text-stone-500 dark:text-stone-400 uppercase tracking-wider">Assigned</span>
+                    <span className="text-base font-black text-slate-600 dark:text-slate-400 mt-0.5">{assignedCount}</span>
+                </div>
+                <div className="bg-white/50 dark:bg-white/5 border border-[#E2DCCE]/40 dark:border-[#A9CBA2]/[0.02] rounded-xl p-2.5 flex flex-col shadow-sm">
+                    <span className="text-[9px] font-black text-stone-500 dark:text-stone-400 uppercase tracking-wider">Uncompleted</span>
+                    <span className="text-base font-black text-[#8C6239] dark:text-[#E2C899] mt-0.5">{uncompletedCount}</span>
+                </div>
+                <div className="bg-white/50 dark:bg-white/5 border border-[#E2DCCE]/40 dark:border-[#A9CBA2]/[0.02] rounded-xl p-2.5 flex flex-col shadow-sm">
+                    <span className="text-[9px] font-black text-stone-500 dark:text-stone-400 uppercase tracking-wider">Completed</span>
+                    <span className="text-base font-black text-emerald-600 dark:text-emerald-400 mt-0.5">{completedCount}</span>
+                </div>
             </div>
             <div className="flex-1 overflow-y-auto p-3 space-y-3 custom-scrollbar">
                 {(() => {
