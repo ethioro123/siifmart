@@ -152,8 +152,8 @@ export const AssignPendingJobs: React.FC<AssignPendingJobsProps> = ({
                     <span className="text-base font-black text-slate-600 dark:text-slate-400 mt-0.5">{assignedCount}</span>
                 </div>
                 <div className="bg-white/50 dark:bg-white/5 border border-[#E2DCCE]/40 dark:border-[#A9CBA2]/[0.02] rounded-xl p-2.5 flex flex-col shadow-sm">
-                    <span className="text-[9px] font-black text-stone-500 dark:text-stone-400 uppercase tracking-wider">Uncompleted</span>
-                    <span className="text-base font-black text-[#8C6239] dark:text-[#E2C899] mt-0.5">{uncompletedCount}</span>
+                    <span className="text-[9px] font-black text-stone-500 dark:text-stone-400 uppercase tracking-wider">Total</span>
+                    <span className="text-base font-black text-[#8C6239] dark:text-[#E2C899] mt-0.5">{uncompletedCount + completedCount}</span>
                 </div>
                 <div className="bg-white/50 dark:bg-white/5 border border-[#E2DCCE]/40 dark:border-[#A9CBA2]/[0.02] rounded-xl p-2.5 flex flex-col shadow-sm">
                     <span className="text-[9px] font-black text-stone-500 dark:text-stone-400 uppercase tracking-wider">Completed</span>
