@@ -107,11 +107,15 @@ export const generateUnifiedBatchLabelsHTML = async (
         const pageInfo = expandedItems.length > 1 ? `<div style="position: absolute; bottom: 1px; right: 3px; font-size: 6px; color: #888;">${item.index}/${item.total}</div>` : '';
         let contentHTML = '';
 
-        // Create rich QR data for maximum information
+        // Create rich QR data for maximum information (audits, inspections, verification)
         const qrData = JSON.stringify({
             sku: item.value,
             name: item.label,
-            date: item.date || ''
+            price: item.price || '',
+            category: item.category || '',
+            date: item.date || new Date().toISOString().split('T')[0],
+            url: `https://ops.siifmart.com/products/${item.value}/verify`,
+            printedAt: new Date().toISOString()
         });
 
         // Defensive check for value

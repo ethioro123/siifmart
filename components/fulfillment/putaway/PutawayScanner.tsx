@@ -4,9 +4,11 @@ import { WMSJob, Product } from '../../../types';
 import { playBeep } from '../../../utils/audioUtils';
 import { normalizeLocation } from '../../../utils/locationTracking';
 import { formatJobId } from '../../../utils/jobIdFormatter';
-import { decodeLocation, isLocationBarcode, extractPrefixFromBarcode } from '../../../utils/locationEncoder';
+import { decodeLocation, isLocationBarcode, extractPrefixFromBarcode, extractSkuFromScan } from '../../../utils/locationEncoder';
 import { useScanOnly } from '../../../hooks/useScanOnly';
 import { logger } from '../../../utils/logger';
+
+const normalizeSku = (s: string) => s.replace(/[-\/\s]/g, '').toUpperCase();
 
 interface PutawayScannerProps {
     job: WMSJob;
@@ -197,8 +199,9 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
                 playBeep('success');
             } else {
                 const itemName = currentItem?.name || 'Item';
+                const decodedSku = extractSkuFromScan(val);
                 try {
-                    await onScanItem(val);
+                    await onScanItem(decodedSku);
                 } catch (err: any) {
                     playBeep('error');
                     setErrorMsg('Incorrect Item Scanned');

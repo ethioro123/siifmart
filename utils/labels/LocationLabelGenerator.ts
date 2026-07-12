@@ -63,7 +63,16 @@ export const generateLocationLabelHTML = async (
             margin: 0
         }) : '';
 
-        const qrData = item.barcode;
+        const qrData = JSON.stringify({
+            loc: item.humanLabel,
+            code: item.barcode,
+            zone: item.zone,
+            aisle: item.aisle,
+            bay: item.bay,
+            site: item.siteName || '',
+            url: `https://ops.siifmart.com/locations/${item.barcode}/audit`,
+            printedAt: new Date().toISOString()
+        });
         const qrObj = showQR ? await generateQRCode({
             data: qrData,
             size: isSmall ? 85 : isMedium ? 90 : 130

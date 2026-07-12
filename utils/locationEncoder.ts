@@ -130,18 +130,46 @@ export const encodeLocation = (location: string, prefix: string = PREFIX): strin
     return `${payload}${checkDigit}`;
 };
 
-/**
- * Decode a 14/15-digit barcode back to human-readable format
- * Returns null if invalid or checksum fails.
- */
 export const decodeLocation = (barcode: string): string | null => {
-    if (!barcode || (barcode.length !== 14 && barcode.length !== 15)) return null;
+    if (!barcode) return null;
+
+    let target = barcode.trim();
+
+    // 1. Handle rich JSON QR payloads
+    if (target.startsWith('{')) {
+        try {
+            const parsed = JSON.parse(target);
+            if (parsed.code) {
+                target = parsed.code;
+            } else if (parsed.loc) {
+                return parsed.loc; // human-readable e.g., A-01-05
+            }
+        } catch (e) {
+            // ignore JSON parse error
+        }
+    }
+
+    // 2. Handle deep link URL QR payloads
+    if (target.includes('http')) {
+        try {
+            const url = new URL(target);
+            const pathParts = url.pathname.split('/');
+            const lastPart = pathParts[pathParts.length - 1];
+            if (lastPart && (lastPart.length === 14 || lastPart.length === 15)) {
+                target = lastPart;
+            }
+        } catch (e) {
+            // ignore URL parse error
+        }
+    }
+
+    if (target.length !== 14 && target.length !== 15) return null;
 
     // 1. Verify Checksum
-    const payload = barcode.substring(0, barcode.length - 1);
-    const check = barcode.substring(barcode.length - 1);
+    const payload = target.substring(0, target.length - 1);
+    const check = target.substring(target.length - 1);
     if (generateCheckDigit(payload) !== check) {
-        console.warn('Invalid Checksum for Location Barcode', barcode);
+        console.warn('Invalid Checksum for Location Barcode', target);
         return null;
     }
 
@@ -151,16 +179,16 @@ export const decodeLocation = (barcode: string): string | null => {
 
     let zoneNum, aisle, bay;
 
-    if (barcode.length === 15) {
+    if (target.length === 15) {
         // 4-digit prefix
-        zoneNum = barcode.substring(4, 6);
-        aisle = barcode.substring(6, 8);
-        bay = barcode.substring(8, 10);
+        zoneNum = target.substring(4, 6);
+        aisle = target.substring(6, 8);
+        bay = target.substring(8, 10);
     } else {
         // 14 digits (standard 3-digit prefix)
-        zoneNum = barcode.substring(3, 5);
-        aisle = barcode.substring(5, 7);
-        bay = barcode.substring(7, 9);
+        zoneNum = target.substring(3, 5);
+        aisle = target.substring(5, 7);
+        bay = target.substring(7, 9);
     }
 
     const zoneLetter = getZoneLetter(zoneNum);
@@ -185,4 +213,32 @@ export const isLocationBarcode = (scan: string): boolean => {
     const payload = scan.substring(0, scan.length - 1);
     const check = scan.substring(scan.length - 1);
     return generateCheckDigit(payload) === check;
+};
+
+/**
+ * Extract raw SKU/Barcode from rich JSON or URL QR scans
+ */
+export const extractSkuFromScan = (val: string): string => {
+    if (!val) return '';
+    const trimmed = val.trim();
+    if (trimmed.startsWith('{')) {
+        try {
+            const parsed = JSON.parse(trimmed);
+            if (parsed.sku) return parsed.sku;
+            if (parsed.barcode) return parsed.barcode;
+        } catch (e) {
+            // ignore
+        }
+    }
+    if (trimmed.includes('http')) {
+        try {
+            const url = new URL(trimmed);
+            const pathParts = url.pathname.split('/');
+            const lastPart = pathParts[pathParts.length - 1];
+            if (lastPart) return lastPart;
+        } catch (e) {
+            // ignore
+        }
+    }
+    return trimmed;
 };

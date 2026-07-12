@@ -4,14 +4,13 @@ import { WMSJob, Product } from '../../../types';
 import { playBeep } from '../../../utils/audioUtils';
 import { normalizeLocation } from '../../../utils/locationTracking';
 import { formatJobId } from '../../../utils/jobIdFormatter';
-import { decodeLocation, isLocationBarcode, extractPrefixFromBarcode } from '../../../utils/locationEncoder';
+import { decodeLocation, isLocationBarcode, extractPrefixFromBarcode, extractSkuFromScan } from '../../../utils/locationEncoder';
 import { useScanOnly } from '../../../hooks/useScanOnly';
 import { isWeightBased, isVolumeBased, getSellUnit } from '../../../utils/units';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { PickScannerPickedList } from './components/PickScannerPickedList';
 import { PickScannerSummary } from './components/PickScannerSummary';
 import { PickScannerInstructionPanel } from './components/PickScannerInstructionPanel';
-
 
 const normalizeSku = (s: string) => s.replace(/[-\/\s]/g, '').toUpperCase();
 
@@ -198,7 +197,8 @@ export const PickScanner: React.FC<PickScannerProps> = ({
         } else if (step === 'ITEM') {
             const product = getProduct(currentItem);
             const targetSku = currentItem.sku ? normalizeSku(currentItem.sku) : '';
-            const scannedVal = normalizeSku(val);
+            const decodedSku = extractSkuFromScan(val);
+            const scannedVal = normalizeSku(decodedSku);
             
             const matchesSku = scannedVal === targetSku;
             const matchesBarcode = product?.barcode && normalizeSku(product.barcode) === scannedVal;
