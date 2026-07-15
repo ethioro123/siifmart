@@ -25,12 +25,19 @@ export const WasteHistory: React.FC<WasteHistoryProps> = ({
     const filteredHistory = useMemo(() => {
         const wasteMoves = movements.filter(m => m.reason.toLowerCase().includes('waste') || m.reason.toLowerCase().includes('spoilage'));
         return wasteMoves.filter(m => {
-            return !search ||
-                (m.productName || '').toLowerCase().includes(search.toLowerCase()) ||
-                m.id.toLowerCase().includes(search.toLowerCase()) ||
-                (m.reason || '').toLowerCase().includes(search.toLowerCase());
+            if (!search) return true;
+            const q = search.toLowerCase();
+            const product = products.find(p => p.id === m.productId);
+            
+            return (
+                (m.productName || '').toLowerCase().includes(q) ||
+                (product?.name || '').toLowerCase().includes(q) ||
+                (product?.sku || '').toLowerCase().includes(q) ||
+                m.id.toLowerCase().includes(q) ||
+                (m.reason || '').toLowerCase().includes(q)
+            );
         });
-    }, [movements, search]);
+    }, [movements, products, search]);
 
     const totalPages = Math.ceil(filteredHistory.length / WASTE_HISTORY_PER_PAGE);
     const paginatedHistory = useMemo(() => {
@@ -57,7 +64,7 @@ export const WasteHistory: React.FC<WasteHistoryProps> = ({
                         placeholder="Search history..."
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        className="woody-input pl-9 text-xs py-2"
+                        className="woody-input !pl-9 text-xs py-2"
                     />
                 </div>
             </div>

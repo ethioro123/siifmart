@@ -19,11 +19,23 @@ export const ReturnsHistory: React.FC<ReturnsHistoryProps> = ({ sales }) => {
 
         if (returnHistorySearch) {
             const query = returnHistorySearch.toLowerCase();
-            filtered = filtered.filter(s =>
-                s.id.toLowerCase().includes(query) ||
-                (s.customer_name && s.customer_name.toLowerCase().includes(query)) ||
-                (s.customerName && s.customerName.toLowerCase().includes(query))
-            );
+            filtered = filtered.filter(s => {
+                const itemsList = s.items || s.lineItems || s.line_items || [];
+                const matchesItems = itemsList.some((item: any) => 
+                    (item.name || item.productName || item.product_name || '').toLowerCase().includes(query) ||
+                    (item.sku || '').toLowerCase().includes(query)
+                );
+
+                return (
+                    s.id.toLowerCase().includes(query) ||
+                    (s.invoice_no && s.invoice_no.toLowerCase().includes(query)) ||
+                    (s.invoiceNo && s.invoiceNo.toLowerCase().includes(query)) ||
+                    (s.customer_name && s.customer_name.toLowerCase().includes(query)) ||
+                    (s.customerName && s.customerName.toLowerCase().includes(query)) ||
+                    (s.status && s.status.toLowerCase().includes(query)) ||
+                    matchesItems
+                );
+            });
         }
 
         return filtered;

@@ -259,22 +259,22 @@ export const TransferJobDetails: React.FC<TransferJobDetailsProps> = ({
                         </div>
                     </div>
                     <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
-                        {transferStatus === 'Requested' && isManager && (
+                        {['Requested', 'Draft'].includes(transferStatus) && isManager && (
                             <button onClick={handleApprove} disabled={loading !== null} className="w-full sm:w-auto justify-center px-8 py-3.5 rounded-2xl font-black text-xs uppercase tracking-widest transition-all flex items-center gap-2.5 active:scale-95 disabled:opacity-50 shadow-sm bg-[#2C5E3B] hover:bg-[#20452B] dark:bg-[#EAE5D9] dark:hover:bg-[#D8D2C4] text-white dark:text-[#1C2620]">
                                 {loading === 'approve' ? <Loader2 size={18} className="animate-spin" /> : <CheckCircle size={18} />} Approve
                             </button>
                         )}
-                        {['Requested', 'Picking'].includes(transferStatus) && isManager && (
+                        {['Requested', 'Draft', 'Picking'].includes(transferStatus) && isManager && (
                             <button onClick={handleReject} disabled={loading !== null} className="w-full sm:w-auto justify-center px-8 py-3.5 rounded-2xl font-black text-xs uppercase tracking-widest transition-all flex items-center gap-2.5 active:scale-95 disabled:opacity-50 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200/50 dark:bg-red-950/20 dark:hover:bg-red-950/40 dark:text-red-400 dark:border-red-500/20">
                                 {loading === 'reject' ? <Loader2 size={18} className="animate-spin" /> : <XCircle size={18} />} Reject
                             </button>
                         )}
-                        {['Requested', 'Approved', 'Picking'].includes(transferStatus) && isManager && (
+                        {['Requested', 'Draft', 'Approved', 'Picking', 'Rejected'].includes(transferStatus) && isManager && (
                             <button onClick={handleDelete} disabled={loading !== null} className="w-full sm:w-auto justify-center px-8 py-3.5 rounded-2xl font-black text-xs uppercase tracking-widest transition-all flex items-center gap-2.5 active:scale-95 disabled:opacity-50 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200/50 dark:bg-red-950/20 dark:hover:bg-red-950/40 dark:text-red-400 dark:border-red-500/20">
                                 {loading === 'delete' ? <Loader2 size={18} className="animate-spin" /> : <Trash2 size={18} />} Delete Manifest
                             </button>
                         )}
-                        {(transferStatus === 'In-Transit' || transferStatus === 'Shipped') && selectedJob.destSiteId === activeSite?.id && (
+                        {(transferStatus === 'In-Transit' || transferStatus === 'Shipped') && (selectedJob.destSiteId === activeSite?.id || ['super_admin', 'admin', 'warehouse_manager'].includes(user?.role || '')) && (
                             <button onClick={() => { setActiveTransferJob(selectedJob); setTransferReceiveItems(selectedJob.lineItems || []); setTransferReceiveMode(true); setSelectedJob(null); }} className="w-full sm:w-auto justify-center px-8 py-3.5 rounded-2xl font-black text-xs uppercase tracking-widest transition-all flex items-center gap-2.5 active:scale-95 disabled:opacity-50 shadow-sm bg-[#2C5E3B] hover:bg-[#20452B] dark:bg-[#EAE5D9] dark:hover:bg-[#D8D2C4] text-white dark:text-[#1C2620]">
                                 <Package size={18} /> {t('warehouse.received')}
                             </button>

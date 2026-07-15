@@ -6,6 +6,7 @@ import {
 import Modal from '../../Modal';
 import { Employee, UserRole } from '../../../types';
 import { CURRENCY_SYMBOL } from '../../../constants';
+import { useData } from '../../../contexts/DataContext';
 import { authService } from '../../../services/auth.service';
 
 interface AddEmployeeWizardProps {
@@ -51,6 +52,8 @@ export default function AddEmployeeWizard({
     resetWizard,
     canAdjustPayroll
 }: AddEmployeeWizardProps) {
+    const { settings, activeSite } = useData();
+    const currencySymbol = (activeSite as any)?.currency || settings?.currency || CURRENCY_SYMBOL;
     const [showPassword, setShowPassword] = React.useState(false);
     return (
         <Modal isOpen={isOpen} onClose={resetWizard} title="Onboard Talent" size="lg">
@@ -256,7 +259,7 @@ export default function AddEmployeeWizard({
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label className="text-xs text-gray-400 uppercase font-bold mb-1 block">
-                                        Monthly Salary ({CURRENCY_SYMBOL}) 
+                                        Monthly Salary ({currencySymbol}) 
                                         {!canAdjustPayroll && <span className="text-[10px] text-amber-500 ml-2">(HR/Admin Only)</span>}
                                     </label>
                                     <input
@@ -358,7 +361,7 @@ export default function AddEmployeeWizard({
                                         <div className="space-y-2 text-sm">
                                             <div className="flex justify-between">
                                                 <span className="text-gray-400">Base Salary:</span>
-                                                <span className="text-green-400 font-bold">${parseFloat(newEmpData.salary).toLocaleString()}/mo</span>
+                                                <span className="text-green-400 font-bold">{currencySymbol} {parseFloat(newEmpData.salary).toLocaleString()}/mo</span>
                                             </div>
                                             <div className="flex justify-between">
                                                 <span className="text-gray-400">Specialization:</span>

@@ -55,14 +55,16 @@ export const ReceivingPendingList: React.FC = () => {
         return allTransferSources.filter(t => {
             if (String(t.destSiteId) !== String(activeSite?.id)) return false;
             
-            const transferStatus = ((t as any).transferStatus || '').toLowerCase();
-            const jobStatus = ((t as any).status || '').toLowerCase();
+            const transferStatus = String((t as any).transferStatus || '').toLowerCase().replace(/[-_]/g, '');
+            const jobStatus = String((t as any).status || '').toLowerCase().replace(/[-_]/g, '');
 
-            // Needs to be in transit or pending dispatch
+            if (['received', 'completed'].includes(transferStatus)) return false;
+
+            // Needs to be in-transit, dispatched, pending, delivered or in-progress
             return (
-                ['in_transit', 'dispatched', 'pending', 'pending_dispatch'].includes(transferStatus) ||
-                ['in_progress', 'pending'].includes(jobStatus)
-            ) && !['received', 'completed'].includes(transferStatus);
+                ['intransit', 'dispatched', 'pending', 'pendingdispatch', 'delivered', 'partiallydelivered'].includes(transferStatus) ||
+                ['inprogress', 'pending', 'staged', 'delivered'].includes(jobStatus)
+            );
         }).sort((a, b) => new Date((b as any).createdAt || 0).getTime() - new Date((a as any).createdAt || 0).getTime());
     }, [transfers, wmsTransferJobs, activeSite]);
 
@@ -136,6 +138,34 @@ export const ReceivingPendingList: React.FC = () => {
                                                         return stat === 'in_transit' || stat === 'dispatched' ? t('posCommand.inTransit') : t('posCommand.pending');
                                                     })()}
                                                 </span>
+                                                {(() => {
+                                                    const delMethod = (item as any).deliveryMethod || 'Internal';
+                                                    const isExt = delMethod === 'External';
+                                                    const tStat = String((item as any).transferStatus || item.status || '').toLowerCase();
+                                                    const isDone = ['delivered', 'completed', 'received'].includes(tStat);
+                                                    if (!isExt && !isDone) {
+                                                        return (
+                                                            <span className="px-2 py-0.5 bg-amber-500/10 text-amber-500 border border-amber-500/20 rounded text-[9px] font-black uppercase tracking-wider">
+                                                                Driver In-Transit (Awaiting Arrival)
+                                                            </span>
+                                                        );
+                                                    }
+                                                    if (!isExt && isDone) {
+                                                        return (
+                                                            <span className="px-2 py-0.5 bg-[#2C5E3B]/10 text-[#2C5E3B] dark:text-[#A9CBA2] border border-[#2C5E3B]/20 rounded text-[9px] font-black uppercase tracking-wider">
+                                                                Driver Delivered — Ready to Receive
+                                                            </span>
+                                                        );
+                                                    }
+                                                    if (isExt) {
+                                                        return (
+                                                            <span className="px-2 py-0.5 bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 rounded text-[9px] font-black uppercase tracking-wider">
+                                                                EXT Carrier
+                                                            </span>
+                                                        );
+                                                    }
+                                                    return null;
+                                                })()}
                                             </div>
                                             
                                             <div className="flex flex-wrap items-center gap-y-1 gap-x-4 text-xs font-bold text-stone-500 dark:text-gray-400">
@@ -158,13 +188,36 @@ export const ReceivingPendingList: React.FC = () => {
                                             >
                                                 {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                                             </button>
-                                            <button
-                                                onClick={() => handleSelectTransferForReceiving(item.id)}
-                                                className="px-4 py-2.5 bg-[#224429] dark:bg-[#2C5E3B] hover:bg-[#1B3520] dark:hover:bg-[#3a7a4d] text-white font-bold rounded-xl text-xs flex items-center gap-1.5 transition-all active:scale-95 shadow-sm"
-                                            >
-                                                {t('posCommand.startReceiving')}
-                                                <ChevronRight size={14} />
-                                            </button>
+                                            {(() => {
+                                                const delMethod = (item as any).deliveryMethod || 'Internal';
+                                                const isExt = delMethod === 'External';
+                                                const tStat = String((item as any).transferStatus || item.status || '').toLowerCase();
+                                                const isDone = ['delivered', 'completed', 'received'].includes(tStat);
+                                                const isLockedByDriver = !isExt && !isDone;
+
+                                                if (isLockedByDriver) {
+                                                    return (
+                                                        <button
+                                                            onClick={() => handleSelectTransferForReceiving(item.id)}
+                                                            className="px-4 py-2.5 bg-amber-500/10 dark:bg-amber-500/20 border border-amber-500/30 text-amber-600 dark:text-amber-400 hover:bg-amber-500/20 font-bold rounded-xl text-xs flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
+                                                            title="Driver must arrive and mark delivery complete before POS can start receiving"
+                                                        >
+                                                            <Clock size={13} />
+                                                            Awaiting Driver Delivery
+                                                        </button>
+                                                    );
+                                                }
+
+                                                return (
+                                                    <button
+                                                        onClick={() => handleSelectTransferForReceiving(item.id)}
+                                                        className="px-4 py-2.5 bg-[#224429] dark:bg-[#2C5E3B] hover:bg-[#1B3520] dark:hover:bg-[#3a7a4d] text-white font-bold rounded-xl text-xs flex items-center gap-1.5 transition-all active:scale-95 shadow-sm"
+                                                    >
+                                                        {t('posCommand.startReceiving')}
+                                                        <ChevronRight size={14} />
+                                                    </button>
+                                                );
+                                            })()}
                                         </div>
                                     </div>
 

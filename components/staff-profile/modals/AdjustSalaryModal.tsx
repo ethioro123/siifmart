@@ -2,6 +2,7 @@ import React from 'react';
 import { DollarSign } from 'lucide-react';
 import Modal from '../../Modal';
 import { CURRENCY_SYMBOL } from '../../../constants';
+import { useData } from '../../../contexts/DataContext';
 
 interface AdjustSalaryModalProps {
     isOpen: boolean;
@@ -18,10 +19,13 @@ export default function AdjustSalaryModal({
     setSalaryInput,
     handleConfirmSalary
 }: AdjustSalaryModalProps) {
+    const { settings, activeSite } = useData();
+    const currencySymbol = (activeSite as any)?.currency || settings?.currency || CURRENCY_SYMBOL;
+
     return (
         <Modal isOpen={isOpen} onClose={onClose} title="Adjust Compensation" size="sm">
             <div className="p-6">
-                <label className="block text-xs text-gray-500 font-black uppercase tracking-widest mb-3">Base Monthly Salary ({CURRENCY_SYMBOL})</label>
+                <label className="block text-xs text-gray-500 font-black uppercase tracking-widest mb-3">Base Monthly Salary ({currencySymbol})</label>
                 <div className="relative mb-8">
                     <DollarSign size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-cyber-primary" />
                     <input

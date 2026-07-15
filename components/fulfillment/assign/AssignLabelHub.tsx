@@ -270,7 +270,7 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
                                 <div className="relative">
                                     <input
                                         title="Product SKU"
-                                        className="woody-input w-full rounded-2xl p-4 pl-12 text-sm focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2]"
+                                        className="woody-input w-full rounded-2xl p-4 !pl-12 text-sm focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2]"
                                         placeholder="Search Product Name or Scan SKU..."
                                         value={searchSku}
                                         onChange={(e) => setSearchSku(e.target.value)}

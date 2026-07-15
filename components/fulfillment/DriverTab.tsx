@@ -130,17 +130,21 @@ export const DriverTab: React.FC<DriverTabProps> = ({
                                     canApprove: true
                                 });
                             } else if (templateProduct) {
-                                await addProduct({
-                                    name: item.name || templateProduct.name || 'Product',
-                                    sku: item.sku || templateProduct.sku,
-                                    price: templateProduct.price || 0,
-                                    costPrice: (templateProduct as any)?.costPrice || 0,
-                                    stock: finalQty,
-                                    unit: templateProduct.unit || 'pcs',
-                                    siteId: destSiteId,
-                                    category: templateProduct.category || 'Uncategorized',
-                                    productId: templateProduct.productId || templateProduct.id
-                                } as any);
+                                try {
+                                    await addProduct({
+                                        name: item.name || templateProduct.name || 'Product',
+                                        sku: item.sku || templateProduct.sku,
+                                        price: templateProduct.price || 0,
+                                        costPrice: (templateProduct as any)?.costPrice || 0,
+                                        stock: finalQty,
+                                        unit: templateProduct.unit || 'pcs',
+                                        siteId: destSiteId,
+                                        category: templateProduct.category || 'Uncategorized',
+                                        productId: templateProduct.productId || templateProduct.id
+                                    } as any);
+                                } catch (addErr) {
+                                    logger.warn('DriverTab', `Product auto-creation skipped: ${(addErr as any)?.message || addErr}`);
+                                }
                             }
                         }
                     }
@@ -156,29 +160,24 @@ export const DriverTab: React.FC<DriverTabProps> = ({
     };
 
     const handleReportIssue = async (data: { type: string; description: string; priority: 'High' | 'Critical'; jobId?: string }) => {
-        const canSeeGlobalQueue = [
-            'super_admin', 'admin', 'regional_manager',
-            'operations_manager', 'warehouse_manager', 'dispatcher'
-        ].includes((user?.role || '').toLowerCase());
+        const managerRoles = ['warehouse_manager', 'operations_manager', 'regional_manager', 'admin', 'super_admin'];
+        const siteManager = employees.find(e =>
+            (e.siteId === activeSite?.id || e.site_id === activeSite?.id) &&
+            managerRoles.includes((e.role || '').toLowerCase())
+        ) || employees.find(e => managerRoles.includes((e.role || '').toLowerCase()));
 
-        const currentEmployee = employees.find(e =>
-            (user?.email && e.email === user.email) ||
-            (user?.name && e.name?.toLowerCase() === user.name.toLowerCase()) ||
-            ((user as any)?.employeeId && e.id === (user as any).employeeId) ||
-            e.id === user?.id
-        );
-        const employeeId = currentEmployee?.id || user?.id;
+        const targetAssignee = siteManager?.id || user?.id;
 
         await tasksService.create({
             title: `INCIDENT: ${data.type}`,
-            description: `Driver Report: ${data.description}${data.jobId ? ` (Job: ${data.jobId})` : ''}`,
-            assignedTo: employeeId,
+            description: `Driver Report (${user?.name || 'Driver'}): ${data.description}${data.jobId ? ` (Job: ${data.jobId})` : ''}`,
+            assignedTo: targetAssignee,
             status: 'Pending',
             priority: data.priority,
             dueDate: new Date().toISOString(),
         } as any);
 
-        addNotification('success', 'Incident reported to management.');
+        addNotification('success', 'Incident reported to Warehouse Manager.');
     };
 
     const handleViewDocs = () => {

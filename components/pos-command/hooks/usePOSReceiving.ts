@@ -58,20 +58,17 @@ export const usePOSReceiving = ({
         const job = jobs.find(j => j.id === transferId);
 
         if (!transfer && job) {
-            transfer = {
-                id: job.id,
-                sourceSiteId: (job as any).sourceSiteId || (job as any).source_site_id,
-                destSiteId: job.destSiteId,
-                status: job.status,
-                transferStatus: job.transferStatus,
-                items: job.lineItems || (job as any).line_items || [],
-                orderRef: job.orderRef,
-                createdAt: job.createdAt,
-                updatedAt: job.updatedAt
-            } as any;
+            transfer = { id: job.id, sourceSiteId: (job as any).sourceSiteId || (job as any).source_site_id, destSiteId: job.destSiteId, status: job.status, transferStatus: job.transferStatus, items: job.lineItems || (job as any).line_items || [], orderRef: job.orderRef, createdAt: job.createdAt, updatedAt: job.updatedAt } as any;
         }
-
         if (!transfer) return;
+
+        // Internal driver check: POS cannot receive until internal driver marks delivery as completed
+        const isExt = ((job as any)?.deliveryMethod || (transfer as any)?.deliveryMethod || 'Internal') === 'External';
+        const isDone = ['delivered', 'completed', 'received'].includes(String((job as any)?.transferStatus || (transfer as any)?.transferStatus || (job as any)?.status || (transfer as any)?.status || '').toLowerCase());
+        if (!isExt && !isDone) {
+            addNotification('alert', 'Internal driver must mark delivery complete before POS receiving can begin.');
+            return;
+        }
 
         setSelectedTransferForReceiving(transferId);
         setIsReceivingModalOpen(true);
@@ -325,7 +322,12 @@ export const usePOSReceiving = ({
 
                         if (destProduct) {
                             const newStock = (destProduct.stock || 0) + item.receivedQty;
-                            await productsService.update(destProduct.id, { stock: newStock });
+                            await productsService.update(destProduct.id, {
+                                stock: newStock,
+                                pos_received_by: receiverName,
+                                pos_received_at: timestampStr,
+                                updated_by: receiverName
+                            } as any);
                         } else {
                             const templateProduct = itemSku
                                 ? allProducts.find(p => p.sku?.trim()?.toUpperCase() === itemSku)
@@ -343,7 +345,10 @@ export const usePOSReceiving = ({
                                     category: templateProduct?.category || t('posCommand.uncategorized'),
                                     minStockLevel: 5,
                                     image: templateProduct?.image || '',
-                                    productId: templateProduct?.productId || templateProduct?.id
+                                    productId: templateProduct?.productId || templateProduct?.id,
+                                    createdBy: receiverName,
+                                    posReceivedBy: receiverName,
+                                    posReceivedAt: timestampStr
                                 } as any);
                             } catch (err) {
                                 logger.error('usePOSReceiving', 'Failed to auto-create product:', err);

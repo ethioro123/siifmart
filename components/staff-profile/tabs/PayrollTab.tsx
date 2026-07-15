@@ -1,6 +1,7 @@
 import React from 'react';
 import { DollarSign, Download } from 'lucide-react';
 import { CURRENCY_SYMBOL } from '../../../constants';
+import { useData } from '../../../contexts/DataContext';
 import { Employee } from '../../../types';
 
 interface PayrollTabProps {
@@ -16,6 +17,9 @@ export default function PayrollTab({
     handleEditSalary,
     handleDownloadPayslip
 }: PayrollTabProps) {
+    const { settings, activeSite } = useData();
+    const currencySymbol = (employee as any).salaryCurrency || (activeSite as any)?.currency || settings?.currency || CURRENCY_SYMBOL;
+
     return (
         <div className="space-y-8 animate-in fade-in">
             {/* Summary Card */}
@@ -25,7 +29,7 @@ export default function PayrollTab({
                     <div className="text-center md:text-left">
                         <p className="text-xs text-gray-400 uppercase font-black tracking-[0.2em] mb-3">Base Monthly Salary</p>
                         <p className="text-5xl font-black text-white font-mono tracking-tighter">
-                            {CURRENCY_SYMBOL} {employee.salary?.toLocaleString() || '0'}
+                            {currencySymbol} {employee.salary?.toLocaleString() || '0'}
                         </p>
                     </div>
                     {canManageEmployees && (

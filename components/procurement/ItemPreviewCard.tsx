@@ -1,5 +1,6 @@
 import React from 'react';
 import { CURRENCY_SYMBOL } from '../../constants';
+import { formatPriceValue } from '../../utils/formatting';
 import { Info } from 'lucide-react';
 import { formatPackBadge } from './utils';
 
@@ -65,7 +66,7 @@ export const ItemPreviewCard: React.FC<ItemPreviewCardProps> = ({
                 </div>
                 {(price > 0) && (
                     <div className="text-right whitespace-nowrap">
-                        <span className="text-xs font-black text-emerald-600 dark:text-emerald-400">{CURRENCY_SYMBOL}{price.toLocaleString()}</span>
+                        <span className="text-xs font-black text-emerald-600 dark:text-emerald-400">{CURRENCY_SYMBOL} {formatPriceValue(price)}</span>
                     </div>
                 )}
             </div>

@@ -382,35 +382,45 @@ export const OutboundJobModal: React.FC<OutboundJobModalProps> = ({
 
                         {/* STEP 2: DELIVERED — Driver confirms delivery at destination */}
                         {job.type === 'DISPATCH' && (job.transferStatus === 'In-Transit' || job.transferStatus === 'Shipped') && (
-                            <>
-                                <button
-                                    onClick={handleNavigate}
-                                    className="h-14 px-6 md:px-8 border border-white/10 bg-white/5 hover:bg-white/10 text-white rounded-2xl flex items-center gap-2 font-black text-[10px] md:text-sm uppercase tracking-widest transition-all"
-                                >
-                                    <Navigation size={18} />
-                                    NAV
-                                </button>
-                                <button
-                                    onClick={async () => {
-                                        setIsSubmitting(true);
-                                        try {
-                                            await onUpdateJob(job.id, {
-                                                status: 'Completed' as any,
-                                                transferStatus: 'Delivered',
-                                                deliveredAt: new Date().toISOString(),
-                                                receivedBy: user?.name || 'Driver'
-                                            } as any);
-                                        } finally {
-                                            setIsSubmitting(false);
-                                        }
-                                    }}
-                                    disabled={isSubmitting}
-                                    className="h-14 flex-1 bg-[#224429] dark:bg-[#EAE5D9] hover:bg-[#1B3520] dark:hover:bg-[#DFD9CA] text-[#FAF8F5] dark:text-[#1E3B24] rounded-2xl font-black text-sm uppercase tracking-[0.2em] shadow-md transition-all flex items-center justify-center gap-3 disabled:opacity-50"
-                                >
-                                    <CheckCircle size={20} />
-                                    DELIVERED
-                                </button>
-                            </>
+                            (() => {
+                                const isAssignedDriver = !job.assignedTo || job.assignedTo === user?.id || (job as any).assigned_to === user?.id;
+                                const isManagerRole = ['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager'].includes((user?.role || '').toLowerCase());
+                                const canCompleteJob = isAssignedDriver || isManagerRole;
+
+                                return (
+                                    <>
+                                        <button
+                                            onClick={handleNavigate}
+                                            className="h-14 px-6 md:px-8 border border-white/10 bg-white/5 hover:bg-white/10 text-white rounded-2xl flex items-center gap-2 font-black text-[10px] md:text-sm uppercase tracking-widest transition-all"
+                                        >
+                                            <Navigation size={18} />
+                                            NAV
+                                        </button>
+                                        <button
+                                            onClick={async () => {
+                                                if (!canCompleteJob) return;
+                                                setIsSubmitting(true);
+                                                try {
+                                                    await onUpdateJob(job.id, {
+                                                        status: 'In-Progress' as any,
+                                                        transferStatus: 'Delivered',
+                                                        deliveredAt: new Date().toISOString(),
+                                                        receivedBy: user?.name || 'Driver'
+                                                    } as any);
+                                                } finally {
+                                                    setIsSubmitting(false);
+                                                }
+                                            }}
+                                            disabled={isSubmitting || !canCompleteJob}
+                                            className={`h-14 flex-1 rounded-2xl font-black text-sm uppercase tracking-[0.2em] shadow-md transition-all flex items-center justify-center gap-3 disabled:opacity-50 ${canCompleteJob ? 'bg-[#224429] dark:bg-[#EAE5D9] hover:bg-[#1B3520] dark:hover:bg-[#DFD9CA] text-[#FAF8F5] dark:text-[#1E3B24]' : 'bg-stone-800 text-stone-500 cursor-not-allowed border border-stone-700'}`}
+                                            title={canCompleteJob ? "Complete Delivery" : "Only the assigned driver or manager can complete this delivery"}
+                                        >
+                                            <CheckCircle size={20} />
+                                            {canCompleteJob ? 'DELIVERED' : 'ASSIGNED TO DRIVER'}
+                                        </button>
+                                    </>
+                                );
+                            })()
                         )}
 
                         {/* DONE — Completed status badge */}

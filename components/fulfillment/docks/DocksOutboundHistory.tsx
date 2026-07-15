@@ -29,21 +29,70 @@ export const DocksOutboundHistory: React.FC<DocksOutboundHistoryProps> = ({
 
     // Filter for Completed/Shipped Dispatch Jobs
     const filteredHistory = useMemo(() => {
-        return jobs.filter(job => {
+        const historyJobs = jobs.filter(job => {
             if (job.type !== 'DISPATCH') return false;
             // Consider "History" as Shipped, Completed, or Cancelled
-            const isHistory = job.status === 'Completed' || job.status === 'Cancelled' || job.transferStatus === 'Shipped';
-            if (!isHistory) return false;
+            return job.status === 'Completed' || job.status === 'Cancelled' || job.transferStatus === 'Shipped';
+        });
 
+        const mapped = historyJobs.map(job => {
+            const userId = job.completedBy || job.assignedTo;
+            const isUUID = (str: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
+            let userObj = employees?.find(e => 
+                e.id === userId || 
+                (e.name && userId && e.name.toLowerCase() === userId.toLowerCase()) || 
+                (e.email && userId && e.email.toLowerCase() === userId.toLowerCase()) ||
+                (e.code && userId && e.code.toLowerCase() === userId.toLowerCase())
+            );
+            const displayId = userObj?.code || (userId ? (isUUID(userId) ? userId.slice(0, 8).toUpperCase() : userId) : '');
+            const resolvedUser = {
+                name: userObj?.name || (userId ? userId : 'System'),
+                displayId: displayId || ''
+            };
+
+            return {
+                ...job,
+                resolvedUser
+            };
+        });
+
+        if (!search) {
+            return mapped.sort((a, b) => new Date(b.updatedAt || b.createdAt || new Date()).getTime() - new Date(a.updatedAt || a.createdAt || new Date()).getTime());
+        }
+
+        const q = search.toLowerCase();
+        return mapped.filter(job => {
             const destSite = sites.find(s => s.id === job.destSiteId)?.name || '';
-            const matchesSearch = !search ||
-                job.id.toLowerCase().includes(search.toLowerCase()) ||
-                destSite.toLowerCase().includes(search.toLowerCase()) ||
-                (job.orderRef && job.orderRef.toLowerCase().includes(search.toLowerCase()));
+            const cleanJobId = formatJobId(job).toLowerCase();
+            const orderRefStr = (job.orderRef || '').toLowerCase();
+            const workerName = (job.resolvedUser?.name || '').toLowerCase();
+            const workerId = (job.resolvedUser?.displayId || '').toLowerCase();
+            const noteStr = (job.notes || '').toLowerCase();
+            const statusStr = (job.status || '').toLowerCase();
+            const jobNum = (job.jobNumber || (job as any).job_number || '').toLowerCase();
 
-            return matchesSearch;
+            // Search product names and SKUs
+            const items = job.lineItems || (job as any).line_items || [];
+            const matchesItems = items.some((item: any) => 
+                (item.name || '').toLowerCase().includes(q) ||
+                (item.productName || '').toLowerCase().includes(q) ||
+                (item.sku || '').toLowerCase().includes(q)
+            );
+
+            return (
+                cleanJobId.includes(q) ||
+                job.id.toLowerCase().includes(q) ||
+                destSite.toLowerCase().includes(q) ||
+                orderRefStr.includes(q) ||
+                workerName.includes(q) ||
+                workerId.includes(q) ||
+                noteStr.includes(q) ||
+                statusStr.includes(q) ||
+                jobNum.includes(q) ||
+                matchesItems
+            );
         }).sort((a, b) => new Date(b.updatedAt || b.createdAt || new Date()).getTime() - new Date(a.updatedAt || a.createdAt || new Date()).getTime());
-    }, [jobs, sites, search]);
+    }, [jobs, sites, search, employees, formatJobId]);
 
     const totalPages = Math.ceil(filteredHistory.length / HISTORY_PER_PAGE);
     const paginatedHistory = useMemo(() => {
@@ -73,7 +122,7 @@ export const DocksOutboundHistory: React.FC<DocksOutboundHistoryProps> = ({
                             placeholder="Search Shipment, Site..."
                             aria-label="Search Shipment or Site"
                             title="Search Shipment or Site"
-                            className="woody-input w-64 pl-10 pr-4 text-xs"
+                            className="woody-input w-64 !pl-11 pr-4 text-xs"
                         />
                     </div>
                 </div>

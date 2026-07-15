@@ -25,7 +25,7 @@ const RESET = '\x1b[0m';
 let passed = 0;
 let failed = 0;
 
-async function testAttack(name: string, shouldSucceed: boolean, fn: () => Promise<{ data: any; error: any }>) {
+async function testAttack(name: string, shouldSucceed: boolean, fn: () => any) {
     const { data, error } = await fn();
     const gotData = !error && data && (!Array.isArray(data) || data.length > 0);
 

@@ -98,6 +98,7 @@ export const TransferActiveList: React.FC<TransferActiveListProps> = ({
         })();
 
         const statusColors: Record<string, string> = {
+            'Draft': 'bg-gray-550/20 text-gray-400 dark:text-gray-500',
             'Requested': 'bg-yellow-500/20 text-yellow-400',
             'Approved': 'bg-[#2C5E3B]/20 text-[#A9CBA2]',
             'Picking': 'bg-orange-500/20 text-orange-400',
@@ -111,6 +112,7 @@ export const TransferActiveList: React.FC<TransferActiveListProps> = ({
 
         const getLocalizedStatus = (status: string) => {
             switch (status) {
+                case 'Draft': return 'Draft';
                 case 'Requested': return t('warehouse.requested');
                 case 'Approved': return t('warehouse.putaway.confirmLocation');
                 case 'Picking': return t('warehouse.picking');

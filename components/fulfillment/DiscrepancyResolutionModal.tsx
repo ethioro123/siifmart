@@ -404,7 +404,7 @@ export function DiscrepancyResolutionModal({
                                             value={claimAmount}
                                             onChange={e => setClaimAmount(e.target.value)}
                                             placeholder="0.00"
-                                            className="woody-input pl-8 pr-4"
+                                            className="woody-input !pl-8 pr-4"
                                         />
                                     </div>
                                 </div>

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Trash2, Plus, Box, Check, ScanBarcode, ChevronRight } from 'lucide-react';
+import { X, Trash2, Plus, Box, Check, ScanBarcode, ChevronRight, Clock, AlertTriangle, Loader2 } from 'lucide-react';
 import { Product, PurchaseOrder, WMSJob } from '../../../types';
 import Badge from '../../shared/Badge';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -55,6 +55,7 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
 }) => {
     const { user } = useStore();
     const [barcodeInput, setBarcodeInput] = useState<Record<string, string>>({});
+    const [localSubmitting, setLocalSubmitting] = useState(false);
 
     const handleAddBarcode = (variantId: string) => {
         const code = barcodeInput[variantId];
@@ -180,8 +181,10 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
                     <div className={`px-4 md:px-6 py-2 md:py-3 rounded-xl border backdrop-blur-md flex items-center gap-2 md:gap-3 shadow-lg transition-all ${remaining === 0 ? 'bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 border-[#2C5E3B]/30 dark:border-[#A9CBA2]/30 text-[#2C5E3B] dark:text-[#A9CBA2]' : 'bg-[#FAF8F5]/50 dark:bg-[#1C2620]/30 border-[#E2DCCE]/60 dark:border-[#A9CBA2]/[0.06] text-stone-700 dark:text-[#EAE5D9]'}`}>
                         {remaining === 0 ? (
                             <Check className="text-[#2C5E3B] dark:text-[#A9CBA2]" size={16} />
+                        ) : remaining > 0 ? (
+                            <Clock className="text-amber-600 dark:text-amber-400 animate-pulse" size={16} />
                         ) : (
-                            <div className="w-4 h-4 md:w-5 md:h-5 rounded-full border-2 border-slate-200 dark:border-gray-500 border-t-slate-900 dark:border-t-white animate-spin" />
+                            <AlertTriangle className="text-red-500 dark:text-red-400" size={16} />
                         )}
                         <p className={`text-sm md:text-lg font-black tabular-nums font-mono ${remaining === 0 ? 'text-[#2C5E3B] dark:text-[#A9CBA2]' : 'text-slate-700 dark:text-white'}`}>
                             {remaining === 0 ? t('warehouse.matched') : remaining > 0 ? `${remaining} ${t('warehouse.left')}` : `${Math.abs(remaining)} ${t('warehouse.over')}`}
@@ -286,7 +289,7 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
                                                             }
                                                         }}
                                                         placeholder={t('warehouse.scanBarcodePlaceholder')}
-                                                        className="woody-input pl-10 font-mono py-2"
+                                                        className="woody-input !pl-10 font-mono py-2"
                                                         aria-label="New Barcode Input"
                                                     />
                                                     <ScanBarcode className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-gray-600" size={14} />
@@ -380,9 +383,11 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
                         {t('warehouse.cancel')}
                     </button>
                     <button
-                        disabled={isSubmitting || totalScanned < 1}
+                        disabled={isSubmitting || localSubmitting || totalScanned < 1}
                         onClick={async () => {
-                            if (isSubmitting || totalScanned < 1) return;
+                            if (isSubmitting || localSubmitting || totalScanned < 1) return;
+
+                            setLocalSubmitting(true);
 
                             const processedVariants = splitVariants.filter(v => (v.quantity || 0) > 0).map(v => {
                                 let updatedVariant = { ...v };
@@ -409,12 +414,14 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
 
                             if (processedVariants.length === 0) {
                                 alert("Please enter a quantity of at least 1 unit to receive.");
+                                setLocalSubmitting(false);
                                 return;
                             }
 
                             const maxToReceive = splitReceivingItem.quantity - previouslyReceived;
                             if (totalScanned > maxToReceive) {
                                 alert(`Cannot receive ${totalScanned} units. Only ${maxToReceive} units are remaining for this PO item.`);
+                                setLocalSubmitting(false);
                                 return;
                             }
 
@@ -435,7 +442,7 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
                                 setReprintItem({
                                     sku: reprintSku,
                                     name: reprintName,
-                                    qty: processedVariants.reduce((sum: number, v: any) => sum + v.quantity, 0),
+                                    qty: 1,
                                     price: splitReceivingItem.retailPrice,
                                     category: splitReceivingItem.category
                                 });
@@ -449,15 +456,19 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
                                 alert(error.message || 'Failed to receive split: an unexpected error occurred.');
                             } finally {
                                 setIsSubmitting(false);
+                                setLocalSubmitting(false);
                             }
                         }}
-                        className={`flex-1 py-3 md:py-4 font-black uppercase tracking-widest text-[10px] rounded-xl md:rounded-2xl shadow-md active:scale-[0.98] transition-all border flex items-center justify-center gap-2 md:gap-3 ${isSubmitting || totalScanned < 1
+                        className={`flex-1 py-3 md:py-4 font-black uppercase tracking-widest text-[10px] rounded-xl md:rounded-2xl shadow-md active:scale-[0.98] transition-all border flex items-center justify-center gap-2 md:gap-3 ${isSubmitting || localSubmitting || totalScanned < 1
                             ? 'bg-slate-100/50 dark:bg-black/25 text-stone-400 border-[#E2DCCE]/40 dark:border-emerald-950/10 cursor-not-allowed opacity-50'
                             : 'woody-btn-primary'
                             }`}
                     >
-                        {isSubmitting ? (
-                            <>{t('warehouse.processingStatus')}...</>
+                        {isSubmitting || localSubmitting ? (
+                            <>
+                                <Loader2 size={16} className="animate-spin text-stone-450 dark:text-stone-400" />
+                                <span>{t('warehouse.processingStatus')}...</span>
+                            </>
                         ) : (
                             <>
                                 <Check size={20} />

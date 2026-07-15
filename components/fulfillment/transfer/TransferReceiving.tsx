@@ -67,33 +67,53 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
 
             // Also complete the transfers table record if exists
             try {
-                const { data: transferRecord } = await supabase
-                    .from('transfers')
-                    .select('id')
-                    .or(`id.eq.${activeTransferJob.id},id.eq.${activeTransferJob.orderRef}`);
+                const isUUID = (val?: string) => val ? /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(val.trim()) : false;
+                const idsToQuery = [];
+                if (activeTransferJob.id && isUUID(activeTransferJob.id)) {
+                    idsToQuery.push(`id.eq.${activeTransferJob.id}`);
+                }
+                if (activeTransferJob.orderRef && isUUID(activeTransferJob.orderRef)) {
+                    idsToQuery.push(`id.eq.${activeTransferJob.orderRef}`);
+                }
 
-                if (transferRecord && transferRecord.length > 0) {
-                    const { transfersService } = await import('../../../services/supabase.service');
-                    for (const tr of transferRecord) {
-                        await transfersService.update(tr.id, {
-                            status: 'Completed',
-                            receivedAt: new Date().toISOString()
-                        });
+                if (idsToQuery.length > 0) {
+                    const { data: transferRecord } = await supabase
+                        .from('transfers')
+                        .select('id')
+                        .or(idsToQuery.join(','));
+
+                    if (transferRecord && transferRecord.length > 0) {
+                        const { transfersService } = await import('../../../services/supabase.service');
+                        for (const tr of transferRecord) {
+                            await transfersService.update(tr.id, {
+                                status: 'Completed',
+                                receivedAt: new Date().toISOString()
+                            });
+                        }
                     }
                 }
             } catch (err) {
                 logger.warn('TransferReceiving', '⚠️ Failed to complete transfers table record:');
             }
 
-            // Process stock adjustments
+            // Process stock adjustments at destination site
+            const destSiteId = activeTransferJob.destSiteId || activeTransferJob.dest_site_id;
             for (const item of transferReceiveItems) {
                 if ((item.receivedQty || 0) > 0) {
-                    const product = allProducts.find(p => p.id === item.productId);
+                    // Find the source product first to get the SKU
+                    const sourceProduct = allProducts.find(p => p.id === item.productId);
+                    // Try to find the product record at the destination site by SKU
+                    const destProduct = sourceProduct ? allProducts.find(p => 
+                        p.sku === sourceProduct.sku && 
+                        (p.siteId === destSiteId || (p as any).site_id === destSiteId)
+                    ) : undefined;
+                    const product = destProduct || sourceProduct;
+                    
                     await adjustStockMutation.mutateAsync({
-                        productId: item.productId,
-                        productName: product?.name || 'Unknown',
+                        productId: product?.id || item.productId,
+                        productName: product?.name || item.productName || 'Unknown',
                         productSku: product?.sku || 'N/A',
-                        siteId: activeSite?.id || '',
+                        siteId: destSiteId || activeSite?.id || '',
                         quantity: item.receivedQty,
                         type: 'IN',
                         reason: `Transfer Receipt ${activeTransferJob.orderRef}`,

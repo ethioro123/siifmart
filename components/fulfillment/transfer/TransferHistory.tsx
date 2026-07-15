@@ -73,11 +73,38 @@ export const TransferHistory: React.FC<TransferHistoryProps> = ({
         return mergedTransfers.filter((t: any) => {
             const destSite = sites.find(s => s.id === t.destSiteId);
             const sourceSite = sites.find(s => s.id === t.sourceSiteId);
-            return !search ||
-                formatJobId(t).toLowerCase().includes(search.toLowerCase()) ||
-                (t.jobNumber && t.jobNumber.toLowerCase().includes(search.toLowerCase())) ||
-                (destSite?.name || '').toLowerCase().includes(search.toLowerCase()) ||
-                (sourceSite?.name || '').toLowerCase().includes(search.toLowerCase());
+            if (!search) return true;
+
+            const q = search.toLowerCase();
+            const cleanJobId = formatJobId(t).toLowerCase();
+            const destSiteName = (destSite?.name || '').toLowerCase();
+            const sourceSiteName = (sourceSite?.name || '').toLowerCase();
+            const jobNum = (t.jobNumber || t.job_number || '').toLowerCase();
+            const noteStr = (t.notes || '').toLowerCase();
+            const statusStr = (t.status || '').toLowerCase();
+            const transferStatusStr = (t.transferStatus || '').toLowerCase();
+
+            // Search product names and SKUs
+            let itemsArr = t.lineItems || t.line_items || [];
+            if (typeof itemsArr === 'string') { try { itemsArr = JSON.parse(itemsArr); } catch { itemsArr = []; } }
+            const productsList = Array.isArray(itemsArr) ? itemsArr : [];
+            const matchesItems = productsList.some((item: any) => 
+                (item.name || '').toLowerCase().includes(q) ||
+                (item.productName || '').toLowerCase().includes(q) ||
+                (item.sku || '').toLowerCase().includes(q)
+            );
+
+            return (
+                cleanJobId.includes(q) ||
+                t.id.toLowerCase().includes(q) ||
+                destSiteName.includes(q) ||
+                sourceSiteName.includes(q) ||
+                jobNum.includes(q) ||
+                noteStr.includes(q) ||
+                statusStr.includes(q) ||
+                transferStatusStr.includes(q) ||
+                matchesItems
+            );
         });
     }, [transfers, jobs, search, sites]);
 

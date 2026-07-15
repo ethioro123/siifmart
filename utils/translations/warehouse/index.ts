@@ -14,6 +14,7 @@ import { count } from './count';
 
 export const warehouse: TranslationBlock = {
     ...core,
+    ...driverHub,
     driverHub,
     docks,
     ...receiving,

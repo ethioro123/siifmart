@@ -61,7 +61,7 @@ export const PickHeader: React.FC<PickHeaderProps> = ({
                             title={t('warehouse.searchByIdOrOrder')}
                             value={pickSearch}
                             onChange={(e) => setPickSearch(e.target.value)}
-                            className="woody-input w-full pl-12 pr-4 py-3 text-xs"
+                            className="woody-input w-full !pl-12 pr-4 py-3 text-xs"
                         />
                     </div>
 

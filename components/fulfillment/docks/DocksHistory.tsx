@@ -21,10 +21,23 @@ export const DocksHistory: React.FC<DocksHistoryProps> = ({ orders, t }) => {
             const isUnloaded = (po.status === 'Approved' || po.status === 'Partially Received' || po.status === 'Received') && po.approvedAt;
             if (!isUnloaded) return false;
 
-            const matchesSearch = !search ||
-                po.poNumber?.toLowerCase().includes(search.toLowerCase()) ||
-                po.supplierName?.toLowerCase().includes(search.toLowerCase()) ||
-                (po.approvedBy && po.approvedBy.toLowerCase().includes(search.toLowerCase()));
+            if (!search) return true;
+            const q = search.toLowerCase();
+
+            // Search product names and SKUs inside order items
+            const items = po.lineItems || po.line_items || [];
+            const matchesItems = items.some((item: any) => 
+                (item.name || item.productName || '').toLowerCase().includes(q) ||
+                (item.sku || '').toLowerCase().includes(q)
+            );
+
+            const matchesSearch =
+                po.poNumber?.toLowerCase().includes(q) ||
+                po.id?.toLowerCase().includes(q) ||
+                po.supplierName?.toLowerCase().includes(q) ||
+                po.status?.toLowerCase().includes(q) ||
+                (po.approvedBy && po.approvedBy.toLowerCase().includes(q)) ||
+                matchesItems;
 
             return matchesSearch;
         }).sort((a: any, b: any) => new Date(b.approvedAt).getTime() - new Date(a.approvedAt).getTime());
@@ -58,7 +71,7 @@ export const DocksHistory: React.FC<DocksHistoryProps> = ({ orders, t }) => {
                             placeholder="Search PO, Supplier..."
                             aria-label="Search PO or Supplier"
                             title="Search PO or Supplier"
-                            className="woody-input w-64 pl-10 pr-4 text-xs"
+                            className="woody-input w-64 !pl-11 pr-4 text-xs"
                         />
                     </div>
                 </div>

@@ -196,7 +196,7 @@ export const ReplenishHeader: React.FC<ReplenishHeaderProps> = ({
                     title="Scan or Search Inventory"
                     value={replenishSearch}
                     onChange={(e) => setReplenishSearch(e.target.value)}
-                    className="woody-input pl-11 text-[11px]"
+                    className="woody-input !pl-11 text-[11px]"
                 />
             </div>
         </div>

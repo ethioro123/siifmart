@@ -162,7 +162,7 @@ export const AssignHeader: React.FC<AssignHeaderProps> = ({
                                 placeholder="Payload ID Intelligence..."
                                 value={dispatchSearch}
                                 onChange={(e) => setDispatchSearch(e.target.value)}
-                                className="woody-input pl-9 pr-4 text-[10px] font-bold tracking-tight py-2"
+                                className="woody-input !pl-9 pr-4 text-[10px] font-bold tracking-tight py-2"
                             />
                         </div>
                     </div>

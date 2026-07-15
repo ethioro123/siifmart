@@ -2,16 +2,11 @@
 -- Run this in Supabase SQL Editor:
 -- https://supabase.com/dashboard/project/zdgzpxvorwinugjufkvb/sql/new
 
--- Creates an atomic stock decrement function that is safe for concurrent
--- offline terminals syncing at the same time.
--- Uses GREATEST(0, stock - qty) to never go negative.
--- Also records a stock movement for audit purposes.
-
 CREATE OR REPLACE FUNCTION public.pos_decrement_stock(
     p_product_id UUID,
     p_quantity    NUMERIC,
-    p_site_id     TEXT,
-    p_product_name TEXT,
+    p_site_id     TEXT DEFAULT NULL,
+    p_product_name TEXT DEFAULT '',
     p_reason      TEXT DEFAULT 'POS Sale (Offline Sync)',
     p_performed_by TEXT DEFAULT 'System',
     p_sale_date   TIMESTAMPTZ DEFAULT NOW()
@@ -23,8 +18,16 @@ AS $$
 DECLARE
     v_new_stock NUMERIC;
     v_name      TEXT;
+    v_site_uuid UUID;
 BEGIN
-    -- Atomic read-modify-write in a single statement — no race condition
+    -- Safely parse site_id UUID
+    IF p_site_id IS NOT NULL AND p_site_id ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$' THEN
+        v_site_uuid := p_site_id::UUID;
+    ELSE
+        v_site_uuid := NULL;
+    END IF;
+
+    -- Atomic read-modify-write in a single statement
     UPDATE public.products
     SET stock = GREATEST(0, stock - p_quantity)
     WHERE id = p_product_id
@@ -45,7 +48,7 @@ BEGIN
         performed_by,
         reason
     ) VALUES (
-        p_site_id,
+        v_site_uuid,
         p_product_id,
         COALESCE(v_name, p_product_name),
         'OUT',

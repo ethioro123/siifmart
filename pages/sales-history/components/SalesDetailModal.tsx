@@ -4,7 +4,7 @@ import {
 } from 'lucide-react';
 import Modal from '../../../components/Modal';
 import { Protected } from '../../../components/Protected';
-import { formatDateTime } from '../../../utils/formatting';
+import { formatDateTime, formatPriceValue } from '../../../utils/formatting';
 import { CURRENCY_SYMBOL } from '../../../constants';
 import { SaleRecord, Site } from '../../../types';
 
@@ -116,9 +116,9 @@ export const SalesDetailModal: React.FC<SalesDetailModalProps> = ({
                                         <div key={i} className="flex justify-between text-xs">
                                             <div>
                                                 <div className="font-bold">{item.name}</div>
-                                                <div className="text-[9px] opacity-60">{item.quantity} x {CURRENCY_SYMBOL}{item.price.toFixed(2)}</div>
+                                                <div className="text-[9px] opacity-60">{item.quantity} x {CURRENCY_SYMBOL} {formatPriceValue(item.price)}</div>
                                             </div>
-                                            <div className="font-bold">{(item.price * item.quantity).toLocaleString()}</div>
+                                            <div className="font-bold">{formatPriceValue(item.price * item.quantity)}</div>
                                         </div>
                                     ))}
                                 </div>

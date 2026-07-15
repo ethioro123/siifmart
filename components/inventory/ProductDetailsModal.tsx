@@ -2,10 +2,11 @@ import React from 'react';
 import { Package, Tag, Hash, Layers, Box, Info, ScanBarcode, Thermometer, ShieldAlert, Droplets, Weight, Ruler, Lock, Edit2, Check, X } from 'lucide-react';
 import { Product, StockMovement, Employee } from '../../types';
 import Modal from '../Modal';
-import { formatCompactNumber } from '../../utils/formatting';
+import { formatCompactNumber, formatPriceValue } from '../../utils/formatting';
 import { CURRENCY_SYMBOL } from '../../constants';
 import { useData } from '../../contexts/DataContext';
 import { getSellUnit, formatProductSize } from '../../utils/units';
+import { getRoleHierarchy } from '../../utils/roles';
 import { useStore } from '../../contexts/CentralStore';
 import { productsService } from '../../services/products.service';
 import { ProductAttributesPanel } from './components/ProductAttributesPanel';
@@ -75,7 +76,7 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
         }
     };
 
-    const canEditThresholds = user?.role === 'super_admin' || user?.role === 'store_manager';
+    const canEditThresholds = user?.role ? getRoleHierarchy(user.role) >= 80 : false;
 
     const customAttrs = product.customAttributes || (product as any).custom_attributes;
     const unitObj = product.unit ? getSellUnit(product.unit) : null;
@@ -211,7 +212,7 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
                         {/* Price/Stock Quick View */}
                         <div className="text-right flex-shrink-0">
                             <p className="text-lg font-black font-mono text-[#2C5E3B] dark:text-[#A9CBA2]">
-                                {CURRENCY_SYMBOL}{product.price.toLocaleString()}
+                                {CURRENCY_SYMBOL} {formatPriceValue(product.price)}
                             </p>
                             <p className="text-[9px] text-gray-500 font-black uppercase tracking-widest mt-1">Retail Price</p>
                             <p className={`text-lg font-black font-mono mt-2 ${product.stock > 0 ? 'text-green-500' : 'text-red-500'}`}>
@@ -281,7 +282,7 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
                             ) : null
                         ) : (
                             <span className="text-[9px] text-stone-400 dark:text-gray-500 font-bold uppercase tracking-wider flex items-center gap-1 bg-stone-150 dark:bg-white/5 px-2 py-0.5 rounded-full border border-stone-200 dark:border-white/5 select-none">
-                                <Lock size={10} /> Read Only (Manager/CEO Edit)
+                                <Lock size={10} /> Read Only (HQ/Executive Edit)
                             </span>
                         )}
                     </div>

@@ -48,13 +48,7 @@ export const PackHistory: React.FC<PackHistoryProps> = ({
     const [openPrintMenuId, setOpenPrintMenuId] = useState<string | null>(null);
 
     const filteredHistory = useMemo(() => {
-        return historicalJobs.filter((j: WMSJob) =>
-            j.type === 'PACK' && (
-                !search ||
-                j.id.toLowerCase().includes(search.toLowerCase()) ||
-                (j.orderRef && resolveOrderRef && (j.orderRef.toLowerCase().includes(search.toLowerCase()) || resolveOrderRef(j.orderRef).toLowerCase().includes(search.toLowerCase())))
-            )
-        ).map(j => {
+        const mapped = historicalJobs.filter((j: WMSJob) => j.type === 'PACK').map(j => {
             const userId = j.completedBy || j.assignedTo;
             const isUUID = (str: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
             let userObj = employees?.find(e => 
@@ -86,7 +80,52 @@ export const PackHistory: React.FC<PackHistoryProps> = ({
                 resolvedUser
             };
         });
-    }, [historicalJobs, search, resolveOrderRef, employees]);
+
+        if (!search) {
+            return mapped.sort((a, b) => {
+                const dateA = new Date(a.completedAt || a.updatedAt || a.createdAt || 0).getTime();
+                const dateB = new Date(b.completedAt || b.updatedAt || b.createdAt || 0).getTime();
+                return dateB - dateA;
+            });
+        }
+
+        const q = search.toLowerCase();
+        return mapped.filter(j => {
+            const cleanJobId = formatJobId(j).toLowerCase();
+            const orderRefStr = (j.orderRef || '').toLowerCase();
+            const orderRefResolvedStr = resolveOrderRef ? resolveOrderRef(j.orderRef).toLowerCase() : '';
+            const workerName = (j.resolvedUser?.name || '').toLowerCase();
+            const workerId = (j.resolvedUser?.displayId || '').toLowerCase();
+            const noteStr = (j.notes || '').toLowerCase();
+            const statusStr = (j.status || '').toLowerCase();
+            const jobNum = (j.jobNumber || (j as any).job_number || '').toLowerCase();
+
+            // Search product names and SKUs
+            const items = j.lineItems || (j as any).line_items || [];
+            const matchesItems = items.some((item: any) => 
+                (item.name || '').toLowerCase().includes(q) ||
+                (item.productName || '').toLowerCase().includes(q) ||
+                (item.sku || '').toLowerCase().includes(q)
+            );
+
+            return (
+                cleanJobId.includes(q) ||
+                j.id.toLowerCase().includes(q) ||
+                orderRefStr.includes(q) ||
+                orderRefResolvedStr.includes(q) ||
+                workerName.includes(q) ||
+                workerId.includes(q) ||
+                noteStr.includes(q) ||
+                statusStr.includes(q) ||
+                jobNum.includes(q) ||
+                matchesItems
+            );
+        }).sort((a, b) => {
+            const dateA = new Date(a.completedAt || a.updatedAt || a.createdAt || 0).getTime();
+            const dateB = new Date(b.completedAt || b.updatedAt || b.createdAt || 0).getTime();
+            return dateB - dateA;
+        });
+    }, [historicalJobs, search, resolveOrderRef, employees, user]);
 
     const totalPages = Math.ceil(filteredHistory.length / ITEMS_PER_PAGE);
     const paginatedHistory = useMemo(() => {

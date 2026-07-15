@@ -287,12 +287,15 @@ export const useJobMaintenance = (deps: UseJobMaintenanceDeps) => {
 
     const deleteJob = useCallback(async (id: string) => {
         try {
+            // Use 'Cancelled' — the DB has a CHECK constraint (wms_jobs_status_check)
+            // that only allows: Pending, In-Progress, Completed, Cancelled.
+            // 'Deleted' violates this constraint and causes a 400 Bad Request.
             await wmsJobsService.update(id, {
-                status: 'Deleted',
+                status: 'Cancelled',
                 completedAt: new Date().toISOString(),
-                completedBy: user?.id || 'System'
+                completedBy: user?.name || 'System'
             } as any);
-            setJobs(prev => prev.map(j => j.id === id ? { ...j, status: 'Deleted', completedAt: new Date().toISOString(), completedBy: user?.id || 'System' } : j));
+            setJobs(prev => prev.filter(j => j.id !== id));
             addNotification('success', 'Job deleted');
             queryClient.invalidateQueries({ queryKey: ['wms_jobs'] });
         } catch (error) {

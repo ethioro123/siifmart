@@ -286,14 +286,15 @@ export const ScannerInterface: React.FC = () => {
                 const itemIndex = selectedJob.lineItems.indexOf(currentItem);
                 await updateJobItem(selectedJob.id, itemIndex, 'Picked', currentItem.expectedQty); // Assuming full pick
 
-                // 2. Adjust Stock (if PICK)
+                // 2. Adjust Stock (if PICK) — deduct from source site
                 if (selectedJob.type === 'PICK' && adjustStockMutation) {
+                    const sourceSiteId = selectedJob.sourceSiteId || (selectedJob as any).source_site_id || selectedJob.siteId || activeSite?.id;
                     await adjustStockMutation.mutateAsync({
                         productId: currentItem.productId,
                         productName: currentItem.name,
                         productSku: currentItem.sku,
-                        siteId: activeSite?.id,
-                        quantity: -currentItem.expectedQty,
+                        siteId: sourceSiteId,
+                        quantity: currentItem.expectedQty, // positive — type:'OUT' handles the deduction
                         reason: `Picked for Job #${selectedJob.jobNumber}`,
                         type: 'OUT',
                         canApprove: true

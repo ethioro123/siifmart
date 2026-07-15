@@ -72,7 +72,7 @@ export const usePosSync = (onSyncComplete?: (count: number) => void) => {
                                     const { error: rpcErr } = await supabase.rpc('pos_decrement_stock', {
                                         p_product_id: item.id,
                                         p_quantity: item.quantity,
-                                        p_site_id: salePayload.siteId || '',
+                                        p_site_id: salePayload.siteId || salePayload.site_id || null,
                                         p_product_name: item.name || '',
                                         p_reason: `POS Sale (Offline Sync) — Receipt ${salePayload.receiptNumber || salePayload.id}`,
                                         p_performed_by: salePayload.cashierName || 'System',

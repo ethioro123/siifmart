@@ -94,7 +94,7 @@ export const PutawayHeader: React.FC<PutawayHeaderProps> = ({
                             title={t('warehouse.putaway.search')}
                             value={putawaySearch}
                             onChange={(e) => setPutawaySearch(e.target.value)}
-                            className="woody-input w-full pl-10 pr-4 text-sm"
+                            className="woody-input w-full !pl-10 pr-4 text-sm"
                         />
                     </div>
                     
@@ -145,7 +145,7 @@ export const PutawayHeader: React.FC<PutawayHeaderProps> = ({
                         title={t('warehouse.putaway.search')}
                         value={putawaySearch}
                         onChange={(e) => setPutawaySearch(e.target.value)}
-                        className="woody-input w-full py-3.5 pl-12 pr-4 font-mono"
+                        className="woody-input w-full py-3.5 !pl-12 pr-4 font-mono"
                     />
                 </div>
 

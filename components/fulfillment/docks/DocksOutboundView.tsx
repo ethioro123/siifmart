@@ -8,7 +8,7 @@ import { DocksOutboundDepartures } from './components/DocksOutboundDepartures';
 // ────────────────────────────────────────────────────────────────
 //  CONSTANTS — single source of truth for dock bay identifiers
 // ────────────────────────────────────────────────────────────────
-const OUTBOUND_DOCKS = ['D3', 'D4'] as const;
+const OUTBOUND_DOCKS = ['D1', 'D2', 'D3', 'D4', 'D5', 'D6'] as const;
 
 interface DocksOutboundViewProps {
     jobs: WMSJob[];
@@ -86,12 +86,18 @@ export const DocksOutboundView: React.FC<DocksOutboundViewProps> = ({
     const stagingJobs = getStagingJobs(jobs);
     const shippedJobs = getShippedJobs(jobs);
     const { deleteJob } = useFulfillment();
+    const isMgr = ['super_admin', 'admin', 'regional_manager', 'operations_manager', 'warehouse_manager'].includes((user?.role || '').toLowerCase());
+    const isOpStaff = isMgr || (user?.role || '').toLowerCase() === 'dispatcher';
+
+    const checkControlAccess = (actionName = 'Control actions') => {
+        if (!isOpStaff) { addNotification('alert', `${actionName} requires Dispatcher or Warehouse Manager role.`); return false; }
+        return true;
+    };
 
     const handleDelete = async (e: React.MouseEvent, jobId: string) => {
         e.stopPropagation();
-        if (window.confirm('Are you sure you want to permanently delete this job?')) {
-            await deleteJob(jobId);
-        }
+        if (!isMgr) { addNotification('alert', 'Job deletion requires Warehouse Manager role.'); return; }
+        if (window.confirm('Are you sure you want to permanently delete this job?')) await deleteJob(jobId);
     };
 
     return (
@@ -110,7 +116,7 @@ export const DocksOutboundView: React.FC<DocksOutboundViewProps> = ({
                                 {t('warehouse.docks.outboundTitle')}
                             </h3>
 
-                            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-12 relative z-10">
+                            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-6 mb-12 relative z-10">
                                 {OUTBOUND_DOCKS.map(dock => {
                                     // ✅ Single source of truth: derived from the jobs array
                                     const assignedJob = findDockJob(jobs, dock);
@@ -148,6 +154,7 @@ export const DocksOutboundView: React.FC<DocksOutboundViewProps> = ({
                                                             onClick={async (e) => {
                                                                 e.stopPropagation();
                                                                 if (!assignedJob) return;
+                                                                if (!checkControlAccess('Dock release')) return;
                                                                 try {
                                                                     await wmsJobsService.update(assignedJob.id, {
                                                                         location: 'Dispatch Bay',
@@ -209,6 +216,7 @@ export const DocksOutboundView: React.FC<DocksOutboundViewProps> = ({
                                                         <div className="flex glass-panel-pushed p-1">
                                                             <button
                                                                 onClick={async () => {
+                                                                    if (!checkControlAccess('Delivery mode toggle')) return;
                                                                     try {
                                                                         await wmsJobsService.update(assignedJob.id, { 
                                                                             deliveryMethod: 'Internal', 
@@ -226,6 +234,7 @@ export const DocksOutboundView: React.FC<DocksOutboundViewProps> = ({
                                                             </button>
                                                             <button
                                                                 onClick={async () => {
+                                                                    if (!checkControlAccess('Delivery mode toggle')) return;
                                                                     try {
                                                                         await wmsJobsService.update(assignedJob.id, { 
                                                                             deliveryMethod: 'External', 
@@ -261,6 +270,7 @@ export const DocksOutboundView: React.FC<DocksOutboundViewProps> = ({
                                                                     defaultValue={assignedJob.externalCarrierName || ''}
                                                                     key={`carrier-${assignedJob.id}-${assignedJob.deliveryMethod}`}
                                                                     onBlur={async (e) => {
+                                                                        if (!checkControlAccess('External carrier update')) return;
                                                                         const carrierName = e.target.value;
                                                                         try {
                                                                             await wmsJobsService.update(assignedJob.id, { 
@@ -280,6 +290,7 @@ export const DocksOutboundView: React.FC<DocksOutboundViewProps> = ({
                                                                     aria-label="Assign Driver"
                                                                     value={assignedJob.assignedTo || ''}
                                                                     onChange={async (e) => {
+                                                                        if (!checkControlAccess('Driver assignment')) return;
                                                                         const driverId = e.target.value || null;
                                                                         try {
                                                                             await wmsJobsService.update(assignedJob.id, { 
@@ -310,6 +321,7 @@ export const DocksOutboundView: React.FC<DocksOutboundViewProps> = ({
                                                                 <button
                                                                     onClick={async (e) => {
                                                                         e.stopPropagation();
+                                                                        if (!checkControlAccess('Departure controls')) return;
                                                                         try {
                                                                             await wmsJobsService.update(assignedJob.id, {
                                                                                 status: 'In-Progress',
@@ -320,18 +332,10 @@ export const DocksOutboundView: React.FC<DocksOutboundViewProps> = ({
                                                                             } as any);
                                                                             if (assignedJob.orderRef) {
                                                                                 const parentJob = jobs.find(j => (j.id === assignedJob.orderRef || j.jobNumber === assignedJob.orderRef) && j.type === 'TRANSFER');
-                                                                                if (parentJob) {
-                                                                                    await wmsJobsService.update(parentJob.id, { 
-                                                                                        transferStatus: 'Shipped',
-                                                                                        assignedBy: user?.name || 'System'
-                                                                                    } as any);
-                                                                                } else {
-                                                                                    // Fallback to original orderRef if not found in local state
-                                                                                    await wmsJobsService.update(assignedJob.orderRef, { 
-                                                                                        transferStatus: 'Shipped',
-                                                                                        assignedBy: user?.name || 'System'
-                                                                                    } as any);
-                                                                                }
+                                                                                await wmsJobsService.update(parentJob ? parentJob.id : assignedJob.orderRef, { 
+                                                                                    transferStatus: 'Shipped',
+                                                                                    assignedBy: user?.name || 'System'
+                                                                                } as any);
                                                                             }
                                                                             await refreshData();
                                                                             addNotification('success', 'Shipment Departed');
@@ -430,6 +434,7 @@ export const DocksOutboundView: React.FC<DocksOutboundViewProps> = ({
                                                             <button
                                                                 onClick={async (e) => {
                                                                     e.stopPropagation();
+                                                                    if (!checkControlAccess('Dock loading')) return;
                                                                     // Find the first empty dock bay from jobs array
                                                                     const availableDock = OUTBOUND_DOCKS.find(d => !findDockJob(jobs, d));
                                                                     if (availableDock) {

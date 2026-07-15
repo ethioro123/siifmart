@@ -210,12 +210,34 @@ export const ReceiveHistory: React.FC<ReceiveHistoryProps> = ({
             new Date(b.date).getTime() - new Date(a.date).getTime()
         );
 
-        return combined.filter(item =>
-            !search ||
-            item.reference.toLowerCase().includes(search.toLowerCase()) ||
-            (item.subtitle && item.subtitle.toLowerCase().includes(search.toLowerCase())) ||
-            (item.resolvedUser && item.resolvedUser.name.toLowerCase().includes(search.toLowerCase()))
-        );
+        return combined.filter(item => {
+            if (!search) return true;
+            const q = search.toLowerCase();
+            const raw = item.rawData;
+
+            let matchesItems = false;
+            if (raw) {
+                const itemsList = (raw as any).lineItems || (raw as any).line_items || [];
+                matchesItems = itemsList.some((li: any) =>
+                    (li.name || '').toLowerCase().includes(q) ||
+                    (li.productName || '').toLowerCase().includes(q) ||
+                    (li.sku || '').toLowerCase().includes(q)
+                );
+            }
+
+            return (
+                item.reference.toLowerCase().includes(q) ||
+                (item.subtitle && item.subtitle.toLowerCase().includes(q)) ||
+                (item.resolvedUser && item.resolvedUser.name.toLowerCase().includes(q)) ||
+                (item.resolvedUser && item.resolvedUser.displayId && item.resolvedUser.displayId.toLowerCase().includes(q)) ||
+                (raw && raw.id && raw.id.toLowerCase().includes(q)) ||
+                (raw && raw.status && raw.status.toLowerCase().includes(q)) ||
+                (raw && (raw as any).notes && (raw as any).notes.toLowerCase().includes(q)) ||
+                (raw && ((raw as any).jobNumber || (raw as any).job_number) && ((raw as any).jobNumber || (raw as any).job_number).toLowerCase().includes(q)) ||
+                (raw && ((raw as any).poNumber || (raw as any).po_number) && ((raw as any).poNumber || (raw as any).po_number).toLowerCase().includes(q)) ||
+                matchesItems
+            );
+        });
     }, [orders, historicalJobs, search, resolveOrderRef, employees, user, jobs, t]);
 
     const totalPages = Math.ceil(filteredHistory.length / perPage);

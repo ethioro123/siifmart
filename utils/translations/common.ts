@@ -55,4 +55,6 @@ export const common: TranslationBlock = {
     dockLoad: { en: 'DOCK LOAD →', am: 'ወደ ዶክ ጫን →', or: 'Gara Dock Fe’i →' },
     clear: { en: 'Clear', am: 'አጽዳ', or: 'Qulqulleessi' },
     enter: { en: 'Enter', am: 'አስገባ', or: 'Galchi' },
+    verify: { en: 'Verify', am: 'አረጋግጥ', or: 'Mirkaneessi' },
+    processing: { en: 'Processing', am: 'በማስኬድ ላይ', or: 'Adeemsisaa jira' },
 };

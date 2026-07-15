@@ -26,9 +26,10 @@ export const formatCompactNumber = (value: number | undefined | null, options?: 
 
     // If NOT compact, or if the number is small (< 1000), use full precision localized string
     if (!options?.compact || (absValue < 1000)) {
+        const hasFraction = absValue % 1 !== 0;
         formattedNumber = absValue.toLocaleString(options?.locale || 'en-US', {
             maximumFractionDigits: options?.maxFractionDigits ?? 2,
-            minimumFractionDigits: options?.maxFractionDigits !== undefined ? options.maxFractionDigits : 0
+            minimumFractionDigits: options?.maxFractionDigits !== undefined ? options.maxFractionDigits : (hasFraction ? 2 : 0)
         });
     } else {
         // Define thresholds for compact mode
@@ -76,6 +77,19 @@ export const formatCompactNumber = (value: number | undefined | null, options?: 
     }
 
     return `${sign}${formattedNumber}`;
+};
+
+/**
+ * Format a number with thousands separators, only displaying decimal places if a fractional value exists.
+ * e.g. 520 -> "520", 70000 -> "70,000", 1299.78 -> "1,299.78"
+ */
+export const formatPriceValue = (val: number | undefined | null): string => {
+    if (val === undefined || val === null || isNaN(val)) return '0';
+    const hasFraction = val % 1 !== 0;
+    return val.toLocaleString('en-US', {
+        minimumFractionDigits: hasFraction ? 2 : 0,
+        maximumFractionDigits: 2
+    });
 };
 
 // Global timezone for the application

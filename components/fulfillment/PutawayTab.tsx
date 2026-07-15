@@ -14,6 +14,7 @@ import { normalizeLocation, parseLocation } from '../../utils/locationTracking';
 import { extractSitePrefix, extractPrefixFromBarcode } from '../../utils/locationEncoder';
 import { logger } from '../../utils/logger';
 import { usePutawayScanning } from './putaway/hooks/usePutawayScanning';
+import { formatJobId } from '../../utils/jobIdFormatter';
 
 interface PutawayTabProps {
     filteredJobs: WMSJob[];
@@ -81,21 +82,52 @@ export const PutawayTab: React.FC<PutawayTabProps> = ({
             if (j.type !== 'PUTAWAY' && j.type !== 'REPLENISH') return false;
             const status = j.status?.toLowerCase() || 'pending';
             if (status === 'completed' || status === 'cancelled') return false;
-            if (j.lineItems && j.lineItems.length > 0) {
-                const allDone = j.lineItems.every(i =>
-                    !i || i.status === 'Picked' || i.status === 'Short' || i.status === 'Discontinued'
-                );
-                if (allDone) return false;
-            }
             return true;
         });
 
         if (putawayStatusFilter !== 'All') filtered = filtered.filter(j => j.status === putawayStatusFilter);
         if (putawaySearch) {
-            filtered = filtered.filter(j =>
-                j.id.toLowerCase().includes(putawaySearch.toLowerCase()) ||
-                (j.orderRef && resolveOrderRef(j.orderRef).toLowerCase().includes(putawaySearch.toLowerCase()))
-            );
+            const q = putawaySearch.toLowerCase();
+            filtered = filtered.filter(j => {
+                const cleanJobId = formatJobId(j).toLowerCase();
+                const orderRefStr = (j.orderRef || '').toLowerCase();
+                const orderRefResolvedStr = resolveOrderRef ? resolveOrderRef(j.orderRef).toLowerCase() : '';
+                const noteStr = (j.notes || '').toLowerCase();
+                const jobNum = (j.jobNumber || (j as any).job_number || '').toLowerCase();
+                const statusStr = (j.status || '').toLowerCase();
+
+                // Worker info
+                const userId = j.completedBy || j.assignedTo;
+                let userObj = employees?.find(e => 
+                    e.id === userId || 
+                    (e.name && userId && e.name.toLowerCase() === userId.toLowerCase()) || 
+                    (e.email && userId && e.email.toLowerCase() === userId.toLowerCase()) ||
+                    (e.code && userId && e.code.toLowerCase() === userId.toLowerCase())
+                );
+                const workerName = (userObj?.name || userId || '').toLowerCase();
+                const workerCode = (userObj?.code || '').toLowerCase();
+
+                // Search product names and SKUs
+                const items = j.lineItems || (j as any).line_items || [];
+                const matchesItems = items.some((item: any) => 
+                    (item.name || '').toLowerCase().includes(q) ||
+                    (item.productName || '').toLowerCase().includes(q) ||
+                    (item.sku || '').toLowerCase().includes(q)
+                );
+
+                return (
+                    cleanJobId.includes(q) ||
+                    j.id.toLowerCase().includes(q) ||
+                    orderRefStr.includes(q) ||
+                    orderRefResolvedStr.includes(q) ||
+                    workerName.includes(q) ||
+                    workerCode.includes(q) ||
+                    noteStr.includes(q) ||
+                    statusStr.includes(q) ||
+                    jobNum.includes(q) ||
+                    matchesItems
+                );
+            });
         }
 
         return filtered.sort((a, b) => {
@@ -108,7 +140,7 @@ export const PutawayTab: React.FC<PutawayTabProps> = ({
                 return new Date(b.id).getTime() - new Date(a.id).getTime();
             }
         });
-    }, [filteredJobs, putawayStatusFilter, putawaySearch, putawaySortBy, orders]);
+    }, [filteredJobs, putawayStatusFilter, putawaySearch, putawaySortBy, orders, employees]);
 
     const putawayTotalPages = Math.ceil(sortedPutawayJobs.length / PUTAWAY_ITEMS_PER_PAGE);
     const safePutawayCurrentPage = Math.min(Math.max(1, putawayCurrentPage), Math.max(1, putawayTotalPages));

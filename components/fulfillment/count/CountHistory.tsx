@@ -29,11 +29,13 @@ export const CountHistory: React.FC<CountHistoryProps> = ({
         const countMoves = movements.filter(m => m.reason.toLowerCase().includes('count') || m.reason.toLowerCase().includes('adjustment'));
         return countMoves.filter(m => {
             if (!countHistorySearch) return true;
+            const q = countHistorySearch.toLowerCase();
             const product = products.find(p => p.id === m.productId);
             return (
-                m.id.toLowerCase().includes(countHistorySearch.toLowerCase()) ||
-                product?.name.toLowerCase().includes(countHistorySearch.toLowerCase()) ||
-                product?.sku.toLowerCase().includes(countHistorySearch.toLowerCase())
+                m.id.toLowerCase().includes(q) ||
+                (m.reason || '').toLowerCase().includes(q) ||
+                (product?.name || '').toLowerCase().includes(q) ||
+                (product?.sku || '').toLowerCase().includes(q)
             );
         });
     }, [movements, products, countHistorySearch]);
@@ -113,7 +115,7 @@ export const CountHistory: React.FC<CountHistoryProps> = ({
                             title="Search count history"
                             value={countHistorySearch}
                             onChange={(e) => setCountHistorySearch(e.target.value)}
-                            className="woody-input pl-9 text-xs py-2"
+                            className="woody-input !pl-9 text-xs py-2"
                         />
                     </div>
                 </div>

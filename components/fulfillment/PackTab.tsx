@@ -62,7 +62,43 @@ export const PackTab: React.FC = () => {
     const filteredPackJobs = useMemo(() => {
         return filteredJobs.filter(j => {
             if (j.type !== 'PACK') return false;
-            if (packSearch && !j.id.toLowerCase().includes(packSearch.toLowerCase())) return false;
+            if (packSearch) {
+                const q = packSearch.toLowerCase();
+                const cleanJobId = formatJobId(j).toLowerCase();
+                const orderRefStr = (j.orderRef || '').toLowerCase();
+                const noteStr = (j.notes || '').toLowerCase();
+                const jobNum = (j.jobNumber || (j as any).job_number || '').toLowerCase();
+
+                // Worker info
+                const userId = j.completedBy || j.assignedTo;
+                let userObj = employees?.find(e => 
+                    e.id === userId || 
+                    (e.name && userId && e.name.toLowerCase() === userId.toLowerCase()) || 
+                    (e.email && userId && e.email.toLowerCase() === userId.toLowerCase()) ||
+                    (e.code && userId && e.code.toLowerCase() === userId.toLowerCase())
+                );
+                const workerName = (userObj?.name || userId || '').toLowerCase();
+                const workerCode = (userObj?.code || '').toLowerCase();
+
+                const matchesItems = j.lineItems?.some((item: any) => 
+                    (item.name || '').toLowerCase().includes(q) ||
+                    (item.productName || '').toLowerCase().includes(q) ||
+                    (item.sku || '').toLowerCase().includes(q)
+                );
+
+                if (
+                    !cleanJobId.includes(q) &&
+                    !j.id.toLowerCase().includes(q) &&
+                    !orderRefStr.includes(q) &&
+                    !workerName.includes(q) &&
+                    !workerCode.includes(q) &&
+                    !noteStr.includes(q) &&
+                    !jobNum.includes(q) &&
+                    !matchesItems
+                ) {
+                    return false;
+                }
+            }
             if (packJobFilter === 'all') return j.status !== 'Completed' && j.status !== 'Cancelled';
             if (packJobFilter === 'pending') return j.status === 'Pending';
             if (packJobFilter === 'in-progress') return j.status === 'In-Progress';
@@ -79,7 +115,7 @@ export const PackTab: React.FC = () => {
             }
             return 0;
         });
-    }, [filteredJobs, packSearch, packJobFilter, packSortBy]);
+    }, [filteredJobs, packSearch, packJobFilter, packSortBy, employees]);
 
     const packJobsTotalPages = Math.ceil(filteredPackJobs.length / PACK_ITEMS_PER_PAGE);
 

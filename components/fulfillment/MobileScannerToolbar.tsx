@@ -218,7 +218,7 @@ export default function MobileScannerToolbar({
                         value={searchValue}
                         onChange={(e) => onSearchChange(e.target.value)}
                         placeholder={searchPlaceholder}
-                        className="w-full h-11 pl-10 pr-10 woody-input font-mono"
+                        className="w-full h-11 !pl-10 pr-10 woody-input font-mono"
                         onKeyDown={(e) => {
                             if (e.key === 'Enter') {
                                 const val = e.currentTarget.value.trim();

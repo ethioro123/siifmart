@@ -28,13 +28,83 @@ export const DriversHistory: React.FC<DriversHistoryProps> = ({
     const filteredHistory = useMemo(() => {
         const canSeeGlobalQueue = ['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher'].includes((user?.role || '').toLowerCase());
         const employeeId = currentEmployee?.id || user?.id;
-        return historicalJobs.filter((j: WMSJob) => {
+        
+        const filteredByTypeAndRole = historicalJobs.filter((j: WMSJob) => {
             const isTypeMatch = (j.type === 'DISPATCH' || j.type === 'TRANSFER' || j.type === 'DRIVER');
             const isRoleMatch = canSeeGlobalQueue ? true : j.assignedTo === employeeId;
-            const isQueryMatch = !searchQuery || formatJobId(j).toLowerCase().includes(searchQuery.toLowerCase()) || (j.orderRef && (j.orderRef.toLowerCase().includes(searchQuery.toLowerCase()) || resolveOrderRef(j.orderRef).toLowerCase().includes(searchQuery.toLowerCase())));
-            return isTypeMatch && isRoleMatch && isQueryMatch;
+            return isTypeMatch && isRoleMatch;
         });
-    }, [historicalJobs, searchQuery, resolveOrderRef, currentEmployee, user?.role, user?.id]);
+
+        const mapped = filteredByTypeAndRole.map(j => {
+            const userId = j.completedBy || j.assignedTo;
+            const isUUID = (str: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
+            let userObj = employees?.find(e => 
+                e.id === userId || 
+                (e.name && userId && e.name.toLowerCase() === userId.toLowerCase()) || 
+                (e.email && userId && e.email.toLowerCase() === userId.toLowerCase()) ||
+                (e.code && userId && e.code.toLowerCase() === userId.toLowerCase())
+            );
+            if (!userObj && user && userId && (
+                userId.toLowerCase() === user.id?.toLowerCase() || 
+                userId.toLowerCase() === user.email?.toLowerCase() || 
+                userId.toLowerCase() === user.name?.toLowerCase() || 
+                userId.toLowerCase() === user.employeeId?.toLowerCase()
+            )) {
+                userObj = employees?.find(e => 
+                    (e.email && user.email && e.email.toLowerCase() === user.email.toLowerCase()) || 
+                    (e.name && user.name && e.name.toLowerCase() === user.name.toLowerCase()) || 
+                    e.id === user.employeeId
+                );
+            }
+            const displayId = userObj?.code || (userId ? (isUUID(userId) ? userId.slice(0, 8).toUpperCase() : userId) : '');
+            const resolvedUser = {
+                name: userObj?.name || (userId ? userId : 'System'),
+                displayId: displayId || ''
+            };
+
+            return {
+                ...j,
+                resolvedUser
+            };
+        });
+
+        if (!searchQuery) {
+            return mapped;
+        }
+
+        const q = searchQuery.toLowerCase();
+        return mapped.filter(j => {
+            const cleanJobId = formatJobId(j).toLowerCase();
+            const orderRefStr = (j.orderRef || '').toLowerCase();
+            const orderRefResolvedStr = resolveOrderRef ? resolveOrderRef(j.orderRef).toLowerCase() : '';
+            const workerName = (j.resolvedUser?.name || '').toLowerCase();
+            const workerId = (j.resolvedUser?.displayId || '').toLowerCase();
+            const noteStr = (j.notes || '').toLowerCase();
+            const statusStr = (j.status || '').toLowerCase();
+            const jobNum = (j.jobNumber || (j as any).job_number || '').toLowerCase();
+
+            // Search product names and SKUs
+            const items = j.lineItems || (j as any).line_items || [];
+            const matchesItems = items.some((item: any) => 
+                (item.name || '').toLowerCase().includes(q) ||
+                (item.productName || '').toLowerCase().includes(q) ||
+                (item.sku || '').toLowerCase().includes(q)
+            );
+
+            return (
+                cleanJobId.includes(q) ||
+                j.id.toLowerCase().includes(q) ||
+                orderRefStr.includes(q) ||
+                orderRefResolvedStr.includes(q) ||
+                workerName.includes(q) ||
+                workerId.includes(q) ||
+                noteStr.includes(q) ||
+                statusStr.includes(q) ||
+                jobNum.includes(q) ||
+                matchesItems
+            );
+        });
+    }, [historicalJobs, searchQuery, resolveOrderRef, currentEmployee, user?.role, user?.id, employees, user]);
 
     const totalPages = Math.ceil(filteredHistory.length / ITEMS_PER_PAGE);
     const paginatedHistory = useMemo(() => filteredHistory.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE), [filteredHistory, currentPage]);

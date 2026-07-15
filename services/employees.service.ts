@@ -17,7 +17,7 @@ export const employeesService = {
         return data.map((e: any) => ({
             ...e,
             siteId: e.site_id,
-            joinDate: e.join_date,
+            joinDate: e.join_date || (e.created_at ? e.created_at.split('T')[0] : e.created_at) || 'N/A',
             performanceScore: e.performance_score,
             attendanceRate: e.attendance_rate,
             lastLoginGps: e.last_login_gps,
@@ -131,7 +131,7 @@ export const employeesService = {
             data: sortedDetails.map((e: any) => ({
                 ...e,
                 siteId: e.site_id,
-                joinDate: e.join_date,
+                joinDate: e.join_date || (e.created_at ? e.created_at.split('T')[0] : e.created_at) || 'N/A',
                 performanceScore: e.performance_score,
                 attendanceRate: e.attendance_rate,
                 lastLoginGps: e.last_login_gps,
@@ -154,7 +154,7 @@ export const employeesService = {
         return {
             ...data,
             siteId: data.site_id,
-            joinDate: data.join_date,
+            joinDate: data.join_date || (data.created_at ? data.created_at.split('T')[0] : data.created_at) || 'N/A',
             performanceScore: data.performance_score,
             attendanceRate: data.attendance_rate,
             lastLoginGps: data.last_login_gps,
@@ -175,7 +175,7 @@ export const employeesService = {
         return {
             ...data,
             siteId: data.site_id,
-            joinDate: data.join_date,
+            joinDate: data.join_date || (data.created_at ? data.created_at.split('T')[0] : data.created_at) || 'N/A',
             performanceScore: data.performance_score,
             attendanceRate: data.attendance_rate,
             lastLoginGps: data.last_login_gps,
@@ -214,7 +214,7 @@ export const employeesService = {
         return {
             ...data,
             siteId: data.site_id,
-            joinDate: data.join_date,
+            joinDate: data.join_date || (data.created_at ? data.created_at.split('T')[0] : data.created_at) || 'N/A',
             performanceScore: data.performance_score,
             attendanceRate: data.attendance_rate,
             lastLoginGps: data.last_login_gps,
@@ -246,7 +246,7 @@ export const employeesService = {
         return {
             ...data,
             siteId: data.site_id,
-            joinDate: data.join_date,
+            joinDate: data.join_date || (data.created_at ? data.created_at.split('T')[0] : data.created_at) || 'N/A',
             performanceScore: data.performance_score,
             attendanceRate: data.attendance_rate,
             lastLoginGps: data.last_login_gps,

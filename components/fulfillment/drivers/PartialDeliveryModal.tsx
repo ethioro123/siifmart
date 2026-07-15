@@ -125,7 +125,7 @@ export const PartialDeliveryModal: React.FC<PartialDeliveryModalProps> = ({
                 ? `[PARTIAL DELIVERY by ${user?.name || 'Driver'} at ${new Date().toLocaleString()}] Reason: ${REJECT_REASONS.find(r => r.id === rejectReason)?.label || rejectReason}. ${notes}`
                 : `[DELIVERY by ${user?.name || 'Driver'} at ${new Date().toLocaleString()}] ${notes}`;
 
-            const finalStatus = 'Completed';
+            const finalStatus = 'In-Progress';
             const finalTransferStatus = hasUndelivered ? 'Partially Delivered' : 'Delivered';
 
             // Build updated line items

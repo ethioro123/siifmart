@@ -13,6 +13,7 @@ import ImageUpload from './ImageUpload';
 import { CURRENCY_SYMBOL, COMMON_UNITS, GROCERY_CATEGORIES } from '../constants';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useStore } from '../contexts/CentralStore';
+import { getRoleHierarchy } from '../utils/roles';
 
 interface ProductFormProps {
     initialData?: Partial<Product>;
@@ -24,7 +25,7 @@ interface ProductFormProps {
 
 export function ProductForm({ initialData, onSubmit, onCancel, isSubmitting, isReadOnly = false }: ProductFormProps) {
     const { user } = useStore();
-    const canEditThresholds = user?.role === 'super_admin' || user?.role === 'store_manager';
+    const canEditThresholds = user?.role ? getRoleHierarchy(user.role) >= 80 : false;
 
     const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm({
         resolver: zodResolver(ProductSchema),

@@ -5,6 +5,7 @@ import { useData } from '../../../contexts/DataContext';
 import { useStore } from '../../../contexts/CentralStore';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { CURRENCY_SYMBOL } from '../../../constants';
+import { formatPriceValue } from '../../../utils/formatting';
 import { ProductDetailsModal } from '../../inventory/ProductDetailsModal';
 import { getSellUnit } from '../../../utils/units';
 
@@ -86,7 +87,7 @@ export const StockListModal: React.FC = () => {
                                             {product.category || t('posCommand.uncategorized')}
                                         </td>
                                         <td className="p-3 text-right font-medium text-[#1E3F27] dark:text-white">
-                                            {CURRENCY_SYMBOL}{product.price.toLocaleString()}
+                                            {CURRENCY_SYMBOL} {formatPriceValue(product.price)}
                                         </td>
                                         <td className="p-3 text-right">
                                             {(() => {

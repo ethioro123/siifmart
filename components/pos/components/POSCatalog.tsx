@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { usePOS } from '../POSContext';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { CURRENCY_SYMBOL } from '../../../constants';
+import { formatPriceValue } from '../../../utils/formatting';
 import { getSellUnit } from '../../../utils/units';
 import { formatPackBadge } from '../../procurement/utils';
 import { Product } from '../../../types';
@@ -134,11 +135,11 @@ export const POSCatalog: React.FC<POSCatalogProps> = ({
                                         <div className="flex items-baseline gap-1.5">
                                             {product.isOnSale && product.salePrice ? (
                                                 <>
-                                                    <p className="text-amber-600 dark:text-amber-400 font-extrabold text-base tracking-tight">{CURRENCY_SYMBOL} {product.salePrice}{product.unit && getSellUnit(product.unit).code !== 'UNIT' ? <span className="text-[8px] text-amber-600/60 dark:text-amber-400/60 font-bold">/{getSellUnit(product.unit).shortLabel}</span> : null}</p>
-                                                    <p className="text-stone-400 dark:text-gray-600 text-[10px] line-through">{CURRENCY_SYMBOL} {product.price}</p>
+                                                    <p className="text-amber-600 dark:text-amber-400 font-extrabold text-base tracking-tight">{CURRENCY_SYMBOL} {formatPriceValue(product.salePrice)}{product.unit && getSellUnit(product.unit).code !== 'UNIT' ? <span className="text-[8px] text-amber-600/60 dark:text-amber-400/60 font-bold">/{getSellUnit(product.unit).shortLabel}</span> : null}</p>
+                                                    <p className="text-stone-400 dark:text-gray-600 text-[10px] line-through">{CURRENCY_SYMBOL} {formatPriceValue(product.price)}</p>
                                                 </>
                                             ) : (
-                                                <p className="text-[#2C5E3B] dark:text-[#A9CBA2] font-black text-base tracking-tight">{CURRENCY_SYMBOL} {product.price}{product.unit && getSellUnit(product.unit).code !== 'UNIT' ? <span className="text-[8px] text-[#4D6E56]/60 dark:text-gray-500 font-bold">/{getSellUnit(product.unit).shortLabel}</span> : null}</p>
+                                                <p className="text-[#2C5E3B] dark:text-[#A9CBA2] font-black text-base tracking-tight">{CURRENCY_SYMBOL} {formatPriceValue(product.price)}{product.unit && getSellUnit(product.unit).code !== 'UNIT' ? <span className="text-[8px] text-[#4D6E56]/60 dark:text-gray-500 font-bold">/{getSellUnit(product.unit).shortLabel}</span> : null}</p>
                                             )}
                                         </div>
                                         <div className="w-8 h-8 rounded-xl bg-[#2C5E3B]/10 dark:bg-white/5 border border-[#2C5E3B]/20 dark:border-white/10 flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:bg-[#2C5E3B]/20 dark:group-hover:bg-white/10">

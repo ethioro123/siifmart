@@ -204,4 +204,13 @@ export const posCommand: TranslationBlock = {
     noTasks: { en: 'No Tasks Scheduled Today', am: 'ዛሬ ምንም የታቀደ ስራ የለም', or: 'Hojii Tokkollee Hin Qabne Guyyaa Kana' },
     ptsThisWeek: { en: 'PTS THIS WEEK', am: 'የዚህ ሳምንት ነጥቦች', or: 'Qabxii Torbee Kanaa' },
     thisMonth: { en: 'This Month', am: 'በዚህ ወር', or: 'Ji\'a Kanaa Keessatti' },
+
+    // Missing Keys
+    inboundShipments: { en: 'Inbound Shipments', am: 'ገቢ ጭነቶች', or: 'Ergaawwan Dhufan' },
+    noInboundTransfers: { en: 'No inbound transfers found', am: 'ምንም ገቢ ዝውውሮች አልተገኘም', or: 'Dabarsi dhufaa jiru hin argamne' },
+    inboundAppear: { en: 'Incoming shipments will appear here when dispatched', am: 'ገቢ ጭነቶች ሲላኩ እዚህ ይታያሉ', or: 'Ergaawwan dhufan yeroo ergaman asitti mul\'atu' },
+    inTransit: { en: 'In Transit', am: 'በመንገድ ላይ', or: 'Karaa Irra Jira' },
+    pending: { en: 'Pending', am: 'በመጠባበቅ ላይ', or: 'Eeggataan Jira' },
+    manifestItems: { en: 'Manifest Items', am: 'የማኒፌስት ዕቃዎች', or: 'Meeshalee Manifeestii' },
+    varianceReasonPlaceholder: { en: 'Please document the cause of this variance...', am: 'እባክዎ የዚህን ልዩነት ምክንያት ይመዝግቡ...', or: 'Maaloo sababa herregni itti garagara ta\'e ibsi...' },
 };

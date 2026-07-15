@@ -322,9 +322,20 @@ export const useJobCompletion = (deps: UseJobCompletionDeps) => {
 
                 // --- INVENTORY DEDUCTION (Internal & Sales) ---
                 if (itemsToValidate && itemsToValidate.length > 0) {
+                    const sourceSiteId = job.sourceSiteId || (job as any).source_site_id || job.siteId;
                     for (const item of itemsToValidate) {
                         if ((item.pickedQty || 0) > 0) {
-                            const productId = item.productId || item.id;
+                            // For transfer PICK jobs, resolve the product at the source site by SKU
+                            // to ensure we always deduct from the correct warehouse record
+                            let productId = item.productId || item.id;
+                            if (isTransfer && sourceSiteId && item.sku) {
+                                const sourceProduct = allProducts.find((p: Product) =>
+                                    p.sku === item.sku &&
+                                    (p.siteId === sourceSiteId || (p as any).site_id === sourceSiteId)
+                                );
+                                if (sourceProduct) productId = sourceProduct.id;
+                            }
+
                             if (productId) {
                                 let deductUnits = item.pickedQty;
 

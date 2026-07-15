@@ -22,12 +22,35 @@ export const ReplenishHistory: React.FC<ReplenishHistoryProps> = ({
     const [replenishHistoryPage, setReplenishHistoryPage] = useState(1);
 
     const filteredReplenishHistory = useMemo(() => {
-        return historicalJobs.filter((j: WMSJob) =>
-            j.type === 'REPLENISH' && (
-                !replenishHistorySearch ||
-                j.id.toLowerCase().includes(replenishHistorySearch.toLowerCase())
-            )
-        );
+        return historicalJobs.filter((j: WMSJob) => {
+            if (j.type !== 'REPLENISH') return false;
+            if (!replenishHistorySearch) return true;
+
+            const q = replenishHistorySearch.toLowerCase();
+            const cleanJobId = formatJobId(j).toLowerCase();
+            const orderRefStr = (j.orderRef || '').toLowerCase();
+            const noteStr = (j.notes || '').toLowerCase();
+            const statusStr = (j.status || '').toLowerCase();
+            const jobNum = (j.jobNumber || (j as any).job_number || '').toLowerCase();
+
+            // Search product names and SKUs
+            const items = j.lineItems || (j as any).line_items || [];
+            const matchesItems = items.some((item: any) => 
+                (item.name || '').toLowerCase().includes(q) ||
+                (item.productName || '').toLowerCase().includes(q) ||
+                (item.sku || '').toLowerCase().includes(q)
+            );
+
+            return (
+                cleanJobId.includes(q) ||
+                j.id.toLowerCase().includes(q) ||
+                orderRefStr.includes(q) ||
+                noteStr.includes(q) ||
+                statusStr.includes(q) ||
+                jobNum.includes(q) ||
+                matchesItems
+            );
+        });
     }, [historicalJobs, replenishHistorySearch]);
 
     const replenishHistoryTotalPages = Math.ceil(filteredReplenishHistory.length / REPLENISH_HISTORY_PER_PAGE);
@@ -58,7 +81,7 @@ export const ReplenishHistory: React.FC<ReplenishHistoryProps> = ({
                         title="Search replenishment history"
                         value={replenishHistorySearch}
                         onChange={(e) => setReplenishHistorySearch(e.target.value)}
-                        className="woody-input pl-9 text-xs py-2"
+                        className="woody-input !pl-9 text-xs py-2"
                     />
                 </div>
             </div>

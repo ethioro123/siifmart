@@ -46,7 +46,7 @@ export const ReceiveResolutionModal: React.FC<ReceiveResolutionModalProps> = ({
                             placeholder={t('warehouse.searchProductToMap')}
                             value={resolutionSearch}
                             onChange={(e) => setResolutionSearch(e.target.value)}
-                            className="woody-input pl-11 py-4 text-[10px] uppercase tracking-widest font-mono"
+                            className="woody-input !pl-11 py-4 text-[10px] uppercase tracking-widest font-mono"
                             aria-label="Search product to map"
                         />
                     </div>

@@ -57,7 +57,7 @@ export const AssignAvailableWorkers: React.FC<AssignAvailableWorkersProps> = ({
                     <span className="bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 text-[#2C5E3B] dark:text-[#A9CBA2] px-2 py-0.5 rounded-full border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20 ml-1">
                         {(() => {
                             let filtered = filteredEmployees.filter(e =>
-                                ['picker', 'packer', 'dispatcher', 'warehouse_manager', 'driver', 'receiver', 'inventory_specialist', 'forklift_operator', 'auditor'].includes(e.role?.toLowerCase()) &&
+                                ['admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher', 'picker', 'packer', 'driver', 'receiver', 'inventory_specialist', 'forklift_operator', 'auditor'].includes(e.role?.toLowerCase()) &&
                                 e.status?.toLowerCase() === 'active'
                             );
                             if (dispatchEmployeeFilter !== 'ALL') filtered = filtered.filter(e => e.role?.toLowerCase() === dispatchEmployeeFilter.toLowerCase());
@@ -76,7 +76,7 @@ export const AssignAvailableWorkers: React.FC<AssignAvailableWorkersProps> = ({
                             placeholder="Search staff..."
                             value={dispatchEmployeeSearch}
                             onChange={(e) => setDispatchEmployeeSearch(e.target.value)}
-                            className="woody-input pl-7 pr-3 py-1 text-[10px] w-32"
+                            className="woody-input !pl-7 pr-3 py-1 text-[10px] w-32"
                         />
                     </div>
 
@@ -119,7 +119,7 @@ export const AssignAvailableWorkers: React.FC<AssignAvailableWorkersProps> = ({
             <div className="flex-1 overflow-y-auto p-3 space-y-3 custom-scrollbar">
                 {(() => {
                     let filtered = filteredEmployees.filter(e =>
-                        ['picker', 'packer', 'dispatcher', 'warehouse_manager', 'driver', 'receiver', 'inventory_specialist', 'forklift_operator', 'auditor', 'admin', 'manager', 'regional_manager', 'operations_manager'].includes(e.role?.toLowerCase()) &&
+                        ['admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher', 'picker', 'packer', 'driver', 'receiver', 'inventory_specialist', 'forklift_operator', 'auditor'].includes(e.role?.toLowerCase()) &&
                         e.status?.toLowerCase() === 'active'
                     );
                     if (dispatchEmployeeFilter !== 'ALL') filtered = filtered.filter(e => e.role?.toLowerCase() === dispatchEmployeeFilter.toLowerCase());
@@ -282,7 +282,7 @@ export const AssignAvailableWorkers: React.FC<AssignAvailableWorkersProps> = ({
                       );
                   })()}
                   {filteredEmployees.filter(e =>
-                      ['picker', 'packer', 'dispatcher', 'warehouse_manager', 'driver', 'receiver', 'inventory_specialist', 'forklift_operator', 'auditor'].includes(e.role?.toLowerCase()) &&
+                      ['admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher', 'picker', 'packer', 'driver', 'receiver', 'inventory_specialist', 'forklift_operator', 'auditor'].includes(e.role?.toLowerCase()) &&
                       e.status?.toLowerCase() === 'active'
                   ).length === 0 && (
                           <div className="text-center py-8 text-slate-400 dark:text-gray-500 text-sm">

@@ -78,6 +78,11 @@ export function useProductActions(deps: UseProductActionsDeps) {
         } catch (error: any) {
             logger.error('useProductActions', 'Error adding product:', error as Error);
 
+            if (error?.status === 403 || error?.code === '42501' || String(error?.message || '').includes('Forbidden')) {
+                logger.warn('useProductActions', `Insufficient permissions to create product "${product.name}" in database. Skipping product auto-creation.`);
+                return undefined;
+            }
+
             if (error?.code === '23505' || error?.message?.includes('unique constraints') || error?.status === 409) {
                 logger.warn('useProductActions', `Product with SKU "${product.sku}" already exists. Fetching existing record...`);
                 try {

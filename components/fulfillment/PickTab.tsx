@@ -13,6 +13,7 @@ import { inventoryRequestsService } from '../../services/supabase.service';
 import { FulfillmentSuccessScreen } from './FulfillmentSuccessScreen';
 import { isWeightBased, isVolumeBased } from '../../utils/units';
 import { logger } from '../../utils/logger';
+import { formatJobId } from '../../utils/jobIdFormatter';
 
 const PICK_ITEMS_PER_PAGE = 12;
 
@@ -156,17 +157,43 @@ export const PickTab: React.FC = () => {
             if (j.assignedTo && j.assignedTo !== employeeId && !['admin', 'warehouse_manager', 'super_admin'].includes(user?.role || '')) return false;
 
             if (pickSearch) {
-                const searchLower = pickSearch.toLowerCase();
-                const matchesId = j.id.toLowerCase().includes(searchLower);
-                const matchesJobNum = j.jobNumber?.toLowerCase().includes(searchLower);
-                const matchesAssigned = j.assignedTo?.toLowerCase().includes(searchLower);
-                const matchesRef = j.orderRef?.toLowerCase().includes(searchLower);
-                const matchesSku = j.lineItems?.some((item: any) =>
-                    item.sku?.toLowerCase().includes(searchLower) ||
-                    item.name?.toLowerCase().includes(searchLower)
+                const q = pickSearch.toLowerCase();
+                const cleanJobId = formatJobId(j).toLowerCase();
+                const orderRefStr = (j.orderRef || '').toLowerCase();
+                const noteStr = (j.notes || '').toLowerCase();
+                const priorityStr = (j.priority || '').toLowerCase();
+                const jobNum = (j.jobNumber || (j as any).job_number || '').toLowerCase();
+
+                // Worker info
+                const userId = j.completedBy || j.assignedTo;
+                let userObj = employees?.find(e => 
+                    e.id === userId || 
+                    (e.name && userId && e.name.toLowerCase() === userId.toLowerCase()) || 
+                    (e.email && userId && e.email.toLowerCase() === userId.toLowerCase()) ||
+                    (e.code && userId && e.code.toLowerCase() === userId.toLowerCase())
+                );
+                const workerName = (userObj?.name || userId || '').toLowerCase();
+                const workerCode = (userObj?.code || '').toLowerCase();
+
+                const matchesItems = j.lineItems?.some((item: any) => 
+                    (item.name || '').toLowerCase().includes(q) ||
+                    (item.productName || '').toLowerCase().includes(q) ||
+                    (item.sku || '').toLowerCase().includes(q)
                 );
 
-                if (!matchesId && !matchesJobNum && !matchesAssigned && !matchesRef && !matchesSku) return false;
+                if (
+                    !cleanJobId.includes(q) &&
+                    !j.id.toLowerCase().includes(q) &&
+                    !orderRefStr.includes(q) &&
+                    !workerName.includes(q) &&
+                    !workerCode.includes(q) &&
+                    !noteStr.includes(q) &&
+                    !priorityStr.includes(q) &&
+                    !jobNum.includes(q) &&
+                    !matchesItems
+                ) {
+                    return false;
+                }
             }
 
             // If this PICK is linked to a TRANSFER, only show it once approved
@@ -179,7 +206,7 @@ export const PickTab: React.FC = () => {
             // Regular outbound PICK (linked to a Sale) — always visible
             return true;
         });
-    }, [filteredJobs, user?.name, user?.role, pickSearch]);
+    }, [filteredJobs, user?.name, user?.role, pickSearch, employees]);
 
     // --- PICK PAGINATION ---
     const pickJobsTotalPages = Math.ceil(filteredPickJobs.length / PICK_ITEMS_PER_PAGE);

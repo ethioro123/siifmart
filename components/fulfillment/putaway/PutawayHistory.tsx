@@ -116,12 +116,28 @@ export const PutawayHistory: React.FC<PutawayHistoryProps> = ({
         return mapped.filter(item => {
             if (!search) return true;
             const q = search.toLowerCase();
+            const raw = item.rawData;
+
+            const matchesItems = (raw.lineItems || raw.line_items || []).some((li: any) =>
+                (li.name || '').toLowerCase().includes(q) ||
+                (li.productName || '').toLowerCase().includes(q) ||
+                (li.sku || '').toLowerCase().includes(q)
+            );
+
             return (
                 item.reference.toLowerCase().includes(q) ||
                 item.subtitle.toLowerCase().includes(q) ||
                 (item.sku && item.sku.toLowerCase().includes(q)) ||
                 item.resolvedUser?.name.toLowerCase().includes(q) ||
-                item.location.toLowerCase().includes(q)
+                (item.resolvedUser?.displayId && item.resolvedUser.displayId.toLowerCase().includes(q)) ||
+                item.location.toLowerCase().includes(q) ||
+                raw.id.toLowerCase().includes(q) ||
+                (raw.orderRef && raw.orderRef.toLowerCase().includes(q)) ||
+                (raw.notes && raw.notes.toLowerCase().includes(q)) ||
+                (raw.status && raw.status.toLowerCase().includes(q)) ||
+                (raw.jobNumber && raw.jobNumber.toLowerCase().includes(q)) ||
+                ((raw as any).job_number && (raw as any).job_number.toLowerCase().includes(q)) ||
+                matchesItems
             );
         });
     }, [historicalJobs, search, employees, t]);
@@ -175,7 +191,7 @@ export const PutawayHistory: React.FC<PutawayHistoryProps> = ({
                         title={t('warehouse.searchHistoryPlaceholder')}
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        className="woody-input w-full pl-12 pr-4 py-3.5 text-[10px] uppercase tracking-[0.2em] font-black"
+                        className="woody-input w-full !pl-12 pr-4 py-3.5 text-[10px] uppercase tracking-[0.2em] font-black"
                     />
                 </div>
             </div>

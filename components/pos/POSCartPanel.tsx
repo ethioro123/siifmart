@@ -4,11 +4,9 @@ import { useData } from '../../contexts/DataContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { Protected } from '../Protected';
 import { CURRENCY_SYMBOL } from '../../constants';
+import { formatPriceValue } from '../../utils/formatting';
 import { getSellUnit, formatQuantityWithUnit } from '../../utils/units';
-import {
-    ArrowLeft, ArrowRight, User, CreditCard, Minus, Plus, Trash2, Tag,
-    PlayCircle, PauseCircle, RotateCcw, Box, Lock, Printer, DollarSign, Settings, Scale, X
-} from 'lucide-react';
+import { ArrowLeft, ArrowRight, User, CreditCard, Minus, Plus, Trash2, Tag, PlayCircle, PauseCircle, RotateCcw, Box, Lock, Printer, DollarSign, Settings, Scale, X } from 'lucide-react';
 
 export const POSCartPanel: React.FC = () => {
     const { t } = useLanguage();
@@ -102,7 +100,7 @@ export const POSCartPanel: React.FC = () => {
                                         <div className="flex-1 min-w-0">
                                             <h4 className="text-[#1E3F27] dark:text-[#EAE5D9] text-xs font-bold group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] transition-colors leading-tight truncate">{item.name}</h4>
                                             <p className="text-[#2C5E3B] dark:text-[#A9CBA2] font-black text-[10px]">
-                                                {CURRENCY_SYMBOL}{item.price}{unit.code !== 'UNIT' ? `/${unit.shortLabel}` : ''} × {formatQuantityWithUnit(item.quantity, item.unit)}
+                                                {CURRENCY_SYMBOL} {formatPriceValue(item.price)}{unit.code !== 'UNIT' ? `/${unit.shortLabel}` : ''} × {formatQuantityWithUnit(item.quantity, item.unit)}
                                             </p>
                                         </div>
                                         <div className="flex items-center gap-2">
@@ -144,7 +142,7 @@ export const POSCartPanel: React.FC = () => {
                                                 </div>
                                             )}
                                             <p className="text-[#1E3F27] dark:text-white font-black text-xs tracking-tighter w-16 text-right">
-                                                {CURRENCY_SYMBOL}{(item.price * item.quantity).toLocaleString()}
+                                                {CURRENCY_SYMBOL} {formatPriceValue(item.price * item.quantity)}
                                             </p>
                                             <button
                                                 onClick={() => removeFromCart(item.id)}
@@ -406,7 +404,7 @@ const WeightEntryModal: React.FC<{
                         <div className="min-w-0">
                             <h3 className="text-[#1E3F27] dark:text-[#EAE5D9] text-sm font-bold leading-tight truncate">{product.name}</h3>
                             <p className="text-[10px] text-[#4D6E56] dark:text-[#7A9E83] truncate">
-                                {CURRENCY_SYMBOL}{effectivePrice.toLocaleString()} per {unit.shortLabel}
+                                {CURRENCY_SYMBOL} {formatPriceValue(effectivePrice)} per {unit.shortLabel}
                             </p>
                         </div>
                     </div>

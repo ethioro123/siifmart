@@ -32,7 +32,7 @@ export const ReceivingHistory: React.FC = () => {
                 jobNumber: j.jobNumber,
                 createdAt: j.createdAt,
                 assignedTo: j.assignedTo,
-                receivedAt: (j as any).receivedAt || (j as any).updatedAt
+                receivedAt: (j as any).receivedAt || (j as any).received_at || null
             }));
     }, [jobs]);
 
@@ -46,9 +46,9 @@ export const ReceivingHistory: React.FC = () => {
 
         return allTransferSources.filter(t => {
             if (String(t.destSiteId) !== String(activeSite?.id)) return false;
-            const transferStatus = ((t as any).transferStatus || '').toLowerCase();
-            const jobStatus = ((t as any).status || '').toLowerCase();
-            return ['received', 'completed'].includes(transferStatus) || ['completed'].includes(jobStatus);
+            const transferStatus = String((t as any).transferStatus || '').toLowerCase();
+            const hasExplicitReceivedAt = Boolean((t as any).receivedAt || (t as any).received_at);
+            return transferStatus === 'received' || (hasExplicitReceivedAt && transferStatus !== 'delivered');
         }).sort((a, b) => {
             const dateA = new Date((a as any).receivedAt || (a as any).updatedAt || 0).getTime();
             const dateB = new Date((b as any).receivedAt || (b as any).updatedAt || 0).getTime();

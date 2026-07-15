@@ -137,12 +137,35 @@ export const DriverActiveMission: React.FC<DriverActiveMissionProps> = ({
                                                 </button>
                                             )}
                                             {(job.transferStatus === 'In-Transit' || job.transferStatus === 'Shipped') ? (
-                                                <button
-                                                    onClick={(e) => { e.stopPropagation(); setPartialDeliveryJob(job); }}
-                                                    className="px-4 py-1.5 bg-[#224429] dark:bg-[#EAE5D9] hover:bg-[#1B3520] dark:hover:bg-[#DFD9CA] text-[#FAF8F5] dark:text-[#1E3B24] rounded-lg text-[9px] font-black uppercase flex items-center justify-center gap-1.5 shadow-md active:scale-95 transition-all"
-                                                >
-                                                    <CheckCircle size={11} /> {(t('warehouse.driverHub.completeDeliveryBtn') || 'Complete Delivery').toUpperCase()}
-                                                </button>
+                                                (() => {
+                                                    const currentEmp = employees.find(e => (user?.email && e.email === user.email) || (user?.name && e.name?.toLowerCase() === user.name.toLowerCase()) || ((user as any)?.employeeId && e.id === (user as any).employeeId) || e.id === user?.id);
+                                                    const empId = currentEmp?.id || user?.id;
+                                                    const isAssigned = !job.assignedTo || job.assignedTo === empId || job.assignedTo === user?.id;
+                                                    const isManagerRole = ['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager'].includes((user?.role || '').toLowerCase());
+                                                    const canComplete = isAssigned || isManagerRole;
+
+                                                    if (!canComplete) {
+                                                        return (
+                                                            <button
+                                                                disabled
+                                                                onClick={(e) => e.stopPropagation()}
+                                                                className="px-4 py-1.5 bg-stone-200 dark:bg-white/10 text-stone-400 dark:text-gray-500 rounded-lg text-[9px] font-black uppercase flex items-center justify-center gap-1.5 cursor-not-allowed opacity-60"
+                                                                title="Only the assigned driver can complete this mission"
+                                                            >
+                                                                <CheckCircle size={11} /> Assigned Driver Only
+                                                            </button>
+                                                        );
+                                                    }
+
+                                                    return (
+                                                        <button
+                                                            onClick={(e) => { e.stopPropagation(); setPartialDeliveryJob(job); }}
+                                                            className="px-4 py-1.5 bg-[#224429] dark:bg-[#EAE5D9] hover:bg-[#1B3520] dark:hover:bg-[#DFD9CA] text-[#FAF8F5] dark:text-[#1E3B24] rounded-lg text-[9px] font-black uppercase flex items-center justify-center gap-1.5 shadow-md active:scale-95 transition-all"
+                                                        >
+                                                            <CheckCircle size={11} /> {(t('warehouse.driverHub.completeDeliveryBtn') || 'Complete Delivery').toUpperCase()}
+                                                        </button>
+                                                    );
+                                                })()
                                             ) : (
                                                 <div className="py-1.5 px-3 bg-green-500/10 border border-green-500/20 rounded-lg text-[9px] font-black text-green-600 dark:text-green-400 uppercase flex items-center justify-center gap-1.5 italic tracking-widest">
                                                     <CheckCircle size={11} /> {t('warehouse.driverHub.completedCaps') || 'Success'}

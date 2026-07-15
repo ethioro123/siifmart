@@ -65,7 +65,7 @@ export const ReceiveTab: React.FC = () => {
         category?: string;
         expiry?: string;
     } | null>(null);
-    const [reprintSize, setReprintSize] = useState<'TINY' | 'SMALL' | 'MEDIUM' | 'LARGE' | 'XL'>('XL');
+    const [reprintSize, setReprintSize] = useState<'TINY' | 'SMALL' | 'MEDIUM' | 'LARGE' | 'XL'>('MEDIUM');
     const [reprintFormat, setReprintFormat] = useState<'QR' | 'Barcode' | 'Both'>('Both');
     const [reprintOptions, setReprintOptions] = useState({
         showPrice: true,
@@ -103,8 +103,19 @@ export const ReceiveTab: React.FC = () => {
 
         return orders.filter(o => {
             const isApproved = o.status === 'Approved';
-            const matchesSearch = o.id.toLowerCase().includes(receiveSearch.toLowerCase()) ||
-                (o.supplierName || '').toLowerCase().includes(receiveSearch.toLowerCase());
+            const q = receiveSearch.toLowerCase();
+            const items = o.lineItems || [];
+            const matchesItems = items.some((item: any) => 
+                (item.name || item.productName || '').toLowerCase().includes(q) ||
+                (item.sku || '').toLowerCase().includes(q)
+            );
+
+            const matchesSearch =
+                o.id.toLowerCase().includes(q) ||
+                (o.poNumber || (o as any).po_number || '').toLowerCase().includes(q) ||
+                (o.supplierName || '').toLowerCase().includes(q) ||
+                matchesItems;
+
             const hasItemsToReceive = (o.lineItems || []).some(item => {
                 const remaining = item.quantity - (item.receivedQty || 0);
                 return remaining > 0;
