@@ -220,8 +220,8 @@ export default function LoginPage() {
           </div>
         </form>
 
-        {/* Quick Dev Sign-In Panel */}
-        {mode === 'login' && (
+        {/* Quick Dev Sign-In Panel (hidden in production) */}
+        {import.meta.env.DEV && mode === 'login' && (
           <div className="mt-6 pt-6 border-t border-[#E2DCCE]/40 dark:border-white/[0.04]">
             <button
               type="button"
@@ -251,7 +251,7 @@ export default function LoginPage() {
         )}
 
         <div className="mt-8 pt-6 border-t border-[#E2DCCE]/40 dark:border-white/[0.04] text-center select-none">
-          <p className="text-[10px] text-[#4D6E56] dark:text-[#7A9E83] font-semibold tracking-wider uppercase">SiifMart Operations v3.1</p>
+          <p className="text-[10px] text-[#4D6E56] dark:text-[#7A9E83] font-semibold tracking-wider uppercase">SiifMart Operations v3.2</p>
         </div>
       </div>
     </div>
