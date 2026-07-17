@@ -102,15 +102,7 @@ export const usePackLabelPrint = (deps: UsePackLabelPrintDeps) => {
 
             const html = await generatePackLabelHTML(packLabelData, { size: labelSize, format: 'Both' });
 
-            let printHTML = html;
-            const scriptTag = '<script>window.onload = function() { setTimeout(function() { window.print(); }, 500); };</script>';
-            if (printHTML.includes('</body>')) {
-                printHTML = printHTML.replace('</body>', `${scriptTag}</body>`);
-            } else {
-                printHTML += scriptTag;
-            }
-
-            printHtmlContent(printHTML);
+            printHtmlContent(html);
 
             addNotification('success', 'Label ready to print!');
         } catch (err) {
@@ -160,15 +152,7 @@ export const usePackLabelPrint = (deps: UsePackLabelPrintDeps) => {
 
             const html = await generatePackLabelHTML(packLabelData, { size: labelSize, format: 'Both' });
 
-            let printHTML = html;
-            const scriptTag = '<script>window.onload = function() { setTimeout(function() { window.print(); }, 500); };</script>';
-            if (printHTML.includes('</body>')) {
-                printHTML = printHTML.replace('</body>', `${scriptTag}</body>`);
-            } else {
-                printHTML += scriptTag;
-            }
-
-            printHtmlContent(printHTML);
+            printHtmlContent(html);
 
             addNotification('success', 'Label ready to print!');
         } catch (err) {
@@ -221,15 +205,8 @@ export const usePackLabelPrint = (deps: UsePackLabelPrintDeps) => {
             if (labelSize === 'Extra Large') labelSize = 'XL';
 
             const html = await generatePackLabelHTML(itemLabelData, { size: labelSize, format: 'Both' });
-            let printHTML = html;
-            const scriptTag = '<script>window.onload = function() { setTimeout(function() { window.print(); }, 500); };</script>';
-            if (printHTML.includes('</body>')) {
-                printHTML = printHTML.replace('</body>', `${scriptTag}</body>`);
-            } else {
-                printHTML += scriptTag;
-            }
 
-            printHtmlContent(printHTML);
+            printHtmlContent(html);
 
             addNotification('success', `Label printed for ${item.name || item.sku}`);
         } catch (err) {

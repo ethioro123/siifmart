@@ -96,15 +96,7 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
             format: labelFormat === 'QR' ? 'QR' : 'Barcode'
         });
 
-        let printHTML = labelHTML;
-        const scriptTag = '<script>window.onload = function() { setTimeout(function() { window.print(); }, 500); };</script>';
-        if (printHTML.includes('</body>')) {
-            printHTML = printHTML.replace('</body>', `${scriptTag}</body>`);
-        } else {
-            printHTML += scriptTag;
-        }
-
-        printHtmlContent(printHTML);
+        printHtmlContent(labelHTML);
         addNotification('success', `Location label ${humanLabel} ready!`);
     };    return (
         <div className="pb-12">
@@ -344,15 +336,7 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
                                                 showCategory: true
                                             });
 
-                                            let printHTML = labelHTML;
-                                            const scriptTag = '<script>window.onload = function() { setTimeout(function() { window.print(); }, 500); };</script>';
-                                            if (printHTML.includes('</body>')) {
-                                                printHTML = printHTML.replace('</body>', `${scriptTag}</body>`);
-                                            } else {
-                                                printHTML += scriptTag;
-                                            }
-
-                                            printHtmlContent(printHTML);
+                                             printHtmlContent(labelHTML);
                                             addNotification('success', `${printQty} Product label${printQty > 1 ? 's' : ''} ready!`);
                                         }}
                                         className={`flex-1 py-4 font-black rounded-2xl transition-all flex items-center justify-center gap-3 ${searchSku.trim()

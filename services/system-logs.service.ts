@@ -8,29 +8,27 @@ export const systemLogsService = {
         module: string;
         ip_address?: string;
     }) {
-        const { data: { user } } = await supabase.auth.getUser();
+
 
         // Map frontend log properties to actual Supabase system_logs database schema columns
+        // Actual columns: id, user_name (NOT NULL), action, details, module, ip_address, created_at
         const dbLog = {
-            user_id: user?.id || null,
+            user_name: log.user_name,
             action: log.action,
-            details: log.details ? `${log.user_name}: ${log.details}` : log.user_name,
+            details: log.details || null,
             module: log.module,
-            ip: log.ip_address || null
+            ip_address: log.ip_address || null
         };
 
-        const { data, error } = await supabase
+        const { error } = await supabase
             .from('system_logs')
-            .insert(dbLog)
-            .select('*');
+            .insert(dbLog);
 
         if (error) throw error;
-        
-        const createdRow = data && data[0] ? data[0] : null;
 
         return {
-            id: createdRow?.id || crypto.randomUUID(),
-            created_at: createdRow?.timestamp || new Date().toISOString(),
+            id: crypto.randomUUID(),
+            created_at: new Date().toISOString(),
             user_name: log.user_name,
             action: log.action,
             details: log.details || '',
@@ -43,8 +41,8 @@ export const systemLogsService = {
         let query = supabase
             .from('system_logs')
             .select('*')
-            // Order by timestamp since created_at does not exist in public.system_logs table
-            .order('timestamp', { ascending: false })
+            // Order by created_at which is the actual timestamp column in public.system_logs table
+            .order('created_at', { ascending: false })
             .limit(100);
 
         if (module) {
@@ -54,25 +52,14 @@ export const systemLogsService = {
         const { data, error } = await query;
         if (error) throw error;
         
-        return data.map((l: any) => {
-            // Parse username back from details if formatted as "UserName: Details"
-            let userName = 'System';
-            let details = l.details || '';
-            const colonIndex = details.indexOf(': ');
-            if (colonIndex > 0) {
-                userName = details.substring(0, colonIndex);
-                details = details.substring(colonIndex + 2);
-            }
-
-            return {
-                id: l.id,
-                created_at: l.timestamp,
-                user_name: userName,
-                action: l.action,
-                details: details,
-                module: l.module,
-                ip_address: l.ip
-            };
-        });
+        return data.map((l: any) => ({
+            id: l.id,
+            created_at: l.created_at,
+            user_name: l.user_name || 'System',
+            action: l.action,
+            details: l.details || '',
+            module: l.module,
+            ip_address: l.ip_address
+        }));
     }
 };

@@ -96,7 +96,7 @@ export const useTransfers = (deps: UseTransfersDeps) => {
                         siteId: transfer.destSiteId,
                         site_id: transfer.destSiteId,
                         priority: 'Normal',
-                        items: jobLineItems.reduce((acc, i) => acc + i.expectedQty, 0),
+                        items: Math.ceil(jobLineItems.reduce((acc, i) => acc + i.expectedQty, 0)),
                         lineItems: jobLineItems,
                         location: 'Receiving Dock',
                         orderRef: transfer.id,

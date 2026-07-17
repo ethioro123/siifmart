@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { isWeightBased, isVolumeBased } from '../../../utils/units';
 import { logger } from '../../../utils/logger';
+import { repairShipmentInventoryHelper } from './utils/receivingRepair';
 
 interface UsePOSReceivingProps {
     user: any;
@@ -53,7 +54,7 @@ export const usePOSReceiving = ({
         ));
     };
 
-    const handleSelectTransferForReceiving = (transferId: string) => {
+    const handleSelectTransferForReceiving = async (transferId: string) => {
         let transfer = transfers.find(t => t.id === transferId);
         const job = jobs.find(j => j.id === transferId);
 
@@ -62,12 +63,63 @@ export const usePOSReceiving = ({
         }
         if (!transfer) return;
 
-        // Internal driver check: POS cannot receive until internal driver marks delivery as completed
-        const isExt = ((job as any)?.deliveryMethod || (transfer as any)?.deliveryMethod || 'Internal') === 'External';
-        const isDone = ['delivered', 'completed', 'received'].includes(String((job as any)?.transferStatus || (transfer as any)?.transferStatus || (job as any)?.status || (transfer as any)?.status || '').toLowerCase());
+        const targetId = transferId;
+        const dispatchJob = jobs.find(j => j.type === 'DISPATCH' && (j.id === targetId || j.orderRef === targetId || (job as any)?.jobNumber === j.jobNumber || (job as any)?.orderRef === j.id));
+        const delMethod = (job as any)?.deliveryMethod || (transfer as any)?.deliveryMethod || (dispatchJob as any)?.deliveryMethod || 'Internal';
+        const isExt = delMethod === 'External';
+        const shippedAt = (job as any)?.shippedAt || (transfer as any)?.shippedAt || (dispatchJob as any)?.shippedAt;
+        const effTransferStatus = (job as any)?.transferStatus || (transfer as any)?.transferStatus || (dispatchJob as any)?.transferStatus || (job as any)?.status || (transfer as any)?.status;
+        const rawStat = String(effTransferStatus || '').toLowerCase().replace(/[-_]/g, '');
+        const isDone = ['delivered', 'completed', 'received'].includes(rawStat);
+        const isDeparted = ['shipped', 'intransit', 'dispatched', 'delivered', 'completed', 'received'].includes(rawStat) || !!shippedAt;
+
+        // 1. Internal Driver: POS cannot receive until internal driver marks delivery complete
         if (!isExt && !isDone) {
-            addNotification('alert', 'Internal driver must mark delivery complete before POS receiving can begin.');
+            addNotification('alert', t('posCommand.awaitingDriverDeliveryMsg') || 'Internal driver must mark delivery complete before POS receiving can begin.');
             return;
+        }
+
+        // 2. External Driver: Driver has no system access. Warehouse authority confirms departure at POS or departure already confirmed at origin.
+        if (isExt && !isDeparted) {
+            const WAREHOUSE_AUTHORITY_ROLES = [
+                'super_admin', 'admin', 'warehouse_manager', 'dispatch_manager',
+                'operations_manager', 'regional_manager', 'dispatcher',
+                'store_manager', 'inventory_manager', 'supervisor'
+            ];
+            const userRole = (user?.role || '').toLowerCase();
+            const hasAuthority = WAREHOUSE_AUTHORITY_ROLES.includes(userRole);
+
+            if (hasAuthority) {
+                try {
+                    const { wmsJobsService } = await import('../../../services/supabase.service');
+                    const timestamp = new Date().toISOString();
+                    const targetId = job?.id || transfer.id;
+                    await wmsJobsService.update(targetId, {
+                        status: 'In-Progress',
+                        transferStatus: 'Shipped',
+                        shippedAt: timestamp,
+                        assignedBy: user?.name || 'POS Warehouse Authority'
+                    } as any);
+
+                    if (job?.orderRef) {
+                        const parentJob = jobs.find(j => (j.id === job.orderRef || j.jobNumber === job.orderRef) && j.type === 'TRANSFER');
+                        if (parentJob) {
+                            await wmsJobsService.update(parentJob.id, {
+                                transferStatus: 'Shipped',
+                                shippedAt: timestamp,
+                                assignedBy: user?.name || 'POS Warehouse Authority'
+                            } as any);
+                        }
+                    }
+                    addNotification('success', t('posCommand.departureConfirmedExt') || 'External carrier departure confirmed.');
+                    await refreshData();
+                } catch (err: any) {
+                    logger.error('usePOSReceiving', 'Failed to confirm external departure:', err);
+                }
+            } else {
+                addNotification('alert', t('posCommand.awaitingDepartureAuthorityMsg') || 'Warehouse authority must confirm departure for external carrier before receiving can begin.');
+                return;
+            }
         }
 
         setSelectedTransferForReceiving(transferId);
@@ -399,77 +451,19 @@ export const usePOSReceiving = ({
     };
 
     const repairShipmentInventory = async (jobId: string) => {
-        const job = jobs.find(j => j.id === jobId);
-        if (!job) {
-            addNotification('alert', t('posCommand.recordNotFound'));
-            return;
-        }
-
-        const items = job.lineItems || (job as any).line_items || [];
-        if (items.length === 0) {
-            addNotification('alert', t('posCommand.noItemsInRecord'));
-            return;
-        }
-
-        addNotification('info', `${t('posCommand.startingRepair')} ${job.orderRef || job.id.substring(0, 8)}...`);
-
-        try {
-            const destSiteId = job.destSiteId || (job as any).dest_site_id || activeSite?.id;
-            let repairCount = 0;
-
-            for (const item of items) {
-                const received = item.receivedQty || (item as any).quantity || item.expectedQty || item.pickedQty ||
-                    (item as any).received_qty || (item as any).qty || 0;
-
-                if (received > 0) {
-                    const itemSku = item.sku?.trim()?.toUpperCase();
-                    const templateProduct = itemSku
-                        ? allProducts.find(p => p.sku?.trim()?.toUpperCase() === itemSku)
-                        : null;
-
-                    if (!templateProduct && !item.sku && !item.name) continue;
-
-                    const destProduct = allProducts.find(p =>
-                        (p.sku === (item.sku || templateProduct?.sku)) &&
-                        (p.siteId === destSiteId || p.site_id === destSiteId)
-                    );
-
-                    let targetId = destProduct?.id;
-
-                    if (!destProduct) {
-                        const created = await addProduct({
-                            name: item.name || templateProduct?.name || t('posCommand.restoredProduct'),
-                            sku: item.sku || templateProduct?.sku || 'N/A',
-                            price: templateProduct?.price || 0,
-                            costPrice: (templateProduct as any)?.costPrice || (templateProduct as any)?.cost || 0,
-                            stock: 0,
-                            unit: templateProduct?.unit || 'pcs',
-                            siteId: destSiteId,
-                            category: templateProduct?.category || t('posCommand.uncategorized'),
-                            productId: templateProduct?.productId || templateProduct?.id
-                        } as any);
-                        targetId = created?.id;
-                        repairCount++;
-                    }
-
-                    if (targetId) {
-                        await adjustStock(
-                            targetId,
-                            received,
-                            'IN',
-                            `${t('posCommand.startingRepair')}: ${formatJobId(job as any)}`,
-                            user?.name || t('posCommand.posRepair')
-                        );
-                    }
-                }
-            }
-
-            await refreshData();
-            addNotification('success', `${t('posCommand.repairComplete')} ${repairCount} missing records.`);
-        } catch (err: any) {
-            logger.error('usePOSReceiving', 'Repair failed:', err);
-            addNotification('alert', `${t('posCommand.repairFailed')} ${err.message}`);
-        }
+        await repairShipmentInventoryHelper({
+            jobId,
+            jobs,
+            allProducts,
+            activeSite,
+            user,
+            addProduct,
+            adjustStock,
+            refreshData,
+            addNotification,
+            formatJobId,
+            t
+        });
     };
 
     return {

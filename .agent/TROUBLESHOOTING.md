@@ -68,9 +68,33 @@
 | Symptom | Likely Cause | Files to Check | Fix Pattern |
 |---------|-------------|----------------|-------------|
 | PATCH/POST returns **400 Bad Request** | Sending unknown column names (camelCase fields not mapped to snake_case) | Relevant `.service.ts` `update()` method | Switch from `{ ...object }` spread to explicit allowlist. See RULES.md "Service Field Mapping" |
+| POST returns **400** with "null value violates not-null constraint" | Missing a NOT NULL column in the insert payload | `.service.ts` `create()` method, `/schemas/db-schema.md` | Check the schema registry for NOT NULL columns and add them to the insert |
 | "column X does not exist" in logs | New TS field added but service mapper not updated | `.service.ts` mapper function, `update()` allowlist | Add the field to both the `mapRow()` (read) and `update()` allowlist (write) |
+| INSERT returns **403 Forbidden** | Chaining `.select('*')` after `.insert()` triggers SELECT RLS policy | `.service.ts` insert method | Remove `.select('*')` or use `.select('id, created_at')` with minimal columns |
 | RLS blocking query | Policy mismatch | `/migrations/`, Supabase dashboard | Update RLS policy |
 | Insert returns 409 Conflict | Unique constraint violation | Migration that created the constraint | Check unique columns (code, site_number, barcode) |
+
+### First Response to Any Supabase 400/403/500 Error
+
+> **ALWAYS probe the live schema before editing service code.** Migration files may not match the live DB.
+
+**Step 1 — Identify the actual columns:**
+```typescript
+// In a scratch script, authenticate and probe:
+const cols = ['id', 'user_id', 'user_name', 'action', 'details', ...];
+for (const col of cols) {
+    const r = await supabase.from('table_name').select(col).limit(1);
+    console.log(`${col}: ${r.error ? '❌' : '✅'}`);
+}
+```
+
+**Step 2 — Map ALL mismatches in one pass:**
+Compare what the service sends vs what the live DB expects. Fix ALL column mismatches together — don't fix them one-by-one (each round costs a deploy/test cycle).
+
+**Step 3 — Update the schema registry:**
+After confirming the fix, update `/schemas/db-schema.md` with the actual columns so the next developer doesn't repeat the same probe.
+
+**Reusable template:** `/scratch/templates/probe_table_schema.ts`
 
 ## Field Mapping Issues
 

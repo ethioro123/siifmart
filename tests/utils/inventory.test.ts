@@ -130,3 +130,31 @@ describe('getExpiryAlerts', () => {
     expect(result.urgent).toHaveLength(1);
   });
 });
+
+// ============================================================================
+// PACKAGE SIZE NORMALIZATION
+// ============================================================================
+import { getEffectivePackageSize } from '../../utils/units';
+
+describe('getEffectivePackageSize', () => {
+  it('converts 1000g specified under KG unit to 1 KG', () => {
+    expect(getEffectivePackageSize('KG', '1000')).toBe(1);
+    expect(getEffectivePackageSize('KG', 1000)).toBe(1);
+  });
+
+  it('converts 1000ml specified under L unit to 1 L', () => {
+    expect(getEffectivePackageSize('L', '1000')).toBe(1);
+  });
+
+  it('preserves normal package sizes in KG or L', () => {
+    expect(getEffectivePackageSize('KG', '1')).toBe(1);
+    expect(getEffectivePackageSize('KG', '25')).toBe(25);
+    expect(getEffectivePackageSize('L', '0.5')).toBe(0.5);
+  });
+
+  it('preserves count-based units', () => {
+    expect(getEffectivePackageSize('UNIT', '5')).toBe(5);
+    expect(getEffectivePackageSize('PACK', '12')).toBe(12);
+  });
+});
+

@@ -151,7 +151,7 @@ export const TransferRequestModal: React.FC<TransferRequestModalProps> = ({
                 sourceSiteId: actualSourceSite,
                 destSiteId: transferDestSite,
                 lineItems,
-                items: lineItems.reduce((acc, curr) => acc + (curr.expectedQty || 0), 0),
+                items: Math.ceil(lineItems.reduce((acc, curr) => acc + (curr.expectedQty || 0), 0)),
                 priority: transferPriority,
                 notes: transferNote,
                 siteId: actualSourceSite

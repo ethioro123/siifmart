@@ -7,7 +7,7 @@ import { PackDetailsModal } from '../PackDetailsModal';
 import { ReturnToWarehouseModal } from '../../returns/ReturnToWarehouseModal';
 import { FulfillmentSuccessScreen } from '../../FulfillmentSuccessScreen';
 import { WMSJob } from '../../../../types';
-import { isWeightBased, isVolumeBased } from '../../../../utils/units';
+import { isWeightBased, isVolumeBased, getEffectivePackageSize } from '../../../../utils/units';
 import { wmsJobsService, inventoryRequestsService } from '../../../../services/supabase.service';
 import { logger } from '../../../../utils/logger';
 import { usePackLabelPrint } from '../hooks/usePackLabelPrint';
@@ -108,7 +108,9 @@ export const PackModalsContainer: React.FC<PackModalsContainerProps> = ({
         updatedLineItems[itemIndex] = {
             ...updatedLineItems[itemIndex],
             status: newStatus as any,
-            pickedQty: casesQty
+            pickedQty: casesQty,
+            packed: casesQty >= expectedQty,
+            packedQty: casesQty
         };
 
         const updatedJob = filteredJobs.find(j => j.id === selectedPackJob.id);
@@ -120,20 +122,25 @@ export const PackModalsContainer: React.FC<PackModalsContainerProps> = ({
         if (!selectedPackJob) return;
 
         const item = selectedPackJob.lineItems![itemIndex];
-        const product = products.find(p => (p.id === item.productId || p.sku === item.sku) && (p.siteId === selectedPackJob.siteId || p.site_id === selectedPackJob.siteId));
-        
+        // productId-first lookup, then site-scoped SKU, then any-site SKU fallback
+        const product = products.find(p => p.id === item.productId)
+            || products.find(p => (p.sku === item.sku) && (p.siteId === selectedPackJob.siteId || p.site_id === selectedPackJob.siteId))
+            || products.find(p => p.sku === item.sku);
+
+        // qty coming in is TOTAL MEASURE (e.g. 37 L). Convert to cases for storage.
+        const effectiveUnit = product?.unit || item.unit;
+        const effectiveSize = product?.size || item.size;
+        const sizeNum = getEffectivePackageSize(effectiveUnit, effectiveSize);
+        const isWeightVol = effectiveUnit ? (isWeightBased(effectiveUnit) || isVolumeBased(effectiveUnit)) : false;
+
         let casesQty = qty;
-        if (product) {
-            const unit = product.unit;
-            const isWeightVol = isWeightBased(unit) || isVolumeBased(unit);
-            const sizeNum = product.size ? parseFloat(product.size as string) : 0;
-            if (isWeightVol && sizeNum > 0) {
-                casesQty = qty / sizeNum;
-            }
+        if (isWeightVol && sizeNum > 1) {
+            // qty is in base measure (e.g. 37 L), convert to cases (37 / 20 = 1.85)
+            casesQty = qty / sizeNum;
         }
 
         const expectedQty = item.expectedQty || 1;
-        const newStatus = casesQty >= expectedQty ? 'Picked' : 'In-Progress';
+        const newStatus = casesQty >= expectedQty - 0.001 ? 'Picked' : 'In-Progress';
 
         await updateJobItem(selectedPackJob.id, itemIndex, newStatus, casesQty);
 
@@ -141,7 +148,9 @@ export const PackModalsContainer: React.FC<PackModalsContainerProps> = ({
         updatedLineItems[itemIndex] = {
             ...updatedLineItems[itemIndex],
             status: newStatus as any,
-            pickedQty: casesQty
+            pickedQty: casesQty,
+            packed: casesQty >= expectedQty - 0.001,
+            packedQty: casesQty
         };
 
         setSelectedPackJob({ ...selectedPackJob, lineItems: updatedLineItems, trackingNumber: selectedPackJob.trackingNumber });

@@ -15,6 +15,9 @@
 - **Logging**: Use `logger` from `/utils/logger.ts` — never raw `console.log` / `console.error`
 - **Error Boundaries**: New page routes MUST be wrapped in `<ModuleErrorBoundary moduleName="X">`
 - **Field Mapping**: Service `update()` methods MUST use explicit allowlists — never `{ ...object }` to Supabase
+- **DB Schema Registry**: Always verify columns against `/schemas/db-schema.md` — never trust migration files blindly
+- **RLS-Aware Queries**: Never chain `.select('*')` after `.insert()` — it triggers SELECT RLS and can cause 403
+- **Probe-First Debugging**: On any Supabase 400/403, probe live schema FIRST before editing code (see TROUBLESHOOTING.md)
 - **Design Tokens**: Use sand/emerald/amber palette (`#2C5E3B`, `#EAE5D9`, `amber-600`) — not old `cyber-*` tokens
 - **Mobile-First (POS/WMS)**: No `backdrop-blur` on scrollable elements, no `transition-all`, only animate `transform`/`opacity`, min 44px touch targets
 
@@ -72,6 +75,9 @@ No file may exceed **500 lines**. Before editing a large file, split it using th
 - ❌ Don't spread full objects into Supabase — use explicit column allowlists
 - ❌ Don't add a TS field without updating the service mapper + allowlist
 - ❌ Don't use old `cyber-*` design tokens — use sand/emerald/amber palette
+- ❌ Don't chain `.select('*')` after `.insert()` — use insert-only or explicit columns
+- ❌ Don't trust migration files as ground truth — verify against `/schemas/db-schema.md`
+- ❌ Don't fix Supabase column errors one-by-one — probe ALL columns first, fix in one pass
 
 ## References
 - Full rules: `.agent/RULES.md`

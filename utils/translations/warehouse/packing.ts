@@ -60,6 +60,7 @@ export const packing: TranslationBlock = {
     overpackDesc: { en: 'More items present than on the manifest', am: 'ከማኒፌስቱ በላይ እቃዎች ተገኝተዋል', or: 'Meeshaleen maanifeestii oli qaamaan argaman' },
     wrongItem: { en: 'Wrong Item', am: 'የተሳሳተ እቃ', or: 'Meeshaa Dogoggoraa' },
     wrongItemDesc: { en: 'A different SKU is in the box', am: 'የተለየ SKU በሳጥኑ ውስጥ አለ', or: 'SKU biraa saanduqa keessa jira' },
+    damaged: { en: 'Damaged', am: 'የተጎዳ', or: 'Kan Miidhame' },
     damagedDesc: { en: 'Items are damaged and cannot be packed', am: 'እቃዎቹ ተጎድተዋል እና ሊታሸጉ አይችሉም', or: 'Meeshaleen miidhamanii jiru, saamamuun hin danda\'amu' },
     packDiscrepancyLogged: { en: 'Pack discrepancy logged for {jobId}. Quantities updated.', am: 'የማሸጊያ ልዩነት ለ {jobId} ተመዝግቧል። ብዛቶች ተዘምነዋል።', or: 'Garaagarummaan hojii {jobId} galmeeffameera. Lakkoofsi fooyya\'eera.' },
     failedToLogDiscrepancy: { en: 'Failed to log discrepancy: ', am: 'ልዩነቱን መመዝገብ አልተቻለም፡ ', or: 'Garaagarummaa galmeessuun hin danda\'amne: ' },

@@ -1,7 +1,7 @@
 import React from 'react';
 import { ChevronDown } from 'lucide-react';
 import { Product, Site } from '../../../types';
-import { getSellUnit } from '../../../utils/units';
+import { getSellUnit, getEffectivePackageSize } from '../../../utils/units';
 
 export type LocationDetail = { location: string; stock: number; siteId: string | null; productId: string };
 
@@ -66,7 +66,7 @@ export const getInventoryValue = (product: Product): number => {
     if (!product.price || product.price <= 0 || !product.stock) return 0;
     const unitDef = getSellUnit(product.unit || '');
     if (unitDef.category === 'weight' || unitDef.category === 'volume') {
-        const sizeNum = parseFloat(product.size || '0');
+        const sizeNum = getEffectivePackageSize(product.unit, product.size);
         if (sizeNum > 0) {
             return product.stock * sizeNum * product.price;
         }
@@ -78,7 +78,7 @@ export const getDisplayStock = (product: Product): number => {
     if (!product.stock) return 0;
     const unitDef = getSellUnit(product.unit || '');
     if (unitDef.category === 'weight' || unitDef.category === 'volume') {
-        const sizeNum = parseFloat(product.size || '0');
+        const sizeNum = getEffectivePackageSize(product.unit, product.size);
         if (sizeNum > 0) {
             return product.stock * sizeNum;
         }

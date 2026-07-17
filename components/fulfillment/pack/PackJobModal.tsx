@@ -8,7 +8,7 @@ import { WMSJob, User, Site, Product } from '../../../types';
 import { formatJobId } from '../../../utils/jobIdFormatter';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { ProgressBar } from '../../shared/ProgressBar';
-import { isWeightBased, isVolumeBased } from '../../../utils/units';
+import { getProductForItem, getItemMeasureQty as getItemMeasureQtyShared } from './utils/packItemHelpers';
 import { PackJobMaterialsPanel } from './components/PackJobMaterialsPanel';
 import { PackJobHeader } from './components/PackJobHeader';
 
@@ -30,27 +30,7 @@ interface PackJobModalProps {
     onFlagDiscrepancy?: () => void;
 }
 
-const getProductHelper = (item: any, job: WMSJob, products: Product[]) => {
-    const targetSiteId = job.siteId || (job as any).site_id;
-    return products.find(p => (p.id === item.productId || p.sku === item.sku) && (p.siteId === targetSiteId || p.site_id === targetSiteId));
-};
 
-const getItemMeasureQtyHelper = (item: any, job: WMSJob, products: Product[], product?: any) => {
-    if ((item as any).requestedMeasureQty !== undefined && (item as any).requestedMeasureQty !== null) {
-        return (item as any).requestedMeasureQty;
-    }
-    const prod = product || getProductHelper(item, job, products);
-    if (prod) {
-        const unit = prod.unit;
-        const isWeightVol = isWeightBased(unit) || isVolumeBased(unit);
-        const sizeNum = prod.size ? parseFloat(prod.size as string) : 0;
-        if (isWeightVol && sizeNum > 0) {
-            const expected = item.expectedQty || (item as any).quantity || 0;
-            return expected * sizeNum;
-        }
-    }
-    return null;
-};
 
 export const PackJobModal: React.FC<PackJobModalProps> = ({
     isOpen,
@@ -91,16 +71,17 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
 
     if (!isOpen) return null;
 
-    const getProduct = (item: any) => getProductHelper(item, job, products);
-    const getItemMeasureQty = (item: any, product?: any) => getItemMeasureQtyHelper(item, job, products, product);
+    const getProduct = (item: any) => getProductForItem(item, job, products);
+    const getItemMeasureQty = (item: any, product?: any) => getItemMeasureQtyShared(item, job, products, product);
 
     const destSite = job.destSiteId ? sites.find(s => s.id === job.destSiteId) : undefined;
     const totalItems = job.lineItems?.length || 0;
     const completedItems = job.lineItems?.filter(i => {
-        const isDone = i.status === 'Completed' || (i.status === 'Picked' && (job as any).type !== 'PACK');
+        // In Pack context: Picked = verified, packed = confirmed via scanner
+        if (i.status === 'Completed' || i.status === 'Picked' || (i as any).packed === true) return true;
         const measureQty = getItemMeasureQty(i);
         const requiredAmount = measureQty || i.expectedQty || 1;
-        return isDone || (i.pickedQty || 0) >= requiredAmount;
+        return (i.pickedQty || 0) >= requiredAmount - 0.001;
     }).length || 0;
     const progressPercent = totalItems > 0 ? (completedItems / totalItems) * 100 : 0;
     const isFullyPacked = completedItems === totalItems && totalItems > 0;
@@ -232,7 +213,7 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
                             {/* Job Progress Pill */}
                             <div className="flex items-center justify-between md:justify-end gap-3 shrink-0 bg-white dark:bg-white/[0.02] border border-[#E2DCCE]/65 dark:border-white/5 px-4 py-2 md:py-3 rounded-xl">
                                 <span className="text-[10px] md:text-xs font-black text-gray-900 dark:text-white uppercase tracking-widest">
-                                    <span className="text-gray-900 dark:text-white">{completedItems}</span> / {totalItems} {t('warehouse.picking')}
+                                    <span className="text-gray-900 dark:text-white">{completedItems}</span> / {totalItems} {t('warehouse.packed') || 'Packed'}
                                 </span>
                                 <div className="w-20 md:w-24 h-2 bg-gray-250 dark:bg-white/5 rounded-full overflow-hidden shrink-0">
                                     <ProgressBar
@@ -263,7 +244,8 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
                                 const product = getProduct(item);
                                 const measureQty = getItemMeasureQty(item, product);
                                 const requiredAmount = measureQty || item.expectedQty || 1;
-                                const isDone = item.status === 'Completed' || (item.status === 'Picked' && (job as any).type !== 'PACK') || (item.pickedQty || 0) >= requiredAmount;
+                                // Picked = verified in pick phase, packed = confirmed in pack scanner
+                                const isDone = item.status === 'Completed' || item.status === 'Picked' || (item as any).packed === true || (item.pickedQty || 0) >= requiredAmount - 0.001;
                                 const isScanningThis = scannedItemIndex === idx;
 
                                 return (
@@ -313,11 +295,12 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
                                                 <div className="text-right">
                                                     <span className="text-[10px] md:text-[9px] text-gray-550 dark:text-gray-550 font-black uppercase tracking-[0.2em] block mb-0 leading-none md:mb-1">{t('warehouse.expected').slice(0, 3)}</span>
                                                     {(() => {
-                                                        let expected = item.expectedQty || (item as any).quantity || 0;
+                                                        const expected = item.expectedQty || (item as any).quantity || 0;
                                                         if (measureQty) {
-                                                            const unitDef = product?.unit ? product.unit : '';
-                                                            const sizeNum = product?.size ? parseFloat(product.size as string) : 0;
-                                                            return <span className="text-sm md:text-lg font-mono font-black text-gray-900 dark:text-white leading-none">{expected} x {sizeNum} <span className="hidden sm:inline text-[8px] md:text-[10px] text-gray-550 dark:text-gray-400 font-bold uppercase tracking-widest">{unitDef}</span></span>;
+                                                            const effUnit = product?.unit || item.unit || '';
+                                                            const effSize = product?.size || item.size;
+                                                            const sizeNum = effSize ? parseFloat(effSize as string) : 0;
+                                                            return <span className="text-sm md:text-lg font-mono font-black text-gray-900 dark:text-white leading-none">{expected} x {sizeNum} <span className="hidden sm:inline text-[8px] md:text-[10px] text-gray-550 dark:text-gray-400 font-bold uppercase tracking-widest">{effUnit}</span></span>;
                                                         }
                                                         return item.orderedQty && item.orderedQty > expected ? (
                                                             <div className="flex flex-col items-end">
@@ -330,16 +313,17 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
                                                     })()}
                                                 </div>
                                                 <div className="text-right">
-                                                    <span className="text-[10px] md:text-[9px] text-gray-550 dark:text-gray-555 font-black uppercase tracking-[0.2em] block mb-0 leading-none md:mb-1">{t('warehouse.picking').slice(0, 3)}</span>
+                                                    <span className="text-[10px] md:text-[9px] text-gray-550 dark:text-gray-555 font-black uppercase tracking-[0.2em] block mb-0 leading-none md:mb-1">{t('warehouse.packed') ? (t('warehouse.packed') as string).slice(0, 3) : 'Pac'}</span>
                                                     {(() => {
                                                         const expected = item.expectedQty || (item as any).quantity || 0;
                                                         const picked = item.pickedQty || 0;
 
                                                         if (measureQty) {
-                                                            const unitDef = product?.unit ? product.unit : '';
-                                                            const sizeNum = product?.size ? parseFloat(product.size as string) : 0;
+                                                            const effUnit = product?.unit || item.unit || '';
+                                                            const effSize = product?.size || item.size;
+                                                            const sizeNum = effSize ? parseFloat(effSize as string) : 0;
                                                             const displayPickedCases = picked <= expected ? picked : (sizeNum > 0 ? picked / sizeNum : picked);
-                                                            return <span className="text-sm md:text-lg font-mono font-black text-emerald-700 dark:text-emerald-400 leading-none">{displayPickedCases} x {sizeNum} <span className="hidden sm:inline text-[8px] md:text-[10px] text-emerald-600/60 dark:text-emerald-500/60 font-bold uppercase tracking-widest">{unitDef}</span></span>;
+                                                            return <span className="text-sm md:text-lg font-mono font-black text-emerald-700 dark:text-emerald-400 leading-none">{displayPickedCases} x {sizeNum} <span className="hidden sm:inline text-[8px] md:text-[10px] text-emerald-600/60 dark:text-emerald-500/60 font-bold uppercase tracking-widest">{effUnit}</span></span>;
                                                         }
                                                         return <span className={`text-sm md:text-lg font-mono font-black leading-none ${isDone ? 'text-green-600 dark:text-green-400' : 'text-gray-400 dark:text-gray-555'}`}>{picked}</span>;
                                                     })()}
@@ -357,7 +341,7 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
                                                             </button>
                                                         )}
                                                         <div className={`px-2.5 py-1.5 rounded-xl text-[9px] md:text-xs font-black uppercase tracking-wider border ${isDone ? 'bg-green-500/10 border-green-500/20 text-green-600 dark:text-green-400' : 'bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-405 dark:text-gray-500'}`}>
-                                                            {isDone ? '✓' : '...'} <span className="hidden sm:inline">{isDone ? ` ${t('warehouse.picking')}` : ` ${t('warehouse.pending')}`}</span>
+                                                            {isDone ? '✓' : '...'} <span className="hidden sm:inline">{isDone ? ` ${t('warehouse.packed') || 'Packed'}` : ` ${t('warehouse.pending')}`}</span>
                                                         </div>
                                                     </div>
                                                 )}

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { X, Package, Box, CheckCircle, XCircle, Trash2, Truck, Clock, Info, ArrowRight, Loader2, AlertTriangle } from 'lucide-react';
 import { WMSJob, Product, User, Site, ReceivingItem } from '../../../types';
 import { formatJobId } from '../../../utils/jobIdFormatter';
-import { getSellUnit } from '../../../utils/units';
+import { getSellUnit, getEffectivePackageSize } from '../../../utils/units';
 import { supabase } from '../../../lib/supabase';
 import { productsService } from '../../../services/products.service';
 import { useLanguage } from '../../../contexts/LanguageContext';
@@ -174,7 +174,7 @@ export const TransferJobDetails: React.FC<TransferJobDetailsProps> = ({
                         <div className="space-y-4">
                             {selectedJob.lineItems?.map((item: any, idx: number) => {
                                 const product = products.find(p => p.id === item.productId || p.sku === item.sku); const itemQty = item.expectedQty || item.quantity || item.pickedQty || 0; const itemSku = item.sku || product?.sku || 'N/A';
-                                const itemUnit = getSellUnit(item.unit || product?.unit); const sizeNum = parseFloat(product?.size || '0'); const isWeightVol = (itemUnit.category === 'weight' || itemUnit.category === 'volume') && sizeNum > 0;
+                                const itemUnit = getSellUnit(item.unit || product?.unit); const sizeNum = getEffectivePackageSize(item.unit || product?.unit, product?.size || item.size); const isWeightVol = (itemUnit.category === 'weight' || itemUnit.category === 'volume') && sizeNum > 0;
                                 const expectedMeasure = isWeightVol ? (item.requestedMeasureQty !== undefined ? item.requestedMeasureQty : (itemQty * sizeNum)) : itemQty;
                                 const showReceived = item.receivedQty !== undefined && ['Received', 'Delivered', 'Completed'].some(s => s === selectedJob.transferStatus || s === selectedJob.status);
                                 const hasDiscrepancy = showReceived && item.receivedQty !== expectedMeasure; const isDone = showReceived && !hasDiscrepancy;

@@ -34,7 +34,7 @@ export const PackDiscrepancyModal: React.FC<PackDiscrepancyModalProps> = ({
         { id: 'underpack' as const, label: t('warehouse.packing.underpack'), desc: t('warehouse.packing.underpackDesc'), color: 'text-orange-500' },
         { id: 'overpack' as const, label: t('warehouse.packing.overpack'), desc: t('warehouse.packing.overpackDesc'), color: 'text-blue-500' },
         { id: 'wrong_item' as const, label: t('warehouse.packing.wrongItem'), desc: t('warehouse.packing.wrongItemDesc'), color: 'text-purple-500' },
-        { id: 'damaged' as const, label: t('warehouse.picking.damaged') || 'Damaged', desc: t('warehouse.packing.damagedDesc'), color: 'text-red-500' },
+        { id: 'damaged' as const, label: t('warehouse.packing.damaged') || 'Damaged', desc: t('warehouse.packing.damagedDesc'), color: 'text-red-500' },
     ];
 
     const [lines, setLines] = useState<PackDiscrepLine[]>([]);

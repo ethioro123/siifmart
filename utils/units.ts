@@ -3,88 +3,10 @@
 // Standardized selling units for grocery/retail operations
 // ══════════════════════════════════════════════════════════════════
 
-export interface SellUnit {
-    code: string;
-    label: string;
-    shortLabel: string; // Compact label for POS/cart display
-    allowDecimal: boolean;
-    step: number; // Input step value (1 for integer, 0.01 for decimal)
-    category: 'count' | 'weight' | 'volume';
-    conversionBase?: string; // Base unit for auto-conversion (e.g., G -> KG)
-    conversionFactor?: number; // e.g., 1000 (1000g = 1kg)
-}
+import { SELL_UNITS, legacyMap, SellUnit } from './units/unitDefinitions';
 
-/**
- * Master list of selling units.
- * These are the units a product can be SOLD in at the point of sale.
- */
-export const SELL_UNITS: SellUnit[] = [
-    // ── COUNT-BASED (no decimals) ──
-    {
-        code: 'UNIT',
-        label: 'Unit (Each)',
-        shortLabel: 'ea',
-        allowDecimal: false,
-        step: 1,
-        category: 'count',
-    },
-    {
-        code: 'PACK',
-        label: 'Pack',
-        shortLabel: 'pk',
-        allowDecimal: false,
-        step: 1,
-        category: 'count',
-    },
-    {
-        code: 'DOZEN',
-        label: 'Dozen',
-        shortLabel: 'dz',
-        allowDecimal: false,
-        step: 1,
-        category: 'count',
-    },
-
-    // ── WEIGHT-BASED (decimals allowed) ──
-    {
-        code: 'KG',
-        label: 'Kilogram',
-        shortLabel: 'kg',
-        allowDecimal: true,
-        step: 0.01,
-        category: 'weight',
-    },
-    {
-        code: 'G',
-        label: 'Gram',
-        shortLabel: 'g',
-        allowDecimal: true,
-        step: 1,
-        category: 'weight',
-        conversionBase: 'KG',
-        conversionFactor: 1000,
-    },
-
-    // ── VOLUME-BASED (decimals allowed) ──
-    {
-        code: 'L',
-        label: 'Litre',
-        shortLabel: 'L',
-        allowDecimal: true,
-        step: 0.01,
-        category: 'volume',
-    },
-    {
-        code: 'ML',
-        label: 'Millilitre',
-        shortLabel: 'ml',
-        allowDecimal: true,
-        step: 1,
-        category: 'volume',
-        conversionBase: 'L',
-        conversionFactor: 1000,
-    },
-];
+export { SELL_UNITS, legacyMap };
+export type { SellUnit };
 
 /** All unit codes as a type */
 export type SellUnitCode = typeof SELL_UNITS[number]['code'];
@@ -101,31 +23,6 @@ export const DEFAULT_UNIT: SellUnitCode = 'UNIT';
 export const getSellUnit = (code?: string | null): SellUnit => {
     if (!code) return SELL_UNITS[0];
     const normalized = code.toUpperCase().trim();
-    // Handle legacy values from the old system
-    const legacyMap: Record<string, string> = {
-        'PCS': 'UNIT',
-        'EA': 'UNIT',
-        'EACH': 'UNIT',
-        'PIECE': 'UNIT',
-        'PIECES': 'UNIT',
-        'KILOGRAM': 'KG',
-        'KILOGRAMS': 'KG',
-        'GRAM': 'G',
-        'GRAMS': 'G',
-        'LITRE': 'L',
-        'LITER': 'L',
-        'LITRES': 'L',
-        'LITERS': 'L',
-        'MILLILITRE': 'ML',
-        'MILLILITER': 'ML',
-        'MILLILITRES': 'ML',
-        'MILLILITERS': 'ML',
-        'CL': 'ML', // centilitres → ml (approximate for simplicity)
-        'MG': 'G',  // milligrams → g (approximate for simplicity)
-        'M': 'UNIT', // meters not relevant, default
-        'CM': 'UNIT',
-        'MM': 'UNIT',
-    };
     const mapped = legacyMap[normalized] || normalized;
     return SELL_UNITS.find(u => u.code === mapped) || SELL_UNITS[0];
 };
@@ -135,12 +32,17 @@ export const isDecimalAllowed = (code?: string | null): boolean => {
     return getSellUnit(code).allowDecimal;
 };
 
-/** Check if a unit is weight-based (needs scale input at POS) */
+/** Check if a unit allows decimal quantities */
+export const allowsDecimal = (code?: string | null): boolean => {
+    return getSellUnit(code).allowDecimal;
+};
+
+/** Check if a unit is weight-based (sold by weight like kg, lb) */
 export const isWeightBased = (code?: string | null): boolean => {
     return getSellUnit(code).category === 'weight';
 };
 
-/** Check if a unit is volume-based */
+/** Check if a unit is volume-based (sold by volume like L, ml, gal) */
 export const isVolumeBased = (code?: string | null): boolean => {
     return getSellUnit(code).category === 'volume';
 };
@@ -151,11 +53,14 @@ export const needsQuantityPrompt = (code?: string | null): boolean => {
     return unit.allowDecimal; // Any decimal unit needs manual entry
 };
 
+/** Get the appropriate input step attribute for a unit */
+export const getUnitStep = (code?: string | null): number => {
+    return getSellUnit(code).step;
+};
+
 /**
  * Format a quantity with its unit for display.
  * e.g., formatQuantityWithUnit(1.25, 'KG') → "1.25 kg"
- * e.g., formatQuantityWithUnit(3, 'UNIT') → "3"
- * e.g., formatQuantityWithUnit(2, 'PACK') → "2 pk"
  */
 export const formatQuantityWithUnit = (qty: number, code?: string | null): string => {
     const unit = getSellUnit(code);
@@ -167,11 +72,28 @@ export const formatQuantityWithUnit = (qty: number, code?: string | null): strin
     return `${formatted} ${unit.shortLabel}`;
 };
 
-/**
- * Format a price with its unit for display.
- * e.g., formatPricePerUnit(355, 'KG', 'ETB') → "ETB 355/kg"
- * e.g., formatPricePerUnit(50, 'UNIT', 'ETB') → "ETB 50"
- */
+/** Format a quantity with its unit label */
+export const formatUnitQty = (
+    qty: number,
+    unitCode?: string | null,
+    options?: { showShortLabel?: boolean; formatDecimals?: boolean }
+): string => {
+    const unit = getSellUnit(unitCode);
+    const label = options?.showShortLabel ? unit.shortLabel : unit.label;
+
+    if (!unit.allowDecimal) {
+        return `${Math.round(qty)} ${label}`;
+    }
+
+    if (options?.formatDecimals !== false) {
+        const formatted = Number.isInteger(qty) ? qty.toString() : qty.toFixed(2).replace(/\.?0+$/, '');
+        return `${formatted} ${label}`;
+    }
+
+    return `${qty} ${label}`;
+};
+
+/** Format a price with its unit for display */
 export const formatPricePerUnit = (price: number, code?: string | null, currency?: string): string => {
     const unit = getSellUnit(code);
     const prefix = currency ? `${currency} ` : '';
@@ -179,10 +101,7 @@ export const formatPricePerUnit = (price: number, code?: string | null, currency
     return `${prefix}${price.toLocaleString()}/${unit.shortLabel}`;
 };
 
-/**
- * Validate a quantity against its unit rules.
- * Returns null if valid, or an error message string.
- */
+/** Validate a quantity against its unit rules */
 export const validateQuantity = (qty: number, code?: string | null): string | null => {
     const unit = getSellUnit(code);
     if (qty <= 0) return 'Quantity must be greater than 0';
@@ -192,43 +111,28 @@ export const validateQuantity = (qty: number, code?: string | null): string | nu
     return null;
 };
 
-/**
- * Clamp/round a quantity to match the unit's rules.
- * Decimal units get rounded to 2 decimal places.
- * Integer units get floored.
- */
+/** Normalize/round quantity based on decimal permissions */
 export const normalizeQuantity = (qty: number, code?: string | null): number => {
     const unit = getSellUnit(code);
     if (!unit.allowDecimal) return Math.max(1, Math.floor(qty));
     return Math.max(unit.step, Math.round(qty * 100) / 100);
 };
 
-/**
- * Get grouped units for organized dropdowns.
- */
+/** Get grouped units for dropdown menus */
 export const getGroupedUnits = () => ({
     count: SELL_UNITS.filter(u => u.category === 'count'),
     weight: SELL_UNITS.filter(u => u.category === 'weight'),
     volume: SELL_UNITS.filter(u => u.category === 'volume'),
 });
 
-/**
- * Formats a product's size with its correct physical unit.
- * Priority: customAttributes.physical.sizeType → customAttributes.physical.unit → sell unit label (only for weight/volume).
- * Count-based units (UNIT, PACK, DOZEN) never show "ea"/"pk"/"dz" as a size suffix — those are meaningless for physical sizes.
- * e.g., size: "200", unit: "UNIT", customAttributes.physical.sizeType: "g" → "200 g"
- * e.g., size: "200", unit: "UNIT", no physical sizeType → "200"
- * e.g., size: "500", unit: "ML" → "500 ml"
- */
+/** Format a product size display string */
 export const formatProductSize = (product?: { size?: string | number; unit?: string; customAttributes?: any; custom_attributes?: any } | null): string => {
     if (!product || product.size === undefined || product.size === null || product.size === '') return '';
     const customAttrs = product.customAttributes || product.custom_attributes;
-    // First: use the physical sizeType from custom attributes (e.g. "g", "ml", "kg")
     const physicalType = customAttrs?.physical?.sizeType || customAttrs?.physical?.unit || '';
     if (physicalType) {
         return `${product.size} ${physicalType}`.trim();
     }
-    // Fallback: for weight/volume sell units, use the sell unit label; for count-based units, show size alone
     if (product.unit) {
         const unitDef = getSellUnit(product.unit);
         if (unitDef.category !== 'count') {
@@ -238,3 +142,19 @@ export const formatProductSize = (product?: { size?: string | number; unit?: str
     return `${product.size}`;
 };
 
+/**
+ * Normalizes and extracts the effective package size multiplier.
+ * E.g., if unit is 'KG' and size is '1000' (meaning 1000g), returns 1 (1 KG).
+ */
+export const getEffectivePackageSize = (unit?: string | null, rawSize?: string | number | null): number => {
+    if (!rawSize) return 1;
+    const parsed = typeof rawSize === 'number' ? rawSize : parseFloat(rawSize as string);
+    if (isNaN(parsed) || parsed <= 0) return 1;
+
+    const sellUnit = getSellUnit(unit);
+    if ((sellUnit.code === 'KG' || sellUnit.code === 'L' || sellUnit.code === 'TON' || sellUnit.code === 'QTL' || sellUnit.code === 'GAL') && parsed >= 100) {
+        return parsed / 1000;
+    }
+
+    return parsed;
+};

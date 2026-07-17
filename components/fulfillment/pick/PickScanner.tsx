@@ -6,11 +6,14 @@ import { normalizeLocation } from '../../../utils/locationTracking';
 import { formatJobId } from '../../../utils/jobIdFormatter';
 import { decodeLocation, isLocationBarcode, extractPrefixFromBarcode, extractSkuFromScan } from '../../../utils/locationEncoder';
 import { useScanOnly } from '../../../hooks/useScanOnly';
-import { isWeightBased, isVolumeBased, getSellUnit } from '../../../utils/units';
+import { isWeightBased, isVolumeBased, getSellUnit, getEffectivePackageSize, SELL_UNITS } from '../../../utils/units';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { PickScannerPickedList } from './components/PickScannerPickedList';
 import { PickScannerSummary } from './components/PickScannerSummary';
 import { PickScannerInstructionPanel } from './components/PickScannerInstructionPanel';
+import { PickScannerSubmitButton } from './components/PickScannerSubmitButton';
+import { PickScannerHeader } from './components/PickScannerHeader';
+import { PickScannerForm } from './components/PickScannerForm';
 
 const normalizeSku = (s: string) => s.replace(/[-\/\s]/g, '').toUpperCase();
 
@@ -43,6 +46,7 @@ export const PickScanner: React.FC<PickScannerProps> = ({
     const [step, setStep] = useState<'LOCATION' | 'ITEM' | 'QUANTITY'>('LOCATION');
     const [inputVal, setInputVal] = useState('');
     const [qtyVal, setQtyVal] = useState('');
+    const [selectedUnit, setSelectedUnit] = useState<string>('UNIT');
     const [shortPickMode, setShortPickMode] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
     const [showError, setShowError] = useState(false);
@@ -73,7 +77,7 @@ export const PickScanner: React.FC<PickScannerProps> = ({
         if (prod) {
             const unit = prod.unit;
             const isWeightVol = isWeightBased(unit) || isVolumeBased(unit);
-            const sizeNum = prod.size ? parseFloat(prod.size as string) : 0;
+            const sizeNum = getEffectivePackageSize(unit, prod.size || item.size);
             if (isWeightVol && sizeNum > 0) {
                 const expected = item.expectedQty || (item as any).quantity || 0;
                 return expected * sizeNum;
@@ -213,25 +217,51 @@ export const PickScanner: React.FC<PickScannerProps> = ({
             }
 
             playBeep('success');
+            const prod = product || getProduct(currentItem);
+            const measureQty = getItemMeasureQty(currentItem, prod);
+            setQtyVal(measureQty !== null ? measureQty.toString() : (currentItem?.expectedQty || 1).toString());
             if (shortPickMode) {
                 setIsItemMatched(true);
                 setMatchedBarcode(val);
+                setSelectedUnit(prod?.unit || currentItem?.unit || 'UNIT');
                 setStep('QUANTITY');
             } else {
                 await executePick(val);
             }
         } else if (step === 'QUANTITY') {
             const qty = parseFloat(qtyVal);
-            const maxExpected = currentItem?.expectedQty || 1;
+            const maxExpectedCases = currentItem?.expectedQty || 1;
             const prod = getProduct(currentItem);
-            const sizeNum = prod?.size ? parseFloat(prod.size as string) : 0;
+            const sizeNum = getEffectivePackageSize(prod?.unit || currentItem?.unit, prod?.size || currentItem?.size);
             const unitDef = prod?.unit ? getSellUnit(prod.unit) : null;
             const isWeightVol = unitDef && (unitDef.category === 'weight' || unitDef.category === 'volume');
-            const expectedMeasureQty = getItemMeasureQty(currentItem, prod);
+            const expectedMeasureQty = getItemMeasureQty(currentItem, prod) || (sizeNum > 0 ? maxExpectedCases * sizeNum : maxExpectedCases);
 
-            const displayMax = isWeightVol && sizeNum > 0 ? expectedMeasureQty : maxExpected;
+            const selUnitDef = getSellUnit(selectedUnit);
 
-            if (isNaN(qty) || qty <= 0 || qty > displayMax) {
+            // Explicit unit conversion based on selectedUnit:
+            let finalQty = qty;
+            if (isWeightVol && sizeNum > 0) {
+                if (selUnitDef.category === 'count') {
+                    // User entered cases/packaging count (e.g. 2.25 cases) -> 2.25 * 20 = 45 kg
+                    finalQty = qty * sizeNum;
+                } else if (selUnitDef.code === 'G' || selUnitDef.code === 'ML' || selUnitDef.code === 'MG') {
+                    // User entered sub-scale units (e.g. 45000 g) -> 45000 / 1000 = 45 kg
+                    const factor = selUnitDef.conversionFactor || 1000;
+                    finalQty = qty / factor;
+                } else {
+                    // User entered direct base measure (e.g. 45 kg) -> 45 kg
+                    finalQty = qty;
+                    // SMART FALLBACK: If they typed the exact case count (e.g. 1.85) but forgot to change unit to cases
+                    if (Math.abs(qty - maxExpectedCases) < 0.005) {
+                        finalQty = maxExpectedCases * sizeNum;
+                    }
+                }
+            }
+
+            const displayMax = isWeightVol && sizeNum > 0 ? expectedMeasureQty : maxExpectedCases;
+
+            if (isNaN(finalQty) || finalQty <= 0 || finalQty > displayMax + 0.001) {
                 playBeep('error');
                 setErrorMsg(t('warehouse.picking.invalidQuantityRange').replace('{max}', String(displayMax)));
                 setShowError(true);
@@ -239,12 +269,12 @@ export const PickScanner: React.FC<PickScannerProps> = ({
                 return;
             }
 
-            if (qty < displayMax) {
-                const confirmed = window.confirm(t('warehouse.picking.shortPickConfirmPrompt').replace('{qty}', String(qty)).replace('{expected}', String(displayMax)));
+            if (finalQty < displayMax - 0.001) {
+                const confirmed = window.confirm(t('warehouse.picking.shortPickConfirmPrompt').replace('{qty}', String(finalQty)).replace('{expected}', String(displayMax)));
                 if (!confirmed) return;
             }
 
-            await executePick(matchedBarcode, qty);
+            await executePick(matchedBarcode, finalQty);
         }
     };
 
@@ -310,173 +340,51 @@ export const PickScanner: React.FC<PickScannerProps> = ({
                 {/* Scrollable Content Container */}
                 <div className="absolute inset-0 overflow-y-auto overflow-x-hidden flex flex-col items-center p-6 pb-32 w-full">
 
-                    {/* Icon Circle */}
-                    <div className={`w-32 h-32 rounded-full border-4 flex items-center justify-center mb-8 shadow-2xl z-10 transition-all duration-500 bg-white dark:bg-transparent ${showSuccess
-                        ? 'border-green-400 dark:bg-green-400/20 shadow-green-400/40 scale-110'
-                        : showError
-                            ? 'border-red-500 dark:bg-red-500/20 shadow-red-500/40 scale-110 animate-shake'
-                            : step === 'LOCATION'
-                                ? 'border-[#2C5E3B] dark:bg-[#2C5E3B]/10 shadow-[#2C5E3B]/20'
-                                : 'border-[#A9CBA2] dark:bg-[#A9CBA2]/10 shadow-[#A9CBA2]/40'
-                        }`}>
-                        {showSuccess ? (
-                            <CheckCircle size={64} className="text-green-500 dark:text-green-400 animate-bounce" />
-                        ) : showError ? (
-                            <AlertTriangle size={64} className="text-red-500" />
-                        ) : step === 'LOCATION' ? (
-                            <MapIcon size={64} className="text-[#2C5E3B] dark:text-[#A9CBA2] drop-shadow-[0_0_10px_rgba(44,94,59,0.5)]" />
-                        ) : (
-                            <Package size={64} className="text-[#2C5E3B] dark:text-[#A9CBA2] drop-shadow-[0_0_15px_rgba(169,203,162,0.6)]" />
-                        )}
-                    </div>
-
-                    {/* Instruction */}
-                    <h1 className={`text-3xl md:text-5xl font-black text-gray-900 dark:text-[#EAE5D9] text-center uppercase italic tracking-tight mb-2 z-10 transition-all duration-300 ${isLocationBarcode(inputVal.trim().toUpperCase()) ? 'text-[#2C5E3B] dark:text-[#A9CBA2] scale-105' : showError ? 'text-red-600 dark:text-red-500 animate-pulse' : ''}`}>
-                        {showSuccess ? t('warehouse.picking.successCaps') : showError ? t('warehouse.picking.errorCaps') : !currentItem ? t('warehouse.picking.missionComplete') : step === 'LOCATION' ? (isLocationBarcode(inputVal.trim().toUpperCase()) ? t('warehouse.picking.locationIdentified') : t('warehouse.scanLocation')) : step === 'QUANTITY' ? t('warehouse.confirmQty') : t('warehouse.scanSkuToConfirm')}
-                    </h1>
-
-                    {showSuccess ? (
-                        <div className="text-center z-10 mb-8 animate-in fade-in zoom-in duration-300">
-                            <p className="text-green-600 dark:text-green-400 text-xl font-bold uppercase tracking-widest">{successMsg}</p>
-                        </div>
-                    ) : showError ? (
-                        <div className="text-center z-10 mb-8 animate-in fade-in zoom-in duration-300">
-                            <p className="text-red-600 dark:text-red-500 text-xl font-bold uppercase tracking-widest">{errorMsg}</p>
-                        </div>
-                    ) : !currentItem ? (
-                        <PickScannerSummary
-                            job={job}
-                            getProduct={getProduct}
-                            getItemMeasureQty={getItemMeasureQty}
-                            t={t}
-                        />
-                    ) : (
-                        <PickScannerInstructionPanel
-                            step={step}
-                            inputVal={inputVal}
-                            currentItem={currentItem}
-                            currentProduct={currentProduct}
-                            isItemMatched={isItemMatched}
-                            shortPickMode={shortPickMode}
-                            setShortPickMode={setShortPickMode}
-                            getItemMeasureQty={getItemMeasureQty}
-                            t={t}
-                        />
-                    )}
+                    {/* Header & Status Instruction View */}
+                    <PickScannerHeader
+                        showSuccess={showSuccess}
+                        showError={showError}
+                        step={step}
+                        inputVal={inputVal}
+                        currentItem={currentItem}
+                        currentProduct={currentProduct}
+                        isItemMatched={isItemMatched}
+                        shortPickMode={shortPickMode}
+                        setShortPickMode={setShortPickMode}
+                        successMsg={successMsg}
+                        errorMsg={errorMsg}
+                        job={job}
+                        getProduct={getProduct}
+                        getItemMeasureQty={getItemMeasureQty}
+                        t={t}
+                    />
 
 
-                    {/* Input Area */}
-                    <form onSubmit={handleScan} className="w-full max-w-md relative z-20 group">
-                        <div className="absolute inset-0 bg-gradient-to-r from-[#2C5E3B] to-[#A9CBA2] dark:from-[#2C5E3B] dark:to-[#A9CBA2] rounded-2xl blur opacity-20 group-focus-within:opacity-40 transition-opacity" />
-                        {currentItem && (
-                            <>
-                                {step === 'QUANTITY' ? (
-                                    <input
-                                        ref={qtyRef}
-                                        type="number"
-                                        inputMode="decimal"
-                                        pattern="[0-9]*"
-                                        aria-label="Pick quantity"
-                                        title="Pick quantity"
-                                        value={qtyVal}
-                                        onChange={(e) => setQtyVal(e.target.value)}
-                                        className="w-full bg-white/90 dark:bg-[#1C2620]/90 border-2 rounded-2xl py-6 px-4 text-center text-5xl font-mono text-gray-900 dark:text-[#EAE5D9] placeholder:text-gray-400 dark:placeholder:text-gray-600 focus:outline-none relative z-10 shadow-xl transition-all border-[#2C5E3B] dark:border-[#A9CBA2]/40 focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2]"
-                                        placeholder="QTY"
-                                        autoFocus
-                                        onFocus={(e) => e.target.select()}
-                                    />
-                                ) : (
-                                    <input
-                                        ref={inputRef}
-                                        type="text"
-                                        aria-label="Scan barcode"
-                                        title="Scan barcode"
-                                        value={inputVal}
-                                        onChange={(e) => setInputVal(e.target.value)}
-                                        onKeyDown={(e) => {
-                                            if (step === 'LOCATION') {
-                                                const now = Date.now();
-                                                if (now - lastKeyTime.current > 300 && e.key !== 'Enter') {
-                                                    lastKeyTime.current = now;
-                                                    return;
-                                                }
-                                                lastKeyTime.current = now;
-                                            } else {
-                                                scanOnlyHandlers.onKeyDown(e);
-                                            }
-                                        }}
-                                        onPaste={(e) => {
-                                            e.preventDefault();
-                                            playBeep('error');
-                                            setErrorMsg(t('warehouse.picking.scanOnlyNoPasting'));
-                                            setShowError(true);
-                                            setTimeout(() => setShowError(false), 2000);
-                                        }}
-                                        className={`w-full bg-white/90 dark:bg-[#1C2620]/90 border-2 rounded-2xl py-6 px-4 text-center text-xl md:text-3xl font-mono text-gray-900 dark:text-[#EAE5D9] placeholder:text-gray-400 dark:placeholder:text-gray-600 focus:outline-none relative z-10 shadow-xl transition-all border-[#E2DCCE] dark:border-[#A9CBA2]/10 focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2]/40`}
-                                        placeholder={step === 'LOCATION' ? t('warehouse.picking.scan15DigitBarcode') : t('warehouse.picking.scanSkuBarcode')}
-                                        autoFocus
-                                        disabled={isProcessing}
-                                    />
-                                )}
-
-                                {step === 'LOCATION' && inputVal.trim() && (
-                                    <div className="mb-4 text-center animate-in fade-in slide-in-from-bottom-1 duration-300 mt-2">
-                                        <p className="text-xs font-black uppercase tracking-[0.3em] text-[#2C5E3B] dark:text-[#A9CBA2] flex items-center justify-center gap-3">
-                                            <span className="w-2 h-2 rounded-full bg-[#2C5E3B] dark:bg-[#A9CBA2] animate-ping" />
-                                            {isLocationBarcode(inputVal.trim().toUpperCase()) ? `IDENTIFIED: ${decodeLocation(inputVal.trim().toUpperCase())}` : t('warehouse.picking.encodedBarcodeProtocolRequired')}
-                                        </p>
-                                    </div>
-                                )}
-                                {step === 'QUANTITY' && (
-                                    <div className="mb-4 text-center mt-2 animate-in fade-in duration-300">
-                                        <p className="text-xs font-black uppercase tracking-widest text-[#2C5E3B] dark:text-[#A9CBA2]">
-                                            {t('warehouse.expected')}: {(() => {
-                                                const measureQty = getItemMeasureQty(currentItem);
-                                                if (measureQty) {
-                                                    const expected = currentItem?.expectedQty || 1;
-                                                    const unitDef = currentProduct?.unit ? currentProduct.unit : '';
-                                                    const sizeNum = currentProduct?.size ? parseFloat(currentProduct.size as string) : 0;
-                                                    return <>{expected} x {sizeNum} {unitDef}</>;
-                                                }
-                                                return currentItem?.expectedQty || 1;
-                                            })()}
-                                        </p>
-                                    </div>
-                                )}
-                            </>
-                        )}
-
-                        {isProcessing && (
-                            <div className="absolute right-4 top-1/2 -translate-y-1/2 z-30">
-                                <RotateCcw className="animate-spin text-gray-500 dark:text-white opacity-50" size={24} />
-                            </div>
-                        )}
-
-                        {/* MOBILE ACTION BUTTON */}
-                        <button
-                            type="submit"
-                            disabled={(step === 'LOCATION' && !inputVal.trim() && !!currentItem) || isProcessing}
-                            className={`mt-6 w-full py-6 rounded-2xl flex items-center justify-center gap-3 transition-all duration-500 active:scale-95 shadow-2xl border-2 relative z-30 pointer-events-auto ${((!inputVal.trim() && !isItemMatched && !!currentItem)) || isProcessing
-                                ? 'bg-gray-200 dark:bg-[#1C2620]/50 border-gray-300 dark:border-white/5 text-gray-400 dark:text-gray-600 grayscale opacity-50 cursor-not-allowed'
-                                : (!currentItem)
-                                    ? 'bg-gradient-to-r from-green-500 to-emerald-600 border-green-400 text-white font-black uppercase tracking-widest shadow-[0_0_40px_rgba(34,197,94,0.4)] scale-105'
-                                    : (isItemMatched)
-                                        ? 'bg-green-600 border-green-400 text-white font-black uppercase tracking-widest shadow-[0_0_40px_rgba(34,197,94,0.3)]'
-                                        : !isStrictlyValid
-                                            ? 'bg-red-50 dark:bg-[#1C2620] border-red-500/50 text-red-600 dark:text-red-400'
-                                            : 'bg-gradient-to-r from-[#2C5E3B] to-[#3a7a4d] dark:from-[#2C5E3B] dark:to-[#3a7a4d] border-[#2C5E3B] dark:border-[#A9CBA2]/20 text-white font-black uppercase tracking-widest shadow-[#2C5E3B]/20'
-                                }`}
-                        >
-                            {isProcessing ? (
-                                <RotateCcw size={24} className="animate-spin" />
-                            ) : (isItemMatched || !currentItem) ? (
-                                <CheckCircle size={24} className="animate-bounce" />
-                            ) : (
-                                <CheckCircle size={24} />
-                            )}
-                            {isProcessing ? t('warehouse.picking.validating') : !currentItem ? t('warehouse.completed') : step === 'QUANTITY' ? t('warehouse.picking.confirmPick') : isItemMatched ? t('warehouse.picking.completePick') : t('warehouse.picking.confirmScan')}
-                    </button>
-                    </form>
+                    {/* Input & Action Form */}
+                    <PickScannerForm
+                        step={step}
+                        inputVal={inputVal}
+                        setInputVal={setInputVal}
+                        qtyVal={qtyVal}
+                        setQtyVal={setQtyVal}
+                        selectedUnit={selectedUnit}
+                        setSelectedUnit={setSelectedUnit}
+                        currentItem={currentItem}
+                        currentProduct={currentProduct}
+                        isItemMatched={isItemMatched}
+                        isStrictlyValid={isStrictlyValid}
+                        isProcessing={isProcessing}
+                        handleScan={handleScan}
+                        getItemMeasureQty={getItemMeasureQty}
+                        scanOnlyHandlers={scanOnlyHandlers}
+                        lastKeyTime={lastKeyTime}
+                        inputRef={inputRef}
+                        qtyRef={qtyRef}
+                        playBeep={playBeep}
+                        setErrorMsg={setErrorMsg}
+                        setShowError={setShowError}
+                        t={t}
+                    />
 
                     {/* PICKED SO FAR */}
                     <PickScannerPickedList

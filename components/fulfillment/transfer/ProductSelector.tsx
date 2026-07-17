@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Search, Package, X } from 'lucide-react';
 import { Product } from '../../../types';
-import { getSellUnit } from '../../../utils/units';
+import { getSellUnit, getEffectivePackageSize } from '../../../utils/units';
 import { useLanguage } from '../../../contexts/LanguageContext';
 
 interface ProductSelectorProps {
@@ -89,7 +89,7 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
                                 <div className="text-[10px] text-gray-500 uppercase font-bold">Stock</div>
                                 {(() => {
                                     const unitDef = getSellUnit(product.unit || '');
-                                    const sizeNum = parseFloat(product.size || '0');
+                                    const sizeNum = getEffectivePackageSize(product.unit, product.size);
                                     const isWeightVol = unitDef.category === 'weight' || unitDef.category === 'volume';
                                     const displayStock = isWeightVol && sizeNum > 0 ? product.stock * sizeNum : product.stock;
                                     const unitLabel = unitDef.code !== 'UNIT' ? ` ${unitDef.shortLabel}` : '';

@@ -39,6 +39,13 @@ export const logger = {
 
     if (error instanceof Error) {
       console.error(`❌ ${prefix}: ${error.message}${contextStr}`, error);
+    } else if (typeof error === 'object' && error !== null) {
+      // Supabase errors are plain objects { code, message, details, hint }
+      try {
+        console.error(`❌ ${prefix}: ${JSON.stringify(error)}${contextStr}`);
+      } catch {
+        console.error(`❌ ${prefix}: ${String(error)}${contextStr}`);
+      }
     } else {
       console.error(`❌ ${prefix}: ${String(error)}${contextStr}`);
     }

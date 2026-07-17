@@ -383,6 +383,8 @@ export interface JobItem {
   returnedAt?: string;
   size?: string;
   brand?: string;
+  packed?: boolean;
+  packedQty?: number;
   packQuantity?: number;
   category?: string;
   customAttributes?: any;

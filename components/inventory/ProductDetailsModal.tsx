@@ -5,7 +5,7 @@ import Modal from '../Modal';
 import { formatCompactNumber, formatPriceValue } from '../../utils/formatting';
 import { CURRENCY_SYMBOL } from '../../constants';
 import { useData } from '../../contexts/DataContext';
-import { getSellUnit, formatProductSize } from '../../utils/units';
+import { getSellUnit, formatProductSize, getEffectivePackageSize } from '../../utils/units';
 import { getRoleHierarchy } from '../../utils/roles';
 import { useStore } from '../../contexts/CentralStore';
 import { productsService } from '../../services/products.service';
@@ -85,7 +85,7 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
 
     // Smart Quantity Calculation
     const isWeightOrVolume = product.unit && ['KG', 'L', 'G', 'ML'].includes(product.unit.toUpperCase());
-    const sizeNum = product.size ? parseFloat(product.size.replace(/[^0-9.]/g, '')) : 1;
+    const sizeNum = getEffectivePackageSize(product.unit, product.size) || 1;
     const physicalQty = isWeightOrVolume && !isNaN(sizeNum) ? product.stock * sizeNum : null;
 
     // Check if the brand is already part of the product name to avoid duplication

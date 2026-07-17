@@ -147,7 +147,7 @@ export const PackScannerStatusView: React.FC<PackScannerStatusViewProps> = ({
                         </div>
                         <div className="text-gray-600 text-2xl">&rarr;</div>
                         <div className="text-center">
-                            <span className="text-[10px] text-gray-500 font-black uppercase tracking-widest block">{t('warehouse.picking')}</span>
+                            <span className="text-[10px] text-gray-500 font-black uppercase tracking-widest block">{t('warehouse.packed') || 'Packed'}</span>
                             <span className="text-3xl font-mono font-black text-[#2C5E3B] dark:text-[#A9CBA2]">
                                 {(() => {
                                     const expected = matchedItem.expectedQty || 1;

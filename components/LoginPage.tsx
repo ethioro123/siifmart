@@ -6,17 +6,6 @@ import { logger } from '../utils/logger';
 
 type Mode = 'login' | 'forgot';
 
-const QUICK_ACCOUNTS = [
-  { name: 'Shukri Kamal', role: 'CEO (Super Admin)', email: 'siif-0001@siifmart.com', password: 'Oromo123' },
-  { name: 'Abebe Yilma', role: 'Picker (Harar)', email: 'siif-0006@siifmart.com', password: 'siif123' },
-  { name: 'Firomsa Hasan', role: 'Packer (Harar)', email: 'siif-0033@siifmart.com', password: 'siif123' },
-  { name: 'Betelhem Bekele', role: 'Dispatcher (Harar)', email: 'siif-0005@siifmart.com', password: 'siif123' },
-  { name: 'Adam Ahmed', role: 'Receiver (Harar)', email: 'siif-0035@siifmart.com', password: 'siif123' },
-  { name: 'Ibsa Sufiyan', role: 'Driver (Harar)', email: 'siif-0032@siifmart.com', password: 'siif123' },
-  { name: 'Kamal Idriss', role: 'Warehouse Mgr (Harar)', email: 'siif-0034@siifmart.com', password: 'siif123' },
-  { name: 'Kebede Alemayehu', role: 'Warehouse Mgr (Harar)', email: 'siif-0028@siifmart.com', password: 'siif123' }
-];
-
 export default function LoginPage() {
   const { login, toggleTheme, theme } = useStore();
   const [mode, setMode] = useState<Mode>('login');
@@ -26,27 +15,6 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [showQuickLogin, setShowQuickLogin] = useState(false);
-
-  const handleQuickLogin = async (quickEmail: string, quickPass: string) => {
-    setEmail(quickEmail);
-    setPassword(quickPass);
-    setError('');
-    setSuccess('');
-    setLoading(true);
-
-    try {
-      const ok = await login(quickEmail, quickPass);
-      if (!ok) {
-        setError('Invalid credentials. Please check your email/username and password.');
-      }
-    } catch (err: any) {
-      logger.error('LoginPage', 'Auth error:', err);
-      setError(err.message || 'Authentication failed. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -220,38 +188,8 @@ export default function LoginPage() {
           </div>
         </form>
 
-        {/* Quick Dev Sign-In Panel (hidden in production) */}
-        {import.meta.env.DEV && mode === 'login' && (
-          <div className="mt-6 pt-6 border-t border-[#E2DCCE]/40 dark:border-white/[0.04]">
-            <button
-              type="button"
-              onClick={() => setShowQuickLogin(!showQuickLogin)}
-              className="w-full flex items-center justify-between text-xs font-black text-[#2C5E3B] dark:text-[#A9CBA2] uppercase tracking-widest hover:underline cursor-pointer"
-            >
-              <span>Quick Dev Sign-In</span>
-              <span className="text-[10px]">{showQuickLogin ? '▼' : '▲'}</span>
-            </button>
-            
-            {showQuickLogin && (
-              <div className="grid grid-cols-2 gap-2 mt-4 max-h-48 overflow-y-auto custom-scrollbar pr-1">
-                {QUICK_ACCOUNTS.map((acc) => (
-                  <button
-                    key={acc.email}
-                    type="button"
-                    onClick={() => handleQuickLogin(acc.email, acc.password)}
-                    className="p-2 text-left bg-stone-50/70 dark:bg-black/25 border border-[#E2DCCE]/50 dark:border-emerald-950/20 hover:border-[#2C5E3B] dark:hover:border-[#A9CBA2] rounded-xl transition-all duration-300 flex flex-col justify-between cursor-pointer"
-                  >
-                    <span className="text-[10px] font-black text-[#1E3F27] dark:text-[#EAE5D9] truncate w-full">{acc.name}</span>
-                    <span className="text-[8px] font-bold text-stone-500 dark:text-stone-400 uppercase mt-0.5">{acc.role}</span>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
         <div className="mt-8 pt-6 border-t border-[#E2DCCE]/40 dark:border-white/[0.04] text-center select-none">
-          <p className="text-[10px] text-[#4D6E56] dark:text-[#7A9E83] font-semibold tracking-wider uppercase">SiifMart Operations v3.2</p>
+          <p className="text-[10px] text-[#4D6E56] dark:text-[#7A9E83] font-semibold tracking-wider uppercase">SiifMart Operations v3.3</p>
         </div>
       </div>
     </div>

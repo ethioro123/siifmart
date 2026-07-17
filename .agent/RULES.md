@@ -192,6 +192,44 @@ import Inventory from './pages/Inventory';
 - Always add new columns as **nullable** or with **defaults** — never break existing rows
 - After changing DB-related code, verify queries against Supabase types
 
+### DB Schema Registry
+
+Migration files can drift from the live database (e.g., someone changed a column in the Supabase Dashboard). To prevent column-mismatch bugs:
+
+- Maintain a **schema registry** at `/schemas/db-schema.md` documenting every table's actual live columns, types, and constraints.
+- When fixing a Supabase error, **always probe the live schema first** — never assume migration files are accurate.
+- After any direct DB change in Supabase Dashboard, update BOTH the registry AND create a migration file.
+- Never trust code comments about column names — verify against the registry or query the live DB.
+
+### RLS-Aware Query Patterns
+
+Row Level Security policies apply separately to INSERT, SELECT, UPDATE, and DELETE. Chaining operations triggers multiple policies:
+
+```typescript
+// ❌ DANGEROUS — triggers BOTH INSERT and SELECT RLS policies
+// If the user can insert but not select, this returns 403
+const { data, error } = await supabase
+    .from('system_logs')
+    .insert(dbLog)
+    .select('*');
+
+// ✅ Correct — insert-only, no SELECT policy triggered
+const { error } = await supabase
+    .from('system_logs')
+    .insert(dbLog);
+
+// ✅ Correct — if you need returned data, use minimal columns
+const { data, error } = await supabase
+    .from('orders')
+    .insert(order)
+    .select('id, created_at');
+```
+
+- **Never chain `.select('*')` after `.insert()`** unless you've verified the user has SELECT permissions.
+- Append-only tables (like `system_logs`) typically have INSERT-only policies.
+- When you don't need the returned row, omit `.select()` entirely.
+
+
 ---
 
 ## Service Field Mapping (CRITICAL)

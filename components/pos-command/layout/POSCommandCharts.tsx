@@ -40,8 +40,8 @@ export const POSCommandCharts: React.FC = () => {
                     </h3>
                 </div>
 
-                <div className="h-[240px] w-full relative overflow-hidden">
-                    <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
+                <div className="h-[240px] w-full relative overflow-hidden min-h-[240px]">
+                    <ResponsiveContainer width="100%" height="100%" minWidth={10} minHeight={10}>
                         <BarChart data={hourlyData} barGap={0} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
                             <defs>
                                 <linearGradient id="barGradientWoody" x1="0" y1="0" x2="0" y2="1">
@@ -90,8 +90,8 @@ export const POSCommandCharts: React.FC = () => {
                 </div>
 
                 <div className="h-[240px] w-full flex flex-col items-center justify-center">
-                    <div className="h-[180px] w-full relative overflow-hidden">
-                        <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
+                    <div className="h-[180px] w-full relative overflow-hidden min-h-[180px]">
+                        <ResponsiveContainer width="100%" height="100%" minWidth={10} minHeight={10}>
                             <PieChart>
                                 <Pie
                                     data={paymentChartData}
@@ -107,13 +107,16 @@ export const POSCommandCharts: React.FC = () => {
                                     ))}
                                 </Pie>
                                 <Tooltip
-                                    contentStyle={{
-                                        backgroundColor: 'white',
-                                        border: '1px solid #E2DCCE',
-                                        borderRadius: '16px',
-                                        fontSize: '12px',
-                                        color: '#1E3F27',
-                                        boxShadow: '0 4px 16px rgba(34,50,38,0.08)'
+                                    content={({ active, payload }) => {
+                                        if (active && payload && payload.length) {
+                                            return (
+                                                <div className="bg-white dark:bg-[#18201B] border border-[#E2DCCE] dark:border-emerald-950/30 p-3 rounded-2xl shadow-lg text-[#1E3F27] dark:text-[#EAE5D9] text-xs">
+                                                    <p className="text-[10px] text-[#4D6E56] dark:text-[#7A9E83] uppercase font-black tracking-widest mb-1">{payload[0].name}</p>
+                                                    <p className="font-bold">{payload[0].value}%</p>
+                                                </div>
+                                            );
+                                        }
+                                        return null;
                                     }}
                                 />
                             </PieChart>
@@ -122,16 +125,17 @@ export const POSCommandCharts: React.FC = () => {
 
                     {/* Legend */}
                     <div className="flex gap-5 mt-2">
-                        {paymentChartData.map((entry, index) => (
-                            <div key={entry.name} className="flex items-center gap-2">
-                                <div
-                                    className="w-2.5 h-2.5 rounded-full"
-                                    ref={(el) => { if (el) el.style.backgroundColor = COLORS[index % COLORS.length]; }}
-                                />
-                                <span className="text-[10px] text-[#4D6E56] dark:text-[#7A9E83] uppercase font-bold tracking-wider">{entry.name}</span>
-                                <span className="text-[10px] text-[#1E3F27] dark:text-[#EAE5D9] font-black">{entry.value}%</span>
-                            </div>
-                        ))}
+                        {paymentChartData.map((entry, index) => {
+                            const bgClasses = ['bg-[#2C5E3B]', 'bg-[#A9CBA2]', 'bg-amber-600'];
+                            const bgClass = bgClasses[index % bgClasses.length];
+                            return (
+                                <div key={entry.name} className="flex items-center gap-2">
+                                    <div className={`w-2.5 h-2.5 rounded-full ${bgClass}`} />
+                                    <span className="text-[10px] text-[#4D6E56] dark:text-[#7A9E83] uppercase font-bold tracking-wider">{entry.name}</span>
+                                    <span className="text-[10px] text-[#1E3F27] dark:text-[#EAE5D9] font-black">{entry.value}%</span>
+                                </div>
+                            );
+                        })}
                     </div>
                 </div>
             </div>

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Scan, MapPin, Clock, ChevronDown, ChevronUp, Truck, ChevronRight } from 'lucide-react';
 import { usePOSCommand } from '../../POSCommandContext';
 import { useData } from '../../../../contexts/DataContext';
+import { useStore } from '../../../../contexts/CentralStore';
 import { useFulfillmentData } from '../../../fulfillment/FulfillmentDataProvider';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import { formatDateTime } from '../../../../utils/formatting';
@@ -10,6 +11,7 @@ import { formatJobId } from '../../../../utils/jobIdFormatter';
 export const ReceivingPendingList: React.FC = () => {
     const { t } = useLanguage();
     const { activeSite, sites } = useData();
+    const { user } = useStore();
     const { jobs, transfers } = useFulfillmentData();
     
     const {
@@ -139,32 +141,42 @@ export const ReceivingPendingList: React.FC = () => {
                                                     })()}
                                                 </span>
                                                 {(() => {
-                                                    const delMethod = (item as any).deliveryMethod || 'Internal';
+                                                    const linkedDispatch = jobs.find(j => j.type === 'DISPATCH' && (j.orderRef === item.id || j.orderRef === (item as any).jobNumber || j.jobNumber === (item as any).jobNumber));
+                                                    const delMethod = (item as any).deliveryMethod || (linkedDispatch as any)?.deliveryMethod || 'Internal';
                                                     const isExt = delMethod === 'External';
-                                                    const tStat = String((item as any).transferStatus || item.status || '').toLowerCase();
-                                                    const isDone = ['delivered', 'completed', 'received'].includes(tStat);
-                                                    if (!isExt && !isDone) {
-                                                        return (
-                                                            <span className="px-2 py-0.5 bg-amber-500/10 text-amber-500 border border-amber-500/20 rounded text-[9px] font-black uppercase tracking-wider">
-                                                                Driver In-Transit (Awaiting Arrival)
-                                                            </span>
-                                                        );
-                                                    }
-                                                    if (!isExt && isDone) {
+                                                    const shippedAt = (item as any).shippedAt || (linkedDispatch as any)?.shippedAt;
+                                                    const effTransferStatus = (item as any).transferStatus || (linkedDispatch as any)?.transferStatus || item.status;
+                                                    const rawStat = String(effTransferStatus || '').toLowerCase().replace(/[-_]/g, '');
+                                                    const isDone = ['delivered', 'completed', 'received'].includes(rawStat);
+                                                    const isDeparted = ['shipped', 'intransit', 'dispatched', 'delivered', 'completed', 'received'].includes(rawStat) || !!shippedAt;
+
+                                                    if (!isExt) {
+                                                        if (!isDone) {
+                                                            return (
+                                                                <span className="px-2 py-0.5 bg-amber-500/10 text-amber-500 border border-amber-500/20 rounded text-[9px] font-black uppercase tracking-wider">
+                                                                    Driver In-Transit (Awaiting Arrival)
+                                                                </span>
+                                                            );
+                                                        }
                                                         return (
                                                             <span className="px-2 py-0.5 bg-[#2C5E3B]/10 text-[#2C5E3B] dark:text-[#A9CBA2] border border-[#2C5E3B]/20 rounded text-[9px] font-black uppercase tracking-wider">
                                                                 Driver Delivered — Ready to Receive
                                                             </span>
                                                         );
-                                                    }
-                                                    if (isExt) {
+                                                    } else {
+                                                        if (!isDeparted) {
+                                                            return (
+                                                                <span className="px-2 py-0.5 bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 rounded text-[9px] font-black uppercase tracking-wider">
+                                                                    EXT Carrier (Awaiting Departure)
+                                                                </span>
+                                                            );
+                                                        }
                                                         return (
-                                                            <span className="px-2 py-0.5 bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 rounded text-[9px] font-black uppercase tracking-wider">
-                                                                EXT Carrier
+                                                            <span className="px-2 py-0.5 bg-[#2C5E3B]/10 text-[#2C5E3B] dark:text-[#A9CBA2] border border-[#2C5E3B]/20 rounded text-[9px] font-black uppercase tracking-wider">
+                                                                EXT Carrier — Departure Confirmed
                                                             </span>
                                                         );
                                                     }
-                                                    return null;
                                                 })()}
                                             </div>
                                             
@@ -189,21 +201,57 @@ export const ReceivingPendingList: React.FC = () => {
                                                 {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                                             </button>
                                             {(() => {
-                                                const delMethod = (item as any).deliveryMethod || 'Internal';
+                                                const linkedDispatch = jobs.find(j => j.type === 'DISPATCH' && (j.orderRef === item.id || j.orderRef === (item as any).jobNumber || j.jobNumber === (item as any).jobNumber));
+                                                const delMethod = (item as any).deliveryMethod || (linkedDispatch as any)?.deliveryMethod || 'Internal';
                                                 const isExt = delMethod === 'External';
-                                                const tStat = String((item as any).transferStatus || item.status || '').toLowerCase();
-                                                const isDone = ['delivered', 'completed', 'received'].includes(tStat);
-                                                const isLockedByDriver = !isExt && !isDone;
+                                                const shippedAt = (item as any).shippedAt || (linkedDispatch as any)?.shippedAt;
+                                                const effTransferStatus = (item as any).transferStatus || (linkedDispatch as any)?.transferStatus || item.status;
+                                                const rawStat = String(effTransferStatus || '').toLowerCase().replace(/[-_]/g, '');
+                                                const isDone = ['delivered', 'completed', 'received'].includes(rawStat);
+                                                const isDeparted = ['shipped', 'intransit', 'dispatched', 'delivered', 'completed', 'received'].includes(rawStat) || !!shippedAt;
 
-                                                if (isLockedByDriver) {
+                                                const WAREHOUSE_AUTHORITY_ROLES = [
+                                                    'super_admin', 'admin', 'warehouse_manager', 'dispatch_manager',
+                                                    'operations_manager', 'regional_manager', 'dispatcher',
+                                                    'store_manager', 'inventory_manager', 'supervisor'
+                                                ];
+                                                const userRole = (user?.role || '').toLowerCase();
+                                                const hasAuthority = WAREHOUSE_AUTHORITY_ROLES.includes(userRole);
+
+                                                if (!isExt && !isDone) {
                                                     return (
                                                         <button
                                                             onClick={() => handleSelectTransferForReceiving(item.id)}
                                                             className="px-4 py-2.5 bg-amber-500/10 dark:bg-amber-500/20 border border-amber-500/30 text-amber-600 dark:text-amber-400 hover:bg-amber-500/20 font-bold rounded-xl text-xs flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
-                                                            title="Driver must arrive and mark delivery complete before POS can start receiving"
+                                                            title="Internal driver must mark delivery complete before POS can start receiving"
                                                         >
                                                             <Clock size={13} />
                                                             Awaiting Driver Delivery
+                                                        </button>
+                                                    );
+                                                }
+
+                                                if (isExt && !isDeparted) {
+                                                    if (hasAuthority) {
+                                                        return (
+                                                            <button
+                                                                onClick={() => handleSelectTransferForReceiving(item.id)}
+                                                                className="px-4 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl text-xs flex items-center gap-1.5 transition-all active:scale-95 shadow-sm cursor-pointer"
+                                                                title="Warehouse authority: Click to confirm external carrier departure & start receiving"
+                                                            >
+                                                                <Truck size={14} />
+                                                                Confirm Departure & Receive
+                                                            </button>
+                                                        );
+                                                    }
+                                                    return (
+                                                        <button
+                                                            onClick={() => handleSelectTransferForReceiving(item.id)}
+                                                            className="px-4 py-2.5 bg-amber-500/10 dark:bg-amber-500/20 border border-amber-500/30 text-amber-600 dark:text-amber-400 hover:bg-amber-500/20 font-bold rounded-xl text-xs flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
+                                                            title="Warehouse authority must confirm departure before external receiving can begin"
+                                                        >
+                                                            <Clock size={13} />
+                                                            Awaiting Departure
                                                         </button>
                                                     );
                                                 }

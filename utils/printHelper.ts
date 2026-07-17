@@ -3,6 +3,9 @@
  * Bypasses browser popup blockers entirely.
  */
 export const printHtmlContent = (htmlContent: string) => {
+    // Strip any auto-print scripts to prevent duplicate print dialog triggers
+    const sanitizedHtml = htmlContent.replace(/<script\b[^>]*>([\s\S]*?)window\.print\(\)[\s\S]*?<\/script>/gi, '');
+
     // 1. Create a hidden iframe
     const iframe = document.createElement('iframe');
     iframe.style.position = 'fixed';
@@ -16,7 +19,7 @@ export const printHtmlContent = (htmlContent: string) => {
     // 2. Write content directly into it
     const doc = iframe.contentWindow?.document || iframe.contentDocument;
     if (doc) {
-        doc.write(htmlContent);
+        doc.write(sanitizedHtml);
         doc.close();
     }
 

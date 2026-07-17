@@ -25,13 +25,16 @@ export const warehouse: TranslationBlock = {
     packing,
     ...putaway,
     putaway,
-    ...modals,
-    ...auxiliary,
-    ...messages,
     ...misc,
+    misc,
+    ...modals,
+    modals,
+    ...auxiliary,
+    auxiliary,
+    ...messages,
+    messages,
+    ...core,
+    core,
     ...count,
     count,
-    // Ensure nested objects that were overwritten by spread are restored if they had unique keys
-    // In this case, 'putaway' was a top-level key in TRANSLATIONS.warehouse AND a sub-object.
-    // Let's check putaway.ts - it defines both.
 };

@@ -210,7 +210,7 @@ export const wmsJobsService = {
             type: job.type,
             priority: job.priority,
             status: job.status,
-            items_count: job.items,
+            items_count: Math.round(job.items || 0),
             assigned_to: job.assignedTo,
             location: job.location,
             order_ref: job.orderRef,
@@ -334,7 +334,7 @@ export const wmsJobsService = {
     async update(id: string, updates: Partial<WMSJob>) {
         const dbUpdates: any = { ...updates };
         if (updates.siteId !== undefined) { dbUpdates.site_id = updates.siteId; delete dbUpdates.siteId; }
-        if (updates.items !== undefined) { dbUpdates.items_count = updates.items; delete dbUpdates.items; }
+        if (updates.items !== undefined) { dbUpdates.items_count = Math.round(updates.items || 0); delete dbUpdates.items; }
         if (updates.assignedTo !== undefined) { dbUpdates.assigned_to = updates.assignedTo; delete dbUpdates.assignedTo; }
         if (updates.orderRef !== undefined) { dbUpdates.order_ref = updates.orderRef; delete dbUpdates.orderRef; }
         if (updates.lineItems !== undefined) { dbUpdates.line_items = updates.lineItems; delete dbUpdates.lineItems; }
