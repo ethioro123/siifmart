@@ -3,6 +3,7 @@ import { usePOS } from '../POSContext';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import Modal from '../../Modal';
 import { CURRENCY_SYMBOL } from '../../../constants';
+import { formatShiftId } from '../../../utils/jobIdFormatter';
 import { CheckCircle, DollarSign, CreditCard, Smartphone, Archive, ArrowLeft, AlertTriangle, Loader2, LogOut } from 'lucide-react';
 
 export const ShiftClosingModal: React.FC = () => {
@@ -26,7 +27,7 @@ export const ShiftClosingModal: React.FC = () => {
         <Modal
             isOpen={isShiftModalOpen}
             onClose={() => !isProcessing && setIsShiftModalOpen(false)}
-            title="Advanced Shift Reconciliation"
+            title={activeShift ? `Shift Reconciliation (${formatShiftId(activeShift)})` : "Advanced Shift Reconciliation"}
             size="lg"
         >
             <div className="space-y-6">

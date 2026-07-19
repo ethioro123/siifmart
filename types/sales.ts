@@ -69,6 +69,8 @@ export interface ReturnRequest {
 
 export interface ShiftRecord {
   id: string;
+  shiftNumber?: string | number;
+  shift_number?: string | number;
   siteId: string;
   site_id?: string; // Supabase compatibility
   cashierId: string;

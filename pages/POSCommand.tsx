@@ -23,6 +23,7 @@ import DateRangeSelector from '../components/DateRangeSelector';
 
 import { useStore } from '../contexts/CentralStore';
 import { useData } from '../contexts/DataContext';
+import { formatShiftId } from '../utils/jobIdFormatter';
 
 const POSCommandContent: React.FC = () => {
   const { t } = useLanguage();
@@ -140,7 +141,7 @@ const POSCommandContent: React.FC = () => {
                 <span className="text-[#4D6E56]/70 dark:text-gray-500 uppercase tracking-widest">{t('pos.activeShift')}:</span>
                 <span className={`px-2 py-0.5 rounded-lg border flex items-center gap-1.5 text-[10px] font-bold ${currentShift ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-700 dark:text-emerald-400' : 'bg-red-500/10 border-red-500/20 text-red-600 dark:text-red-400'}`}>
                   <div className={`w-1.5 h-1.5 rounded-full ${currentShift ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}`} />
-                  {currentShift?.id.substring(0, 8) || t('posCommand.noActiveShift')}
+                  {currentShift ? formatShiftId(currentShift) : t('posCommand.noActiveShift')}
                 </span>
                 <span className="text-[#4D6E56]/50 dark:text-gray-600">•</span>
                 <span className="text-[#4D6E56] dark:text-gray-400 font-sans font-bold tracking-wide">

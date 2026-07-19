@@ -117,6 +117,26 @@ export const formatTransferId = (transfer: { id: string; jobNumber?: string; job
 };
 
 /**
+ * Formats a shift ID for human display (e.g. SHF-1F1742C4 or SHF-0042)
+ */
+export const formatShiftId = (shift?: { id?: string; shiftNumber?: string | number; shift_number?: string | number } | string | null): string => {
+    if (!shift) return 'N/A';
+    const rawId = typeof shift === 'string' ? shift : (shift.shiftNumber || shift.shift_number || shift.id);
+    if (!rawId) return 'N/A';
+
+    const clean = String(rawId).trim();
+    if (clean.toUpperCase().startsWith('SHF-')) return clean.toUpperCase();
+
+    if (/^\d+$/.test(clean)) return `SHF-${clean.padStart(4, '0')}`;
+
+    if (clean.length > 8 && clean.includes('-')) {
+        return `SHF-${clean.split('-')[0].slice(0, 8).toUpperCase()}`;
+    }
+
+    return `SHF-${clean.slice(0, 8).toUpperCase()}`;
+};
+
+/**
  * Sequential PO Generator (AAAA0000 -> ZZZZ9999)
  * Transitions from old formats and ensures sequential progression
  */
