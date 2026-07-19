@@ -1,6 +1,21 @@
-import React from 'react';
-import { Layers, Search, AlertTriangle, Clock, List, RefreshCw, Smartphone, Loader2, CheckCircle } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Layers, Search, AlertTriangle, Clock, List, RefreshCw, Smartphone, CheckCircle, Loader2 } from 'lucide-react';
 import { SortDropdown } from '../FulfillmentShared';
+
+/** Returns true when viewport < 768 px (md breakpoint). SSR-safe. */
+function useIsMobile(): boolean {
+    const [isMobile, setIsMobile] = useState(() =>
+        typeof window !== 'undefined' ? window.innerWidth < 768 : false
+    );
+    useEffect(() => {
+        const mq = window.matchMedia('(max-width: 767px)');
+        setIsMobile(mq.matches);
+        const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+        mq.addEventListener('change', handler);
+        return () => mq.removeEventListener('change', handler);
+    }, []);
+    return isMobile;
+}
 
 interface PutawayHeaderProps {
     filteredJobsCount: {
@@ -43,6 +58,7 @@ export const PutawayHeader: React.FC<PutawayHeaderProps> = ({
     onCompleteJob,
     t
 }) => {
+    const isMobile = useIsMobile();
     return (
         <div className="glass-panel p-2 md:p-6 relative overflow-hidden group">
             <div className="hidden md:block absolute -top-24 -right-24 w-64 h-64 bg-[#2C5E3B]/5 dark:bg-[#2C5E3B]/10 blur-[120px] rounded-full pointer-events-none" />
@@ -82,11 +98,63 @@ export const PutawayHeader: React.FC<PutawayHeaderProps> = ({
                 </div>
             </div>
 
-            {/* ── MOBILE: Compact bar ── */}
-            <div className="md:hidden flex flex-col gap-3 relative z-10 p-1">
-                <div className="flex items-center gap-2">
-                    <div className="flex-1 relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-gray-500" size={16} />
+            {isMobile ? (
+                /* ── MOBILE: Compact bar ── */
+                <div className="flex flex-col gap-3 relative z-10 p-1 mt-4">
+                    <div className="flex items-center gap-2">
+                        <div className="flex-1 relative">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-gray-500" size={16} />
+                            <input
+                                type="text"
+                                placeholder={`${t('warehouse.putaway.search')}`}
+                                aria-label={t('warehouse.putaway.search')}
+                                title={t('warehouse.putaway.search')}
+                                value={putawaySearch}
+                                onChange={(e) => setPutawaySearch(e.target.value)}
+                                className="woody-input w-full !pl-10 pr-4 text-sm"
+                            />
+                        </div>
+                        
+                        <div className="glass-panel-pushed p-1 flex shrink-0">
+                            <button
+                                onClick={() => setViewMode('Process')}
+                                className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all ${viewMode === 'Process' ? 'bg-[#2C5E3B] dark:bg-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24] shadow-sm' : 'text-slate-500 dark:text-gray-400'}`}
+                            >
+                                {t('warehouse.putaway.process')}
+                            </button>
+                            <button
+                                onClick={() => setViewMode('History')}
+                                className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all ${viewMode === 'History' ? 'bg-[#2C5E3B] dark:bg-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24] shadow-sm' : 'text-slate-500 dark:text-gray-400'}`}
+                            >
+                                {t('warehouse.putaway.history')}
+                            </button>
+                        </div>
+
+                        <button
+                            onClick={() => refreshData()}
+                            disabled={isSubmitting}
+                            className="woody-btn-secondary p-2.5 text-stone-600 hover:text-[#2C5E3B]"
+                            title={t('warehouse.putaway.syncOperations')}
+                        >
+                            <RefreshCw size={18} className={isSubmitting ? 'animate-spin' : ''} />
+                        </button>
+                    </div>
+
+                    {onStartScanning && viewMode === 'Process' && (
+                        <button
+                            onClick={onStartScanning}
+                            disabled={isSubmitting}
+                            className="woody-btn-primary w-full h-12 text-[10px] uppercase tracking-widest flex items-center justify-center gap-2"
+                        >
+                            <Smartphone size={16} /> {t('warehouse.scanBarcode')}
+                        </button>
+                    )}
+                </div>
+            ) : (
+                /* ── DESKTOP: Full filters row ── */
+                <div className="flex flex-row gap-4 mt-8 pt-6 border-t border-slate-100 dark:border-white/5 relative z-10">
+                    <div className="flex-1 relative group/search">
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-gray-500 group-focus-within/search:text-[#2C5E3B] dark:group-focus-within/search:text-[#A9CBA2] transition-colors" size={18} />
                         <input
                             type="text"
                             placeholder={`${t('warehouse.putaway.search')}`}
@@ -94,132 +162,82 @@ export const PutawayHeader: React.FC<PutawayHeaderProps> = ({
                             title={t('warehouse.putaway.search')}
                             value={putawaySearch}
                             onChange={(e) => setPutawaySearch(e.target.value)}
-                            className="woody-input w-full !pl-10 pr-4 text-sm"
+                            className="woody-input w-full py-3.5 !pl-12 pr-4 font-mono"
                         />
                     </div>
-                    
-                    <div className="glass-panel-pushed p-1 flex shrink-0">
+
+                    <div className="flex gap-2">
+                        <div className="glass-panel-pushed p-1.5 flex mr-2 shadow-inner">
+                            <button
+                                onClick={() => setViewMode('Process')}
+                                className={`px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all ${viewMode === 'Process' ? 'bg-[#2C5E3B] dark:bg-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24] shadow-md' : 'text-gray-555 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
+                            >
+                                {t('warehouse.putaway.process')}
+                            </button>
+                            <button
+                                onClick={() => setViewMode('History')}
+                                className={`px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all ${viewMode === 'History' ? 'bg-[#2C5E3B] dark:bg-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24] shadow-md' : 'text-gray-555 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
+                            >
+                                {t('warehouse.putaway.history')}
+                            </button>
+                        </div>
+
+                        {viewMode === 'Process' && (
+                            <>
+                                <div className="flex glass-panel-pushed p-1.5 shrink-0 shadow-inner">
+                                    {(['All', 'Pending', 'In-Progress'] as const).map(status => (
+                                        <button
+                                            key={status}
+                                            onClick={() => setPutawayStatusFilter(status)}
+                                            className={`px-6 py-2.5 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all ${putawayStatusFilter === status ? 'bg-[#2C5E3B] dark:bg-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24] shadow-md' : 'text-slate-500 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5'}`}
+                                        >
+                                            {status === 'All' ? t('warehouse.allStatus') : status === 'Pending' ? t('warehouse.pending') : t('warehouse.inProgress')}
+                                        </button>
+                                    ))}
+                                </div>
+
+                                <SortDropdown
+                                    label={t('warehouse.priority')}
+                                    options={[
+                                        { id: 'priority' as const, label: t('warehouse.priority'), icon: <AlertTriangle size={14} /> },
+                                        { id: 'date' as const, label: t('warehouse.date'), icon: <Clock size={14} /> },
+                                        { id: 'items' as const, label: t('warehouse.items'), icon: <List size={14} /> }
+                                    ]}
+                                    value={putawaySortBy}
+                                    onChange={(val) => setPutawaySortBy(val)}
+                                    isOpen={isPutawaySortDropdownOpen}
+                                    setIsOpen={setIsPutawaySortDropdownOpen}
+                                />
+                            </>
+                        )}
+
+                        {onCompleteJob && (
+                            <button
+                                onClick={onCompleteJob}
+                                disabled={isSubmitting}
+                                className="woody-btn-primary px-6 text-[10px] uppercase tracking-[0.2em] flex items-center justify-center gap-3 active:scale-[0.98]"
+                            >
+                                {isSubmitting ? (
+                                    <Loader2 size={20} className="animate-spin" />
+                                ) : (
+                                    <>
+                                        <CheckCircle size={18} className="stroke-[3]" /> {t('warehouse.completeJob')}
+                                    </>
+                                )}
+                            </button>
+                        )}
+
                         <button
-                            onClick={() => setViewMode('Process')}
-                            className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all ${viewMode === 'Process' ? 'bg-[#2C5E3B] dark:bg-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24] shadow-sm' : 'text-slate-500 dark:text-gray-400'}`}
-                        >
-                            {t('warehouse.putaway.process')}
-                        </button>
-                        <button
-                            onClick={() => setViewMode('History')}
-                            className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all ${viewMode === 'History' ? 'bg-[#2C5E3B] dark:bg-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24] shadow-sm' : 'text-slate-500 dark:text-gray-400'}`}
-                        >
-                            {t('warehouse.putaway.history')}
-                        </button>
-                    </div>
-
-                    <button
-                        onClick={() => refreshData()}
-                        disabled={isSubmitting}
-                        className="woody-btn-secondary p-2.5 text-stone-600 hover:text-[#2C5E3B]"
-                        title={t('warehouse.putaway.syncOperations')}
-                    >
-                        <RefreshCw size={18} className={isSubmitting ? 'animate-spin' : ''} />
-                    </button>
-                </div>
-
-                {onStartScanning && viewMode === 'Process' && (
-                    <button
-                        onClick={onStartScanning}
-                        disabled={isSubmitting}
-                        className="woody-btn-primary w-full h-12 text-[10px] uppercase tracking-widest flex items-center justify-center gap-2"
-                    >
-                        <Smartphone size={16} /> {t('warehouse.scanBarcode')}
-                    </button>
-                )}
-            </div>
-
-            {/* ── DESKTOP: Full filters row ── */}
-            <div className="hidden md:flex flex-row gap-4 mt-8 pt-6 border-t border-slate-100 dark:border-white/5 relative z-10">
-                <div className="flex-1 relative group/search">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-gray-500 group-focus-within/search:text-[#2C5E3B] dark:group-focus-within/search:text-[#A9CBA2] transition-colors" size={18} />
-                    <input
-                        type="text"
-                        placeholder={`${t('warehouse.putaway.search')}`}
-                        aria-label={t('warehouse.putaway.search')}
-                        title={t('warehouse.putaway.search')}
-                        value={putawaySearch}
-                        onChange={(e) => setPutawaySearch(e.target.value)}
-                        className="woody-input w-full py-3.5 !pl-12 pr-4 font-mono"
-                    />
-                </div>
-
-                <div className="flex gap-2">
-                    <div className="glass-panel-pushed p-1.5 flex mr-2 shadow-inner">
-                        <button
-                            onClick={() => setViewMode('Process')}
-                            className={`px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all ${viewMode === 'Process' ? 'bg-[#2C5E3B] dark:bg-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24] shadow-md' : 'text-gray-555 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
-                        >
-                            {t('warehouse.putaway.process')}
-                        </button>
-                        <button
-                            onClick={() => setViewMode('History')}
-                            className={`px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all ${viewMode === 'History' ? 'bg-[#2C5E3B] dark:bg-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24] shadow-md' : 'text-gray-555 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
-                        >
-                            {t('warehouse.putaway.history')}
-                        </button>
-                    </div>
-
-                    {viewMode === 'Process' && (
-                        <>
-                            <div className="flex glass-panel-pushed p-1.5 shrink-0 shadow-inner">
-                                {(['All', 'Pending', 'In-Progress'] as const).map(status => (
-                                    <button
-                                        key={status}
-                                        onClick={() => setPutawayStatusFilter(status)}
-                                        className={`px-6 py-2.5 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all ${putawayStatusFilter === status ? 'bg-[#2C5E3B] dark:bg-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24] shadow-md' : 'text-slate-500 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5'}`}
-                                    >
-                                        {status === 'All' ? t('warehouse.allStatus') : status === 'Pending' ? t('warehouse.pending') : t('warehouse.inProgress')}
-                                    </button>
-                                ))}
-                            </div>
-
-                            <SortDropdown
-                                label={t('warehouse.priority')}
-                                options={[
-                                    { id: 'priority' as const, label: t('warehouse.priority'), icon: <AlertTriangle size={14} /> },
-                                    { id: 'date' as const, label: t('warehouse.date'), icon: <Clock size={14} /> },
-                                    { id: 'items' as const, label: t('warehouse.items'), icon: <List size={14} /> }
-                                ]}
-                                value={putawaySortBy}
-                                onChange={(val) => setPutawaySortBy(val)}
-                                isOpen={isPutawaySortDropdownOpen}
-                                setIsOpen={setIsPutawaySortDropdownOpen}
-                            />
-                        </>
-                    )}
-
-                    {onCompleteJob && (
-                        <button
-                            onClick={onCompleteJob}
+                            onClick={() => refreshData()}
                             disabled={isSubmitting}
-                            className="woody-btn-primary px-6 text-[10px] uppercase tracking-[0.2em] flex items-center justify-center gap-3 active:scale-[0.98]"
+                            className="woody-btn-secondary p-3.5 text-stone-600 dark:text-stone-400 hover:text-[#2C5E3B] dark:hover:text-[#A9CBA2] active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed group"
+                            title={t('warehouse.putaway.syncOperations')}
                         >
-                            {isSubmitting ? (
-                                <Loader2 size={20} className="animate-spin" />
-                            ) : (
-                                <>
-                                    <CheckCircle size={18} className="stroke-[3]" /> {t('warehouse.completeJob')}
-                                </>
-                            )}
+                            <RefreshCw size={20} className={`transform group-hover:rotate-180 transition-transform duration-700 ${isSubmitting ? 'animate-spin' : ''}`} />
                         </button>
-                    )}
-
-                    <button
-                        onClick={() => refreshData()}
-                        disabled={isSubmitting}
-                        className="woody-btn-secondary p-3.5 text-stone-600 dark:text-stone-400 hover:text-[#2C5E3B] dark:hover:text-[#A9CBA2] active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed group"
-                        title={t('warehouse.putaway.syncOperations')}
-                    >
-                        <RefreshCw size={20} className={`transform group-hover:rotate-180 transition-transform duration-700 ${isSubmitting ? 'animate-spin' : ''}`} />
-                    </button>
+                    </div>
                 </div>
-            </div>
+            )}
         </div>
     );
 };

@@ -1,5 +1,20 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { useFulfillment, OpTab } from './FulfillmentContext';
+
+/** Returns true when viewport < 768 px (md breakpoint). SSR-safe. */
+function useIsMobile(): boolean {
+    const [isMobile, setIsMobile] = useState(() =>
+        typeof window !== 'undefined' ? window.innerWidth < 768 : false
+    );
+    useEffect(() => {
+        const mq = window.matchMedia('(max-width: 767px)');
+        setIsMobile(mq.matches);
+        const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+        mq.addEventListener('change', handler);
+        return () => mq.removeEventListener('change', handler);
+    }, []);
+    return isMobile;
+}
 import { useData } from '../../contexts/DataContext';
 import { Protected } from '../Protected';
 import { MobileTabSelector, DesktopTabSelector } from './TabSelectors';
@@ -103,6 +118,7 @@ export const FulfillmentContent: React.FC = () => {
         return tabs.filter(tab => canAccessTab(tab));
     }, [user?.role]);
 
+    const isMobile = useIsMobile();
 
     return (
         <div className="h-full flex flex-col gap-4 md:gap-6 p-2 md:p-0">
@@ -112,26 +128,27 @@ export const FulfillmentContent: React.FC = () => {
                 </div>
             )}
 
-            {/* --- MOBILE TAB SELECTOR --- */}
-            <MobileTabSelector
-                activeTab={activeTab}
-                setActiveTab={setActiveTab}
-                visibleTabs={visibleTabs}
-                t={t}
-                filteredJobs={filteredJobs}
-            />
-
-            {/* --- DESKTOP TABS --- */}
-            <DesktopTabSelector
-                activeTab={activeTab}
-                setActiveTab={setActiveTab}
-                visibleTabs={visibleTabs}
-                t={t}
-                filteredJobs={filteredJobs}
-                showPointsPopup={showPointsPopup}
-                setShowPointsPopup={setShowPointsPopup}
-                earnedPoints={earnedPoints}
-            />
+            {/* --- TAB SELECTORS --- */}
+            {isMobile ? (
+                <MobileTabSelector
+                    activeTab={activeTab}
+                    setActiveTab={setActiveTab}
+                    visibleTabs={visibleTabs}
+                    t={t}
+                    filteredJobs={filteredJobs}
+                />
+            ) : (
+                <DesktopTabSelector
+                    activeTab={activeTab}
+                    setActiveTab={setActiveTab}
+                    visibleTabs={visibleTabs}
+                    t={t}
+                    filteredJobs={filteredJobs}
+                    showPointsPopup={showPointsPopup}
+                    setShowPointsPopup={setShowPointsPopup}
+                    earnedPoints={earnedPoints}
+                />
+            )}
 
             {/* --- DOCKS TAB --- */}
             {activeTab === 'DOCKS' && (

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Package, AlertTriangle, MapPin, Clock, List, ArrowRight, ChevronRight, Trash2 } from 'lucide-react';
 import Pagination from '../../shared/Pagination';
 import { SortDropdown, isUUID } from '../FulfillmentShared';
@@ -6,6 +6,21 @@ import { WMSJob, Employee, Site } from '../../../types';
 import { formatJobId } from '../../../utils/jobIdFormatter';
 import { useFulfillment } from '../FulfillmentContext';
 import { useStore } from '../../../contexts/CentralStore';
+
+/** Returns true when viewport < 768 px (md breakpoint). SSR-safe. */
+function useIsMobile(): boolean {
+    const [isMobile, setIsMobile] = useState(() =>
+        typeof window !== 'undefined' ? window.innerWidth < 768 : false
+    );
+    useEffect(() => {
+        const mq = window.matchMedia('(max-width: 767px)');
+        setIsMobile(mq.matches);
+        const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+        mq.addEventListener('change', handler);
+        return () => mq.removeEventListener('change', handler);
+    }, []);
+    return isMobile;
+}
 
 interface PickListProps {
     filteredPickJobs: WMSJob[];
@@ -42,6 +57,7 @@ export const PickList: React.FC<PickListProps> = ({
 }) => {
     const { deleteJob } = useFulfillment();
     const { user } = useStore();
+    const isMobile = useIsMobile();
 
     const handleDelete = async (e: React.MouseEvent, jobId: string) => {
         e.stopPropagation();
@@ -96,35 +112,39 @@ export const PickList: React.FC<PickListProps> = ({
                                 const pickedItems = lineItems.filter((i: any) => i.status === 'Picked').length;
                                 const progress = totalItems > 0 ? (pickedItems / totalItems) * 100 : 0;
 
-                                return (
-                                    <React.Fragment key={job.id}>
-                                        {/* ── MOBILE: Compact tappable row ── */}
+                                // ── Conditional render: only mount what the viewport needs ──
+                                if (isMobile) {
+                                    return (
                                         <div
-                                            className={`md:hidden flex items-center gap-3 bg-[#FAF8F5]/80 dark:bg-[#1C2620]/60 border rounded-xl p-3 active:bg-stone-50 dark:active:bg-white/5 transition-all cursor-pointer ${job.priority === 'Critical' ? 'border-red-500/30' : 'border-[#E2DCCE]/60 dark:border-[#A9CBA2]/10'}`}
+                                            key={job.id}
+                                            className={`flex items-center gap-3 bg-[#FAF8F5]/80 dark:bg-[#1C2620]/60 border rounded-xl p-3 active:bg-stone-50 dark:active:bg-white/5 transition-colors cursor-pointer ${job.priority === 'Critical' ? 'border-red-500/30' : 'border-[#E2DCCE]/60 dark:border-[#A9CBA2]/10'}`}
                                             onClick={() => handleStartJob(job)}
                                         >
                                             <div className={`w-10 h-10 rounded-full flex items-center justify-center text-xs font-black flex-shrink-0 border ${
                                                 progress >= 100 ? 'bg-emerald-50 dark:bg-emerald-500/20 border-emerald-100 dark:border-emerald-500/30 text-emerald-600 dark:text-emerald-400' : 'bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20 text-[#2C5E3B] dark:text-[#A9CBA2]'
-                                            }`}>
+                                            }}`}>
                                                 {Math.round(progress)}%
                                             </div>
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex items-center gap-2">
                                                     <span className="text-sm font-black text-slate-900 dark:text-white tracking-wider uppercase">{formatJobId(job)}</span>
                                                     {job.priority === 'Critical' && (
-                                                        <span className="bg-red-500 text-white text-[8px] font-black px-1 py-0.5 rounded uppercase animate-pulse">!</span>
+                                                        <span className="bg-red-500 text-white text-[8px] font-black px-1 py-0.5 rounded uppercase">!</span>
                                                     )}
                                                 </div>
                                                 <span className="text-[10px] text-zinc-500 dark:text-gray-400 font-bold uppercase tracking-widest">{totalItems} {t('warehouse.itemPlural')}</span>
                                             </div>
                                             <ChevronRight size={18} className="text-zinc-400 dark:text-gray-600 flex-shrink-0" />
                                         </div>
+                                    );
+                                }
 
-                                        {/* ── DESKTOP: Full card ── */}
-                                        <div
-                                            onClick={() => handleStartJob(job)}
-                                            className={`hidden md:block group glass-panel hover:border-[#2C5E3B]/30 dark:hover:border-[#A9CBA2]/30 p-6 relative overflow-hidden cursor-pointer active:scale-[0.99] ${job.priority === 'Critical' ? 'border-red-500/30 dark:border-red-500/20 shadow-red-500/5' : ''} ${job.status === 'In-Progress' ? 'border-[#2C5E3B]/50 dark:border-[#A9CBA2]/50 shadow-md' : ''}`}
-                                        >
+                                return (
+                                    <div
+                                        key={job.id}
+                                        onClick={() => handleStartJob(job)}
+                                        className={`group glass-panel hover:border-[#2C5E3B]/30 dark:hover:border-[#A9CBA2]/30 p-6 relative overflow-hidden cursor-pointer active:scale-[0.99] ${job.priority === 'Critical' ? 'border-red-500/30 dark:border-red-500/20 shadow-red-500/5' : ''} ${job.status === 'In-Progress' ? 'border-[#2C5E3B]/50 dark:border-[#A9CBA2]/50 shadow-md' : ''}`}
+                                    >
                                         {job.priority === 'Critical' && <div className="absolute top-0 right-0 w-24 h-24 bg-red-500/5 blur-2xl rounded-full pointer-events-none" />}
 
                                         <div className="flex justify-between items-start mb-6 relative z-10 w-full">
@@ -132,7 +152,7 @@ export const PickList: React.FC<PickListProps> = ({
                                                 <div className="flex flex-wrap items-center gap-2">
                                                     <span className="text-sm font-black text-slate-900 dark:text-white tracking-widest uppercase">{formatJobId(job)}</span>
                                                     {job.priority === 'Critical' && (
-                                                        <div className="flex items-center gap-1 bg-red-100 dark:bg-red-500 text-red-700 dark:text-white text-[9px] font-black px-1.5 py-0.5 rounded uppercase tracking-wider animate-pulse border border-red-500/20 dark:border-transparent">
+                                                        <div className="flex items-center gap-1 bg-red-100 dark:bg-red-500 text-red-700 dark:text-white text-[9px] font-black px-1.5 py-0.5 rounded uppercase tracking-wider border border-red-500/20 dark:border-transparent">
                                                             <AlertTriangle size={8} className="fill-current" />
                                                             {t('warehouse.urgentLabel')}
                                                         </div>
@@ -161,7 +181,7 @@ export const PickList: React.FC<PickListProps> = ({
                                                 </div>
                                             </div>
                                             <span className={`text-[10px] px-2.5 py-1 rounded-xl font-black whitespace-nowrap shrink-0 border uppercase tracking-widest shadow-sm ${job.status === 'In-Progress'
-                                                ? 'bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/20 text-[#2C5E3B] dark:text-[#A9CBA2] border-[#2C5E3B]/20 dark:border-[#A9CBA2]/30 md:animate-pulse'
+                                                ? 'bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/20 text-[#2C5E3B] dark:text-[#A9CBA2] border-[#2C5E3B]/20 dark:border-[#A9CBA2]/30 animate-pulse'
                                                 : job.priority === 'High'
                                                     ? 'bg-orange-50 dark:bg-orange-500/20 text-orange-600 dark:text-orange-400 border-orange-100 dark:border-orange-500/30'
                                                     : 'bg-[#FAF8F5]/80 dark:bg-white/5 text-slate-500 dark:text-gray-400 border-[#E2DCCE]/60 dark:border-white/10'
@@ -171,7 +191,7 @@ export const PickList: React.FC<PickListProps> = ({
                                             {['super_admin', 'warehouse_manager'].includes(user?.role as string) && (
                                                 <button
                                                     onClick={(e) => handleDelete(e, job.id)}
-                                                    className="w-8 h-6 ml-2 rounded border bg-white/5 border-white/10 text-red-500 hover:text-white hover:bg-red-500 hover:border-red-500 transition-all flex items-center justify-center shrink-0"
+                                                    className="w-8 h-6 ml-2 rounded border bg-white/5 border-white/10 text-red-500 hover:text-white hover:bg-red-500 hover:border-red-500 transition-colors flex items-center justify-center shrink-0"
                                                     title="Delete Job"
                                                 >
                                                     <Trash2 size={12} />
@@ -187,7 +207,7 @@ export const PickList: React.FC<PickListProps> = ({
 
                                             <div className="w-full h-1.5 bg-stone-100 dark:bg-white/5 rounded-full overflow-hidden">
                                                 <div
-                                                    className="h-full bg-[#2C5E3B] dark:bg-[#A9CBA2] shadow-sm transition-all duration-700"
+                                                    className="h-full bg-[#2C5E3B] dark:bg-[#A9CBA2] shadow-sm transition-[width] duration-700"
                                                     ref={(el) => { if (el) el.style.width = `${Math.round(progress)}%`; }}
                                                 />
                                             </div>
@@ -216,15 +236,14 @@ export const PickList: React.FC<PickListProps> = ({
                                                 </div>
                                             </div>
 
-                                            <div className="flex flex-col md:flex-row gap-2 mt-4">
+                                            <div className="flex flex-col gap-2 mt-4">
                                                 <button className="woody-btn-primary w-full h-12 text-[10px]">
                                                     {job.status === 'In-Progress' ? t('warehouse.continueArrow') : t('warehouse.startArrow')}
                                                     <ArrowRight size={14} className="inline ml-1" />
                                                 </button>
                                             </div>
                                         </div>
-                                        </div>
-                                    </React.Fragment>
+                                    </div>
                                 );
                             })}
                         </div>

@@ -1,5 +1,20 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Search, Calendar, Box, Package, ArrowRight, History as HistoryIcon, User, Undo2, Clock } from 'lucide-react';
+
+/** Returns true when viewport < 768 px (md breakpoint). SSR-safe. */
+function useIsMobile(): boolean {
+    const [isMobile, setIsMobile] = useState(() =>
+        typeof window !== 'undefined' ? window.innerWidth < 768 : false
+    );
+    useEffect(() => {
+        const mq = window.matchMedia('(max-width: 767px)');
+        setIsMobile(mq.matches);
+        const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+        mq.addEventListener('change', handler);
+        return () => mq.removeEventListener('change', handler);
+    }, []);
+    return isMobile;
+}
 import Pagination from '../../shared/Pagination';
 import { WMSJob, Product } from '../../../types';
 import { formatJobId } from '../../../utils/jobIdFormatter';
@@ -41,6 +56,7 @@ export const PickHistory: React.FC<PickHistoryProps> = ({
     const [search, setSearch] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [returnJob, setReturnJob] = useState<WMSJob | null>(null);
+    const isMobile = useIsMobile();
 
     const filteredHistory = useMemo(() => {
         const mapped = historicalJobs.filter((j: WMSJob) => j.type === 'PICK').map(j => {
@@ -170,12 +186,12 @@ export const PickHistory: React.FC<PickHistoryProps> = ({
                                 const itemsArr = Array.isArray(rawItems) ? rawItems : [];
                                 const productNames = itemsArr.map((li: any) => li.name || li.product?.name || li.sku || t('warehouse.picking.unknownUser')).filter(Boolean);
 
-                                return (
-                                    <React.Fragment key={job.id}>
-                                        {/* ── MOBILE: Compact tappable row ── */}
+                                if (isMobile) {
+                                    return (
                                         <div
+                                            key={job.id}
                                             onClick={() => { setSelectedJob(job); setIsDetailsOpen(true); }}
-                                            className={`md:hidden flex items-center gap-3 bg-[#FAF8F5]/80 dark:bg-white/5 border rounded-xl p-3 active:bg-[#FAF8F5]/90 dark:active:bg-white/10 transition-colors cursor-pointer ${(job.status || '').toLowerCase() === 'completed' ? 'border-[#E2DCCE]/60 dark:border-white/10' : 'border-red-500/30'}`}
+                                            className={`flex items-center gap-3 bg-[#FAF8F5]/80 dark:bg-white/5 border rounded-xl p-3 active:bg-[#FAF8F5]/90 dark:active:bg-white/10 transition-colors cursor-pointer ${(job.status || '').toLowerCase() === 'completed' ? 'border-[#E2DCCE]/60 dark:border-white/10' : 'border-red-500/30'}`}
                                         >
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex items-center gap-2 mb-1">
@@ -203,12 +219,15 @@ export const PickHistory: React.FC<PickHistoryProps> = ({
                                             </div>
                                             <ArrowRight size={16} className="text-zinc-400 dark:text-gray-600 flex-shrink-0" />
                                         </div>
+                                    );
+                                }
 
-                                        {/* ── DESKTOP: Full card ── */}
-                                        <div
-                                            onClick={() => { setSelectedJob(job); setIsDetailsOpen(true); }}
-                                            className="hidden md:block group relative bg-[#FAF8F5]/80 dark:bg-[#1C2620]/60 hover:bg-[#FAF8F5] dark:hover:bg-[#1C2620] border border-[#E2DCCE]/60 dark:border-[#A9CBA2]/[0.06] hover:border-[#2C5E3B]/30 dark:hover:border-[#A9CBA2]/30 rounded-[2rem] p-5 transition-colors cursor-pointer overflow-hidden shadow-sm hover:shadow-xl active:scale-[0.98]"
-                                        >
+                                return (
+                                    <div
+                                        key={job.id}
+                                        onClick={() => { setSelectedJob(job); setIsDetailsOpen(true); }}
+                                        className="group relative bg-[#FAF8F5]/80 dark:bg-[#1C2620]/60 hover:bg-[#FAF8F5] dark:hover:bg-[#1C2620] border border-[#E2DCCE]/60 dark:border-[#A9CBA2]/[0.06] hover:border-[#2C5E3B]/30 dark:hover:border-[#A9CBA2]/30 rounded-[2rem] p-5 transition-colors cursor-pointer overflow-hidden shadow-sm hover:shadow-xl active:scale-[0.98]"
+                                    >
                                         {/* Hover Glow */}
                                         <div className="absolute inset-0 bg-zinc-900/5 dark:bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
 
@@ -237,7 +256,7 @@ export const PickHistory: React.FC<PickHistoryProps> = ({
                                             </h5>
                                             <div className="flex items-center gap-1.5 mt-2 transition-colors">
                                                 <Calendar size={10} className="text-[#2C5E3B]/50 dark:text-[#A9CBA2]/50" />
-                                                <span className="text-[10px] font-mono font-black text-[#2C5E3B] dark:text-[#A9CBA2] bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 px-1.5 py-0.5 rounded tracking-tighter uppercase transition-all group-hover:bg-[#2C5E3B]/20">
+                                                <span className="text-[10px] font-mono font-black text-[#2C5E3B] dark:text-[#A9CBA2] bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 px-1.5 py-0.5 rounded tracking-tighter uppercase transition-colors group-hover:bg-[#2C5E3B]/20">
                                                     {formatDateTime(job.updatedAt || job.createdAt || '', { showTime: true })}
                                                 </span>
                                             </div>
@@ -266,25 +285,24 @@ export const PickHistory: React.FC<PickHistoryProps> = ({
                                                 </div>
                                             </div>
 
-                                            <div className="flex items-center gap-2 bg-stone-50 dark:bg-white/5 px-2 py-1 rounded-lg border border-stone-200 dark:border-white/5 group-hover:border-[#2C5E3B]/20 transition-all shadow-inner">
+                                            <div className="flex items-center gap-2 bg-stone-50 dark:bg-white/5 px-2 py-1 rounded-lg border border-stone-200 dark:border-white/5 group-hover:border-[#2C5E3B]/20 transition-colors shadow-inner">
                                                 {(job.status || '').toLowerCase() === 'completed' && (
                                                     <button
                                                         onClick={(e) => { e.stopPropagation(); setReturnJob(job); }}
-                                                        className="flex items-center gap-1.5 bg-amber-100 hover:bg-amber-200 dark:bg-amber-500/5 dark:hover:bg-amber-500/15 px-2 py-1 rounded-lg border border-amber-300 dark:border-amber-500/10 hover:border-amber-400 dark:hover:border-amber-500/30 transition-all text-amber-800 hover:text-amber-900 dark:text-amber-400 dark:hover:text-amber-300"
+                                                        className="flex items-center gap-1.5 bg-amber-100 hover:bg-amber-200 dark:bg-amber-500/5 dark:hover:bg-amber-500/15 px-2 py-1 rounded-lg border border-amber-300 dark:border-amber-500/10 hover:border-amber-400 dark:hover:border-amber-500/30 transition-colors text-amber-800 hover:text-amber-900 dark:text-amber-400 dark:hover:text-amber-300"
                                                         title={t('warehouse.packing.returnItemsToWarehouse')}
                                                     >
                                                         <Undo2 size={10} />
                                                         <span className="text-[9px] font-black uppercase tracking-widest">{t('warehouse.driverHub.return')}</span>
                                                     </button>
                                                 )}
-                                                <div className="flex items-center gap-1.5 bg-[#FAF8F5] dark:bg-white/5 px-2 py-1 rounded-lg border border-[#E2DCCE]/60 dark:border-white/10 group-hover:border-[#2C5E3B]/30 transition-all">
+                                                <div className="flex items-center gap-1.5 bg-[#FAF8F5] dark:bg-white/5 px-2 py-1 rounded-lg border border-[#E2DCCE]/60 dark:border-white/10 group-hover:border-[#2C5E3B]/30 transition-colors">
                                                     <Box size={12} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
                                                     <span className="text-[10px] font-black text-[#2C5E3B] dark:text-[#A9CBA2] tabular-nums">{job.items} {job.items === 1 ? t('warehouse.itemSingular') : t('warehouse.itemPlural')}</span>
                                                 </div>
                                             </div>
                                         </div>
-                                        </div>
-                                    </React.Fragment>
+                                    </div>
                                 );
                             })}
                         </>
