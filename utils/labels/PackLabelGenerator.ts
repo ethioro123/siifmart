@@ -203,9 +203,9 @@ export const generatePackLabelHTML = async (
         const showQR = validFormat === 'QR' || validFormat === 'Both';
 
         contentHTML = `
-            <div style="display: flex; flex-direction: column; height: 100%; border: 4px solid #000; font-family: 'SF Mono', 'Fira Code', 'Inter', monospace; color: #000; background: #fff; box-sizing: border-box; padding: ${pSize}; overflow: hidden; line-height: 1.1;">
+            <div style="display: flex; flex-direction: column; min-height: 100%; border: 4px solid #000; font-family: 'SF Mono', 'Fira Code', 'Inter', monospace; color: #000; background: #fff; box-sizing: border-box; padding: ${pSize}; line-height: 1.1;">
                 <!-- TOP HEADER -->
-                <div style="display: flex; justify-content: space-between; border-bottom: 3px solid #000; padding-bottom: 15px; margin-bottom: 20px; flex-shrink: 0;">
+                <div style="display: flex; justify-content: space-between; border-bottom: 3px solid #000; padding-bottom: 10px; margin-bottom: 14px; flex-shrink: 0;">
                     <div>
                         <div style="font-weight: 900; font-size: 28px; letter-spacing: 0.1em;">SIIFMART LOGISTICS</div>
                         <div style="font-size: 13px; font-weight: 900; margin-top: 3px;">DOMESTIC PRIORITY SERVICE // 2026 EDITION</div>
@@ -214,9 +214,9 @@ export const generatePackLabelHTML = async (
                 </div>
 
                 <!-- MAIN SHIP BLOCK -->
-                <div style="display: flex; flex-direction: column; min-height: 0; border-bottom: 3px solid #000; padding-bottom: 20px;">
+                <div style="display: flex; flex-direction: column; border-bottom: 3px solid #000; padding-bottom: 12px;">
                     <!-- SENDER (TOP LEFT, SMALL) -->
-                    <div style="margin-bottom: 15px;">
+                    <div style="margin-bottom: 10px;">
                         <div style="font-weight: 900; font-size: 10px; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.1em; color: #666;">FROM:</div>
                         <div style="font-size: 11px; font-weight: 700; line-height: 1.2; text-transform: uppercase; color: #333;">
                             ${data.fromName || 'SiifMart Logistics Center'} // ${data.fromAddress?.replace(/<br>/g, ', ') || 'Bole Sub-City, Woreda 03, Addis Ababa'}
@@ -240,7 +240,7 @@ export const generatePackLabelHTML = async (
 
                 <!-- PRODUCT MANIFEST -->
                 ${(data.lineItems && data.lineItems.length > 0) ? `
-                <div style="margin-top: 16px; padding: 12px 0; border-top: 1.5px solid #000; flex: 1; min-height: 0; overflow: hidden;">
+                <div style="margin-top: 12px; padding: 8px 0;">
                     <div style="font-weight: 900; font-size: 11px; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.15em; opacity: 0.7;">MANIFEST — ${data.lineItems.length} ITEM${data.lineItems.length > 1 ? 'S' : ''}</div>
                     <div style="font-size: 13px; font-weight: 700;">
                         ${data.lineItems.slice(0, 12).map(item => `
@@ -256,15 +256,15 @@ export const generatePackLabelHTML = async (
                 ` : ''}
 
                 <!-- BARCODE & TRACKING -->
-                <div style="margin-top: 26px; border-top: 3px solid #000; padding-top: 20px; text-align: center; flex-shrink: 0;">
-                    <div class="barcode-container" style="height: 78px; margin-bottom: 13px; display:flex; justify-content:center;">${barcode}</div>
-                    <div style="font-weight: 900; font-size: 21px; letter-spacing: 0.3em; text-transform: uppercase; font-family:'SF Mono', 'Fira Code', monospace; margin-top:10px; color: #000;">
+                <div style="margin-top: 16px; border-top: 3px solid #000; padding-top: 14px; text-align: center;">
+                    <div class="barcode-container" style="height: 68px; margin-bottom: 8px; display:flex; justify-content:center;">${barcode}</div>
+                    <div style="font-weight: 900; font-size: 18px; letter-spacing: 0.25em; text-transform: uppercase; font-family:'SF Mono', 'Fira Code', monospace; margin-top:6px; color: #000;">
                         * TRK :: ${data.trackingNumber || formattedOrderRef} *
                     </div>
                 </div>
 
                 <!-- FOOTER DATA -->
-                <div style="margin-top: 20px; display: flex; justify-content: space-between; font-weight: 900; font-size: 13px; border-top: 1.5px solid #000; padding-top: 10px; flex-shrink: 0;">
+                <div style="margin-top: 12px; display: flex; justify-content: space-between; font-weight: 900; font-size: 11px; border-top: 1.5px solid #000; padding-top: 8px;">
                     <span>DATE: ${data.packDate ? new Date(data.packDate).toLocaleDateString('en-GB') : new Date().toLocaleDateString('en-GB')}</span>
                     <span>${data.packageNumber ? `PACKAGE: ${data.packageNumber} OF ${data.totalPackages || 1}` : `${data.totalPackages || 1} PACKAGE${(data.totalPackages || 1) > 1 ? 'S' : ''}`}</span>
                     <span>ITEMS: [ ${data.itemCount} ]</span>
