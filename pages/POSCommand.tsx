@@ -44,6 +44,7 @@ const POSCommandContent: React.FC = () => {
     handleEndShift,
     setIsReceivingModalOpen,
     setIsStockListOpen,
+    setIsPrintHubOpen,
     dateRange,
     setDateRange
   } = usePOSCommand();
@@ -167,10 +168,18 @@ const POSCommandContent: React.FC = () => {
 
             <button
               onClick={() => setIsStockListOpen(true)}
-              className="px-4 py-2.5 bg-white/80 dark:bg-white/5 hover:bg-[#2C5E3B]/10 text-[#2C4D35] dark:text-gray-300 hover:text-[#1E3F27] dark:hover:text-white text-[11px] font-bold uppercase tracking-widest rounded-2xl border border-[#E2DCCE] dark:border-white/5 hover:border-[#2C5E3B]/20 transition-all flex items-center gap-2 group shadow-sm"
+              className="px-4 py-2.5 bg-white/80 dark:bg-white/5 hover:bg-[#2C5E3B]/10 text-[#2C4D35] dark:text-gray-300 hover:text-[#1E3F27] dark:hover:text-white text-[11px] font-bold uppercase tracking-widest rounded-2xl border border-[#E2DCCE] dark:border-white/5 hover:border-[#2C5E3B]/20 transition-all flex items-center gap-2 group shadow-sm cursor-pointer"
             >
               <Box size={14} className="opacity-70 group-hover:opacity-100 transition-opacity" />
               {t('posCommand.stockListLabel')}
+            </button>
+
+            <button
+              onClick={() => setIsPrintHubOpen(true)}
+              className="px-4 py-2.5 bg-white/80 dark:bg-white/5 hover:bg-[#2C5E3B]/10 text-[#2C4D35] dark:text-gray-300 hover:text-[#1E3F27] dark:hover:text-white text-[11px] font-bold uppercase tracking-widest rounded-2xl border border-[#E2DCCE] dark:border-white/5 hover:border-[#2C5E3B]/20 transition-all flex items-center gap-2 group shadow-sm cursor-pointer"
+            >
+              <Printer size={14} className="opacity-70 group-hover:opacity-100 transition-opacity" />
+              {t('posCommand.printHubLabel') || 'Print Hub'}
             </button>
 
             <button

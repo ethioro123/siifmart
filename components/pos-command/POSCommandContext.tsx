@@ -60,6 +60,10 @@ interface POSCommandContextType {
     stockSearch: string;
     setStockSearch: React.Dispatch<React.SetStateAction<string>>;
 
+    // Print Hub State
+    isPrintHubOpen: boolean;
+    setIsPrintHubOpen: React.Dispatch<React.SetStateAction<boolean>>;
+
     // Shift Closing State
     isClosingShift: boolean;
     setIsClosingShift: React.Dispatch<React.SetStateAction<boolean>>;
@@ -113,6 +117,7 @@ export const POSCommandProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     const [pin, setPin] = useState('');
     const [isStockListOpen, setIsStockListOpen] = useState(false);
     const [stockSearch, setStockSearch] = useState('');
+    const [isPrintHubOpen, setIsPrintHubOpen] = useState(false);
 
     // Shift Closing
     const [isClosingShift, setIsClosingShift] = useState(false);
@@ -295,6 +300,7 @@ export const POSCommandProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         handleCloseReceivingModal: receivingState.handleCloseReceivingModal,
 
         isStockListOpen, setIsStockListOpen, stockSearch, setStockSearch,
+        isPrintHubOpen, setIsPrintHubOpen,
         isClosingShift, setIsClosingShift, closingStep, setClosingStep,
         cashDenominations, setCashDenominations, discrepancyReason, setDiscrepancyReason, isSubmittingShift,
         txPage, setTxPage, TX_PER_PAGE,

@@ -1,8 +1,10 @@
-import React, { useState, useRef } from 'react';
-import { X, Printer, Package, Settings } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { X, Printer, Package, Settings, Search, Plus, Minus, Trash2 } from 'lucide-react';
 import Barcode from 'react-barcode';
 import { Product } from '../types';
 import { printHtmlContent } from '../utils/printHelper';
+import { useData } from '../contexts/DataContext';
+import { buildLabelPrintHtml } from '../utils/labels/LabelPrintStyleBuilder';
 
 // Map internal barcode types to react-barcode formats
 const getBarcodeFormat = (type?: string): any => {
@@ -40,138 +42,64 @@ const LABEL_SIZES = {
 };
 
 export default function LabelPrintModal({ isOpen, onClose, labels, onPrint }: LabelPrintModalProps) {
+    const { products } = useData();
     const [labelSize, setLabelSize] = useState<LabelSize>('medium');
+    const [activeLabels, setActiveLabels] = useState<LabelData[]>(labels || []);
+    const [searchQuery, setSearchQuery] = useState('');
     const printRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (isOpen) {
+            setActiveLabels(labels || []);
+            setSearchQuery('');
+        }
+    }, [labels, isOpen]);
 
     if (!isOpen) return null;
 
-    const totalLabels = labels.reduce((sum, label) => sum + label.quantity, 0);
+    const searchResults = searchQuery.trim()
+        ? products.filter(p =>
+            p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            p.sku.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            (p.barcode && p.barcode.toLowerCase().includes(searchQuery.toLowerCase()))
+        ).slice(0, 6)
+        : [];
+
+    const handleAddProduct = (product: Product) => {
+        setActiveLabels(prev => {
+            const existingIdx = prev.findIndex(l => l.product.id === product.id || l.product.sku === product.sku);
+            if (existingIdx >= 0) {
+                const updated = [...prev];
+                updated[existingIdx] = { ...updated[existingIdx], quantity: updated[existingIdx].quantity + 1 };
+                return updated;
+            }
+            return [...prev, { product, quantity: 1 }];
+        });
+        setSearchQuery('');
+    };
+
+    const handleUpdateQuantity = (index: number, delta: number) => {
+        setActiveLabels(prev => {
+            const updated = [...prev];
+            const newQty = updated[index].quantity + delta;
+            if (newQty <= 0) {
+                return updated.filter((_, i) => i !== index);
+            }
+            updated[index] = { ...updated[index], quantity: newQty };
+            return updated;
+        });
+    };
+
+    const handleRemoveLabel = (index: number) => {
+        setActiveLabels(prev => prev.filter((_, i) => i !== index));
+    };
+
+    const totalLabels = activeLabels.reduce((sum, label) => sum + label.quantity, 0);
     const config = LABEL_SIZES[labelSize];
 
     const handlePrint = () => {
-        // Get all label HTML
         const labelContent = printRef.current?.innerHTML || '';
-
-        const html = `
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <title>Print Labels</title>
-                <style>
-                    * {
-                        margin: 0;
-                        padding: 0;
-                        box-sizing: border-box;
-                    }
-                    
-                    @page {
-                        size: ${config.width}mm ${config.height}mm;
-                        margin: 0;
-                    }
-                    
-                    body {
-                        font-family: Arial, sans-serif;
-                        background: white;
-                        color: black;
-                    }
-                    
-                    .label {
-                        width: ${config.width}mm;
-                        height: ${config.height}mm;
-                        padding: 2mm;
-                        border: 0.2mm solid #000;
-                        display: flex;
-                        flex-direction: column;
-                        justify-content: space-between;
-                        page-break-after: always;
-                        page-break-inside: avoid;
-                        break-inside: avoid;
-                        overflow: hidden;
-                        background: white;
-                    }
-                    
-                    .label-header {
-                        border-bottom: 0.2mm solid #000;
-                        padding-bottom: 1mm;
-                        margin-bottom: 1mm;
-                    }
-                    
-                    .label-header h3 {
-                        font-size: 3.5mm;
-                        font-weight: bold;
-                        text-align: center;
-                        white-space: nowrap;
-                        overflow: hidden;
-                        text-overflow: ellipsis;
-                    }
-                    
-                    .label-body {
-                        flex: 1;
-                        display: flex;
-                        flex-direction: column;
-                        justify-content: center;
-                        align-items: center;
-                        padding: 1mm 0;
-                    }
-                    
-                    .product-name {
-                        font-size: 2.8mm;
-                        font-weight: bold;
-                        text-align: center;
-                        margin-bottom: 1.5mm;
-                        display: -webkit-box;
-                        -webkit-line-clamp: 2;
-                        -webkit-box-orient: vertical;
-                        overflow: hidden;
-                    }
-                    
-                    .barcode-container {
-                        width: 100%;
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-                        margin-top: 1mm;
-                    }
-                    
-                    .barcode-container svg {
-                        max-width: 100%;
-                        height: auto;
-                    }
-                    
-                    .label-footer {
-                        border-top: 0.2mm solid #000;
-                        padding-top: 1mm;
-                        margin-top: 1mm;
-                        display: flex;
-                        justify-content: space-between;
-                        font-size: 2mm;
-                        font-family: monospace;
-                    }
-                    
-                    /* Size specific adjustments */
-                    .label-small {
-                        padding: 1mm;
-                    }
-                    .label-small .label-header h3 {
-                        font-size: 2.8mm;
-                    }
-                    .label-small .product-name {
-                        font-size: 2.2mm;
-                        margin-bottom: 1mm;
-                    }
-                    
-                    .label-small .barcode-container {
-                        border: none;
-                        margin: 0;
-                    }
-                </style>
-            </head>
-            <body>
-                ${labelContent}
-            </body>
-            </html>
-        `;
-
+        const html = buildLabelPrintHtml(labelContent, config);
         printHtmlContent(html);
         onPrint();
     };
@@ -180,7 +108,7 @@ export default function LabelPrintModal({ isOpen, onClose, labels, onPrint }: La
     const renderLabels = () => {
         const allLabels: React.ReactElement[] = [];
 
-        labels.forEach((labelData: LabelData, labelIndex: number) => {
+        activeLabels.forEach((labelData: LabelData, labelIndex: number) => {
             for (let i = 0; i < labelData.quantity; i++) {
                 const key = `${labelIndex}-${i}`;
                 const barcodeValue = labelData.product.barcode || labelData.product.sku;
@@ -297,17 +225,68 @@ export default function LabelPrintModal({ isOpen, onClose, labels, onPrint }: La
                     </div>
 
                     {/* Label Preview Area */}
-                    <div className="flex-1 overflow-y-auto p-6 bg-black/40">
-                        <div className="mb-4 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg text-sm text-blue-400">
+                    <div className="flex-1 overflow-y-auto p-6 bg-black/40 space-y-4">
+                        {/* Product Search & Add Bar */}
+                        <div className="relative">
+                            <div className="flex items-center bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 focus-within:border-cyber-primary/50 transition-colors">
+                                <Search size={18} className="text-gray-400 mr-2 shrink-0" />
+                                <input
+                                    type="text"
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    placeholder="Search products by Name, SKU or Barcode to add to print queue..."
+                                    className="w-full bg-transparent text-white placeholder-gray-500 text-sm focus:outline-none"
+                                />
+                                {searchQuery && (
+                                    <button onClick={() => setSearchQuery('')} className="text-gray-400 hover:text-white p-1">
+                                        <X size={14} />
+                                    </button>
+                                )}
+                            </div>
+
+                            {/* Dropdown Results */}
+                            {searchResults.length > 0 && (
+                                <div className="absolute top-full left-0 right-0 mt-1 bg-[#18201B] border border-white/10 rounded-xl shadow-2xl z-50 overflow-hidden divide-y divide-white/5 max-h-60 overflow-y-auto">
+                                    {searchResults.map((product) => (
+                                        <button
+                                            key={product.id}
+                                            type="button"
+                                            onClick={() => handleAddProduct(product)}
+                                            className="w-full p-3 flex items-center justify-between text-left hover:bg-white/5 transition-colors group cursor-pointer"
+                                        >
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-9 h-9 rounded-lg bg-black/40 border border-white/10 overflow-hidden flex items-center justify-center shrink-0">
+                                                    {product.image ? (
+                                                        <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+                                                    ) : (
+                                                        <Package className="text-gray-500" size={18} />
+                                                    )}
+                                                </div>
+                                                <div>
+                                                    <p className="font-bold text-white text-xs truncate max-w-xs">{product.name}</p>
+                                                    <p className="text-[10px] font-mono text-gray-400">SKU: {product.sku} {product.barcode ? `| ${product.barcode}` : ''}</p>
+                                                </div>
+                                            </div>
+                                            <span className="text-xs font-bold text-cyber-primary bg-cyber-primary/10 border border-cyber-primary/20 px-2.5 py-1 rounded-lg group-hover:bg-cyber-primary group-hover:text-black transition-all flex items-center gap-1">
+                                                <Plus size={12} /> Add
+                                            </span>
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg text-sm text-blue-400">
                             <strong>Tip:</strong> Label size: {config.width}mm × {config.height}mm ({labelSize === 'small' ? '2" × 1"' : labelSize === 'medium' ? '4" × 2"' : '4" × 3"'})
                         </div>
+
                         <div className="space-y-4">
-                            {labels.map((labelData, index) => (
-                                <div key={index} className="bg-white/5 border border-white/10 rounded-xl p-4 flex gap-4 hover:border-cyber-primary/30 transition-colors">
+                            {activeLabels.map((labelData, index) => (
+                                <div key={index} className="bg-white/5 border border-white/10 rounded-xl p-4 flex gap-4 hover:border-cyber-primary/30 transition-colors items-center">
                                     {/* Product Info */}
-                                    <div className="flex-1">
+                                    <div className="flex-1 min-w-0">
                                         <div className="flex items-center gap-4">
-                                            <div className="w-16 h-16 rounded-lg bg-black/40 border border-white/10 overflow-hidden flex items-center justify-center">
+                                            <div className="w-16 h-16 rounded-lg bg-black/40 border border-white/10 overflow-hidden flex items-center justify-center shrink-0">
                                                 {labelData.product.image ? (
                                                     <img
                                                         src={labelData.product.image}
@@ -318,9 +297,9 @@ export default function LabelPrintModal({ isOpen, onClose, labels, onPrint }: La
                                                     <Package className="text-gray-600" size={32} />
                                                 )}
                                             </div>
-                                            <div>
-                                                <h4 className="font-bold text-white text-lg">{labelData.product.name}</h4>
-                                                <div className="flex items-center gap-3 mt-1">
+                                            <div className="min-w-0">
+                                                <h4 className="font-bold text-white text-base truncate">{labelData.product.name}</h4>
+                                                <div className="flex items-center gap-3 mt-1 flex-wrap">
                                                     <span className="text-xs font-mono text-cyan-400 bg-cyan-950/30 px-2 py-0.5 rounded border border-cyan-500/20">
                                                         {labelData.product.sku || 'NO SKU'}
                                                     </span>
@@ -333,7 +312,7 @@ export default function LabelPrintModal({ isOpen, onClose, labels, onPrint }: La
                                     </div>
 
                                     {/* Preview of Label Layout */}
-                                    <div className="bg-white p-2 rounded w-48 opacity-90 border-4 border-dashed border-gray-300 transform scale-90 origin-right">
+                                    <div className="bg-white p-2 rounded w-44 shrink-0 opacity-90 border-4 border-dashed border-gray-300 transform scale-90">
                                         <div className="h-full flex flex-col items-center justify-center text-black text-[10px] leading-tight text-center">
                                             <p className="font-bold truncate w-full px-1">{labelData.product.name}</p>
                                             <div className="my-1 w-full flex justify-center overflow-hidden">
@@ -354,13 +333,46 @@ export default function LabelPrintModal({ isOpen, onClose, labels, onPrint }: La
                                         </div>
                                     </div>
 
-                                    {/* Quantity Control */}
-                                    <div className="flex flex-col items-center justify-center px-4 border-l border-white/10">
-                                        <span className="text-2xl font-bold text-cyber-primary">{labelData.quantity}</span>
-                                        <span className="text-xs text-gray-500 uppercase tracking-wider">Copies</span>
+                                    {/* Quantity Controls */}
+                                    <div className="flex items-center gap-2 px-4 border-l border-white/10 shrink-0">
+                                        <div className="flex items-center bg-black/40 border border-white/10 rounded-xl p-1">
+                                            <button
+                                                type="button"
+                                                onClick={() => handleUpdateQuantity(index, -1)}
+                                                className="p-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
+                                                title="Decrease copies"
+                                            >
+                                                <Minus size={14} />
+                                            </button>
+                                            <span className="w-8 text-center text-sm font-extrabold text-cyber-primary font-mono">{labelData.quantity}</span>
+                                            <button
+                                                type="button"
+                                                onClick={() => handleUpdateQuantity(index, 1)}
+                                                className="p-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
+                                                title="Increase copies"
+                                            >
+                                                <Plus size={14} />
+                                            </button>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={() => handleRemoveLabel(index)}
+                                            className="p-2 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-xl transition-colors"
+                                            title="Remove label"
+                                        >
+                                            <Trash2 size={16} />
+                                        </button>
                                     </div>
                                 </div>
                             ))}
+
+                            {activeLabels.length === 0 && (
+                                <div className="p-12 text-center border-2 border-dashed border-white/10 rounded-2xl bg-white/[0.02]">
+                                    <Package size={40} className="mx-auto text-gray-600 mb-3 opacity-60" />
+                                    <p className="text-white font-bold text-base">No labels in print queue</p>
+                                    <p className="text-gray-400 text-xs mt-1">Use the search bar above to find and add products to print.</p>
+                                </div>
+                            )}
                         </div>
                     </div>
 
@@ -374,10 +386,11 @@ export default function LabelPrintModal({ isOpen, onClose, labels, onPrint }: La
                         </button>
                         <button
                             onClick={handlePrint}
-                            className="flex-[2] py-4 bg-cyber-primary hover:bg-cyber-accent text-black font-bold rounded-xl transition-all flex items-center justify-center gap-3 shadow-[0_0_20px_rgba(0,255,157,0.3)] hover:shadow-[0_0_30px_rgba(0,255,157,0.5)] transform hover:scale-[1.01]"
+                            disabled={totalLabels === 0}
+                            className="flex-[2] py-4 bg-cyber-primary hover:bg-cyber-accent disabled:opacity-40 disabled:cursor-not-allowed text-black font-bold rounded-xl transition-all flex items-center justify-center gap-3 shadow-[0_0_20px_rgba(0,255,157,0.3)] hover:shadow-[0_0_30px_rgba(0,255,157,0.5)] transform hover:scale-[1.01]"
                         >
                             <Printer size={20} />
-                            <span>Print {totalLabels} Labels ({labelSize.toUpperCase()})</span>
+                            <span>Print {totalLabels} Label{totalLabels !== 1 ? 's' : ''} ({labelSize.toUpperCase()})</span>
                         </button>
                     </div>
                 </div>

@@ -103,10 +103,6 @@ input {
   color: #6b7280;
 }
 
-[data-theme="light"] .text-white {
-  color: #111827;
-}
-
 /* Fix Accent Colors in Light Mode */
 [data-theme="light"] .text-blue-400 {
   color: #2563eb;

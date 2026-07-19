@@ -245,7 +245,7 @@ export const ReceivingForm: React.FC = () => {
                     <button
                         onClick={handleConfirmTransferReceiving}
                         disabled={isConfirmingReceive || transferReceivingItems.reduce((sum, item) => sum + item.receivedQty, 0) === 0}
-                        className="px-8 py-3 text-white font-bold flex items-center gap-2 rounded-2xl transition-all disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed active:scale-95 hover:opacity-90 bg-gradient-to-br from-[#224429] to-[#2C5E3B] shadow-[0_4px_16px_rgba(44,94,59,0.25)]"
+                        className="px-8 py-3 disabled:bg-stone-200 dark:disabled:bg-white/5 disabled:text-stone-400 dark:disabled:text-stone-600 border border-transparent disabled:border-stone-300 dark:disabled:border-white/10 disabled:cursor-not-allowed text-white font-bold flex items-center gap-2 rounded-2xl transition-all active:scale-95 hover:opacity-90 bg-gradient-to-br from-[#224429] to-[#2C5E3B] shadow-[0_4px_16px_rgba(44,94,59,0.25)] disabled:shadow-none"
                     >
                         {isConfirmingReceive ? (
                             <span className="flex items-center gap-2"><div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" /> {t('common.processing')}...</span>

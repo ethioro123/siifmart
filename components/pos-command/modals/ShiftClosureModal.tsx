@@ -131,7 +131,7 @@ export const ShiftClosureModal: React.FC = () => {
                                     <div className="flex gap-3">
                                         <button
                                             onClick={() => setClosingStep(1)}
-                                            className="flex-1 py-3.5 bg-[#FAF8F5] dark:bg-white/5 hover:bg-[#2C5E3B]/8 dark:hover:bg-white/10 text-[#4D6E56] dark:text-gray-400 hover:text-[#2C5E3B] font-bold rounded-2xl border border-[#E2DCCE] dark:border-white/8 transition-all flex items-center justify-center gap-2 select-none"
+                                            className="flex-1 py-3.5 bg-[#FAF8F5] dark:bg-white/5 hover:bg-[#2C5E3B]/8 dark:hover:bg-white/10 text-stone-700 dark:text-stone-300 hover:text-[#2C5E3B] font-bold rounded-2xl border border-[#E2DCCE] dark:border-white/8 transition-all flex items-center justify-center gap-2 select-none"
                                         >
                                             <ArrowLeft size={16} />
                                             {t('posCommand.recount')}
@@ -139,7 +139,7 @@ export const ShiftClosureModal: React.FC = () => {
                                         <button
                                             onClick={handleSubmitShift}
                                             disabled={isSubmittingShift || (isVariance && !discrepancyReason)}
-                                            className="flex-1 py-3.5 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold rounded-2xl transition-all active:scale-[0.98] flex items-center justify-center gap-2 hover:opacity-90 bg-gradient-to-br from-[#224429] to-[#2C5E3B] shadow-[0_4px_20px_rgba(44,94,59,0.25)] select-none"
+                                            className="flex-1 py-3.5 disabled:bg-stone-200 dark:disabled:bg-white/5 disabled:text-stone-400 dark:disabled:text-stone-600 border border-transparent disabled:border-stone-300 dark:disabled:border-white/10 disabled:cursor-not-allowed text-white font-bold rounded-2xl transition-all active:scale-[0.98] flex items-center justify-center gap-2 hover:opacity-90 bg-gradient-to-br from-[#224429] to-[#2C5E3B] shadow-[0_4px_20px_rgba(44,94,59,0.25)] disabled:shadow-none select-none"
                                         >
                                             {isSubmittingShift && <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
                                             {t('posCommand.finalizeLogout')}

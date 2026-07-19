@@ -24,7 +24,7 @@ export const ReceiptPreviewModal: React.FC = () => {
                 <div className="flex justify-end gap-3 pt-4 border-t border-[#E2DCCE] dark:border-white/10">
                     <button
                         onClick={() => setIsReceiptPreviewOpen(false)}
-                        className="px-4 py-2 bg-white/90 dark:bg-black/35 border border-[#E2DCCE] dark:border-white/10 hover:bg-[#2C5E3B]/10 hover:text-[#2C5E3B] dark:hover:text-white text-stone-500 rounded-lg transition-colors"
+                        className="px-4 py-2 bg-white/90 dark:bg-black/35 border border-[#E2DCCE] dark:border-white/10 hover:bg-[#2C5E3B]/10 hover:text-[#2C5E3B] dark:hover:text-white text-stone-700 dark:text-stone-300 rounded-lg transition-colors font-bold text-sm"
                     >
                         Cancel
                     </button>

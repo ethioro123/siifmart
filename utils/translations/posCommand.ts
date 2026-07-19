@@ -6,6 +6,7 @@ export const posCommand: TranslationBlock = {
     dashboardHeader: { en: 'POS Command Center', am: 'የPOS ትዕዛዝ ማዕከል', or: 'Buufata To’annoo POS' },
     receiveTransfer: { en: 'Receive Order', am: 'ትዕዛዝ ተቀበል', or: 'Ajaja Fudhadhu' },
     receiveLabel: { en: 'Receive', am: 'ተቀበል', or: 'Fudhadhu' },
+    printHubLabel: { en: 'Print Hub', am: 'የህትመት ማዕከል', or: 'Wiirtuu Maxxansaa' },
     receivedQty: { en: 'Received Quantity', am: 'የተቀበሉት መጠን', or: 'Hanga Fudhatame' },
     condition: { en: 'Condition', am: 'ሁኔታ', or: 'Haala' },
     stockListLabel: { en: 'Stock List', am: 'የክምችት ዝርዝር', or: 'Tarree Kuusaa' },

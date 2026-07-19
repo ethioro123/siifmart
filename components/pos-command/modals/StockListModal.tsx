@@ -7,7 +7,9 @@ import { useLanguage } from '../../../contexts/LanguageContext';
 import { CURRENCY_SYMBOL } from '../../../constants';
 import { formatPriceValue } from '../../../utils/formatting';
 import { ProductDetailsModal } from '../../inventory/ProductDetailsModal';
+import LabelPrintModal from '../../LabelPrintModal';
 import { getSellUnit } from '../../../utils/units';
+import { Printer } from 'lucide-react';
 
 export const StockListModal: React.FC = () => {
     const { t } = useLanguage();
@@ -19,6 +21,8 @@ export const StockListModal: React.FC = () => {
     const pageSize = 20;
 
     const [selectedProduct, setSelectedProduct] = React.useState<any>(null);
+    const [isPrintHubOpen, setIsPrintHubOpen] = React.useState(false);
+    const [labelsToPrint, setLabelsToPrint] = React.useState<any[]>([]);
     const { products, activeSite } = useData();
     const { user } = useStore();
 
@@ -54,6 +58,17 @@ export const StockListModal: React.FC = () => {
                         className="flex-1 bg-transparent border-none outline-none text-[#1E3F27] dark:text-white px-2 py-1 placeholder:text-stone-400 dark:placeholder:text-gray-500"
                         autoFocus
                     />
+                    <button
+                        type="button"
+                        onClick={() => {
+                            setLabelsToPrint([]);
+                            setIsPrintHubOpen(true);
+                        }}
+                        className="px-3.5 py-2 bg-[#224429] dark:bg-[#2C5E3B] hover:bg-[#1B3520] dark:hover:bg-[#2C5E3B]/80 text-white text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 shrink-0 shadow-sm cursor-pointer"
+                    >
+                        <Printer size={15} />
+                        <span>Print Hub</span>
+                    </button>
                 </div>
 
                 <div className="overflow-x-auto">
@@ -68,6 +83,7 @@ export const StockListModal: React.FC = () => {
                                 <th className="text-center p-3 font-medium uppercase tracking-wider">{t('common.status')}</th>
                                 <th className="text-right p-3 font-medium uppercase tracking-wider">Last Updated</th>
                                 <th className="text-right p-3 font-medium uppercase tracking-wider">Added By</th>
+                                <th className="text-center p-3 font-medium uppercase tracking-wider">Tag</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-[#E2DCCE] dark:divide-white/5">
@@ -154,12 +170,25 @@ export const StockListModal: React.FC = () => {
                                         <td className="p-3 text-right text-stone-500 dark:text-gray-400 text-[11px] whitespace-nowrap font-medium tracking-wide">
                                             {product.posReceivedBy || product.pos_received_by || product.createdBy || product.created_by || '—'}
                                         </td>
+                                        <td className="p-3 text-center" onClick={(e) => e.stopPropagation()}>
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    setLabelsToPrint([{ product, quantity: 1 }]);
+                                                    setIsPrintHubOpen(true);
+                                                }}
+                                                className="p-1.5 rounded-lg bg-stone-100 hover:bg-[#2C5E3B]/10 dark:bg-white/5 dark:hover:bg-[#2C5E3B]/20 text-[#2C4D35] dark:text-[#A9CBA2] transition-colors border border-stone-200 dark:border-white/10 cursor-pointer"
+                                                title="Print Price Tag / Barcode Label"
+                                            >
+                                                <Printer size={14} />
+                                            </button>
+                                        </td>
                                     </tr>
                                 );
                             })}
                             {filteredProducts.length === 0 && (
                                 <tr>
-                                    <td colSpan={8} className="p-8 text-center text-stone-400 dark:text-gray-500">
+                                    <td colSpan={9} className="p-8 text-center text-stone-400 dark:text-gray-500">
                                         {t('posCommand.noProductsLocation')}
                                     </td>
                                 </tr>
@@ -199,6 +228,13 @@ export const StockListModal: React.FC = () => {
                 product={selectedProduct}
                 isOpen={!!selectedProduct}
                 onClose={() => setSelectedProduct(null)}
+            />
+
+            <LabelPrintModal
+                isOpen={isPrintHubOpen}
+                onClose={() => setIsPrintHubOpen(false)}
+                labels={labelsToPrint}
+                onPrint={() => setIsPrintHubOpen(false)}
             />
         </Modal>
     );
