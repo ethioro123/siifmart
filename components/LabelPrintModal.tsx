@@ -4,7 +4,7 @@ import Barcode from 'react-barcode';
 import { Product } from '../types';
 import { printHtmlContent } from '../utils/printHelper';
 import { useData } from '../contexts/DataContext';
-import { buildLabelPrintHtml } from '../utils/labels/LabelPrintStyleBuilder';
+import { generateUnifiedBatchLabelsHTML } from '../utils/labels/ProductLabelGenerator';
 
 // Map internal barcode types to react-barcode formats
 const getBarcodeFormat = (type?: string): any => {
@@ -97,9 +97,25 @@ export default function LabelPrintModal({ isOpen, onClose, labels, onPrint }: La
     const totalLabels = activeLabels.reduce((sum, label) => sum + label.quantity, 0);
     const config = LABEL_SIZES[labelSize];
 
-    const handlePrint = () => {
-        const labelContent = printRef.current?.innerHTML || '';
-        const html = buildLabelPrintHtml(labelContent, config);
+    const handlePrint = async () => {
+        const items = activeLabels.map(l => ({
+            value: l.product.sku || l.product.barcode || '',
+            label: l.product.name,
+            quantity: l.quantity,
+            price: (l.product.price || '0.00').toString(),
+            category: l.product.category || 'General',
+            date: ''
+        }));
+
+        const printOptions = {
+            size: labelSize === 'small' ? 'Small' : labelSize === 'large' ? 'Large' : 'Medium',
+            format: 'Barcode' as const,
+            showPrice: true,
+            showCategory: true,
+            showName: true
+        };
+
+        const html = await generateUnifiedBatchLabelsHTML(items, printOptions);
         printHtmlContent(html);
         onPrint();
     };
@@ -312,23 +328,33 @@ export default function LabelPrintModal({ isOpen, onClose, labels, onPrint }: La
                                     </div>
 
                                     {/* Preview of Label Layout */}
-                                    <div className="bg-white p-2 rounded w-44 shrink-0 opacity-90 border-4 border-dashed border-gray-300 transform scale-90">
-                                        <div className="h-full flex flex-col items-center justify-center text-black text-[10px] leading-tight text-center">
-                                            <p className="font-bold truncate w-full px-1">{labelData.product.name}</p>
-                                            <div className="my-1 w-full flex justify-center overflow-hidden">
-                                                {(labelData.product.barcode || labelData.product.sku) ? (
-                                                    <Barcode
-                                                        value={labelData.product.barcode || labelData.product.sku}
-                                                        format={getBarcodeFormat(labelData.product.barcodeType || 'CODE128')}
-                                                        displayValue={false}
-                                                        height={20}
-                                                        width={1}
-                                                        margin={0}
-                                                    />
-                                                ) : <span className="text-red-500 font-bold text-[8px]">NO DATA</span>}
-                                            </div>
-                                            <div className="font-mono font-bold text-[8px] text-gray-500">
+                                    <div className="bg-white p-2.5 rounded-xl w-52 shrink-0 text-black border-2 border-slate-900 font-sans shadow-lg transform scale-90">
+                                        <div className="bg-slate-100 p-1 border-b-2 border-dashed border-slate-300 text-[10px] font-black uppercase tracking-wider truncate text-center text-slate-900 rounded-t-sm">
+                                            {labelData.product.name}
+                                        </div>
+                                        <div className="py-2 flex flex-col items-center justify-center">
+                                            {(labelData.product.barcode || labelData.product.sku) ? (
+                                                <Barcode
+                                                    value={labelData.product.barcode || labelData.product.sku}
+                                                    format={getBarcodeFormat(labelData.product.barcodeType || 'CODE128')}
+                                                    displayValue={false}
+                                                    height={22}
+                                                    width={1.2}
+                                                    margin={0}
+                                                />
+                                            ) : <span className="text-red-500 font-bold text-[8px]">NO DATA</span>}
+                                            <div className="font-mono font-black text-[9px] mt-1 text-slate-800 tracking-wider">
                                                 {labelData.product.sku}
+                                            </div>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-1 border-t-2 border-dashed border-slate-300 pt-1.5 text-[8px]">
+                                            <div className="text-center bg-slate-50 p-1 rounded border border-slate-200">
+                                                <span className="block font-extrabold text-slate-500 text-[7px] uppercase tracking-wider">PRICE</span>
+                                                <span className="block font-black text-slate-900 text-[9px]">ETB {labelData.product.price}</span>
+                                            </div>
+                                            <div className="text-center bg-slate-50 p-1 rounded border border-slate-200">
+                                                <span className="block font-extrabold text-slate-500 text-[7px] uppercase tracking-wider">CAT</span>
+                                                <span className="block font-black text-slate-900 text-[9px] truncate">{(labelData.product.category || 'General').toUpperCase()}</span>
                                             </div>
                                         </div>
                                     </div>
