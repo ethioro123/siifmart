@@ -429,8 +429,7 @@ input {
     print-color-adjust: exact !important;
   }
 
-  /* Aggressively hide all UI chrome AND main root so background POs don't print */
-  #root,
+  /* Aggressively hide UI chrome during print */
   aside,
   nav,
   header,
