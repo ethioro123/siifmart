@@ -267,7 +267,7 @@ export default function LoginPage() {
         )}
 
         <div className="mt-8 pt-6 border-t border-[#E2DCCE]/40 dark:border-white/[0.04] text-center select-none">
-          <p className="text-[10px] text-[#4D6E56] dark:text-[#7A9E83] font-semibold tracking-wider uppercase">SiifMart Operations v3.3</p>
+          <p className="text-[10px] text-[#4D6E56] dark:text-[#7A9E83] font-semibold tracking-wider uppercase">SiifMart Operations v3.4</p>
         </div>
       </div>
     </div>
