@@ -4,7 +4,7 @@ import { Pagination } from '../../shared';
 import { WMSJob, Site, Product } from '../../../types';
 import { formatJobId } from '../../../utils/jobIdFormatter';
 import { formatDateTime } from '../../../utils/formatting';
-import { motion, AnimatePresence } from 'framer-motion';
+
 
 interface PackHistoryProps {
     historicalJobs: WMSJob[];
@@ -135,8 +135,6 @@ export const PackHistory: React.FC<PackHistoryProps> = ({
 
     return (
         <div className="border-t border-[#E2DCCE] dark:border-[#A9CBA2]/10 mt-8 pt-8 relative overflow-hidden group/history">
-            {/* 🌿 Forest Mesh Accent */}
-            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#2C5E3B]/10 blur-[120px] rounded-full -mr-40 -mt-40 pointer-events-none opacity-50 group-hover/history:opacity-100 transition-opacity duration-1000" />
             <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-[#A9CBA2]/10 to-transparent" />
 
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 mb-8">
@@ -168,7 +166,7 @@ export const PackHistory: React.FC<PackHistoryProps> = ({
             {paginatedHistory.length > 0 ? (
                 <>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pb-12">
-                        <AnimatePresence>
+                        <>
                             {paginatedHistory.map((job, index) => {
                                 const formattedId = formatJobIdFn(job);
                                 const totalItems = job.items || job.lineItems?.length || 0;
@@ -182,12 +180,9 @@ export const PackHistory: React.FC<PackHistoryProps> = ({
                                 return (
                                     <React.Fragment key={job.id}>
                                         {/* Mobile Layout (Slim Row) */}
-                                        <motion.div
-                                            initial={{ opacity: 0, y: 10 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            transition={{ delay: index * 0.02 }}
+                                        <div
                                             onClick={() => onJobSelect && onJobSelect(job)}
-                                            className="md:hidden group relative bg-gray-50 dark:bg-black/60 hover:bg-white dark:hover:bg-black border border-gray-100 dark:border-white/10 rounded-xl p-3 transition-all duration-300 overflow-hidden cursor-pointer active:bg-gray-100 dark:active:bg-white/5 mb-2 shadow-sm"
+                                            className="md:hidden group relative bg-gray-50 dark:bg-black/60 hover:bg-white dark:hover:bg-black border border-gray-100 dark:border-white/10 rounded-xl p-3 transition-colors overflow-hidden cursor-pointer active:bg-gray-100 dark:active:bg-white/5 mb-2 shadow-sm"
                                         >
                                             <div className="flex items-center justify-between">
                                                 <div className="flex items-center gap-3">
@@ -214,15 +209,12 @@ export const PackHistory: React.FC<PackHistoryProps> = ({
                                                     </div>
                                                 </div>
                                             </div>
-                                        </motion.div>
+                                        </div>
 
                                         {/* Desktop Layout (Detailed Card) */}
-                                        <motion.div
-                                            initial={{ opacity: 0, y: 20 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            transition={{ delay: index * 0.05 }}
+                                        <div
                                             onClick={() => onJobSelect && onJobSelect(job)}
-                                            className="hidden md:block group relative bg-[#FAF8F5]/80 dark:bg-[#1C2620]/60 hover:bg-[#FAF8F5] dark:hover:bg-[#1C2620] border border-[#E2DCCE]/60 dark:border-[#A9CBA2]/[0.06] hover:border-[#2C5E3B]/30 dark:hover:border-[#A9CBA2]/30 rounded-[2rem] p-5 transition-all duration-500 cursor-pointer overflow-hidden shadow-sm hover:shadow-xl active:scale-[0.98]"
+                                            className="hidden md:block group relative bg-[#FAF8F5]/80 dark:bg-[#1C2620]/60 hover:bg-[#FAF8F5] dark:hover:bg-[#1C2620] border border-[#E2DCCE]/60 dark:border-[#A9CBA2]/[0.06] hover:border-[#2C5E3B]/30 dark:hover:border-[#A9CBA2]/30 rounded-[2rem] p-5 transition-colors cursor-pointer overflow-hidden shadow-sm hover:shadow-xl active:scale-[0.98]"
                                         >
                                             {/* Hover Glow */}
                                             <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
@@ -318,14 +310,10 @@ export const PackHistory: React.FC<PackHistoryProps> = ({
                                                             <Printer size={12} />
                                                         </button>
 
-                                                        <AnimatePresence>
-                                                            {openPrintMenuId === job.id && (
-                                                                    <motion.div
-                                                                    initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                                                                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                                                                    exit={{ opacity: 0, scale: 0.95, y: 5 }}
-                                                                    className="absolute bottom-[calc(100%+8px)] right-0 w-32 bg-white dark:bg-[#1C2620]/95 border border-gray-200 dark:border-[#2C5E3B]/30 rounded-xl p-2 shadow-xl dark:shadow-[#2C5E3B]/20 z-[100] flex flex-col gap-1 backdrop-blur-md"
-                                                                    onClick={(e) => e.stopPropagation()}
+                                                        {openPrintMenuId === job.id && (
+                                                                <div
+                                                                    className="absolute bottom-[calc(100%+8px)] right-0 w-32 bg-white dark:bg-[#1C2620] border border-gray-200 dark:border-[#2C5E3B]/30 rounded-xl p-2 shadow-xl z-[100] flex flex-col gap-1"
+                                                                    onClick={(e: React.MouseEvent) => e.stopPropagation()}
                                                                 >
                                                                     <div className="text-[9px] font-black text-gray-400 dark:text-[#A9CBA2]/50 uppercase tracking-widest px-2 pb-1 border-b border-gray-100 dark:border-white/5 mb-1">{t('warehouse.labelSize')}</div>
                                                                     {(['Small', 'Medium', 'Large', 'XL'] as const).map(size => (
@@ -341,17 +329,16 @@ export const PackHistory: React.FC<PackHistoryProps> = ({
                                                                             {size}
                                                                         </button>
                                                                     ))}
-                                                                </motion.div>
+                                                                </div>
                                                             )}
-                                                        </AnimatePresence>
                                                     </div>
                                                 </div>
                                             </div>
-                                        </motion.div>
+                                        </div>
                                     </React.Fragment>
                                 );
                             })}
-                        </AnimatePresence>
+                        </>
                     </div>
                     <Pagination
                         currentPage={currentPage}

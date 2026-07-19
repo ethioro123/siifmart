@@ -4,7 +4,7 @@ import Pagination from '../../shared/Pagination';
 import { WMSJob, Product } from '../../../types';
 import { formatJobId } from '../../../utils/jobIdFormatter';
 import { formatDateTime } from '../../../utils/formatting';
-import { motion, AnimatePresence } from 'framer-motion';
+
 import { ReturnToWarehouseModal } from '../returns/ReturnToWarehouseModal';
 
 interface PickHistoryProps {
@@ -130,8 +130,6 @@ export const PickHistory: React.FC<PickHistoryProps> = ({
 
     return (
         <div className="border-t border-[#E2DCCE]/60 dark:border-white/10 mt-8 pt-8 relative overflow-hidden group/history">
-            {/* 🌈 Futuristic Mesh Accent */}
-            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#2C5E3B]/5 dark:bg-[#2C5E3B]/10 blur-[120px] rounded-full -mr-40 -mt-40 pointer-events-none opacity-50 group-hover/history:opacity-100 transition-opacity duration-1000" />
             <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-zinc-200 dark:via-white/10 to-transparent" />
 
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 mb-8">
@@ -162,7 +160,7 @@ export const PickHistory: React.FC<PickHistoryProps> = ({
             {paginatedHistory.length > 0 ? (
                 <>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pb-12">
-                        <AnimatePresence>
+                        <>
                             {paginatedHistory.map((job, index) => {
                                 const formattedId = formatJobId(job);
                                 // Parse items for product name preview
@@ -175,11 +173,9 @@ export const PickHistory: React.FC<PickHistoryProps> = ({
                                 return (
                                     <React.Fragment key={job.id}>
                                         {/* ── MOBILE: Compact tappable row ── */}
-                                        <motion.div
-                                            initial={{ opacity: 0, y: 10 }}
-                                            animate={{ opacity: 1, y: 0 }}
+                                        <div
                                             onClick={() => { setSelectedJob(job); setIsDetailsOpen(true); }}
-                                            className={`md:hidden flex items-center gap-3 bg-[#FAF8F5]/80 dark:bg-white/5 border rounded-xl p-3 active:bg-[#FAF8F5]/90 dark:active:bg-white/10 transition-all cursor-pointer ${(job.status || '').toLowerCase() === 'completed' ? 'border-[#E2DCCE]/60 dark:border-white/10' : 'border-red-500/30'}`}
+                                            className={`md:hidden flex items-center gap-3 bg-[#FAF8F5]/80 dark:bg-white/5 border rounded-xl p-3 active:bg-[#FAF8F5]/90 dark:active:bg-white/10 transition-colors cursor-pointer ${(job.status || '').toLowerCase() === 'completed' ? 'border-[#E2DCCE]/60 dark:border-white/10' : 'border-red-500/30'}`}
                                         >
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex items-center gap-2 mb-1">
@@ -206,15 +202,12 @@ export const PickHistory: React.FC<PickHistoryProps> = ({
                                                 </div>
                                             </div>
                                             <ArrowRight size={16} className="text-zinc-400 dark:text-gray-600 flex-shrink-0" />
-                                        </motion.div>
+                                        </div>
 
                                         {/* ── DESKTOP: Full card ── */}
-                                        <motion.div
-                                            initial={{ opacity: 0, y: 20 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            transition={{ delay: index * 0.05 }}
+                                        <div
                                             onClick={() => { setSelectedJob(job); setIsDetailsOpen(true); }}
-                                            className="hidden md:block group relative bg-[#FAF8F5]/80 dark:bg-[#1C2620]/60 hover:bg-[#FAF8F5] dark:hover:bg-[#1C2620] border border-[#E2DCCE]/60 dark:border-[#A9CBA2]/[0.06] hover:border-[#2C5E3B]/30 dark:hover:border-[#A9CBA2]/30 rounded-[2rem] p-5 transition-all duration-500 cursor-pointer overflow-hidden shadow-sm hover:shadow-xl active:scale-[0.98]"
+                                            className="hidden md:block group relative bg-[#FAF8F5]/80 dark:bg-[#1C2620]/60 hover:bg-[#FAF8F5] dark:hover:bg-[#1C2620] border border-[#E2DCCE]/60 dark:border-[#A9CBA2]/[0.06] hover:border-[#2C5E3B]/30 dark:hover:border-[#A9CBA2]/30 rounded-[2rem] p-5 transition-colors cursor-pointer overflow-hidden shadow-sm hover:shadow-xl active:scale-[0.98]"
                                         >
                                         {/* Hover Glow */}
                                         <div className="absolute inset-0 bg-zinc-900/5 dark:bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
@@ -290,11 +283,11 @@ export const PickHistory: React.FC<PickHistoryProps> = ({
                                                 </div>
                                             </div>
                                         </div>
-                                        </motion.div>
+                                        </div>
                                     </React.Fragment>
                                 );
                             })}
-                        </AnimatePresence>
+                        </>
                     </div>
                     <Pagination
                         currentPage={currentPage}

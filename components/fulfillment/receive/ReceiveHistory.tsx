@@ -3,7 +3,7 @@ import { History as HistoryIcon, Search, ChevronRight, User, Calendar, Clock, Pa
 import Pagination from '../../shared/Pagination';
 import { WMSJob, PurchaseOrder, Product } from '../../../types';
 import { formatDateTime } from '../../../utils/formatting';
-import { motion, AnimatePresence } from 'framer-motion';
+
 import { ReturnToWarehouseModal } from '../returns/ReturnToWarehouseModal';
 import { getSellUnit } from '../../../utils/units';
 
@@ -276,7 +276,6 @@ export const ReceiveHistory: React.FC<ReceiveHistoryProps> = ({
     return (
         <div className="border-t border-[#E2DCCE]/60 dark:border-[#A9CBA2]/10 mt-4 md:mt-8 pt-4 md:pt-8 relative overflow-hidden group/history">
             {/* 🌈 Futuristic Mesh Accent — hidden on mobile */}
-            <div className="hidden md:block absolute top-0 right-0 w-[500px] h-[500px] bg-[#2C5E3B]/10 dark:bg-[#1E3F27]/5 blur-[120px] rounded-full -mr-40 -mt-40 pointer-events-none opacity-50 group-hover/history:opacity-100 transition-opacity duration-1000" />
             <div className="hidden md:block absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-[#E2DCCE] dark:via-[#A9CBA2]/10 to-transparent" />
 
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 md:gap-6 mb-4 md:mb-8">
@@ -306,18 +305,15 @@ export const ReceiveHistory: React.FC<ReceiveHistoryProps> = ({
             {paginatedHistory.length > 0 ? (
                 <>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4">
-                        <AnimatePresence>
+                        <>
                             {paginatedHistory.map((item: any, index) => (
-                                    <motion.div
+                                    <div
                                     key={`${item.type}-${item.id}`}
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: index * 0.05 }}
                                     onClick={() => {
                                         setSelectedJob(item.rawData);
                                         setIsDetailsOpen(true);
                                     }}
-                                    className="group relative bg-[#FAF8F5]/80 dark:bg-[#1C2620]/60 hover:bg-[#FAF8F5] dark:hover:bg-[#1C2620] border border-[#E2DCCE]/60 dark:border-[#A9CBA2]/[0.06] hover:border-[#2C5E3B]/30 dark:hover:border-[#A9CBA2]/30 rounded-[2rem] p-3 md:p-5 transition-all duration-500 cursor-pointer overflow-hidden shadow-sm hover:shadow-xl active:scale-[0.98]"
+                                    className="group relative bg-[#FAF8F5]/80 dark:bg-[#1C2620]/60 hover:bg-[#FAF8F5] dark:hover:bg-[#1C2620] border border-[#E2DCCE]/60 dark:border-[#A9CBA2]/[0.06] hover:border-[#2C5E3B]/30 dark:hover:border-[#A9CBA2]/30 rounded-[2rem] p-3 md:p-5 transition-colors cursor-pointer overflow-hidden shadow-sm hover:shadow-xl active:scale-[0.98]"
                                 >
                                     {/* Hover Glow — hidden on mobile */}
                                     <div className="hidden md:block absolute inset-0 bg-stone-900/5 dark:bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
@@ -422,9 +418,9 @@ export const ReceiveHistory: React.FC<ReceiveHistoryProps> = ({
                                                 <ChevronRight size={14} className="text-stone-400 dark:text-[#A9CBA2] group-hover:translate-x-1 transition-all" />
                                             </div>
                                     </div>
-                                </motion.div>
+                                </div>
                             ))}
-                        </AnimatePresence>
+                        </>
                     </div>
                     <Pagination
                         currentPage={currentPage}

@@ -4,7 +4,7 @@ import Pagination from '../../shared/Pagination';
 import { WMSJob, Site, TransferRecord } from '../../../types';
 import { formatJobId } from '../../../utils/jobIdFormatter';
 import { formatDateTime } from '../../../utils/formatting';
-import { motion, AnimatePresence } from 'framer-motion';
+
 
 interface TransferHistoryProps {
     transfers: TransferRecord[];
@@ -123,7 +123,7 @@ export const TransferHistory: React.FC<TransferHistoryProps> = ({
     return (
         <div className="border-t border-white/10 mt-10 pt-8 relative overflow-hidden group/history">
             {/* Mesh Accent */}
-            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#2C5E3B]/5 blur-[120px] rounded-full -mr-40 -mt-40 pointer-events-none opacity-50 group-hover/history:opacity-100 transition-opacity duration-1000" />
+
 
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
                 <div>
@@ -156,7 +156,7 @@ export const TransferHistory: React.FC<TransferHistoryProps> = ({
             {paginatedHistory.length > 0 ? (
                 <>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pb-12">
-                        <AnimatePresence>
+                        <>
                             {paginatedHistory.map((transfer: any, index) => {
                                 const formattedId = formatJobId(transfer);
                                 const totalItems = Array.isArray(transfer.items) ? transfer.items.length : (transfer.lineItems?.length || 0);
@@ -168,16 +168,13 @@ export const TransferHistory: React.FC<TransferHistoryProps> = ({
                                 const productNames = products.map((p: any) => p.name || p.productName || p.sku).filter(Boolean);
 
                                 return (
-                                    <motion.div
+                                    <div
                                         key={transfer.id}
-                                        initial={{ opacity: 0, y: 10 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        transition={{ delay: index * 0.05 }}
                                         onClick={() => {
                                             setSelectedJob(transfer);
                                             setIsDetailsOpen(true);
                                         }}
-                                        className="group relative bg-black/40 hover:bg-black/60 border border-white/5 hover:border-[#2C5E3B]/50 rounded-2xl p-5 transition-all duration-300 cursor-pointer overflow-hidden shadow-sm"
+                                        className="group relative bg-black/40 hover:bg-black/60 border border-white/5 hover:border-[#2C5E3B]/50 rounded-2xl p-5 transition-colors cursor-pointer overflow-hidden shadow-sm"
                                     >
                                         <div className="absolute inset-0 bg-gradient-to-br from-[#2C5E3B]/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
 
@@ -243,10 +240,10 @@ export const TransferHistory: React.FC<TransferHistoryProps> = ({
                                                 <ChevronRight size={14} className="text-gray-600 group-hover:text-[#A9CBA2] transition-colors" />
                                             </div>
                                         </div>
-                                    </motion.div>
+                                    </div>
                                 );
                             })}
-                        </AnimatePresence>
+                        </>
                     </div>
                     <Pagination
                         currentPage={currentPage}

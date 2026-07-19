@@ -3,7 +3,7 @@ import { History as HistoryIcon, Search, ChevronRight, User, Calendar, Clock, Pa
 import Pagination from '../../shared/Pagination';
 import { WMSJob } from '../../../types';
 import { formatJobId } from '../../../utils/jobIdFormatter';
-import { motion, AnimatePresence } from 'framer-motion';
+
 import { getSellUnit } from '../../../utils/units';
 
 import { useStore } from '../../../contexts/CentralStore';
@@ -173,7 +173,7 @@ export const PutawayHistory: React.FC<PutawayHistoryProps> = ({
     };
     return (
         <div className="border-t-2 border-[#E2DCCE]/60 dark:border-white/10 mt-8 pt-8 relative overflow-hidden group/history">
-            <div className="hidden md:block absolute top-0 right-0 w-[500px] h-[500px] bg-[#2C5E3B]/5 dark:bg-[#2C5E3B]/10 blur-[120px] rounded-full -mr-40 -mt-40 pointer-events-none opacity-50 group-hover/history:opacity-100 transition-opacity duration-1000" />
+
             
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
                 <h4 className="text-xl font-black text-gray-900 dark:text-white flex items-center gap-3 uppercase tracking-tight">
@@ -199,18 +199,15 @@ export const PutawayHistory: React.FC<PutawayHistoryProps> = ({
             {paginatedHistory.length > 0 ? (
                 <>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                        <AnimatePresence>
+                        <>
                             {paginatedHistory.map((item, index) => (
-                                <motion.div
+                                <div
                                     key={item.id}
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: index * 0.05 }}
                                     onClick={() => {
                                         setSelectedJob(item.rawData);
                                         setIsDetailsOpen(true);
                                     }}
-                                    className="group relative bg-[#FAF8F5]/80 dark:bg-[#1C2620]/60 hover:bg-[#FAF8F5] dark:hover:bg-[#1C2620] border border-[#E2DCCE]/60 dark:border-[#A9CBA2]/[0.06] hover:border-[#2C5E3B]/30 dark:hover:border-[#A9CBA2]/30 rounded-[2rem] p-5 transition-all duration-500 cursor-pointer overflow-hidden shadow-sm hover:shadow-xl active:scale-[0.98]"
+                                    className="group relative bg-[#FAF8F5]/80 dark:bg-[#1C2620]/60 hover:bg-[#FAF8F5] dark:hover:bg-[#1C2620] border border-[#E2DCCE]/60 dark:border-[#A9CBA2]/[0.06] hover:border-[#2C5E3B]/30 dark:hover:border-[#A9CBA2]/30 rounded-[2rem] p-5 transition-colors cursor-pointer overflow-hidden shadow-sm hover:shadow-xl active:scale-[0.98]"
                                 >
                                     <div className="relative flex justify-between items-start mb-4">
                                         <div className="flex items-center gap-2.5">
@@ -262,9 +259,9 @@ export const PutawayHistory: React.FC<PutawayHistoryProps> = ({
                                             <span className="text-[11px] font-black text-gray-900 dark:text-[#EAE5D9] tabular-nums font-mono">{item.displayQty}</span>
                                         </div>
                                     </div>
-                                </motion.div>
+                                </div>
                             ))}
-                        </AnimatePresence>
+                        </>
                     </div>
                     <div className="mt-8"><Pagination currentPage={currentPage} totalPages={totalPages} totalItems={filteredHistory.length} itemsPerPage={perPage} onPageChange={setCurrentPage} itemName="records" /></div>
                 </>
