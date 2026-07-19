@@ -57,7 +57,7 @@ const PinPad: React.FC<PinPadProps> = ({ pin, setPin, onEnter, onCancel }) => {
 
                 <button
                     onClick={() => handleKeyPress('clear')}
-                    className="h-16 rounded-2xl bg-red-500/10 hover:bg-red-500/20 active:bg-red-500/30 text-red-400 text-sm font-bold uppercase transition-all border border-transparent hover:border-red-500/20 active:scale-95 flex items-center justify-center tracking-widest"
+                    className="h-16 rounded-2xl bg-red-500/10 dark:bg-red-500/10 hover:bg-red-500/20 active:bg-red-500/30 text-red-600 dark:text-red-400 text-sm font-bold uppercase transition-all border border-red-500/20 active:scale-95 flex items-center justify-center tracking-widest"
                 >
                     {t('common.clear')}
                 </button>
@@ -74,7 +74,7 @@ const PinPad: React.FC<PinPadProps> = ({ pin, setPin, onEnter, onCancel }) => {
                     title={t('common.delete') || "Delete"}
                     aria-label={t('common.delete') || "Delete"}
                     onClick={() => handleKeyPress('delete')}
-                    className="h-16 rounded-2xl bg-white/80 dark:bg-[#18201B]/40 hover:bg-white dark:hover:bg-[#18201B]/80 text-stone-500 hover:text-[#1E3F27] dark:hover:text-white transition-all border border-[#E2DCCE] dark:border-white/10 active:scale-95 flex items-center justify-center shadow-sm"
+                    className="h-16 rounded-2xl bg-white/80 dark:bg-[#18201B]/40 hover:bg-white dark:hover:bg-[#18201B]/80 text-stone-700 dark:text-stone-300 hover:text-[#1E3F27] dark:hover:text-white transition-all border border-[#E2DCCE] dark:border-white/10 active:scale-95 flex items-center justify-center shadow-sm"
                 >
                     <Delete size={24} />
                 </button>
@@ -84,7 +84,7 @@ const PinPad: React.FC<PinPadProps> = ({ pin, setPin, onEnter, onCancel }) => {
                 {onCancel && (
                     <button
                         onClick={onCancel}
-                        className="flex-1 py-4 bg-white/90 dark:bg-black/35 text-stone-500 hover:text-[#1E3F27] dark:hover:text-white font-bold uppercase tracking-wider text-sm rounded-2xl transition-all border border-[#E2DCCE] dark:border-white/10 flex items-center justify-center gap-2 hover:scale-105 active:scale-95 shadow-sm"
+                        className="flex-1 py-4 bg-white/90 dark:bg-black/35 text-stone-700 dark:text-stone-300 hover:text-[#1E3F27] dark:hover:text-white font-bold uppercase tracking-wider text-sm rounded-2xl transition-all border border-[#E2DCCE] dark:border-white/10 flex items-center justify-center gap-2 hover:scale-105 active:scale-95 shadow-sm"
                     >
                         <ArrowLeft size={18} />
                         {t('common.cancel')}
@@ -93,7 +93,7 @@ const PinPad: React.FC<PinPadProps> = ({ pin, setPin, onEnter, onCancel }) => {
                 <button
                     onClick={() => handleKeyPress('enter')}
                     disabled={pin.length < 4}
-                    className="flex-1 py-4 bg-gradient-to-r from-[#224429] to-[#2C5E3B] hover:opacity-90 text-white font-black uppercase tracking-widest text-sm rounded-2xl transition-all shadow-md hover:scale-105 active:scale-95 disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-2"
+                    className="flex-1 py-4 bg-gradient-to-r from-[#224429] to-[#2C5E3B] hover:opacity-90 disabled:bg-stone-200 dark:disabled:bg-white/5 text-white disabled:text-stone-400 dark:disabled:text-stone-600 border border-transparent disabled:border-stone-300 dark:disabled:border-white/10 disabled:cursor-not-allowed disabled:hover:scale-100 font-black uppercase tracking-widest text-sm rounded-2xl transition-all shadow-md disabled:shadow-none hover:scale-105 active:scale-95 flex items-center justify-center gap-2"
                 >
                     {t('common.enter')}
                     <KeyRound size={18} />

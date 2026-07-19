@@ -35,7 +35,7 @@ export const POSCatalog: React.FC<POSCatalogProps> = ({
         <div className="flex-1 overflow-y-auto p-4">
             {filteredProducts.length === 0 ? (
                 <div className="h-full flex flex-col items-center justify-center text-center py-12">
-                    <Box size={64} className="text-gray-650 mb-4" />
+                    <Box size={64} className="text-[#4D6E56] dark:text-gray-500 mb-4 opacity-50" />
                     <h3 className="text-xl font-bold text-[#1E3F27] dark:text-[#EAE5D9] mb-2">{t('pos.noProductsAvailable')}</h3>
                     <p className="text-[#4D6E56] dark:text-[#7A9E83] max-w-md">
                         {t('pos.productsWillAppear')}
@@ -61,7 +61,7 @@ export const POSCatalog: React.FC<POSCatalogProps> = ({
                                     }
                                 }}
                                 disabled={product.stock === 0}
-                                className={`text-left bg-white/70 dark:bg-[#18201B]/30 border rounded-2xl p-4 hover:bg-white dark:hover:bg-[#18201B]/50 transition-all duration-300 group relative overflow-hidden flex flex-col h-full active:scale-[0.98] shadow-sm hover:shadow-md ${product.stock <= 0 ? 'border-red-650/80 dark:border-red-500/60 opacity-60 cursor-not-allowed' : 'border-[#E2DCCE] dark:border-emerald-950/10 hover:border-[#2C5E3B]/40 dark:hover:border-[#A9CBA2]/30'}`}
+                                className={`text-left bg-white/70 dark:bg-[#18201B]/30 border rounded-2xl p-4 hover:bg-white dark:hover:bg-[#18201B]/50 transition-all duration-300 group relative overflow-hidden flex flex-col h-full active:scale-[0.98] shadow-sm hover:shadow-md ${product.stock <= 0 ? 'border-red-500/80 dark:border-red-500/60 opacity-60 cursor-not-allowed' : 'border-[#E2DCCE] dark:border-emerald-950/10 hover:border-[#2C5E3B]/40 dark:hover:border-[#A9CBA2]/30'}`}
                             >
                                 <div className="aspect-square rounded-xl bg-[#F4F0E6] dark:bg-black/35 mb-4 overflow-hidden relative border border-[#E2DCCE]/40 dark:border-white/5 flex items-center justify-center">
                                     {product.image && !product.image.includes('placeholder.com') ? (

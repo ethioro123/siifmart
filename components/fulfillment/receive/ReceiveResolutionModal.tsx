@@ -29,7 +29,7 @@ export const ReceiveResolutionModal: React.FC<ReceiveResolutionModalProps> = ({
     t
 }) => {
     return (
-        <div className="fixed inset-0 bg-black/60 dark:bg-black/80 z-[100] flex items-center justify-center p-4 backdrop-blur-md">
+        <div className="fixed inset-0 bg-black/80 z-[100] flex items-center justify-center p-2 sm:p-4 overflow-x-hidden">
             <div className="glass-panel rounded-3xl w-full max-w-2xl overflow-hidden relative">
                 {/* 🌟 Modal Ambient Glow */}
                 <div className="absolute -top-24 -right-24 w-64 h-64 bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/5 blur-[100px] rounded-full pointer-events-none opacity-50" />

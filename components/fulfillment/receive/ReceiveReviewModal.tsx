@@ -68,14 +68,14 @@ export const ReceiveReviewModal: React.FC<ReceiveReviewModalProps> = ({
     const isFullyReceived = stats.totalReceived >= stats.totalExpected;
 
     return (
-        <div className="fixed inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-2 sm:p-4 z-50 overflow-x-hidden animate-in fade-in duration-200">
             <div className="glass-panel rounded-3xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh] relative">
                 {/* 🌟 Modal Ambient Glow — hidden on mobile */}
                 <div className="hidden md:block absolute -top-24 -right-24 w-64 h-64 bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/5 blur-[100px] rounded-full pointer-events-none" />
                 <div className="hidden md:block absolute -bottom-24 -left-24 w-64 h-64 bg-amber-600/10 dark:bg-amber-700/5 blur-[100px] rounded-full pointer-events-none" />
 
                 {/* Header */}
-                <div className="p-4 md:p-6 border-b border-[#E2DCCE]/60 dark:border-[#A9CBA2]/[0.06] flex justify-between items-start bg-[#FAF8F5]/30 dark:bg-[#1C2620]/30 backdrop-blur-sm">
+                <div className="p-4 md:p-6 border-b border-[#E2DCCE]/60 dark:border-[#A9CBA2]/[0.06] flex justify-between items-start bg-[#FAF8F5] dark:bg-[#1C2620]">
                     <div>
                         <h3 className="text-base md:text-xl font-black text-slate-900 dark:text-white flex items-center gap-2 md:gap-3 uppercase tracking-tight">
                             <FileText className="text-[#2C5E3B] dark:text-[#A9CBA2]" size={20} />
@@ -154,7 +154,7 @@ export const ReceiveReviewModal: React.FC<ReceiveReviewModalProps> = ({
                 </div>
 
                 {/* Footer */}
-                <div className="p-4 md:p-6 border-t border-[#E2DCCE]/50 dark:border-emerald-950/20 bg-white/20 dark:bg-[#1C2620]/20 flex flex-col md:flex-row gap-3 justify-end shrink-0 backdrop-blur-md">
+                <div className="p-4 md:p-6 border-t border-[#E2DCCE]/50 dark:border-emerald-950/20 bg-[#FAF8F5] dark:bg-[#1C2620] flex flex-col md:flex-row gap-3 justify-end shrink-0">
                     <button
                         onClick={onClose}
                         className="woody-btn-secondary w-full md:w-auto px-10 py-3.5 text-[10px] uppercase tracking-widest font-black order-2 md:order-1"

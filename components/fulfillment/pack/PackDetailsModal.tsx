@@ -108,14 +108,14 @@ export const PackDetailsModal: React.FC<PackDetailsModalProps> = ({
     };
 
     return (
-        <div className="fixed inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center z-[200] p-0 md:p-4 animate-in fade-in duration-200">
-            <div className="bg-[#FAF8F5]/95 dark:bg-[#1C2620]/95 border-0 md:border border-[#E2DCCE] dark:border-emerald-950/20 w-full max-w-4xl h-[100dvh] md:h-auto md:max-h-[90vh] md:rounded-3xl shadow-2xl flex flex-col overflow-hidden relative">
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[200] p-0 md:p-4 overflow-x-hidden animate-in fade-in duration-200">
+            <div className="bg-[#FAF8F5] dark:bg-[#1C2620] border-0 md:border border-[#E2DCCE] dark:border-emerald-950/20 w-full max-w-4xl h-[100dvh] md:h-auto md:max-h-[90vh] md:rounded-3xl shadow-2xl flex flex-col overflow-hidden relative">
                 {/* 🌟 Modal Ambient Glow - Cyan Theme for Pack */}
                 <div className="absolute -top-24 -right-24 w-64 h-64 bg-[#2C5E3B]/10 dark:bg-[#2C5E3B]/20 blur-[100px] rounded-full pointer-events-none" />
                 <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-teal-500/10 dark:bg-teal-550/5 blur-[100px] rounded-full pointer-events-none" />
 
                 {/* Header */}
-                <div className="p-3 md:p-6 border-b border-[#E2DCCE]/60 dark:border-emerald-950/20 flex justify-between items-start bg-[#FAF8F5]/30 dark:bg-[#1C2620]/30 backdrop-blur-sm shrink-0">
+                <div className="p-3 md:p-6 border-b border-[#E2DCCE]/60 dark:border-emerald-950/20 flex justify-between items-start bg-[#FAF8F5] dark:bg-[#1C2620] shrink-0">
                     <div className="flex gap-3 md:gap-4 relative z-10">
                         <div className="p-2 md:p-3 rounded-lg md:rounded-xl border border-[#E2DCCE]/25 dark:border-[#A9CBA2]/20 bg-[#2C5E3B]/15 dark:bg-[#A9CBA2]/15 text-[#2C5E3B] dark:text-[#A9CBA2] shadow-sm transition-all duration-500">
                             <Archive size={20} className="md:w-6 md:h-6" />

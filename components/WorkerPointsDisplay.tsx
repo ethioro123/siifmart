@@ -153,7 +153,7 @@ const WorkerPointsDisplay: React.FC<WorkerPointsDisplayProps> = ({ employeeId, c
                         </div>
 
                         <div className="flex-1">
-                            <h3 className="text-xl font-bold text-white">{points.employeeName}</h3>
+                            <h3 className="text-xl font-bold text-[#1E3F27] dark:text-white">{points.employeeName}</h3>
                             <div className="flex items-center gap-2 mt-1">
                                 <span className={`px-3 py-1 rounded-full text-sm font-bold bg-gradient-to-r ${levelColor} text-white shadow-lg`}>
                                     {levelInfo.currentLevel.title}
@@ -249,32 +249,32 @@ const WorkerPointsDisplay: React.FC<WorkerPointsDisplayProps> = ({ employeeId, c
                                         <Gift size={20} className="text-white" />
                                     </div>
                                     <div>
-                                        <h4 className="font-bold text-white text-sm flex items-center gap-2">
+                                        <h4 className="font-bold text-[#1E3F27] dark:text-white text-sm flex items-center gap-2">
                                             Estimated Bonus
                                             <span className={`px-2 py-0.5 rounded text-[10px] font-bold bg-gradient-to-r ${getBonusTierColor(bonusInfo.tier.tierColor)} text-white`}>
                                                 {bonusInfo.tier.tierName}
                                             </span>
                                         </h4>
-                                        <p className="text-[10px] text-gray-400">Based on your {points.monthlyPoints} monthly points</p>
+                                        <p className="text-[10px] text-[#4D6E56] dark:text-gray-400">Based on your {points.monthlyPoints} monthly points</p>
                                     </div>
                                 </div>
                                 <div className="text-right">
-                                    <p className="text-2xl font-black text-green-400">
+                                    <p className="text-2xl font-black text-emerald-700 dark:text-green-400">
                                         {currency}{bonusInfo.bonus.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                                     </p>
-                                    <p className="text-[10px] text-gray-500">this period</p>
+                                    <p className="text-[10px] text-[#4D6E56]/70 dark:text-gray-500">this period</p>
                                 </div>
                             </div>
 
                             {/* Bonus breakdown */}
                             <div className="grid grid-cols-2 gap-2 text-xs">
-                                <div className="bg-black/20 rounded-lg p-2">
-                                    <span className="text-gray-400">Base:</span>
-                                    <span className="float-right text-white font-bold">{currency}{bonusInfo.tier.bonusAmount.toLocaleString()}</span>
+                                <div className="bg-white/80 dark:bg-black/20 rounded-lg p-2 border border-[#E2DCCE]/50 dark:border-transparent">
+                                    <span className="text-[#4D6E56] dark:text-gray-400">Base:</span>
+                                    <span className="float-right text-[#1E3F27] dark:text-white font-bold">{currency}{bonusInfo.tier.bonusAmount.toLocaleString()}</span>
                                 </div>
-                                <div className="bg-black/20 rounded-lg p-2">
-                                    <span className="text-gray-400">Per Point:</span>
-                                    <span className="float-right text-white font-bold">{currency}{(bonusInfo.tier.bonusPerPoint || 0).toFixed(2)}</span>
+                                <div className="bg-white/80 dark:bg-black/20 rounded-lg p-2 border border-[#E2DCCE]/50 dark:border-transparent">
+                                    <span className="text-[#4D6E56] dark:text-gray-400">Per Point:</span>
+                                    <span className="float-right text-[#1E3F27] dark:text-white font-bold">{currency}{(bonusInfo.tier.bonusPerPoint || 0).toFixed(2)}</span>
                                 </div>
                             </div>
 
@@ -344,11 +344,11 @@ function TimeCard({ label, points, icon }: { label: string; points: number; icon
 
 function AchievementBadge({ achievement }: { achievement: WorkerAchievement }) {
     return (
-        <div className="bg-gradient-to-br from-amber-500/5 to-yellow-500/5 rounded-xl p-3 border border-amber-500/10 dark:border-yellow-500/20 hover:border-[#2C5E3B]/30 hover:bg-[#2C5E3B]/5 transition-all group cursor-pointer">
+        <div className="bg-gradient-to-br from-amber-500/5 to-yellow-500/5 rounded-xl p-3 border border-amber-500/20 dark:border-yellow-500/20 hover:border-[#2C5E3B]/30 hover:bg-[#2C5E3B]/5 transition-all group cursor-pointer">
             <div className="text-2xl mb-1">{getAchievementIcon(achievement.type)}</div>
-            <p className="text-sm font-bold text-white truncate">{achievement.name}</p>
-            <p className="text-[10px] text-gray-400 truncate">{achievement.description}</p>
-            <p className="text-[10px] text-yellow-400 mt-1 font-bold">+{achievement.pointsAwarded} pts</p>
+            <p className="text-sm font-bold text-[#1E3F27] dark:text-white truncate">{achievement.name}</p>
+            <p className="text-[10px] text-[#4D6E56] dark:text-gray-400 truncate">{achievement.description}</p>
+            <p className="text-[10px] text-amber-700 dark:text-yellow-400 mt-1 font-bold">+{achievement.pointsAwarded} pts</p>
         </div>
     );
 }

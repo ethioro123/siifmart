@@ -82,23 +82,23 @@ export const POSHeader: React.FC<POSHeaderProps> = ({ setIsFilterPanelOpen, acti
                 {/* Unknown Barcode Alert */}
                 {unknownBarcode && (
                     <div className="absolute left-0 right-0 top-full mt-2 z-50">
-                        <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-2xl p-4 backdrop-blur-md shadow-lg animate-in fade-in slide-in-from-top-2">
+                        <div className="bg-yellow-500/15 border border-yellow-500/30 rounded-2xl p-4 backdrop-blur-md shadow-lg animate-in fade-in slide-in-from-top-2">
                             <button
                                 onClick={() => setUnknownBarcode('')}
-                                className="absolute top-2 right-2 p-1.5 rounded-lg text-yellow-400/60 hover:text-yellow-400 hover:bg-yellow-500/10 transition-colors"
+                                className="absolute top-2 right-2 p-1.5 rounded-lg text-amber-700 dark:text-yellow-400/60 hover:text-amber-900 dark:hover:text-yellow-400 hover:bg-yellow-500/10 transition-colors"
                                 aria-label="Dismiss"
                             >
                                 <X size={16} />
                             </button>
                             <div className="flex flex-col items-center gap-3">
                                 <div className="text-center">
-                                    <p className="text-yellow-400 text-sm font-medium mb-1">{t('pos.unknownBarcodeDetected')}</p>
-                                    <p className="text-yellow-300 text-2xl font-mono font-bold tracking-wider">{unknownBarcode}</p>
+                                    <p className="text-amber-800 dark:text-yellow-400 text-sm font-medium mb-1">{t('pos.unknownBarcodeDetected')}</p>
+                                    <p className="text-amber-900 dark:text-yellow-300 text-2xl font-mono font-bold tracking-wider">{unknownBarcode}</p>
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <button
                                         onClick={() => setUnknownBarcode('')}
-                                        className="px-4 py-2 bg-white/5 border border-white/10 text-gray-300 hover:bg-white/10 rounded-xl text-sm font-bold transition-all"
+                                        className="px-4 py-2 bg-white/90 dark:bg-white/5 border border-stone-200 dark:border-white/10 text-stone-700 dark:text-gray-300 hover:bg-white dark:hover:bg-white/10 rounded-xl text-sm font-bold transition-all shadow-sm"
                                     >
                                         {t('pos.dismiss')}
                                     </button>
@@ -107,7 +107,7 @@ export const POSHeader: React.FC<POSHeaderProps> = ({ setIsFilterPanelOpen, acti
                                             setCapturedBarcodeForModal(unknownBarcode);
                                             setIsUnknownBarcodeModalOpen(true);
                                         }}
-                                        className="px-4 py-2 bg-yellow-500 text-black hover:bg-yellow-400 rounded-xl text-sm font-bold flex items-center gap-2 transition-all"
+                                        className="px-4 py-2 bg-amber-600 dark:bg-yellow-500 text-white dark:text-black hover:bg-amber-700 dark:hover:bg-yellow-400 rounded-xl text-sm font-bold flex items-center gap-2 transition-all shadow-sm"
                                     >
                                         <Link size={14} />
                                         {t('pos.linkBarcode')}

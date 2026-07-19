@@ -25,7 +25,7 @@ export const DriverHeader: React.FC<DriverHeaderProps> = ({
     refreshData
 }) => {
     return (
-        <div className="bg-white/80 dark:bg-black/60 backdrop-blur-3xl border border-gray-200 dark:border-white/10 rounded-2xl p-3 shadow-xl flex items-center justify-between sticky top-0 z-50">
+        <div className="bg-white dark:bg-[#121214] border border-gray-200 dark:border-white/10 rounded-2xl p-3 shadow-xl flex items-center justify-between sticky top-0 z-50">
             <div className="flex items-center gap-3 overflow-hidden">
                 <div className="p-2 bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 rounded-xl border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20 shrink-0">
                     <Truck className="text-[#2C5E3B] dark:text-[#A9CBA2]" size={18} />

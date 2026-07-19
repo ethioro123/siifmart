@@ -59,11 +59,11 @@ export const POSCartPanel: React.FC = () => {
                 <div className="p-4 border-b border-[#E2DCCE]/50 dark:border-white/5 flex items-center justify-between">
                     <button
                         onClick={() => setShowCart(false)}
-                        className="p-2 hover:bg-white/10 rounded-lg text-gray-400 hover:text-white transition-colors lg:hidden flex items-center gap-2"
+                        className="p-2 hover:bg-[#2C5E3B]/10 rounded-lg text-[#4D6E56] dark:text-gray-400 hover:text-[#1E3F27] dark:hover:text-white transition-colors lg:hidden flex items-center gap-2"
                         aria-label={t('pos.backToProducts')}
                     >
                         <ArrowLeft size={20} />
-                        <span className="font-bold text-white">{t('pos.backToProducts')}</span>
+                        <span className="font-bold text-[#1E3F27] dark:text-white">{t('pos.backToProducts')}</span>
                     </button>
                     <button
                         onClick={() => setIsCustomerModalOpen(true)}
@@ -188,7 +188,7 @@ export const POSCartPanel: React.FC = () => {
                         {/* Tax Breakdown */}
                         <div className="space-y-0.5">
                             {taxBreakdown.map((rule, idx) => (
-                                <div key={idx} className="flex justify-between items-center text-gray-400">
+                                <div key={idx} className="flex justify-between items-center text-[#4D6E56] dark:text-gray-400">
                                     <span className="text-[9px] font-black uppercase tracking-[0.1em] flex items-center gap-1 truncate mr-2">
                                         {rule.name}
                                         {rule.compound && <span className="text-purple-400 text-[8px]">+</span>}
@@ -197,32 +197,32 @@ export const POSCartPanel: React.FC = () => {
                                 </div>
                             ))}
                             {taxBreakdown.length > 1 && (
-                                <div className="flex justify-between items-center text-gray-500 pt-1 border-t border-white/5">
+                                <div className="flex justify-between items-center text-[#4D6E56] dark:text-gray-400 pt-1 border-t border-[#E2DCCE]/40 dark:border-white/5">
                                     <span className="text-[9px] font-black uppercase tracking-[0.2em] truncate mr-2">{t('pos.totalTax')}</span>
-                                    <span className="font-bold tabular-nums text-sm text-white whitespace-nowrap">{CURRENCY_SYMBOL} {tax.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                    <span className="font-bold tabular-nums text-sm text-[#1E3F27] dark:text-white whitespace-nowrap">{CURRENCY_SYMBOL} {tax.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                 </div>
                             )}
                         </div>
 
                         {/* Cash Rounding */}
-                        <div className="flex justify-between items-center text-gray-400 py-1">
+                        <div className="flex justify-between items-center text-[#4D6E56] dark:text-gray-400 py-1">
                             <div className="flex items-center gap-2">
                                 <span className="text-[9px] font-black uppercase tracking-[0.1em] truncate">{t('pos.cashRounding')}</span>
                                 <button
                                     title="Toggle cash rounding to nearest 5"
                                     onClick={() => setIsRoundingEnabled(!isRoundingEnabled)}
-                                    className={`w-8 h-4 rounded-full transition-all relative shrink-0 ${isRoundingEnabled ? 'bg-amber-500' : 'bg-white/10'}`}
+                                    className={`w-8 h-4 rounded-full transition-all relative shrink-0 ${isRoundingEnabled ? 'bg-amber-500' : 'bg-stone-300 dark:bg-white/10'}`}
                                 >
                                     <div className={`w-3 h-3 bg-white rounded-full absolute top-0.5 transition-all shadow ${isRoundingEnabled ? 'left-4.5' : 'left-0.5'}`} />
                                 </button>
                             </div>
-                            <span className={roundingAdjustment > 0 ? "text-amber-400 font-bold tabular-nums text-xs whitespace-nowrap ml-2" : "text-gray-600 tabular-nums text-xs whitespace-nowrap ml-2"}>
+                            <span className={roundingAdjustment > 0 ? "text-amber-600 dark:text-amber-400 font-bold tabular-nums text-xs whitespace-nowrap ml-2" : "text-[#4D6E56]/70 dark:text-gray-500 tabular-nums text-xs whitespace-nowrap ml-2"}>
                                 {roundingAdjustment > 0 ? `+ ${CURRENCY_SYMBOL} ${roundingAdjustment.toFixed(2)}` : `${CURRENCY_SYMBOL} 0`}
                             </span>
                         </div>
 
                         <div className="flex justify-between items-center pt-2 border-t border-[#E2DCCE]/50 dark:border-white/10 mt-2">
-                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/50 truncate mr-2">{t('common.total')}</span>
+                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#4D6E56] dark:text-white/50 truncate mr-2">{t('common.total')}</span>
                             <span className="text-2xl font-black text-[#2C5E3B] dark:text-[#EAE5D9] tracking-tighter tabular-nums drop-shadow-[0_2px_10px_rgba(44,94,59,0.15)] whitespace-nowrap">{CURRENCY_SYMBOL} {total.toLocaleString()}</span>
                         </div>
                     </div>
@@ -337,7 +337,7 @@ export const POSCartPanel: React.FC = () => {
                     <button
                         onClick={handleInitiatePayment}
                         disabled={cart.length === 0}
-                        className="w-full py-4 bg-gradient-to-r from-[#224429] to-[#2C5E3B] hover:opacity-90 disabled:bg-white/5 disabled:text-gray-500 disabled:cursor-not-allowed rounded-2xl flex items-center justify-center gap-3 transition-all duration-300 shadow-lg active:scale-[0.98] group relative overflow-hidden text-white font-black uppercase tracking-[0.3em] text-sm select-none cursor-pointer"
+                        className="w-full py-4 bg-gradient-to-r from-[#224429] to-[#2C5E3B] hover:opacity-90 disabled:bg-stone-200/90 dark:disabled:bg-white/5 text-white disabled:text-stone-400 dark:disabled:text-stone-600 border border-transparent disabled:border-stone-300/80 dark:disabled:border-white/5 disabled:cursor-not-allowed rounded-2xl flex items-center justify-center gap-3 transition-all duration-300 shadow-lg disabled:shadow-none active:scale-[0.98] group relative overflow-hidden font-black uppercase tracking-[0.3em] text-sm select-none cursor-pointer"
                     >
                         <CreditCard size={20} className="relative z-10" />
                         <span className="relative z-10">{t('pos.initializePayment')}</span>
@@ -480,14 +480,14 @@ const WeightEntryModal: React.FC<{
                 <div className="p-4 border-t border-[#E2DCCE]/50 dark:border-white/5 flex gap-2">
                     <button
                         onClick={onCancel}
-                        className="flex-1 py-3 bg-white/90 dark:bg-black/30 text-[#4D6E56] dark:text-gray-300 rounded-xl font-bold text-sm transition-all border border-[#E2DCCE] dark:border-white/10"
+                        className="flex-1 py-3 bg-white/90 dark:bg-black/30 text-stone-700 dark:text-gray-300 hover:bg-stone-100 dark:hover:bg-black/50 rounded-xl font-bold text-sm transition-all border border-[#E2DCCE] dark:border-white/10"
                     >
                         Cancel
                     </button>
                     <button
                         onClick={() => numericValue > 0 && onConfirm(numericValue)}
                         disabled={numericValue <= 0}
-                        className="flex-1 py-3 bg-gradient-to-r from-[#224429] to-[#2C5E3B] disabled:bg-white/5 disabled:text-gray-600 text-white rounded-xl font-black text-sm transition-all uppercase tracking-wider"
+                        className="flex-1 py-3 bg-gradient-to-r from-[#224429] to-[#2C5E3B] disabled:bg-stone-200 dark:disabled:bg-white/5 text-white disabled:text-stone-400 dark:disabled:text-stone-600 border border-transparent disabled:border-stone-300 dark:disabled:border-white/5 disabled:cursor-not-allowed rounded-xl font-black text-sm transition-all uppercase tracking-wider"
                     >
                         Add to Cart
                     </button>

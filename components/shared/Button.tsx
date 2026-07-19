@@ -32,11 +32,11 @@ export default function Button({
     const loading = externalLoading || internalLoading;
 
     const variants = {
-        primary: 'bg-cyber-primary text-black hover:bg-cyber-accent shadow-[0_0_20px_rgba(0,255,157,0.3)]',
-        secondary: 'bg-white/10 text-white hover:bg-white/20 border border-white/20',
-        danger: 'bg-red-500/20 text-red-400 hover:bg-red-500/30 border border-red-500/50',
-        success: 'bg-green-500/20 text-green-400 hover:bg-green-500/30 border border-green-500/50',
-        ghost: 'bg-transparent text-gray-400 hover:text-white hover:bg-white/5'
+        primary: 'bg-[#2C5E3B] text-white hover:bg-[#1E3F27] shadow-sm',
+        secondary: 'bg-white/90 dark:bg-white/10 text-stone-800 dark:text-white hover:bg-stone-100 dark:hover:bg-white/20 border border-[#E2DCCE] dark:border-white/20 shadow-sm',
+        danger: 'bg-red-500/10 dark:bg-red-500/20 text-red-700 dark:text-red-400 hover:bg-red-500/20 border border-red-500/30 dark:border-red-500/50',
+        success: 'bg-emerald-500/10 dark:bg-green-500/20 text-emerald-800 dark:text-green-400 hover:bg-emerald-500/20 border border-emerald-500/30 dark:border-green-500/50',
+        ghost: 'bg-transparent text-[#4D6E56] dark:text-gray-400 hover:text-[#1E3F27] dark:hover:text-white hover:bg-stone-100 dark:hover:bg-white/5'
     };
 
     const sizes = {
@@ -70,7 +70,7 @@ export default function Button({
         ${variants[variant]}
         ${sizes[size]}
         ${fullWidth ? 'w-full' : ''}
-        ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}
+        ${isDisabled ? 'disabled:bg-stone-200 dark:disabled:bg-white/5 disabled:text-stone-400 dark:disabled:text-gray-600 border border-transparent disabled:border-stone-300 dark:disabled:border-white/10 opacity-70 cursor-not-allowed shadow-none' : ''}
         ${className}
       `}
             disabled={isDisabled}

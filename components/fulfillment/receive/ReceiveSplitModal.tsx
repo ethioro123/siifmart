@@ -100,7 +100,7 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
     const progress = Math.min(100, ((previouslyReceived + totalScanned) / splitReceivingItem.quantity) * 100);
 
     return (
-        <div className="fixed inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-2xl flex items-center justify-center z-[200] p-4 animate-in fade-in duration-300">
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[200] p-2 sm:p-4 overflow-x-hidden animate-in fade-in duration-300">
             <div className="w-full max-w-6xl max-h-[90vh] md:max-h-[95vh] rounded-3xl glass-panel relative overflow-hidden flex flex-col">
 
                 {/* 🌟 Background Effects — hidden on mobile */}
@@ -108,7 +108,7 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
                 <div className="hidden md:block absolute bottom-0 left-0 w-[500px] h-[500px] bg-amber-600/10 dark:bg-amber-700/5 blur-[100px] rounded-full pointer-events-none" />
 
                 {/* Header (HUD Style) */}
-                <div className="p-4 md:p-8 border-b border-[#E2DCCE]/60 dark:border-[#A9CBA2]/[0.06] relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-3 md:gap-6 bg-[#FAF8F5]/30 dark:bg-[#1C2620]/30 backdrop-blur-md">
+                <div className="p-4 md:p-8 border-b border-[#E2DCCE]/60 dark:border-[#A9CBA2]/[0.06] relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-3 md:gap-6 bg-[#FAF8F5] dark:bg-[#1C2620]">
                     <div className="flex items-center gap-3 md:gap-6">
                         <div className="relative group hidden md:block">
                             <div className="absolute -inset-1 bg-[#2C5E3B] dark:bg-[#A9CBA2] rounded-2xl blur opacity-0 group-hover:opacity-10 dark:group-hover:opacity-20 transition duration-1000"></div>
@@ -178,7 +178,7 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
 
                     <div className="flex-1" />
 
-                    <div className={`px-4 md:px-6 py-2 md:py-3 rounded-xl border backdrop-blur-md flex items-center gap-2 md:gap-3 shadow-lg transition-all ${remaining === 0 ? 'bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 border-[#2C5E3B]/30 dark:border-[#A9CBA2]/30 text-[#2C5E3B] dark:text-[#A9CBA2]' : 'bg-[#FAF8F5]/50 dark:bg-[#1C2620]/30 border-[#E2DCCE]/60 dark:border-[#A9CBA2]/[0.06] text-stone-700 dark:text-[#EAE5D9]'}`}>
+                    <div className={`px-4 md:px-6 py-2 md:py-3 rounded-xl border flex items-center gap-2 md:gap-3 shadow-lg transition-all ${remaining === 0 ? 'bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 border-[#2C5E3B]/30 dark:border-[#A9CBA2]/30 text-[#2C5E3B] dark:text-[#A9CBA2]' : 'bg-[#FAF8F5]/80 dark:bg-[#1C2620]/80 border-[#E2DCCE]/60 dark:border-[#A9CBA2]/[0.06] text-stone-700 dark:text-[#EAE5D9]'}`}>
                         {remaining === 0 ? (
                             <Check className="text-[#2C5E3B] dark:text-[#A9CBA2]" size={16} />
                         ) : remaining > 0 ? (
@@ -375,7 +375,7 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
                 </div>
 
                 {/* 🦶 Footer */}
-                <div className="p-4 md:p-8 border-t border-[#E2DCCE]/50 dark:border-emerald-950/20 relative z-10 flex gap-3 md:gap-4 bg-white/20 dark:bg-[#1C2620]/20 backdrop-blur-md">
+                <div className="p-4 md:p-8 border-t border-[#E2DCCE]/50 dark:border-emerald-950/20 relative z-10 flex gap-3 md:gap-4 bg-[#FAF8F5] dark:bg-[#1C2620]">
                     <button
                         onClick={() => { setIsSplitReceiving(false); setSplitReceivingItem(null); setSplitReceivingPO(null); setSplitVariants([]); }}
                         className="woody-btn-secondary px-4 md:px-8 py-3 md:py-4 text-[10px] uppercase tracking-widest font-black"

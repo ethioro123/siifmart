@@ -47,7 +47,7 @@ export const ReceiveReprintModal: React.FC<ReceiveReprintModalProps> = ({
     };
 
     return (
-        <div className="fixed inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-md flex items-center justify-center z-[300] p-4 animate-in fade-in duration-300">
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[300] p-2 sm:p-4 overflow-x-hidden animate-in fade-in duration-300">
             <motion.div
                 initial={{ opacity: 0, scale: 0.9, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -58,7 +58,7 @@ export const ReceiveReprintModal: React.FC<ReceiveReprintModalProps> = ({
                 <div className="hidden md:block absolute bottom-0 left-0 w-64 h-64 bg-amber-600/10 dark:bg-amber-700/5 blur-[80px] rounded-full pointer-events-none" />
 
                 {/* Header */}
-                <div className="p-6 border-b border-[#E2DCCE]/60 dark:border-[#A9CBA2]/[0.06] flex justify-between items-center bg-[#FAF8F5]/30 dark:bg-[#1C2620]/30 shrink-0 backdrop-blur-md">
+                <div className="p-6 border-b border-[#E2DCCE]/60 dark:border-[#A9CBA2]/[0.06] flex justify-between items-center bg-[#FAF8F5] dark:bg-[#1C2620] shrink-0">
                     <div className="flex items-center gap-3">
                         <div className="p-2.5 bg-[#2C5E3B]/15 dark:bg-[#A9CBA2]/15 rounded-xl border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20 text-[#2C5E3B] dark:text-[#A9CBA2] shadow-sm">
                             <Printer size={22} />
@@ -194,7 +194,7 @@ export const ReceiveReprintModal: React.FC<ReceiveReprintModalProps> = ({
                 </div>
 
                 {/* Footer Action */}
-                <div className="p-8 border-t border-[#E2DCCE]/50 dark:border-emerald-950/20 bg-white/20 dark:bg-[#1C2620]/20 shrink-0 backdrop-blur-md">
+                <div className="p-8 border-t border-[#E2DCCE]/50 dark:border-emerald-950/20 bg-[#FAF8F5] dark:bg-[#1C2620] shrink-0">
                     <button
                         disabled={isSubmitting}
                         onClick={handleReprintLabels}

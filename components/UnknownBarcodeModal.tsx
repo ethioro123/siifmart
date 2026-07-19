@@ -366,13 +366,13 @@ export default function UnknownBarcodeModal({
                         />
 
                         <div className="flex items-center justify-between pt-4 border-t border-[#E2DCCE] dark:border-white/5">
-                            <span className="text-[10px] font-black text-stone-400 dark:text-gray-500 uppercase tracking-widest">
+                            <span className="text-[10px] font-black text-stone-600 dark:text-gray-400 uppercase tracking-widest">
                                 {imageFile ? 'Ready to proceed' : 'Selection Required'}
                             </span>
                             <button
                                 onClick={() => setStep('search')}
                                 disabled={!imageFile || isCompressing || captureMode === 'camera'}
-                                className="group px-6 py-3 bg-gradient-to-br from-[#224429] to-[#2C5E3B] hover:opacity-90 text-white font-black rounded-2xl disabled:opacity-30 disabled:grayscale transition-all flex items-center gap-3 text-xs uppercase tracking-[0.2em] shadow-md"
+                                className="group px-6 py-3 bg-gradient-to-br from-[#224429] to-[#2C5E3B] hover:opacity-90 text-white font-black rounded-2xl disabled:bg-stone-200 dark:disabled:bg-white/5 disabled:text-stone-400 dark:disabled:text-stone-600 border border-transparent disabled:border-stone-300 dark:disabled:border-white/10 disabled:cursor-not-allowed transition-all flex items-center gap-3 text-xs uppercase tracking-[0.2em] shadow-md disabled:shadow-none"
                             >
                                 Continue To Mapping
                                 <ChevronRight size={16} className="group-hover:translate-x-1 transition-transform" />
@@ -425,7 +425,7 @@ export default function UnknownBarcodeModal({
                                 );
                             })}
                             {searchTerm && filteredProducts.length === 0 && (
-                                <div className="text-center text-[#4D6E56] dark:text-gray-500 py-4">No products found</div>
+                                <div className="text-center text-[#4D6E56] dark:text-gray-400 font-medium py-4">No products found</div>
                             )}
                         </div>
 
@@ -437,7 +437,7 @@ export default function UnknownBarcodeModal({
                             )}
                             <button
                                 onClick={() => setStep('evidence')}
-                                className="px-4 py-2 text-stone-500 hover:text-[#2C5E3B] dark:text-gray-400 dark:hover:text-white transition-colors"
+                                className="px-4 py-2 text-stone-700 hover:text-[#2C5E3B] dark:text-gray-300 dark:hover:text-white font-bold text-sm transition-colors"
                             >
                                 Back
                             </button>
@@ -446,7 +446,7 @@ export default function UnknownBarcodeModal({
                                     handleMap();
                                 }}
                                 disabled={!selectedProduct || isUploading}
-                                className="px-6 py-2 bg-gradient-to-br from-[#224429] to-[#2C5E3B] text-white hover:opacity-90 font-bold rounded-lg disabled:opacity-50 flex items-center gap-2 transition-all shadow-md"
+                                className="px-6 py-2 bg-gradient-to-br from-[#224429] to-[#2C5E3B] text-white hover:opacity-90 font-bold rounded-lg disabled:bg-stone-200 dark:disabled:bg-white/5 disabled:text-stone-400 dark:disabled:text-stone-600 border border-transparent disabled:border-stone-300 dark:disabled:border-white/10 disabled:cursor-not-allowed flex items-center gap-2 transition-all shadow-md disabled:shadow-none"
                             >
                                 {isUploading ? <Loader2 className="animate-spin" size={18} /> : <LinkIcon size={18} />}
                                 Map Barcode

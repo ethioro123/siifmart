@@ -69,7 +69,7 @@ export const IncidentReportModal: React.FC<IncidentReportModalProps> = ({
     };
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-2 sm:p-4 bg-black/80 overflow-x-hidden">
             <div className="bg-[#0c0c0e] w-full max-w-md rounded-[2rem] border border-white/10 shadow-2xl flex flex-col overflow-hidden max-h-[90vh] animate-in fade-in zoom-in-95 duration-200 relative">
                 
                 {/* Header */}
@@ -83,7 +83,7 @@ export const IncidentReportModal: React.FC<IncidentReportModalProps> = ({
                             <p className="text-[8px] sm:text-[9px] text-gray-500 font-bold uppercase tracking-widest mt-0.5">{t('warehouse.driverHub.immediateAlert')}</p>
                         </div>
                     </div>
-                    <button onClick={onClose} aria-label={t('warehouse.driverHub.close')} className="p-2 hover:bg-white/5 rounded-full text-gray-500 transition-colors shrink-0">
+                    <button onClick={onClose} aria-label={t('warehouse.driverHub.close')} className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-white/5 rounded-full text-gray-500 transition-colors shrink-0">
                         <X size={18} className="sm:w-[20px] sm:h-[20px]" />
                     </button>
                 </div>
@@ -105,7 +105,7 @@ export const IncidentReportModal: React.FC<IncidentReportModalProps> = ({
                                     <button
                                         key={type.id}
                                         onClick={() => setIssueType(type.id)}
-                                        className={`flex items-center gap-2 p-2 sm:p-3 rounded-xl border transition-all ${
+                                        className={`flex items-center gap-2 p-2 sm:p-3 min-h-[44px] rounded-xl border transition-all ${
                                             issueType === type.id 
                                                 ? 'bg-white/10 border-white/20 shadow-inner' 
                                                 : 'bg-white/5 border-transparent opacity-60 grayscale-[0.5]'

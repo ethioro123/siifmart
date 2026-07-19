@@ -19,7 +19,7 @@ export const PackJobHeader: React.FC<PackJobHeaderProps> = ({
     t,
 }) => {
     return (
-        <div className="relative p-4 md:p-6 border-b border-[#E2DCCE]/60 dark:border-[#2C5E3B]/10 bg-[#FAF8F5]/30 dark:bg-[#1C2620]/30 backdrop-blur-md overflow-hidden shrink-0 z-10">
+        <div className="relative p-4 md:p-6 border-b border-[#E2DCCE]/60 dark:border-[#2C5E3B]/10 bg-[#FAF8F5] dark:bg-[#1C2620] overflow-hidden shrink-0 z-10">
             <div className="absolute -top-10 -right-10 w-40 h-40 bg-[#2C5E3B]/10 blur-[80px] rounded-full pointer-events-none hidden md:block" />
             <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-[#A9CBA2]/10 blur-[80px] rounded-full pointer-events-none hidden md:block" />
 
@@ -61,7 +61,7 @@ export const PackJobHeader: React.FC<PackJobHeaderProps> = ({
                         </div>
                     </div>
                 </div>
-                <button onClick={onClose} aria-label={t('warehouse.dismiss')} className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-xl text-gray-400 dark:text-gray-550 hover:text-gray-900 dark:hover:text-white transition-all">
+                <button onClick={onClose} aria-label={t('warehouse.dismiss')} className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-gray-100 dark:hover:bg-white/10 rounded-xl text-gray-400 dark:text-gray-550 hover:text-gray-900 dark:hover:text-white transition-all shrink-0">
                     <X size={18} className="md:w-6 md:h-6" />
                 </button>
             </div>

@@ -15,7 +15,7 @@ export const MiscItemModal: React.FC = () => {
         <Modal isOpen={isMiscItemModalOpen} onClose={() => setIsMiscItemModalOpen(false)} title="Add Miscellaneous Item" size="sm">
             <div className="space-y-4">
                 <div>
-                    <label htmlFor="misc-desc" className="text-xs text-[#4D6E56] dark:text-gray-400 uppercase font-bold tracking-wider mb-1 block">Description</label>
+                    <label htmlFor="misc-desc" className="text-xs text-[#1E3F27] dark:text-gray-300 uppercase font-black tracking-wider mb-1 block">Description</label>
                     <input
                         id="misc-desc"
                         value={miscItem.name}
@@ -24,7 +24,7 @@ export const MiscItemModal: React.FC = () => {
                     />
                 </div>
                 <div>
-                    <label className="text-xs text-[#4D6E56] dark:text-gray-400 uppercase font-bold tracking-wider mb-1 block">Price</label>
+                    <label className="text-xs text-[#1E3F27] dark:text-gray-300 uppercase font-black tracking-wider mb-1 block">Price</label>
                     <input
                         type="number"
                         value={miscItem.price}
@@ -37,7 +37,7 @@ export const MiscItemModal: React.FC = () => {
                 <button
                     onClick={addMiscItem}
                     disabled={!miscItem.price}
-                    className="w-full py-3 bg-gradient-to-br from-[#224429] to-[#2C5E3B] hover:opacity-90 text-white font-bold rounded-xl shadow-md disabled:opacity-50 transition-all"
+                    className="w-full py-3 bg-gradient-to-br from-[#224429] to-[#2C5E3B] hover:opacity-90 text-white font-bold rounded-xl shadow-md disabled:bg-stone-200 dark:disabled:bg-white/5 disabled:text-stone-400 dark:disabled:text-stone-600 border border-transparent disabled:border-stone-300 dark:disabled:border-white/10 disabled:cursor-not-allowed disabled:shadow-none transition-all"
                 >
                     Add to Cart
                 </button>

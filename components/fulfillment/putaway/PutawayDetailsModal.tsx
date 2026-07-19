@@ -68,14 +68,14 @@ export const PutawayDetailsModal: React.FC<PutawayDetailsModalProps> = ({
     };
 
     return (
-        <div className="fixed inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-sm flex items-stretch md:items-center justify-center z-[200] p-0 md:p-4 animate-in fade-in duration-300">
-            <div className="bg-[#FAF8F5]/95 dark:bg-[#1C2620]/95 border border-[#E2DCCE] dark:border-emerald-950/20 md:rounded-3xl w-full md:max-w-2xl shadow-2xl flex flex-col h-full md:h-auto md:max-h-[92vh] overflow-hidden relative transition-all">
+        <div className="fixed inset-0 bg-black/80 flex items-stretch md:items-center justify-center z-[200] p-0 md:p-4 overflow-x-hidden animate-in fade-in duration-300">
+            <div className="bg-[#FAF8F5] dark:bg-[#1C2620] border border-[#E2DCCE] dark:border-emerald-950/20 md:rounded-3xl w-full md:max-w-2xl shadow-2xl flex flex-col h-full md:h-auto md:max-h-[92vh] overflow-hidden relative transition-all">
                 {/* Visual Flair */}
                 <div className="hidden md:block absolute -top-32 -right-32 w-80 h-80 bg-[#2C5E3B]/10 dark:bg-[#2C5E3B]/20 blur-[100px] rounded-full pointer-events-none" />
                 <div className="hidden md:block absolute -bottom-32 -left-32 w-80 h-80 bg-[#A9CBA2]/10 dark:bg-[#A9CBA2]/25 blur-[100px] rounded-full pointer-events-none" />
 
                 {/* Header */}
-                <div className="p-6 md:p-8 border-b border-[#E2DCCE]/60 dark:border-emerald-950/20 flex justify-between items-start bg-[#FAF8F5]/30 dark:bg-[#1C2620]/30 backdrop-blur-md relative z-10">
+                <div className="p-6 md:p-8 border-b border-[#E2DCCE]/60 dark:border-emerald-950/20 flex justify-between items-start bg-[#FAF8F5] dark:bg-[#1C2620] relative z-10">
                     <div className="flex gap-5">
                         <div className="hidden md:flex p-4 rounded-2xl border border-[#E2DCCE]/65 dark:border-[#2C5E3B]/30 bg-[#2C5E3B]/15 dark:bg-[#2C5E3B]/20 text-[#2C5E3B] dark:text-[#A9CBA2] shadow-sm transition-all duration-500 active:scale-95">
                             <PackageCheck size={28} />
@@ -93,7 +93,7 @@ export const PutawayDetailsModal: React.FC<PutawayDetailsModalProps> = ({
                             </p>
                         </div>
                     </div>
-                    <button onClick={onClose} className="p-2.5 rounded-xl bg-[#E2DCCE]/40 dark:bg-white/5 text-[#2C5E3B] dark:text-[#A9CBA2] hover:text-[#1E3F27] dark:hover:text-white hover:bg-[#E2DCCE]/60 dark:hover:bg-white/10 transition-colors" aria-label={t('warehouse.dismiss')}>
+                    <button onClick={onClose} className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl bg-[#E2DCCE]/40 dark:bg-white/5 text-[#2C5E3B] dark:text-[#A9CBA2] hover:text-[#1E3F27] dark:hover:text-white hover:bg-[#E2DCCE]/60 dark:hover:bg-white/10 transition-colors shrink-0" aria-label={t('warehouse.dismiss')}>
                         <X size={20} />
                     </button>
                 </div>

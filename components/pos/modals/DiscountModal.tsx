@@ -100,7 +100,7 @@ export const DiscountModal: React.FC = () => {
                             <button
                                 onClick={handleValidateDiscountCode}
                                 disabled={!discountCodeInput.trim() || isValidatingCode}
-                                className="w-full bg-gradient-to-r from-[#224429] to-[#2C5E3B] text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer shadow-sm"
+                                className="w-full bg-gradient-to-r from-[#224429] to-[#2C5E3B] text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 disabled:bg-stone-200 dark:disabled:bg-white/5 disabled:text-stone-400 dark:disabled:text-stone-600 border border-transparent disabled:border-stone-300 dark:disabled:border-white/10 disabled:cursor-not-allowed hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer shadow-sm disabled:shadow-none"
                             >
                                 {isValidatingCode ? (
                                     <>

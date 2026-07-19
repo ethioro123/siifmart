@@ -93,14 +93,14 @@ export const PutawayJobModal: React.FC<PutawayJobModalProps> = ({
     const progressPercent = totalItems > 0 ? (completedItems / totalItems) * 100 : 0;
 
     return (
-        <div className="fixed inset-0 z-[160] flex items-stretch md:items-center justify-center p-0 md:p-4 bg-black/60 dark:bg-black/80 backdrop-blur-sm animate-in fade-in duration-300">
-            <div className="bg-[#FAF8F5]/95 dark:bg-[#1C2620]/95 w-full md:max-w-5xl md:max-h-[92vh] md:rounded-3xl border border-[#E2DCCE] dark:border-emerald-950/20 shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-500 relative">
+        <div className="fixed inset-0 z-[160] flex items-stretch md:items-center justify-center p-0 md:p-4 bg-black/80 overflow-x-hidden animate-in fade-in duration-300">
+            <div className="bg-[#FAF8F5] dark:bg-[#1C2620] w-full md:max-w-5xl md:max-h-[92vh] md:rounded-3xl border border-[#E2DCCE] dark:border-emerald-950/20 shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-500 relative">
                 {/* Visual Flair */}
                 <div className="hidden md:block absolute -top-32 -right-32 w-96 h-96 bg-[#2C5E3B]/10 dark:bg-[#2C5E3B]/20 blur-[100px] rounded-full pointer-events-none" />
                 <div className="hidden md:block absolute -bottom-32 -left-32 w-96 h-96 bg-[#A9CBA2]/10 dark:bg-[#A9CBA2]/25 blur-[100px] rounded-full pointer-events-none" />
 
                 {/* Header Section */}
-                <div className="relative p-5 md:p-10 border-b border-[#E2DCCE]/60 dark:border-[#2C5E3B]/10 bg-[#FAF8F5]/30 dark:bg-[#1C2620]/30 backdrop-blur-md overflow-hidden shrink-0 z-10">
+                <div className="relative p-5 md:p-10 border-b border-[#E2DCCE]/60 dark:border-[#2C5E3B]/10 bg-[#FAF8F5] dark:bg-[#1C2620] overflow-hidden shrink-0 z-10">
                     <div className="relative flex justify-between items-start">
                         <div className="flex items-center gap-6">
                             <div className="hidden md:flex w-20 h-20 rounded-[2rem] bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/25 border-2 border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20 items-center justify-center text-[#2C5E3B] dark:text-[#A9CBA2] shadow-sm transition-all duration-700 active:scale-95">
@@ -142,7 +142,7 @@ export const PutawayJobModal: React.FC<PutawayJobModalProps> = ({
                             </div>
                             <button
                                 onClick={onClose}
-                                className="w-10 h-10 rounded-xl bg-stone-200/50 hover:bg-stone-200 dark:bg-white/5 dark:hover:bg-white/10 flex items-center justify-center text-slate-700 dark:text-white/80 transition-colors"
+                                className="min-w-[44px] min-h-[44px] rounded-xl bg-stone-200/50 hover:bg-stone-200 dark:bg-white/5 dark:hover:bg-white/10 flex items-center justify-center text-slate-700 dark:text-white/80 transition-colors shrink-0"
                                 aria-label={t('warehouse.dismiss')}
                             >
                                 <X size={20} />

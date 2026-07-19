@@ -120,7 +120,7 @@ export const ReturnModal: React.FC = () => {
                                                     <select
                                                         value={itemConfig.condition}
                                                         onChange={(e) => updateReturnConfig(item.id, 'condition', e.target.value)}
-                                                        className={`bg-white dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-xl px-3 py-2 text-xs outline-none ${itemConfig.condition === 'Damaged' ? 'text-red-400' : 'text-green-400'}`}
+                                                        className={`bg-white dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-xl px-3 py-2 text-xs outline-none font-bold ${itemConfig.condition === 'Damaged' ? 'text-red-600 dark:text-red-400' : 'text-emerald-700 dark:text-green-400'}`}
                                                         aria-label="Condition"
                                                     >
                                                         <option value="Resalable">Return to Stock (Resalable)</option>
@@ -136,7 +136,7 @@ export const ReturnModal: React.FC = () => {
 
                         <div className="bg-white/50 dark:bg-black/25 border border-[#E2DCCE] dark:border-white/10 rounded-xl p-4">
                             <div className="flex justify-between items-center mb-4">
-                                <span className="text-[#4D6E56] dark:text-gray-400">{t('pos.totalRefund')}</span>
+                                <span className="text-[#4D6E56] dark:text-gray-400 font-medium">{t('pos.totalRefund')}</span>
                                 <span className="text-2xl font-mono font-bold text-[#2C5E3B] dark:text-[#A9CBA2]">
                                     {CURRENCY_SYMBOL} {totalRefundAmount.toLocaleString()}
                                 </span>
@@ -144,21 +144,21 @@ export const ReturnModal: React.FC = () => {
 
                             {totalRefundAmount > 0 && (
                                 <div className="mb-4 p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg flex items-start gap-3">
-                                    <AlertTriangle size={16} className="text-amber-600 dark:text-amber-500 mt-0.5" />
-                                    <p className="text-xs text-amber-600 dark:text-amber-200/80">
+                                    <AlertTriangle size={16} className="text-amber-600 dark:text-amber-500 mt-0.5 shrink-0" />
+                                    <p className="text-xs text-amber-700 dark:text-amber-200/80 font-medium">
                                         {t('pos.refundWarning')}
                                     </p>
                                 </div>
                             )}
 
                             <div className="flex gap-3">
-                                <button onClick={() => setFoundSaleForReturn(null)} className="flex-1 py-3 bg-white/90 dark:bg-black/35 text-stone-500 border border-[#E2DCCE] dark:border-white/10 rounded-xl">
+                                <button onClick={() => setFoundSaleForReturn(null)} className="flex-1 py-3 bg-white/90 dark:bg-black/35 text-stone-700 dark:text-stone-300 border border-[#E2DCCE] dark:border-white/10 rounded-xl hover:bg-stone-100 dark:hover:bg-white/10 transition-colors font-bold text-sm">
                                     Cancel
                                 </button>
                                 <button
                                     onClick={handleProcessReturn}
                                     disabled={totalRefundAmount === 0 || isProcessing}
-                                    className="flex-1 py-3 bg-gradient-to-r from-[#224429] to-[#2C5E3B] text-white font-bold rounded-xl flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer"
+                                    className="flex-1 py-3 bg-gradient-to-r from-[#224429] to-[#2C5E3B] text-white font-bold rounded-xl flex items-center justify-center gap-2 disabled:bg-stone-200 dark:disabled:bg-white/5 disabled:text-stone-400 dark:disabled:text-stone-600 border border-transparent disabled:border-stone-300 dark:disabled:border-white/10 disabled:cursor-not-allowed hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer shadow-sm disabled:shadow-none"
                                 >
                                     {isProcessing ? <Loader2 className="animate-spin" /> : <RotateCcw size={18} />}
                                     {isProcessing ? t('pos.processing') : t('pos.confirmRefund')}

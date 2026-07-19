@@ -32,16 +32,16 @@ export const PrintReceiptModal: React.FC = () => {
                 </div>
 
                 <h3 className="text-3xl font-black text-[#1E3F27] dark:text-[#EAE5D9] tracking-tighter mb-2">{t('pos.paymentSuccess')}</h3>
-                <p className="text-stone-400 dark:text-gray-500 text-sm font-medium mb-10 uppercase tracking-[0.2em]">{t('pos.transactionVerified')}</p>
+                <p className="text-[#4D6E56] dark:text-gray-400 text-sm font-bold mb-10 uppercase tracking-[0.2em]">{t('pos.transactionVerified')}</p>
 
                 <div className="w-full space-y-4 mb-10 px-6">
                     <div className="flex justify-between items-center py-3 border-b border-[#E2DCCE] dark:border-white/5">
-                        <span className="text-[10px] font-black text-stone-400 dark:text-gray-500 uppercase tracking-widest">{t('pos.totalPaid')}</span>
+                        <span className="text-[10px] font-black text-stone-600 dark:text-gray-400 uppercase tracking-widest">{t('pos.totalPaid')}</span>
                         <span className="text-xl font-black text-[#2C5E3B] dark:text-[#A9CBA2] tabular-nums">{CURRENCY_SYMBOL} {(lastSale?.total || 0).toLocaleString()}</span>
                     </div>
                     {lastSale && lastSale.method === 'Cash' && (
                         <div className="flex justify-between items-center py-3 border-b border-[#E2DCCE] dark:border-white/5">
-                            <span className="text-[10px] font-black text-stone-400 dark:text-gray-500 uppercase tracking-widest">{t('pos.changeDue')}</span>
+                            <span className="text-[10px] font-black text-stone-600 dark:text-gray-400 uppercase tracking-widest">{t('pos.changeDue')}</span>
                             <span className="text-xl font-black text-[#1E3F27] dark:text-[#EAE5D9] tabular-nums">{CURRENCY_SYMBOL} {lastSale.change?.toLocaleString()}</span>
                         </div>
                     )}

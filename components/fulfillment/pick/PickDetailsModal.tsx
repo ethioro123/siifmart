@@ -116,15 +116,15 @@ export const PickDetailsModal: React.FC<PickDetailsModalProps> = ({
 
     return (
         <>
-        <div className="fixed inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center z-[200] p-4 animate-in fade-in duration-200">
-            <div className="bg-[#FAF8F5]/95 dark:bg-[#1C2620]/95 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-3xl w-full max-w-4xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden relative">
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[200] p-2 sm:p-4 overflow-x-hidden animate-in fade-in duration-200">
+            <div className="bg-[#FAF8F5] dark:bg-[#1C2620] border border-[#E2DCCE] dark:border-emerald-950/20 rounded-3xl w-full max-w-4xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden relative">
 
                 {/* 🌿 Modal Ambient Glow - Forest Green Theme for Pick */}
                 <div className="absolute -top-24 -right-24 w-64 h-64 bg-[#2C5E3B]/10 dark:bg-[#2C5E3B]/20 blur-[100px] rounded-full pointer-events-none" />
                 <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-[#A9CBA2]/10 dark:bg-[#A9CBA2]/25 blur-[100px] rounded-full pointer-events-none" />
 
                 {/* Header */}
-                <div className="p-6 border-b border-[#E2DCCE]/60 dark:border-emerald-950/20 flex justify-between items-start bg-[#FAF8F5]/30 dark:bg-[#1C2620]/30 backdrop-blur-sm">
+                <div className="p-4 sm:p-6 border-b border-[#E2DCCE]/60 dark:border-emerald-950/20 flex justify-between items-start bg-[#FAF8F5] dark:bg-[#1C2620]">
                     <div className="flex gap-4 relative z-10">
                         <div className="p-3 rounded-xl border border-[#E2DCCE]/20 dark:border-[#A9CBA2]/20 bg-[#2C5E3B]/15 dark:bg-[#A9CBA2]/15 text-[#2C5E3B] dark:text-[#A9CBA2] shadow-sm transition-all duration-500">
                             <Package size={24} />

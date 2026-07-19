@@ -85,7 +85,7 @@ export const CustomerSelectionModal: React.FC = () => {
                         })}
 
                         {filteredCustomers.length === 0 && (
-                            <div className="text-center py-8 text-[#4D6E56] dark:text-gray-500">
+                            <div className="text-center py-8 text-[#4D6E56] dark:text-gray-400 font-medium">
                                 <User size={32} className="mx-auto mb-2 opacity-50" />
                                 <p>No customers found</p>
                             </div>
@@ -103,29 +103,29 @@ export const CustomerSelectionModal: React.FC = () => {
                             <div className="space-y-3">
                                 <div className="grid grid-cols-2 gap-3">
                                     <div className="bg-white/90 dark:bg-black/35 border border-[#E2DCCE] dark:border-white/10 p-3 rounded-lg">
-                                        <p className="text-xs text-[#4D6E56] dark:text-gray-400">Total Visits</p>
+                                        <p className="text-xs text-[#4D6E56] dark:text-gray-400 font-medium">Total Visits</p>
                                         <p className="text-xl font-bold text-[#1E3F27] dark:text-[#EAE5D9]">{getCustomerStats(selectedCustomer.id).totalVisits}</p>
                                     </div>
                                     <div className="bg-white/90 dark:bg-black/35 border border-[#E2DCCE] dark:border-white/10 p-3 rounded-lg">
-                                        <p className="text-xs text-[#4D6E56] dark:text-gray-400">Total Spent</p>
+                                        <p className="text-xs text-[#4D6E56] dark:text-gray-400 font-medium">Total Spent</p>
                                         <p className="text-xl font-bold text-[#2C5E3B] dark:text-[#A9CBA2]">{formatCompactNumber(getCustomerStats(selectedCustomer.id).totalSpent, { currency: CURRENCY_SYMBOL })}</p>
                                     </div>
                                 </div>
 
                                 <div>
-                                    <p className="text-xs text-[#4D6E56] dark:text-gray-400 mb-2">Recent Purchases</p>
+                                    <p className="text-xs text-[#4D6E56] dark:text-gray-400 font-medium mb-2">Recent Purchases</p>
                                     <div className="space-y-2 max-h-48 overflow-y-auto custom-scrollbar">
                                         {getCustomerHistory(selectedCustomer.id).slice(0, 5).map((sale, idx) => (
                                             <div key={idx} className="bg-white/90 dark:bg-black/35 border border-[#E2DCCE] dark:border-white/5 p-2 rounded text-xs">
                                                 <div className="flex justify-between">
-                                                    <span className="text-stone-700 dark:text-gray-300">{formatDateTime(sale.date, { useRelative: true })}</span>
+                                                    <span className="text-stone-700 dark:text-gray-300 font-medium">{formatDateTime(sale.date, { useRelative: true })}</span>
                                                     <span className="text-[#2C5E3B] dark:text-[#A9CBA2] font-bold">{formatCompactNumber(sale.total, { currency: CURRENCY_SYMBOL })}</span>
                                                 </div>
-                                                <p className="text-[#4D6E56] dark:text-gray-500 text-[10px] mt-1">{sale.items.length} items</p>
+                                                <p className="text-[#4D6E56] dark:text-gray-400 text-[10px] mt-1">{sale.items.length} items</p>
                                             </div>
                                         ))}
                                         {getCustomerHistory(selectedCustomer.id).length === 0 && (
-                                            <p className="text-gray-500 text-xs italic">No purchase history</p>
+                                            <p className="text-[#4D6E56] dark:text-gray-400 text-xs italic">No purchase history</p>
                                         )}
                                     </div>
                                 </div>
@@ -137,7 +137,7 @@ export const CustomerSelectionModal: React.FC = () => {
                 <div className="pt-4 border-t border-[#E2DCCE] dark:border-white/10 flex justify-end">
                     <button
                         onClick={() => setIsCustomerModalOpen(false)}
-                        className="px-6 py-2 bg-white/90 dark:bg-black/35 border border-[#E2DCCE] dark:border-white/10 hover:bg-[#2C5E3B]/10 hover:text-[#2C5E3B] dark:hover:text-white text-stone-500 rounded-lg transition-colors"
+                        className="px-6 py-2 bg-white/90 dark:bg-black/35 border border-[#E2DCCE] dark:border-white/10 hover:bg-[#2C5E3B]/10 hover:text-[#2C5E3B] dark:hover:text-white text-stone-700 dark:text-stone-300 rounded-lg transition-colors font-bold text-sm"
                     >
                         Cancel
                     </button>

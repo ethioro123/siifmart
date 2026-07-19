@@ -142,7 +142,7 @@ export const PickAmendModal: React.FC<PickAmendModalProps> = ({
     const isManager = MANAGER_ROLES.includes(currentUser?.role || '');
 
     return (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[300] p-4 animate-in fade-in duration-200">
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[300] p-2 sm:p-4 overflow-x-hidden animate-in fade-in duration-200">
             <div className="bg-white dark:bg-zinc-950 border-2 border-amber-500/30 rounded-3xl w-full max-w-2xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden relative">
 
                 {/* Ambient glow */}

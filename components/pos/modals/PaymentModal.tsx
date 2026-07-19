@@ -64,7 +64,7 @@ export const PaymentModal: React.FC = () => {
                 {selectedPaymentMethod === 'Cash' && (
                     <div className="space-y-4 animate-in fade-in slide-in-from-top-2">
                         <div>
-                            <label htmlFor="amount-tendered-input" className="block text-sm text-gray-400 mb-2">{t('pos.amountTendered')}</label>
+                            <label htmlFor="amount-tendered-input" className="block text-sm text-[#4D6E56] dark:text-gray-400 mb-2 font-medium">{t('pos.amountTendered')}</label>
                             <input
                                 id="amount-tendered-input"
                                 type="number"
@@ -76,7 +76,7 @@ export const PaymentModal: React.FC = () => {
                             />
                         </div>
                         <div className="flex-1 max-w-xl relative">
-                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[#4D6E56] dark:text-gray-400" size={20} />
                             <input
                                 onKeyDown={handleSearchKeyDown}
                                 placeholder={t('pos.searchPlaceholder')}
@@ -84,7 +84,7 @@ export const PaymentModal: React.FC = () => {
                                 className="w-full pl-12 pr-4 py-4 bg-white/90 dark:bg-black/25 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-2xl text-[#1E3F27] dark:text-[#EAE5D9] placeholder-stone-400 dark:placeholder-stone-500 focus:outline-none focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:ring-4 focus:ring-[#2C5E3B]/10 dark:focus:ring-[#A9CBA2]/10 transition-all font-medium"
                             />
                             {!unknownBarcode && (
-                                <div className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-gray-600 font-mono">
+                                <div className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-[#4D6E56]/70 dark:text-gray-500 font-mono">
                                     ENTER
                                 </div>
                             )}
@@ -94,7 +94,7 @@ export const PaymentModal: React.FC = () => {
                                 <button
                                     key={i}
                                     onClick={() => setAmountTendered(Math.ceil(amt).toString())}
-                                    className="px-4 py-2 bg-white/90 dark:bg-black/35 text-stone-600 dark:text-gray-300 hover:bg-white/10 rounded-lg border border-[#E2DCCE] dark:border-white/10 text-sm font-mono whitespace-nowrap"
+                                    className="px-4 py-2 bg-white/90 dark:bg-black/35 text-stone-700 dark:text-gray-300 hover:bg-stone-100 dark:hover:bg-white/10 rounded-lg border border-[#E2DCCE] dark:border-white/10 text-sm font-mono whitespace-nowrap transition-colors"
                                 >
                                     {amt === total ? 'Exact' : `${CURRENCY_SYMBOL} ${amt}`}
                                 </button>
@@ -103,7 +103,7 @@ export const PaymentModal: React.FC = () => {
 
                         <div className="flex justify-between items-center p-4 bg-white/90 dark:bg-black/25 rounded-xl border border-[#E2DCCE] dark:border-white/5">
                             <span className="text-[#4D6E56] dark:text-gray-400">{t('pos.changeDue')}:</span>
-                            <span className={`font-mono text-xl font-bold ${changeDue < 0 ? 'text-red-400' : 'text-[#2C5E3B] dark:text-[#A9CBA2]'}`}>
+                            <span className={`font-mono text-xl font-bold ${changeDue < 0 ? 'text-red-500 dark:text-red-400' : 'text-[#2C5E3B] dark:text-[#A9CBA2]'}`}>
                                 {CURRENCY_SYMBOL} {changeDue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             </span>
                         </div>
@@ -112,10 +112,10 @@ export const PaymentModal: React.FC = () => {
 
                 {selectedPaymentMethod !== 'Cash' && (
                     <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-xl flex items-start gap-3 animate-in fade-in slide-in-from-top-2">
-                        <RefreshCcw className="w-5 h-5 text-blue-400 mt-0.5" />
+                        <RefreshCcw className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5" />
                         <div>
-                            <p className="text-blue-400 text-sm font-bold">Waiting for Terminal...</p>
-                            <p className="text-gray-400 text-xs mt-1">Ask customer to tap card or scan QR code.</p>
+                            <p className="text-blue-700 dark:text-blue-400 text-sm font-bold">Waiting for Terminal...</p>
+                            <p className="text-stone-600 dark:text-gray-400 text-xs mt-1">Ask customer to tap card or scan QR code.</p>
                         </div>
                     </div>
                 )}
@@ -123,14 +123,14 @@ export const PaymentModal: React.FC = () => {
                 <div className="flex gap-4 pt-4 relative z-10">
                     <button
                         onClick={() => setIsPaymentModalOpen(false)}
-                        className="flex-1 py-4 px-6 bg-white/90 dark:bg-black/35 text-stone-500 hover:text-[#1E3F27] dark:hover:text-white rounded-[1.5rem] font-bold transition-all border border-[#E2DCCE] dark:border-white/10 hover:scale-105 active:scale-95 shadow-sm"
+                        className="flex-1 py-4 px-6 bg-white/90 dark:bg-black/35 text-stone-700 dark:text-stone-300 hover:text-[#1E3F27] dark:hover:text-white rounded-[1.5rem] font-bold transition-all border border-[#E2DCCE] dark:border-white/10 hover:scale-105 active:scale-95 shadow-sm"
                     >
                         {t('common.cancel')}
                     </button>
                     <button
                         onClick={handleProcessPayment}
                         disabled={!isPaymentValid || isProcessing}
-                        className="flex-[2] py-4 px-6 bg-gradient-to-r from-[#224429] to-[#2C5E3B] hover:opacity-90 disabled:bg-white/5 disabled:text-gray-500 disabled:cursor-not-allowed text-white font-black uppercase tracking-[0.2em] rounded-[1.5rem] transition-all duration-300 shadow-lg active:scale-[0.98] flex items-center justify-center gap-3 relative overflow-hidden group cursor-pointer"
+                        className="flex-[2] py-4 px-6 bg-gradient-to-r from-[#224429] to-[#2C5E3B] hover:opacity-90 disabled:bg-stone-200 dark:disabled:bg-white/5 text-white disabled:text-stone-400 dark:disabled:text-stone-600 border border-transparent disabled:border-stone-300 dark:disabled:border-white/10 disabled:cursor-not-allowed font-black uppercase tracking-[0.2em] rounded-[1.5rem] transition-all duration-300 shadow-lg disabled:shadow-none active:scale-[0.98] flex items-center justify-center gap-3 relative overflow-hidden group cursor-pointer"
                     >
                         {isProcessing ? (
                             <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />

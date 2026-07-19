@@ -36,11 +36,11 @@ export const ShiftClosingModal: React.FC = () => {
                         <div key={step} className="flex items-center gap-2">
                             <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs transition-all ${closingStep === step
                                 ? 'bg-gradient-to-br from-[#224429] to-[#2C5E3B] text-white scale-110 shadow-lg shadow-[#2C5E3B]/20'
-                                : closingStep > step ? 'bg-[#2C5E3B]/10 text-[#2C5E3B] dark:text-[#A9CBA2]' : 'bg-stone-100 dark:bg-white/5 text-stone-400 dark:text-gray-500'
+                                : closingStep > step ? 'bg-[#2C5E3B]/10 text-[#2C5E3B] dark:text-[#A9CBA2]' : 'bg-stone-200 dark:bg-white/5 text-stone-600 dark:text-gray-500'
                                 }`}>
                                 {closingStep > step ? <CheckCircle size={14} /> : step}
                             </div>
-                            <span className={`text-[10px] font-black uppercase tracking-widest ${closingStep === step ? 'text-[#1E3F27] dark:text-[#EAE5D9]' : 'text-stone-400 dark:text-stone-500'
+                            <span className={`text-[10px] font-black uppercase tracking-widest ${closingStep === step ? 'text-[#1E3F27] dark:text-[#EAE5D9]' : 'text-stone-600 dark:text-stone-500'
                                 }`}>
                                 {step === 1 ? t('pos.summary') : step === 2 ? t('pos.cashTray') : t('pos.verifyShift')}
                             </span>
@@ -106,7 +106,7 @@ export const ShiftClosingModal: React.FC = () => {
                             {Object.keys(cashDenominations).sort((a, b) => parseInt(b) - parseInt(a)).map((denom) => (
                                 <div key={denom} className="bg-white dark:bg-black/20 border border-[#E2DCCE] dark:border-white/5 rounded-2xl p-4 flex flex-col gap-2 focus-within:border-[#2C5E3B] dark:focus-within:border-[#A9CBA2] transition-all">
                                     <div className="flex justify-between items-center">
-                                        <span className="text-[10px] text-stone-400 dark:text-gray-500 font-black tracking-widest uppercase">{denom}</span>
+                                        <span className="text-[10px] text-stone-600 dark:text-gray-500 font-black tracking-widest uppercase">{denom}</span>
                                         <span className="text-xs font-mono text-[#2C5E3B] dark:text-[#A9CBA2] font-semibold">{CURRENCY_SYMBOL}{(parseInt(denom) * cashDenominations[denom]).toLocaleString()}</span>
                                     </div>
                                     <input
@@ -125,7 +125,7 @@ export const ShiftClosingModal: React.FC = () => {
                         </div>
 
                         <div className="p-4 bg-white dark:bg-[#18201B]/40 border border-[#E2DCCE] dark:border-white/5 rounded-2xl flex justify-between items-center shadow-sm">
-                            <span className="text-sm font-bold text-stone-400 dark:text-gray-400 uppercase tracking-widest">{t('pos.totalCounted')}</span>
+                            <span className="text-sm font-bold text-stone-700 dark:text-gray-400 uppercase tracking-widest">{t('pos.totalCounted')}</span>
                             <span className="text-2xl font-mono text-[#1E3F27] dark:text-white">
                                 {CURRENCY_SYMBOL} {Object.entries(cashDenominations).reduce((sum, [d, q]) => sum + (parseInt(d) * q), 0).toLocaleString()}
                             </span>
@@ -134,7 +134,7 @@ export const ShiftClosingModal: React.FC = () => {
                         <div className="flex gap-3">
                             <button
                                 onClick={() => setClosingStep(1)}
-                                className="flex-1 py-4 bg-white/80 dark:bg-black/35 border border-[#E2DCCE] dark:border-white/10 hover:bg-[#2C5E3B]/10 hover:text-[#2C5E3B] dark:hover:text-white text-stone-500 rounded-xl font-bold transition-all"
+                                className="flex-1 py-4 bg-white/80 dark:bg-black/35 border border-[#E2DCCE] dark:border-white/10 hover:bg-[#2C5E3B]/10 hover:text-[#2C5E3B] dark:hover:text-white text-stone-700 dark:text-stone-300 font-bold transition-all"
                             >
                                 Back
                             </button>
@@ -177,7 +177,7 @@ export const ShiftClosingModal: React.FC = () => {
 
                                     <div className="space-y-4">
                                         <div className="space-y-2">
-                                            <label className="text-[10px] text-stone-400 dark:text-gray-500 uppercase font-black tracking-widest px-1">{t('pos.varianceReason')}</label>
+                                            <label className="text-[10px] text-stone-600 dark:text-gray-400 uppercase font-black tracking-widest px-1">{t('pos.varianceReason')}</label>
                                             <textarea
                                                 placeholder="Document variance cause..."
                                                 className="w-full bg-white dark:bg-black/40 border border-[#E2DCCE] dark:border-white/10 rounded-2xl p-4 text-sm text-[#1E3F27] dark:text-white outline-none focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] min-h-[80px]"
@@ -188,11 +188,11 @@ export const ShiftClosingModal: React.FC = () => {
 
                                         <div className="bg-white dark:bg-[#18201B]/40 border border-[#E2DCCE] dark:border-white/5 rounded-2xl p-4 space-y-2 text-xs">
                                             <div className="flex justify-between">
-                                                <span className="text-stone-400 dark:text-gray-500">Expected</span>
+                                                <span className="text-stone-600 dark:text-gray-400 font-medium">Expected</span>
                                                 <span className="text-[#1E3F27] dark:text-white font-mono">{CURRENCY_SYMBOL} {summary.expected.toLocaleString()}</span>
                                             </div>
                                             <div className="flex justify-between">
-                                                <span className="text-stone-400 dark:text-gray-500">Actual</span>
+                                                <span className="text-stone-600 dark:text-gray-400 font-medium">Actual</span>
                                                 <span className="text-[#1E3F27] dark:text-white font-mono">{CURRENCY_SYMBOL} {actual.toLocaleString()}</span>
                                             </div>
                                         </div>
@@ -202,14 +202,14 @@ export const ShiftClosingModal: React.FC = () => {
                                         <button
                                             onClick={() => setClosingStep(2)}
                                             disabled={isProcessing}
-                                            className="flex-1 py-4 bg-white/80 dark:bg-black/35 border border-[#E2DCCE] dark:border-white/10 hover:bg-[#2C5E3B]/10 hover:text-[#2C5E3B] dark:hover:text-white text-stone-500 rounded-xl font-bold transition-all disabled:opacity-50"
+                                            className="flex-1 py-4 bg-white/80 dark:bg-black/35 border border-[#E2DCCE] dark:border-white/10 hover:bg-[#2C5E3B]/10 hover:text-[#2C5E3B] dark:hover:text-white text-stone-700 dark:text-stone-300 rounded-xl font-bold transition-all disabled:opacity-50"
                                         >
                                             Recount
                                         </button>
                                         <button
                                             onClick={handleSubmitShift}
                                             disabled={isProcessing || (isVariance && !discrepancyReason.trim())}
-                                            className="flex-[2] py-4 bg-gradient-to-br from-[#dc2626] to-[#b91c1c] hover:opacity-90 text-white font-bold rounded-xl shadow-md flex items-center justify-center gap-2 disabled:opacity-50 transition-all"
+                                            className="flex-[2] py-4 bg-gradient-to-br from-[#dc2626] to-[#b91c1c] hover:opacity-90 text-white font-bold rounded-xl shadow-md flex items-center justify-center gap-2 disabled:bg-stone-200 dark:disabled:bg-white/5 disabled:text-stone-400 dark:disabled:text-stone-600 border border-transparent disabled:border-stone-300 dark:disabled:border-white/10 disabled:cursor-not-allowed disabled:shadow-none transition-all"
                                         >
                                             {isProcessing ? <Loader2 className="animate-spin" /> : <LogOut size={18} />}
                                             Finalize & Logout

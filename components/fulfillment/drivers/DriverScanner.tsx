@@ -22,11 +22,11 @@ export const DriverScanner: React.FC<DriverScannerProps> = ({
     setSelectedJob
 }) => {
     return (
-        <div className="fixed inset-0 z-[100] bg-black flex flex-col items-center justify-center p-6 bg-opacity-95 backdrop-blur-xl">
+        <div className="fixed inset-0 z-[100] bg-black/95 flex flex-col items-center justify-center p-6 overflow-x-hidden">
             <button
                 onClick={() => setDriverScannerOpen(false)}
                 title={t('warehouse.misc.closeScanner')}
-                className="absolute top-4 right-4 sm:top-10 sm:right-10 p-2.5 sm:p-4 bg-white/10 hover:bg-white/20 rounded-full text-white transition-all shrink-0"
+                className="absolute top-4 right-4 sm:top-10 sm:right-10 p-2.5 sm:p-4 min-w-[44px] min-h-[44px] flex items-center justify-center bg-white/10 hover:bg-white/20 rounded-full text-white transition-all shrink-0"
             >
                 <X size={20} className="sm:w-[32px] sm:h-[32px]" />
             </button>
