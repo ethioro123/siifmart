@@ -254,7 +254,13 @@ export default function LabelPrintModal({ isOpen, onClose, labels, onPrint }: La
                                     className="w-full bg-transparent text-white placeholder-gray-500 text-sm focus:outline-none"
                                 />
                                 {searchQuery && (
-                                    <button onClick={() => setSearchQuery('')} className="text-gray-400 hover:text-white p-1">
+                                    <button
+                                        type="button"
+                                        onClick={() => setSearchQuery('')}
+                                        className="text-gray-400 hover:text-white p-1"
+                                        aria-label="Clear search"
+                                        title="Clear search"
+                                    >
                                         <X size={14} />
                                     </button>
                                 )}
