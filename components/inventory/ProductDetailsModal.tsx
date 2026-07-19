@@ -1,16 +1,18 @@
 import React from 'react';
-import { Package, Tag, Hash, Layers, Box, Info, ScanBarcode, Thermometer, ShieldAlert, Droplets, Weight, Ruler, Lock, Edit2, Check, X } from 'lucide-react';
-import { Product, StockMovement, Employee } from '../../types';
+import {
+    Package, Tag, Hash, Layers, Box, Info, ScanBarcode, Lock, Edit2, Check, X,
+    TrendingUp, TrendingDown, DollarSign, Percent, AlertTriangle, Calendar, Building2, User, Clock
+} from 'lucide-react';
+import { Product } from '../../types';
 import Modal from '../Modal';
 import { formatCompactNumber, formatPriceValue } from '../../utils/formatting';
 import { CURRENCY_SYMBOL } from '../../constants';
 import { useData } from '../../contexts/DataContext';
 import { getSellUnit, formatProductSize, getEffectivePackageSize } from '../../utils/units';
-import { getRoleHierarchy } from '../../utils/roles';
+import { getRoleHierarchy, canViewCostPrice } from '../../utils/roles';
 import { useStore } from '../../contexts/CentralStore';
 import { productsService } from '../../services/products.service';
 import { ProductAttributesPanel } from './components/ProductAttributesPanel';
-import { formatPackBadge } from '../procurement/utils';
 
 interface ProductDetailsModalProps {
     product: Product | null;
@@ -18,9 +20,28 @@ interface ProductDetailsModalProps {
     onClose: () => void;
 }
 
+const DetailField = ({ label, value, icon: Icon, colorClass, highlight }: { label: string; value: React.ReactNode; icon?: any; colorClass?: string; highlight?: boolean }) => {
+    return (
+        <div className={`p-3 rounded-xl flex items-start gap-3 border ${
+            highlight 
+                ? 'bg-amber-500/5 border-amber-500/20 dark:bg-amber-400/5 dark:border-amber-400/10' 
+                : 'bg-stone-50/50 dark:bg-black/10 border-stone-200/50 dark:border-white/5'
+        }`}>
+            {Icon && <Icon size={14} className={`mt-0.5 flex-shrink-0 ${colorClass || 'text-[#2C5E3B] dark:text-[#A9CBA2]'}`} />}
+            <div className="space-y-0.5 min-w-0 flex-1">
+                <span className="text-[9px] text-gray-500 font-bold uppercase tracking-wider block">{label}</span>
+                <div className="text-xs font-black text-gray-950 dark:text-stone-100 leading-tight">
+                    {value !== undefined && value !== null && value !== '' ? value : <span className="text-gray-300 dark:text-gray-650 font-bold">—</span>}
+                </div>
+            </div>
+        </div>
+    );
+};
+
 export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ product, isOpen, onClose }) => {
     const { movements, employees, refreshData, deleteProduct } = useData();
     const { user, showToast } = useStore();
+    const showCostPrice = canViewCostPrice(user?.role);
 
     const [isEditingThresholds, setIsEditingThresholds] = React.useState(false);
     const [minVal, setMinVal] = React.useState<number | ''>('');
@@ -43,15 +64,13 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
 
     const handleDelete = async () => {
         if (!isCEO && !isStoreManager) return;
-
         if (isCEO) {
             const confirmation = window.prompt(
                 `WARNING: You are about to permanently delete "${product.name}" (${product.sku}).\n` +
-                `This action cannot be undone and will update related transaction records.\n\n` +
-                `To confirm deletion, please type "DELETE" below:`
+                `This action cannot be undone.\n\nType "DELETE" to confirm:`
             );
             if (confirmation !== 'DELETE') {
-                showToast('Deletion cancelled. Confirmation text did not match.', 'info');
+                showToast('Deletion cancelled.', 'info');
                 return;
             }
         } else if (isStoreManager) {
@@ -59,11 +78,7 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
                 showToast('Store Managers can only delete products that are out of stock.', 'error');
                 return;
             }
-            const confirm = window.confirm(
-                `Are you sure you want to permanently delete "${product.name}"?\n` +
-                `All related records will be updated.`
-            );
-            if (!confirm) return;
+            if (!window.confirm(`Are you sure you want to permanently delete "${product.name}"?`)) return;
         }
 
         try {
@@ -77,21 +92,11 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
     };
 
     const canEditThresholds = user?.role ? getRoleHierarchy(user.role) >= 80 : false;
-
     const customAttrs = product.customAttributes || (product as any).custom_attributes;
     const unitObj = product.unit ? getSellUnit(product.unit) : null;
-    const physicalUnitLabel = customAttrs?.physical?.sizeType || customAttrs?.physical?.unit ||
-        (unitObj && unitObj.category !== 'count' ? unitObj.shortLabel : '') || '';
 
-    // Smart Quantity Calculation
-    const isWeightOrVolume = product.unit && ['KG', 'L', 'G', 'ML'].includes(product.unit.toUpperCase());
-    const sizeNum = getEffectivePackageSize(product.unit, product.size) || 1;
-    const physicalQty = isWeightOrVolume && !isNaN(sizeNum) ? product.stock * sizeNum : null;
-
-    // Check if the brand is already part of the product name to avoid duplication
     const brandAlreadyInName = product.brand && product.name.toLowerCase().startsWith(product.brand.toLowerCase());
 
-    // Compute system description (mirrors procurement ItemPreviewCard)
     const systemDesc = [
         brandAlreadyInName ? '' : product.brand,
         product.name,
@@ -103,9 +108,7 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
             return physicalWeight ? `${physicalWeight}${physicalType}` : '';
         })(),
     ].filter(Boolean).join(' ');
-    // NOTE: Pack/case info is intentionally NOT in the name — use formatPackBadge for UI rendering.
 
-    // Collect all barcodes
     const allBarcodes = new Set<string>();
     if (product.barcode) allBarcodes.add(product.barcode.trim());
     if ((product as any).barcodes && Array.isArray((product as any).barcodes)) {
@@ -113,13 +116,6 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
     }
     const barcodeList = Array.from(allBarcodes);
 
-    // Check if any attributes exist
-    const hasPhysical = customAttrs?.physical && Object.values(customAttrs.physical).some((v: any) => v !== '' && v !== null && v !== undefined);
-    const hasPackaging = customAttrs?.packaging && Object.values(customAttrs.packaging).some((v: any) => v !== '' && v !== null && v !== undefined && v !== false);
-    const hasStorage = customAttrs?.storage && Object.values(customAttrs.storage).some((v: any) => v !== '' && v !== null && v !== undefined && v !== false);
-    const hasCommercial = customAttrs?.commercial && Object.values(customAttrs.commercial).some((v: any) => v !== '' && v !== null && v !== undefined && v !== false);
-    const hasDescriptive = customAttrs?.descriptive && Object.values(customAttrs.descriptive).some((v: any) => v !== '' && v !== null && v !== undefined);
-    const hasAnyAttributes = hasPhysical || hasPackaging || hasStorage || hasCommercial || hasDescriptive;
     const recentReceives = movements
         ? movements
             .filter(m => (m.productId === product.id || m.productId === product.productId) && m.type === 'IN')
@@ -127,339 +123,200 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
             .slice(0, 5)
         : [];
 
+    const price = product.price || 0;
+    const cost = product.costPrice || 0;
+    const grossProfit = price - cost;
+    const marginPct = price > 0 ? (grossProfit / price) * 100 : 0;
+    const markupPct = cost > 0 ? (grossProfit / cost) * 100 : 0;
+    const compPrice = product.competitorPrice || 0;
+    const compDiff = compPrice > 0 ? price - compPrice : 0;
+    const salePrice = product.salePrice || 0;
+    const discountAmt = price - salePrice;
+    const discountPct = price > 0 ? (discountAmt / price) * 100 : 0;
+
+    let healthColor = 'text-green-500 border-green-500/25 bg-green-500/5';
+    let healthLabel = 'Optimal Level';
+    if (product.stock === 0) {
+        healthColor = 'text-red-500 border-red-500/25 bg-red-500/5';
+        healthLabel = 'Out of Stock';
+    } else if (product.minStock && product.stock < product.minStock) {
+        healthColor = product.stock <= product.minStock * 0.5 ? 'text-red-500 border-red-500/25 bg-red-500/5' : 'text-amber-500 border-amber-500/25 bg-amber-500/5';
+        healthLabel = 'Low Stock';
+    }
+
+    let expiryAlert = '';
+    let expiryColor = '';
+    if (product.expiryDate) {
+        const daysDiff = Math.ceil((new Date(product.expiryDate).getTime() - new Date().getTime()) / (1000 * 3600 * 24));
+        if (daysDiff < 0) { expiryAlert = `Expired ${Math.abs(daysDiff)}d ago`; expiryColor = 'text-red-500'; }
+        else if (daysDiff < 30) { expiryAlert = `${daysDiff}d left`; expiryColor = 'text-amber-500'; }
+    }
+
     const modalFooter = (
         <div className="flex items-center justify-between w-full">
-            <div>
-                {showDeleteButton && (
-                    <button
-                        onClick={handleDelete}
-                        disabled={isDeleteDisabled}
-                        className={`px-4 py-2 text-xs font-black uppercase tracking-wider rounded-xl transition-all border ${
-                            isDeleteDisabled
-                                ? 'bg-stone-100 dark:bg-white/5 border-stone-200 dark:border-white/5 text-stone-400 dark:text-gray-500 cursor-not-allowed opacity-50'
-                                : 'bg-red-500/10 hover:bg-red-500/25 border-red-500/20 text-red-600 dark:text-red-400 hover:scale-105 active:scale-95'
-                        }`}
-                        title={isDeleteDisabled ? 'Store Managers can only delete products when they are out of stock' : 'Permanently delete this product'}
-                    >
-                        Delete Product
-                    </button>
-                )}
-            </div>
-            <button
-                onClick={onClose}
-                className="px-4 py-2 bg-stone-100 hover:bg-stone-200 dark:bg-white/5 dark:hover:bg-white/10 text-stone-600 dark:text-stone-300 font-bold text-xs rounded-xl border border-stone-200 dark:border-white/10 transition-colors uppercase tracking-wider"
-            >
-                Close
-            </button>
+            {showDeleteButton && (
+                <button
+                    onClick={handleDelete}
+                    disabled={isDeleteDisabled}
+                    className={`px-4 py-2 text-xs font-black uppercase rounded-xl border ${isDeleteDisabled ? 'bg-stone-100 text-stone-400 cursor-not-allowed' : 'bg-red-500/10 text-red-600 hover:bg-red-500/20'}`}
+                >
+                    Delete Product
+                </button>
+            )}
+            <button onClick={onClose} className="px-4 py-2 bg-stone-100 dark:bg-white/10 text-stone-700 dark:text-stone-300 font-bold text-xs rounded-xl">Close</button>
         </div>
     );
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title="Product Details" size="xl" footer={modalFooter}>
-            <div className="space-y-5">
-
-                {/* ── Product Header ── */}
-                <div className="p-5 bg-[#faf8f5]/65 dark:bg-[#18201B]/40 rounded-2xl border border-[#E2DCCE] dark:border-emerald-950/20 backdrop-blur-md shadow-sm">
-                    <div className="flex gap-5 items-start">
-                        <div className="w-20 h-20 rounded-2xl bg-white dark:bg-black/40 border border-gray-200 dark:border-white/10 flex items-center justify-center flex-shrink-0 shadow-inner overflow-hidden">
+        <Modal isOpen={isOpen} onClose={onClose} title="Product Profile & Inventory Console" size="xl" footer={modalFooter}>
+            <div className="flex flex-col gap-6 text-[#1E3F27] dark:text-[#EAE5D9]">
+                <div className="flex flex-col md:flex-row gap-6 items-center justify-between pb-6 border-b border-stone-200 dark:border-white/5">
+                    <div className="flex flex-col sm:flex-row gap-4 items-center sm:items-start flex-1 min-w-0">
+                        <div className="w-16 h-16 rounded-xl bg-stone-100 dark:bg-black/40 border border-stone-200 dark:border-white/10 flex items-center justify-center flex-shrink-0 overflow-hidden">
                             {product.image && !product.image.includes('placeholder.com') ? (
                                 <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
                             ) : (
-                                <Package size={28} className="text-[#2C5E3B]/40 dark:text-[#A9CBA2]/40" />
+                                <Package size={24} className="text-[#2C5E3B]/40 dark:text-[#A9CBA2]/40" />
                             )}
                         </div>
-                        <div className="flex-1 min-w-0">
-                            <h2 className="text-lg font-black text-[#1E3F27] dark:text-white uppercase tracking-tight leading-tight">
-                                {product.brand && !brandAlreadyInName && <span className="text-[#2C5E3B] dark:text-[#A9CBA2]">{product.brand} </span>}
+                        <div className="flex-1 min-w-0 text-center sm:text-left">
+                            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-1.5">
+                                <span className="text-[9px] font-extrabold uppercase tracking-widest text-[#2C5E3B] dark:text-[#A9CBA2]">
+                                    {product.category || 'Uncategorised'}
+                                </span>
+                                <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest border ${healthColor}`}>
+                                    {healthLabel}
+                                </span>
+                            </div>
+                            <h2 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tight mt-1 leading-none">
+                                {product.brand && !brandAlreadyInName && <span className="text-[#2C5E3B] dark:text-[#A9CBA2] font-black">{product.brand} </span>}
                                 {product.name}
                             </h2>
-                            <p className="text-[10px] text-gray-500 dark:text-gray-500 mt-1 font-mono font-bold uppercase">
-                                {customAttrs?.identity?.variant ? `${customAttrs.identity.variant} • ` : ''}
-                                {formatProductSize(product) || 'Size'} • {product.category || 'Category'}
-                                {customAttrs?.identity?.subcategory ? ` • ${customAttrs.identity.subcategory}` : ''}
-                            </p>
-
-                            {/* Tag Badges */}
-                            <div className="flex flex-wrap gap-1.5 mt-3">
-                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-[#2C5E3B]/10 text-[#2C5E3B] border border-[#2C5E3B]/30 dark:bg-[#A9CBA2]/10 dark:text-[#A9CBA2] dark:border-[#A9CBA2]/30 rounded text-[10px] font-black font-mono tracking-widest">
-                                    <Hash size={10} /> {product.sku}
-                                </span>
-                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-amber-500/10 text-amber-700 border border-amber-500/25 dark:bg-[#F3EAD3]/10 dark:text-[#F3EAD3] dark:border-[#F3EAD3]/25 rounded text-[10px] font-bold uppercase tracking-widest">
-                                    <Tag size={10} /> {product.category}
-                                </span>
-                                {product.size && (
-                                    <span className="inline-flex items-center px-2.5 py-0.5 bg-stone-100 text-stone-700 border border-stone-200 dark:bg-white/5 dark:text-stone-300 dark:border-white/10 rounded text-[10px] font-bold uppercase tracking-widest">
-                                        {formatProductSize(product)}
-                                    </span>
-                                )}
-                                {(() => {
-                                    const badge = formatPackBadge(product);
-                                    return badge ? (
-                                        <span className="inline-flex items-center px-2.5 py-0.5 bg-amber-500/10 text-amber-700 border border-amber-500/20 dark:text-amber-400 dark:border-amber-500/25 rounded text-[10px] font-bold uppercase tracking-widest">
-                                            {badge}
-                                        </span>
-                                    ) : null;
-                                })()}
-                                <span className={`inline-block px-2.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-widest ${product.status === 'active' ? 'bg-green-500/10 text-green-600 border border-green-500/20' :
-                                    product.status === 'low_stock' ? 'bg-amber-500/10 text-amber-600 border border-amber-500/20' :
-                                        'bg-gray-500/10 text-gray-500 border border-gray-500/20'
-                                    }`}>
-                                    {product.status.replace('_', ' ')}
-                                </span>
-                            </div>
-                        </div>
-
-                        {/* Price/Stock Quick View */}
-                        <div className="text-right flex-shrink-0">
-                            <p className="text-lg font-black font-mono text-[#2C5E3B] dark:text-[#A9CBA2]">
-                                {CURRENCY_SYMBOL} {formatPriceValue(product.price)}
-                            </p>
-                            <p className="text-[9px] text-gray-500 font-black uppercase tracking-widest mt-1">Retail Price</p>
-                            <p className={`text-lg font-black font-mono mt-2 ${product.stock > 0 ? 'text-green-500' : 'text-red-500'}`}>
-                                {product.stock}
-                            </p>
-                            <p className="text-[9px] text-gray-500 font-black uppercase tracking-widest">
-                                {unitObj?.code !== 'UNIT' ? unitObj?.shortLabel : 'Units'} in Stock
-                            </p>
-                            {(product.minStock || product.maxStock) && (
-                                <div className="mt-2 flex items-center gap-2 justify-end">
-                                    {product.minStock !== undefined && product.minStock > 0 && (
-                                        <span className="text-[9px] font-black px-2 py-0.5 rounded border bg-amber-500/10 text-amber-600 border-amber-500/20">
-                                            Min {product.minStock}
-                                        </span>
-                                    )}
-                                    {product.maxStock !== undefined && product.maxStock > 0 && (
-                                        <span className="text-[9px] font-black px-2 py-0.5 rounded border bg-green-500/10 text-green-600 border-green-500/20">
-                                            Max {product.maxStock}
-                                        </span>
-                                    )}
-                                </div>
-                            )}
                         </div>
                     </div>
-
-                    {/* Physical Quantity Breakdown (for weight/volume items) */}
-                    {physicalQty !== null && (
-                        <div className="mt-3 pt-3 border-t border-[#E2DCCE]/50 dark:border-white/5">
-                            <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest bg-gray-100 dark:bg-white/5 inline-block px-2 py-0.5 rounded border border-gray-200 dark:border-white/10">
-                                {sizeNum} {physicalUnitLabel || unitObj?.shortLabel || product.unit} × {product.stock} Units = {physicalQty} {physicalUnitLabel || unitObj?.shortLabel || product.unit}
+                    <div className="flex gap-8 items-center self-stretch md:self-auto justify-around text-center md:text-right min-w-[200px]">
+                        <div>
+                            <p className="text-xl font-black font-mono text-[#2C5E3B] dark:text-[#A9CBA2] tracking-tighter">
+                                {CURRENCY_SYMBOL}{formatPriceValue(product.price)}
                             </p>
+                            <p className="text-[9px] text-gray-500 font-bold uppercase tracking-wider mt-0.5">Retail Price</p>
                         </div>
-                    )}
-                </div>
-
-                {/* ── System Description ── */}
-                <div className="glass-panel-pushed px-4 py-3 shadow-inner">
-                    <div className="flex items-center gap-1.5 mb-2">
-                        <Info size={12} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
-                        <span className="text-[10px] text-[#2C5E3B] dark:text-[#A9CBA2] uppercase font-black tracking-widest leading-none">System Description</span>
+                        <div>
+                            <p className={`text-xl font-black font-mono tracking-tighter ${product.stock > 0 ? 'text-green-500' : 'text-red-500'}`}>
+                                {product.stock.toLocaleString()}
+                            </p>
+                            <p className="text-[9px] text-gray-500 font-bold uppercase tracking-wider mt-0.5">Units in Stock</p>
+                        </div>
                     </div>
-                    <p className="text-[11px] text-gray-900 dark:text-gray-300 font-mono leading-relaxed font-bold">
-                        {systemDesc}
-                    </p>
-                    {customAttrs?.descriptive?.keyFeatures && (
-                        <p className="text-[10px] text-gray-500 mt-1.5 italic border-t border-white/5 pt-1.5">
-                            Features: {customAttrs.descriptive.keyFeatures}
-                        </p>
-                    )}
                 </div>
 
-                {/* ── Stock Policies & Thresholds ── */}
-                <div className="p-5 bg-white dark:bg-black/20 rounded-2xl border border-gray-200 dark:border-white/10 shadow-sm space-y-4">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                            <Layers size={14} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
-                            <h3 className="text-[11px] font-black text-gray-900 dark:text-white uppercase tracking-[0.15em]">Stock Policies & Limits</h3>
-                        </div>
-                        {canEditThresholds ? (
-                            !isEditingThresholds ? (
-                                <button
-                                    onClick={() => setIsEditingThresholds(true)}
-                                    className="px-2.5 py-1 text-[10px] font-black uppercase bg-[#2C5E3B]/10 hover:bg-[#2C5E3B]/20 text-[#2C5E3B] dark:text-[#A9CBA2] rounded-lg transition-colors flex items-center gap-1 border border-[#2C5E3B]/25"
-                                >
-                                    <Edit2 size={10} /> Edit Limits
-                                </button>
-                            ) : null
-                        ) : (
-                            <span className="text-[9px] text-stone-400 dark:text-gray-500 font-bold uppercase tracking-wider flex items-center gap-1 bg-stone-150 dark:bg-white/5 px-2 py-0.5 rounded-full border border-stone-200 dark:border-white/5 select-none">
-                                <Lock size={10} /> Read Only (HQ/Executive Edit)
-                            </span>
+                <div className="bg-white dark:bg-black/15 p-5 rounded-2xl border border-stone-200 dark:border-white/5 space-y-4 shadow-sm">
+                    <div className="flex items-center gap-2 border-b border-stone-100 dark:border-white/5 pb-2">
+                        <Info size={14} className="text-[#2C5E3B]" />
+                        <h3 className="text-[10px] font-black uppercase tracking-wider">Product Specifications</h3>
+                    </div>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <DetailField label="SKU" value={product.sku} icon={Hash} />
+                        <DetailField label="Barcodes" value={barcodeList.length > 0 ? <span className="font-mono">{barcodeList.join(', ')}</span> : null} icon={ScanBarcode} />
+                        <DetailField label="Category" value={product.category} icon={Tag} />
+                        <DetailField label="Sell Unit" value={unitObj ? `${unitObj.label} (${unitObj.shortLabel})` : product.unit} icon={Package} />
+                        <DetailField label="Size / Weight" value={formatProductSize(product)} icon={Box} />
+                        <DetailField label="Variant" value={customAttrs?.identity?.variant} icon={Tag} />
+                        <DetailField label="Batch / Lot No" value={product.batchNumber} icon={Layers} />
+                        <DetailField label="Expiry Date" value={product.expiryDate ? `${new Date(product.expiryDate).toLocaleDateString()}${expiryAlert ? ` (${expiryAlert})` : ''}` : null} icon={Calendar} colorClass={expiryColor || undefined} />
+                        <DetailField label="Shelf Position" value={product.shelfPosition} icon={Layers} />
+                        <DetailField label="Storage Location" value={product.location} icon={Building2} />
+                        <DetailField label="Date Registered" value={product.createdAt || (product as any).created_at ? new Date(product.createdAt || (product as any).created_at).toLocaleDateString() : null} icon={Clock} />
+                        {(product as any).salesVelocity && <DetailField label="Sales Velocity" value={(product as any).salesVelocity} icon={TrendingUp} />}
+                    </div>
+                </div>
+
+                <div className="bg-white dark:bg-black/15 p-5 rounded-2xl border border-stone-200 dark:border-white/5 space-y-4 shadow-sm">
+                    <div className="flex items-center gap-2 border-b border-stone-100 dark:border-white/5 pb-2">
+                        <DollarSign size={14} className="text-[#2C5E3B]" />
+                        <h3 className="text-[10px] font-black uppercase tracking-wider">Financial & Pricing Details</h3>
+                    </div>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <DetailField label="Retail Price" value={`${CURRENCY_SYMBOL} ${formatPriceValue(product.price)}`} icon={DollarSign} />
+                        <DetailField label="Promo Price" value={salePrice > 0 ? `${CURRENCY_SYMBOL} ${formatPriceValue(salePrice)}` : null} icon={Tag} highlight />
+                        <DetailField label="Discount" value={salePrice > 0 && discountPct > 0 ? `${discountPct.toFixed(1)}%` : null} icon={Percent} highlight />
+                        {compPrice > 0 && <DetailField label="Competitor Price" value={`${CURRENCY_SYMBOL} ${formatPriceValue(compPrice)}`} icon={compDiff > 0 ? TrendingDown : TrendingUp} colorClass={compDiff > 0 ? 'text-red-500' : 'text-green-500'} />}
+                        {showCostPrice && (
+                            <>
+                                <DetailField label="Cost Price (COGS)" value={cost > 0 ? `${CURRENCY_SYMBOL} ${formatPriceValue(cost)}` : null} icon={Lock} colorClass="text-stone-400" />
+                                <DetailField label="Gross Profit" value={grossProfit > 0 ? `${CURRENCY_SYMBOL} ${grossProfit.toFixed(2)}` : null} icon={TrendingUp} />
+                                <DetailField label="Gross Margin" value={marginPct > 0 ? `${marginPct.toFixed(1)}%` : null} icon={Percent} />
+                                <DetailField label="Markup Rate" value={markupPct > 0 ? `${markupPct.toFixed(1)}%` : null} icon={Percent} />
+                            </>
                         )}
                     </div>
-
-                    {!isEditingThresholds ? (
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="p-3 bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 rounded-xl">
-                                <p className="text-[9px] text-gray-500 font-black uppercase tracking-wider">Min Stock (Reorder Point)</p>
-                                <p className="text-sm font-black font-mono mt-1 text-amber-600 dark:text-amber-400">
-                                    {product.minStock !== undefined && product.minStock !== null ? `${product.minStock} units` : 'Not configured'}
-                                </p>
-                            </div>
-                            <div className="p-3 bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 rounded-xl">
-                                <p className="text-[9px] text-gray-500 font-black uppercase tracking-wider">Max Stock (Capacity)</p>
-                                <p className="text-sm font-black font-mono mt-1 text-green-600 dark:text-green-400">
-                                    {product.maxStock !== undefined && product.maxStock !== null ? `${product.maxStock} units` : 'Not configured'}
-                                </p>
-                            </div>
-                        </div>
-                    ) : (
-                        <div className="space-y-3">
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-1">
-                                    <label className="text-[9px] text-[#2C5E3B] dark:text-[#A9CBA2] font-black uppercase tracking-wider">Min Stock</label>
-                                    <input
-                                        type="number"
-                                        min="0"
-                                        value={minVal}
-                                        onChange={(e) => setMinVal(e.target.value === '' ? '' : Math.max(0, parseInt(e.target.value) || 0))}
-                                        placeholder="e.g. 10"
-                                        className="w-full bg-gray-100 dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-xl px-3 py-2 text-sm text-gray-900 dark:text-white font-mono focus:outline-none focus:border-[#2C5E3B]/50"
-                                    />
-                                </div>
-                                <div className="space-y-1">
-                                    <label className="text-[9px] text-[#2C5E3B] dark:text-[#A9CBA2] font-black uppercase tracking-wider">Max Stock</label>
-                                    <input
-                                        type="number"
-                                        min="0"
-                                        value={maxVal}
-                                        onChange={(e) => setMaxVal(e.target.value === '' ? '' : Math.max(0, parseInt(e.target.value) || 0))}
-                                        placeholder="e.g. 100"
-                                        className="w-full bg-gray-100 dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-xl px-3 py-2 text-sm text-gray-900 dark:text-white font-mono focus:outline-none focus:border-[#2C5E3B]/50"
-                                    />
-                                </div>
-                            </div>
-                            <div className="flex gap-2 justify-end pt-1">
-                                <button
-                                    onClick={() => setIsEditingThresholds(false)}
-                                    disabled={isSaving}
-                                    className="px-3 py-1.5 text-[10px] font-black uppercase bg-gray-100 hover:bg-gray-200 dark:bg-white/5 dark:hover:bg-white/10 text-gray-500 dark:text-gray-400 rounded-xl transition-all flex items-center gap-1"
-                                >
-                                    <X size={12} /> Cancel
-                                </button>
-                                <button
-                                    onClick={async () => {
-                                        setIsSaving(true);
-                                        try {
-                                            const finalMin = minVal === '' ? null : minVal;
-                                            const finalMax = maxVal === '' ? null : maxVal;
-                                            
-                                            await productsService.update(product.id, {
-                                                minStock: finalMin ?? undefined,
-                                                maxStock: finalMax ?? undefined
-                                            });
-
-                                            product.minStock = finalMin ?? undefined;
-                                            product.maxStock = finalMax ?? undefined;
-
-                                            showToast('Stock limits updated successfully', 'success');
-                                            setIsEditingThresholds(false);
-                                            await refreshData();
-                                        } catch (err: any) {
-                                            showToast(err.message || 'Failed to save limits', 'error');
-                                        } finally {
-                                            setIsSaving(false);
-                                        }
-                                    }}
-                                    disabled={isSaving}
-                                    className="px-3.5 py-1.5 text-[10px] font-black uppercase bg-[#2C5E3B] hover:bg-[#1E3F27] text-white rounded-xl transition-all flex items-center gap-1 shadow-sm"
-                                >
-                                    <Check size={12} /> {isSaving ? 'Saving...' : 'Save Limits'}
-                                </button>
-                            </div>
-                        </div>
-                    )}
                 </div>
 
                 <ProductAttributesPanel product={product} />
 
-                {/* ── Identification & Sales ── */}
-                <div className="p-5 bg-white dark:bg-black/20 rounded-2xl border border-gray-200 dark:border-white/10 shadow-sm">
-                    <div className="flex items-center gap-2 mb-4">
-                        <ScanBarcode size={14} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
-                        <h3 className="text-[11px] font-black text-gray-900 dark:text-white uppercase tracking-[0.15em]">Identification & Sales</h3>
-                    </div>
-
-                    <div className="grid grid-cols-2 lg:grid-cols-3 gap-y-5 gap-x-8">
-                        <div className="space-y-1">
-                            <p className="text-[10px] text-gray-500 font-black uppercase tracking-widest">Registered Barcodes</p>
-                            {barcodeList.length > 0 ? (
-                                <div className="flex flex-wrap gap-1.5 mt-1">
-                                    {barcodeList.map((bc, i) => (
-                                        <span key={i} className="inline-block px-2 py-0.5 bg-gray-100 dark:bg-black/40 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-white/10 rounded text-xs font-mono tracking-tight">
-                                            {bc}
-                                        </span>
-                                    ))}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="bg-white dark:bg-black/15 p-5 rounded-2xl border border-stone-200 dark:border-white/5 space-y-4 shadow-sm">
+                        <div className="flex items-center justify-between border-b border-stone-100 dark:border-white/5 pb-2">
+                            <div className="flex items-center gap-2"><Layers size={14} className="text-[#2C5E3B]"/><h3 className="text-[10px] font-black uppercase tracking-wider">Stock Policies</h3></div>
+                            {canEditThresholds && !isEditingThresholds && <button onClick={() => setIsEditingThresholds(true)} className="px-2 py-0.5 text-[9px] font-black uppercase bg-[#2C5E3B]/10 hover:bg-[#2C5E3B]/20 text-[#2C5E3B] dark:text-[#A9CBA2] rounded-lg border border-[#2C5E3B]/25">Edit</button>}
+                        </div>
+                        {!isEditingThresholds ? (
+                            <div className="grid grid-cols-2 gap-3">
+                                <div className="p-3 bg-stone-50 dark:bg-white/[0.02] rounded-xl border border-stone-200/50 dark:border-white/5 text-center">
+                                    <span className="text-[9px] text-gray-500 font-bold uppercase block">Min Stock</span>
+                                    <span className="text-sm font-mono font-bold text-amber-600 dark:text-amber-400 block mt-1">{product.minStock !== undefined && product.minStock !== null ? `${product.minStock} units` : '—'}</span>
                                 </div>
-                            ) : (
-                                <p className="text-sm font-medium text-gray-400 dark:text-gray-600">—</p>
-                            )}
-                        </div>
-                        <div className="space-y-1">
-                            <p className="text-[10px] text-gray-500 font-black uppercase tracking-widest">Sell Unit</p>
-                            <p className="text-sm font-medium text-gray-900 dark:text-gray-200">{unitObj ? `${unitObj.label} (${unitObj.shortLabel})` : (product.unit || '—')}</p>
-                        </div>
-                        <div className="space-y-1">
-                            <p className="text-[10px] text-gray-500 font-black uppercase tracking-widest">Sale Price</p>
-                            <p className="text-sm font-medium text-gray-900 dark:text-gray-200">
-                                {product.salePrice ? formatCompactNumber(product.salePrice, { currency: CURRENCY_SYMBOL }) : 'No active discount'}
-                            </p>
-                        </div>
-
-                        <div className="space-y-1">
-                            <p className="text-[10px] text-gray-500 font-black uppercase tracking-widest">Date Added</p>
-                            <p className="text-sm font-medium text-gray-900 dark:text-gray-200">
-                                {product.createdAt || (product as any).created_at ? new Date(product.createdAt || (product as any).created_at).toLocaleDateString() : '—'}
-                            </p>
-                        </div>
-                        {product.expiryDate && (
-                            <div className="space-y-1">
-                                <p className="text-[10px] text-gray-500 font-black uppercase tracking-widest">Expiry Date</p>
-                                <p className="text-sm font-medium text-gray-900 dark:text-gray-200">{new Date(product.expiryDate).toLocaleDateString()}</p>
+                                <div className="p-3 bg-stone-50 dark:bg-white/[0.02] rounded-xl border border-stone-200/50 dark:border-white/5 text-center">
+                                    <span className="text-[9px] text-gray-500 font-bold uppercase block">Max Stock</span>
+                                    <span className="text-sm font-mono font-bold text-green-600 dark:text-green-400 block mt-1">{product.maxStock !== undefined && product.maxStock !== null ? `${product.maxStock} units` : '—'}</span>
+                                </div>
                             </div>
-                        )}
-                        {product.batchNumber && (
-                            <div className="space-y-1">
-                                <p className="text-[10px] text-gray-500 font-black uppercase tracking-widest">Batch Number</p>
-                                <p className="text-sm font-medium font-mono text-gray-900 dark:text-gray-200">{product.batchNumber}</p>
-                            </div>
-                        )}
-                    </div>
-                </div>
-
-                {/* ── Recent Receiving History ── */}
-                <div className="p-5 bg-white dark:bg-black/20 rounded-2xl border border-gray-200 dark:border-white/10 shadow-sm">
-                    <div className="flex items-center gap-2 mb-4">
-                        <Layers size={14} className="text-purple-500" />
-                        <h3 className="text-[11px] font-black text-gray-900 dark:text-white uppercase tracking-[0.15em]">Recent Restocks</h3>
-                    </div>
-
-                    {recentReceives.length > 0 ? (
-                        <div className="space-y-2">
-                            {recentReceives.map(movement => {
-                                const employee = employees?.find(e => e.id === movement.performedBy || e.name === movement.performedBy);
-                                const employeeName = employee ? employee.name : movement.performedBy || 'System';
-                                return (
-                                    <div key={movement.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-white/5 rounded-xl border border-gray-100 dark:border-white/5">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-8 h-8 rounded-lg bg-green-100 dark:bg-green-500/20 text-green-600 dark:text-green-400 flex items-center justify-center font-black text-xs">
-                                                +{movement.quantity}
-                                            </div>
-                                            <div>
-                                                <p className="text-sm font-bold text-gray-900 dark:text-gray-200 uppercase">{employeeName}</p>
-                                                <p className="text-[10px] text-gray-500 font-mono mt-0.5">
-                                                    {new Date(movement.date).toLocaleString([], { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                                                </p>
-                                            </div>
-                                        </div>
+                        ) : (
+                            <div className="space-y-3">
+                                <div className="grid grid-cols-2 gap-2">
+                                    <div>
+                                        <label htmlFor="min-stock-input" className="text-[8px] text-gray-500 font-bold uppercase block mb-1">Min Stock</label>
+                                        <input id="min-stock-input" type="number" min="0" value={minVal} onChange={(e) => setMinVal(e.target.value === '' ? '' : Math.max(0, parseInt(e.target.value) || 0))} placeholder="e.g. 10" className="w-full bg-gray-100 dark:bg-black/40 border border-stone-200 rounded-lg px-2.5 py-1.5 text-xs font-mono focus:outline-none" />
                                     </div>
-                                );
-                            })}
+                                    <div>
+                                        <label htmlFor="max-stock-input" className="text-[8px] text-gray-500 font-bold uppercase block mb-1">Max Stock</label>
+                                        <input id="max-stock-input" type="number" min="0" value={maxVal} onChange={(e) => setMaxVal(e.target.value === '' ? '' : Math.max(0, parseInt(e.target.value) || 0))} placeholder="e.g. 100" className="w-full bg-gray-100 dark:bg-black/40 border border-stone-200 rounded-lg px-2.5 py-1.5 text-xs font-mono focus:outline-none" />
+                                    </div>
+                                </div>
+                                <div className="flex gap-1.5 justify-end pt-1">
+                                    <button onClick={() => setIsEditingThresholds(false)} className="px-2 py-1 text-[9px] font-black uppercase bg-stone-100 dark:bg-white/5 text-stone-500 rounded-lg">Cancel</button>
+                                    <button onClick={async () => { setIsSaving(true); try { await productsService.update(product.id, { minStock: minVal === '' ? undefined : minVal, maxStock: maxVal === '' ? undefined : maxVal }); showToast('Updated', 'success'); setIsEditingThresholds(false); await refreshData(); } catch (err: any) { showToast('Error', 'error'); } finally { setIsSaving(false); } }} className="px-2 py-1 text-[9px] font-black uppercase bg-[#2C5E3B] text-white rounded-lg">Save</button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                    <div className="bg-white dark:bg-black/15 p-5 rounded-2xl border border-stone-200 dark:border-white/5 space-y-4 shadow-sm">
+                        <div className="flex items-center gap-2 border-b border-stone-100 dark:border-white/5 pb-2">
+                            <TrendingUp size={14} className="text-[#2C5E3B]" />
+                            <h3 className="text-[10px] font-black uppercase tracking-wider">Restock Log & Audits</h3>
                         </div>
-                    ) : (
-                        <p className="text-sm font-medium text-gray-500 italic text-center py-3">No recent receiving history available for this product.</p>
-                    )}
+                        {recentReceives.length > 0 ? (
+                            <div className="space-y-3 pl-2 border-l border-stone-200 dark:border-white/5 ml-2 max-h-[140px] overflow-y-auto">
+                                {recentReceives.map(m => (
+                                    <div key={m.id} className="relative flex flex-col gap-0.5">
+                                        <div className="absolute -left-[14px] top-1.5 w-1.5 h-1.5 rounded-full bg-green-500 border border-white dark:border-black" />
+                                        <div className="flex items-center justify-between text-[11px]"><span className="font-bold text-gray-900 dark:text-white uppercase">{employees?.find(e => e.id === m.performedBy)?.name || m.performedBy || 'System'}</span><span className="font-mono text-green-600 font-bold">+{m.quantity}</span></div>
+                                        <span className="text-[9px] text-gray-400 font-mono">{new Date(m.date).toLocaleDateString([], { month: 'short', day: 'numeric' })}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : <p className="text-xs font-bold text-gray-400 text-center py-2">No recent restocks</p>}
+                        <div className="pt-3 border-t border-stone-200 dark:border-white/5 text-[10px] space-y-1.5">
+                            <div className="flex justify-between"><span className="text-gray-500 font-bold uppercase">Created:</span><span className="font-semibold">{product.createdBy || 'System'}</span></div>
+                        </div>
+                    </div>
                 </div>
 
+                <div className="p-4 bg-stone-50/50 dark:bg-black/10 rounded-xl border border-stone-200 dark:border-white/5 text-[11px] leading-relaxed font-mono">
+                    <span className="text-gray-400 font-bold uppercase block mb-1">Catalog Description Spec:</span>
+                    <span className="text-gray-800 dark:text-stone-200 font-bold">{systemDesc || '—'}</span>
+                    {customAttrs?.descriptive?.keyFeatures && <p className="mt-2 text-stone-600 dark:text-stone-400 italic">Features: {customAttrs.descriptive.keyFeatures}</p>}
+                </div>
             </div>
         </Modal>
     );

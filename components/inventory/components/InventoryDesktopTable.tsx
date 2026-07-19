@@ -9,6 +9,8 @@ import { getABCClass, getInventoryValue, LocationDropdown } from '../utils/inven
 import { getSellUnit } from '../../../utils/units';
 import { CompactLocationDisplay } from '../../ProductLocationDisplay';
 import { Protected } from '../../Protected';
+import { useStore } from '../../../contexts/CentralStore';
+import { canViewCostPrice } from '../../../utils/roles';
 
 interface InventoryDesktopTableProps {
     products: Product[];
@@ -45,6 +47,9 @@ export const InventoryDesktopTable: React.FC<InventoryDesktopTableProps> = ({
     handleDeleteProduct,
     setSelectedViewProduct
 }) => {
+    const { user } = useStore();
+    const showCostPrice = canViewCostPrice(user?.role);
+
     return (
         <table className="w-full text-left border-collapse hidden md:table">
             <thead className="sticky top-0 bg-gray-50/95 dark:bg-black/80 backdrop-blur-md z-10 border-b border-gray-200 dark:border-white/10 shadow-sm">
@@ -106,6 +111,16 @@ export const InventoryDesktopTable: React.FC<InventoryDesktopTableProps> = ({
                             </div>
                         </div>
                     </th>
+                    {showCostPrice && (
+                        <th className="p-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-right cursor-pointer hover:text-white transition-colors group select-none" onClick={() => handleSort('costPrice')}>
+                            <div className="flex items-center justify-end gap-2">
+                                Cost Price
+                                <div className={`p-1 rounded transition-colors ${sortConfig?.key === 'costPrice' ? 'bg-[#2C5E3B]/20 text-[#2C5E3B] dark:bg-[#A9CBA2]/20 dark:text-[#A9CBA2]' : 'text-gray-600 group-hover:text-gray-400'}`}>
+                                    <ArrowUpDown size={10} className={sortConfig?.key === 'costPrice' && sortConfig.direction === 'asc' ? 'rotate-180' : ''} />
+                                </div>
+                            </div>
+                        </th>
+                    )}
                     <th className="p-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-right cursor-pointer hover:text-white transition-colors group select-none" onClick={() => handleSort('assetValue')}>
                         <div className="flex items-center justify-end gap-2">
                             Value
@@ -292,6 +307,19 @@ export const InventoryDesktopTable: React.FC<InventoryDesktopTableProps> = ({
                                     <span className="text-[9px] text-gray-500 font-bold uppercase tracking-widest mt-0.5">Retail Price</span>
                                 </div>
                             </td>
+                            {showCostPrice && (
+                                <td className="p-5 text-right">
+                                    <div className="flex flex-col items-end">
+                                        <span className="text-[13px] font-black text-gray-900 dark:text-white font-mono tracking-tighter group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] transition-colors">
+                                            {product.costPrice && product.costPrice > 0 ? formatCompactNumber(product.costPrice, { currency: CURRENCY_SYMBOL }) : '—'}
+                                            {product.costPrice !== undefined && product.costPrice !== null && product.costPrice > 0 && getSellUnit(product.unit || '').code !== 'UNIT' && (
+                                                <span className="text-[9px] text-gray-500 font-bold">/{getSellUnit(product.unit || '').shortLabel}</span>
+                                            )}
+                                        </span>
+                                        <span className="text-[9px] text-gray-500 font-bold uppercase tracking-widest mt-0.5">Cost Price</span>
+                                    </div>
+                                </td>
+                            )}
                             <td className="p-5 text-right">
                                 <div className="inline-flex flex-col items-end bg-gray-100 dark:bg-black/20 p-2 rounded-xl border border-gray-100 dark:border-white/[0.03]">
                                     <span className="text-[12px] font-black text-[#2C5E3B] dark:text-[#A9CBA2] font-mono tracking-tighter">

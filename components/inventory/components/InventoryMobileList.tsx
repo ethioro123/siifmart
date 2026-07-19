@@ -5,6 +5,8 @@ import { CURRENCY_SYMBOL } from '../../../constants';
 import { formatCompactNumber } from '../../../utils/formatting';
 import { getABCClass, getInventoryValue } from '../utils/inventoryHelpers';
 import { getSellUnit } from '../../../utils/units';
+import { useStore } from '../../../contexts/CentralStore';
+import { canViewCostPrice } from '../../../utils/roles';
 
 interface InventoryMobileListProps {
     products: Product[];
@@ -35,7 +37,11 @@ export const InventoryMobileList: React.FC<InventoryMobileListProps> = ({
     handleDeleteProduct,
     setSelectedViewProduct
 }) => {
+    const { user } = useStore();
+    const showCostPrice = canViewCostPrice(user?.role);
+
     return (
+
         <div className="block md:hidden divide-y divide-gray-100 dark:divide-white/5">
             {products.map((product) => {
                 const abc = getABCClass(product, totalInventoryValue);
@@ -101,7 +107,7 @@ export const InventoryMobileList: React.FC<InventoryMobileListProps> = ({
                         </div>
 
                         {/* Middle details: Location, Price, Total Value */}
-                        <div className="grid grid-cols-3 gap-2 text-left bg-[#FAF8F5] dark:bg-black/10 p-3 rounded-xl border border-gray-100 dark:border-white/5">
+                        <div className={`grid ${showCostPrice ? 'grid-cols-4' : 'grid-cols-3'} gap-2 text-left bg-[#FAF8F5] dark:bg-black/10 p-3 rounded-xl border border-gray-100 dark:border-white/5`}>
                             <div className="flex flex-col min-w-0">
                                 <span className="text-[8px] text-gray-500 font-bold uppercase tracking-widest">Location</span>
                                 {(() => {
@@ -119,6 +125,14 @@ export const InventoryMobileList: React.FC<InventoryMobileListProps> = ({
                                     {product.price && product.price > 0 ? formatCompactNumber(product.price, { currency: CURRENCY_SYMBOL }) : '—'}
                                 </span>
                             </div>
+                            {showCostPrice && (
+                                <div className="flex flex-col items-center">
+                                    <span className="text-[8px] text-gray-500 font-bold uppercase tracking-widest">Cost</span>
+                                    <span className="text-[10px] text-gray-900 dark:text-white font-mono font-bold mt-0.5">
+                                        {product.costPrice && product.costPrice > 0 ? formatCompactNumber(product.costPrice, { currency: CURRENCY_SYMBOL }) : '—'}
+                                    </span>
+                                </div>
+                            )}
                             <div className="flex flex-col items-end">
                                 <span className="text-[8px] text-gray-500 font-bold uppercase tracking-widest">Value</span>
                                 <span className="text-[10px] text-[#2C5E3B] dark:text-[#A9CBA2] font-mono font-bold mt-0.5">

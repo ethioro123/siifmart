@@ -137,3 +137,31 @@ export const canViewLocation = (
 
     return userLevel > targetLevel;
 };
+
+export const canViewCostPrice = (role: string | undefined): boolean => {
+    if (!role) return false;
+
+    // Explicitly allow merchandising manager, merchandiser, finance manager, and procurement manager
+    if (
+        role === 'finance_manager' ||
+        role === 'procurement_manager' ||
+        role === 'merchandising_manager' ||
+        role === 'merchandiser'
+    ) {
+        return true;
+    }
+
+    // Explicitly disallow store managers and inventory managers
+    if (role === 'store_manager' || role === 'inventory_manager' || role === 'warehouse_manager') {
+        return false;
+    }
+
+    // Disallow anyone with level <= 72 (e.g., cashier, shift_lead, etc.)
+    const level = getRoleHierarchy(role);
+    if (level <= 72) {
+        return false;
+    }
+
+    return true;
+};
+

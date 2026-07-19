@@ -13,7 +13,7 @@ import ImageUpload from './ImageUpload';
 import { CURRENCY_SYMBOL, COMMON_UNITS, GROCERY_CATEGORIES } from '../constants';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useStore } from '../contexts/CentralStore';
-import { getRoleHierarchy } from '../utils/roles';
+import { getRoleHierarchy, canViewCostPrice } from '../utils/roles';
 
 interface ProductFormProps {
     initialData?: Partial<Product>;
@@ -26,6 +26,7 @@ interface ProductFormProps {
 export function ProductForm({ initialData, onSubmit, onCancel, isSubmitting, isReadOnly = false }: ProductFormProps) {
     const { user } = useStore();
     const canEditThresholds = user?.role ? getRoleHierarchy(user.role) >= 80 : false;
+    const showCostPrice = canViewCostPrice(user?.role);
 
     const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm({
         resolver: zodResolver(ProductSchema),
@@ -125,7 +126,7 @@ export function ProductForm({ initialData, onSubmit, onCancel, isSubmitting, isR
                     )}
                     {activeSection === 'inventory' && (
                         <motion.div key="inventory" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }} className="grid grid-cols-2 gap-8">
-                            <FinancialCard register={register} /> <QuantitativeCard register={register} watch={watch} thresholdsDisabled={isReadOnly || !canEditThresholds} />
+                            <FinancialCard register={register} showCostPrice={showCostPrice} /> <QuantitativeCard register={register} watch={watch} thresholdsDisabled={isReadOnly || !canEditThresholds} />
                         </motion.div>
                     )}
                     {activeSection === 'logistics' && (
@@ -154,12 +155,14 @@ const FormGroup = ({ label, icon: Icon, children, error }: any) => (
     </div>
 );
 
-const FinancialCard = ({ register }: any) => (
+const FinancialCard = ({ register, showCostPrice }: any) => (
     <div className="col-span-2 md:col-span-1 bg-gray-50 dark:bg-white/[0.02] border border-gray-200 dark:border-white/5 rounded-[2rem] p-6 space-y-6">
         <h3 className="text-xs font-black text-green-600 dark:text-green-400 uppercase tracking-[0.2em] flex items-center gap-2"><DollarSign size={14} /> Financials</h3>
         <div className="space-y-4">
             <FormGroup label="Retail Price"><div className="relative"><span className="absolute left-4 top-1/2 -translate-y-1/2 text-green-600 font-mono font-black">{CURRENCY_SYMBOL}</span><input {...register('price', { valueAsNumber: true })} type="number" step="0.01" className="form-input pl-10 text-lg font-mono font-black text-right" placeholder="0.00" /></div></FormGroup>
-            <FormGroup label="Cost Price"><div className="relative"><span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-mono">{CURRENCY_SYMBOL}</span><input {...register('costPrice', { valueAsNumber: true })} type="number" step="0.01" className="form-input pl-10 text-sm font-mono text-gray-500 dark:text-gray-300 text-right" placeholder="0.00" /></div></FormGroup>
+            {showCostPrice && (
+                <FormGroup label="Cost Price"><div className="relative"><span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-mono">{CURRENCY_SYMBOL}</span><input {...register('costPrice', { valueAsNumber: true })} type="number" step="0.01" className="form-input pl-10 text-sm font-mono text-gray-500 dark:text-gray-300 text-right" placeholder="0.00" /></div></FormGroup>
+            )}
         </div>
     </div>
 );
