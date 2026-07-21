@@ -11,7 +11,7 @@ import { useData } from '../../contexts/DataContext';
 import { getSellUnit, formatProductSize, getEffectivePackageSize } from '../../utils/units';
 import { getRoleHierarchy, canViewCostPrice } from '../../utils/roles';
 import { useStore } from '../../contexts/CentralStore';
-import { productsService } from '../../services/products.service';
+import { productsService, inventoryRequestsService } from '../../services/supabase.service';
 import { ProductAttributesPanel } from './components/ProductAttributesPanel';
 
 interface ProductDetailsModalProps {
@@ -62,6 +62,8 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
     const isStoreManager = user?.role === 'store_manager';
     const showDeleteButton = isCEO || isStoreManager || isWarehouseManager;
     const isDeleteDisabled = (isStoreManager || isWarehouseManager) && product.stock > 0;
+    // Only CEO can directly edit. Everyone else submits for CEO approval.
+    const canDirectEdit = isCEO;
 
     const handleDelete = async () => {
         if (!isCEO && !isStoreManager) return;
@@ -92,7 +94,9 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
         }
     };
 
-    const canEditThresholds = user?.role ? ['super_admin', 'admin', 'warehouse_manager', 'store_manager', 'inventory_manager', 'procurement_manager', 'operations_manager', 'regional_manager'].includes(user.role) || getRoleHierarchy(user.role) >= 80 : false;
+    // Any manager can see the Edit button, but only CEO applies changes immediately.
+    // All other managers submit a pending request for CEO approval.
+    const canEditThresholds = user?.role ? getRoleHierarchy(user.role) >= 70 : false;
     const customAttrs = product.customAttributes || (product as any).custom_attributes;
     const unitObj = product.unit ? getSellUnit(product.unit) : null;
 
@@ -286,7 +290,38 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
                                 </div>
                                 <div className="flex gap-1.5 justify-end pt-1">
                                     <button onClick={() => setIsEditingThresholds(false)} className="px-2 py-1 text-[9px] font-black uppercase bg-stone-100 dark:bg-white/5 text-stone-500 rounded-lg">Cancel</button>
-                                    <button onClick={async () => { setIsSaving(true); try { await productsService.update(product.id, { minStock: minVal === '' ? undefined : minVal, maxStock: maxVal === '' ? undefined : maxVal }); showToast('Updated', 'success'); setIsEditingThresholds(false); await refreshData(); } catch (err: any) { showToast('Error', 'error'); } finally { setIsSaving(false); } }} className="px-2 py-1 text-[9px] font-black uppercase bg-[#2C5E3B] text-white rounded-lg">Save</button>
+                                    <button onClick={async () => {
+                                        setIsSaving(true);
+                                        try {
+                                            if (canDirectEdit) {
+                                                // CEO: apply immediately
+                                                await productsService.update(product.id, { minStock: minVal === '' ? undefined : minVal, maxStock: maxVal === '' ? undefined : maxVal });
+                                                showToast('Stock thresholds updated', 'success');
+                                            } else {
+                                                // Non-CEO managers: submit for CEO approval
+                                                await inventoryRequestsService.create({
+                                                    productId: product.id,
+                                                    productName: product.name,
+                                                    productSku: product.sku,
+                                                    siteId: product.siteId || '',
+                                                    changeType: 'edit',
+                                                    requestedBy: user?.name || 'Unknown',
+                                                    requestedAt: new Date().toISOString(),
+                                                    status: 'pending',
+                                                    proposedChanges: { ...product, minStock: minVal === '' ? product.minStock : minVal, maxStock: maxVal === '' ? product.maxStock : maxVal },
+                                                });
+                                                showToast('Threshold change submitted for CEO approval', 'info');
+                                            }
+                                            setIsEditingThresholds(false);
+                                            await refreshData();
+                                        } catch (err: any) {
+                                            showToast(err?.message || 'Failed to save thresholds', 'error');
+                                        } finally {
+                                            setIsSaving(false);
+                                        }
+                                    }} disabled={isSaving} className="px-2 py-1 text-[9px] font-black uppercase bg-[#2C5E3B] text-white rounded-lg disabled:opacity-50">
+                                        {isSaving ? 'Saving…' : canDirectEdit ? 'Save' : 'Submit for Approval'}
+                                    </button>
                                 </div>
                             </div>
                         )}
