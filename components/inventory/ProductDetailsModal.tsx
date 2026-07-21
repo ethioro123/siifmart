@@ -58,9 +58,10 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
     if (!product) return null;
 
     const isCEO = user?.role === 'super_admin';
+    const isWarehouseManager = user?.role === 'warehouse_manager';
     const isStoreManager = user?.role === 'store_manager';
-    const showDeleteButton = isCEO || isStoreManager;
-    const isDeleteDisabled = isStoreManager && product.stock > 0;
+    const showDeleteButton = isCEO || isStoreManager || isWarehouseManager;
+    const isDeleteDisabled = (isStoreManager || isWarehouseManager) && product.stock > 0;
 
     const handleDelete = async () => {
         if (!isCEO && !isStoreManager) return;
@@ -91,7 +92,7 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
         }
     };
 
-    const canEditThresholds = user?.role ? getRoleHierarchy(user.role) >= 80 : false;
+    const canEditThresholds = user?.role ? ['super_admin', 'admin', 'warehouse_manager', 'store_manager', 'inventory_manager', 'procurement_manager', 'operations_manager', 'regional_manager'].includes(user.role) || getRoleHierarchy(user.role) >= 80 : false;
     const customAttrs = product.customAttributes || (product as any).custom_attributes;
     const unitObj = product.unit ? getSellUnit(product.unit) : null;
 

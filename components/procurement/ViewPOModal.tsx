@@ -39,8 +39,9 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
 
     const isCEO = user?.role === 'super_admin';
     const isProcurementManager = user?.role === 'procurement_manager';
-    const canApprove = isProcurementManager || user?.role === 'finance_manager' || user?.role === 'admin' || isCEO;
-    const canFullDelete = isCEO || isProcurementManager;
+    const isWarehouseManager = user?.role === 'warehouse_manager';
+    const canApprove = isProcurementManager || user?.role === 'finance_manager' || user?.role === 'admin' || isCEO || isWarehouseManager;
+    const canFullDelete = isCEO || isProcurementManager || isWarehouseManager;
 
     const handleApprovePO = async () => {
         if (!window.confirm(`Are you sure you want to approve PO ${formatPONumber(po)}?`)) return;

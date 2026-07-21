@@ -75,12 +75,12 @@ export const getRoleHierarchy = (role: UserRole | string): number => {
         'supply_chain_manager': 80,
 
         // Level 3: Site Managers & Department Heads
-        'logistics_manager': 75,
-        'inventory_manager': 72,
-        'security_manager': 72,
-        'store_manager': 70,
-        'warehouse_manager': 68,
-        'dispatch_manager': 65,
+        'logistics_manager': 80,
+        'inventory_manager': 80,
+        'security_manager': 75,
+        'store_manager': 80,
+        'warehouse_manager': 80,
+        'dispatch_manager': 75,
         'cs_manager': 60,
         'assistant_manager': 60,
         'store_supervisor': 55,

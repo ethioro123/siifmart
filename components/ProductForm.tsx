@@ -25,8 +25,9 @@ interface ProductFormProps {
 
 export function ProductForm({ initialData, onSubmit, onCancel, isSubmitting, isReadOnly = false }: ProductFormProps) {
     const { user } = useStore();
-    const canEditThresholds = user?.role ? getRoleHierarchy(user.role) >= 80 : false;
+    const canEditThresholds = user?.role ? ['super_admin', 'admin', 'warehouse_manager', 'store_manager', 'inventory_manager', 'procurement_manager', 'operations_manager', 'regional_manager'].includes(user.role) || getRoleHierarchy(user.role) >= 80 : false;
     const showCostPrice = canViewCostPrice(user?.role);
+    const thresholdsDisabled = !canEditThresholds || isReadOnly;
 
     const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm({
         resolver: zodResolver(ProductSchema),
@@ -201,7 +202,7 @@ const QuantitativeCard = ({ register, watch, thresholdsDisabled }: any) => {
                         </p>
                         {thresholdsDisabled && (
                             <span className="text-[9px] text-amber-500 dark:text-amber-400 font-bold uppercase tracking-wider flex items-center gap-1 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
-                                <Lock size={10} /> Manager & CEO Only
+                                <Lock size={10} /> Manager Access Required
                             </span>
                         )}
                     </div>

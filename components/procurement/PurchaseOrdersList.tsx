@@ -299,27 +299,29 @@ export const PurchaseOrdersList: React.FC<PurchaseOrdersListProps> = ({
                                                     <CheckCircle size={12} /> Approve
                                                 </button>
                                             )}
-                                            {/* Edit Logic:
-                                                1. CEO/Super Admin can edit anything NOT received.
-                                                2. Other staff can ONLY edit their own Draft POs.
-                                            */}
-                                            {((isCEO && po.status !== 'Received') || 
-                                              (po.status === 'Draft' && (po.createdBy === user?.name || po.requestedBy === user?.name))) && (
-                                                <button
-                                                    onClick={(e) => { e.stopPropagation(); onEdit(po); }}
-                                                    className="p-1 text-[#2C5E3B] dark:text-[#A9CBA2] hover:opacity-80"
-                                                    title="Edit"
-                                                >
-                                                    <Edit3 size={14} />
-                                                </button>
-                                            )}
+                                             {/* Edit Logic:
+                                                 1. CEO/Warehouse Manager/Procurement Manager can edit anything NOT received.
+                                                 2. Other staff can ONLY edit their own Draft POs.
+                                             */}
+                                             {((isCEO && po.status !== 'Received') || 
+                                               (user?.role === 'warehouse_manager' && po.status !== 'Received') ||
+                                               (po.status === 'Draft' && (po.createdBy === user?.name || po.requestedBy === user?.name))) && (
+                                                 <button
+                                                     onClick={(e) => { e.stopPropagation(); onEdit(po); }}
+                                                     className="p-1 text-[#2C5E3B] dark:text-[#A9CBA2] hover:opacity-80"
+                                                     title="Edit"
+                                                 >
+                                                     <Edit3 size={14} />
+                                                 </button>
+                                             )}
 
-                                            {/* Deletion Logic:
-                                                1. Super Admin can delete anything NOT received.
-                                                2. Other staff can ONLY delete their own Draft POs.
-                                            */}
-                                            {((isCEO && po.status !== 'Received') || 
-                                              (po.status === 'Draft' && (po.createdBy === user?.name || po.requestedBy === user?.name))) && (
+                                             {/* Deletion Logic:
+                                                 1. Super Admin/Warehouse Manager can delete anything NOT received.
+                                                 2. Other staff can ONLY delete their own Draft POs.
+                                             */}
+                                             {((isCEO && po.status !== 'Received') || 
+                                               (user?.role === 'warehouse_manager' && po.status !== 'Received') ||
+                                               (po.status === 'Draft' && (po.createdBy === user?.name || po.requestedBy === user?.name))) && (
                                                 <button
                                                     onClick={(e) => handleDeletePO(e, po)}
                                                     className="p-1 text-red-400 hover:text-red-300"

@@ -139,6 +139,7 @@ export const PurchaseOrdersMobileList: React.FC<PurchaseOrdersMobileListProps> =
                                     </button>
                                 )}
                                 {((isCEO && po.status !== 'Received') ||
+                                    (user?.role === 'warehouse_manager' && po.status !== 'Received') ||
                                     (po.status === 'Draft' && (po.createdBy === user?.name || po.requestedBy === user?.name))) && (
                                     <button
                                         onClick={() => onEdit(po)}
@@ -150,6 +151,7 @@ export const PurchaseOrdersMobileList: React.FC<PurchaseOrdersMobileListProps> =
                                     </button>
                                 )}
                                 {((isCEO && po.status !== 'Received') ||
+                                    (user?.role === 'warehouse_manager' && po.status !== 'Received') ||
                                     (po.status === 'Draft' && (po.createdBy === user?.name || po.requestedBy === user?.name))) && (
                                     <button
                                         onClick={(e) => handleDeletePO(e, po)}

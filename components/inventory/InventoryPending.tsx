@@ -52,23 +52,24 @@ export const InventoryPending: React.FC<InventoryPendingProps> = ({
     const canApproveThisChange = (change: PendingInventoryChange): boolean => {
         if (!canApprove) return false;
         const role = userRole?.toLowerCase() || '';
-        // Super admin can approve everything
-        if (role === 'super_admin') return true;
+        // Super admin, admin, warehouse_manager, procurement_manager, store_manager can approve changes
+        if (['super_admin', 'admin', 'warehouse_manager', 'procurement_manager', 'store_manager', 'operations_manager', 'regional_manager'].includes(role)) return true;
         const requiredRole = change.approvalRole || (change as any).approval_role;
         // No specific role required → use the existing canApprove
         if (!requiredRole) return true;
         // Check if user's role matches the required approval role
         if (requiredRole === 'procurement_manager' && (role === 'procurement_manager' || role === 'procurement')) return true;
         if (requiredRole === 'warehouse_manager' && (role === 'warehouse_manager' || role === 'manager' || role === 'warehouse')) return true;
+        if (requiredRole === 'store_manager' && (role === 'store_manager' || role === 'manager')) return true;
         return false;
     };
 
     const getAwaitingLabel = (change: PendingInventoryChange): string => {
         const requiredRole = change.approvalRole || (change as any).approval_role;
-        if (change.changeType === 'edit' || change.changeType === 'create') return 'Awaiting CEO Approval';
         if (requiredRole === 'procurement_manager') return 'Awaiting Procurement Manager';
         if (requiredRole === 'warehouse_manager') return 'Awaiting Warehouse Manager';
-        return 'Awaiting CEO Approval';
+        if (requiredRole === 'store_manager') return 'Awaiting Store Manager';
+        return 'Awaiting Manager Approval';
     };
 
     // --- HELPER: Render Diff ---
