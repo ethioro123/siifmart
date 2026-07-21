@@ -308,6 +308,7 @@ export interface PurchaseOrder {
   createdBy?: string;
   approvedBy?: string;
   approvedAt?: string;
+  receivedBy?: string; // Who physically received the goods (may differ from approvedBy)
   paymentTerms?: 'Net 30' | 'Net 60' | 'Immediate' | 'Cash on Delivery' | string;
   incoterms?: 'EXW' | 'FOB' | 'CIF' | 'DDP' | string;
   destination?: string;

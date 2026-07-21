@@ -309,6 +309,15 @@ export const useReceivingSplit = (deps: UseReceivingSplitDeps) => {
                 setOrders(prev => prev.map(o => o.id === poId ? updatedPO : o));
                 setAllOrders(prev => prev.map(o => o.id === poId ? updatedPO : o));
             }
+
+            // Stamp who physically received the goods (distinct from PO approver)
+            if (actionUser?.name) {
+                try {
+                    await purchaseOrdersService.update(poId, { receivedBy: actionUser.name });
+                } catch (err) {
+                    logger.warn('useReceivingSplit', 'Could not stamp receivedBy on PO', { error: err instanceof Error ? err.message : JSON.stringify(err) });
+                }
+            }
         } catch (e: any) {
             logger.error('useReceivingSplit', 'caught error', e as Error);
             addNotification('alert', e.message || "Failed to split receive");

@@ -245,6 +245,7 @@ export const purchaseOrdersService = {
         if (updates.dockSlot !== undefined) { dbUpdates.dock_slot = updates.dockSlot; }
         if (updates.createdBy !== undefined) { dbUpdates.created_by = updates.createdBy; }
         if (updates.requestedBy !== undefined) { dbUpdates.requested_by = updates.requestedBy; }
+        if (updates.receivedBy !== undefined) { dbUpdates.received_by = updates.receivedBy; }
         if (updates.poNumber !== undefined) { dbUpdates.po_number = updates.poNumber; }
         if (updates.notes !== undefined && !dbUpdates.notes) { dbUpdates.notes = updates.notes; }
         if (updates.date !== undefined) { dbUpdates.order_date = updates.date; }

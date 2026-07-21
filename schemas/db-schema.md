@@ -184,6 +184,7 @@
 | `requested_by` | |
 | `created_by` | |
 | `priority` | |
+| `received_by` | Name of employee who physically received the goods |
 
 ---
 

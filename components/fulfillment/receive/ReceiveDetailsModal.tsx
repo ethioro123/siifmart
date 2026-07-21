@@ -65,7 +65,7 @@ export const ReceiveDetailsModal: React.FC<ReceiveDetailsModalProps> = ({
         title: selectedItem.supplierName || 'Unknown Supplier',
         status: selectedItem.status,
         date: selectedItem.updatedAt || selectedItem.createdAt,
-        user: resolveUser(selectedItem.approvedBy || selectedItem.createdBy),
+        user: resolveUser((selectedItem as any).receivedBy || selectedItem.createdBy),
         items: selectedItem.lineItems || []
     } : {
         type: 'JOB',
