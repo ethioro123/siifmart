@@ -143,7 +143,9 @@ export const ReceiveDetailsModal: React.FC<ReceiveDetailsModalProps> = ({
                             <User size={18} />
                         </div>
                         <div>
-                            <p className="text-[10px] text-stone-400 dark:text-stone-500 uppercase font-black tracking-widest leading-none mb-1.5">{t('warehouse.processedBy')}</p>
+                            <p className="text-[10px] text-stone-400 dark:text-stone-500 uppercase font-black tracking-widest leading-none mb-1.5">
+                                {isPO(selectedItem) && selectedItem.approvedBy ? 'Approved By' : t('warehouse.processedBy')}
+                            </p>
                             <p className="text-xs text-slate-900 dark:text-zinc-200 font-black uppercase break-words leading-tight">
                                 {data.user.name} {data.user.displayId && <span className="text-slate-400 dark:text-[#A9CBA2]/60 font-normal">({data.user.displayId})</span>}
                             </p>
