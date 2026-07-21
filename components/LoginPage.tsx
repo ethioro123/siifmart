@@ -6,36 +6,86 @@ import { logger } from '../utils/logger';
 
 type Mode = 'login' | 'forgot';
 
-const QUICK_ACCOUNTS = [
-  { name: 'Shukri Kamal', role: 'CEO (Super Admin)', email: 'siif-0001@siifmart.com', password: 'Oromo123' },
-  { name: 'Sara Tesfaye', role: 'Operations Mgr', email: 'siif-0002@siifmart.com', password: 'siif123' },
-  { name: 'Lensa Merga', role: 'Warehouse Mgr (Adama)', email: 'siif-0004@siifmart.com', password: 'siif123' },
-  { name: 'Kebede Alemayehu', role: 'Warehouse Mgr (Harar)', email: 'siif-0028@siifmart.com', password: 'siif123' },
-  { name: 'Kamal Idriss', role: 'Warehouse Mgr (Harar)', email: 'siif-0034@siifmart.com', password: 'siif123' },
-  { name: 'Abdi ahmed', role: 'Warehouse Mgr (Ambo)', email: 'siif-0030@siifmart.com', password: 'siif123' },
-  { name: 'Betelhem Bekele', role: 'Dispatcher (Harar)', email: 'siif-0005@siifmart.com', password: 'siif123' },
-  { name: 'Adam Ahmed', role: 'Receiver (Harar)', email: 'siif-0035@siifmart.com', password: 'siif123' },
-  { name: 'Abebe Yilma', role: 'Picker (Harar)', email: 'siif-0006@siifmart.com', password: 'siif123' },
-  { name: 'Helen Getachew', role: 'Picker (Adama)', email: 'siif-0003@siifmart.com', password: 'siif123' },
-  { name: 'Meron Yilma', role: 'Picker (Dire Dawa)', email: 'siif-0007@siifmart.com', password: 'siif123' },
-  { name: 'Cala kalifa', role: 'Picker (Ambo)', email: 'siif-0031@siifmart.com', password: 'siif123' },
-  { name: 'Firomsa Hasan', role: 'Packer (Harar)', email: 'siif-0033@siifmart.com', password: 'siif123' },
-  { name: 'Ibsa Sufiyan', role: 'Driver (Harar)', email: 'siif-0032@siifmart.com', password: 'siif123' },
-  { name: 'Mulugeta Tadesse', role: 'Driver (Adama)', email: 'siif-0023@siifmart.com', password: 'siif123' },
-  { name: 'Ahmed Hassan', role: 'Store Mgr (Adama)', email: 'siif-0015@siifmart.com', password: 'siif123' },
-  { name: 'Solomon Tesfaye', role: 'Store Mgr (Dire Dawa)', email: 'siif-0016@siifmart.com', password: 'siif123' },
-  { name: 'Hanna Girma', role: 'Store Mgr (Aratanya)', email: 'siif-0018@siifmart.com', password: 'siif123' },
-  { name: 'Abdi Rahman', role: 'Store Mgr (Awaday)', email: 'siif-0019@siifmart.com', password: 'siif123' },
-  { name: 'Sara Mohammed', role: 'Store Mgr (Bole)', email: 'siif-0020@siifmart.com', password: 'siif123' },
-  { name: 'Amina Ali', role: 'Store Mgr (Merkato)', email: 'siif-0036@siifmart.com', password: 'siif123' },
-  { name: 'Helen Kebede', role: 'Shift Lead (Bole)', email: 'siif-0010@siifmart.com', password: 'siif123' },
-  { name: 'Sara Bekele', role: 'Shift Lead (Aratanya)', email: 'siif-0011@siifmart.com', password: 'siif123' },
-  { name: 'Yonas Tadesse', role: 'Shift Lead (Awaday)', email: 'siif-0013@siifmart.com', password: 'siif123' },
-  { name: 'Tomas Tesfaye', role: 'Cashier (Bole)', email: 'siif-0009@siifmart.com', password: 'siif123' },
-  { name: 'Tomas Dinka', role: 'Sales (Awaday)', email: 'siif-0014@siifmart.com', password: 'siif123' },
-  { name: 'Hanna Mulugeta', role: 'Inventory Specialist', email: 'siif-0012@siifmart.com', password: 'siif123' },
-  { name: 'Rahel Tesfaye', role: 'Finance Manager', email: 'siif-0025@siifmart.com', password: 'siif123' },
-  { name: 'Tigist Alemayehu', role: 'HR Manager', email: 'siif-0024@siifmart.com', password: 'siif123' }
+const QUICK_ACCOUNTS_BY_SITE = [
+  {
+    siteName: 'Central Operations (HQ)',
+    accounts: [
+      { name: 'Shukri Kamal', role: 'CEO (Super Admin)', email: 'siif-0001@siifmart.com', password: 'Oromo123' },
+      { name: 'Sara Tesfaye', role: 'Operations Mgr', email: 'siif-0002@siifmart.com', password: 'siif123' },
+      { name: 'Tigist Alemayehu', role: 'HR Manager', email: 'siif-0024@siifmart.com', password: 'siif123' },
+      { name: 'Rahel Tesfaye', role: 'Finance Manager', email: 'siif-0025@siifmart.com', password: 'siif123' },
+      { name: 'Yohannes Bekele', role: 'Procurement Mgr', email: 'siif-0026@siifmart.com', password: 'siif123' },
+      { name: 'Dawit Haile', role: 'Auditor', email: 'siif-0027@siifmart.com', password: 'siif123' },
+      { name: 'Elias Kebede', role: 'IT Support', email: 'siif-0021@siifmart.com', password: 'siif123' }
+    ]
+  },
+  {
+    siteName: 'Harar Logistics Hub',
+    accounts: [
+      { name: 'Kebede Alemayehu', role: 'Warehouse Mgr', email: 'siif-0028@siifmart.com', password: 'siif123' },
+      { name: 'Kamal Idriss', role: 'Warehouse Mgr', email: 'siif-0034@siifmart.com', password: 'siif123' },
+      { name: 'Betelhem Bekele', role: 'Dispatcher', email: 'siif-0005@siifmart.com', password: 'siif123' },
+      { name: 'Adam Ahmed', role: 'Receiver', email: 'siif-0035@siifmart.com', password: 'siif123' },
+      { name: 'Abebe Yilma', role: 'Picker', email: 'siif-0006@siifmart.com', password: 'siif123' },
+      { name: 'Firomsa Hasan', role: 'Packer', email: 'siif-0033@siifmart.com', password: 'siif123' },
+      { name: 'Ibsa Sufiyan', role: 'Driver', email: 'siif-0032@siifmart.com', password: 'siif123' }
+    ]
+  },
+  {
+    siteName: 'Adama Distribution Center',
+    accounts: [
+      { name: 'Lensa Merga', role: 'Warehouse Mgr', email: 'siif-0004@siifmart.com', password: 'siif123' },
+      { name: 'Ahmed Hassan', role: 'Store Mgr', email: 'siif-0015@siifmart.com', password: 'siif123' },
+      { name: 'Helen Getachew', role: 'Picker', email: 'siif-0003@siifmart.com', password: 'siif123' },
+      { name: 'Hanna Mulugeta', role: 'Inventory Specialist', email: 'siif-0012@siifmart.com', password: 'siif123' },
+      { name: 'Mulugeta Tadesse', role: 'Driver', email: 'siif-0023@siifmart.com', password: 'siif123' }
+    ]
+  },
+  {
+    siteName: 'Dire Dawa Storage Facility',
+    accounts: [
+      { name: 'Solomon Tesfaye', role: 'Store Mgr', email: 'siif-0016@siifmart.com', password: 'siif123' },
+      { name: 'Meron Yilma', role: 'Picker', email: 'siif-0007@siifmart.com', password: 'siif123' },
+      { name: 'Betelhem Yilma', role: 'Picker', email: 'siif-0008@siifmart.com', password: 'siif123' }
+    ]
+  },
+  {
+    siteName: 'Ambo Logistics',
+    accounts: [
+      { name: 'Abdi ahmed', role: 'Warehouse Mgr', email: 'siif-0030@siifmart.com', password: 'siif123' },
+      { name: 'Cala kalifa', role: 'Picker', email: 'siif-0031@siifmart.com', password: 'siif123' }
+    ]
+  },
+  {
+    siteName: 'Bole Supermarket',
+    accounts: [
+      { name: 'Sara Mohammed', role: 'Store Mgr', email: 'siif-0020@siifmart.com', password: 'siif123' },
+      { name: 'Helen Kebede', role: 'Shift Lead', email: 'siif-0010@siifmart.com', password: 'siif123' },
+      { name: 'Tomas Tesfaye', role: 'Cashier / POS', email: 'siif-0009@siifmart.com', password: 'siif123' }
+    ]
+  },
+  {
+    siteName: 'Aratanya Market',
+    accounts: [
+      { name: 'Hanna Girma', role: 'Store Mgr', email: 'siif-0018@siifmart.com', password: 'siif123' },
+      { name: 'Sara Bekele', role: 'Shift Lead', email: 'siif-0011@siifmart.com', password: 'siif123' },
+      { name: 'Selamawit Girma', role: 'CS Manager', email: 'siif-0022@siifmart.com', password: 'siif123' }
+    ]
+  },
+  {
+    siteName: 'Awaday Grocery',
+    accounts: [
+      { name: 'Abdi Rahman', role: 'Store Mgr', email: 'siif-0019@siifmart.com', password: 'siif123' },
+      { name: 'Yonas Tadesse', role: 'Shift Lead', email: 'siif-0013@siifmart.com', password: 'siif123' },
+      { name: 'Tomas Dinka', role: 'Sales Associate', email: 'siif-0014@siifmart.com', password: 'siif123' }
+    ]
+  },
+  {
+    siteName: 'Merkato Retail Store',
+    accounts: [
+      { name: 'Amina Ali', role: 'Store Mgr', email: 'siif-0036@siifmart.com', password: 'siif123' }
+    ]
+  }
 ];
 
 export default function LoginPage() {
@@ -261,17 +311,26 @@ export default function LoginPage() {
             </button>
             
             {showQuickLogin && (
-              <div className="grid grid-cols-2 gap-2 mt-4 max-h-56 overflow-y-auto custom-scrollbar pr-1">
-                {QUICK_ACCOUNTS.map((acc) => (
-                  <button
-                    key={acc.email}
-                    type="button"
-                    onClick={() => handleQuickLogin(acc.email, acc.password)}
-                    className="p-2 text-left bg-stone-50/70 dark:bg-black/25 border border-[#E2DCCE]/50 dark:border-emerald-950/20 hover:border-[#2C5E3B] dark:hover:border-[#A9CBA2] rounded-xl transition-all duration-300 flex flex-col justify-between cursor-pointer"
-                  >
-                    <span className="text-[10px] font-black text-[#1E3F27] dark:text-[#EAE5D9] truncate w-full">{acc.name}</span>
-                    <span className="text-[8px] font-bold text-stone-500 dark:text-stone-400 uppercase mt-0.5">{acc.role}</span>
-                  </button>
+              <div className="space-y-4 mt-4 max-h-72 overflow-y-auto custom-scrollbar pr-1">
+                {QUICK_ACCOUNTS_BY_SITE.map((group) => (
+                  <div key={group.siteName}>
+                    <div className="text-[9px] font-black text-[#2C5E3B] dark:text-[#A9CBA2] uppercase tracking-wider mb-1.5 border-b border-[#E2DCCE]/40 dark:border-white/10 pb-0.5">
+                      {group.siteName}
+                    </div>
+                    <div className="grid grid-cols-2 gap-1.5">
+                      {group.accounts.map((acc) => (
+                        <button
+                          key={acc.email}
+                          type="button"
+                          onClick={() => handleQuickLogin(acc.email, acc.password)}
+                          className="p-2 text-left bg-stone-50/70 dark:bg-black/25 border border-[#E2DCCE]/50 dark:border-emerald-950/20 hover:border-[#2C5E3B] dark:hover:border-[#A9CBA2] rounded-xl transition-all duration-300 flex flex-col justify-between cursor-pointer"
+                        >
+                          <span className="text-[10px] font-black text-[#1E3F27] dark:text-[#EAE5D9] truncate w-full">{acc.name}</span>
+                          <span className="text-[8px] font-bold text-stone-500 dark:text-stone-400 uppercase mt-0.5">{acc.role}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 ))}
               </div>
             )}
