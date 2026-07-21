@@ -49,7 +49,12 @@ BEGIN
   END IF;
 
   -- C. GENERAL UPDATE / OPERATIONAL ACCESS CHECK
-  -- Requires manager status OR active job assignment
+  -- Receivers are always performing valid operational work (stock intake), bypass job check
+  IF emp_role = 'receiver' THEN
+    RETURN NEW;
+  END IF;
+
+  -- Requires manager status OR active job assignment for all other roles
   IF NOT public.is_manager() THEN
       SELECT EXISTS (
           SELECT 1
