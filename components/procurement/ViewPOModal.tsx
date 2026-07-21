@@ -10,7 +10,8 @@ import { formatCompactNumber } from '../../utils/formatting';
 import { formatDateTime } from '../../utils/formatting';
 import { formatPONumber } from '../../utils/jobIdFormatter';
 import { formatPOItemDescription } from './utils';
-import { POPrintView } from './POPrintView';
+import { POPrintView, generatePOHTML } from './POPrintView';
+import { printHtmlContent } from '../../utils/printHelper';
 import { logger } from '../../utils/logger';
 
 interface ViewPOModalProps {
@@ -101,7 +102,9 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
     };
 
     const handlePrintPO = () => {
-        window.print();
+        if (!po) return;
+        const html = generatePOHTML(po, sites, user, allProducts);
+        printHtmlContent(html);
     };
 
     return (
