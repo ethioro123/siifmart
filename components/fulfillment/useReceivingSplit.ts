@@ -205,11 +205,15 @@ export const useReceivingSplit = (deps: UseReceivingSplitDeps) => {
                             if (changed) {
                                 updates.barcodes = currentBarcodes;
                             }
-                            const updated = await productsService.update(existingProduct.id, updates);
-                            if (updated) {
-                                // Immediately update local states to prevent state desync
-                                setProducts?.(prev => prev.map(p => p.id === existingProduct.id ? updated : p));
-                                setAllProducts?.(prev => prev.map(p => p.id === existingProduct.id ? updated : p));
+                            try {
+                                const updated = await productsService.update(existingProduct.id, updates);
+                                if (updated) {
+                                    // Immediately update local states to prevent state desync
+                                    setProducts?.(prev => prev.map(p => p.id === existingProduct.id ? updated : p));
+                                    setAllProducts?.(prev => prev.map(p => p.id === existingProduct.id ? updated : p));
+                                }
+                            } catch (err) {
+                                logger.warn('useReceivingSplit', 'Could not sync product details in DB during receive split', { error: String(err) });
                             }
                         }
                     } else {
