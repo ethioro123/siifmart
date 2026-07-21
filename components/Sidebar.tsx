@@ -63,7 +63,7 @@ export default function Sidebar() {
       { to: "/inventory", icon: Package, label: "Inventory", section: "inventory", roles: ['super_admin', 'store_manager', 'assistant_manager', 'shift_lead', 'warehouse_manager', 'dispatcher', 'dispatch_manager', 'auditor', 'procurement_manager', 'inventory_specialist', 'store_supervisor', 'pos'] },
 
       // FULFILLMENT (WMS) - Warehouse staff only
-      { to: "/wms-ops", icon: ClipboardList, label: "Fulfillment", section: "warehouse", roles: ['warehouse_manager', 'dispatch_manager', 'dispatcher', 'picker', 'driver', 'inventory_specialist'] },
+      { to: "/wms-ops", icon: ClipboardList, label: "Fulfillment", section: "warehouse", roles: ['super_admin', 'admin', 'warehouse_manager', 'operations_manager', 'dispatch_manager', 'dispatcher', 'picker', 'packer', 'receiver', 'driver', 'inventory_specialist'] },
 
       // PROCUREMENT - Warehouse and procurement only
       { to: "/procurement", icon: Truck, label: "Procurement", section: "procurement", roles: ['super_admin', 'warehouse_manager', 'dispatcher', 'procurement_manager', 'finance_manager'] },

@@ -95,7 +95,7 @@ export const AssignAvailableWorkers: React.FC<AssignAvailableWorkersProps> = ({
                             <>
                                 <div className="fixed inset-0 z-[50]" onClick={() => setIsEmployeeRoleDropdownOpen(false)} />
                                 <div className="absolute top-full right-0 mt-2 w-32 glass-panel p-2 shadow-2xl z-[51] animate-in fade-in slide-in-from-top-2 duration-200">
-                                    {['ALL', 'picker', 'packer', 'dispatcher', 'driver', 'receiver', 'inventory_specialist'].map(role => (
+                                    {['ALL', 'picker', 'packer', 'dispatcher', 'driver', 'receiver', 'warehouse_manager', 'inventory_specialist'].map(role => (
                                         <button
                                             key={role}
                                             onClick={() => {
@@ -130,8 +130,8 @@ export const AssignAvailableWorkers: React.FC<AssignAvailableWorkersProps> = ({
                         if (!job) return false;
                         const role = employee.role?.toLowerCase();
 
-                        // Executive / Admin roles can do ANY job
-                        if (['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager'].includes(role)) return true;
+                        // Executive / Admin / Warehouse Manager roles can do ANY job
+                        if (['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager'].includes(role)) return true;
 
                         if (job.type === 'PICK' && (role === 'picker' || role === 'dispatcher' || role === 'warehouse_manager')) return true;
                         if (job.type === 'PACK' && (role === 'packer' || role === 'picker' || role === 'dispatcher' || role === 'warehouse_manager')) return true;

@@ -320,7 +320,7 @@ export const DocksOutboundView: React.FC<DocksOutboundViewProps> = ({
                                                                 >
                                                                     <option value="">Select Driver...</option>
                                                                     {employees
-                                                                        .filter(e => (e.role === 'driver' || e.role === 'dispatcher') && (e as any).status === 'Active')
+                                                                        .filter(e => ['driver', 'dispatcher', 'warehouse_manager'].includes(e.role?.toLowerCase() || '') && (e as any).status === 'Active')
                                                                         .map(e => (
                                                                             <option key={e.id} value={e.id}>{e.name} ({e.role.toUpperCase()})</option>
                                                                         ))}
