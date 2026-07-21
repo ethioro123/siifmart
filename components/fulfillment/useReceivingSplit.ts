@@ -213,7 +213,7 @@ export const useReceivingSplit = (deps: UseReceivingSplitDeps) => {
                                     setAllProducts?.(prev => prev.map(p => p.id === existingProduct.id ? updated : p));
                                 }
                             } catch (err) {
-                                logger.warn('useReceivingSplit', 'Could not sync product details in DB during receive split', { error: String(err) });
+                                logger.warn('useReceivingSplit', 'Could not sync product details in DB during receive split', { error: err instanceof Error ? err.message : JSON.stringify(err) });
                             }
                         }
                     } else {
