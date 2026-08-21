@@ -42,7 +42,9 @@ export const ZoneOccupancyCard: React.FC<ZoneOccupancyCardProps> = ({
                                 <div className="w-full bg-[#FAF8F5] dark:bg-black/35 border border-[#E2DCCE]/40 dark:border-white/[0.04] rounded-full h-2 overflow-hidden p-0.5">
                                     <div
                                         className={`h-full rounded-full bg-gradient-to-r ${colorClass} transition-all duration-1000 ease-out shadow-[0_0_10px_rgba(44,94,59,0.15)]`}
-                                        style={{ width: `${percent}%` }}
+                                        ref={(el) => {
+                                            if (el) el.style.width = `${percent}%`;
+                                        }}
                                     />
                                 </div>
                             </div>

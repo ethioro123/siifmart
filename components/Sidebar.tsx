@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, ShoppingCart, Package, Truck, Users,
   Briefcase, Map, Settings, X, FileText, ClipboardList, Tags, Eye,
@@ -40,14 +40,28 @@ const SidebarItem: React.FC<SidebarItemProps> = ({ to, icon: Icon, label, onClic
 
 export default function Sidebar() {
   const { user, isSidebarOpen, toggleSidebar } = useStore();
+  const { activeSite, sites, setActiveSite } = useData();
+  const navigate = useNavigate();
 
   if (!user) return null;
 
-  // Get activeSite - it might be null during initial load
-  const { activeSite } = useData();
-
   // Get available sections based on role AND site type
   const availableSections = getAvailableSections(user.role, activeSite?.type);
+
+  // CEO clicking "Central Operations": switch to the Administration site (SITE-0001)
+  const handleAdminClick = () => {
+    const adminSite = sites.find(s =>
+      s.code === 'SITE-0001' ||
+      s.name === 'Central Operations' ||
+      ['Administrative', 'Administration', 'HQ', 'Headquarters', 'Head Office'].includes(s.type || '')
+    );
+    if (adminSite) {
+      setActiveSite(adminSite.id);
+    }
+    navigate('/admin');
+    toggleSidebar();
+  };
+
 
   // --- ADVANCED NAVIGATION LOGIC ---
   // Map each nav item to its required permission section
@@ -71,7 +85,7 @@ export default function Sidebar() {
       // ROADMAP
       { to: "/roadmap", icon: Map, label: "Roadmap", section: "dashboard", roles: ['super_admin', 'admin', 'store_manager', 'assistant_manager', 'shift_lead', 'warehouse_manager', 'dispatcher', 'dispatch_manager', 'pos', 'hr', 'auditor', 'finance_manager', 'procurement_manager', 'store_supervisor', 'inventory_specialist', 'cs_manager', 'it_support'] },
 
-      // CENTRAL OPERATIONS - CEO Only
+      // CENTRAL OPERATIONS - CEO Only (handled separately via handleAdminClick)
       { to: "/admin", icon: Activity, label: "Central Operations", section: "dashboard", roles: ['super_admin'] },
 
       // POS
@@ -99,47 +113,35 @@ export default function Sidebar() {
       { to: "/settings", icon: Settings, label: "Settings", section: "settings", roles: ['super_admin', 'admin', 'hr', 'it_support'] },
     ];
 
-    // DETERMINE EFFECTIVE ROLE FOR CONTEXTUAL NAVIGATION
-    // If a Global Admin is viewing a specific Site, downgrade their view to matching local role
-    let effectiveRole = userRole;
-    if (userRole === 'super_admin' && activeSite) {
-      if (['Store', 'Dark Store'].includes(activeSite.type)) {
-        effectiveRole = 'store_manager';
-      } else if (['Warehouse', 'Distribution Center'].includes(activeSite.type)) {
-        effectiveRole = 'warehouse_manager';
-      }
-    }
-
-    // Filter by role AND available sections (site-type filtering)
+    // Filter by role AND site-type context
     let filteredItems = allItems.filter(item => {
-      const hasRole = item.roles.includes(effectiveRole);
+      const hasRole = item.roles.includes(userRole) || userRole === 'super_admin';
 
-      // Check if section is available for this site type
-      let hasSection = availableSections.includes('*') || availableSections.includes(item.section);
+      const siteType = activeSite?.type || '';
+      const isStore = ['Store', 'Dark Store', 'Retail', 'POS'].includes(siteType);
+      const isWarehouse = ['Warehouse', 'Distribution Center', 'WMS', 'Fulfillment Center'].includes(siteType);
+      const isHQ = !isStore && !isWarehouse;
 
-      // --- STRICT VISUAL FILTERING BASED ON ACTIVE SITE ---
-      if (activeSite) {
-        const isStore = activeSite.type === 'Store' || activeSite.type === 'Dark Store';
-        const isWarehouse = activeSite.type === 'Warehouse' || activeSite.type === 'Distribution Center';
+      let isAllowedForSite = true;
 
-        if (isStore) {
-          if (['warehouse', 'procurement'].includes(item.section)) {
-            hasSection = false;
-          }
+      if (isWarehouse) {
+        // In WMS site: strictly WMS & Inventory menu options ONLY. Hide Administration HQ & POS.
+        if (item.to === '/admin' || ['pos', 'pricing', 'finance', 'settings', 'customers'].includes(item.section)) {
+          isAllowedForSite = false;
         }
-
-        if (isWarehouse) {
-          if (['pos', 'pricing', 'customers'].includes(item.section)) {
-            hasSection = false;
-          }
+      } else if (isStore) {
+        // In POS store site: strictly POS, Sales & Customers menu options ONLY. Hide Administration HQ & WMS.
+        if (item.to === '/admin' || ['warehouse', 'procurement', 'finance', 'pricing', 'settings'].includes(item.section)) {
+          isAllowedForSite = false;
         }
-      } else {
-        if (['pos', 'warehouse'].includes(item.section)) {
-          hasSection = false;
+      } else if (isHQ) {
+        // In Administration HQ site (e.g. SITE-0001): SHOW Central Operations & HQ tools; HIDE WMS-only & POS-only site ops.
+        if (['warehouse', 'pos'].includes(item.section)) {
+          isAllowedForSite = false;
         }
       }
 
-      return hasRole && hasSection;
+      return hasRole && isAllowedForSite;
     });
 
     // --- NATIVE APP RESTRICTIONS ---
@@ -177,15 +179,32 @@ export default function Sidebar() {
 
         <nav className="flex-1 px-4 space-y-1 overflow-y-auto custom-scrollbar py-4">
           <p className="px-4 text-xs font-bold text-stone-400 dark:text-gray-500 uppercase tracking-wider mb-3">Menu</p>
-          {navItems.map(item => (
-            <SidebarItem
-              key={item.to}
-              to={item.to}
-              icon={item.icon}
-              label={item.label}
-              onClick={toggleSidebar}
-            />
-          ))}
+          {navItems.map(item => {
+            const Icon = item.icon;
+            // "Central Operations" for CEO: clear activeSite before navigating
+            if (item.to === '/admin' && user.role === 'super_admin') {
+              return (
+                <button
+                  key={item.to}
+                  type="button"
+                  onClick={handleAdminClick}
+                  className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group text-stone-500 dark:text-gray-400 hover:bg-stone-100 dark:hover:bg-white/5 hover:text-[#2C5E3B] dark:hover:text-[#A9CBA2]"
+                >
+                  <Icon className="w-5 h-5" />
+                  <span className="font-medium tracking-wide">Central Operations</span>
+                </button>
+              );
+            }
+            return (
+              <SidebarItem
+                key={item.to}
+                to={item.to}
+                icon={item.icon}
+                label={item.label}
+                onClick={toggleSidebar}
+              />
+            );
+          })}
         </nav>
 
       </aside >

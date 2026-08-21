@@ -84,7 +84,17 @@ export const PartialDeliveryModal: React.FC<PartialDeliveryModalProps> = ({
         setLines(
             (job.lineItems as any[]).map((item: any, idx: number) => {
                 const templateProduct = products.find(p => p.sku === item.sku || p.id === item.productId);
-                const qty = item.receivedQty ?? item.pickedQty ?? item.expectedQty ?? item.quantity ?? 0;
+                const qty = (
+                    (typeof item.dispatchedQty === 'number' && item.dispatchedQty > 0 ? item.dispatchedQty : null) ??
+                    (typeof item.shippedQty === 'number' && item.shippedQty > 0 ? item.shippedQty : null) ??
+                    (typeof item.packedQty === 'number' && item.packedQty > 0 ? item.packedQty : null) ??
+                    (typeof item.pickedQty === 'number' && item.pickedQty > 0 ? item.pickedQty : null) ??
+                    (typeof item.expectedQty === 'number' && item.expectedQty > 0 ? item.expectedQty : null) ??
+                    (typeof item.quantity === 'number' && item.quantity > 0 ? item.quantity : null) ??
+                    (typeof (item as any).qty === 'number' && (item as any).qty > 0 ? (item as any).qty : null) ??
+                    (typeof item.receivedQty === 'number' && item.receivedQty > 0 ? item.receivedQty : null) ??
+                    0
+                );
                 return {
                     index: idx,
                     name: item.name || templateProduct?.name || 'Unknown',
@@ -125,16 +135,18 @@ export const PartialDeliveryModal: React.FC<PartialDeliveryModalProps> = ({
                 ? `[PARTIAL DELIVERY by ${user?.name || 'Driver'} at ${new Date().toLocaleString()}] Reason: ${REJECT_REASONS.find(r => r.id === rejectReason)?.label || rejectReason}. ${notes}`
                 : `[DELIVERY by ${user?.name || 'Driver'} at ${new Date().toLocaleString()}] ${notes}`;
 
-            const finalStatus = 'In-Progress';
+            const finalStatus = 'Completed';
             const finalTransferStatus = hasUndelivered ? 'Partially Delivered' : 'Delivered';
 
             // Build updated line items
             const updatedLineItems = (job.lineItems as any[]).map((item: any, idx: number) => {
                 const line = lines[idx];
-                const deliveredQty = parseInt(line.delivered) ?? line.dispatched;
+                const parsed = parseInt(line.delivered);
+                const deliveredQty = isNaN(parsed) ? line.dispatched : parsed;
                 return {
                     ...item,
                     deliveredQty,
+                    receivedQty: deliveredQty,
                     undeliveredQty: line.dispatched - deliveredQty,
                 };
             });

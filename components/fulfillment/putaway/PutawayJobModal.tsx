@@ -237,7 +237,16 @@ export const PutawayJobModal: React.FC<PutawayJobModalProps> = ({
                                                 <div className="relative group/loc">
                                                     <div className="absolute inset-0 bg-[#2C5E3B]/10 rounded-2xl blur-lg transition-all opacity-0 group-hover/loc:opacity-100" />
                                                     <div className="relative">
-                                                        {formatBeautifulLocation(product?.location, 'woody')}
+                                                        {item.suggestedLocation ? (
+                                                            <div className="flex flex-col items-start xl:items-end gap-0.5">
+                                                                <span className="text-[8px] text-emerald-500 font-black uppercase tracking-widest bg-emerald-500/10 px-1.5 py-0.5 rounded flex items-center gap-1">
+                                                                    <Zap size={8} /> Smart Suggestion
+                                                                </span>
+                                                                {formatBeautifulLocation(item.suggestedLocation, 'purple')}
+                                                            </div>
+                                                        ) : (
+                                                            formatBeautifulLocation(product?.location, 'woody')
+                                                        )}
                                                     </div>
                                                 </div>
                                             </div>

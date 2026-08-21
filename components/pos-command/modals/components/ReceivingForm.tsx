@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import { Clock, Scan, CheckCircle } from 'lucide-react';
 import { usePOSCommand } from '../../POSCommandContext';
 import { useFulfillmentData } from '../../../fulfillment/FulfillmentDataProvider';
@@ -22,10 +22,46 @@ export const ReceivingForm: React.FC = () => {
         handleScanTransferItem
     } = usePOSCommand();
 
+    const inputRef = useRef<HTMLInputElement>(null);
+    const lastKeyTimeRef = useRef<number>(0);
+    const scanBufferRef = useRef<string>('');
+
+    useEffect(() => {
+        inputRef.current?.focus();
+    }, [selectedTransferForReceiving]);
+
     if (!selectedTransferForReceiving) return null;
 
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const scannedCode = (scanBufferRef.current || transferScanBarcode).trim();
+            if (scannedCode) {
+                handleScanTransferItem(scannedCode);
+            }
+            scanBufferRef.current = '';
+            setTransferScanBarcode('');
+            return;
+        }
+
+        const now = performance.now();
+        const timeDiff = lastKeyTimeRef.current ? now - lastKeyTimeRef.current : 0;
+        lastKeyTimeRef.current = now;
+
+        if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
+            // Hardware scanners output characters rapidly (< 75ms apart)
+            if (timeDiff > 75 && scanBufferRef.current.length > 0) {
+                e.preventDefault();
+                scanBufferRef.current = '';
+                setTransferScanBarcode('');
+                return;
+            }
+            scanBufferRef.current += e.key;
+        }
+    };
+
     return (
-        <div className="space-y-4 animate-in slide-in-from-right-4 duration-300">
+        <div className="space-y-4 animate-in fade-in duration-300">
             {/* Back button and title */}
             <div className="flex items-center gap-3 border-b border-[#E2DCCE]/60 dark:border-white/10 pb-4">
                 <button
@@ -53,30 +89,29 @@ export const ReceivingForm: React.FC = () => {
                 </div>
             </div>
 
-            {/* Quick Scan Input */}
+            {/* Quick Hardware Scanner Only Input */}
             <div className="bg-[#FAF8F5] dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-2xl p-4">
-                <label className="text-xs font-black text-[#4D6E56] dark:text-[#7A9E83] uppercase block mb-2 tracking-wider flex items-center gap-2">
-                    <Scan size={14} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
-                    {t('posCommand.scanNextItem')}
-                </label>
-                <div className="flex gap-2 relative">
+                <div className="flex items-center justify-between mb-2">
+                    <label className="text-xs font-black text-[#4D6E56] dark:text-[#7A9E83] uppercase tracking-wider flex items-center gap-2">
+                        <Scan size={14} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
+                        {t('posCommand.scanNextItem')}
+                    </label>
+                    <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-[#A9CBA2] border border-emerald-500/20 text-[9px] font-bold uppercase tracking-wider">
+                        Hardware Scanner Active
+                    </span>
+                </div>
+                <div className="relative">
                     <input
-                        autoFocus
+                        ref={inputRef}
                         type="text"
                         value={transferScanBarcode}
+                        onPaste={(e) => e.preventDefault()}
+                        onKeyDown={handleKeyDown}
                         onChange={(e) => setTransferScanBarcode(e.target.value)}
-                        onKeyDown={(e) => {
-                            if (e.key === 'Enter') handleScanTransferItem(transferScanBarcode);
-                        }}
-                        placeholder={t('posCommand.scanBarcodePlaceholder')}
+                        onBlur={() => setTimeout(() => inputRef.current?.focus(), 150)}
+                        placeholder="Scan barcode with hardware scanner (Manual typing & paste disabled)..."
                         className="w-full bg-white dark:bg-black/40 border border-[#E2DCCE] dark:border-white/10 rounded-xl px-4 py-3 text-[#1E3F27] dark:text-white font-mono outline-none transition-all placeholder:text-[#4D6E56]/40 dark:placeholder:text-gray-600 focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:ring-1 focus:ring-[#2C5E3B] dark:focus:ring-[#A9CBA2]"
                     />
-                    <button
-                        onClick={() => handleScanTransferItem(transferScanBarcode)}
-                        className="px-6 py-3 bg-[#224429] dark:bg-[#2C5E3B] hover:bg-[#1B3520] dark:hover:bg-[#3a7a4d] text-white font-bold rounded-xl transition-all active:scale-95 border border-transparent shadow-sm"
-                    >
-                        {t('common.add')}
-                    </button>
                 </div>
             </div>
 

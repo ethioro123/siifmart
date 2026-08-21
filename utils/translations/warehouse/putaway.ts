@@ -19,6 +19,7 @@ export const putaway: TranslationBlock = {
     scanJobIdOrSku: { en: 'Scan Job ID or SKU...', am: 'የስራ መታወቂያ ወይም SKU ስካን...', or: 'Eenyummaa Hojii yookaan SKU Iskaani...' },
     queueEmpty: { en: 'Storage Queue Empty', am: 'የማከማቻ ወረፋ ባዶ', or: 'Tarree Kuusaa Duwwaa' },
     progress: { en: 'Progress', am: 'ሂደት', or: 'Adeemsa' },
+    putawayProgress: { en: 'Putaway Progress', am: 'የማስቀመጥ ሂደት', or: 'Adeemsa Kaawwachuu' },
     assignUser: { en: 'Assign User', am: 'ተጠቃሚ መድብ', or: 'Fayyadamaa Ramadi' },
     noPendingPutawayJobs: { en: 'No pending putaway jobs matching current filters.', am: 'ምንም የማስቀመጫ ስራዎች የሉም።', or: 'Hojiiwwan kaawwachuu eegaa jiran hin jiran.' },
     startPutaway: { en: 'Start Putaway', am: 'ማስቀመጥ ጀምር', or: 'Kaawwachuu Jalqabi' },

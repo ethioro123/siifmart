@@ -223,50 +223,81 @@ export const FulfillmentDataProvider = ({ children }: { children: ReactNode }) =
             return enhancedJob;
         });
     }, [jobs, sales, orders]); // Simplified for now
-
-
     // --- REALTIME SUBSCRIPTIONS ---
     useEffect(() => {
         if (!activeSiteId) return;
 
         logger.debug('FulfillmentDataProvider', `📡 [Fulfillment] Subscribing to real-time updates for site: ${activeSiteId}`);
 
+        /**
+         * Map raw Supabase snake_case job payload → camelCase WMSJob
+         * Supabase postgres_changes sends the full row, but large JSONB columns
+         * (like line_items) may be truncated when the payload exceeds 1 MB.
+         * We detect this and fall back to a targeted single-row re-fetch.
+         */
+        const mapJobPayload = (payload: any) => ({
+            ...payload,
+            siteId: payload.site_id,
+            items: payload.items_count,
+            assignedTo: payload.assigned_to,
+            orderRef: payload.order_ref,
+            lineItems: payload.line_items || [],
+            jobNumber: payload.job_number,
+            sourceSiteId: payload.source_site_id,
+            destSiteId: payload.dest_site_id,
+            transferStatus: payload.transfer_status,
+            requestedBy: payload.requested_by,
+            approvedBy: payload.approved_by,
+            shippedAt: payload.shipped_at,
+            deliveredAt: payload.delivered_at,
+            receivedAt: payload.received_at,
+            receivedBy: payload.received_by,
+            trackingNumber: payload.tracking_number,
+            createdAt: payload.created_at,
+            updatedAt: payload.updated_at,
+            deliveryMethod: payload.delivery_method,
+            hasDiscrepancy: payload.has_discrepancy,
+            discrepancyDetails: payload.discrepancy_details,
+            completedBy: payload.completed_by,
+            completedAt: payload.completed_at,
+            externalCarrierName: payload.external_carrier_name,
+            assignedBy: payload.assigned_by,
+            notes: payload.notes
+        });
+
         const subscriptions = realtimeService.subscribeToSite(activeSiteId, {
             onWMSJobChange: (event, payload) => {
-                // Map raw DB payload (snake_case) to camelCase domain model
-                // Without this mapping, realtime payloads create "ghost" jobs with undefined fields
-                const mapped = {
-                    ...payload,
-                    siteId: payload.site_id,
-                    items: payload.items_count,
-                    assignedTo: payload.assigned_to,
-                    orderRef: payload.order_ref,
-                    lineItems: payload.line_items || [],
-                    jobNumber: payload.job_number,
-                    sourceSiteId: payload.source_site_id,
-                    destSiteId: payload.dest_site_id,
-                    transferStatus: payload.transfer_status,
-                    requestedBy: payload.requested_by,
-                    approvedBy: payload.approved_by,
-                    shippedAt: payload.shipped_at,
-                    deliveredAt: payload.delivered_at,
-                    receivedAt: payload.received_at,
-                    receivedBy: payload.received_by,
-                    trackingNumber: payload.tracking_number,
-                    createdAt: payload.created_at,
-                    updatedAt: payload.updated_at,
-                    deliveryMethod: payload.delivery_method,
-                    hasDiscrepancy: payload.has_discrepancy,
-                    discrepancyDetails: payload.discrepancy_details,
-                    completedBy: payload.completed_by,
-                    completedAt: payload.completed_at,
-                    externalCarrierName: payload.external_carrier_name,
-                    assignedBy: payload.assigned_by,
-                    notes: payload.notes
-                };
-                if (event === 'INSERT') setJobs(prev => prev.find(j => j.id === mapped.id) ? prev : [mapped, ...prev]);
-                else if (event === 'UPDATE') setJobs(prev => prev.map(j => j.id === mapped.id ? mapped : j));
-                else if (event === 'DELETE') setJobs(prev => prev.filter(j => j.id !== (payload.old?.id || payload.id)));
+                if (event === 'INSERT') {
+                    const mapped = mapJobPayload(payload);
+                    setJobs(prev => prev.find(j => j.id === mapped.id) ? prev : [mapped, ...prev]);
+                }
+                else if (event === 'UPDATE') {
+                    const mapped = mapJobPayload(payload);
+                    // Supabase may truncate large JSONB columns (line_items).
+                    // If line_items came back null/empty but the job already exists locally,
+                    // do a targeted single-row re-fetch to get the full data.
+                    const hasLineItemsInPayload = Array.isArray(payload.line_items) && payload.line_items.length > 0;
+                    setJobs(prev => {
+                        const existing = prev.find(j => j.id === mapped.id);
+                        if (!hasLineItemsInPayload && existing && (existing.lineItems || []).length > 0) {
+                            // Payload was truncated — fetch full job and patch it in
+                            wmsJobsService.getById(mapped.id).then((freshJob: WMSJob | null) => {
+                                if (freshJob) {
+                                    setJobs(curr => curr.map(j => j.id === freshJob.id ? freshJob : j));
+                                }
+                            }).catch(() => {
+                                // Fallback: use the mapped partial payload (top-level fields are correct)
+                                setJobs(curr => curr.map(j => j.id === mapped.id ? { ...j, ...mapped } : j));
+                            });
+                            // Optimistically merge top-level fields while the fetch completes
+                            return prev.map(j => j.id === mapped.id ? { ...j, ...mapped } : j);
+                        }
+                        return prev.map(j => j.id === mapped.id ? mapped : j);
+                    });
+                }
+                else if (event === 'DELETE') {
+                    setJobs(prev => prev.filter(j => j.id !== (payload.old?.id || payload.id)));
+                }
             },
             onJobAssignmentChange: (event, payload) => {
                 if (event === 'INSERT') setJobAssignments(prev => [payload, ...prev]);
@@ -289,15 +320,9 @@ export const FulfillmentDataProvider = ({ children }: { children: ReactNode }) =
                     updatedAt: data.updated_at,
                     deliveryMethod: data.delivery_method
                 });
-                
-                if (event === 'INSERT') {
-                    const mapped = mapRealtimeTransfer(payload);
-                    setTransfers(prev => [mapped, ...prev]);
-                }
-                else if (event === 'UPDATE') {
-                    const mapped = mapRealtimeTransfer(payload);
-                    setTransfers(prev => prev.map(t => t.id === payload.id ? mapped : t));
-                }
+
+                if (event === 'INSERT') setTransfers(prev => [mapRealtimeTransfer(payload), ...prev]);
+                else if (event === 'UPDATE') setTransfers(prev => prev.map(t => t.id === payload.id ? mapRealtimeTransfer(payload) : t));
                 else if (event === 'DELETE') setTransfers(prev => prev.filter(t => t.id !== payload.id));
             }
         });

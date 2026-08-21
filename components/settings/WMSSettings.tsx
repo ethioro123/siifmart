@@ -13,6 +13,7 @@ import { formatDateTime } from '../../utils/formatting';
 import { BarcodeGenerator } from './BarcodeGenerator';
 import { logger } from '../../utils/logger';
 import { SectionHeader, RadioGroup, SliderGroup, ToggleRow } from './components/SettingFormControls';
+import SmartRoutingConfig from './components/SmartRoutingConfig';
 
 
 
@@ -23,7 +24,7 @@ export default function WMSSettings() {
         sites, allSales, releaseOrder, refreshData
     } = useData();
 
-    const [activeTab, setActiveTab] = useState<'rules' | 'pick-control'>('rules');
+    const [activeTab, setActiveTab] = useState<'rules' | 'pick-control' | 'smart-routing'>('rules');
     const [activePickSubTab, setActivePickSubTab] = useState<'strategies' | 'zones' | 'release'>('strategies');
 
     // --- GENERAL RULES STATE ---
@@ -180,6 +181,12 @@ export default function WMSSettings() {
                 >
                     <Scan size={16} /> Pick Control Hub
                 </button>
+                <button
+                    onClick={() => setActiveTab('smart-routing')}
+                    className={`flex-1 px-4 py-2.5 rounded-xl text-xs font-black tracking-widest uppercase transition-all flex items-center justify-center gap-2 ${activeTab === 'smart-routing' ? 'bg-cyber-primary text-black' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
+                >
+                    <MapPin size={16} /> Smart Routing
+                </button>
             </div>
 
             {activeTab === 'rules' && (
@@ -314,12 +321,16 @@ export default function WMSSettings() {
 
                         </div>
                     </div>
-
                 </div>
             )}
 
-            {
-                activeTab === 'pick-control' && (
+            {activeTab === 'smart-routing' && (
+                <div className="space-y-6">
+                    <SmartRoutingConfig siteId={selectedSiteId} />
+                </div>
+            )}
+
+            {activeTab === 'pick-control' && (
                     <div className="space-y-6">
                         <div className="flex items-center gap-2 p-1 bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 mb-6">
                             <button

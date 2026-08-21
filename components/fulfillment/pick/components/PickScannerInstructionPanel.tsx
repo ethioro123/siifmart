@@ -2,6 +2,7 @@ import React from 'react';
 import { Product } from '../../../../types';
 import { isLocationBarcode, decodeLocation } from '../../../../utils/locationEncoder';
 import { normalizeLocation } from '../../../../utils/locationTracking';
+import { getSellUnit } from '../../../../utils/units';
 
 interface PickScannerInstructionPanelProps {
     step: 'LOCATION' | 'ITEM' | 'QUANTITY';
@@ -75,16 +76,15 @@ export const PickScannerInstructionPanel: React.FC<PickScannerInstructionPanelPr
                 {currentItem?.name}
             </p>
             <p className="text-[#2C5E3B] dark:text-[#A9CBA2] font-mono text-xl mt-1">{currentItem?.sku}</p>
-            <p className="text-gray-555 text-xs mt-1">{t('warehouse.expected')}: <span className="font-bold text-gray-900 dark:text-white">{(() => {
-                let expected = currentItem?.expectedQty || 1;
-                const measureQty = getItemMeasureQty(currentItem);
-                if (measureQty) {
-                    const unitDef = currentProduct?.unit ? currentProduct.unit : '';
-                    const sizeNum = currentProduct?.size ? parseFloat(currentProduct.size as string) : 0;
-                    return <>{expected} x {sizeNum} <span className="text-[10px] uppercase text-gray-505">{(unitDef as string)}</span></>;
-                }
-                return expected;
-            })()}</span></p>
+                <span className="font-bold text-gray-900 dark:text-white">{(() => {
+                    let expected = currentItem?.expectedQty || 1;
+                    const unitDef = getSellUnit(currentProduct?.unit || currentItem?.unit);
+                    const sizeStr = currentProduct?.size || currentItem?.size;
+                    const isWeightVol = (unitDef.category === 'weight' || unitDef.category === 'volume') && !!sizeStr;
+                    const unitText = isWeightVol ? `packs (${sizeStr}${unitDef.shortLabel})` : unitDef.code !== 'UNIT' ? unitDef.shortLabel : '';
+
+                    return <>{expected} {unitText ? <span className="text-[10px] uppercase text-gray-500 font-bold ml-0.5">{unitText}</span> : null}</>;
+                })()}</span>
             {!isItemMatched && (currentItem?.expectedQty || 1) > 0 && (
                 <button
                     type="button"

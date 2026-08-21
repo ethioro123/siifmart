@@ -1,6 +1,7 @@
 import React from 'react';
 import { CheckCircle } from 'lucide-react';
 import { WMSJob, Product } from '../../../../types';
+import { getSellUnit } from '../../../../utils/units';
 
 interface PickScannerPickedListProps {
     job: WMSJob;
@@ -36,18 +37,17 @@ export const PickScannerPickedList: React.FC<PickScannerPickedListProps> = ({
                             <p className="text-gray-900 dark:text-white text-sm font-bold truncate">{item.name}</p>
                             <p className="text-gray-550 text-[10px] font-mono">{item.sku}</p>
                         </div>
-                        <span className="bg-green-50 dark:bg-green-500/15 text-green-600 dark:text-green-400 text-xs font-mono font-black px-2 py-1 rounded-lg border border-green-200 dark:border-green-500/20 whitespace-nowrap">
+                        <span className="bg-green-50 dark:bg-green-500/15 text-green-600 dark:text-green-400 text-xs font-mono font-black px-2 py-0.5 rounded-lg border border-green-200 dark:border-green-500/20 whitespace-nowrap">
                             {(() => {
                                 let expected = item.expectedQty || 1;
                                 let picked = item.pickedQty || 0;
-                                const measureQty = getItemMeasureQty(item);
-                                if (measureQty) {
-                                    const prod = getProduct(item);
-                                    const sizeNum = prod?.size ? parseFloat(prod.size as string) : 0;
-                                    const displayPickedCases = picked <= expected ? picked : (sizeNum > 0 ? picked / sizeNum : picked);
-                                    return <>{displayPickedCases} x {sizeNum} / {expected} x {sizeNum}</>;
-                                }
-                                return <>{picked} / {expected}</>;
+                                const prod = getProduct(item);
+                                const unitDef = getSellUnit(prod?.unit || item.unit);
+                                const sizeStr = prod?.size || item.size;
+                                const isWeightVol = (unitDef.category === 'weight' || unitDef.category === 'volume') && !!sizeStr;
+                                const unitText = isWeightVol ? `packs (${sizeStr}${unitDef.shortLabel})` : unitDef.code !== 'UNIT' ? unitDef.shortLabel : '';
+
+                                return <>{picked} / {expected} {unitText ? <span className="text-[9px] uppercase font-bold text-gray-500 ml-0.5">{unitText}</span> : null}</>;
                             })()}
                         </span>
                     </div>

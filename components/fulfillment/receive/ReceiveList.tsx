@@ -6,6 +6,7 @@ import Pagination from '../../shared/Pagination';
 import { formatPOItemDescription, formatPackBadge } from '../../procurement/utils';
 import { getSellUnit } from '../../../utils/units';
 import { hasPermission } from '../../../utils/permissions';
+import { convertToSellableUnits } from '../useReceiving';
 
 interface ReceiveListProps {
     paginatedReceiveOrders: PurchaseOrder[];
@@ -102,10 +103,11 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                             product?.sku
                         ].filter(Boolean) as string[];
                         
+                        const expectedSellable = convertToSellableUnits(item.quantity, item);
                         const mapReceived = candidateKeys.length > 0 
                             ? candidateKeys.reduce((max, k) => Math.max(max, receivedMap[k] || 0), 0)
                             : 0;
-                        return Math.max(dbReceived, mapReceived) >= item.quantity;
+                        return Math.max(dbReceived, mapReceived) >= expectedSellable;
                     }) || false;
 
                     return (
@@ -146,7 +148,8 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                                         ? candidateKeys.reduce((max, k) => Math.max(max, receivedMap[k] || 0), 0)
                                         : 0;
                                     const receivedQty = Math.max(dbReceivedQty, mapReceivedQty);
-                                    const remainingQty = Math.max(0, item.quantity - receivedQty);
+                                    const expectedSellable = convertToSellableUnits(item.quantity, item);
+                                    const remainingQty = Math.max(0, expectedSellable - receivedQty);
                                     const isComplete = remainingQty <= 0;
 
                                     const employeeId = employees?.find((e: any) => e.email === user?.email || e.name === user?.name || e.id === user?.id)?.id;
@@ -186,7 +189,7 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                                                                 const label = itemUnit.shortLabel.toLowerCase();
                                                                 return (
                                                                     <span className={`text-lg font-black tabular-nums tracking-tighter leading-none ${isComplete ? 'text-stone-400 dark:text-stone-500' : 'text-slate-900 dark:text-white'}`}>
-                                                                        {receivedQty}<span className="text-stone-400 dark:text-stone-600">/{item.quantity}</span>
+                                                                        {receivedQty}<span className="text-stone-400 dark:text-stone-600">/{expectedSellable}</span>
                                                                         <span className="text-[10px] font-black text-stone-400 dark:text-stone-500 ml-1 uppercase">× {sizeNum}{label}</span>
                                                                     </span>
                                                                 );
@@ -194,7 +197,7 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
 
                                                             return (
                                                                 <span className={`text-xl font-black tabular-nums tracking-tighter leading-none ${isComplete ? 'text-stone-400 dark:text-stone-500' : 'text-[#1E3F27] dark:text-[#A9CBA2]'}`}>
-                                                                    {receivedQty}<span className="text-stone-400 dark:text-stone-600">/{item.quantity}</span>
+                                                                    {receivedQty}<span className="text-stone-400 dark:text-stone-600">/{expectedSellable}</span>
                                                                 </span>
                                                             );
                                                         })()}

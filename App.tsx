@@ -56,7 +56,7 @@ import { initializeAvatarsBucket } from './services/imageStorage.service';
 
 export default function App() {
   const { user, loading } = useStore();
-  const { cleanupAdminProducts, isDataInitialLoading, loadError, loadingProgress } = useData();
+  const { activeSite, cleanupAdminProducts, isDataInitialLoading, loadError, loadingProgress } = useData();
 
   React.useEffect(() => {
     if (native.isNative()) {
@@ -65,29 +65,6 @@ export default function App() {
 
     // Run auto-migration once
     runAutoMigration();
-
-    // STRICT SESSION ISOLATION FOR LOCALHOST
-    // This ensures that "multi-account" testing works by forcing sessions to be tab-specific (sessionStorage).
-    // It prevents standard localStorage tokens from leaking across tabs.
-    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-      try {
-        const keysToRemove: string[] = [];
-        for (let i = 0; i < localStorage.length; i++) {
-          const key = localStorage.key(i);
-          if (key && key.startsWith('sb-') && key.includes('-auth-token')) {
-            keysToRemove.push(key);
-          }
-        }
-        if (keysToRemove.length > 0) {
-          console.log('🧹 Cleaning up legacy localStorage auth tokens to enforce strict tab isolation:', keysToRemove);
-          keysToRemove.forEach(k => localStorage.removeItem(k));
-        }
-      } catch (e) {
-        console.warn('LocalStorage cleanup failed (likely private browsing restrictions)', e);
-      }
-    }
-    // Note: Storage buckets (system-assets, avatars) should be created manually in Supabase Dashboard.
-    // Client-side bucket creation is blocked by RLS policies for security.
   }, []);
 
   // Keyboard shortcut: Ctrl+Shift+H (or Cmd+Shift+H on Mac) to cleanup HQ products
@@ -208,34 +185,26 @@ export default function App() {
         <Layout>
           <Suspense fallback={<ModuleLoader />}>
             <Routes>
-            {/* Dashboard - Accessible by all authenticated users, content varies by role */}
+            {/* Dashboard - Accessible by all authenticated users, content strictly scoped by role & active site */}
             <Route path="/" element={
               <ProtectedRoute module="dashboard">
                 {(() => {
-                  // 1. CEO & L2 Directors -> Location Select
-                  const l2Roles = ['regional_manager', 'operations_manager', 'supply_chain_manager'];
-                  if (user?.role === 'super_admin' || l2Roles.includes(user?.role || '')) {
-                    return <Navigate to="/location-select" replace />;
+                  const activeSiteType = activeSite?.type || '';
+                  const isWarehouse = ['Warehouse', 'Distribution Center', 'WMS', 'Fulfillment Center'].includes(activeSiteType);
+                  const isStore = ['Store', 'Dark Store', 'Retail', 'POS'].includes(activeSiteType);
+
+                  // 1. CEO Default Landing -> Administration Access (/admin) unless scoped to a WMS or POS site
+                  if (user?.role === 'super_admin' || (user?.role as string) === 'CEO') {
+                    if (isWarehouse) return <Navigate to="/wms-ops" replace />;
+                    if (isStore) return <Navigate to="/pos-dashboard" replace />;
+                    return <Navigate to="/admin" replace />;
                   }
 
-                  // Store Roles (L3 + L4 Store Staff)
-                  const storeRoles = ['store_manager', 'assistant_manager', 'shift_lead', 'cashier', 'sales_associate', 'stock_clerk', 'customer_service', 'manager', 'pos'];
-
-                  // Warehouse Manager Roles (get dashboard)
-                  const warehouseManagerRoles = ['warehouse_manager', 'dispatch_manager'];
-
-                  // Warehouse Operations Roles (get Fulfillment/Ops view)
-                  const warehouseOpRoles = ['picker', 'packer', 'driver', 'receiver', 'forklift_operator', 'inventory_specialist', 'dispatcher'];
-
-                  if (warehouseOpRoles.includes(user?.role || '')) {
+                  // 2. Strict Site-Type Redirection for all staff
+                  if (isWarehouse) {
                     return <Navigate to="/wms-ops" replace />;
                   }
-
-                  if (warehouseManagerRoles.includes(user?.role || '')) {
-                    return <Navigate to="/wms-dashboard" replace />;
-                  }
-
-                  if (storeRoles.includes(user?.role || '')) {
+                  if (isStore) {
                     return <Navigate to="/pos-dashboard" replace />;
                   }
 
@@ -245,7 +214,7 @@ export default function App() {
                   if (user?.role === 'procurement_manager') return <Navigate to="/procurement" replace />;
                   if (user?.role === 'it_support') return <Navigate to="/settings" replace />;
 
-                  return <Navigate to="/pos-dashboard" replace />; // Default fallback
+                  return <Navigate to="/admin" replace />;
                 })()}
               </ProtectedRoute>
             } />

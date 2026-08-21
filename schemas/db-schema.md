@@ -307,6 +307,19 @@
 
 ---
 
+## `category_zones`
+
+| Column | Notes |
+|--------|-------|
+| `id` | PK |
+| `site_id` | FK → sites |
+| `category` | |
+| `default_zone` | |
+| `created_at` | auto |
+| `updated_at` | auto |
+
+---
+
 ## `stock_movements`
 
 | Column | Notes |

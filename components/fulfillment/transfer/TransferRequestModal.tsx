@@ -283,12 +283,12 @@ export const TransferRequestModal: React.FC<TransferRequestModalProps> = ({
                                                                 const sourceStockItem = allProducts.find(p => p.sku === prod?.sku && p.siteId === transferSourceSite);
                                                                 const rawStock = sourceStockItem?.stock || 0;
                                                                 const unitDef = getSellUnit(sourceStockItem?.unit || prod?.unit || '');
-                                                                const sizeNum = parseFloat(sourceStockItem?.size || prod?.size || '0');
-                                                                const isWeightVol = unitDef.category === 'weight' || unitDef.category === 'volume';
-                                                                const displayStock = isWeightVol && sizeNum > 0 ? rawStock * sizeNum : rawStock;
-                                                                const deduction = (isWeightVol && sizeNum > 0 && !item.isMeasure) ? item.quantity * sizeNum : item.quantity;
+                                                                const sizeStr = sourceStockItem?.size || prod?.size;
+                                                                const isWeightVol = (unitDef.category === 'weight' || unitDef.category === 'volume') && !!sizeStr;
+                                                                const displayStock = rawStock;
+                                                                const deduction = item.quantity;
                                                                 const displayRemaining = displayStock - deduction;
-                                                                const unitLabel = unitDef.code !== 'UNIT' ? ` ${unitDef.shortLabel} ` : '';
+                                                                const unitLabel = isWeightVol ? ` packs (${sizeStr}${unitDef.shortLabel})` : unitDef.code !== 'UNIT' ? ` ${unitDef.shortLabel}` : '';
                                                                 const isWarning = displayRemaining < 0;
                                                                 return (
                                                                     <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded flex items-center gap-1 ${isWarning ? 'bg-red-500/10 text-red-400' : 'bg-green-500/10 text-green-400'}`}>

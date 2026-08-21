@@ -130,4 +130,8 @@ export const receiving: TranslationBlock = {
     scanBarcodePlaceholder: { en: 'Scan barcode...', am: 'ባርኮድ ስካን ያድርጉ...', or: 'Baarkoodii iskaanii...' },
     primary: { en: 'Primary', am: 'ዋና', or: 'Duraa' },
     stockPutaway: { en: 'Stock Putaway', am: 'ምርት ማስቀመጥ', or: 'Meeshaa Kaahuu' },
+    receivedBy: { en: 'Received By', am: 'የተቀበለው ሰው', or: 'Kan Fudhate' },
+    bayFullAssignNew: { en: 'Primary Bay Full? Assign Alternate Bay', am: 'ዋናው ቦታ ሞልቷል? አዲስ ቦታ መድብ', or: 'Bakki duraa guuteeraa? Bakka haaraa ramadi' },
+    overflowModeActive: { en: 'OVERFLOW MODE: Primary bay full — scanning alternate storage bay', am: 'የትርፍ ቦታ ሁኔታ፡ ዋናው ቦታ ስለሞላ አዲስ ቦታ እየተፈለገ ነው', or: 'HAALA DABALATAA: Bakki duraa guuteera — bakka dabalataa barbaadaa jira' },
+    existingLocations: { en: 'Existing Stock Locations for SKU', am: 'ለዚህ SKU ያሉ ነባር ቦታዎች', or: 'Bakkeewwan meeshaa kanaa kan turan' },
 };

@@ -37,24 +37,24 @@ export const PackJobHeader: React.FC<PackJobHeaderProps> = ({
                                 #{formatJobId(job)}
                             </span>
                         </div>
-                        <div className="hidden md:flex items-center gap-4 text-xs font-medium text-gray-500 dark:text-gray-400">
-                            <span className={`px-2.5 py-1 rounded-xl text-[10px] uppercase font-black tracking-widest border ${job.priority === 'Critical' ? 'border-red-200 dark:border-red-500/30 text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/10 shadow-[0_0_15px_rgba(239,68,68,0.05)]' :
+                        <div className="flex flex-wrap items-center gap-2 md:gap-4 text-xs font-medium text-gray-500 dark:text-gray-400 mt-1">
+                            <span className={`px-2 py-0.5 rounded-lg text-[9px] uppercase font-black tracking-widest border ${job.priority === 'Critical' ? 'border-red-200 dark:border-red-500/30 text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/10 shadow-[0_0_15px_rgba(239,68,68,0.05)]' :
                                 job.priority === 'High' ? 'border-amber-200 dark:border-amber-500/30 text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10' :
                                     'border-gray-200 dark:border-white/10 text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-white/5'
                                 }`}>
                                 {job.priority}
                             </span>
-                            <span className="flex items-center gap-1.5 text-gray-700 dark:text-gray-400">
-                                <MapPin size={12} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
-                                <span className="break-words leading-tight">
+                            <span className="flex items-center gap-1 text-gray-700 dark:text-gray-300 font-bold">
+                                <MapPin size={12} className="text-[#2C5E3B] dark:text-[#A9CBA2] shrink-0" />
+                                <span className="truncate max-w-[160px] sm:max-w-none">
                                     {destSite ? (
                                         <>
-                                            {destSite.name} <span className="text-gray-500 dark:text-zinc-650 font-normal lowercase">({destSite.code || destSite.id})</span>
+                                            {destSite.name} <span className="text-gray-400 dark:text-gray-500 font-mono text-[10px]">({destSite.code || destSite.id})</span>
                                         </>
                                     ) : ((job as any).customerName || 'Customer')}
                                 </span>
                             </span>
-                            <span className="flex items-center gap-1.5 text-gray-550">
+                            <span className="hidden sm:flex items-center gap-1 text-gray-400 text-[11px]">
                                 <Clock size={12} className="text-gray-400" />
                                 {new Date(job.createdAt || (job as any).date || '').toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}
                             </span>

@@ -29,39 +29,34 @@ import { useReceivingSplit } from './useReceivingSplit';
  * it converts through base units.
  */
 export const convertToSellableUnits = (orderQty: number, item: any): number => {
-    if (!item) return orderQty;
+    if (!item || !orderQty) return orderQty || 0;
 
-    const attrs = item.customAttributes;
+    const attrs = item.customAttributes || (item as any).custom_attributes;
     const sizeValue = parseFloat(item.size || attrs?.packaging?.unitSize || '0');
-    const sizeType = (attrs?.physical?.sizeType || '').toLowerCase().trim();
-    const sellUnit = (item.unit || '').toUpperCase().trim();
+    const sizeType = (attrs?.physical?.sizeType || attrs?.physical?.unit || '').toLowerCase().trim();
+    const sellUnit = (item.unit || attrs?.commercial?.sellUnit || '').toUpperCase().trim();
+    const sellBy = attrs?.commercial?.sellBy || (['KG', 'G', 'L', 'ML'].includes(sellUnit) ? (['KG', 'G'].includes(sellUnit) ? 'Weight' : 'Volume') : 'Unit');
     const packQty = parseInt(attrs?.packaging?.packQty || '0');
     const caseSize = parseInt(attrs?.packaging?.caseSize || '0');
 
-    logger.info('useReceiving', `convertToSellableUnits: orderQty=${orderQty}, size=${sizeValue}, sizeType="${sizeType}", sellUnit="${sellUnit}", packQty=${packQty}, caseSize=${caseSize}`);
-
-    // Step 1: Handle pack/case multiplier (for count-based products).
-    // Formula mirrors POItemForm and SellingAttributes:
-    //   hasCases = caseSize >= 1  (any explicit case layer, even 1 pack/case)
-    //   hasPacks = packQty > 1 and no case layer
+    // Step 1: Pack / Case Multipliers (for count-based selling)
     const hasCases = caseSize >= 1;
     const hasPacks = packQty > 1 && !hasCases;
-    const unitsPerOrderUnit = hasCases ? caseSize * packQty : hasPacks ? packQty : 1;
+    const unitsPerOrderUnit = hasCases ? caseSize * packQty : hasPacks ? packQty : (item.packQuantity && item.packQuantity > 1 ? item.packQuantity : 1);
 
     if (unitsPerOrderUnit > 1) {
-        if (['UNIT', 'PACK', 'DOZEN'].includes(sellUnit) || !sellUnit) {
+        if (['UNIT', 'PACK', 'DOZEN', 'EA', 'PCS', ''].includes(sellUnit)) {
             return orderQty * unitsPerOrderUnit;
         }
     }
 
-    // Step 2: Handle size-based conversion (for weight/volume products)
-    if (sizeValue > 0 && sizeType) {
+    // Step 2: Size-based conversion ONLY for products explicitly sold by Weight or Volume (e.g. bulk walnuts sold by kg)
+    // Physical packet sizes like 400g (e.g. Buna Tea 400g) are unit sizes and DO NOT multiply the order quantity!
+    if ((sellBy === 'Weight' || sellBy === 'Volume') && sizeValue > 0 && sizeType) {
         let sizeInBase = sizeValue;
         let sizeCategory = '';
-        // Weight
         if (['kg', 'kilogram', 'kilograms', 'kgs'].includes(sizeType)) { sizeInBase = sizeValue * 1000; sizeCategory = 'weight'; }
         else if (['g', 'gram', 'grams', 'gr'].includes(sizeType)) { sizeInBase = sizeValue; sizeCategory = 'weight'; }
-        // Volume
         else if (['l', 'litre', 'liter', 'litres', 'liters', 'lt'].includes(sizeType)) { sizeInBase = sizeValue * 1000; sizeCategory = 'volume'; }
         else if (['ml', 'millilitre', 'milliliter', 'millilitres', 'milliliters'].includes(sizeType)) { sizeInBase = sizeValue; sizeCategory = 'volume'; }
 
@@ -72,7 +67,8 @@ export const convertToSellableUnits = (orderQty: number, item: any): number => {
         else if (sellUnit === 'L') { sellInBase = 1000; sellCategory = 'volume'; }
         else if (sellUnit === 'ML') { sellInBase = 1; sellCategory = 'volume'; }
 
-        if (sizeCategory && sizeCategory === sellCategory) {
+        // Only convert if sizeCategory === sellCategory AND sellUnit is NOT count-based
+        if (sizeCategory && sizeCategory === sellCategory && ['KG', 'G', 'L', 'ML'].includes(sellUnit)) {
             const sellUnitsPerPackage = sizeInBase / sellInBase;
             logger.info('useReceiving', `Converted: ${orderQty} × ${sellUnitsPerPackage} = ${orderQty * sellUnitsPerPackage} ${sellUnit}`);
             return orderQty * sellUnitsPerPackage;
@@ -149,37 +145,54 @@ export const useReceiving = (deps: UseReceivingDeps) => {
                 const decision = skuDecisions ? skuDecisions[lineItem.sku || ''] : 'keep';
                 const scannedSku = scannedSkus ? scannedSkus[lineItem.sku || ''] : null;
 
-                // Get product details (check allProducts first)
-                let existingProduct = allProducts.find(p => p.id === targetProductId || p.sku === productSku);
-                if (!existingProduct) {
-                    existingProduct = products.find(p => p.id === targetProductId || p.sku === productSku);
+                // 2. Check if the product already exists in the TARGET SITE
+                let localProduct = allProducts.find(p => 
+                    (p.id === targetProductId || p.sku === productSku) && 
+                    (p.siteId === targetSiteId || (p as any).site_id === targetSiteId)
+                );
+                if (!localProduct) {
+                    localProduct = products.find(p => 
+                        (p.id === targetProductId || p.sku === productSku) && 
+                        (p.siteId === targetSiteId || (p as any).site_id === targetSiteId)
+                    );
                 }
 
-                if (existingProduct) {
-                    productSku = existingProduct.sku; // Use canonical SKU
-                    targetProductId = existingProduct.id;
+                // Also find a global product to act as a template if we need to create one
+                let globalProduct = allProducts.find(p => p.id === targetProductId || p.sku === productSku);
+
+                if (localProduct) {
+                    productSku = localProduct.sku; // Use canonical SKU
+                    targetProductId = localProduct.id;
                     
                     // Sync PO line item details if they are missing
                     const updates: any = {};
-                    if (!existingProduct.size && lineItem.size) updates.size = lineItem.size;
-                    if (!existingProduct.brand && lineItem.brand) updates.brand = lineItem.brand;
-                    if (!existingProduct.unit && lineItem.unit) updates.unit = lineItem.unit;
-                    if (!existingProduct.category && lineItem.category) updates.category = lineItem.category;
-                    if ((!existingProduct.price || existingProduct.price === 0) && lineItem.retailPrice) updates.price = lineItem.retailPrice;
-                    if ((!existingProduct.costPrice || existingProduct.costPrice === 0) && lineItem.unitCost) {
+                    if (!localProduct.size && lineItem.size) updates.size = lineItem.size;
+                    if (!localProduct.brand && lineItem.brand) updates.brand = lineItem.brand;
+                    if (!localProduct.unit && lineItem.unit) updates.unit = lineItem.unit;
+                    if (!localProduct.category && lineItem.category) updates.category = lineItem.category;
+                    if (lineItem.retailPrice && lineItem.retailPrice > 0 && lineItem.retailPrice !== localProduct.price) {
+                        updates.price = lineItem.retailPrice;
+                        updates.priceUpdatedAt = new Date().toISOString();
+                        if (targetSiteId && lineItem.sku) {
+                            productsService.updatePriceBySku(lineItem.sku, targetSiteId, lineItem.retailPrice).catch(e => {
+                                logger.warn('useReceiving', `Failed to sync price across SKU ${lineItem.sku}`, e);
+                            });
+                        }
+                    }
+                    if ((!localProduct.costPrice || localProduct.costPrice === 0) && lineItem.unitCost) {
                         const unitsPerOrderUnit = convertToSellableUnits(1, lineItem);
                         updates.costPrice = unitsPerOrderUnit > 0 ? (lineItem.unitCost / unitsPerOrderUnit) : lineItem.unitCost;
                     }
-                    if (!existingProduct.customAttributes && lineItem.customAttributes) updates.customAttributes = lineItem.customAttributes;
-                    if (!existingProduct.description && lineItem.description) updates.description = lineItem.description;
-                    if (!existingProduct.minStock && lineItem.minStock) updates.minStock = lineItem.minStock;
-                    if (!existingProduct.maxStock && lineItem.maxStock) updates.maxStock = lineItem.maxStock;
+                    if (!localProduct.customAttributes && lineItem.customAttributes) updates.customAttributes = lineItem.customAttributes;
+                    if (!localProduct.description && lineItem.description) updates.description = lineItem.description;
+                    if (!localProduct.minStock && lineItem.minStock) updates.minStock = lineItem.minStock;
+                    if (!localProduct.maxStock && lineItem.maxStock) updates.maxStock = lineItem.maxStock;
  
                     if (Object.keys(updates).length > 0) {
-                        const updated = await productsService.update(existingProduct.id, updates);
+                        const updated = await productsService.update(localProduct.id, updates);
                         if (updated) {
-                            setProducts?.(prev => prev.map(p => p.id === existingProduct.id ? updated : p));
-                            setAllProducts?.(prev => prev.map(p => p.id === existingProduct.id ? updated : p));
+                            setProducts?.(prev => prev.map(p => p.id === localProduct!.id ? updated : p));
+                            setAllProducts?.(prev => prev.map(p => p.id === localProduct!.id ? updated : p));
                         }
                     }
                 } else {
@@ -187,27 +200,29 @@ export const useReceiving = (deps: UseReceivingDeps) => {
                     try {
                         const created = await productsService.create({
                             siteId: targetSiteId || activeSite?.id || '',
-                            name: productName || lineItem.productName || `Item ${productSku}`,
+                            name: productName || lineItem.productName || globalProduct?.name || `Item ${productSku}`,
                             sku: productSku || lineItem.sku,
-                            barcode: (lineItem as any).barcode || '',
-                            barcodes: (lineItem as any).barcodes || [],
-                            price: lineItem.retailPrice || 0,
+                            barcode: (lineItem as any).barcode || globalProduct?.barcode || '',
+                            barcodes: (lineItem as any).barcodes || globalProduct?.barcodes || [],
+                            price: lineItem.retailPrice || globalProduct?.price || 0,
                             costPrice: (() => {
                                 const unitsPerOrderUnit = convertToSellableUnits(1, lineItem);
-                                return unitsPerOrderUnit > 0 ? (lineItem.unitCost / unitsPerOrderUnit) : (lineItem.unitCost || 0);
+                                return unitsPerOrderUnit > 0 ? (lineItem.unitCost / unitsPerOrderUnit) : (lineItem.unitCost || globalProduct?.costPrice || 0);
                             })(),
-                            category: lineItem.category || 'Uncategorized',
+                            category: lineItem.category || globalProduct?.category || 'Uncategorized',
                             status: 'active',
                             stock: 0,
                             location: 'On Order',
-                            size: lineItem.size || '',
-                            brand: lineItem.brand || '',
-                            unit: lineItem.unit || 'UNIT',
-                            packQuantity: lineItem.packQuantity || 1,
-                            customAttributes: lineItem.customAttributes || null,
-                            description: lineItem.description || '',
-                            minStock: lineItem.minStock || 0,
-                            maxStock: lineItem.maxStock || 0
+                            expiryDate: (lineItem as any).expiryDate || (lineItem as any).expiry_date || globalProduct?.expiryDate,
+                            batchNumber: (lineItem as any).batchNumber || (lineItem as any).batch_number || globalProduct?.batchNumber,
+                            size: lineItem.size || globalProduct?.size || '',
+                            brand: lineItem.brand || globalProduct?.brand || '',
+                            unit: lineItem.unit || globalProduct?.unit || 'UNIT',
+                            packQuantity: lineItem.packQuantity || globalProduct?.packQuantity || 1,
+                            customAttributes: lineItem.customAttributes || globalProduct?.customAttributes || null,
+                            description: lineItem.description || globalProduct?.description || '',
+                            minStock: lineItem.minStock || globalProduct?.minStock || 0,
+                            maxStock: lineItem.maxStock || globalProduct?.maxStock || 0
                         } as any);
                         if (created) {
                             targetProductId = created.id;
@@ -242,6 +257,8 @@ export const useReceiving = (deps: UseReceivingDeps) => {
                         cost: lineItem.unitCost,
                         retailPrice: lineItem.retailPrice,
                         unit: lineItem.unit,
+                        expiryDate: (lineItem as any).expiryDate || (lineItem as any).expiry_date,
+                        batchNumber: (lineItem as any).batchNumber || (lineItem as any).batch_number,
                         // Pass PO attributes so putaway can create a complete Product record
                         size: lineItem.size,
                         brand: lineItem.brand,
@@ -263,6 +280,15 @@ export const useReceiving = (deps: UseReceivingDeps) => {
 
             // Update local state
             setJobs(prev => [...prev, ...newJobs]);
+
+            // Stamp who physically received the goods
+            if (actionUser?.name) {
+                try {
+                    await purchaseOrdersService.update(poId, { receivedBy: actionUser.name });
+                } catch (err) {
+                    logger.warn('useReceiving', 'Could not stamp receivedBy on PO', { error: err instanceof Error ? err.message : JSON.stringify(err) });
+                }
+            }
 
             // Refresh PO details
             const updatedPO = await purchaseOrdersService.getById(poId);
@@ -316,7 +342,8 @@ export const useReceiving = (deps: UseReceivingDeps) => {
                 const received = candidateKeys.length > 0 
                     ? candidateKeys.reduce((max, k) => Math.max(max, receivedMap[k] || 0), 0)
                     : 0;
-                return received >= item.quantity;
+                const expectedSellable = convertToSellableUnits(item.quantity, item);
+                return received >= expectedSellable;
             });
 
             const status = allReceived ? 'Received' : 'Partially Received';

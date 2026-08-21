@@ -54,11 +54,13 @@ interface POSCommandContextType {
     transferReceivingItems: any[];
     setTransferReceivingItems: React.Dispatch<React.SetStateAction<any[]>>;
 
-    // Stock Search State
+    // Stock Search & Updates Notification State
     isStockListOpen: boolean;
     setIsStockListOpen: React.Dispatch<React.SetStateAction<boolean>>;
     stockSearch: string;
     setStockSearch: React.Dispatch<React.SetStateAction<string>>;
+    lastSeenUpdates: number;
+    markUpdatesAsRead: () => void;
 
     // Print Hub State
     isPrintHubOpen: boolean;
@@ -118,6 +120,18 @@ export const POSCommandProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     const [isStockListOpen, setIsStockListOpen] = useState(false);
     const [stockSearch, setStockSearch] = useState('');
     const [isPrintHubOpen, setIsPrintHubOpen] = useState(false);
+
+    // Notification Read State
+    const [lastSeenUpdates, setLastSeenUpdates] = useState<number>(() => {
+        const stored = localStorage.getItem('siifmart_pos_updates_last_seen');
+        return stored ? parseInt(stored, 10) : 0;
+    });
+
+    const markUpdatesAsRead = () => {
+        const now = Date.now();
+        setLastSeenUpdates(now);
+        localStorage.setItem('siifmart_pos_updates_last_seen', String(now));
+    };
 
     // Shift Closing
     const [isClosingShift, setIsClosingShift] = useState(false);
@@ -300,6 +314,7 @@ export const POSCommandProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         handleCloseReceivingModal: receivingState.handleCloseReceivingModal,
 
         isStockListOpen, setIsStockListOpen, stockSearch, setStockSearch,
+        lastSeenUpdates, markUpdatesAsRead,
         isPrintHubOpen, setIsPrintHubOpen,
         isClosingShift, setIsClosingShift, closingStep, setClosingStep,
         cashDenominations, setCashDenominations, discrepancyReason, setDiscrepancyReason, isSubmittingShift,

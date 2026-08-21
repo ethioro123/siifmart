@@ -126,7 +126,7 @@ const PointsPerformanceDashboard: React.FC<PointsPerformanceDashboardProps> = ({
                         Network Synergy Score
                     </h3>
                     <div className="w-full h-[250px]">
-                        <ResponsiveContainer width="100%" height="100%">
+                        <ResponsiveContainer width="100%" height={280}>
                             <RadarChart cx="50%" cy="50%" outerRadius="80%" data={radarData}>
                                 <PolarGrid stroke="#333" />
                                 <PolarAngleAxis dataKey="subject" tick={{ fill: '#999', fontSize: 10 }} />

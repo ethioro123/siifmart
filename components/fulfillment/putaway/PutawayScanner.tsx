@@ -4,9 +4,10 @@ import { WMSJob, Product } from '../../../types';
 import { playBeep } from '../../../utils/audioUtils';
 import { normalizeLocation } from '../../../utils/locationTracking';
 import { formatJobId } from '../../../utils/jobIdFormatter';
-import { decodeLocation, isLocationBarcode, extractPrefixFromBarcode, extractSkuFromScan } from '../../../utils/locationEncoder';
+import { decodeLocation, isLocationBarcode, extractPrefixFromBarcode, extractSkuFromScan, parseLocationParts } from '../../../utils/locationEncoder';
 import { useScanOnly } from '../../../hooks/useScanOnly';
 import { logger } from '../../../utils/logger';
+import { PutawayScannerOverflowPanel } from './components/PutawayScannerOverflowPanel';
 
 const normalizeSku = (s: string) => s.replace(/[-\/\s]/g, '').toUpperCase();
 
@@ -53,9 +54,37 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
     const [errorMsg, setErrorMsg] = useState('');
     const [awaitingOccupancyConfirmation, setAwaitingOccupancyConfirmation] = useState(false);
     const [awaitingMismatchConfirmation, setAwaitingMismatchConfirmation] = useState(false);
+    const [isOverflowMode, setIsOverflowMode] = useState(false);
     const [lastCheckedLocation, setLastCheckedLocation] = useState<string | null>(null);
     const inputRef = useRef<HTMLInputElement>(null);
     const scanLockRef = useRef(false);
+
+    const existingSkuLocations = useMemo(() => {
+        if (!currentItem?.sku) return [];
+        const targetSiteId = activeSiteId || job.siteId || (job as any).site_id;
+        const normSku = (s: string) => s.replace(/[-\/\s]/g, '').toUpperCase();
+        const targetNormSku = normSku(currentItem.sku);
+
+        return allProducts.filter(p => 
+            p.sku && normSku(p.sku) === targetNormSku &&
+            (p.siteId === targetSiteId || p.site_id === targetSiteId) &&
+            p.location &&
+            p.location !== 'On Order' &&
+            p.location !== 'Receiving Dock'
+        );
+    }, [currentItem, allProducts, activeSiteId, job]);
+
+    const handleSelectLocation = async (loc: string) => {
+        const norm = normalizeLocation(loc) || loc.trim().toUpperCase();
+        await onScanLocation(norm);
+        setStep('ITEM');
+        setInputVal('');
+        setIsOverflowMode(false);
+        setAwaitingOccupancyConfirmation(false);
+        setAwaitingMismatchConfirmation(false);
+        setLastCheckedLocation(null);
+        playBeep('success');
+    };
 
     const scanOnlyHandlers = useScanOnly(setInputVal, {
         onReject: (reason) => {
@@ -183,7 +212,7 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
                     playBeep('warning');
                     return;
                 }
-                if (recommendation?.type === 'ASSIGNED' && normalizedAssigned && targetLoc !== normalizedAssigned && !awaitingMismatchConfirmation) {
+                if (!isOverflowMode && recommendation?.type === 'ASSIGNED' && normalizedAssigned && targetLoc !== normalizedAssigned && !awaitingMismatchConfirmation) {
                     setLastCheckedLocation(targetLoc);
                     setAwaitingMismatchConfirmation(true);
                     playBeep('warning');
@@ -254,23 +283,8 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
 
                 <div className="absolute inset-0 overflow-y-auto flex flex-col items-center p-6 pb-32 transition-all">
                     {/* Status Orb */}
-                    <div className={`w-32 h-32 rounded-[2.5rem] border-4 flex items-center justify-center mb-10 shadow-2xl z-10 transition-all duration-700 ${showSuccess
-                        ? 'border-emerald-400 bg-emerald-400/20 shadow-emerald-500/40 scale-110'
-                        : showError
-                            ? 'border-rose-500 bg-rose-500/20 shadow-rose-500/40 scale-110 animate-shake'
-                            : step === 'LOCATION'
-                                ? 'border-[#2C5E3B] bg-[#2C5E3B]/10 shadow-[#2C5E3B]/20'
-                                : 'border-emerald-500 bg-emerald-500/10 shadow-emerald-500/20'
-                        }`}>
-                        {showSuccess ? (
-                            <CheckCircle size={64} className="text-emerald-400 animate-bounce" />
-                        ) : showError ? (
-                            <AlertTriangle size={64} className="text-rose-500" />
-                        ) : step === 'LOCATION' ? (
-                            <MapIcon size={64} className="text-[#2C5E3B] dark:text-[#A9CBA2] drop-shadow-[0_0_15px_rgba(44,94,59,0.5)]" />
-                        ) : (
-                            <Box size={64} className="text-emerald-500 drop-shadow-[0_0_15px_rgba(16,185,129,0.5)]" />
-                        )}
+                    <div className={`w-32 h-32 rounded-[2.5rem] border-4 flex items-center justify-center mb-10 shadow-2xl z-10 transition-all duration-700 ${showSuccess ? 'border-emerald-400 bg-emerald-400/20 shadow-emerald-500/40 scale-110' : showError ? 'border-rose-500 bg-rose-500/20 shadow-rose-500/40 scale-110 animate-shake' : step === 'LOCATION' ? 'border-[#2C5E3B] bg-[#2C5E3B]/10 shadow-[#2C5E3B]/20' : 'border-emerald-500 bg-emerald-500/10 shadow-emerald-500/20'}`}>
+                        {showSuccess ? <CheckCircle size={64} className="text-emerald-400 animate-bounce" /> : showError ? <AlertTriangle size={64} className="text-rose-500" /> : step === 'LOCATION' ? <MapIcon size={64} className="text-[#2C5E3B] dark:text-[#A9CBA2] drop-shadow-[0_0_15px_rgba(44,94,59,0.5)]" /> : <Box size={64} className="text-emerald-500 drop-shadow-[0_0_15px_rgba(16,185,129,0.5)]" />}
                     </div>
 
                     <h1 className={`text-4xl md:text-5xl font-black text-gray-900 dark:text-white text-center uppercase tracking-tight mb-4 z-10 transition-all duration-700 ${isStrictlyValid ? 'text-[#2C5E3B] dark:text-[#A9CBA2] scale-105' : showError ? 'text-rose-500' : ''}`}>
@@ -304,6 +318,30 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
                                             : (normalizeLocation(inputVal) || recommendation?.location || currentProduct?.location || '—')}
                                     </p>
 
+                                    {(() => {
+                                        const locStr = isStrictlyValid
+                                            ? decodeLocation(inputVal.trim().toUpperCase())
+                                            : (normalizeLocation(inputVal) || recommendation?.location || currentProduct?.location || '');
+                                        const parts = parseLocationParts(locStr);
+                                        if (!parts) return null;
+                                        return (
+                                            <div className="grid grid-cols-3 gap-2 mt-4 pt-4 border-t border-current/15">
+                                                <div className="bg-white/60 dark:bg-black/30 p-2 rounded-2xl border border-current/10 flex flex-col items-center">
+                                                    <span className="text-[9px] font-black uppercase tracking-wider opacity-60">Zone</span>
+                                                    <span className="text-base font-black font-mono">{parts.zone}</span>
+                                                </div>
+                                                <div className="bg-white/60 dark:bg-black/30 p-2 rounded-2xl border border-current/10 flex flex-col items-center">
+                                                    <span className="text-[9px] font-black uppercase tracking-wider opacity-60">Aisle</span>
+                                                    <span className="text-base font-black font-mono">{parts.aisle}</span>
+                                                </div>
+                                                <div className="bg-white/60 dark:bg-black/30 p-2 rounded-2xl border border-current/10 flex flex-col items-center">
+                                                    <span className="text-[9px] font-black uppercase tracking-wider opacity-60">Bay</span>
+                                                    <span className="text-base font-black font-mono">{parts.bin}</span>
+                                                </div>
+                                            </div>
+                                        );
+                                    })()}
+
                                     {recommendation?.type === 'SUGGESTED' && !normalizeLocation(inputVal) && (
                                         <div className="mt-4 border-t-2 border-[#E2DCCE]/60 dark:border-white/5 pt-3">
                                             <p className="text-[10px] text-[#2C5E3B] dark:text-[#A9CBA2] font-black uppercase tracking-widest mb-1">
@@ -314,28 +352,17 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
                                 </div>
                             </div>
 
-                            {currentOccupants.length > 0 && (
-                                <div className="mt-8 p-5 rounded-2xl bg-amber-50 dark:bg-amber-500/5 border-2 border-amber-100 dark:border-amber-500/20 text-left animate-in slide-in-from-top-4 duration-700 shadow-lg shadow-amber-500/5">
-                                    <div className="flex items-center gap-3 mb-4 border-b border-amber-200 dark:border-amber-500/10 pb-3">
-                                        <Box size={16} className="text-amber-500" />
-                                        <span className="text-[10px] font-black uppercase text-amber-600 dark:text-amber-500/80 tracking-widest">{t('warehouse.putaway.locationOccupants')} ({currentOccupants.length})</span>
-                                    </div>
-                                    <div className="space-y-4">
-                                        {currentOccupants.slice(0, 2).map((occ: Product) => (
-                                            <div key={occ.id} className="flex items-start gap-4">
-                                                <div className="w-8 h-8 rounded-xl bg-amber-100 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 flex items-center justify-center shrink-0">
-                                                    <Info size={14} className="text-amber-600 dark:text-amber-500" />
-                                                </div>
-                                                <div className="min-w-0">
-                                                    <p className="text-xs font-black text-amber-900 dark:text-amber-100 truncate uppercase tracking-tight">{occ.name}</p>
-                                                    <p className="text-[10px] font-black font-mono text-amber-600/50 truncate uppercase tracking-widest">{occ.sku}</p>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-                        </div>
+                                <PutawayScannerOverflowPanel
+                                    isOverflowMode={isOverflowMode}
+                                    setIsOverflowMode={setIsOverflowMode}
+                                    setAwaitingMismatchConfirmation={setAwaitingMismatchConfirmation}
+                                    existingSkuLocations={existingSkuLocations}
+                                    handleSelectLocation={handleSelectLocation}
+                                    currentItem={currentItem}
+                                    currentOccupants={currentOccupants}
+                                    t={t}
+                                />
+                            </div>
                     ) : (
                         <div className="text-center z-10 mb-10 w-full max-w-sm">
                             <p className="text-gray-400 dark:text-gray-500 text-[10px] font-black uppercase tracking-[0.2em] mb-4">Item Verification</p>

@@ -450,16 +450,14 @@ export const AssignPendingJobs: React.FC<AssignPendingJobsProps> = ({
                             .filter(e => {
                                 const role = e.role?.toLowerCase();
                                 if (role === 'super_admin') return false;
-                                if (!['picker', 'packer', 'dispatcher', 'driver', 'warehouse_manager', 'receiver', 'inventory_specialist', 'admin', 'manager', 'regional_manager', 'operations_manager'].includes(role)) return false;
+                                // All warehouse/operations roles are cross-functional
+                                const warehouseRoles = [
+                                    'admin', 'manager', 'regional_manager', 'operations_manager',
+                                    'warehouse_manager', 'dispatcher', 'picker', 'packer', 'receiver',
+                                    'driver', 'inventory_specialist', 'forklift_operator'
+                                ];
+                                if (!warehouseRoles.includes(role)) return false;
                                 if (e.status !== 'Active') return false;
-
-                                if (['admin', 'manager', 'regional_manager', 'operations_manager'].includes(role)) return true;
-
-                                if (job.type === 'PICK' && role !== 'picker' && role !== 'dispatcher' && role !== 'warehouse_manager') return false;
-                                if (job.type === 'PACK' && role !== 'packer' && role !== 'picker' && role !== 'dispatcher' && role !== 'warehouse_manager') return false;
-                                if (job.type === 'PUTAWAY' && role !== 'dispatcher' && role !== 'warehouse_manager' && role !== 'inventory_specialist' && role !== 'picker') return false;
-                                if (job.type === 'RECEIVE' && role !== 'receiver' && role !== 'dispatcher' && role !== 'warehouse_manager' && role !== 'inventory_specialist' && role !== 'picker') return false;
-                                if ((job.type === 'DISPATCH' || job.type === 'DRIVER') && role !== 'dispatcher' && role !== 'driver' && role !== 'warehouse_manager') return false;
                                 return true;
                             })
                             .map(e => {

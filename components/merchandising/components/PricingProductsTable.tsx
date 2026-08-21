@@ -25,7 +25,8 @@ export const PricingProductsTable: React.FC = () => {
         handleSavePrice,
         setSelectedLocationProduct,
         setIsLocationModalOpen,
-        handleEditClick
+        handleEditClick,
+        openProductControl
     } = useMerchandising();
 
     const startIndex = (currentPage - 1) * itemsPerPage;
@@ -157,7 +158,13 @@ export const PricingProductsTable: React.FC = () => {
                                         </div>
                                         <div className="flex flex-col">
                                             <div className="flex items-center gap-2">
-                                                <p className="text-sm font-bold text-[#1E3F27] dark:text-white leading-none">{p.name}</p>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => openProductControl(p)}
+                                                    className="text-sm font-bold text-[#1E3F27] dark:text-white leading-none hover:text-[#2C5E3B] dark:hover:text-[#A9CBA2] hover:underline transition-colors text-left cursor-pointer"
+                                                >
+                                                    {p.name}
+                                                </button>
                                                 {p.sku && (
                                                     <span className="text-[10px] bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20 px-1.5 py-0.5 rounded text-[#2C5E3B] dark:text-[#A9CBA2] font-mono uppercase tracking-wider">
                                                         {p.sku}
@@ -183,6 +190,17 @@ export const PricingProductsTable: React.FC = () => {
                                 <td className="p-4 text-right">
                                     {isEditing ? (
                                         <div className="flex flex-col items-end gap-1.5">
+                                            <div className="flex items-center gap-1.5" title="Cost Price is set by Purchase Orders and cannot be edited manually">
+                                                <span className="text-[10px] text-stone-400 dark:text-stone-500 font-bold uppercase flex items-center gap-0.5">🔒 Cost:</span>
+                                                <input
+                                                    type="number"
+                                                    readOnly
+                                                    disabled
+                                                    className="w-24 bg-stone-100 dark:bg-black/40 border border-[#E2DCCE]/50 dark:border-emerald-950/10 rounded-xl px-2 py-1 text-right text-stone-400 dark:text-stone-500 font-mono outline-none cursor-not-allowed opacity-75"
+                                                    value={editForm.cost}
+                                                    aria-label="Cost Price - Read-only from PO"
+                                                />
+                                            </div>
                                             <div className="flex items-center gap-1.5">
                                                 <span className="text-[10px] text-stone-400 dark:text-stone-500 font-bold uppercase">Price:</span>
                                                 <input
@@ -191,16 +209,6 @@ export const PricingProductsTable: React.FC = () => {
                                                     value={editForm.price}
                                                     onChange={(e) => setEditForm({ ...editForm, price: parseFloat(e.target.value) || 0 })}
                                                     aria-label="Retail Price"
-                                                />
-                                            </div>
-                                            <div className="flex items-center gap-1.5">
-                                                <span className="text-[10px] text-stone-400 dark:text-stone-500 font-bold uppercase">Cost:</span>
-                                                <input
-                                                    type="number"
-                                                    className="w-24 bg-white dark:bg-black/25 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-xl px-2 py-1 text-right text-[#1E3F27] dark:text-[#EAE5D9] outline-none font-mono focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2]"
-                                                    value={editForm.cost}
-                                                    onChange={(e) => setEditForm({ ...editForm, cost: parseFloat(e.target.value) || 0 })}
-                                                    aria-label="Cost Price"
                                                 />
                                             </div>
                                         </div>
@@ -320,9 +328,9 @@ export const PricingProductsTable: React.FC = () => {
                                     ) : (
                                         <div className="flex justify-end gap-2">
                                             <button
-                                                onClick={() => handleEditClick(p)}
+                                                onClick={() => openProductControl(p)}
                                                 className="p-1.5 hover:bg-stone-100 dark:hover:bg-white/5 text-stone-600 dark:text-stone-400 hover:text-[#1E3F27] dark:hover:text-white rounded-lg transition-all"
-                                                title="Edit pricing"
+                                                title="Edit Product & Pricing"
                                                 aria-label={`Edit pricing for ${p.name}`}
                                             >
                                                 <Edit2 size={14} />

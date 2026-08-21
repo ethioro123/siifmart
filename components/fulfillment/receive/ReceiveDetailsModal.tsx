@@ -33,25 +33,13 @@ export const ReceiveDetailsModal: React.FC<ReceiveDetailsModalProps> = ({
     const resolveUser = (userId?: string) => {
         if (!userId || userId === 'System') return { name: 'System', displayId: '' };
         const isUUID = (str: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
-        let userObj = employees.find(e => 
+        const userObj = employees.find(e => 
             e.id === userId || 
             (e.name && userId && e.name.toLowerCase() === userId.toLowerCase()) || 
             (e.email && userId && e.email.toLowerCase() === userId.toLowerCase()) ||
             (e.code && userId && e.code.toLowerCase() === userId.toLowerCase())
         );
-        if (!userObj && user && userId && (
-            userId.toLowerCase() === user.id?.toLowerCase() || 
-            userId.toLowerCase() === user.email?.toLowerCase() || 
-            userId.toLowerCase() === user.name?.toLowerCase() || 
-            userId.toLowerCase() === user.employeeId?.toLowerCase()
-        )) {
-            userObj = employees.find(e => 
-                (e.email && user.email && e.email.toLowerCase() === user.email.toLowerCase()) || 
-                (e.name && user.name && e.name.toLowerCase() === user.name.toLowerCase()) || 
-                e.id === user.employeeId
-            );
-        }
-        const displayId = userObj?.code || (isUUID(userId) ? userId.slice(0, 8).toUpperCase() : userId);
+        const displayId = userObj?.code || (isUUID(userId) ? userId.slice(0, 8).toUpperCase() : '');
         return {
             name: userObj ? userObj.name : userId,
             displayId: displayId

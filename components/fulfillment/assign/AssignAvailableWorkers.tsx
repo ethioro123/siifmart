@@ -130,15 +130,13 @@ export const AssignAvailableWorkers: React.FC<AssignAvailableWorkersProps> = ({
                         if (!job) return false;
                         const role = employee.role?.toLowerCase();
 
-                        // Executive / Admin / Warehouse Manager roles can do ANY job
-                        if (['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager'].includes(role)) return true;
-
-                        if (job.type === 'PICK' && (role === 'picker' || role === 'dispatcher' || role === 'warehouse_manager')) return true;
-                        if (job.type === 'PACK' && (role === 'packer' || role === 'picker' || role === 'dispatcher' || role === 'warehouse_manager')) return true;
-                        if (job.type === 'PUTAWAY' && (role === 'dispatcher' || role === 'warehouse_manager' || role === 'inventory_specialist' || role === 'picker')) return true;
-                        if (job.type === 'RECEIVE' && (role === 'receiver' || role === 'dispatcher' || role === 'warehouse_manager' || role === 'inventory_specialist' || role === 'picker')) return true;
-                        if ((job.type === 'DRIVER' || job.type === 'DISPATCH') && (role === 'driver' || role === 'dispatcher' || role === 'warehouse_manager')) return true;
-                        return false;
+                        // All warehouse/operations roles can do any job (cross-functional)
+                        const warehouseRoles = [
+                            'super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager',
+                            'warehouse_manager', 'dispatcher', 'picker', 'packer', 'receiver',
+                            'driver', 'inventory_specialist', 'forklift_operator'
+                        ];
+                        return warehouseRoles.includes(role);
                     };
 
                     // Sort by:role match first, then by workload

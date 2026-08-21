@@ -72,9 +72,14 @@ export const BuyingAttributes: React.FC<BuyingAttributesProps> = ({
         <div className="space-y-4">
             {/* ─── HEADER ──────────────────────────────────── */}
             {/* ─── HEADER ──────────────────────────────────── */}
-            <div className="flex items-center gap-2 pb-2 border-b border-[#2C5E3B]/20 dark:border-white/5">
-                <div className="w-1.5 h-1.5 rounded-full bg-[#2C5E3B] dark:bg-[#A9CBA2] shadow-[0_0_8px_rgba(44,94,59,0.4)] dark:shadow-[0_0_8px_rgba(169,203,162,0.4)]" />
-                <span className="text-[10px] text-[#2C5E3B] dark:text-[#A9CBA2] font-black uppercase tracking-[0.2em]">Product & Procurement</span>
+            <div className="flex items-center justify-between pb-2 border-b border-[#2C5E3B]/20 dark:border-white/5">
+                <div className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-[#2C5E3B] dark:bg-[#A9CBA2] shadow-[0_0_8px_rgba(44,94,59,0.4)] dark:shadow-[0_0_8px_rgba(169,203,162,0.4)]" />
+                    <span className="text-[10px] text-[#2C5E3B] dark:text-[#A9CBA2] font-black uppercase tracking-[0.2em]">Product & Procurement</span>
+                </div>
+                <span className="text-[9px] font-bold text-stone-500 dark:text-stone-400 bg-stone-100 dark:bg-black/30 border border-stone-200 dark:border-white/10 px-2 py-0.5 rounded-md flex items-center gap-1">
+                    🔒 Establishes Master Spec for Merchandising
+                </span>
             </div>
 
             <div className="relative overflow-hidden rounded-xl p-[1px]">

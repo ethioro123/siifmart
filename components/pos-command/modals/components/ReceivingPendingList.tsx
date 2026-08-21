@@ -85,6 +85,7 @@ export const ReceivingPendingList: React.FC = () => {
                     <input
                         type="text"
                         value={orderRefScanInput}
+                        onPaste={(e) => e.preventDefault()}
                         onChange={(e) => setOrderRefScanInput(e.target.value)}
                         onKeyDown={(e) => {
                             if (e.key === 'Enter') handleScanOrderRef(orderRefScanInput);

@@ -1,18 +1,19 @@
 import React from 'react';
 import {
     Package, Tag, Hash, Layers, Box, Info, ScanBarcode, Lock, Edit2, Check, X,
-    TrendingUp, TrendingDown, DollarSign, Percent, AlertTriangle, Calendar, Building2, User, Clock
+    TrendingUp, TrendingDown, DollarSign, Percent, AlertTriangle, Calendar, Building2, User, Clock, Sparkles
 } from 'lucide-react';
 import { Product } from '../../types';
 import Modal from '../Modal';
 import { formatCompactNumber, formatPriceValue } from '../../utils/formatting';
 import { CURRENCY_SYMBOL } from '../../constants';
 import { useData } from '../../contexts/DataContext';
-import { getSellUnit, formatProductSize, getEffectivePackageSize } from '../../utils/units';
+import { getSellUnit, formatProductSize, getEffectivePackageSize, formatStockDisplay } from '../../utils/units';
 import { getRoleHierarchy, canViewCostPrice } from '../../utils/roles';
 import { useStore } from '../../contexts/CentralStore';
 import { productsService, inventoryRequestsService } from '../../services/supabase.service';
 import { ProductAttributesPanel } from './components/ProductAttributesPanel';
+import { ProductLocationBreakdown } from './components/ProductLocationBreakdown';
 
 interface ProductDetailsModalProps {
     product: Product | null;
@@ -39,7 +40,7 @@ const DetailField = ({ label, value, icon: Icon, colorClass, highlight }: { labe
 };
 
 export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ product, isOpen, onClose }) => {
-    const { movements, employees, refreshData, deleteProduct } = useData();
+    const { movements, employees, refreshData, deleteProduct, allProducts, sites } = useData();
     const { user, showToast } = useStore();
     const showCostPrice = canViewCostPrice(user?.role);
 
@@ -47,6 +48,36 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
     const [minVal, setMinVal] = React.useState<number | ''>('');
     const [maxVal, setMaxVal] = React.useState<number | ''>('');
     const [isSaving, setIsSaving] = React.useState(false);
+    const [isSmartUnitModalOpen, setIsSmartUnitModalOpen] = React.useState(false);
+
+    const locationBreakdown = React.useMemo(() => {
+        if (!product?.sku || !allProducts) return [];
+        const matches = allProducts.filter(p => p.sku === product.sku || (product.productId && p.productId === product.productId));
+
+        // Group by unique siteId to prevent duplicate site entries
+        const siteMap = new Map<string, typeof matches[0]>();
+        matches.forEach(p => {
+            const sId = p.siteId || (p as any).site_id || 'unknown';
+            // Keep the record that matches the current product ID, or the one with highest stock / latest
+            if (!siteMap.has(sId) || p.id === product.id) {
+                siteMap.set(sId, p);
+            }
+        });
+
+        return Array.from(siteMap.values()).map(p => {
+            const sId = p.siteId || (p as any).site_id;
+            const siteObj = sites?.find(s => s.id === sId);
+            return {
+                id: p.id,
+                siteName: siteObj?.name || 'Main Location',
+                location: p.location || 'General Area',
+                stock: p.stock || 0,
+                price: p.price,
+                minStock: p.minStock,
+                isCurrentSite: p.id === product.id || sId === (product.siteId || (product as any).site_id),
+            };
+        });
+    }, [product, allProducts, sites]);
 
     React.useEffect(() => {
         if (product) {
@@ -208,18 +239,32 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
                         </div>
                         <div>
                             <p className={`text-xl font-black font-mono tracking-tighter ${product.stock > 0 ? 'text-green-500' : 'text-red-500'}`}>
-                                {product.stock.toLocaleString()}
+                                {formatStockDisplay(product.stock, product)}
                             </p>
-                            <p className="text-[9px] text-gray-500 font-bold uppercase tracking-wider mt-0.5">Units in Stock</p>
+                            <p className="text-[9px] text-gray-500 font-bold uppercase tracking-wider mt-0.5">Stock Level</p>
                         </div>
                     </div>
                 </div>
 
+                {/* Multi-Site & Store Stock Locations */}
+                <ProductLocationBreakdown product={product} locationBreakdown={locationBreakdown} />
+
                 <div className="bg-white dark:bg-black/15 p-5 rounded-2xl border border-stone-200 dark:border-white/5 space-y-4 shadow-sm">
-                    <div className="flex items-center gap-2 border-b border-stone-100 dark:border-white/5 pb-2">
-                        <Info size={14} className="text-[#2C5E3B]" />
-                        <h3 className="text-[10px] font-black uppercase tracking-wider">Product Specifications</h3>
+                    <div className="flex items-center justify-between border-b border-stone-100 dark:border-white/5 pb-2">
+                        <div className="flex items-center gap-2">
+                            <Info size={14} className="text-[#2C5E3B]" />
+                            <h3 className="text-[10px] font-black uppercase tracking-wider">Product Specifications</h3>
+                        </div>
+                        <button
+                            type="button"
+                            onClick={() => setIsSmartUnitModalOpen(true)}
+                            className="px-2.5 py-1 text-[10px] font-black uppercase bg-[#2C5E3B]/10 hover:bg-[#2C5E3B]/20 text-[#2C5E3B] dark:text-[#A9CBA2] rounded-lg border border-[#2C5E3B]/25 flex items-center gap-1 transition-all cursor-pointer"
+                        >
+                            <Sparkles size={12} className="text-amber-500" />
+                            <span>Smart Unit Spec</span>
+                        </button>
                     </div>
+
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                         <DetailField label="SKU" value={product.sku} icon={Hash} />
                         <DetailField label="Barcodes" value={barcodeList.length > 0 ? <span className="font-mono">{barcodeList.join(', ')}</span> : null} icon={ScanBarcode} />

@@ -3,6 +3,7 @@ import { useStore } from '../../../../contexts/CentralStore';
 import { useData } from '../../../../contexts/DataContext';
 import { logger } from '../../../../utils/logger';
 import { convertToSellableUnits } from '../../useReceiving';
+import { Product } from '../../../../types';
 
 export function usePutawayStock() {
     const { user } = useStore();
@@ -100,25 +101,26 @@ export function usePutawayStock() {
                     logger.debug('Fulfillment', `♻️ Recycling placeholder product ${sourceProduct.id} from '${sourceProduct.location}' to '${params.location}'`);
 
                     // Update the existing placeholder to be the real record
-                    const updated = await productsService.update(sourceProduct.id, {
+                    const updates: Partial<Product> = {
                         location: params.location,
                         stock: params.quantity,
-                        expiryDate: params.expiryDate || sourceProduct.expiryDate,
-                        batchNumber: params.batchNumber || sourceProduct.batchNumber,
-                        // Carry over PO attributes from params (they travel from WMS job line item)
-                        size: params.size || sourceProduct.size,
-                        brand: params.brand || sourceProduct.brand,
-                        unit: params.unit || sourceProduct.unit,
-                        packQuantity: params.packQuantity || sourceProduct.packQuantity,
-                        category: params.category || sourceProduct.category,
-                        price: params.retailPrice || sourceProduct.price,
-                        customAttributes: params.customAttributes || sourceProduct.customAttributes,
-                        description: params.description || sourceProduct.description,
-                        minStock: params.minStock || sourceProduct.minStock,
-                        maxStock: params.maxStock || sourceProduct.maxStock,
-                        // Ensure status is valid
                         status: 'active'
-                    });
+                    };
+                    if (params.expiryDate || sourceProduct.expiryDate) updates.expiryDate = params.expiryDate || sourceProduct.expiryDate;
+                    if (params.batchNumber || sourceProduct.batchNumber) updates.batchNumber = params.batchNumber || sourceProduct.batchNumber;
+
+                    // Sync PO line item details if missing on placeholder
+                    if (!sourceProduct.size && params.size) updates.size = params.size;
+                    if (!sourceProduct.brand && params.brand) updates.brand = params.brand;
+                    if (!sourceProduct.unit && params.unit) updates.unit = params.unit;
+                    if (!sourceProduct.packQuantity && params.packQuantity) updates.packQuantity = params.packQuantity;
+                    if (!sourceProduct.category && params.category) updates.category = params.category;
+                    if (!sourceProduct.customAttributes && params.customAttributes) updates.customAttributes = params.customAttributes;
+                    if (!sourceProduct.description && params.description) updates.description = params.description;
+                    if (!sourceProduct.minStock && params.minStock) updates.minStock = params.minStock;
+                    if (!sourceProduct.maxStock && params.maxStock) updates.maxStock = params.maxStock;
+
+                    const updated = await productsService.update(sourceProduct.id, updates);
                     destProductId = updated.id;
 
                     // [FIX] Log Movement for Recycled Record

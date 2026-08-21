@@ -33,10 +33,23 @@ export const POSHeader: React.FC<POSHeaderProps> = ({ setIsFilterPanelOpen, acti
         setIsMiscItemModalOpen,
         currentStorePoints,
         storeBonus,
-        userBonusShare
+        userBonusShare,
+        lastSeenPriceUpdate,
+        markPriceUpdatesAsRead
     } = usePOS();
 
-    const { triggerSync, posSyncStatus, posPendingSyncCount, settings } = useData();
+    const { triggerSync, posSyncStatus, posPendingSyncCount, settings, products, activeSite } = useData();
+
+    // Calculate unseen price changes in active site (last 7 days)
+    const siteId = activeSite?.id;
+    const cutoff = Date.now() - 7 * 24 * 60 * 60 * 1000;
+    const unseenPriceChanges = products.filter((p: any) => {
+        const matchesSite = !siteId || p.siteId === siteId || p.site_id === siteId;
+        const priceTime = p.priceUpdatedAt || p.price_updated_at || p.updatedAt || p.updated_at;
+        if (!priceTime) return false;
+        const ts = new Date(priceTime).getTime();
+        return matchesSite && ts > cutoff && ts > (lastSeenPriceUpdate || 0);
+    });
 
     // Helper to check for Neutralino (native app mode)
     const isNativeApp = typeof window !== 'undefined' && (window as any).Neutralino;
@@ -74,8 +87,23 @@ export const POSHeader: React.FC<POSHeaderProps> = ({ setIsFilterPanelOpen, acti
                             className="ml-2 p-1.5 rounded-xl bg-[#2C5E3B]/10 hover:bg-[#2C5E3B]/20 text-[#2C5E3B] dark:text-[#A9CBA2] transition-colors flex-shrink-0"
                             aria-label="Search"
                         >
-                            <ArrowRight size={16} />
                         </button>
+                    )}
+                    {unseenPriceChanges.length > 0 && (
+                        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-blue-500/10 border border-blue-400/30 text-blue-700 dark:text-blue-300 ml-2 flex-shrink-0">
+                            <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
+                            <span className="text-[10px] font-black uppercase tracking-wider">
+                                {unseenPriceChanges.length} Price {unseenPriceChanges.length === 1 ? 'Change' : 'Changes'}
+                            </span>
+                            <button
+                                type="button"
+                                onClick={markPriceUpdatesAsRead}
+                                className="ml-1 text-[9px] font-black uppercase px-1.5 py-0.5 rounded bg-blue-500 text-white hover:bg-blue-600 transition-colors cursor-pointer"
+                                title="Dismiss price notifications"
+                            >
+                                Dismiss
+                            </button>
+                        </div>
                     )}
                 </div>
 

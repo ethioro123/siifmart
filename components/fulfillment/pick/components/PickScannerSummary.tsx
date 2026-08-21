@@ -1,5 +1,7 @@
 import React from 'react';
+import { CheckCircle } from 'lucide-react';
 import { WMSJob, Product } from '../../../../types';
+import { getSellUnit } from '../../../../utils/units';
 
 interface PickScannerSummaryProps {
     job: WMSJob;
@@ -11,43 +13,48 @@ interface PickScannerSummaryProps {
 export const PickScannerSummary: React.FC<PickScannerSummaryProps> = ({
     job,
     getProduct,
-    getItemMeasureQty,
     t,
 }) => {
+    const totalItems = job.lineItems?.length || 0;
+
     return (
-        <div className="text-center z-10 mb-8 bg-green-50 dark:bg-green-500/10 border-2 border-green-500/50 p-6 rounded-2xl shadow-[0_0_30px_rgba(34,197,94,0.1)] w-full max-w-md">
-            <p className="text-green-700 dark:text-green-400 text-lg font-bold uppercase tracking-widest mb-4">{t('warehouse.picking.allItemsPicked')}</p>
+        <div className="text-center z-10 my-4 bg-gradient-to-b from-green-500/10 to-emerald-500/5 dark:from-green-500/15 dark:to-emerald-950/20 border border-green-500/30 p-5 rounded-3xl shadow-xl w-full max-w-md backdrop-blur-md">
+            <div className="w-12 h-12 rounded-2xl bg-green-500/20 text-green-600 dark:text-green-400 flex items-center justify-center mx-auto mb-3 border border-green-500/30 shadow-inner">
+                <CheckCircle size={26} />
+            </div>
+            <h3 className="text-green-700 dark:text-green-400 text-base font-black uppercase tracking-wider mb-0.5">{t('warehouse.picking.allItemsPicked')}</h3>
+            <p className="text-[10px] text-gray-500 dark:text-gray-400 font-extrabold uppercase tracking-widest mb-4">{totalItems} {totalItems === 1 ? 'Product' : 'Products'} Picked</p>
 
-            <div className="bg-white dark:bg-black/40 rounded-xl p-4 mb-4 text-left max-h-48 overflow-y-auto border border-gray-200 dark:border-green-500/20 shadow-inner dark:shadow-none">
-                <h4 className="text-gray-500 dark:text-gray-400 text-xs font-bold uppercase tracking-widest mb-3 border-b border-gray-200 dark:border-white/10 pb-2">{t('warehouse.picking.missionSummary')}</h4>
-                <div className="flex flex-col gap-3">
-                    {job.lineItems?.map((item: any, idx: number) => (
-                        <div key={idx} className="flex justify-between items-start">
-                            <div>
-                                <p className="text-gray-900 dark:text-white text-sm font-bold line-clamp-1">{item.name}</p>
-                                <p className="text-[#2C5E3B] dark:text-[#A9CBA2] text-xs font-mono">{item.sku}</p>
+            <div className="bg-white/90 dark:bg-black/50 rounded-2xl p-3.5 mb-4 text-left max-h-56 overflow-y-auto border border-stone-200 dark:border-white/10 shadow-sm space-y-2 custom-scrollbar">
+                <h4 className="text-stone-400 dark:text-gray-500 text-[9px] font-black uppercase tracking-widest pb-1 border-b border-stone-200/50 dark:border-white/5">{t('warehouse.picking.missionSummary')}</h4>
+                <div className="space-y-1.5">
+                    {job.lineItems?.map((item: any, idx: number) => {
+                        const prod = getProduct(item);
+                        let expected = item.expectedQty || item.quantity || 1;
+                        let picked = item.pickedQty || item.quantity || 1;
+                        const unitDef = getSellUnit(prod?.unit || item.unit);
+                        const sizeStr = prod?.size || item.size;
+                        const isWeightVol = (unitDef.category === 'weight' || unitDef.category === 'volume') && !!sizeStr;
+                        const unitText = isWeightVol ? `packs (${sizeStr}${unitDef.shortLabel})` : unitDef.code !== 'UNIT' ? unitDef.shortLabel : '';
+
+                        return (
+                            <div key={idx} className="flex justify-between items-center bg-stone-50 dark:bg-white/5 px-3 py-2 rounded-xl border border-stone-200/50 dark:border-white/5 gap-2">
+                                <div className="min-w-0 flex-1">
+                                    <p className="text-gray-900 dark:text-white text-xs font-bold truncate uppercase">{item.name}</p>
+                                    <span className="text-[#2C5E3B] dark:text-[#A9CBA2] text-[9px] font-mono font-bold bg-stone-200/40 dark:bg-black/30 px-1 rounded">{item.sku}</span>
+                                </div>
+                                <div className="text-right shrink-0">
+                                    <span className="text-gray-900 dark:text-white font-mono font-black text-xs">
+                                        {picked} / {expected} <span className="text-[9px] text-gray-500 font-bold uppercase ml-0.5">{unitText}</span>
+                                    </span>
+                                </div>
                             </div>
-                            {(() => {
-                                let expected = item.expectedQty || item.quantity || 1;
-                                let picked = item.pickedQty || item.quantity || 1;
-
-                                const measureQty = getItemMeasureQty(item);
-                                if (measureQty) {
-                                    const prod = getProduct(item);
-                                    const unitDef = prod?.unit ? prod.unit : '';
-                                    const sizeNum = prod?.size ? parseFloat(prod.size as string) : 0;
-                                    const displayPickedCases = picked <= expected ? picked : (sizeNum > 0 ? picked / sizeNum : picked);
-                                    return <span className="text-gray-900 dark:text-white font-bold">{displayPickedCases} x {sizeNum} / {expected} x {sizeNum} <span className="text-[9px] lowercase opacity-80 pl-0.5">{unitDef}</span></span>;
-                                }
-
-                                return <span className="text-gray-900 dark:text-white font-bold">{picked} / {expected}</span>;
-                            })()}
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
             </div>
 
-            <p className="text-gray-600 dark:text-white text-sm opacity-80 max-w-[200px] mx-auto">{t('warehouse.picking.finalizeMissionInfo')}</p>
+            <p className="text-gray-600 dark:text-gray-300 text-xs font-medium max-w-[260px] mx-auto leading-relaxed">{t('warehouse.picking.finalizeMissionInfo')}</p>
         </div>
     );
 };

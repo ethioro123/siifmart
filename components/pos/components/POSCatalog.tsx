@@ -5,7 +5,7 @@ import { usePOS } from '../POSContext';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { CURRENCY_SYMBOL } from '../../../constants';
 import { formatPriceValue } from '../../../utils/formatting';
-import { getSellUnit } from '../../../utils/units';
+import { getSellUnit, formatStockDisplay } from '../../../utils/units';
 import { formatPackBadge } from '../../procurement/utils';
 import { Product } from '../../../types';
 
@@ -26,7 +26,7 @@ export const POSCatalog: React.FC<POSCatalogProps> = ({
 }) => {
     const { t } = useLanguage();
     const navigate = useNavigate();
-    const { filteredProducts, addToCart } = usePOS();
+    const { filteredProducts, addToCart, lastSeenPriceUpdate } = usePOS();
 
     const isNativeApp = typeof window !== 'undefined' && (window as any).Neutralino;
     const native = isNativeApp ? (window as any).Neutralino.os : null;
@@ -105,20 +105,35 @@ export const POSCatalog: React.FC<POSCatalogProps> = ({
                                                 {isOutOfStock ? (
                                                     <span>{t('common.outOfStock')}</span>
                                                 ) : (
-                                                    <>
-                                                        {product.stock.toLocaleString(undefined, { maximumFractionDigits: getSellUnit(product.unit).category === 'count' ? 0 : 2 })}
-                                                        <span className="text-[7px] opacity-70 uppercase">{getSellUnit(product.unit).shortLabel}</span>
-                                                    </>
+                                                    <span>{formatStockDisplay(product.stock, product, { compact: true })}</span>
                                                 )}
                                             </div>
                                         );
                                     })()}
 
-                                    {product.isOnSale && (
-                                        <div className="absolute top-2.5 left-2.5 bg-gradient-to-r from-amber-500 to-amber-600 px-2 py-0.5 rounded-lg text-[7px] font-black text-white uppercase tracking-wider shadow-sm">
-                                            {t('pos.sale')}
-                                        </div>
-                                    )}
+                                     {(() => {
+                                         const priceTime = (product as any).priceUpdatedAt || (product as any).price_updated_at || (product as any).updatedAt || (product as any).updated_at;
+                                         const cutoff = Date.now() - 7 * 24 * 60 * 60 * 1000;
+                                         if (priceTime) {
+                                             const ts = new Date(priceTime).getTime();
+                                             if (ts > cutoff && ts > (lastSeenPriceUpdate || 0)) {
+                                                 return (
+                                                     <div className="absolute top-2.5 left-2.5 bg-blue-600 text-white px-2 py-0.5 rounded-lg text-[8px] font-black uppercase tracking-wider shadow-md flex items-center gap-1 z-10">
+                                                         <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                                                         Price Changed
+                                                     </div>
+                                                 );
+                                             }
+                                         }
+                                         if (product.isOnSale) {
+                                             return (
+                                                 <div className="absolute top-2.5 left-2.5 bg-gradient-to-r from-amber-500 to-amber-600 px-2 py-0.5 rounded-lg text-[7px] font-black text-white uppercase tracking-wider shadow-sm">
+                                                     {t('pos.sale')}
+                                                 </div>
+                                             );
+                                         }
+                                         return null;
+                                     })()}
                                 </div>
 
                                 <div className="flex-1 flex flex-col min-w-0">
@@ -132,15 +147,33 @@ export const POSCatalog: React.FC<POSCatalogProps> = ({
                                         ) : null;
                                     })()}
                                     <div className="mt-auto pt-1.5 flex items-center justify-between border-t border-[#E2DCCE]/30 dark:border-white/5">
-                                        <div className="flex items-baseline gap-1.5">
-                                            {product.isOnSale && product.salePrice ? (
-                                                <>
-                                                    <p className="text-amber-600 dark:text-amber-400 font-extrabold text-base tracking-tight">{CURRENCY_SYMBOL} {formatPriceValue(product.salePrice)}{product.unit && getSellUnit(product.unit).code !== 'UNIT' ? <span className="text-[8px] text-amber-600/60 dark:text-amber-400/60 font-bold">/{getSellUnit(product.unit).shortLabel}</span> : null}</p>
-                                                    <p className="text-stone-400 dark:text-gray-600 text-[10px] line-through">{CURRENCY_SYMBOL} {formatPriceValue(product.price)}</p>
-                                                </>
-                                            ) : (
-                                                <p className="text-[#2C5E3B] dark:text-[#A9CBA2] font-black text-base tracking-tight">{CURRENCY_SYMBOL} {formatPriceValue(product.price)}{product.unit && getSellUnit(product.unit).code !== 'UNIT' ? <span className="text-[8px] text-[#4D6E56]/60 dark:text-gray-500 font-bold">/{getSellUnit(product.unit).shortLabel}</span> : null}</p>
-                                            )}
+                                        <div className="flex flex-col">
+                                            {(() => {
+                                                const priceTime = (product as any).priceUpdatedAt || (product as any).price_updated_at || (product as any).updatedAt || (product as any).updated_at;
+                                                const cutoff = Date.now() - 7 * 24 * 60 * 60 * 1000;
+                                                if (priceTime) {
+                                                    const ts = new Date(priceTime).getTime();
+                                                    if (ts > cutoff && ts > (lastSeenPriceUpdate || 0)) {
+                                                        return (
+                                                            <span className="inline-flex items-center gap-1 text-[8px] font-black text-blue-600 dark:text-blue-400 uppercase mb-0.5 tracking-wider">
+                                                                <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
+                                                                Price Updated
+                                                            </span>
+                                                        );
+                                                    }
+                                                }
+                                                return null;
+                                            })()}
+                                            <div className="flex items-baseline gap-1.5">
+                                                {product.isOnSale && product.salePrice ? (
+                                                    <>
+                                                        <p className="text-amber-600 dark:text-amber-400 font-extrabold text-base tracking-tight">{CURRENCY_SYMBOL} {formatPriceValue(product.salePrice)}{product.unit && getSellUnit(product.unit).code !== 'UNIT' ? <span className="text-[8px] text-amber-600/60 dark:text-amber-400/60 font-bold">/{getSellUnit(product.unit).shortLabel}</span> : null}</p>
+                                                        <p className="text-stone-400 dark:text-gray-600 text-[10px] line-through">{CURRENCY_SYMBOL} {formatPriceValue(product.price)}</p>
+                                                    </>
+                                                ) : (
+                                                    <p className="text-[#2C5E3B] dark:text-[#A9CBA2] font-black text-base tracking-tight">{CURRENCY_SYMBOL} {formatPriceValue(product.price)}{product.unit && getSellUnit(product.unit).code !== 'UNIT' ? <span className="text-[8px] text-[#4D6E56]/60 dark:text-gray-500 font-bold">/{getSellUnit(product.unit).shortLabel}</span> : null}</p>
+                                                )}
+                                            </div>
                                         </div>
                                         <div className="w-8 h-8 rounded-xl bg-[#2C5E3B]/10 dark:bg-white/5 border border-[#2C5E3B]/20 dark:border-white/10 flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:bg-[#2C5E3B]/20 dark:group-hover:bg-white/10">
                                             <Plus size={14} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />

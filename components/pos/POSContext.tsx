@@ -52,24 +52,12 @@ export const POSProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     
     // --- Product Search & Filtering hook ---
     const {
-        searchTerm, setSearchTerm,
-        selectedCategory, setSelectedCategory,
-        selectedDepartment, setSelectedDepartment,
-        sortBy, setSortBy,
-        minPriceFilter, setMinPriceFilter,
-        maxPriceFilter, setMaxPriceFilter,
-        selectedBrands, setSelectedBrands,
-        selectedVelocities, setSelectedVelocities,
-        stockStatusFilter, setStockStatusFilter,
-        onSaleOnly, setOnSaleOnly,
-        competitorMatchedOnly, setCompetitorMatchedOnly,
-        serverSearchResults, isSearchingServer,
-        resetAllFilters,
-        categories,
-        filteredProducts
-    } = usePOSProductFilters({
-        products, activeSite, transfers
-    });
+        searchTerm, setSearchTerm, selectedCategory, setSelectedCategory, selectedDepartment, setSelectedDepartment,
+        sortBy, setSortBy, minPriceFilter, setMinPriceFilter, maxPriceFilter, setMaxPriceFilter,
+        selectedBrands, setSelectedBrands, selectedVelocities, setSelectedVelocities,
+        stockStatusFilter, setStockStatusFilter, onSaleOnly, setOnSaleOnly, competitorMatchedOnly, setCompetitorMatchedOnly,
+        serverSearchResults, isSearchingServer, resetAllFilters, categories, filteredProducts
+    } = usePOSProductFilters({ products, activeSite, transfers });
     const [serverCustomerResults, setServerCustomerResults] = useState<Customer[]>([]);
     const [isSearchingCustomerServer, setIsSearchingCustomerServer] = useState(false);
     const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
@@ -103,6 +91,18 @@ export const POSProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const [shiftNotes, setShiftNotes] = useState('');
     const activeShift = shifts.find((s: ShiftRecord) => s.cashierId === user?.id && s.status === 'Open');
     const [shiftStartTime, setShiftStartTime] = useState(activeShift?.startTime || new Date().toISOString());
+
+    // Price Change Notification Read State
+    const [lastSeenPriceUpdate, setLastSeenPriceUpdate] = useState<number>(() => {
+        const stored = localStorage.getItem('siifmart_pos_terminal_price_seen');
+        return stored ? parseInt(stored, 10) : 0;
+    });
+
+    const markPriceUpdatesAsRead = () => {
+        const now = Date.now();
+        setLastSeenPriceUpdate(now);
+        localStorage.setItem('siifmart_pos_terminal_price_seen', String(now));
+    };
 
     const [isReceivingModalOpen, setIsReceivingModalOpen] = useState(false);
     const [scannedBarcode, setScannedBarcode] = useState('');
@@ -222,13 +222,16 @@ export const POSProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const isPaymentValid = selectedPaymentMethod === 'Cash' ? parseFloat(amountTendered || '0') >= total : true;
 
     const priceUpdatedProducts = useMemo(() => {
-        const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+        const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+        const siteId = activeSite?.id;
         return products.filter((p: Product) => {
-            if (!p.priceUpdatedAt && !p.price_updated_at) return false;
-            const date = new Date(p.priceUpdatedAt || p.price_updated_at || '');
-            return date > twentyFourHoursAgo;
+            const matchesSite = !siteId || p.siteId === siteId || (p as any).site_id === siteId;
+            const timeStr = (p as any).priceUpdatedAt || (p as any).price_updated_at || (p as any).updatedAt || (p as any).updated_at;
+            if (!timeStr) return false;
+            const date = new Date(timeStr);
+            return matchesSite && date > sevenDaysAgo;
         });
-    }, [products]);
+    }, [products, activeSite]);
 
     const [isPriceUpdatesModalOpen, setIsPriceUpdatesModalOpen] = useState(false);
 
@@ -437,6 +440,7 @@ export const POSProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         setIsPriceUpdatesModalOpen,
         isShiftModalOpen, setIsShiftModalOpen, closingStep, setClosingStep, cashDenominations, setCashDenominations,
         discrepancyReason, setDiscrepancyReason, countedCash, setCountedCash, shiftNotes, setShiftNotes,
+        lastSeenPriceUpdate, markPriceUpdatesAsRead,
         activeShift, shiftStartTime, isReceivingModalOpen, setIsReceivingModalOpen, scannedBarcode, setScannedBarcode,
         receivedItems, setReceivedItems, isQRScannerOpen, setIsQRScannerOpen, receivingMode, setReceivingMode,
         selectedTransferForReceiving, setSelectedTransferForReceiving, transferReceivingItems, setTransferReceivingItems,
@@ -469,7 +473,7 @@ export const POSProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         appliedDiscountCodeDetails, isDiscountModalOpen, discountCodeInput, discountCodeError,
         isValidatingCode, isMiscItemModalOpen, miscItem, isRoundingEnabled, roundingAdjustment,
         isReturnModalOpen, returnSearchId, foundSaleForReturn, returnConfig, priceUpdatedProducts,
-        isPriceUpdatesModalOpen, isShiftModalOpen, closingStep, cashDenominations,
+        isPriceUpdatesModalOpen, lastSeenPriceUpdate, isShiftModalOpen, closingStep, cashDenominations,
         discrepancyReason, countedCash, shiftNotes, activeShift, shiftStartTime,
         isReceivingModalOpen, scannedBarcode, receivedItems, isQRScannerOpen, receivingMode,
         selectedTransferForReceiving, transferReceivingItems, isConfirmingReceive,

@@ -6,6 +6,7 @@ import { PromoModal } from '../components/merchandising/PromoModal';
 import { RuleModal } from '../components/merchandising/RuleModal';
 import { BulkDiscountModal } from '../components/merchandising/BulkDiscountModal';
 import { LocationModal } from '../components/merchandising/LocationModal';
+import { ProductControlModal } from '../components/merchandising/ProductControlModal';
 
 // Split Tabs
 import { MerchandisingProvider } from '../components/merchandising/MerchandisingContext';
@@ -51,7 +52,12 @@ export default function Pricing() {
 
       isLocationModalOpen,
       setIsLocationModalOpen,
-      selectedLocationProduct
+      selectedLocationProduct,
+
+      isProductControlOpen,
+      setIsProductControlOpen,
+      selectedControlProduct,
+      refreshData
    } = state;
 
    return (
@@ -199,6 +205,14 @@ export default function Pricing() {
                products={products}
                sites={sites}
                allOrders={allOrders}
+            />
+
+            {/* --- PRODUCT CONTROL MODAL --- */}
+            <ProductControlModal
+               product={selectedControlProduct}
+               isOpen={isProductControlOpen}
+               onClose={() => setIsProductControlOpen(false)}
+               onSaved={refreshData}
             />
          </div>
       </MerchandisingProvider>

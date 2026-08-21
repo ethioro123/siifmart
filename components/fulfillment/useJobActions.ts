@@ -243,19 +243,12 @@ export const useJobActions = (deps: UseJobActionsDeps) => {
 
             const getRoleMatch = (employee: any, job: WMSJob) => {
                 const role = (employee.role || '').toLowerCase();
-                const type = (job.type || '').toUpperCase();
-                
-                if (['manager', 'regional_manager', 'operations_manager'].includes(role)) return true;
-
-                // Specific role restrictions for specialized jobs
-                if (type === 'PICK' && !['picker', 'dispatcher', 'warehouse_manager'].includes(role)) return false;
-                if (type === 'PACK' && !['packer', 'picker', 'dispatcher', 'warehouse_manager'].includes(role)) return false;
-                if (type === 'PUTAWAY' && !['inventory_specialist', 'picker', 'dispatcher', 'warehouse_manager'].includes(role)) return false;
-                if (type === 'RECEIVE' && !['receiver', 'inventory_specialist', 'picker', 'dispatcher', 'warehouse_manager'].includes(role)) return false;
-                if ((type === 'DRIVER' || type === 'DISPATCH') && !['driver', 'dispatcher', 'warehouse_manager'].includes(role)) return false;
-                
-                // Allow any active worker for general tasks (COUNT, REPLENISH) if they passed the specific checks above
-                return true;
+                const warehouseRoles = [
+                    'super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager',
+                    'warehouse_manager', 'dispatcher', 'picker', 'packer', 'receiver',
+                    'driver', 'inventory_specialist', 'forklift_operator'
+                ];
+                return warehouseRoles.includes(role);
             };
 
             let assignedCount = 0;

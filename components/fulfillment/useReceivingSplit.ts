@@ -7,6 +7,7 @@ import {
 } from '../../services/supabase.service';
 import { logger } from '../../utils/logger';
 import { convertToSellableUnits } from './useReceiving';
+import { categoryZonesService } from '../../services/category-zones.service';
 
 interface UseReceivingSplitDeps {
     orders: PurchaseOrder[];
@@ -76,6 +77,7 @@ export const useReceivingSplit = (deps: UseReceivingSplitDeps) => {
                 let targetProductId = variant.productId || itemId;
                 let productSku = variant.sku;
                 let primaryBarcode = variant.barcode;
+                let existingProduct: Product | undefined;
 
                 // 1. Handle New Product Creation
                 if (variant.skuType === 'new') {
@@ -123,68 +125,88 @@ export const useReceivingSplit = (deps: UseReceivingSplitDeps) => {
                 else if (variant.productId || itemId) {
                     const prodId = variant.productId || item.productId;
                     const prodSku = variant.sku || item.sku;
+                    const targetSiteId = po.siteId || activeSite?.id || '';
 
-                    let existingProduct = allProducts.find(p => 
+                    // First find local product
+                    let localProduct = allProducts.find(p => 
+                        ((prodId && p.id === prodId) || (prodSku && p.sku === prodSku)) &&
+                        (p.siteId === targetSiteId || (p as any).site_id === targetSiteId)
+                    );
+                    
+                    if (!localProduct && products) {
+                        localProduct = products.find(p => 
+                            ((prodId && p.id === prodId) || (prodSku && p.sku === prodSku)) &&
+                            (p.siteId === targetSiteId || (p as any).site_id === targetSiteId)
+                        );
+                    }
+
+                    // Also find global product to use as template
+                    let globalProduct = allProducts.find(p => 
                         (prodId && p.id === prodId) || 
                         (prodSku && p.sku === prodSku)
                     );
-                    if (!existingProduct && products) {
-                        existingProduct = products.find(p => 
-                            (prodId && p.id === prodId) || 
-                            (prodSku && p.sku === prodSku)
-                        );
-                    }
-                    if (!existingProduct) {
+
+                    if (!localProduct && !globalProduct) {
                         // Let's try fetching it from DB to be absolutely sure!
                         try {
                             if (prodId && prodId.length === 36 && !prodId.startsWith('variant-')) { // Looks like a UUID
-                                existingProduct = await productsService.getById(prodId);
+                                globalProduct = await productsService.getById(prodId);
                             }
                         } catch (e) {
                             logger.warn('useReceivingSplit', 'Could not fetch product by ID from DB in receivePOSplit');
                         }
-                        if (!existingProduct && prodSku) {
+                        if (!globalProduct && prodSku) {
                             try {
-                                existingProduct = await productsService.getBySKU(prodSku) || undefined;
+                                globalProduct = await productsService.getBySKU(prodSku) || undefined;
                             } catch (e) {
                                 logger.warn('useReceivingSplit', 'Could not fetch product by SKU from DB in receivePOSplit');
                             }
                         }
                     }
 
-                    if (existingProduct) {
-                        targetProductId = existingProduct.id;
-                        productSku = existingProduct.sku;
+                    if (localProduct) {
+                        targetProductId = localProduct.id;
+                        productSku = localProduct.sku;
 
                         const updates: any = {};
                         
                         // Sync PO line item details if they are missing
-                        if (!existingProduct.size && item.size) updates.size = item.size;
-                        if (!existingProduct.brand && item.brand) updates.brand = item.brand;
-                        if (!existingProduct.unit && item.unit) updates.unit = item.unit;
-                        if (!existingProduct.category && item.category) updates.category = item.category;
-                        if ((!existingProduct.price || existingProduct.price === 0) && item.retailPrice) updates.price = item.retailPrice;
-                        if ((!existingProduct.costPrice || existingProduct.costPrice === 0) && item.unitCost) {
+                        if (!localProduct.size && item.size) updates.size = item.size;
+                        if (!localProduct.brand && item.brand) updates.brand = item.brand;
+                        if (!localProduct.unit && item.unit) updates.unit = item.unit;
+                        if (!localProduct.category && item.category) updates.category = item.category;
+                        if (item.retailPrice && item.retailPrice > 0 && item.retailPrice !== localProduct.price) {
+                            updates.price = item.retailPrice;
+                            updates.priceUpdatedAt = new Date().toISOString();
+                            if (targetSiteId && item.sku) {
+                                productsService.updatePriceBySku(item.sku, targetSiteId, item.retailPrice).catch(e => {
+                                    logger.warn('useReceivingSplit', `Failed to sync price across SKU ${item.sku}`, e);
+                                });
+                            }
+                        }
+                        if ((!localProduct.costPrice || localProduct.costPrice === 0) && item.unitCost) {
                             const unitsPerOrderUnit = convertToSellableUnits(1, item);
                             updates.costPrice = unitsPerOrderUnit > 0 ? (item.unitCost / unitsPerOrderUnit) : item.unitCost;
                         }
-                        if (!existingProduct.customAttributes && item.customAttributes) updates.customAttributes = item.customAttributes;
-                        if (!existingProduct.description && item.description) updates.description = item.description;
-                        if (!existingProduct.minStock && item.minStock) updates.minStock = item.minStock;
-                        if (!existingProduct.maxStock && item.maxStock) updates.maxStock = item.maxStock;
+                        if (!localProduct.customAttributes && item.customAttributes) updates.customAttributes = item.customAttributes;
+                        if (!localProduct.description && item.description) updates.description = item.description;
+                        if (!localProduct.minStock && item.minStock) updates.minStock = item.minStock;
+                        if (!localProduct.maxStock && item.maxStock) updates.maxStock = item.maxStock;
+                        if (variant.expiryDate) updates.expiryDate = variant.expiryDate;
+                        if (variant.batchNumber) updates.batchNumber = variant.batchNumber;
 
-                        const currentBarcodes = Array.isArray(existingProduct.barcodes) 
-                            ? [...existingProduct.barcodes] 
+                        const currentBarcodes = Array.isArray(localProduct.barcodes) 
+                            ? [...localProduct.barcodes] 
                             : [];
                         let changed = false;
 
                         // Check if variant.barcode is new and needs to be registered
                         if (variant.barcode) {
                             const cleanBarcode = variant.barcode.trim();
-                            if (!existingProduct.barcode) {
+                            if (!localProduct.barcode) {
                                 updates.barcode = cleanBarcode;
                                 changed = true;
-                            } else if (existingProduct.barcode !== cleanBarcode && !currentBarcodes.includes(cleanBarcode)) {
+                            } else if (localProduct.barcode !== cleanBarcode && !currentBarcodes.includes(cleanBarcode)) {
                                 currentBarcodes.push(cleanBarcode);
                                 changed = true;
                             }
@@ -192,9 +214,10 @@ export const useReceivingSplit = (deps: UseReceivingSplitDeps) => {
 
                         // Check if variant.barcodes has any new aliases
                         if (variant.barcodes && variant.barcodes.length > 0) {
+                            const existingBarcode = localProduct.barcode;
                             variant.barcodes.forEach(b => {
                                 const cleanB = b.trim();
-                                if (cleanB !== existingProduct.barcode && !currentBarcodes.includes(cleanB)) {
+                                if (cleanB !== existingBarcode && !currentBarcodes.includes(cleanB)) {
                                     currentBarcodes.push(cleanB);
                                     changed = true;
                                 }
@@ -206,11 +229,11 @@ export const useReceivingSplit = (deps: UseReceivingSplitDeps) => {
                                 updates.barcodes = currentBarcodes;
                             }
                             try {
-                                const updated = await productsService.update(existingProduct.id, updates);
+                                const updated = await productsService.update(targetProductId, updates);
                                 if (updated) {
                                     // Immediately update local states to prevent state desync
-                                    setProducts?.(prev => prev.map(p => p.id === existingProduct.id ? updated : p));
-                                    setAllProducts?.(prev => prev.map(p => p.id === existingProduct.id ? updated : p));
+                                    setProducts?.(prev => prev.map(p => p.id === targetProductId ? updated : p));
+                                    setAllProducts?.(prev => prev.map(p => p.id === targetProductId ? updated : p));
                                 }
                             } catch (err) {
                                 logger.warn('useReceivingSplit', 'Could not sync product details in DB during receive split', { error: err instanceof Error ? err.message : JSON.stringify(err) });
@@ -220,28 +243,30 @@ export const useReceivingSplit = (deps: UseReceivingSplitDeps) => {
                         // Create product placeholder record in DB
                         try {
                             const created = await productsService.create({
-                                siteId: po.siteId || activeSite?.id || '',
-                                name: variant.productName || item.productName || `Item ${variant.sku || productSku}`,
+                                siteId: targetSiteId,
+                                name: variant.productName || item.productName || globalProduct?.name || `Item ${variant.sku || productSku}`,
                                 sku: variant.sku || item.sku || productSku,
-                                barcode: variant.barcode || (item as any).barcode || '',
-                                barcodes: variant.barcodes || (item as any).barcodes || [],
-                                price: item.retailPrice || 0,
+                                barcode: variant.barcode || (item as any).barcode || globalProduct?.barcode || '',
+                                barcodes: variant.barcodes || (item as any).barcodes || globalProduct?.barcodes || [],
+                                price: item.retailPrice || globalProduct?.price || 0,
                                 costPrice: (() => {
                                     const unitsPerOrderUnit = convertToSellableUnits(1, item);
-                                    return unitsPerOrderUnit > 0 ? (item.unitCost / unitsPerOrderUnit) : (item.unitCost || 0);
+                                    return unitsPerOrderUnit > 0 ? (item.unitCost / unitsPerOrderUnit) : (item.unitCost || globalProduct?.costPrice || 0);
                                 })(),
-                                category: item.category || 'Uncategorized',
+                                category: item.category || globalProduct?.category || 'Uncategorized',
                                 status: 'active',
                                 stock: 0,
                                 location: 'On Order',
-                                size: item.size || '',
-                                brand: item.brand || '',
-                                unit: item.unit || 'UNIT',
-                                packQuantity: item.packQuantity || 1,
-                                customAttributes: item.customAttributes || null,
-                                description: item.description || '',
-                                minStock: item.minStock || 0,
-                                maxStock: item.maxStock || 0
+                                expiryDate: variant.expiryDate,
+                                batchNumber: variant.batchNumber,
+                                size: item.size || globalProduct?.size || '',
+                                brand: item.brand || globalProduct?.brand || '',
+                                unit: item.unit || globalProduct?.unit || 'UNIT',
+                                packQuantity: item.packQuantity || globalProduct?.packQuantity || 1,
+                                customAttributes: item.customAttributes || globalProduct?.customAttributes || null,
+                                description: item.description || globalProduct?.description || '',
+                                minStock: item.minStock || globalProduct?.minStock || 0,
+                                maxStock: item.maxStock || globalProduct?.maxStock || 0
                             } as any);
                             if (created) {
                                 targetProductId = created.id;
@@ -257,14 +282,39 @@ export const useReceivingSplit = (deps: UseReceivingSplitDeps) => {
                     }
                 }
 
+                // SMART ROUTING LOGIC
+                let smartSuggestedLocation = '';
+                
+                // 1. SKU Memory: Check if the product already has a valid location in the system
+                if (existingProduct?.location && existingProduct.location !== 'On Order' && existingProduct.location !== 'Receiving Dock') {
+                    smartSuggestedLocation = existingProduct.location;
+                } else {
+                    // 2. Category Routing: Look up default zone for the product's category
+                    try {
+                        const targetSiteId = po.siteId || activeSite?.id || '';
+                        const itemCat = item.category || '';
+                        if (targetSiteId && itemCat) {
+                            const categoryMappings = await categoryZonesService.getMappings(targetSiteId);
+                            const match = categoryMappings.find(m => m.category.toLowerCase() === itemCat.toLowerCase());
+                            if (match?.defaultZone) {
+                                smartSuggestedLocation = match.defaultZone;
+                                logger.info('useReceivingSplit', `🎯 Smart Routing: Category "${itemCat}" mapped to zone "${smartSuggestedLocation}"`);
+                            }
+                        }
+                    } catch (e) {
+                        logger.warn('useReceivingSplit', 'Category routing lookup failed (using fallback logic)');
+                    }
+                }
+
                 const newJob: Omit<WMSJob, 'id'> = {
+                    siteId: po.siteId || activeSite?.id || '',
+                    site_id: po.siteId || activeSite?.id || '',
                     type: 'PUTAWAY',
                     priority: 'Normal',
                     status: 'Pending',
                     assignedTo: undefined,
-                    location: locationId || 'Receiving Dock',
+                    location: 'Receiving Dock',
                     items: 1,
-                    siteId: po.siteId || activeSite?.id || '',
                     orderRef: po.id,
                     createdBy: actionUser?.name || 'System',
                     lineItems: [{
@@ -276,8 +326,10 @@ export const useReceivingSplit = (deps: UseReceivingSplitDeps) => {
                         status: 'Pending',
                         // Advanced fields
                         barcode: primaryBarcode,
+                        expiryDate: variant.expiryDate,
                         batchNumber: variant.batchNumber,
                         condition: (variant.condition || 'Good') as any,
+                        suggestedLocation: smartSuggestedLocation || undefined,
                         // Pass pricing data for labels and inventory creation
                         cost: item.unitCost,
                         retailPrice: item.retailPrice,

@@ -242,3 +242,56 @@ export const extractSkuFromScan = (val: string): string => {
     }
     return trimmed;
 };
+
+export interface LocationParts {
+    zone: string;
+    aisle: string;
+    bin: string;
+}
+
+export const parseLocationParts = (location?: string | null): LocationParts | null => {
+    if (!location) return null;
+    
+    // 1. Remove keywords and clean up
+    const clean = location.replace(/zone|aisle|bay|bin|shelf/gi, '').trim().toUpperCase();
+
+    // 2. Compact format: e.g. A0607
+    // Must be exactly 1 char A-Z followed by 2-4 digits to avoid matching random text
+    const match = clean.match(/^([A-Z])(\d{1,2})(\d{1,2})$/);
+    if (match) {
+        return {
+            zone: match[1],
+            aisle: match[2].padStart(2, '0'),
+            bin: match[3].padStart(2, '0')
+        };
+    }
+
+    // 3. Hyphenated or Space-separated format: e.g. A-06-07, A 06 07, A-06-07-01
+    const parts = clean.split(/[\s-]+/).filter(Boolean);
+    
+    if (parts.length >= 3) {
+        return {
+            zone: parts[0],
+            aisle: parts[1],
+            bin: parts.slice(2).join('-')
+        };
+    }
+
+    if (parts.length === 2) {
+        return {
+            zone: parts[0],
+            aisle: parts[1],
+            bin: '—'
+        };
+    }
+    
+    if (parts.length === 1) {
+        return {
+            zone: parts[0],
+            aisle: '—',
+            bin: '—'
+        };
+    }
+
+    return null;
+};

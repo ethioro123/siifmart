@@ -80,20 +80,37 @@ export const PackTab: React.FC = () => {
                 const workerName = (userObj?.name || userId || '').toLowerCase();
                 const workerCode = (userObj?.code || '').toLowerCase();
 
-                const matchesItems = j.lineItems?.some((item: any) => 
-                    (item.name || '').toLowerCase().includes(q) ||
-                    (item.productName || '').toLowerCase().includes(q) ||
-                    (item.sku || '').toLowerCase().includes(q)
-                );
+                const qRaw = packSearch.toLowerCase();
+                const qClean = qRaw.replace(/[-\s]/g, '');
+
+                const matchesItems = j.lineItems?.some((item: any) => {
+                    const itemName = (item.name || item.productName || '').toLowerCase();
+                    const itemSku = (item.sku || '').toLowerCase();
+                    const itemSkuClean = itemSku.replace(/[-\s]/g, '');
+                    
+                    const prod = products?.find(p => p.id === item.productId || p.sku === item.sku);
+                    const prodBarcode = (prod?.barcode || '').toLowerCase();
+                    const prodBarcodeClean = prodBarcode.replace(/[-\s]/g, '');
+                    const prodCategory = (prod?.category || '').toLowerCase();
+
+                    return (
+                        itemName.includes(qRaw) ||
+                        itemSku.includes(qRaw) ||
+                        (itemSkuClean.length > 0 && itemSkuClean.includes(qClean)) ||
+                        (prodBarcode.length > 0 && prodBarcode.includes(qRaw)) ||
+                        (prodBarcodeClean.length > 0 && prodBarcodeClean.includes(qClean)) ||
+                        prodCategory.includes(qRaw)
+                    );
+                });
 
                 if (
-                    !cleanJobId.includes(q) &&
-                    !j.id.toLowerCase().includes(q) &&
-                    !orderRefStr.includes(q) &&
-                    !workerName.includes(q) &&
-                    !workerCode.includes(q) &&
-                    !noteStr.includes(q) &&
-                    !jobNum.includes(q) &&
+                    !cleanJobId.includes(qRaw) &&
+                    !j.id.toLowerCase().includes(qRaw) &&
+                    !orderRefStr.includes(qRaw) &&
+                    !workerName.includes(qRaw) &&
+                    !workerCode.includes(qRaw) &&
+                    !noteStr.includes(qRaw) &&
+                    !jobNum.includes(qRaw) &&
                     !matchesItems
                 ) {
                     return false;
@@ -258,17 +275,7 @@ export const PackTab: React.FC = () => {
                 <div className="flex-1 overflow-hidden flex flex-col">
                     {viewMode === 'Process' ? (
                         <>
-                            <PackGlobalScanBar
-                                scanInput={scanInput}
-                                setScanInput={setScanInput}
-                                isScanning={isScanning}
-                                scanSuccess={scanSuccess}
-                                scanError={scanError}
-                                onSubmit={handleGlobalScan}
-                                t={t}
-                            />
-
-                            <div className={`flex-1 overflow-hidden ${scanSuccess || scanError ? 'mt-4' : ''}`}>
+                            <div className="flex-1 overflow-hidden">
                                 <PackList
                                     filteredPackJobs={filteredPackJobs}
                                     paginatedPackJobs={paginatedPackJobs}

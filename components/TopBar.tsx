@@ -6,6 +6,7 @@ import { useGamification } from '../contexts/GamificationContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import { tasksService } from '../services/supabase.service';
+import { authService } from '../services/auth.service';
 import { supabase } from '../lib/supabase';
 import { canAccessModule } from '../utils/permissions';
 
@@ -306,15 +307,20 @@ export default function TopBar() {
          addNotification('alert', 'Failed to create task');
       }
    };
-
    const handleRefresh = async () => {
       if (isRefreshing) return;
       setIsRefreshing(true);
       try {
+         // Verify active session before reloading to guarantee user is never logged out
+         const session = await authService.getSession();
+         if (session) {
+            window.location.reload();
+            return;
+         }
          await refreshData();
          addNotification('success', 'Data refreshed successfully');
       } catch {
-         addNotification('alert', 'Failed to refresh data');
+         window.location.reload();
       } finally {
          setTimeout(() => setIsRefreshing(false), 800);
       }
@@ -369,8 +375,9 @@ export default function TopBar() {
             {/* Refresh Button */}
             <button 
                onClick={handleRefresh}
-               className={`hidden sm:flex p-2 rounded-xl border border-[#E2DCCE] dark:border-emerald-950/20 bg-white/50 dark:bg-black/10 text-[#4D6E56] dark:text-[#A9CBA2] hover:text-[#2C5E3B] dark:hover:text-white hover:border-[#2C5E3B]/30 dark:hover:border-emerald-800/30 transition-all cursor-pointer ${isRefreshing ? 'animate-spin text-[#2C5E3B] dark:text-[#A9CBA2]' : ''}`}
-               title="Refresh Intelligence"
+               className={`flex p-2 rounded-xl border border-[#E2DCCE] dark:border-emerald-950/20 bg-white/50 dark:bg-black/10 text-[#4D6E56] dark:text-[#A9CBA2] hover:text-[#2C5E3B] dark:hover:text-white hover:border-[#2C5E3B]/30 dark:hover:border-emerald-800/30 transition-all cursor-pointer ${isRefreshing ? 'animate-spin text-[#2C5E3B] dark:text-[#A9CBA2]' : ''}`}
+               title="Reload Page"
+               aria-label="Reload Page"
             >
                <RefreshCw size={16} />
             </button>

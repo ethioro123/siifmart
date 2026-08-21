@@ -28,6 +28,9 @@ export interface POSContextType {
     competitorMatchedOnly: boolean;
     setCompetitorMatchedOnly: React.Dispatch<React.SetStateAction<boolean>>;
     resetAllFilters: () => void;
+    // Price Update Notification State
+    lastSeenPriceUpdate: number;
+    markPriceUpdatesAsRead: () => void;
 
     serverSearchResults: Product[];
     isSearchingServer: boolean;

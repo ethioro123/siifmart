@@ -178,14 +178,13 @@ export const PackScanner: React.FC<PackScannerProps> = ({
                 setMatchedIndex(foundIndex);
                 const matchedItem = job.lineItems![foundIndex];
                 const prod = getProduct(matchedItem);
-                // measureQty now falls back to item.unit+item.size if product not found
-                const measureQty = getItemMeasureQty(matchedItem, prod);
                 const effectiveUnit = prod?.unit || matchedItem?.unit || 'UNIT';
                 setSelectedUnit(effectiveUnit);
                 playBeep('success');
                 setStep('CONFIRM_QTY');
-                // Always pre-fill with the TOTAL measure qty (e.g. 37 L), not case count
-                setQtyVal(measureQty !== null ? measureQty.toString() : (matchedItem.expectedQty || 1).toString());
+                // Always pre-fill with expected sellable unit count (e.g. 20 packs)
+                const expectedCases = matchedItem.expectedQty || 1;
+                setQtyVal(expectedCases.toString());
             } else {
                 playBeep('error');
                 setErrorMsg('Item not found in this Pack job.');
@@ -201,45 +200,11 @@ export const PackScanner: React.FC<PackScannerProps> = ({
             if (matchedIndex === null) return;
 
             const matchedItem = job.lineItems![matchedIndex];
-            const prod = getProduct(matchedItem);
-            // Derive unit and size from product first, fall back to line item fields
-            const effectiveUnit = prod?.unit || matchedItem?.unit || null;
-            const effectiveSize = prod?.size || matchedItem?.size || null;
-            const sizeNum = getEffectivePackageSize(effectiveUnit, effectiveSize);
             const expectedCases = matchedItem.expectedQty || 1;
-            // measureQty now uses item fallback - critical for products not in catalogue
-            const measureQty = getItemMeasureQty(matchedItem, prod);
-            const displayMax = measureQty !== null ? measureQty : expectedCases;
+            const displayMax = expectedCases;
 
-            // Determine if this is a weight/volume unit - check both prod and item unit
-            const unitCodeForCheck = effectiveUnit;
-            const isWeightVol = unitCodeForCheck
-                ? (isWeightBased(unitCodeForCheck) || isVolumeBased(unitCodeForCheck))
-                : false;
-
-            // Simple conversion: user always enters total measure (e.g. 37 L).
-            // The unit selector only matters for sub-unit entry (e.g. ML, G).
             let finalQty = qty;
-            if (isWeightVol && sizeNum > 1) {
-                const selUnitDef = getSellUnit(selectedUnit);
-                if (selUnitDef.category === 'count') {
-                    // User entered number of cases (e.g. 1.85 cases) → convert to total measure
-                    finalQty = qty * sizeNum;
-                } else if (selUnitDef.code === 'G' || selUnitDef.code === 'ML' || selUnitDef.code === 'MG') {
-                    // User entered sub-scale units (e.g. 37000 ml) → convert to base unit (L)
-                    const factor = selUnitDef.conversionFactor || 1000;
-                    finalQty = qty / factor;
-                } else {
-                    // User entered base measure directly (e.g. 37 L) → use as-is
-                    finalQty = qty;
-                    // SMART FALLBACK: if user typed exactly the case count (1.85) instead of total (37)
-                    if (Math.abs(qty - expectedCases) < 0.005 && sizeNum > 1) {
-                        finalQty = expectedCases * sizeNum;
-                    }
-                }
-            }
-
-            if (isNaN(finalQty) || finalQty <= 0 || finalQty > displayMax + 0.001) {
+            if (isNaN(finalQty) || finalQty <= 0) {
                 playBeep('error');
                 setErrorMsg(`Invalid Quantity (1-${displayMax})`);
                 setShowError(true);
@@ -247,8 +212,11 @@ export const PackScanner: React.FC<PackScannerProps> = ({
                 return;
             }
 
-            if (finalQty < displayMax - 0.001) {
-                const confirmed = window.confirm(`Discrepancy detected. You entered ${finalQty} but expected ${displayMax}. Are you sure?`);
+            if (finalQty > displayMax + 0.001) {
+                const confirmed = window.confirm(`Overpack detected. You entered ${finalQty} but expected ${displayMax}. Are you sure?`);
+                if (!confirmed) return;
+            } else if (finalQty < displayMax - 0.001) {
+                const confirmed = window.confirm(`Short pack detected. You entered ${finalQty} but expected ${displayMax}. Are you sure?`);
                 if (!confirmed) return;
             }
 
@@ -320,7 +288,7 @@ export const PackScanner: React.FC<PackScannerProps> = ({
             <div className="flex-1 relative w-full overflow-hidden flex flex-col">
                 <div className={`absolute inset-0 opacity-20 blur-3xl transition-colors duration-700 pointer-events-none ${step === 'CONFIRM_QTY' ? 'bg-[#A9CBA2]' : 'bg-[#2C5E3B]'}`} />
 
-                <div className="absolute inset-0 overflow-y-auto flex flex-col items-center p-6 pb-32">
+                <div className="absolute inset-0 overflow-y-auto custom-scrollbar flex flex-col items-center p-3 md:p-6 pb-6">
 
                     {/* Status / content area */}
                     <PackScannerStatusView
@@ -340,12 +308,12 @@ export const PackScanner: React.FC<PackScannerProps> = ({
 
                     {/* Input Area */}
                     <form onSubmit={handleScan} className="w-full max-w-md relative z-20 group">
-                        <div className="absolute inset-0 bg-gradient-to-r from-[#2C5E3B] to-[#A9CBA2] rounded-2xl blur opacity-20 group-focus-within:opacity-40 transition-opacity" />
+                        <div className="absolute inset-0 bg-gradient-to-r from-[#2C5E3B] to-[#A9CBA2] rounded-xl blur opacity-20 group-focus-within:opacity-40 transition-opacity" />
 
                         {!isFullyPacked && (
                             <>
                                 {step === 'CONFIRM_QTY' ? (
-                                    <div className="flex gap-2 items-center w-full">
+                                    <div className="relative flex items-stretch w-full bg-[#FAF8F5] dark:bg-[#1C2620]/90 border-2 border-[#2C5E3B] dark:border-[#A9CBA2]/40 rounded-xl overflow-hidden shadow-md focus-within:border-[#2C5E3B] dark:focus-within:border-[#A9CBA2] z-10">
                                         <input
                                             ref={qtyRef}
                                             type="number"
@@ -355,23 +323,19 @@ export const PackScanner: React.FC<PackScannerProps> = ({
                                             title="Confirm quantity"
                                             value={qtyVal}
                                             onChange={(e) => setQtyVal(e.target.value)}
-                                            className="flex-1 bg-[#FAF8F5] dark:bg-[#1C2620]/90 border-2 rounded-2xl py-6 px-4 text-center text-5xl font-mono text-gray-900 dark:text-[#EAE5D9] placeholder:text-gray-300 dark:placeholder:text-[#A9CBA2]/30 focus:outline-none relative z-10 shadow-xl transition-all border-[#2C5E3B] dark:border-[#A9CBA2]/40 focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2]"
+                                            className="flex-1 bg-transparent py-2.5 px-3 text-center text-2xl md:text-3xl font-mono font-bold text-gray-900 dark:text-[#EAE5D9] placeholder:text-gray-300 dark:placeholder:text-[#A9CBA2]/30 outline-none"
                                             placeholder="QTY"
                                             autoFocus
                                             onFocus={(e) => e.target.select()}
                                         />
-                                        <select
-                                            value={selectedUnit}
-                                            onChange={(e) => setSelectedUnit(e.target.value)}
-                                            className="bg-[#FAF8F5] dark:bg-[#1C2620] border-2 border-[#2C5E3B] dark:border-[#A9CBA2]/40 text-gray-900 dark:text-white font-black rounded-2xl px-4 py-6 text-base uppercase focus:outline-none shadow-xl cursor-pointer relative z-10"
-                                            aria-label="Select unit"
-                                        >
-                                            {SELL_UNITS.map(u => (
-                                                <option key={u.code} value={u.code}>
-                                                    {u.shortLabel.toUpperCase()}
-                                                </option>
-                                            ))}
-                                        </select>
+                                        <div className="bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/15 text-[#2C5E3B] dark:text-[#A9CBA2] border-l border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20 px-3.5 py-2.5 text-xs font-mono font-black uppercase flex items-center justify-center shrink-0">
+                                            {(() => {
+                                                const unitDef = getSellUnit(selectedUnit);
+                                                const sizeStr = matchedProduct?.size || matchedItem?.size;
+                                                const isWeightVol = (unitDef.category === 'weight' || unitDef.category === 'volume') && !!sizeStr;
+                                                return isWeightVol ? `packs (${sizeStr}${unitDef.shortLabel})` : unitDef.shortLabel.toUpperCase();
+                                            })()}
+                                        </div>
                                     </div>
                                 ) : (
                                     <input
@@ -383,63 +347,18 @@ export const PackScanner: React.FC<PackScannerProps> = ({
                                         onChange={(e) => setInputVal(e.target.value)}
                                         onKeyDown={scanOnlyHandlers.onKeyDown}
                                         onPaste={scanOnlyHandlers.onPaste}
-                                        className="w-full bg-[#FAF8F5] dark:bg-[#1C2620]/90 border-2 rounded-2xl py-6 px-4 text-center text-3xl font-mono text-gray-900 dark:text-[#EAE5D9] placeholder:text-gray-300 dark:placeholder:text-[#A9CBA2]/30 focus:outline-none relative z-10 shadow-xl transition-all border-[#E2DCCE] dark:border-[#A9CBA2]/10 focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2]/40"
+                                        className="w-full bg-[#FAF8F5] dark:bg-[#1C2620]/90 border-2 rounded-xl py-3 px-4 text-center text-lg md:text-xl font-mono text-gray-900 dark:text-[#EAE5D9] placeholder:text-gray-300 dark:placeholder:text-[#A9CBA2]/30 focus:outline-none relative z-10 shadow-md transition-all border-[#E2DCCE] dark:border-[#A9CBA2]/10 focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2]/40"
                                         placeholder="SCAN BARCODE"
                                         autoFocus
                                         disabled={isProcessing}
                                     />
                                 )}
-
-                                {step === 'CONFIRM_QTY' && (
-                                    <div className="mb-4 text-center mt-2 animate-in fade-in duration-300">
-                                        <p className="text-xs font-black uppercase tracking-widest text-[#2C5E3B] dark:text-[#A9CBA2]">
-                                            {t('warehouse.expected')}: {(() => {
-                                                const measureQty = getItemMeasureQty(matchedItem, matchedProduct);
-                                                const expected = matchedItem?.expectedQty || 1;
-                                                const effUnit = matchedProduct?.unit || (matchedItem as any)?.unit || '';
-                                                const effSize = matchedProduct?.size || (matchedItem as any)?.size;
-                                                const sizeNum = getEffectivePackageSize(effUnit, effSize);
-                                                if (measureQty !== null && sizeNum > 1) {
-                                                    return <>{expected} × {sizeNum} {effUnit} = {measureQty} {effUnit}</>;
-                                                }
-                                                return <>{expected} {effUnit || 'units'}</>;
-                                            })()}
-                                        </p>
-
-                                        {matchedItem && (
-                                            <button
-                                                type="button"
-                                                onClick={(e) => {
-                                                    const measureQty = getItemMeasureQty(matchedItem, matchedProduct);
-                                                    const expectedCases = matchedItem.expectedQty || 1;
-                                                    // Pre-fill with total measure (e.g. 37 L) so confirm is one tap
-                                                    const quickVal = measureQty !== null ? measureQty : expectedCases;
-                                                    setQtyVal(quickVal.toString());
-                                                    setTimeout(() => {
-                                                        const formElem = (e.target as HTMLElement).closest('form');
-                                                        if (formElem) formElem.requestSubmit();
-                                                    }, 50);
-                                                }}
-                                                className="w-full mt-3 py-4 px-6 rounded-2xl bg-[#2C5E3B] text-[#EAE5D9] dark:bg-[#A9CBA2] dark:text-[#1C2620] font-black text-sm uppercase tracking-wider shadow-lg hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer border border-[#A9CBA2]/30"
-                                            >
-                                                <CheckCircle size={18} />
-                                                {(() => {
-                                                    const measureQty = getItemMeasureQty(matchedItem, matchedProduct);
-                                                    const expectedCases = matchedItem.expectedQty || 1;
-                                                    const effUnit = matchedProduct?.unit || (matchedItem as any)?.unit || '';
-                                                    if (measureQty !== null) return `Confirm ${measureQty} ${effUnit} (${expectedCases} cases)`;
-                                                    return `Confirm ${expectedCases} ${effUnit || 'units'}`;
-                                                })()}
-                                            </button>
-                                        )}
-                                    </div>
-                                )}
                             </>
                         )}
 
                         {isProcessing && (
-                            <div className="absolute right-4 top-1/2 -translate-y-1/2 z-30">
-                                <RotateCcw className="animate-spin text-gray-900 dark:text-white opacity-50" size={24} />
+                            <div className="absolute right-3 top-1/2 -translate-y-1/2 z-30">
+                                <RotateCcw className="animate-spin text-gray-900 dark:text-white opacity-50" size={18} />
                             </div>
                         )}
 
@@ -448,22 +367,22 @@ export const PackScanner: React.FC<PackScannerProps> = ({
                             type={isFullyPacked ? 'button' : 'submit'}
                             onClick={isFullyPacked ? onCompleteJob : undefined}
                             disabled={(!isFullyPacked && step === 'SCAN' && !inputVal.trim()) || isProcessing || isSubmitting}
-                            className={`mt-6 w-full py-6 rounded-2xl flex items-center justify-center gap-3 transition-all duration-500 active:scale-95 shadow-2xl border-2 relative z-30 ${
+                            className={`mt-3 w-full py-3.5 md:py-4 rounded-xl flex items-center justify-center gap-2 transition-all duration-300 active:scale-95 shadow-md border relative z-30 font-black text-xs md:text-sm uppercase tracking-widest ${
                                 isProcessing || isSubmitting
                                     ? 'bg-gray-100 dark:bg-[#1C2620]/50 border-gray-200 dark:border-white/5 text-gray-400 dark:text-gray-600 opacity-50 cursor-not-allowed'
                                     : isFullyPacked
-                                        ? 'bg-gradient-to-r from-green-500 to-emerald-600 border-green-400 text-white font-black uppercase tracking-widest shadow-[0_0_40px_rgba(34,197,94,0.4)] scale-105'
+                                        ? 'bg-gradient-to-r from-green-500 to-emerald-600 border-green-400 text-white shadow-green-500/25'
                                         : step === 'CONFIRM_QTY'
-                                            ? 'bg-[#2C5E3B] border-[#A9CBA2]/40 text-white font-black uppercase tracking-widest shadow-[0_0_40px_rgba(44,94,59,0.3)]'
+                                            ? 'bg-[#2C5E3B] border-[#A9CBA2]/40 text-white shadow-[#2C5E3B]/30'
                                             : !inputVal.trim()
                                                 ? 'bg-gray-200 dark:bg-[#1C2620]/50 border-gray-100 dark:border-white/5 text-gray-400 dark:text-gray-600 grayscale opacity-50 cursor-not-allowed'
-                                                : 'bg-gradient-to-r from-[#2C5E3B] to-[#3a7a4d] border-gray-200 dark:border-white/20 text-white font-black uppercase tracking-widest shadow-[#2C5E3B]/20'
+                                                : 'bg-[#2C5E3B] hover:bg-[#1B3520] border-[#2C5E3B]/20 text-white'
                             }`}
                         >
                             {isProcessing || isSubmitting ? (
-                                <RotateCcw size={24} className="animate-spin" />
+                                <RotateCcw size={18} className="animate-spin" />
                             ) : (
-                                <CheckCircle size={24} className={isFullyPacked ? 'animate-bounce' : ''} />
+                                <CheckCircle size={18} />
                             )}
                             {isProcessing || isSubmitting
                                 ? 'Saving...'
@@ -475,8 +394,8 @@ export const PackScanner: React.FC<PackScannerProps> = ({
                         </button>
                     </form>
 
-                    {/* Running tally of packed items */}
-                    {!isFullyPacked && (
+                    {/* Packed items tally — only shown while still scanning */}
+                    {packedItems.length > 0 && !isFullyPacked && (
                         <PackScannerItemTally
                             packedItems={packedItems}
                             totalItems={totalItems}
@@ -485,9 +404,6 @@ export const PackScanner: React.FC<PackScannerProps> = ({
                         />
                     )}
 
-                    <p className="mt-8 text-gray-500 text-[10px] font-mono font-bold uppercase tracking-widest z-10 text-center opacity-60">
-                        Scan &amp; Verify Protocol
-                    </p>
                 </div>
             </div>
         </div>

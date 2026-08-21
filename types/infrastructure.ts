@@ -379,6 +379,7 @@ export interface JobItem {
   startedAt?: string;
   started_at?: string;
   location?: string;
+  suggestedLocation?: string;
   returnedQty?: number;
   returnedAt?: string;
   size?: string;

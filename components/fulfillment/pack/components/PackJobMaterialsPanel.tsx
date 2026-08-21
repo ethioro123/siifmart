@@ -36,54 +36,14 @@ export const PackJobMaterialsPanel: React.FC<PackJobMaterialsPanelProps> = ({
     t,
 }) => {
     return (
-        <div className="w-full lg:w-80 flex flex-col gap-4 shrink-0 p-4 lg:p-6 border-t lg:border-t-0 border-[#E2DCCE]/60 dark:border-white/10 bg-stone-50 dark:bg-black/10">
-            {/* Progress */}
-            <div className="bg-white dark:bg-white/[0.02] border border-[#E2DCCE]/60 dark:border-white/10 rounded-2xl p-5">
-                <div className="flex justify-between items-end mb-2">
-                    <span className="text-[10px] text-gray-500 font-black uppercase tracking-widest block">{t('warehouse.putaway.progress')}</span>
-                    <span className="text-xl font-mono font-black text-gray-900 dark:text-white leading-none">{Math.round(progressPercent)}%</span>
-                </div>
-                <ProgressBar
-                    progress={progressPercent}
-                    containerClassName="h-2 bg-gray-200 dark:bg-white/5 rounded-full overflow-hidden"
-                    fillClassName={`h-full transition-all duration-300 ${isFullyPacked ? 'bg-green-500' : 'bg-[#2C5E3B] dark:bg-[#A9CBA2]'}`}
-                />
-            </div>
-
-            {/* Shipping Info */}
-            <div className="bg-white dark:bg-white/[0.02] border border-[#E2DCCE]/60 dark:border-white/10 rounded-2xl p-5 flex flex-col gap-3">
-                <span className="text-[10px] text-gray-550 font-black uppercase tracking-widest block">{t('warehouse.packing.shipping')}</span>
-
-                <div className="flex items-center gap-3">
-                    <Truck size={14} className="text-[#2C5E3B] dark:text-[#A9CBA2] shrink-0 w-4 h-4" />
-                    <div className="min-w-0">
-                        <span className="text-[9px] text-gray-500 font-black uppercase tracking-widest block truncate">{t('warehouse.to')}</span>
-                        <span className="text-gray-900 dark:text-white text-sm font-bold break-words leading-tight block">
-                            {destSite ? (
-                                <>
-                                    {destSite.name} <span className="text-gray-500 dark:text-zinc-650 font-normal lowercase">({destSite.code || destSite.id})</span>
-                                </>
-                            ) : ((job as any).customerName || 'Customer')}
-                        </span>
-                    </div>
-                </div>
-                
-                <div className="flex items-center gap-3">
-                    <Info size={14} className="text-[#2C5E3B] dark:text-[#A9CBA2] shrink-0 w-4 h-4" />
-                    <div className="min-w-0">
-                        <span className="text-[9px] text-gray-555 font-black uppercase tracking-widest block truncate">{t('warehouse.putaway.jobDetails')}</span>
-                        <span className="text-gray-900 dark:text-white text-sm font-bold font-mono truncate block">{formatJobId(job)}</span>
-                    </div>
-                </div>
-            </div>
-
+        <div className="w-full lg:w-72 flex flex-col gap-2.5 shrink-0 p-3 lg:p-4 border-t lg:border-t-0 lg:border-l border-[#E2DCCE]/60 dark:border-white/10 bg-stone-50 dark:bg-black/10">
             {/* Packing Options */}
-            <div className="bg-white dark:bg-white/[0.02] border border-[#E2DCCE]/60 dark:border-white/10 rounded-2xl p-5 flex flex-col gap-4">
-                <span className="text-[10px] text-gray-555 font-black uppercase tracking-widest block">{t('warehouse.packingOptions')}</span>
+            <div className="bg-white dark:bg-white/[0.02] border border-[#E2DCCE]/60 dark:border-white/10 rounded-xl p-3 flex flex-col gap-3 shadow-sm">
+                <span className="text-[9px] text-gray-500 font-extrabold uppercase tracking-widest block">{t('warehouse.packingOptions')}</span>
 
                 <div>
-                    <label className="text-[9px] text-gray-500 font-black uppercase tracking-widest block mb-2">{t('warehouse.boxSize')}</label>
-                    <select title="Box Size" aria-label="Select Box Size" value={boxSize} onChange={(e) => setBoxSize(e.target.value as any)} className="w-full bg-white/90 dark:bg-black/25 border border-[#E2DCCE] dark:border-white/10 hover:border-[#CFC6B4] dark:hover:border-white/20 text-[#1E3F27] dark:text-[#EAE5D9] rounded-xl p-3 text-sm outline-none focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:bg-white dark:focus:bg-zinc-900 transition-all focus:ring-4 focus:ring-[#2C5E3B]/10 dark:focus:ring-[#A9CBA2]/10">
+                    <label className="text-[8px] text-gray-400 font-extrabold uppercase tracking-widest block mb-1">{t('warehouse.boxSize')}</label>
+                    <select title="Box Size" aria-label="Select Box Size" value={boxSize} onChange={(e) => setBoxSize(e.target.value as any)} className="w-full bg-white/90 dark:bg-black/25 border border-[#E2DCCE] dark:border-white/10 text-gray-900 dark:text-gray-200 rounded-lg p-2 text-xs outline-none focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2]">
                         <option value="Small">{t('warehouse.boxSmall')}</option>
                         <option value="Medium">{t('warehouse.boxMedium')}</option>
                         <option value="Large">{t('warehouse.boxLarge')}</option>
@@ -92,25 +52,27 @@ export const PackJobMaterialsPanel: React.FC<PackJobMaterialsPanelProps> = ({
                 </div>
 
                 {hasFragileItems && (
-                    <div className="pt-2 border-t border-[#E2DCCE]/60 dark:border-white/10">
-                        <p className="text-[9px] text-red-655 dark:text-red-400 font-black uppercase tracking-widest mb-2 flex items-center gap-1"><AlertTriangle size={10} /> {t('warehouse.packing.fragile')}</p>
-                        <label className="flex items-center gap-3 mb-2 cursor-pointer group">
-                            <input type="checkbox" aria-label="Bubble Wrap" title="Bubble Wrap" checked={packingMaterials.bubbleWrap} onChange={e => setPackingMaterials({ ...packingMaterials, bubbleWrap: e.target.checked })} className="w-4 h-4 rounded border-[#E2DCCE] dark:border-white/20 text-[#2C5E3B] dark:text-[#A9CBA2] focus:ring-[#2C5E3B] dark:focus:ring-[#A9CBA2] focus:ring-offset-white dark:focus:ring-offset-black bg-white dark:bg-black/40" />
-                            <span className="text-sm text-gray-700 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">{t('warehouse.packing.bubbleWrap')}</span>
-                        </label>
-                        <label className="flex items-center gap-3 cursor-pointer group">
-                            <input type="checkbox" aria-label="Fragile Stickers" title="Fragile Stickers" checked={packingMaterials.fragileStickers} onChange={e => setPackingMaterials({ ...packingMaterials, fragileStickers: e.target.checked })} className="w-4 h-4 rounded border-[#E2DCCE] dark:border-white/20 text-[#2C5E3B] dark:text-[#A9CBA2] focus:ring-[#2C5E3B] dark:focus:ring-[#A9CBA2] focus:ring-offset-white dark:focus:ring-offset-black bg-white dark:bg-black/40" />
-                            <span className="text-sm text-gray-700 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">{t('warehouse.packing.stickers')}</span>
-                        </label>
+                    <div className="pt-2 border-t border-[#E2DCCE]/60 dark:border-white/10 space-y-1.5">
+                        <p className="text-[8px] text-red-500 font-extrabold uppercase tracking-widest flex items-center gap-1"><AlertTriangle size={9} /> {t('warehouse.packing.fragile')}</p>
+                        <div className="flex flex-wrap gap-3">
+                            <label className="flex items-center gap-2 cursor-pointer text-xs text-gray-700 dark:text-gray-300">
+                                <input type="checkbox" aria-label="Bubble Wrap" title="Bubble Wrap" checked={packingMaterials.bubbleWrap} onChange={e => setPackingMaterials({ ...packingMaterials, bubbleWrap: e.target.checked })} className="w-3.5 h-3.5 rounded border-gray-300 text-[#2C5E3B]" />
+                                <span>{t('warehouse.packing.bubbleWrap')}</span>
+                            </label>
+                            <label className="flex items-center gap-2 cursor-pointer text-xs text-gray-700 dark:text-gray-300">
+                                <input type="checkbox" aria-label="Fragile Stickers" title="Fragile Stickers" checked={packingMaterials.fragileStickers} onChange={e => setPackingMaterials({ ...packingMaterials, fragileStickers: e.target.checked })} className="w-3.5 h-3.5 rounded border-gray-300 text-[#2C5E3B]" />
+                                <span>{t('warehouse.packing.stickers')}</span>
+                            </label>
+                        </div>
                     </div>
                 )}
 
                 {hasColdItems && (
-                    <div className="pt-2 border-t border-[#E2DCCE]/60 dark:border-white/10">
-                        <p className="text-[9px] text-[#2C5E3B] dark:text-[#A9CBA2] font-black uppercase tracking-widest mb-2 flex items-center gap-1"><Snowflake size={10} /> {t('warehouse.packing.coldChain')}</p>
-                        <label className="flex items-center gap-3 cursor-pointer group">
-                            <input type="checkbox" aria-label="Ice Packs" title="Ice Packs" checked={hasIcePack} onChange={e => setHasIcePack(e.target.checked)} className="w-4 h-4 rounded border-[#E2DCCE] dark:border-white/20 text-[#2C5E3B] dark:text-[#A9CBA2] focus:ring-[#2C5E3B] dark:focus:ring-[#A9CBA2] focus:ring-offset-white dark:focus:ring-offset-black bg-white dark:bg-black/40" />
-                            <span className="text-sm text-gray-700 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">{t('warehouse.packing.icePacks')}</span>
+                    <div className="pt-2 border-t border-[#E2DCCE]/60 dark:border-white/10 space-y-1.5">
+                        <p className="text-[8px] text-[#2C5E3B] dark:text-[#A9CBA2] font-extrabold uppercase tracking-widest flex items-center gap-1"><Snowflake size={9} /> {t('warehouse.packing.coldChain')}</p>
+                        <label className="flex items-center gap-2 cursor-pointer text-xs text-gray-700 dark:text-gray-300">
+                            <input type="checkbox" aria-label="Ice Packs" title="Ice Packs" checked={hasIcePack} onChange={e => setHasIcePack(e.target.checked)} className="w-3.5 h-3.5 rounded border-gray-300 text-[#2C5E3B]" />
+                            <span>{t('warehouse.packing.icePacks')}</span>
                         </label>
                     </div>
                 )}

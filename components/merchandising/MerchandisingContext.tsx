@@ -92,6 +92,13 @@ export interface MerchandisingContextType {
    selectedLocationProduct: Product | null;
    setSelectedLocationProduct: (p: Product | null) => void;
 
+   // Product Control Modal
+   isProductControlOpen: boolean;
+   setIsProductControlOpen: (open: boolean) => void;
+   selectedControlProduct: Product | null;
+   setSelectedControlProduct: (p: Product | null) => void;
+   openProductControl: (p: Product, tab?: 'profile' | 'unit' | 'pricing' | 'stock') => void;
+
    // Handlers
    handleSort: (key: keyof Product | 'margin') => void;
    handleCreatePromo: () => void;

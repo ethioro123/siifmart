@@ -81,7 +81,7 @@ export const InventorySection = ({
                             Stock Health
                         </h3>
                         <div className="flex-1 w-full min-h-0 relative">
-                            <ResponsiveContainer width="100%" height="100%">
+                            <ResponsiveContainer width="100%" height={280}>
                                 <PieChart>
                                     <Pie data={stockStatusData} innerRadius={40} outerRadius={60} paddingAngle={5} dataKey="value">
                                         {stockStatusData.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.color} stroke="none" />)}

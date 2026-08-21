@@ -117,9 +117,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         }
 
         if (!location) {
-          // If no pre-cached session location, we must attempt to fetch the location.
-          // This will throw an error to block the sign-in if location tracking is disabled.
-          location = await fetchLoginLocation();
+          try {
+            location = await fetchLoginLocation();
+          } catch (e) {
+            logger.warn('CentralStore', 'Could not fetch login location on session sync, using fallback');
+            location = 'Local-Session';
+          }
         }
 
         // Cache the verified login location for this browser session
@@ -215,15 +218,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         logger.warn('CentralStore', '⚠️ CentralStore: Profile sync timed out after 5s - continuing without blocking');
       } else {
         logger.error('CentralStore', 'CentralStore: Sync failed', error);
-        // Force logout if strict location check throws error during sync lifecycle
-        if (error?.message?.includes('Location tracking failed')) {
-          await authService.signOut();
-          setUser(null);
-          try {
-            sessionStorage.removeItem('siifmart_login_location');
-          } catch (e) {}
-          throw error;
-        }
       }
     }
   };

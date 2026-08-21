@@ -3,6 +3,7 @@ import type { Product } from '../../types';
 import { stockMovementsService } from '../stock-movements.service';
 import { _mapProduct, _calculateStatus } from './products-helpers';
 import { handleAutoReplenish } from './products-replenish';
+import { logger } from '../../utils/logger';
 
 /**
  * Check if a barcode is registered under a different SKU.
@@ -58,35 +59,30 @@ export async function createProduct(product: Omit<Product, 'id' | 'created_at' |
         await checkBarcodeConflicts(product.sku, barcodesToCheck);
     }
 
+    const cleanSku = product.sku ? product.sku.replace(/[-\s]/g, '').toUpperCase() : product.sku;
+
     const dbProduct: any = {
         site_id: product.siteId,
         name: product.name,
-        sku: product.sku,
+        sku: cleanSku,
         category: product.category,
-        price: product.price,
-        cost_price: product.costPrice,
-        sale_price: product.salePrice,
-        is_on_sale: product.isOnSale,
-        stock: product.stock,
+        price: product.price || 0,
+        cost_price: product.costPrice ?? (product as any).cost ?? 0,
+        stock: product.stock || 0,
         status: _calculateStatus(product.stock || 0, product.minStock, product.status),
         location: product.location,
         expiry_date: product.expiryDate,
         batch_number: product.batchNumber,
-        shelf_position: product.shelfPosition,
-        competitor_price: product.competitorPrice,
-        sales_velocity: product.salesVelocity,
         image: product.image,
         barcode: product.barcode,
         barcodes: product.barcodes,
-        barcode_type: product.barcodeType,
-        approval_status: product.approvalStatus,
-        created_by: product.createdBy,
         approved_by: product.approvedBy,
         approved_at: product.approvedAt,
+        rejected_by: product.rejectedBy,
+        rejected_at: product.rejectedAt,
         brand: product.brand,
         size: product.size,
         unit: product.unit,
-        pack_quantity: product.packQuantity,
         custom_attributes: product.customAttributes,
         description: product.description,
         min_stock: product.minStock,
@@ -100,37 +96,32 @@ export async function createProduct(product: Omit<Product, 'id' | 'created_at' |
         dbProduct.created_at = (product as any).createdAt;
     }
 
+    // Clean undefined fields
+    Object.keys(dbProduct).forEach(key => {
+        if (dbProduct[key] === undefined) delete dbProduct[key];
+    });
+
     const { data, error } = await supabase
         .from('products')
         .insert(dbProduct)
-        .select()
+        .select('id, site_id, name, sku, category, price, cost_price, stock, status, location, barcode, barcodes, brand, size, unit, custom_attributes, description, min_stock, max_stock, created_at')
         .single();
 
     if (error) {
-        if (error.message.includes('column') && error.message.includes('does not exist')) {
-            console.warn('⚠️ Schema mismatch detected. Retrying product creation without approval fields...');
-            const coreProduct: any = { ...dbProduct };
-            delete coreProduct.approval_status;
-            delete coreProduct.created_by;
-            delete coreProduct.approved_by;
-            delete coreProduct.approved_at;
-            delete coreProduct.product_id;
-
-            const { data: retryData, error: retryError } = await supabase
+        if (error.code === '23505') {
+            logger.warn('products-mutations', `Product with SKU ${dbProduct.sku} already exists at site ${dbProduct.site_id}. Retrieving existing record...`);
+            const { data: existing } = await supabase
                 .from('products')
-                .insert(coreProduct)
-                .select()
-                .single();
-
-            if (retryError) throw retryError;
-            const mappedProduct = _mapProduct(retryData);
-            if (mappedProduct.stock !== undefined) {
-                handleAutoReplenish(mappedProduct).catch(err => {
-                    console.error('❌ Background Auto-Replenishment Failed:', err);
-                });
+                .select('id, site_id, name, sku, category, price, cost_price, stock, status, location, barcode, barcodes, brand, size, unit, custom_attributes, description, min_stock, max_stock, created_at')
+                .eq('sku', dbProduct.sku)
+                .eq('site_id', dbProduct.site_id)
+                .limit(1)
+                .maybeSingle();
+            if (existing) {
+                return _mapProduct(existing);
             }
-            return mappedProduct;
         }
+        logger.error('products-mutations', 'Failed to insert product:', error);
         throw error;
     }
     const mappedProduct = _mapProduct(data);
@@ -214,9 +205,7 @@ export async function updateProduct(id: string, updates: Partial<Product>) {
     fieldsToRemove.forEach(field => delete dbUpdates[field]);
 
     if (updates.siteId !== undefined) { dbUpdates.site_id = updates.siteId; delete dbUpdates.siteId; }
-    if (updates.costPrice !== undefined) { dbUpdates.cost_price = updates.costPrice; delete dbUpdates.costPrice; }
-    if (updates.salePrice !== undefined) { dbUpdates.sale_price = updates.salePrice; delete dbUpdates.salePrice; }
-    if (updates.isOnSale !== undefined) { dbUpdates.is_on_sale = updates.isOnSale; delete dbUpdates.isOnSale; }
+    if (updates.costPrice !== undefined) { dbUpdates.cost_price = updates.costPrice; delete dbUpdates.costPrice; delete dbUpdates.cost; }
     if (updates.expiryDate !== undefined) { dbUpdates.expiry_date = updates.expiryDate; delete dbUpdates.expiryDate; }
     if (updates.batchNumber !== undefined) { dbUpdates.batch_number = updates.batchNumber; delete dbUpdates.batchNumber; }
     if (updates.shelfPosition !== undefined) { dbUpdates.shelf_position = updates.shelfPosition; delete dbUpdates.shelfPosition; }
@@ -244,13 +233,8 @@ export async function updateProduct(id: string, updates: Partial<Product>) {
     if (updates.minStock !== undefined) { dbUpdates.min_stock = updates.minStock; delete dbUpdates.minStock; }
     if (updates.maxStock !== undefined) { dbUpdates.max_stock = updates.maxStock; delete dbUpdates.maxStock; }
 
-    const extraFields = ['minStockLevel', 'maxStockLevel', 'retailPrice', 'zoneId'];
+    const extraFields = ['minStockLevel', 'maxStockLevel', 'retailPrice', 'zoneId', 'barcodeType', 'costPrice', 'salePrice', 'isOnSale', 'salesVelocity', 'competitorPrice', 'shelfPosition', 'packQuantity', 'approvalStatus', 'createdBy'];
     extraFields.forEach(f => delete dbUpdates[f]);
-
-    if (updates.barcodeType !== undefined) {
-        dbUpdates.barcode_type = updates.barcodeType;
-        delete dbUpdates.barcodeType;
-    }
 
     if (updates.barcodes !== undefined) {
         dbUpdates.barcodes = updates.barcodes;
@@ -258,24 +242,20 @@ export async function updateProduct(id: string, updates: Partial<Product>) {
 
     const isPriceUpdate =
         updates.price !== undefined ||
-        updates.costPrice !== undefined ||
-        updates.salePrice !== undefined ||
-        updates.isOnSale !== undefined;
+        updates.costPrice !== undefined;
 
     if (isPriceUpdate) {
         const { data: currentProduct } = await supabase
             .from('products')
-            .select('price, cost_price, sale_price, is_on_sale')
+            .select('price, cost_price')
             .eq('id', id)
             .single();
 
         if (currentProduct) {
             const priceChanged = updates.price !== undefined && updates.price !== currentProduct.price;
             const costChanged = updates.costPrice !== undefined && updates.costPrice !== currentProduct.cost_price;
-            const salePriceChanged = updates.salePrice !== undefined && updates.salePrice !== currentProduct.sale_price;
-            const onSaleChanged = updates.isOnSale !== undefined && updates.isOnSale !== currentProduct.is_on_sale;
 
-            if (priceChanged || costChanged || salePriceChanged || onSaleChanged) {
+            if (priceChanged || costChanged) {
                 dbUpdates.price_updated_at = new Date().toISOString();
                 if (priceChanged) {
                     dbUpdates.old_price = currentProduct.price;
@@ -461,4 +441,26 @@ export async function adjustStock(
     } as any);
 
     return updated;
+}
+
+export async function updatePriceBySku(sku: string, siteId: string, newPrice: number) {
+    if (!sku || !newPrice || newPrice <= 0) return [];
+    const nowStr = new Date().toISOString();
+
+    const { data, error } = await supabase
+        .from('products')
+        .update({
+            price: newPrice,
+            price_updated_at: nowStr
+        })
+        .eq('sku', sku)
+        .eq('site_id', siteId)
+        .select('*');
+
+    if (error) {
+        logger.warn('products-mutations', `Could not update price by SKU ${sku}`, { error: error.message });
+        return [];
+    }
+
+    return (data || []).map(_mapProduct);
 }

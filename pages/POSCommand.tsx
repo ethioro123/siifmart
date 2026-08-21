@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Lock, ArrowLeft, Printer, Box, Power, LayoutDashboard
@@ -29,7 +29,7 @@ const POSCommandContent: React.FC = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const { user } = useStore();
-  const { storePoints, activeSite, shifts } = useData();
+  const { storePoints, activeSite, shifts, products } = useData();
 
   const {
     activeShift,
@@ -63,6 +63,23 @@ const POSCommandContent: React.FC = () => {
   };
 
   const currentShift = shifts.find(s => s.cashierId === user?.id && s.status === 'Open');
+
+  const { lastSeenUpdates } = usePOSCommand();
+
+  // ── Notification badge: count UNSEEN products updated in the last 24 h ──
+  const updatedProductCount = useMemo(() => {
+    const siteId = activeSite?.id || user?.siteId;
+    const cutoff = Date.now() - 24 * 60 * 60 * 1000;
+    return products.filter((p: any) => {
+      const matchesSite = !siteId || p.siteId === siteId || p.site_id === siteId;
+      const updatedAt = p.updatedAt || p.updated_at;
+      if (!updatedAt) return false;
+      const ts = new Date(updatedAt).getTime();
+      const isRecent = ts > cutoff;
+      const isUnseen = ts > lastSeenUpdates;
+      return matchesSite && isRecent && isUnseen;
+    }).length;
+  }, [products, activeSite, user?.siteId, lastSeenUpdates]);
 
   // Lock Screen — Woody Style
   if (isLocked) {
@@ -114,14 +131,21 @@ const POSCommandContent: React.FC = () => {
 
           {/* Left — Logo + Title */}
           <div className="relative z-10 flex items-center gap-5">
-            <button
-              title={t('common.back') || 'Back'}
-              aria-label={t('common.back') || 'Back'}
-              onClick={() => navigate('/pos/terminal')}
-              className="p-3.5 bg-white/70 dark:bg-white/5 hover:bg-[#2C5E3B]/10 text-[#4D6E56] dark:text-gray-400 hover:text-[#2C5E3B] dark:hover:text-[#A9CBA2] rounded-2xl transition-all active:scale-95 border border-[#E2DCCE] dark:border-white/5 hover:border-[#2C5E3B]/30 shadow-sm hover:shadow-md backdrop-blur-sm"
-            >
-              <ArrowLeft size={22} />
-            </button>
+            <div className="relative">
+              <button
+                title={t('common.back') || 'Back'}
+                aria-label={t('common.back') || 'Back'}
+                onClick={() => navigate('/pos/terminal')}
+                className="p-3.5 bg-white/70 dark:bg-white/5 hover:bg-[#2C5E3B]/10 text-[#4D6E56] dark:text-gray-400 hover:text-[#2C5E3B] dark:hover:text-[#A9CBA2] rounded-2xl transition-all active:scale-95 border border-[#E2DCCE] dark:border-white/5 hover:border-[#2C5E3B]/30 shadow-sm hover:shadow-md backdrop-blur-sm"
+              >
+                <ArrowLeft size={22} />
+              </button>
+              {updatedProductCount > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-red-500 text-white text-[10px] font-black rounded-full flex items-center justify-center shadow-md ring-2 ring-white dark:ring-[#18201B] animate-pulse">
+                  {updatedProductCount > 99 ? '99+' : updatedProductCount}
+                </span>
+              )}
+            </div>
 
             {/* Logo icon */}
             <div className="relative group select-none">
@@ -166,13 +190,20 @@ const POSCommandContent: React.FC = () => {
               {t('posCommand.receiveLabel')}
             </button>
 
-            <button
-              onClick={() => setIsStockListOpen(true)}
-              className="px-4 py-2.5 bg-white/80 dark:bg-white/5 hover:bg-[#2C5E3B]/10 text-[#2C4D35] dark:text-gray-300 hover:text-[#1E3F27] dark:hover:text-white text-[11px] font-bold uppercase tracking-widest rounded-2xl border border-[#E2DCCE] dark:border-white/5 hover:border-[#2C5E3B]/20 transition-all flex items-center gap-2 group shadow-sm cursor-pointer"
-            >
-              <Box size={14} className="opacity-70 group-hover:opacity-100 transition-opacity" />
-              {t('posCommand.stockListLabel')}
-            </button>
+            <div className="relative">
+              <button
+                onClick={() => setIsStockListOpen(true)}
+                className="px-4 py-2.5 bg-white/80 dark:bg-white/5 hover:bg-[#2C5E3B]/10 text-[#2C4D35] dark:text-gray-300 hover:text-[#1E3F27] dark:hover:text-white text-[11px] font-bold uppercase tracking-widest rounded-2xl border border-[#E2DCCE] dark:border-white/5 hover:border-[#2C5E3B]/20 transition-all flex items-center gap-2 group shadow-sm cursor-pointer"
+              >
+                <Box size={14} className="opacity-70 group-hover:opacity-100 transition-opacity" />
+                {t('posCommand.stockListLabel')}
+              </button>
+              {updatedProductCount > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-amber-500 text-white text-[10px] font-black rounded-full flex items-center justify-center shadow-md ring-2 ring-white dark:ring-[#18201B]">
+                  {updatedProductCount > 99 ? '99+' : updatedProductCount}
+                </span>
+              )}
+            </div>
 
             <button
               onClick={() => setIsPrintHubOpen(true)}

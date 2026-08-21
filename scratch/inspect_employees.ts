@@ -5,23 +5,28 @@ dotenv.config({ path: '.env.local' });
 const supabase = createClient(process.env.VITE_SUPABASE_URL!, process.env.VITE_SUPABASE_ANON_KEY!);
 
 async function main() {
-    // Sign in as admin/staff
-    const authRes = await supabase.auth.signInWithPassword({
-        email: 'shukri.kamal@siifmart.com',
+    await supabase.auth.signInWithPassword({
+        email: 'siif-0001@siifmart.com',
         password: 'Oromo123'
     });
-    console.log("Auth session active:", !!authRes.data.session);
 
-    const { data: employees, error } = await supabase
-        .from('employees')
-        .select('id, name, email, code, site_id');
-
-    if (error) {
-        console.error("Error fetching employees:", error);
+    const { data: employees, error: empErr } = await supabase.from('employees').select('id, name, email, code, role, site_id').order('code');
+    if (empErr) {
+        console.error("Emp err:", empErr);
         return;
     }
+    const { data: sites } = await supabase.from('sites').select('id, name');
+    const siteMap = new Map((sites || []).map(s => [s.id, s.name]));
 
-    console.log("Employees records in database:");
-    console.log(JSON.stringify(employees, null, 2));
+    console.log(`Found ${employees?.length} employees:`);
+    for (const emp of employees || []) {
+        const pass = emp.email === 'siif-0001@siifmart.com' ? 'Oromo123' : 'siif123';
+        const { data, error } = await supabase.auth.signInWithPassword({
+            email: emp.email,
+            password: pass
+        });
+        const site = siteMap.get(emp.site_id) || '';
+        console.log(`${emp.code} | ${emp.name} (${emp.role} @ ${site}) | ${emp.email} | pass: ${pass} => ${error ? 'FAILED: ' + error.message : 'SUCCESS'}`);
+    }
 }
 main();

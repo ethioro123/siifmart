@@ -126,7 +126,9 @@ export const DashboardLeaderboard: React.FC<DashboardLeaderboardProps> = ({
                                     <div className="h-3 bg-[#FAF8F5] dark:bg-black/45 rounded-lg overflow-hidden border border-[#E2DCCE]/50 dark:border-emerald-950/20 p-0.5">
                                         <div
                                             className={`h-full rounded-md bg-gradient-to-r ${config.bg} relative`}
-                                            style={{ width: `${Math.min(100, (worker.weeklyPoints / 2500) * 100)}%` }}
+                                            ref={(el) => {
+                                                if (el) el.style.width = `${Math.min(100, (worker.weeklyPoints / 2500) * 100)}%`;
+                                            }}
                                         >
                                             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer" />
                                         </div>

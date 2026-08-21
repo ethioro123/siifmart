@@ -9,11 +9,13 @@ import { useData } from '../../contexts/DataContext';
 import { useFulfillment } from './FulfillmentContext';
 import { PutawayJobModal } from './putaway/PutawayJobModal';
 import { PutawayDetailsModal } from './putaway/PutawayDetailsModal';
+import { productsService } from '../../services/supabase.service';
 import { useStore } from '../../contexts/CentralStore';
 import { normalizeLocation, parseLocation } from '../../utils/locationTracking';
 import { extractSitePrefix, extractPrefixFromBarcode } from '../../utils/locationEncoder';
 import { logger } from '../../utils/logger';
 import { usePutawayScanning } from './putaway/hooks/usePutawayScanning';
+import { usePutawayAutoRepair } from './putaway/hooks/usePutawayAutoRepair';
 import { formatJobId } from '../../utils/jobIdFormatter';
 
 interface PutawayTabProps {
@@ -75,6 +77,9 @@ export const PutawayTab: React.FC<PutawayTabProps> = ({
         putawayStock,
         t
     } = useFulfillment();
+
+    // --- AUTO-REPAIR MISSING PRODUCTS FOR PUTAWAY JOBS ---
+    usePutawayAutoRepair(filteredJobs, activeSite, allProducts, refreshData);
 
     // --- SORTED/FILTERED PUTAWAY JOBS ---
     const sortedPutawayJobs = useMemo(() => {
@@ -183,6 +188,15 @@ export const PutawayTab: React.FC<PutawayTabProps> = ({
         if (!currentItem) return null;
         const targetSku = currentItem.sku;
         const targetSiteId = activeSite?.id;
+
+        // 0. EXPLICIT: Smart Routing engine from Receiving
+        if (currentItem.suggestedLocation) {
+            return {
+                location: currentItem.suggestedLocation,
+                type: 'ASSIGNED' as const,
+                label: 'Smart Routing Suggestion'
+            };
+        }
 
         // 1. PRIMARY: Consolidation (Same SKU already in this warehouse)
         // Check if this SKU exists in ANY bay in the current site

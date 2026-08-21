@@ -53,6 +53,22 @@ export function useDataInitialization({
   useEffect(() => {
     const canSwitchSites = ['super_admin', 'CEO', 'Super Admin', 'Admin', 'Auditor'].includes(user?.role || '');
 
+    if (user && sites.length > 0 && !activeSiteId) {
+      if (canSwitchSites) {
+        // CEO / super_admin: default to the Administration / Central Operations site (SITE-0001)
+        const adminSite = sites.find(s =>
+          s.code === 'SITE-0001' ||
+          s.name === 'Central Operations' ||
+          ['Administrative', 'Administration', 'HQ', 'Headquarters', 'Head Office'].includes(s.type || '')
+        );
+        if (adminSite) {
+          setActiveSiteId(adminSite.id);
+        }
+        userSiteSyncRef.current = true;
+        return;
+      }
+    }
+
     if (canSwitchSites && userSiteSyncRef.current && activeSiteId) {
       return;
     }

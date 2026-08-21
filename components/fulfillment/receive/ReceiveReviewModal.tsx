@@ -2,6 +2,8 @@ import React, { useMemo } from 'react';
 import { X, CheckCircle, AlertTriangle, FileText } from 'lucide-react';
 import { PurchaseOrder, WMSJob } from '../../../types';
 import { useFulfillment } from '../../fulfillment/FulfillmentContext';
+import { convertToSellableUnits } from '../useReceiving';
+import { formatPackBadge } from '../../procurement/utils';
 
 interface ReceiveReviewModalProps {
     po: PurchaseOrder;
@@ -38,8 +40,10 @@ export const ReceiveReviewModal: React.FC<ReceiveReviewModalProps> = ({
             });
         });
 
-        let totalExpected = 0;
-        let totalReceived = 0;
+        let totalExpectedSellable = 0;
+        let totalReceivedSellable = 0;
+        let totalOrderedCases = 0;
+
         const details = (po.lineItems || []).map(item => {
             const product = allProducts.find(p => p.id === item.productId || (item.sku && p.sku === item.sku));
             const candidateKeys = [
@@ -53,19 +57,24 @@ export const ReceiveReviewModal: React.FC<ReceiveReviewModalProps> = ({
                 ? candidateKeys.reduce((max, k) => Math.max(max, receivedMap[k] || 0), 0)
                 : 0;
 
-            totalExpected += item.quantity;
-            totalReceived += received;
+            const expectedSellable = convertToSellableUnits(item.quantity, item);
+
+            totalOrderedCases += item.quantity;
+            totalExpectedSellable += expectedSellable;
+            totalReceivedSellable += received;
+
             return {
                 ...item,
+                expectedSellable,
                 received,
-                status: received >= item.quantity ? 'Complete' : received > 0 ? 'Partial' : 'Pending'
+                status: received >= expectedSellable ? 'Complete' : received > 0 ? 'Partial' : 'Pending'
             };
         });
 
-        return { totalExpected, totalReceived, details };
+        return { totalOrderedCases, totalExpectedSellable, totalReceivedSellable, details };
     }, [po, jobs, allProducts]);
 
-    const isFullyReceived = stats.totalReceived >= stats.totalExpected;
+    const isFullyReceived = stats.totalReceivedSellable >= stats.totalExpectedSellable;
 
     return (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-2 sm:p-4 z-50 overflow-x-hidden animate-in fade-in duration-200">
@@ -97,11 +106,20 @@ export const ReceiveReviewModal: React.FC<ReceiveReviewModalProps> = ({
                     <div className="grid grid-cols-2 gap-3 md:gap-4">
                         <div className="p-3 md:p-5 glass-panel-pushed text-center shadow-sm">
                             <p className="text-[10px] text-slate-400 dark:text-zinc-500 uppercase font-black tracking-widest mb-1.5">{t('warehouse.totalOrdered')}</p>
-                            <p className="text-xl md:text-2xl font-black text-slate-900 dark:text-white uppercase tabular-nums font-mono leading-none">{stats.totalExpected}</p>
+                            <p className="text-xl md:text-2xl font-black text-slate-900 dark:text-white uppercase tabular-nums font-mono leading-none">
+                                {stats.totalExpectedSellable} <span className="text-xs text-stone-400 font-normal">units</span>
+                            </p>
+                            {stats.totalExpectedSellable !== stats.totalOrderedCases && (
+                                <p className="text-[9px] text-stone-500 dark:text-stone-400 font-bold uppercase mt-1">
+                                    ({stats.totalOrderedCases} ordered {stats.totalOrderedCases === 1 ? 'package' : 'packages'})
+                                </p>
+                            )}
                         </div>
                         <div className={`p-3 md:p-5 rounded-xl md:rounded-2xl border text-center transition-all shadow-sm ${isFullyReceived ? 'bg-[#2C5E3B] dark:bg-[#EAE5D9] border-[#2C5E3B] dark:border-[#EAE5D9]' : 'glass-panel-pushed'}`}>
                             <p className={`text-[10px] uppercase font-black tracking-widest mb-1.5 ${isFullyReceived ? 'text-[#FAF8F5]/80 dark:text-[#1E3B24]/80' : 'text-slate-400 dark:text-zinc-500'}`}>{t('warehouse.totalReceived')}</p>
-                            <p className={`text-xl md:text-2xl font-black tabular-nums font-mono leading-none ${isFullyReceived ? 'text-[#FAF8F5] dark:text-[#1E3B24] drop-shadow-sm' : 'text-slate-900 dark:text-white'}`}>{stats.totalReceived}</p>
+                            <p className={`text-xl md:text-2xl font-black tabular-nums font-mono leading-none ${isFullyReceived ? 'text-[#FAF8F5] dark:text-[#1E3B24] drop-shadow-sm' : 'text-slate-900 dark:text-white'}`}>
+                                {stats.totalReceivedSellable} <span className="text-xs opacity-75 font-normal">units</span>
+                            </p>
                         </div>
                     </div>
 
@@ -111,7 +129,7 @@ export const ReceiveReviewModal: React.FC<ReceiveReviewModalProps> = ({
                             <div>
                                 <h4 className="text-sm font-black text-amber-900 dark:text-amber-200 uppercase tracking-tight">{t('warehouse.discrepancyDetected')}</h4>
                                 <p className="text-[10px] text-amber-700/80 dark:text-amber-500/80 mt-1 uppercase tracking-widest font-black leading-relaxed">
-                                    Finalizing with {stats.totalExpected - stats.totalReceived} {t('warehouse.missingItems')}.
+                                    Finalizing with {stats.totalExpectedSellable - stats.totalReceivedSellable} {t('warehouse.missingItems')}.
                                     Marked as <span className="text-amber-900 dark:text-amber-100 underline decoration-amber-500/30">{t('warehouse.partialReceipt')}</span>.
                                 </p>
                             </div>
@@ -133,9 +151,22 @@ export const ReceiveReviewModal: React.FC<ReceiveReviewModalProps> = ({
                                     <tr key={idx} className="hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
                                         <td className="p-2.5 md:p-4">
                                             <p className="text-slate-900 dark:text-white font-black uppercase tracking-tight truncate max-w-[120px] md:max-w-[180px] text-[10px] md:text-xs">{item.productName}</p>
+                                            {(() => {
+                                                const badge = formatPackBadge(item);
+                                                return badge ? (
+                                                    <span className="inline-block mt-1 px-1.5 py-0.5 rounded bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400 text-[9px] font-black uppercase tracking-widest">
+                                                        {badge}
+                                                    </span>
+                                                ) : null;
+                                            })()}
                                             <p className="text-[9px] text-slate-400 dark:text-zinc-600 font-black tracking-widest uppercase mt-1 font-mono">{item.sku}</p>
                                         </td>
-                                        <td className="p-2.5 md:p-4 text-center text-slate-500 dark:text-zinc-500 font-black tabular-nums text-xs">{item.quantity}</td>
+                                        <td className="p-2.5 md:p-4 text-center text-slate-500 dark:text-zinc-500 font-black tabular-nums text-xs">
+                                            {item.expectedSellable}
+                                            {item.expectedSellable !== item.quantity && (
+                                                <div className="text-[9px] text-stone-400 dark:text-stone-500 font-normal">({item.quantity} pkgs)</div>
+                                            )}
+                                        </td>
                                         <td className="p-2.5 md:p-4 text-center font-black text-[#2C5E3B] dark:text-[#A9CBA2] tabular-nums text-xs">{item.received}</td>
                                         <td className="p-2.5 md:p-4 text-right">
                                             <span className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border transition-all ${item.status === 'Complete' ? 'bg-[#2C5E3B] dark:bg-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24] border-[#2C5E3B] dark:border-[#EAE5D9] shadow-sm' :

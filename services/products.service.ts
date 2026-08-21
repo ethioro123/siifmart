@@ -8,7 +8,8 @@ import {
     deleteProduct,
     cascadeDeleteProduct,
     clearLocationForEmptyProducts,
-    adjustStock
+    adjustStock,
+    updatePriceBySku
 } from './products/products-mutations';
 
 export const productsService = {
@@ -16,6 +17,7 @@ export const productsService = {
     _mapProduct,
     _calculateStatus,
     handleAutoReplenish,
+    updatePriceBySku,
 
     async getAll(siteId?: string, limit?: number, offset?: number, filters?: any, sort?: { key: string, direction: 'asc' | 'desc' }) {
         let query = supabase
@@ -44,8 +46,10 @@ export const productsService = {
 
         if (filters) {
             if (filters.search) {
-                const search = filters.search;
-                query = query.or(`name.ilike.%${search}%,sku.ilike.%${search}%,location.ilike.%${search}%,barcode.eq.${search}`);
+                const cleanSearch = filters.search.trim().replace(/['"\\]/g, '');
+                if (cleanSearch) {
+                    query = query.or(`name.ilike.%${cleanSearch}%,sku.ilike.%${cleanSearch}%,location.ilike.%${cleanSearch}%,barcode.ilike.%${cleanSearch}%`);
+                }
             }
             if (filters.category && filters.category !== 'All') {
                 query = query.eq('category', filters.category);
@@ -125,22 +129,32 @@ export const productsService = {
     },
 
     async getBySKU(sku: string, siteId?: string) {
-        let query = supabase.from('products').select('*').eq('sku', sku);
+        if (!sku) return null;
+        const cleanSku = sku.replace(/[-\s]/g, '').toUpperCase();
+        let query = supabase
+            .from('products')
+            .select('*')
+            .or(`sku.eq.${sku},sku.eq.${cleanSku}`);
         if (siteId) {
             query = query.eq('site_id', siteId);
         }
+        query = query.order('stock', { ascending: false }).limit(1);
         const { data, error } = await query.maybeSingle();
         if (error) throw error;
         return data ? this._mapProduct(data) : null;
     },
 
     async getBySkuAndLocation(sku: string, location: string, siteId: string) {
+        if (!sku) return null;
+        const cleanSku = sku.replace(/[-\s]/g, '').toUpperCase();
         const { data, error } = await supabase
             .from('products')
             .select('*')
-            .eq('sku', sku)
+            .or(`sku.eq.${sku},sku.eq.${cleanSku}`)
             .eq('site_id', siteId)
             .ilike('location', location)
+            .order('stock', { ascending: false })
+            .limit(1)
             .maybeSingle();
 
         if (error) throw error;

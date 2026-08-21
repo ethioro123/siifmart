@@ -90,9 +90,9 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
                                 {(() => {
                                     const unitDef = getSellUnit(product.unit || '');
                                     const sizeNum = getEffectivePackageSize(product.unit, product.size);
-                                    const isWeightVol = unitDef.category === 'weight' || unitDef.category === 'volume';
-                                    const displayStock = isWeightVol && sizeNum > 0 ? product.stock * sizeNum : product.stock;
-                                    const unitLabel = unitDef.code !== 'UNIT' ? ` ${unitDef.shortLabel}` : '';
+                                    const isWeightVol = (unitDef.category === 'weight' || unitDef.category === 'volume') && sizeNum > 0 && product.size;
+                                    const displayStock = product.stock || 0;
+                                    const unitLabel = isWeightVol ? ` packs (${product.size}${unitDef.shortLabel})` : unitDef.code !== 'UNIT' ? ` ${unitDef.shortLabel}` : '';
                                     return (
                                         <div className={`text-xs font-mono font-bold ${displayStock > 0 ? 'text-green-400' : 'text-red-400'}`}>
                                             {displayStock.toLocaleString()}{unitLabel}

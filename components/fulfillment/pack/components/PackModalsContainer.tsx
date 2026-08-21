@@ -7,8 +7,8 @@ import { PackDetailsModal } from '../PackDetailsModal';
 import { ReturnToWarehouseModal } from '../../returns/ReturnToWarehouseModal';
 import { FulfillmentSuccessScreen } from '../../FulfillmentSuccessScreen';
 import { WMSJob } from '../../../../types';
-import { isWeightBased, isVolumeBased, getEffectivePackageSize } from '../../../../utils/units';
 import { wmsJobsService, inventoryRequestsService } from '../../../../services/supabase.service';
+import { isWeightBased, isVolumeBased } from '../../../../utils/units';
 import { logger } from '../../../../utils/logger';
 import { usePackLabelPrint } from '../hooks/usePackLabelPrint';
 
@@ -122,22 +122,10 @@ export const PackModalsContainer: React.FC<PackModalsContainerProps> = ({
         if (!selectedPackJob) return;
 
         const item = selectedPackJob.lineItems![itemIndex];
-        // productId-first lookup, then site-scoped SKU, then any-site SKU fallback
-        const product = products.find(p => p.id === item.productId)
-            || products.find(p => (p.sku === item.sku) && (p.siteId === selectedPackJob.siteId || p.site_id === selectedPackJob.siteId))
-            || products.find(p => p.sku === item.sku);
 
-        // qty coming in is TOTAL MEASURE (e.g. 37 L). Convert to cases for storage.
-        const effectiveUnit = product?.unit || item.unit;
-        const effectiveSize = product?.size || item.size;
-        const sizeNum = getEffectivePackageSize(effectiveUnit, effectiveSize);
-        const isWeightVol = effectiveUnit ? (isWeightBased(effectiveUnit) || isVolumeBased(effectiveUnit)) : false;
-
-        let casesQty = qty;
-        if (isWeightVol && sizeNum > 1) {
-            // qty is in base measure (e.g. 37 L), convert to cases (37 / 20 = 1.85)
-            casesQty = qty / sizeNum;
-        }
+        // qty coming in from PackScanner is already the CASES count (e.g. 20 packs),
+        // NOT the base measure — scanner now pre-fills expectedQty directly, so no conversion needed.
+        const casesQty = qty;
 
         const expectedQty = item.expectedQty || 1;
         const newStatus = casesQty >= expectedQty - 0.001 ? 'Picked' : 'In-Progress';

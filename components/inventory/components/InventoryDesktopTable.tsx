@@ -6,7 +6,7 @@ import { Product, Site } from '../../../types';
 import { CURRENCY_SYMBOL } from '../../../constants';
 import { formatCompactNumber } from '../../../utils/formatting';
 import { getABCClass, getInventoryValue, LocationDropdown } from '../utils/inventoryHelpers';
-import { getSellUnit } from '../../../utils/units';
+import { getSellUnit, formatStockDisplay } from '../../../utils/units';
 import { CompactLocationDisplay } from '../../ProductLocationDisplay';
 import { Protected } from '../../Protected';
 import { useStore } from '../../../contexts/CentralStore';
@@ -266,9 +266,6 @@ export const InventoryDesktopTable: React.FC<InventoryDesktopTableProps> = ({
                             </td>
                             <td className="p-5 text-center">
                                 {(() => {
-                                    const unitDef = getSellUnit(product.unit || '');
-                                    const sizeNum = parseFloat(product.size || '0');
-                                    const isWeightVol = (unitDef.category === 'weight' || unitDef.category === 'volume') && sizeNum > 0;
                                     const stockVal = product.stock || 0;
                                     const threshold = product.minStock !== undefined && product.minStock !== null && product.minStock > 0 ? product.minStock : 10;
                                     const isOutOfStock = stockVal === 0;
@@ -280,12 +277,7 @@ export const InventoryDesktopTable: React.FC<InventoryDesktopTableProps> = ({
                                         : 'bg-green-500/10 text-green-500 border border-green-500/30';
                                     return (
                                         <div className={`inline-flex items-center justify-center min-w-[50px] px-3 py-1.5 rounded-2xl text-[12px] font-black font-mono shadow-sm transition-all ${colorClasses}`}>
-                                            {stockVal.toLocaleString()}
-                                            {isWeightVol ? (
-                                                <span className="text-[9px] font-bold ml-1 opacity-60">× {sizeNum}{unitDef.shortLabel.toLowerCase()}</span>
-                                            ) : unitDef.code !== 'UNIT' ? (
-                                                <span className="text-[9px] font-bold ml-1 uppercase opacity-60">{unitDef.shortLabel}</span>
-                                            ) : null}
+                                            {formatStockDisplay(stockVal, product)}
                                         </div>
                                     );
                                 })()}

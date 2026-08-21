@@ -55,7 +55,7 @@ export default function Modal({
   const isSide = variant === 'side';
 
   const modalContent = (
-    <div className={`fixed inset-0 ${zIndex} flex ${isSide ? 'justify-end' : 'items-center justify-center'} p-0 sm:p-4 print:static print:block print:p-0 print:bg-white`}>
+    <div className={`fixed inset-0 ${zIndex} flex ${isSide ? 'justify-end' : 'items-center justify-center'} p-4 sm:p-6 overflow-hidden print:static print:block print:p-0 print:bg-white`}>
       {/* Backdrop with blur and darken */}
       <div
         className="absolute inset-0 bg-black/60 backdrop-blur-[2px] transition-opacity print:hidden"
@@ -63,7 +63,7 @@ export default function Modal({
       />
 
       {/* Modal Content */}
-      <div className={`relative w-full ${isSide ? 'h-full max-w-md rounded-l-3xl rounded-r-none animate-in slide-in-from-right duration-300' : `${sizeClasses[size]} rounded-2xl animate-in fade-in zoom-in duration-200`} bg-[#F7F3ED]/95 dark:bg-[#1E2822]/95 backdrop-blur-2xl border border-[#E2DCCE] dark:border-emerald-950/20 shadow-2xl dark:shadow-[0_32px_96px_-12px_rgba(5,8,6,0.65)] transform transition-all flex flex-col ${isSide ? 'max-h-full' : 'max-h-[90vh]'} print:max-w-none print:w-full print:max-h-none print:shadow-none print:border-none print:rounded-none print:bg-white`}>
+      <div className={`relative w-full max-w-full overflow-hidden ${isSide ? 'h-full max-w-md rounded-l-3xl rounded-r-none animate-in slide-in-from-right duration-300' : `${sizeClasses[size]} rounded-2xl animate-in fade-in zoom-in duration-200`} bg-[#F7F3ED]/95 dark:bg-[#1E2822]/95 backdrop-blur-2xl border border-[#E2DCCE] dark:border-emerald-950/20 shadow-2xl dark:shadow-[0_32px_96px_-12px_rgba(5,8,6,0.65)] transform transition-all flex flex-col ${isSide ? 'max-h-full' : 'max-h-[90vh]'} print:max-w-none print:w-full print:max-h-none print:shadow-none print:border-none print:rounded-none print:bg-white`}>
 
         {/* Glow Effect */}
         <div className={`absolute -inset-[1px] bg-gradient-to-r from-transparent via-[#2C5E3B]/20 to-transparent dark:via-[#A9CBA2]/10 ${isSide ? 'rounded-l-3xl' : 'rounded-2xl'} blur-sm -z-10 pointer-events-none print:hidden`} />
@@ -83,7 +83,7 @@ export default function Modal({
         </div>
 
         {/* Body - Scrollable */}
-        <div className="p-6 overflow-y-auto custom-scrollbar flex-1 print:overflow-visible print:px-0 print:py-0">
+        <div className="p-6 overflow-y-auto overflow-x-hidden custom-scrollbar flex-1 print:overflow-visible print:px-0 print:py-0">
           {children}
         </div>
 

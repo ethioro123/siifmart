@@ -88,6 +88,15 @@ export const useMerchandisingState = (): MerchandisingContextType => {
    const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
    const [selectedLocationProduct, setSelectedLocationProduct] = useState<Product | null>(null);
 
+   // Product Control Modal State
+   const [isProductControlOpen, setIsProductControlOpen] = useState(false);
+   const [selectedControlProduct, setSelectedControlProduct] = useState<Product | null>(null);
+
+   const openProductControl = (p: Product) => {
+      setSelectedControlProduct(p);
+      setIsProductControlOpen(true);
+   };
+
    // --- ACTIONS ---
 
    const handleCreatePromo = async () => {
@@ -404,6 +413,12 @@ export const useMerchandisingState = (): MerchandisingContextType => {
       setIsLocationModalOpen,
       selectedLocationProduct,
       setSelectedLocationProduct,
+
+      isProductControlOpen,
+      setIsProductControlOpen,
+      selectedControlProduct,
+      setSelectedControlProduct,
+      openProductControl,
 
       handleSort,
       handleCreatePromo,
