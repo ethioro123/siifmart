@@ -287,8 +287,9 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
                 const siteSubtotal = siteItems.reduce((sum, item) => sum + item.totalCost, 0);
                 const siteTotalAmount = siteSubtotal + shippingCost - (siteSubtotal * discountRate / 100) + (siteSubtotal * taxRate / 100); // Updated total with new tax
 
+                const isEditMode = Boolean(editingPO?.id);
                 const newPO: PurchaseOrder = {
-                    id: editingPO ? editingPO.id : crypto.randomUUID(),
+                    id: (isEditMode && editingPO?.id) ? editingPO.id : crypto.randomUUID(),
                     siteId: siteId,
                     supplierId: vendorId,
                     supplierName: vendorName,
@@ -307,7 +308,7 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
                     requestedBy: poRequestedBy,
                 };
 
-                if (editingPO) {
+                if (isEditMode) {
                     await purchaseOrdersService.update(newPO.id, newPO);
                     successCount++;
                 } else {
@@ -316,7 +317,8 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
                 }
             }
 
-            showToast(editingPO ? 'PO Updated' : `Created ${successCount} PO(s)`, 'success');
+            const isEditMode = Boolean(editingPO && editingPO.id);
+            showToast(isEditMode ? 'PO Updated' : `Created ${successCount} PO(s)`, 'success');
             onSuccess();
             onClose();
 
@@ -327,6 +329,8 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
             setIsSubmitting(false);
         }
     };
+
+    const isEditMode = Boolean(editingPO && editingPO.id);
 
     const createPOFooter = (
         <div className="flex justify-between items-center w-full px-2">
@@ -352,7 +356,7 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
                     className="woody-btn-primary px-8 py-2.5 rounded-2xl text-xs font-black transition-all flex items-center gap-2.5 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
                 >
                     {isSubmitting && <Loader2 size={15} className="animate-spin" />}
-                    {editingPO ? 'Save Changes' : 'Create Purchase Order'}
+                    {isEditMode ? 'Save Changes' : 'Create Purchase Order'}
                 </button>
             </div>
         </div>
@@ -362,7 +366,7 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
         <Modal
             isOpen={isOpen}
             onClose={onClose}
-            title={editingPO ? "Edit Purchase Order" : "Initiate Purchase Order"}
+            title={isEditMode ? "Edit Purchase Order" : "Initiate Purchase Order"}
             size="4xl"
             footer={createPOFooter}
         >
