@@ -1,14 +1,10 @@
-
 import React, { useMemo } from 'react';
 import {
-    Users, User, Star, Award, Zap, TrendingUp,
-    MapPin, Shield, Clock, Phone, Mail, ChevronRight
+    Users, User, Award, TrendingUp, ChevronRight
 } from 'lucide-react';
 import { useData } from '../contexts/DataContext';
-
 import { useGamification } from '../contexts/GamificationContext';
 import { useRoster } from '../contexts/RosterContext';
-import { Employee, POINTS_CONFIG } from '../types';
 import { useLanguage } from '../contexts/LanguageContext';
 
 interface SiteRosterProps {
@@ -35,9 +31,8 @@ export default function SiteRoster({
     }, [employees, activeSite]);
 
     const sortedEmployees = useMemo(() => {
-        // Merge with points data and sort by points or name
         return siteEmployees.map(emp => {
-            const points = getWorkerPoints(emp.id); // Use helper instead of raw find
+            const points = getWorkerPoints(emp.id);
             return {
                 ...emp,
                 points: points?.totalPoints || 0,
@@ -45,7 +40,6 @@ export default function SiteRoster({
                 level: points?.level || 1,
                 levelTitle: points?.levelTitle || 'Rookie',
                 rank: points?.rank || 0,
-                // Add roster status check if needed using schedules
                 isRostered: schedules.some(s => s.employeeId === emp.id && s.date === new Date().toISOString().split('T')[0])
             };
         }).sort((a, b) => b.points - a.points);
@@ -55,34 +49,39 @@ export default function SiteRoster({
 
     if (!activeSite) return null;
 
+    const siteTypeLabel = activeSite.type === 'Warehouse' || activeSite.type === 'Distribution Center'
+        ? 'Warehouse Facility'
+        : activeSite.type === 'Store' || activeSite.type === 'Dark Store'
+            ? 'Store Location'
+            : 'Operations Node';
+
     return (
         <div className={`space-y-6 ${className}`}>
             <div className="flex items-center justify-between mb-2">
                 <div>
-                    <div>
-                        <h3 className="text-xl font-black dark:text-white text-slate-900 flex items-center gap-3 uppercase tracking-tighter">
-                            <div className="p-2.5 rounded-xl dark:bg-cyber-primary/10 bg-cyber-primary/5 border dark:border-cyber-primary/20 border-black/5 shadow-inner">
-                                <Users size={22} className="text-cyber-primary" />
-                            </div>
-                            {t('posCommand.siteRosterTitle')}
-                        </h3>
-                        <p className="dark:text-gray-500 text-slate-400 text-[10px] mt-2 font-bold uppercase tracking-[0.2em] opacity-60">
-                            {siteEmployees.length} {t('posCommand.totalEmployees')} {t('posCommand.siteDescription')}
-                        </p>
-                    </div>
+                    <h3 className="text-xl font-black dark:text-[#EAE5D9] text-[#1E3F27] flex items-center gap-3 uppercase tracking-tight">
+                        <div className="p-2.5 rounded-2xl bg-emerald-50 text-[#2C5E3B] dark:bg-[#2C5E3B]/20 dark:text-[#A9CBA2] border border-emerald-200 dark:border-emerald-950/30 shadow-inner">
+                            <Users size={22} />
+                        </div>
+                        Site Personnel Roster
+                    </h3>
+                    <p className="text-stone-500 dark:text-stone-400 text-[10px] mt-1.5 font-bold uppercase tracking-wider">
+                        {siteEmployees.length} Total Staff Stationed at {activeSite.name || siteTypeLabel}
+                    </p>
                 </div>
+
                 <div className="flex -space-x-3 hover:space-x-1 transition-all">
                     {displayEmployees.slice(0, 5).map((e) => (
-                        <div key={e.id} className="w-10 h-10 rounded-xl border-2 dark:border-cyber-black border-white bg-slate-100 flex items-center justify-center overflow-hidden shadow-lg transform transition-transform hover:scale-110 hover:z-10">
+                        <div key={e.id} className="w-10 h-10 rounded-xl border-2 dark:border-[#18201B] border-white bg-stone-100 dark:bg-black/40 flex items-center justify-center overflow-hidden shadow-md transform transition-transform hover:scale-110 hover:z-10">
                             {e.avatar ? (
                                 <img src={e.avatar} alt={e.name} className="w-full h-full object-cover" />
                             ) : (
-                                <User size={18} className="text-slate-400" />
+                                <User size={18} className="text-stone-400" />
                             )}
                         </div>
                     ))}
                     {siteEmployees.length > 5 && (
-                        <div className="w-10 h-10 rounded-xl border-2 dark:border-cyber-black border-white bg-cyber-primary flex items-center justify-center text-[10px] font-black text-black z-0 shadow-lg">
+                        <div className="w-10 h-10 rounded-xl border-2 dark:border-[#18201B] border-white bg-[#2C5E3B] text-[#EAE5D9] flex items-center justify-center text-[10px] font-black z-0 shadow-md">
                             +{siteEmployees.length - 5}
                         </div>
                     )}
@@ -97,75 +96,75 @@ export default function SiteRoster({
                         <div
                             key={emp.id}
                             className={`
-                relative overflow-hidden group transition-all duration-300
-                ${layout === 'grid'
-                                    ? 'p-5 rounded-[2rem] dark:bg-white/[0.03] bg-white border dark:border-white/5 border-black/[0.03] hover:translate-y-[-4px] hover:shadow-2xl'
-                                    : 'p-4 rounded-2xl dark:bg-white/[0.02] bg-white border dark:border-white/5 border-black/[0.03] flex items-center gap-4'}
-                ${isHighlighted ? 'border-cyber-primary/40 shadow-[0_0_20px_rgba(0,255,157,0.1)]' : ''}
-              `}
+                                relative overflow-hidden group transition-all duration-300
+                                ${layout === 'grid'
+                                    ? 'p-5 rounded-3xl bg-white/85 dark:bg-[#18201B]/60 border border-[#E2DCCE] dark:border-emerald-950/20 hover:translate-y-[-3px] hover:shadow-lg hover:border-[#2C5E3B]/40'
+                                    : 'p-4 rounded-2xl bg-white/85 dark:bg-[#18201B]/60 border border-[#E2DCCE] dark:border-emerald-950/20 flex items-center gap-4'}
+                                ${isHighlighted ? 'border-[#2C5E3B] shadow-[0_0_20px_rgba(44,94,59,0.15)]' : ''}
+                            `}
                         >
-                            {/* Status Glow */}
-                            <div className={`absolute top-0 right-0 w-32 h-32 blur-[40px] opacity-10 transition-opacity group-hover:opacity-20 ${emp.status === 'Active' ? 'bg-cyber-primary' : 'bg-orange-500'}`} />
-
                             {/* Grid Layout Card */}
                             {layout === 'grid' && (
                                 <>
-                                    <div className="flex items-start justify-between mb-6">
+                                    <div className="flex items-start justify-between mb-5">
                                         <div className="relative">
-                                            <div className={`w-16 h-16 rounded-2xl dark:bg-black/40 bg-slate-50 flex items-center justify-center border-2 ${isHighlighted ? 'border-cyber-primary' : 'dark:border-white/5 border-black/5'} overflow-hidden shadow-xl`}>
+                                            <div className={`w-14 h-14 rounded-2xl dark:bg-black/40 bg-stone-50 flex items-center justify-center border ${isHighlighted ? 'border-[#2C5E3B]' : 'border-[#E2DCCE] dark:border-white/10'} overflow-hidden shadow-sm`}>
                                                 {emp.avatar ? (
                                                     <img src={emp.avatar} alt={emp.name} className="w-full h-full object-cover" />
                                                 ) : (
-                                                    <User size={28} className="dark:text-white/20 text-slate-300" />
+                                                    <User size={24} className="text-stone-400" />
                                                 )}
                                             </div>
-                                            <div className={`absolute -bottom-2 -right-2 w-6 h-6 rounded-lg bg-cyber-black border border-white/10 flex items-center justify-center text-[9px] font-black text-cyber-primary`}>
+                                            <div className="absolute -bottom-1.5 -right-1.5 w-6 h-6 rounded-lg bg-[#2C5E3B] border border-white/20 flex items-center justify-center text-[9px] font-black text-white">
                                                 {emp.level}
                                             </div>
                                         </div>
                                         <div className="text-right">
-                                            <div className={`text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-md mb-1 inline-block ${emp.status === 'Active' ? 'dark:bg-cyber-primary/10 bg-cyber-primary/5 text-cyber-primary' : 'bg-orange-500/10 text-orange-400'
-                                                }`}>
+                                            <div className={`text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-lg mb-1 inline-block ${
+                                                emp.status === 'Active'
+                                                    ? 'bg-emerald-50 text-[#2C5E3B] dark:bg-[#2C5E3B]/20 dark:text-[#A9CBA2] border border-emerald-200 dark:border-emerald-950/30'
+                                                    : 'bg-amber-50 text-amber-700 dark:bg-amber-950/30 dark:text-amber-400 border border-amber-200 dark:border-amber-900/30'
+                                            }`}>
                                                 {emp.status}
                                             </div>
-                                            <p className="text-[10px] dark:text-gray-500 text-slate-400 font-bold uppercase tracking-widest leading-none">
+                                            <p className="text-[10px] text-stone-500 dark:text-stone-400 font-bold uppercase tracking-wider leading-none">
                                                 {emp.role.replace('_', ' ')}
                                             </p>
                                         </div>
                                     </div>
 
-                                    <div className="mb-6">
-                                        <h4 className="text-lg font-black dark:text-white text-slate-900 truncate tracking-tight">{emp.name}</h4>
-                                        <p className="text-[10px] dark:text-cyber-primary/70 text-cyber-primary font-bold uppercase tracking-[0.2em]">{emp.levelTitle}</p>
+                                    <div className="mb-5">
+                                        <h4 className="text-base font-black dark:text-[#EAE5D9] text-[#1E3F27] truncate tracking-tight">{emp.name}</h4>
+                                        <p className="text-[10px] text-[#2C5E3B] dark:text-[#A9CBA2] font-bold uppercase tracking-wider mt-0.5">{emp.levelTitle}</p>
                                     </div>
 
-                                    <div className="grid grid-cols-2 gap-2 mb-6">
-                                        <div className="p-3 rounded-xl dark:bg-white/[0.02] bg-slate-50 border dark:border-white/5 border-black/[0.02]">
-                                            <p className="text-[8px] dark:text-gray-500 text-slate-400 font-black uppercase tracking-widest mb-1">{t('posCommand.efficiency')}</p>
-                                            <span className="text-sm font-bold dark:text-white text-slate-900">{(emp as any).performanceScore || 95}%</span>
+                                    <div className="grid grid-cols-2 gap-2 mb-5">
+                                        <div className="p-3 rounded-2xl bg-[#FAF8F5] dark:bg-black/30 border border-[#E2DCCE]/60 dark:border-white/5">
+                                            <p className="text-[8px] text-stone-400 font-bold uppercase tracking-wider mb-1">Efficiency</p>
+                                            <span className="text-xs font-black dark:text-white text-[#1E3F27]">{(emp as any).performanceScore || 100}%</span>
                                         </div>
-                                        <div className="p-3 rounded-xl dark:bg-white/[0.02] bg-slate-50 border dark:border-white/5 border-black/[0.02]">
-                                            <p className="text-[8px] dark:text-gray-500 text-slate-400 font-black uppercase tracking-widest mb-1">{t('posCommand.weekly')}</p>
-                                            <span className="text-sm font-bold dark:text-white text-slate-900">{emp.weeklyPoints.toLocaleString()} <span className="text-[9px] text-cyber-primary">PTS</span></span>
+                                        <div className="p-3 rounded-2xl bg-[#FAF8F5] dark:bg-black/30 border border-[#E2DCCE]/60 dark:border-white/5">
+                                            <p className="text-[8px] text-stone-400 font-bold uppercase tracking-wider mb-1">Weekly</p>
+                                            <span className="text-xs font-black font-mono dark:text-[#A9CBA2] text-[#2C5E3B]">{emp.weeklyPoints.toLocaleString()} PTS</span>
                                         </div>
                                     </div>
 
-                                    <div className="flex items-center justify-between pt-4 border-t dark:border-white/5 border-black/5">
+                                    <div className="flex items-center justify-between pt-3 border-t border-[#E2DCCE]/60 dark:border-white/5">
                                         <div className="flex gap-1">
                                             {emp.badges?.slice(0, 3).map((b, i) => (
-                                                <div key={i} className="w-7 h-7 rounded-lg dark:bg-white/5 bg-slate-100 flex items-center justify-center text-xs shadow-sm border dark:border-white/5 border-black/5">
+                                                <div key={i} className="w-6 h-6 rounded-lg bg-stone-100 dark:bg-white/5 flex items-center justify-center text-xs shadow-sm border border-[#E2DCCE]/60 dark:border-white/5">
                                                     {b}
                                                 </div>
                                             )) || (
-                                                    <div className="w-7 h-7 rounded-lg dark:bg-white/5 bg-slate-100 flex items-center justify-center text-xs opacity-20">
-                                                        <Award size={14} />
-                                                    </div>
-                                                )}
+                                                <div className="w-6 h-6 rounded-lg bg-stone-100 dark:bg-white/5 flex items-center justify-center text-xs opacity-30">
+                                                    <Award size={13} />
+                                                </div>
+                                            )}
                                         </div>
                                         {emp.rank > 0 && emp.rank <= 3 && (
-                                            <div className="flex items-center gap-1.5 text-yellow-400 font-black text-[10px] uppercase tracking-widest animate-pulse">
+                                            <div className="flex items-center gap-1 text-amber-600 dark:text-amber-400 font-black text-[10px] uppercase tracking-wider">
                                                 <TrendingUp size={12} />
-                                                {t('posCommand.rank')} #{emp.rank}
+                                                Rank #{emp.rank}
                                             </div>
                                         )}
                                     </div>
@@ -175,32 +174,32 @@ export default function SiteRoster({
                             {/* List Layout Component */}
                             {layout === 'list' && (
                                 <>
-                                    <div className="relative">
-                                        <div className="w-12 h-12 rounded-xl dark:bg-black/40 bg-slate-50 flex items-center justify-center border dark:border-white/10 border-black/5 overflow-hidden">
+                                    <div className="relative shrink-0">
+                                        <div className="w-10 h-10 rounded-xl dark:bg-black/40 bg-stone-50 flex items-center justify-center border border-[#E2DCCE] dark:border-white/10 overflow-hidden">
                                             {emp.avatar ? (
                                                 <img src={emp.avatar} alt={emp.name} className="w-full h-full object-cover" />
                                             ) : (
-                                                <User size={20} className="dark:text-white/20 text-slate-300" />
+                                                <User size={18} className="text-stone-400" />
                                             )}
                                         </div>
-                                        <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-cyber-primary flex items-center justify-center text-[7px] font-black text-black">
+                                        <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-[#2C5E3B] text-white flex items-center justify-center text-[7px] font-black">
                                             {emp.level}
                                         </div>
                                     </div>
 
                                     <div className="flex-1 min-w-0">
-                                        <h4 className="text-sm font-black dark:text-white text-slate-900 truncate tracking-tight">{emp.name}</h4>
-                                        <p className="text-[9px] dark:text-gray-500 text-slate-400 font-bold uppercase tracking-widest leading-none mt-0.5">
+                                        <h4 className="text-xs font-bold dark:text-white text-[#1E3F27] truncate">{emp.name}</h4>
+                                        <p className="text-[9px] text-stone-500 dark:text-stone-400 font-bold uppercase tracking-wider leading-none mt-0.5">
                                             {emp.role.replace('_', ' ')} • {emp.levelTitle}
                                         </p>
                                     </div>
 
-                                    <div className="text-right">
-                                        <p className="text-sm font-black dark:text-cyber-primary text-cyber-primary font-mono">{emp.weeklyPoints.toLocaleString()}</p>
-                                        <p className="text-[8px] dark:text-gray-600 text-slate-400 font-bold uppercase tracking-widest leading-none">{t('posCommand.ptsThisWeek')}</p>
+                                    <div className="text-right shrink-0">
+                                        <p className="text-xs font-black font-mono text-[#2C5E3B] dark:text-[#A9CBA2]">{emp.weeklyPoints.toLocaleString()} PTS</p>
+                                        <p className="text-[8px] text-stone-400 font-bold uppercase tracking-wider leading-none">Weekly</p>
                                     </div>
 
-                                    <div className={`w-2 h-2 rounded-full ${emp.status === 'Active' ? 'bg-cyber-primary shadow-[0_0_8px_rgba(0,255,157,0.5)]' : 'bg-orange-500'} ml-2 animate-pulse`} />
+                                    <div className={`w-2 h-2 rounded-full ${emp.status === 'Active' ? 'bg-[#2C5E3B]' : 'bg-amber-500'} ml-2`} />
                                 </>
                             )}
                         </div>
