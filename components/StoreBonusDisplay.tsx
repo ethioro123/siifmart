@@ -19,7 +19,7 @@ interface StoreBonusDisplayProps {
 }
 
 // Calculate store bonus from points and tiers
-export const calculateStoreBonus = (points: number, tiers: BonusTier[] = DEFAULT_POS_BONUS_TIERS): { tier: BonusTier; bonus: number } => {
+export const calculateStoreBonus = (points: number = 0, tiers: BonusTier[] = DEFAULT_POS_BONUS_TIERS): { tier: BonusTier; bonus: number } => {
     const tier = (tiers.length > 0
         ? tiers.find(t => points >= t.minPoints && (t.maxPoints === null || points <= t.maxPoints))
         : null) || tiers[0] || DEFAULT_POS_BONUS_TIERS[0];
@@ -48,7 +48,7 @@ const getTierColor = (tierColor: string) => {
 };
 
 // Get level info
-const getLevelInfo = (totalPoints: number) => {
+const getLevelInfo = (totalPoints: number = 0) => {
     const levels = POINTS_CONFIG.LEVELS;
     let currentLevel = levels[0];
     let nextLevel = levels[1];
@@ -77,11 +77,10 @@ export function StoreBonusWidget({
     bonusTiers = DEFAULT_POS_BONUS_TIERS
 }: StoreBonusDisplayProps) {
     const { t } = useLanguage();
-    if (!storePoints) return null;
 
     const bonusInfo = useMemo(() =>
-        calculateStoreBonus(storePoints.monthlyPoints, bonusTiers),
-        [storePoints.monthlyPoints, bonusTiers]
+        calculateStoreBonus(storePoints?.monthlyPoints || 0, bonusTiers),
+        [storePoints?.monthlyPoints, bonusTiers]
     );
 
     const userShare = useMemo(() => {
@@ -96,28 +95,30 @@ export function StoreBonusWidget({
         };
     }, [currentUserRole, roleDistribution, bonusInfo.bonus]);
 
+    if (!storePoints) return null;
+
     return (
-        <div className="flex items-center gap-2 bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 rounded-xl px-3 py-1.5">
-            <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${getTierColor(bonusInfo.tier.tierColor)} flex items-center justify-center`}>
+        <div className="flex items-center gap-2 bg-[#2C5E3B]/10 dark:bg-emerald-950/20 border border-[#2C5E3B]/20 dark:border-emerald-900/30 rounded-2xl px-3 py-1.5 shadow-2xs">
+            <div className={`w-8 h-8 rounded-xl bg-gradient-to-br ${getTierColor(bonusInfo.tier.tierColor)} flex items-center justify-center shrink-0`}>
                 <Store size={16} className="text-white" />
             </div>
             <div>
-                <p className="text-xs font-bold text-white">
+                <p className="text-xs font-black text-[#1E3F27] dark:text-white">
                     {storePoints.siteName}
                     <span className={`ml-1 px-1.5 py-0.5 rounded text-[8px] font-bold bg-gradient-to-r ${getTierColor(bonusInfo.tier.tierColor)} text-white`}>
                         {bonusInfo.tier.tierName}
                     </span>
                 </p>
-                <p className="text-[10px] text-gray-400">
+                <p className="text-[10px] text-stone-500 dark:text-stone-400 font-medium">
                     {storePoints.monthlyPoints.toLocaleString()} {t('posCommand.ptsThisMonth')}
                 </p>
             </div>
             {userShare && (
-                <div className="text-right pl-2 border-l border-green-500/30">
-                    <p className="text-xs text-green-400 font-bold">
+                <div className="text-right pl-2 border-l border-[#2C5E3B]/20 dark:border-emerald-900/30 ml-auto">
+                    <p className="text-xs text-[#2C5E3B] dark:text-[#A9CBA2] font-black font-mono">
                         {formatCompactNumber(userShare.amount, { currency: CURRENCY_SYMBOL, maxFractionDigits: 0 })}
                     </p>
-                    <p className="text-[10px] text-gray-500">{t('posCommand.yourShare')} ({userShare.percentage}%)</p>
+                    <p className="text-[10px] text-stone-400">{t('posCommand.yourShare')} ({userShare.percentage}%)</p>
                 </div>
             )}
         </div>
@@ -135,34 +136,28 @@ export default function StoreBonusDisplay({
     leaderboard
 }: StoreBonusDisplayProps) {
     const { t } = useLanguage();
-    if (!storePoints) {
-        return (
-            <div className="bg-gradient-to-r from-blue-500/5 to-purple-500/5 border border-blue-500/20 rounded-2xl p-6 text-center">
-                <Store className="mx-auto text-gray-500 mb-2" size={32} />
-                <p className="text-gray-400 text-sm">{t('posCommand.noBonusInfo')}</p>
-                <p className="text-gray-500 text-xs mt-1">{t('posCommand.completeTxToEarn')}</p>
-            </div>
-        );
-    }
 
+    const monthlyPoints = storePoints?.monthlyPoints || 0;
+
+    // Unconditional hook declarations at the top level
     const bonusInfo = useMemo(() =>
-        calculateStoreBonus(storePoints.monthlyPoints, bonusTiers),
-        [storePoints.monthlyPoints, bonusTiers]
+        calculateStoreBonus(monthlyPoints, bonusTiers),
+        [monthlyPoints, bonusTiers]
     );
 
     // Find next tier
     const nextTier = useMemo(() => {
         const sortedTiers = [...bonusTiers].sort((a, b) => a.minPoints - b.minPoints);
-        return sortedTiers.find(t => t.minPoints > storePoints.monthlyPoints);
-    }, [storePoints.monthlyPoints, bonusTiers]);
+        return sortedTiers.find(t => t.minPoints > monthlyPoints);
+    }, [monthlyPoints, bonusTiers]);
 
     // Calculate progress to next tier
     const tierProgress = useMemo(() => {
         if (!nextTier) return 100;
         const range = nextTier.minPoints - bonusInfo.tier.minPoints;
-        const progress = storePoints.monthlyPoints - bonusInfo.tier.minPoints;
-        return Math.min(100, (progress / range) * 100);
-    }, [storePoints.monthlyPoints, bonusInfo.tier, nextTier]);
+        const progress = monthlyPoints - bonusInfo.tier.minPoints;
+        return Math.min(100, Math.max(0, (progress / (range || 1)) * 100));
+    }, [monthlyPoints, bonusInfo.tier, nextTier]);
 
     // Calculate user's personal share
     const userShare = useMemo(() => {
@@ -185,6 +180,16 @@ export default function StoreBonusDisplay({
         [workerPoints]
     );
 
+    if (!storePoints) {
+        return (
+            <div className="bg-white/85 dark:bg-[#18201B]/60 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-3xl p-8 text-center shadow-sm">
+                <Store className="mx-auto text-stone-300 dark:text-stone-600 mb-2" size={32} />
+                <p className="text-stone-600 dark:text-stone-300 text-sm font-bold">{t('posCommand.noBonusInfo')}</p>
+                <p className="text-stone-400 text-xs mt-1">{t('posCommand.completeTxToEarn')}</p>
+            </div>
+        );
+    }
+
     if (compact) {
         return (
             <StoreBonusWidget
@@ -197,123 +202,116 @@ export default function StoreBonusDisplay({
     }
 
     return (
-        <div className="bg-black/60 backdrop-blur-2xl bg-gradient-to-br from-black/0 to-blue-900/20 border border-white/5 rounded-2xl p-6 h-full relative overflow-hidden group">
-            {/* Animated Glow Effect */}
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-purple-500/5 to-pink-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-            <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-
+        <div className="bg-white/85 dark:bg-[#18201B]/60 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-3xl p-6 shadow-sm relative overflow-hidden group">
             {/* Header */}
             <div className="relative flex items-center justify-between mb-6">
                 <div className="flex items-center gap-4">
-                    <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${getTierColor(bonusInfo.tier.tierColor)} flex items-center justify-center shadow-lg relative`}>
-                        <div className="absolute inset-0 bg-white/20 animate-pulse rounded-xl" />
+                    <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${getTierColor(bonusInfo.tier.tierColor)} flex items-center justify-center shadow-sm relative shrink-0`}>
                         <Store size={28} className="text-white relative z-10" />
-                        <div className="absolute -bottom-2 -right-2 bg-black/80 border border-white/10 rounded-lg px-1.5 py-0.5">
-                            <span className="text-[10px] font-bold text-white">Lvl {levelInfo?.currentLevel.level || '-'}</span>
+                        <div className="absolute -bottom-2 -right-2 bg-stone-900 text-white rounded-lg px-1.5 py-0.5 border border-white/10">
+                            <span className="text-[10px] font-bold font-mono">Lvl {levelInfo?.currentLevel.level || '-'}</span>
                         </div>
                     </div>
                     <div>
-                        <h3 className="font-bold text-white text-lg flex items-center gap-2">
+                        <h3 className="font-black text-[#1E3F27] dark:text-white text-lg flex items-center gap-2">
                             {t('posCommand.performance')}
-                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold bg-gradient-to-r ${getTierColor(bonusInfo.tier.tierColor)} text-white shadow shadow-white/10`}>
+                            <span className={`px-2 py-0.5 rounded-lg text-[10px] font-black uppercase bg-gradient-to-r ${getTierColor(bonusInfo.tier.tierColor)} text-white shadow-2xs`}>
                                 {bonusInfo.tier.tierName}
                             </span>
                         </h3>
-                        <p className="text-xs text-blue-300 flex items-center gap-1">
-                            <Sparkles size={10} />
+                        <p className="text-xs text-[#2C5E3B] dark:text-[#A9CBA2] flex items-center gap-1 font-bold mt-0.5">
+                            <Sparkles size={11} />
                             {storePoints.siteName}
                         </p>
                     </div>
                 </div>
                 {/* Points / Bonus Toggle View */}
                 <div className="text-right">
-                    <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">{t('posCommand.storePool')}</p>
-                    <p className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">
+                    <p className="text-[10px] text-stone-400 font-bold uppercase tracking-wider">{t('posCommand.storePool')}</p>
+                    <p className="text-2xl font-black font-mono text-[#2C5E3B] dark:text-[#A9CBA2]">
                         {formatCompactNumber(bonusInfo.bonus, { currency: CURRENCY_SYMBOL, maxFractionDigits: 0 })}
                     </p>
                 </div>
             </div>
 
             {/* Main Stats Grid */}
-            <div className="relative grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
                 {/* Total Store Sales/Points */}
-                <div className="bg-black/30 p-4 rounded-xl border border-white/5 backdrop-blur-sm">
-                    <div className="flex items-center justify-between mb-2">
-                        <p className="text-[10px] text-gray-400 uppercase font-bold">{t('posCommand.storePoints')}</p>
-                        <Trophy size={14} className="text-yellow-500" />
+                <div className="bg-[#FAF8F5] dark:bg-black/30 p-4 rounded-2xl border border-[#E2DCCE]/60 dark:border-white/5">
+                    <div className="flex items-center justify-between mb-1.5">
+                        <p className="text-[10px] text-stone-400 uppercase font-bold">{t('posCommand.storePoints')}</p>
+                        <Trophy size={14} className="text-amber-500" />
                     </div>
-                    <p className="text-2xl font-black text-white">{storePoints.monthlyPoints.toLocaleString()}</p>
-                    <p className="text-[10px] text-green-400 flex items-center gap-1">
+                    <p className="text-2xl font-black font-mono text-[#1E3F27] dark:text-white">{storePoints.monthlyPoints.toLocaleString()}</p>
+                    <p className="text-[10px] text-[#2C5E3B] dark:text-[#A9CBA2] flex items-center gap-1 font-bold mt-1">
                         <TrendingUp size={10} />
                         +{storePoints.todayPoints.toLocaleString()} {t('posCommand.today')}
                     </p>
                 </div>
 
-                {/* Personal Contribution (Gamified) */}
-                <div className="bg-gradient-to-br from-blue-500/10 to-transparent p-4 rounded-xl border border-blue-500/20 backdrop-blur-sm">
-                    <div className="flex items-center justify-between mb-2">
-                        <p className="text-[10px] text-blue-300 uppercase font-bold">{t('posCommand.yourScore')}</p>
-                        <Zap size={14} className="text-blue-400" />
+                {/* Personal Contribution */}
+                <div className="bg-[#FAF8F5] dark:bg-black/30 p-4 rounded-2xl border border-[#E2DCCE]/60 dark:border-white/5">
+                    <div className="flex items-center justify-between mb-1.5">
+                        <p className="text-[10px] text-stone-400 uppercase font-bold">{t('posCommand.yourScore')}</p>
+                        <Zap size={14} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
                     </div>
-                    <p className="text-2xl font-black text-white">{workerPoints?.totalPoints.toLocaleString() || 0}</p>
-                    <p className="text-[10px] text-blue-300">
+                    <p className="text-2xl font-black font-mono text-[#1E3F27] dark:text-white">{workerPoints?.totalPoints.toLocaleString() || 0}</p>
+                    <p className="text-[10px] text-stone-500 dark:text-stone-400 font-medium mt-1">
                         {(levelInfo?.currentLevel.title === 'Rookie' ? t('posCommand.rookie') : levelInfo?.currentLevel.title) || t('posCommand.rookie')} • Lvl {levelInfo?.currentLevel.level || 1}
                     </p>
                 </div>
 
                 {/* Rank */}
-                <div className="bg-black/30 p-4 rounded-xl border border-white/5 backdrop-blur-sm">
-                    <div className="flex items-center justify-between mb-2">
-                        <p className="text-[10px] text-gray-400 uppercase font-bold">{t('posCommand.storeRank')}</p>
-                        <Crown size={14} className="text-purple-500" />
+                <div className="bg-[#FAF8F5] dark:bg-black/30 p-4 rounded-2xl border border-[#E2DCCE]/60 dark:border-white/5">
+                    <div className="flex items-center justify-between mb-1.5">
+                        <p className="text-[10px] text-stone-400 uppercase font-bold">{t('posCommand.storeRank')}</p>
+                        <Crown size={14} className="text-amber-500" />
                     </div>
                     <div className="flex items-baseline gap-2">
-                        <p className="text-2xl font-black text-white">#{workerPoints?.rank || '-'}</p>
-                        <span className="text-xs text-gray-500">{t('posCommand.of')} {leaderboard?.length || '-'}</span>
+                        <p className="text-2xl font-black font-mono text-[#1E3F27] dark:text-white">#{workerPoints?.rank || '-'}</p>
+                        <span className="text-xs text-stone-400 font-bold">{t('posCommand.of')} {leaderboard?.length || '-'}</span>
                     </div>
-                    <p className="text-[10px] text-gray-500 truncate">{t('posCommand.topStaff')}</p>
+                    <p className="text-[10px] text-stone-400 font-medium truncate mt-1">{t('posCommand.topStaff')}</p>
                 </div>
             </div>
 
             {/* Progress to Next Store Tier */}
-            <div className="relative space-y-2 mb-6">
-                <div className="flex justify-between text-[10px] text-gray-400 uppercase font-bold">
+            <div className="space-y-2 mb-6">
+                <div className="flex justify-between text-[10px] text-stone-400 uppercase font-bold">
                     <span>{t('posCommand.current')} {bonusInfo.tier.tierName}</span>
                     {nextTier ? (
-                        <span className="text-blue-400">{nextTier.minPoints - storePoints.monthlyPoints} {t('posCommand.ptsTo')} {nextTier.tierName}</span>
+                        <span className="text-[#2C5E3B] dark:text-[#A9CBA2] font-black">{nextTier.minPoints - storePoints.monthlyPoints} {t('posCommand.ptsTo')} {nextTier.tierName}</span>
                     ) : (
-                        <span className="text-purple-400">{t('posCommand.maxTierReached')}</span>
+                        <span className="text-amber-600 font-black">{t('posCommand.maxTierReached')}</span>
                     )}
                 </div>
-                <div className="h-3 bg-black/50 rounded-full overflow-hidden border border-white/10 relative">
+                <div className="h-2.5 bg-stone-200 dark:bg-black/40 rounded-full overflow-hidden border border-[#E2DCCE]/60 dark:border-white/5 relative">
                     <div
-                        className={`h-full bg-gradient-to-r ${getTierColor(bonusInfo.tier.tierColor)} transition-all duration-1000 relative overflow-hidden`}
-                        ref={(el) => { if (el) el.style.width = `${tierProgress}%`; }}
-                    >
-                        <div className="absolute inset-0 bg-white/20 animate-[shimmer_2s_infinite]" />
-                    </div>
+                        className={`h-full bg-gradient-to-r ${getTierColor(bonusInfo.tier.tierColor)} transition-all duration-1000`}
+                        style={{ width: `${tierProgress}%` }}
+                    />
                 </div>
                 {nextTier && (
-                    <p className="text-[10px] text-gray-500 text-center">
-                        {t('posCommand.nextTierUnlocks')} <span className="text-white font-bold">{formatCompactNumber(nextTier.bonusAmount, { currency: CURRENCY_SYMBOL })}</span> {t('posCommand.baseBonus')}
+                    <p className="text-[10px] text-stone-400 text-center font-medium">
+                        {t('posCommand.nextTierUnlocks')} <span className="text-[#1E3F27] dark:text-white font-bold">{formatCompactNumber(nextTier.bonusAmount, { currency: CURRENCY_SYMBOL })}</span> {t('posCommand.baseBonus')}
                     </p>
                 )}
             </div>
 
             {/* Personal Share Estimate */}
             {userShare && (
-                <div className="relative bg-gradient-to-r from-green-500/10 to-emerald-500/5 rounded-xl p-4 border border-green-500/20">
+                <div className="bg-emerald-50 dark:bg-[#2C5E3B]/20 rounded-2xl p-4 border border-emerald-200 dark:border-emerald-950/30">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-lg bg-green-500/20 flex items-center justify-center">
-                                <DollarSign className="text-green-400" />
+                            <div className="w-9 h-9 rounded-xl bg-[#2C5E3B] text-white flex items-center justify-center shrink-0 shadow-2xs">
+                                <DollarSign size={18} />
                             </div>
                             <div>
-                                <p className="text-xs text-gray-300 font-bold">{t('posCommand.estPersonalBonus')}</p>
-                                <p className="text-[10px] text-green-400/80">{userShare.percentage}% {t('posCommand.share')} ({userShare.role})</p>
+                                <p className="text-xs text-[#1E3F27] dark:text-white font-bold">{t('posCommand.estPersonalBonus')}</p>
+                                <p className="text-[10px] text-[#2C5E3B] dark:text-[#A9CBA2] font-medium">{userShare.percentage}% {t('posCommand.share')} ({userShare.role})</p>
                             </div>
                         </div>
-                        <p className="text-2xl font-black text-green-400">
+                        <p className="text-xl font-black font-mono text-[#2C5E3B] dark:text-[#A9CBA2]">
                             {formatCompactNumber(userShare.amount, { currency: CURRENCY_SYMBOL, maxFractionDigits: 0 })}
                         </p>
                     </div>
@@ -341,18 +339,18 @@ export function StoreLeaderboard({
 
     if (sortedStores.length === 0) {
         return (
-            <div className="bg-white/5 border border-white/10 rounded-2xl p-6 text-center">
-                <Trophy className="mx-auto text-gray-500 mb-2" size={32} />
-                <p className="text-gray-400 text-sm">{t('posCommand.noStoreRankings')}</p>
+            <div className="bg-white/85 dark:bg-[#18201B]/60 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-3xl p-6 text-center shadow-sm">
+                <Trophy className="mx-auto text-stone-300 dark:text-stone-600 mb-2" size={32} />
+                <p className="text-stone-600 dark:text-stone-300 text-sm font-bold">{t('posCommand.noStoreRankings')}</p>
             </div>
         );
     }
 
     return (
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
-            <h3 className="font-bold text-white mb-4 flex items-center gap-2">
-                <Trophy className="text-yellow-400" size={20} />
-                {t('posCommand.storeRankings')}
+        <div className="bg-white/85 dark:bg-[#18201B]/60 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-3xl p-5 shadow-sm">
+            <h3 className="font-black text-xs text-[#1E3F27] dark:text-white uppercase tracking-wider mb-4 flex items-center gap-2">
+                <Trophy className="text-amber-500" size={16} />
+                <span>{t('posCommand.storeRankings')}</span>
             </h3>
             <div className="space-y-2">
                 {sortedStores.slice(0, 5).map((store, index) => {
@@ -362,29 +360,29 @@ export function StoreLeaderboard({
                     return (
                         <div
                             key={store.id}
-                            className={`flex items-center gap-3 p-3 rounded-xl transition-all ${isCurrentStore
-                                ? 'bg-blue-500/10 border border-blue-500/30'
-                                : 'bg-black/30 hover:bg-black/40'
+                            className={`flex items-center gap-3 p-3 rounded-2xl transition-all border ${isCurrentStore
+                                ? 'bg-emerald-50 dark:bg-[#2C5E3B]/20 border-emerald-300 dark:border-emerald-950/40'
+                                : 'bg-[#FAF8F5] dark:bg-black/30 border-[#E2DCCE]/60 dark:border-white/5 hover:border-[#2C5E3B]/40'
                                 }`}
                         >
-                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm ${index === 0 ? 'bg-yellow-500 text-black' :
-                                index === 1 ? 'bg-gray-400 text-black' :
-                                    index === 2 ? 'bg-amber-600 text-white' :
-                                        'bg-white/10 text-gray-400'
+                            <div className={`w-7 h-7 rounded-xl flex items-center justify-center font-black text-xs font-mono shrink-0 ${index === 0 ? 'bg-amber-500 text-white' :
+                                index === 1 ? 'bg-stone-300 text-stone-800' :
+                                    index === 2 ? 'bg-amber-700 text-white' :
+                                        'bg-stone-100 dark:bg-white/10 text-stone-500 dark:text-stone-400'
                                 }`}>
                                 {index + 1}
                             </div>
                             <div className="flex-1 min-w-0">
-                                <p className="font-bold text-white text-sm truncate flex items-center gap-1">
+                                <p className="font-bold text-[#1E3F27] dark:text-white text-xs truncate flex items-center gap-1">
                                     {store.siteName}
-                                    {isCurrentStore && <span className="text-[10px] text-blue-400">({t('posCommand.you')})</span>}
+                                    {isCurrentStore && <span className="text-[10px] text-[#2C5E3B] dark:text-[#A9CBA2] font-black">({t('posCommand.you')})</span>}
                                 </p>
-                                <p className="text-[10px] text-gray-400">
+                                <p className="text-[10px] text-stone-400">
                                     {store.monthlyPoints.toLocaleString()} pts • {bonus.tier.tierName}
                                 </p>
                             </div>
                             <div className="text-right">
-                                <p className="text-sm font-bold text-green-400">
+                                <p className="text-xs font-black font-mono text-[#2C5E3B] dark:text-[#A9CBA2]">
                                     {formatCompactNumber(bonus.bonus, { currency: CURRENCY_SYMBOL, maxFractionDigits: 0 })}
                                 </p>
                             </div>
