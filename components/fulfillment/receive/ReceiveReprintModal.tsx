@@ -162,7 +162,7 @@ export const ReceiveReprintModal: React.FC<ReceiveReprintModalProps> = ({
                                     {format === 'QR' && <QrCode size={14} />}
                                     {format === 'Barcode' && <ScanLine size={14} />}
                                     {format === 'Both' && <Box size={14} />}
-                                    {format}
+                                    {format === 'Both' ? (t('common.both') || 'Both') : format}
                                 </button>
                             ))}
                         </div>
@@ -184,7 +184,7 @@ export const ReceiveReprintModal: React.FC<ReceiveReprintModalProps> = ({
                                         }`}
                                 >
                                     <span className="text-[10px] uppercase tracking-widest">
-                                        {opt === 'showPrice' ? 'Price' : opt === 'showCategory' ? 'Category' : 'Name'}
+                                        {opt === 'showPrice' ? (t('common.price') || 'Price') : opt === 'showCategory' ? (t('common.category') || 'Category') : (t('common.name') || 'Name')}
                                     </span>
                                     {reprintOptions[opt] ? <Eye size={14} className="text-[#FAF8F5] dark:text-[#1E3B24]" /> : <EyeOff size={14} className="text-[#2C4D35]/40 dark:text-[#A9CBA2]/40" />}
                                 </button>
