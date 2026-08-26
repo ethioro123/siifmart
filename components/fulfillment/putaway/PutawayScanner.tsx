@@ -338,7 +338,7 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
                         </div>
                     ) : (
                         <div className="text-center mb-6 w-full max-w-md">
-                            <p className="text-stone-400 dark:text-stone-500 text-[10px] font-black uppercase tracking-[0.2em] mb-3">Item Verification</p>
+                            <p className="text-stone-400 dark:text-stone-500 text-[10px] font-black uppercase tracking-[0.2em] mb-3">{t('warehouse.putaway.itemVerification')}</p>
                             <div className="bg-emerald-50/80 dark:bg-emerald-950/20 border-2 border-emerald-400/40 rounded-3xl p-6 shadow-lg">
                                 <p className="text-2xl text-stone-900 dark:text-white font-black uppercase tracking-tight leading-snug mb-3">
                                     {currentItem?.name || currentItem?.productName}
@@ -383,7 +383,7 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
                                         ? 'border-amber-400 shadow-amber-500/25 ring-2 ring-amber-400/30' 
                                         : 'border-[#E2DCCE] dark:border-white/10 focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2]'
                                 }`}
-                                placeholder={step === 'LOCATION' ? 'SCAN LOCATION' : 'SCAN SKU'}
+                                placeholder={step === 'LOCATION' ? t('warehouse.putaway.scanLocationPlaceholder') : t('warehouse.putaway.scanSkuPlaceholder')}
                                 autoFocus
                                 disabled={isProcessing}
                             />
@@ -402,10 +402,10 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
                             <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-500/10 border border-amber-400/50 animate-in zoom-in-95 duration-300 shadow-sm text-left">
                                 <div className="flex items-center gap-2 text-amber-700 dark:text-amber-400 mb-1">
                                     <AlertTriangle size={18} className="shrink-0 stroke-[2.5]" />
-                                    <span className="font-black uppercase tracking-wider text-xs">Stock Merge Required</span>
+                                    <span className="font-black uppercase tracking-wider text-xs">{t('warehouse.putaway.stockMergeRequired')}</span>
                                 </div>
                                 <p className="text-[11px] text-stone-700 dark:text-stone-300 leading-relaxed">
-                                    Existing stock of this item is already at this location. Scan or submit again to confirm merge.
+                                    {t('warehouse.putaway.stockMergeInstruction')}
                                 </p>
                             </div>
                         )}
@@ -415,10 +415,10 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
                             <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-500/10 border border-amber-400/50 animate-in zoom-in-95 duration-300 shadow-sm text-left">
                                 <div className="flex items-center gap-2 text-amber-700 dark:text-amber-400 mb-1">
                                     <AlertTriangle size={18} className="shrink-0 stroke-[2.5]" />
-                                    <span className="font-black uppercase tracking-wider text-xs">Alternate Location Scanned</span>
+                                    <span className="font-black uppercase tracking-wider text-xs">{t('warehouse.putaway.alternateLocationScanned')}</span>
                                 </div>
                                 <p className="text-[11px] text-stone-700 dark:text-stone-300 leading-relaxed">
-                                    You scanned a different location from the suggested bay. Tap submit again to confirm placement here.
+                                    {t('warehouse.putaway.alternateLocationInstruction')}
                                 </p>
                             </div>
                         )}
@@ -428,13 +428,13 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
                             <div className="p-5 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border-2 border-rose-500 animate-in zoom-in-95 duration-300 shadow-md text-left">
                                 <div className="flex items-center gap-2 text-rose-600 dark:text-rose-400 mb-2">
                                     <X size={20} className="shrink-0 stroke-[3]" />
-                                    <span className="font-black uppercase tracking-wider text-sm">Placement Blocked</span>
+                                    <span className="font-black uppercase tracking-wider text-sm">{t('warehouse.putaway.placementBlocked')}</span>
                                 </div>
                                 <p className="text-xs font-black text-rose-900 dark:text-rose-200 leading-relaxed mb-2">
                                     Incompatible inventory detected: <span className="bg-rose-600 text-white px-2 py-0.5 rounded-lg font-mono">{conflictingOccupants[0]?.sku}</span>
                                 </p>
                                 <p className="text-[10px] text-rose-700 dark:text-rose-300 uppercase font-bold tracking-wider">
-                                    Mixed SKU storage is not allowed at this location.
+                                    {t('warehouse.putaway.mixedSkuNotAllowed')}
                                 </p>
                             </div>
                         )}

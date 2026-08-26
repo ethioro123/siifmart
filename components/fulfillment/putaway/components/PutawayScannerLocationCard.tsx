@@ -50,10 +50,10 @@ export const PutawayScannerLocationCard: React.FC<PutawayScannerLocationCardProp
             {/* Header label */}
             <p className="text-stone-400 dark:text-stone-500 text-[10px] font-black uppercase tracking-[0.2em] mb-3">
                 {recommendation?.type === 'ASSIGNED' 
-                    ? 'Assigned Location' 
+                    ? t('warehouse.putaway.assignedLocation') 
                     : recommendation?.type === 'SUGGESTED' 
-                        ? 'Suggested Location' 
-                        : 'Awaiting Scan'}
+                        ? t('warehouse.putaway.suggestedLocation') 
+                        : t('warehouse.putaway.awaitingScan')}
             </p>
 
             {/* Main Location Box - Original aesthetic with guaranteed 1-line horizontal fit */}
@@ -79,15 +79,15 @@ export const PutawayScannerLocationCard: React.FC<PutawayScannerLocationCardProp
                 {parts && (
                     <div className="grid grid-cols-3 gap-2 mt-4 pt-4 border-t border-current/15">
                         <div className="bg-white/60 dark:bg-black/30 p-2 sm:p-2.5 rounded-2xl border border-current/10 flex flex-col items-center justify-center">
-                            <span className="text-[9px] font-black uppercase tracking-wider opacity-60">Zone</span>
+                            <span className="text-[9px] font-black uppercase tracking-wider opacity-60">{t('warehouse.putaway.zone')}</span>
                             <span className="text-base sm:text-lg font-black font-mono leading-tight">{parts.zone}</span>
                         </div>
                         <div className="bg-white/60 dark:bg-black/30 p-2 sm:p-2.5 rounded-2xl border border-current/10 flex flex-col items-center justify-center">
-                            <span className="text-[9px] font-black uppercase tracking-wider opacity-60">Aisle</span>
+                            <span className="text-[9px] font-black uppercase tracking-wider opacity-60">{t('warehouse.putaway.aisle')}</span>
                             <span className="text-base sm:text-lg font-black font-mono leading-tight">{parts.aisle}</span>
                         </div>
                         <div className="bg-white/60 dark:bg-black/30 p-2 sm:p-2.5 rounded-2xl border border-current/10 flex flex-col items-center justify-center">
-                            <span className="text-[9px] font-black uppercase tracking-wider opacity-60">Bay</span>
+                            <span className="text-[9px] font-black uppercase tracking-wider opacity-60">{t('warehouse.putaway.bay')}</span>
                             <span className="text-base sm:text-lg font-black font-mono leading-tight">{parts.bin}</span>
                         </div>
                     </div>

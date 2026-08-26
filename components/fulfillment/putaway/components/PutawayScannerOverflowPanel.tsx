@@ -42,7 +42,7 @@ export const PutawayScannerOverflowPanel: React.FC<PutawayScannerOverflowPanelPr
                     }`}
                 >
                     <ArrowLeftRight size={15} className={isOverflowMode ? 'rotate-180 transition-transform' : ''} />
-                    <span>{isOverflowMode ? '↩️ Revert to Primary Bay' : '📦 Primary Bay Full? Assign Alternate Bay'}</span>
+                    <span>{isOverflowMode ? `↩️ ${t('warehouse.putaway.revertToPrimaryBay')}` : `📦 ${t('warehouse.putaway.bayFullAssignNew')}`}</span>
                 </button>
             </div>
 
@@ -52,17 +52,17 @@ export const PutawayScannerOverflowPanel: React.FC<PutawayScannerOverflowPanelPr
                     <div className="flex items-center justify-center gap-2 text-amber-700 dark:text-amber-300 mb-2">
                         <AlertTriangle size={16} className="shrink-0" />
                         <p className="text-[11px] font-black uppercase tracking-wider">
-                            Overflow Mode Activated
+                            {t('warehouse.putaway.overflowModeActive')}
                         </p>
                     </div>
                     <p className="text-[11px] text-stone-600 dark:text-stone-300 leading-relaxed max-w-xs mx-auto">
-                        Primary bay is full. Scan any target location barcode or select an existing storage bay below:
+                        {t('warehouse.putaway.overflowInstruction')}
                     </p>
 
                     {existingSkuLocations.length > 0 && (
                         <div className="mt-4 pt-3.5 border-t border-amber-500/20">
                             <p className="text-[10px] font-black uppercase tracking-widest text-amber-800 dark:text-amber-300/80 mb-2.5">
-                                Existing Bays for {currentItem?.sku || 'SKU'}:
+                                {t('warehouse.putaway.existingBaysForSku')}:
                             </p>
                             <div className="flex flex-wrap gap-2 justify-center">
                                 {existingSkuLocations.map(p => {
