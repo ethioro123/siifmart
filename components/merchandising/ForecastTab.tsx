@@ -34,7 +34,8 @@ export const ForecastTab: React.FC = () => {
 
    // 2. Intelligent Buy Recommendations based on real catalog data
    const recommendedOrders = useMemo(() => {
-      return products
+      return (products || [])
+         .filter(p => p.status !== 'archived' && !p.name?.startsWith('Test') && !p.sku?.startsWith('TEST'))
          .map(p => {
             const minThreshold = p.minStock && p.minStock > 0 ? p.minStock : 15;
             const velocityMultiplier = p.salesVelocity === 'High' ? 3.5 : p.salesVelocity === 'Medium' ? 1.8 : 0.9;
