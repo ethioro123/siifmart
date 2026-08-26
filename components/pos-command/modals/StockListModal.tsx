@@ -232,32 +232,38 @@ export const StockListModal: React.FC = () => {
                                         </td>
                                         <td className="p-3 text-right text-stone-500 dark:text-gray-400 text-[11px] whitespace-nowrap font-medium tracking-wide">
                                              {(() => {
-                                                 const raw = product.posReceivedBy || product.pos_received_by || (product as any).receivedBy || (product as any).received_by || product.createdBy || product.created_by || product.approvedBy || product.approved_by || (product as any).author;
-                                                 if (raw && !['system admin', 'system', 'admin'].includes(raw.toLowerCase())) {
-                                                     const emp = employees?.find(e => e.id === raw || e.email === raw || e.code === raw || e.name?.toLowerCase() === raw.toLowerCase());
+                                                 // 1. Direct Creator / Receiver on product record
+                                                 const directUser = product.posReceivedBy || product.pos_received_by || (product as any).receivedBy || (product as any).received_by || product.createdBy || product.created_by || product.approvedBy || product.approved_by || (product as any).author || (product as any).updatedBy || (product as any).updated_by;
+                                                 if (directUser && !['system admin', 'system', 'admin', 'unknown'].includes(directUser.toLowerCase())) {
+                                                     const emp = employees?.find(e => e.id === directUser || e.email === directUser || e.code === directUser || e.name?.toLowerCase() === directUser.toLowerCase());
                                                      if (emp?.name) return emp.name;
-                                                     if (!raw.includes('-') && raw.length < 30) return raw;
+                                                     if (!directUser.includes('-') && directUser.length < 30) return directUser;
                                                  }
+
+                                                 // 2. Stock Movement History for this product/SKU
                                                  const prodMovements = movements?.filter(m => m.productId === product.id || m.productId === product.productId || (m as any).sku === product.sku);
                                                  if (prodMovements && prodMovements.length > 0) {
-                                                     const inMove = prodMovements.find(m => (m.type === 'IN' || (m.reason && m.reason.toLowerCase().includes('receiv'))) && m.performedBy && !['system admin', 'system', 'admin'].includes(m.performedBy.toLowerCase()));
-                                                     const target = inMove || prodMovements.find(m => m.performedBy && !['system admin', 'system', 'admin'].includes(m.performedBy.toLowerCase()));
+                                                     const inMove = prodMovements.find(m => (m.type === 'IN' || (m.reason && m.reason.toLowerCase().includes('receiv'))) && m.performedBy && !['system admin', 'system', 'admin', 'unknown'].includes(m.performedBy.toLowerCase()));
+                                                     const target = inMove || prodMovements.find(m => m.performedBy && !['system admin', 'system', 'admin', 'unknown'].includes(m.performedBy.toLowerCase()));
                                                      if (target?.performedBy) {
-                                                         const emp = employees?.find(e => e.id === target.performedBy || e.email === target.performedBy || e.code === target.performedBy);
+                                                         const emp = employees?.find(e => e.id === target.performedBy || e.email === target.performedBy || e.code === target.performedBy || e.name?.toLowerCase() === target.performedBy.toLowerCase());
                                                          if (emp?.name) return emp.name;
                                                          if (!target.performedBy.includes('-')) return target.performedBy;
                                                      }
                                                  }
+
+                                                 // 3. Purchase Order Receiving
                                                  const matchingPO = orders?.find((po: any) => po.items?.some((i: any) => i.productId === product.id || i.sku === product.sku) && (po as any).receivedBy);
                                                  if (matchingPO && (matchingPO as any).receivedBy) {
                                                      const rec = (matchingPO as any).receivedBy;
-                                                     const emp = employees?.find(e => e.id === rec || e.email === rec || e.code === rec);
+                                                     const emp = employees?.find(e => e.id === rec || e.email === rec || e.code === rec || e.name?.toLowerCase() === rec.toLowerCase());
                                                      if (emp?.name) return emp.name;
                                                      if (!rec.includes('-')) return rec;
                                                  }
-                                                 const siteStaff = employees?.find(e => (e.siteId === product.siteId || e.site_id === product.siteId) && (e.role?.includes('receiver') || e.role?.includes('manager') || e.role?.includes('specialist')));
-                                                 if (siteStaff?.name) return siteStaff.name;
-                                                 return user?.name || employees?.[0]?.name || 'Shukri Kamal';
+
+                                                 // 4. Current Logged-in Operator or Explicit Fallback
+                                                 if (user?.name) return user.name;
+                                                 return 'HQ Operations';
                                              })()}
                                          </td>
                                         <td className="p-3 text-center" onClick={(e) => e.stopPropagation()}>

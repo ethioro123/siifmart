@@ -76,6 +76,17 @@ export const usePOSReturnActions = ({
         });
         if (returnItems.length > 0) {
             await processReturn(foundSaleForReturn.id, returnItems, refundTotal, user?.name || 'System');
+            try {
+                const { systemLogsService } = await import('../../../services/supabase.service');
+                await systemLogsService.create({
+                    module: 'POS_RETURNS',
+                    action: 'REFUND_PROCESSED',
+                    user_name: user?.name || 'Cashier',
+                    details: `Processed refund of ${CURRENCY_SYMBOL} ${refundTotal.toLocaleString()} for sale ${foundSaleForReturn.receiptNumber || foundSaleForReturn.id} (${returnItems.length} item types returned)`
+                });
+            } catch (logErr) {
+                // Non-blocking audit log
+            }
             addNotification('success', `Refund Processed: ${CURRENCY_SYMBOL} ${refundTotal.toLocaleString()}`);
         }
         setIsProcessing(false);

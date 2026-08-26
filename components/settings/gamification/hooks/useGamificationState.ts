@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useStore } from '../../../../contexts/CentralStore';
 import { useData } from '../../../../contexts/DataContext';
 import {
@@ -18,15 +18,17 @@ export const useGamificationState = () => {
 
     // Local state for WAREHOUSE bonus settings
     const [bonusEnabled, setBonusEnabled] = useState(settings.bonusEnabled ?? true);
-    const [bonusTiers, setBonusTiers] = useState<BonusTier[]>(settings.bonusTiers ?? DEFAULT_BONUS_TIERS);
+    const [bonusTiers, setBonusTiers] = useState<BonusTier[]>(
+        (settings.bonusTiers && settings.bonusTiers.length > 0) ? settings.bonusTiers : DEFAULT_BONUS_TIERS
+    );
     const [payoutFrequency, setPayoutFrequency] = useState<'weekly' | 'biweekly' | 'monthly'>(
         settings.bonusPayoutFrequency ?? 'monthly'
     );
     const [warehousePointsRoles, setWarehousePointsRoles] = useState<{ role: string; enabled: boolean; label: string }[]>(
-        settings.warehousePointsEligibleRoles ?? DEFAULT_WAREHOUSE_POINTS_ROLES
+        (settings.warehousePointsEligibleRoles && settings.warehousePointsEligibleRoles.length > 0) ? settings.warehousePointsEligibleRoles : DEFAULT_WAREHOUSE_POINTS_ROLES
     );
     const [warehousePointRules, setWarehousePointRules] = useState<WarehousePointRule[]>(
-        settings.warehousePointRules ?? DEFAULT_WAREHOUSE_POINT_RULES
+        (settings.warehousePointRules && settings.warehousePointRules.length > 0) ? settings.warehousePointRules : DEFAULT_WAREHOUSE_POINT_RULES
     );
     const [isWarehouseRuleModalOpen, setIsWarehouseRuleModalOpen] = useState(false);
     const [editingWarehouseRule, setEditingWarehouseRule] = useState<WarehousePointRule | null>(null);
@@ -34,16 +36,30 @@ export const useGamificationState = () => {
 
     // Local state for POS bonus settings
     const [posBonusEnabled, setPosBonusEnabled] = useState(settings.posBonusEnabled ?? true);
-    const [posBonusTiers, setPosBonusTiers] = useState<BonusTier[]>(settings.posBonusTiers ?? DEFAULT_POS_BONUS_TIERS);
+    const [posBonusTiers, setPosBonusTiers] = useState<BonusTier[]>(
+        (settings.posBonusTiers && settings.posBonusTiers.length > 0) ? settings.posBonusTiers : DEFAULT_POS_BONUS_TIERS
+    );
     const [posPayoutFrequency, setPosPayoutFrequency] = useState<'weekly' | 'biweekly' | 'monthly'>(
         settings.posBonusPayoutFrequency ?? 'monthly'
     );
     const [posRoleDistribution, setPosRoleDistribution] = useState<POSRoleDistribution[]>(
-        settings.posRoleDistribution ?? DEFAULT_POS_ROLE_DISTRIBUTION
+        (settings.posRoleDistribution && settings.posRoleDistribution.length > 0) ? settings.posRoleDistribution : DEFAULT_POS_ROLE_DISTRIBUTION
     );
     const [posPointRules, setPosPointRules] = useState<StorePointRule[]>(
-        settings.posPointRules ?? DEFAULT_STORE_POINT_RULES
+        (settings.posPointRules && settings.posPointRules.length > 0) ? settings.posPointRules : DEFAULT_STORE_POINT_RULES
     );
+
+    // Sync from settings
+    useEffect(() => {
+        if (settings) {
+            if (settings.bonusTiers && settings.bonusTiers.length > 0) setBonusTiers(settings.bonusTiers);
+            if (settings.warehousePointsEligibleRoles && settings.warehousePointsEligibleRoles.length > 0) setWarehousePointsRoles(settings.warehousePointsEligibleRoles);
+            if (settings.warehousePointRules && settings.warehousePointRules.length > 0) setWarehousePointRules(settings.warehousePointRules);
+            if (settings.posBonusTiers && settings.posBonusTiers.length > 0) setPosBonusTiers(settings.posBonusTiers);
+            if (settings.posRoleDistribution && settings.posRoleDistribution.length > 0) setPosRoleDistribution(settings.posRoleDistribution);
+            if (settings.posPointRules && settings.posPointRules.length > 0) setPosPointRules(settings.posPointRules);
+        }
+    }, [settings]);
 
     // Point rule modal state
     const [isPointRuleModalOpen, setIsPointRuleModalOpen] = useState(false);

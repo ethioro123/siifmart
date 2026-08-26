@@ -52,8 +52,13 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
 }) => {
     const { t } = useLanguage();
 
-    const [boxSize, setBoxSize] = useState<'Small' | 'Medium' | 'Large' | 'Extra Large'>('Medium');
-    const [packingMaterials, setPackingMaterials] = useState({ bubbleWrap: false, fragileStickers: false });
+    const [boxSize, setBoxSize] = useState<'Small' | 'Medium' | 'Large' | 'Extra Large' | 'Poly Mailer' | 'Thermal Cool Box'>('Medium');
+    const [packingMaterials, setPackingMaterials] = useState({
+        bubbleWrap: false,
+        fragileStickers: false,
+        thisSideUp: false,
+        securitySeal: false
+    });
     const [hasIcePack, setHasIcePack] = useState(false);
 
     // Item-level Scanning State (must be before early return to satisfy React hooks rules)
@@ -275,7 +280,20 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
                                                 </div>
 
                                                 {!isScanningThis && (
-                                                    <div className="flex items-center gap-1">
+                                                    <div className="flex items-center gap-1.5">
+                                                        {!isDone && (
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => {
+                                                                    setScannedItemIndex(idx);
+                                                                    setConfirmQty(String(item.expectedQty || 1));
+                                                                }}
+                                                                className="px-2.5 py-1 rounded-lg bg-[#2C5E3B]/10 hover:bg-[#2C5E3B]/20 text-[#2C5E3B] dark:text-[#A9CBA2] border border-[#2C5E3B]/20 font-black text-[9px] uppercase tracking-wider flex items-center gap-1 transition-all cursor-pointer"
+                                                            >
+                                                                <span>Pack</span>
+                                                                <ArrowRight size={10} />
+                                                            </button>
+                                                        )}
                                                         {onPrintItemLabel && (
                                                             <button
                                                                 type="button"
@@ -340,7 +358,9 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
                                 );
                             })}
                             </div>
-                        </div>                        {/* Right Col: Details & Action */}
+                        </div>
+
+                        {/* Right Col: Details & Action */}
                         <PackJobMaterialsPanel
                             progressPercent={progressPercent}
                             isFullyPacked={isFullyPacked}
@@ -368,14 +388,6 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
                         >
                             <Printer size={18} className="md:w-4 md:h-4" /> <span className="hidden md:inline">{t('warehouse.printLabel')}</span>
                         </button>
-                        {!isFullyPacked && onOpenScanner && (
-                            <button
-                                onClick={onOpenScanner}
-                                className="p-2.5 md:px-6 md:py-3.5 bg-white/80 dark:bg-[#18201B]/70 border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20 text-[#2C5E3B] dark:text-[#A9CBA2] hover:text-[#1E3F27] dark:hover:text-white hover:scale-105 active:scale-95 transition-all rounded-xl md:rounded-2xl font-black text-xs md:text-sm uppercase tracking-widest md:flex items-center gap-2 shadow-sm"
-                            >
-                                <Barcode size={16} /> <span>{t('warehouse.scanBarcode')}</span>
-                            </button>
-                        )}
                         {/* Flag Discrepancy — packer count doesn't match manifest */}
                         {onFlagDiscrepancy && job.status !== 'Completed' && (
                             <button
@@ -390,30 +402,44 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
                     <div className="flex items-center gap-2 md:gap-3 flex-1 justify-end">
                         <button
                             onClick={onClose}
-                            className="px-5 py-3 md:px-7 md:py-3.5 rounded-xl md:rounded-2xl bg-white/80 dark:bg-[#18201B]/70 border border-[#E2DCCE] dark:border-emerald-950/20 text-gray-700 dark:text-[#A9CBA2] hover:text-[#1E3F27] dark:hover:text-white font-black text-xs uppercase tracking-widest transition-all active:scale-95"
+                            className="px-5 py-3 md:px-7 md:py-3.5 rounded-xl md:rounded-2xl bg-white/80 dark:bg-[#18201B]/70 border border-[#E2DCCE] dark:border-emerald-950/20 text-gray-700 dark:text-[#A9CBA2] hover:text-[#1E3F27] dark:hover:text-white font-black text-xs uppercase tracking-widest transition-all active:scale-95 cursor-pointer"
                         >
                             {t('warehouse.dismiss')}
                         </button>
 
                         {job.status !== 'Completed' && (
-                            <button
-                                onClick={() => {
-                                    if (hasColdItems && !hasIcePack) {
-                                        alert(t('warehouse.packing.icePacksRequired'));
-                                        return;
-                                    }
-                                    onCompleteJob(boxDetails);
-                                }}
-                                disabled={isSubmitting || !isFullyPacked}
-                                className={`flex-1 max-w-[150px] md:max-w-none md:flex-none justify-center px-5 py-3 md:px-8 md:py-3.5 rounded-xl md:rounded-2xl font-black text-xs md:text-sm uppercase tracking-widest shadow-md transition-all flex items-center gap-1.5 md:gap-3 active:scale-95 disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed ${isFullyPacked ? 'bg-green-600 hover:bg-green-500 border border-green-400/50 text-white shadow-green-500/25' : 'bg-[#2C5E3B] hover:bg-[#1B3520] dark:bg-[#EAE5D9] dark:hover:bg-[#DFD9CA] text-white dark:text-[#1E3B24] border border-[#2C5E3B]/20 dark:border-[#EAE5D9]/20 shadow-sm'}`}
-                            >
-                                {isSubmitting ? <Loader2 size={16} className="animate-spin md:w-[18px] md:h-[18px]" /> : (
-                                    <>
-                                        <CheckCircle size={14} className="md:w-[18px] md:h-[18px]" />
-                                        {isFullyPacked ? t('warehouse.completed') : t('warehouse.packing.complete')}
-                                    </>
-                                )}
-                            </button>
+                            !isFullyPacked ? (
+                                <button
+                                    onClick={() => {
+                                        if (onOpenScanner) onOpenScanner();
+                                        else onStartPack(job);
+                                    }}
+                                    disabled={isSubmitting}
+                                    className="px-5 py-3 md:px-8 md:py-3.5 rounded-xl md:rounded-2xl font-black text-xs md:text-sm uppercase tracking-widest shadow-md transition-all flex items-center gap-2 active:scale-95 bg-[#2C5E3B] hover:bg-[#1B3520] text-white border border-[#2C5E3B]/20 shadow-[#2C5E3B]/20 cursor-pointer"
+                                >
+                                    <span>Start Packing</span>
+                                    <ArrowRight size={16} />
+                                </button>
+                            ) : (
+                                <button
+                                    onClick={() => {
+                                        if (hasColdItems && !hasIcePack) {
+                                            alert(t('warehouse.packing.icePacksRequired'));
+                                            return;
+                                        }
+                                        onCompleteJob(boxDetails);
+                                    }}
+                                    disabled={isSubmitting}
+                                    className="px-5 py-3 md:px-8 md:py-3.5 rounded-xl md:rounded-2xl font-black text-xs md:text-sm uppercase tracking-widest shadow-md transition-all flex items-center gap-2 active:scale-95 bg-green-600 hover:bg-green-500 border border-green-400/50 text-white shadow-green-500/25 cursor-pointer"
+                                >
+                                    {isSubmitting ? <Loader2 size={16} className="animate-spin md:w-[18px] md:h-[18px]" /> : (
+                                        <>
+                                            <CheckCircle size={16} />
+                                            <span>Complete Packing</span>
+                                        </>
+                                    )}
+                                </button>
+                            )
                         )}
                     </div>
                 </div>

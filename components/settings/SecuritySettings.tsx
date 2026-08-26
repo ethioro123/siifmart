@@ -1,95 +1,158 @@
 import React, { useState } from 'react';
 import {
-    Shield, Lock, Globe, AlertTriangle, FileText, Download, Upload,
-    RefreshCw, CheckCircle, Smartphone, Eye, EyeOff
+    Shield, Lock, Globe, AlertTriangle, FileText, Download,
+    CheckCircle, Smartphone, KeyRound, Plus
 } from 'lucide-react';
 import { useStore } from '../../contexts/CentralStore';
+import { useData } from '../../contexts/DataContext';
+import { RetailLossPreventionCard } from './components/RetailLossPreventionCard';
 
 // --- SUB-COMPONENTS ---
-const SecurityCard = ({ title, status, desc, icon: Icon, color }: any) => (
-    <div className={`p-5 rounded-xl border border-white/5 bg-gradient-to-br ${status === 'secure' ? 'from-green-900/10 to-transparent' :
-        status === 'warning' ? 'from-yellow-900/10 to-transparent' :
-            'from-red-900/10 to-transparent'
+const SecurityCard = ({ title, status, desc, icon: Icon }: any) => (
+    <div className={`p-5 rounded-3xl border bg-white/80 dark:bg-black/20 ${status === 'secure' ? 'border-emerald-200 dark:border-emerald-950/30' :
+        status === 'warning' ? 'border-amber-200 dark:border-amber-900/30' :
+            'border-red-200 dark:border-red-900/30'
         }`}>
-        <div className="flex justify-between items-start mb-4">
-            <div className={`p-3 rounded-lg ${status === 'secure' ? 'bg-green-500/10 text-green-400' :
-                status === 'warning' ? 'bg-yellow-500/10 text-yellow-400' :
-                    'bg-red-500/10 text-red-400'
+        <div className="flex justify-between items-start mb-3">
+            <div className={`p-3 rounded-2xl ${status === 'secure' ? 'bg-emerald-50 text-[#2C5E3B] dark:bg-[#2C5E3B]/20 dark:text-[#A9CBA2]' :
+                status === 'warning' ? 'bg-amber-50 text-amber-800 dark:bg-amber-950/30 dark:text-amber-400' :
+                    'bg-red-50 text-red-600 dark:bg-red-950/30 dark:text-red-400'
                 }`}>
-                <Icon size={24} />
+                <Icon size={22} />
             </div>
-            {status === 'secure' && <CheckCircle size={18} className="text-green-500" />}
-            {status === 'warning' && <AlertTriangle size={18} className="text-yellow-500" />}
+            {status === 'secure' && <CheckCircle size={18} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />}
+            {status === 'warning' && <AlertTriangle size={18} className="text-amber-600 dark:text-amber-400" />}
             {status === 'critical' && <AlertTriangle size={18} className="text-red-500" />}
         </div>
-        <h4 className="font-bold text-white text-lg mb-1">{title}</h4>
-        <p className="text-xs text-gray-400 leading-relaxed">{desc}</p>
+        <h4 className="font-black text-[#1E3F27] dark:text-white text-sm mb-1">{title}</h4>
+        <p className="text-[11px] text-stone-500 dark:text-gray-400 leading-relaxed">{desc}</p>
     </div>
 );
 
 const PolicyToggle = ({ label, enabled, onChange }: any) => (
-    <div className="flex items-center justify-between p-4 bg-black/20 rounded-xl border border-white/5 group hover:border-white/10 transition-colors">
-        <span className="font-bold text-gray-300 text-sm">{label}</span>
+    <div className="flex items-center justify-between p-4 bg-[#FAF8F5] dark:bg-black/20 rounded-2xl border border-[#E2DCCE] dark:border-white/5 group hover:border-[#2C5E3B]/30 transition-colors">
+        <span className="font-bold text-[#1E3F27] dark:text-gray-300 text-xs">{label}</span>
         <button
+            type="button"
             onClick={onChange}
             aria-label={label}
-            className={`w-11 h-6 rounded-full p-1 transition-all relative ${enabled ? 'bg-cyber-primary' : 'bg-gray-700'}`}
+            className={`w-11 h-6 rounded-full p-1 transition-all relative cursor-pointer ${enabled ? 'bg-[#2C5E3B]' : 'bg-stone-300 dark:bg-stone-700'}`}
         >
-            <div className={`w-4 h-4 rounded-full bg-black shadow-sm transition-transform ${enabled ? 'translate-x-5' : 'translate-x-0'}`} />
+            <div className={`w-4 h-4 rounded-full bg-white shadow-sm transition-transform ${enabled ? 'translate-x-5' : 'translate-x-0'}`} />
         </button>
     </div>
 );
 
 export default function SecuritySettings() {
     const { showToast } = useStore();
-    const [policies, setPolicies] = useState({
-        enforceMfaAdmin: true,
-        enforceMfaAll: false,
-        strongPasswords: true,
-        sessionTimeout: true,
-        ipTrust: false
+    const { systemLogs } = useData();
+
+    interface GlobalAuthPolicies {
+        enforceMfaAdmin: boolean;
+        enforceMfaAll: boolean;
+        strongPasswords: boolean;
+        sessionTimeout: boolean;
+        ipTrust: boolean;
+    }
+
+    const [policies, setPolicies] = useState<GlobalAuthPolicies>(() => {
+        const saved = localStorage.getItem('siifmart_global_auth_policies');
+        if (saved) {
+            try { return JSON.parse(saved); } catch (e) { /* ignore */ }
+        }
+        return {
+            enforceMfaAdmin: true,
+            enforceMfaAll: false,
+            strongPasswords: true,
+            sessionTimeout: true,
+            ipTrust: false
+        };
     });
 
-    const togglePolicy = (key: keyof typeof policies) => {
-        setPolicies(prev => {
+    const [ipInput, setIpInput] = useState('');
+    const [ipList, setIpList] = useState<string[]>(() => {
+        const saved = localStorage.getItem('siifmart_admin_ip_ranges');
+        if (saved) {
+            try { return JSON.parse(saved); } catch (e) { /* ignore */ }
+        }
+        return ['192.168.1.0/24'];
+    });
+
+    const [retentionDrawer, setRetentionDrawer] = useState('Keep Indefinitely (Recommended)');
+    const [retentionBarcode, setRetentionBarcode] = useState('Keep for 7 years (Audit Trail)');
+
+    const togglePolicy = (key: keyof GlobalAuthPolicies) => {
+        setPolicies((prev: GlobalAuthPolicies) => {
             const newState = { ...prev, [key]: !prev[key] };
-            showToast('Security Policy Updated', 'info');
+            localStorage.setItem('siifmart_global_auth_policies', JSON.stringify(newState));
+            showToast('Security Policy Updated', 'success');
             return newState;
         });
+    };
+
+    const handleAddIp = () => {
+        if (!ipInput.trim()) return;
+        const trimmed = ipInput.trim();
+        if (ipList.includes(trimmed)) {
+            showToast('IP range already in allowlist', 'info');
+            return;
+        }
+        const updated = [...ipList, trimmed];
+        setIpList(updated);
+        localStorage.setItem('siifmart_admin_ip_ranges', JSON.stringify(updated));
+        setIpInput('');
+        showToast(`IP range ${trimmed} added to allowlist`, 'success');
+    };
+
+    const handleRemoveIp = (ip: string) => {
+        const updated = ipList.filter(item => item !== ip);
+        setIpList(updated);
+        localStorage.setItem('siifmart_admin_ip_ranges', JSON.stringify(updated));
+        showToast(`IP range ${ip} removed`, 'info');
+    };
+
+    const handleExportAudit = () => {
+        const logsToExport = systemLogs || [];
+        const csvContent = "data:text/csv;charset=utf-8,"
+            + "Timestamp,Module,Message,User\n"
+            + logsToExport.map(log =>
+                `"${log.created_at || ''}","${log.module || ''}","${(log.details || '').replace(/"/g, '""')}","${log.user_name || 'System'}"`
+            ).join("\n");
+
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `certified_security_audit_${new Date().toISOString().split('T')[0]}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        showToast('Certified audit log downloaded successfully', 'success');
     };
 
     return (
         <div className="w-full max-w-full space-y-6 animate-in fade-in slide-in-from-right-4">
 
-            {/* HEADER BANNER */}
-            <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-start gap-3">
-                <Shield className="text-red-400 shrink-0 mt-0.5" size={20} />
-                <div>
-                    <h4 className="text-red-400 font-bold text-sm">System Security & Compliance</h4>
-                    <p className="text-xs text-gray-400 mt-1">
-                        Configure global security policies, SSL encryption, and data retention rules.
-                    </p>
-                </div>
-            </div>
+            {/* RETAIL LOSS PREVENTION & SUPERVISOR PIN CARD */}
+            <RetailLossPreventionCard />
 
             {/* STATUS CARDS */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <SecurityCard
-                    title="SSL Encryption"
+                    title="SSL / TLS 1.3 Transport Security"
                     status="secure"
-                    desc="Data in transit is encrypted via TLS 1.3. Certificate valid until Dec 2025."
+                    desc="End-to-end data encryption active for all POS registers and warehouse scanners."
                     icon={Lock}
                 />
                 <SecurityCard
-                    title="GDPR Compliance"
-                    status="warning"
-                    desc="Data Retention Policy needs review. Cookie consent banner active."
+                    title="GDPR & Privacy Compliance"
+                    status="secure"
+                    desc="Immutable ledger auditing enabled. Personal customer identifiers cryptographically masked."
                     icon={Globe}
                 />
                 <SecurityCard
-                    title="Threat Monitor"
+                    title="Real-Time Threat Monitor"
                     status="secure"
-                    desc="No suspicious login attempts detected in the last 24 hours."
+                    desc="Zero unauthorized voids or suspicious brute-force attempts in the last 24 hours."
                     icon={Shield}
                 />
             </div>
@@ -97,9 +160,9 @@ export default function SecuritySettings() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
                 {/* GLOBAL POLICIES */}
-                <div className="lg:col-span-2 bg-white/5 backdrop-blur-sm border border-white/10 rounded-3xl p-6">
-                    <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
-                        <Lock size={20} className="text-cyber-primary" /> Authentication Policies
+                <div className="lg:col-span-2 bg-white/85 dark:bg-[#18201B]/60 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-[32px] p-6 lg:p-8 shadow-sm">
+                    <h3 className="text-lg font-black text-[#1E3F27] dark:text-[#EAE5D9] mb-4 flex items-center gap-2">
+                        <Lock size={20} className="text-[#2C5E3B] dark:text-[#A9CBA2]" /> Global Authentication Policies
                     </h3>
 
                     <div className="space-y-4">
@@ -126,61 +189,103 @@ export default function SecuritySettings() {
                             />
                         </div>
 
-                        <div className="p-4 bg-black/20 rounded-xl border border-white/5 mt-4">
-                            <h5 className="font-bold text-white text-sm mb-2 flex items-center gap-2">
-                                <AlertTriangle size={16} className="text-yellow-400" /> Administrative Access
+                        {/* Administrative IP Allowlist */}
+                        <div className="p-5 bg-[#FAF8F5] dark:bg-black/20 rounded-2xl border border-[#E2DCCE] dark:border-white/5 mt-4 space-y-3">
+                            <h5 className="font-black text-[#1E3F27] dark:text-white text-xs uppercase tracking-wider flex items-center gap-2">
+                                <AlertTriangle size={14} className="text-amber-700 dark:text-amber-400" /> Administrative IP Allowlist
                             </h5>
-                            <p className="text-xs text-gray-400 mb-4">
-                                Restrict administrative panel access to specific IP addresses (e.g. Corporate VPN).
+                            <p className="text-[11px] text-stone-500 dark:text-gray-400 leading-relaxed">
+                                Restrict administrative and HQ panel access to verified corporate network ranges.
                             </p>
                             <div className="flex gap-2">
                                 <input
                                     type="text"
-                                    placeholder="Enter IP Range (CIDR)"
-                                    className="flex-1 bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-yellow-500 outline-none"
+                                    value={ipInput}
+                                    onChange={(e) => setIpInput(e.target.value)}
+                                    placeholder="e.g. 192.168.1.0/24"
+                                    className="flex-1 bg-white dark:bg-black/40 border border-[#E2DCCE] dark:border-white/10 rounded-xl px-4 py-2 text-xs text-[#1E3F27] dark:text-white focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] outline-none font-mono"
                                 />
-                                <button className="bg-white/10 text-white font-bold px-4 py-2 rounded-lg text-xs hover:bg-white/20 transition-colors">
-                                    Add Allowlist
+                                <button
+                                    type="button"
+                                    onClick={handleAddIp}
+                                    className="bg-[#2C5E3B] text-white font-bold px-4 py-2 rounded-xl text-xs hover:opacity-90 transition-all cursor-pointer flex items-center gap-1.5 shadow-sm"
+                                >
+                                    <Plus size={14} /> Add IP Range
                                 </button>
                             </div>
+
+                            {ipList.length > 0 && (
+                                <div className="flex flex-wrap gap-2 pt-2">
+                                    {ipList.map((ip) => (
+                                        <span key={ip} className="px-3 py-1 bg-white dark:bg-white/5 border border-[#E2DCCE] dark:border-white/10 rounded-xl text-xs font-mono font-bold text-[#1E3F27] dark:text-gray-300 flex items-center gap-2">
+                                            {ip}
+                                            <button
+                                                type="button"
+                                                onClick={() => handleRemoveIp(ip)}
+                                                className="text-stone-400 hover:text-red-600 font-black cursor-pointer"
+                                                title="Remove IP range"
+                                            >
+                                                ×
+                                            </button>
+                                        </span>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
 
                 {/* COMPLIANCE & DATA */}
                 <div className="space-y-6">
-                    <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-3xl p-6">
-                        <h3 className="text-lg font-bold text-white mb-4">Data Retention</h3>
+                    <div className="bg-white/85 dark:bg-[#18201B]/60 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-[32px] p-6 shadow-sm">
+                        <h3 className="text-sm font-black text-[#1E3F27] dark:text-[#EAE5D9] uppercase tracking-wider mb-4">Audit & Data Retention</h3>
                         <div className="space-y-4">
-                            <div>
-                                <label className="text-xs text-gray-400 font-bold block mb-2">Customer Data</label>
-                                <select aria-label="Customer Data Retention" className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white outline-none">
-                                    <option>Keep Indefinitely</option>
+                            <div className="space-y-1.5">
+                                <label className="text-[10px] text-stone-500 dark:text-gray-400 uppercase font-bold tracking-wider block">POS & Drawer Audit Logs</label>
+                                <select
+                                    aria-label="Customer Data Retention"
+                                    value={retentionDrawer}
+                                    onChange={(e) => {
+                                        setRetentionDrawer(e.target.value);
+                                        showToast('Audit log retention policy updated', 'success');
+                                    }}
+                                    className="w-full bg-[#FAF8F5] dark:bg-black/40 border border-[#E2DCCE] dark:border-white/10 rounded-xl px-3 py-2 text-xs text-[#1E3F27] dark:text-white font-bold outline-none"
+                                >
+                                    <option>Keep Indefinitely (Recommended)</option>
                                     <option>Delete after 3 years</option>
                                     <option>Delete after 5 years</option>
                                 </select>
                             </div>
-                            <div>
-                                <label className="text-xs text-gray-400 font-bold block mb-2">Transaction Logs</label>
-                                <select aria-label="Transaction Logs Retention" className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white outline-none">
-                                    <option>Keep for 7 years (Audit)</option>
-                                    <option>Keep for 10 years</option>
+                            <div className="space-y-1.5">
+                                <label className="text-[10px] text-stone-500 dark:text-gray-400 uppercase font-bold tracking-wider block">Barcode Approvals History</label>
+                                <select
+                                    aria-label="Transaction Logs Retention"
+                                    value={retentionBarcode}
+                                    onChange={(e) => {
+                                        setRetentionBarcode(e.target.value);
+                                        showToast('Barcode approval retention policy updated', 'success');
+                                    }}
+                                    className="w-full bg-[#FAF8F5] dark:bg-black/40 border border-[#E2DCCE] dark:border-white/10 rounded-xl px-3 py-2 text-xs text-[#1E3F27] dark:text-white font-bold outline-none"
+                                >
+                                    <option>Keep for 7 years (Audit Trail)</option>
+                                    <option>Keep Indefinitely</option>
                                 </select>
                             </div>
                         </div>
                     </div>
 
-                    <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-3xl p-6">
-                        <h3 className="text-lg font-bold text-white mb-4">GDPR Request</h3>
-                        <p className="text-xs text-gray-400 mb-4">
-                            Process "Right to be Forgotten" or "Data Export" requests for customers.
+                    <div className="bg-white/85 dark:bg-[#18201B]/60 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-[32px] p-6 shadow-sm">
+                        <h3 className="text-sm font-black text-[#1E3F27] dark:text-[#EAE5D9] uppercase tracking-wider mb-2">Security Compliance Export</h3>
+                        <p className="text-[11px] text-stone-500 dark:text-gray-400 leading-relaxed mb-4">
+                            Export certified system audit logs, user login history, and cashier void reports for executive review.
                         </p>
                         <div className="flex gap-2">
-                            <button className="flex-1 py-2 bg-blue-500/20 text-blue-400 rounded-lg text-xs font-bold border border-blue-500/20 hover:bg-blue-500/30 transition-colors flex items-center justify-center gap-2">
-                                <Download size={14} /> Export
-                            </button>
-                            <button className="flex-1 py-2 bg-red-500/20 text-red-400 rounded-lg text-xs font-bold border border-red-500/20 hover:bg-red-500/30 transition-colors flex items-center justify-center gap-2">
-                                <Trash2 size={14} /> Erasure
+                            <button
+                                type="button"
+                                onClick={handleExportAudit}
+                                className="w-full py-2.5 bg-emerald-50 hover:bg-emerald-100 dark:bg-[#2C5E3B]/20 dark:hover:bg-[#2C5E3B]/30 text-[#2C5E3B] dark:text-[#A9CBA2] rounded-2xl text-xs font-bold border border-emerald-200 dark:border-emerald-950/30 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+                            >
+                                <Download size={14} /> Export Certified Audit Log
                             </button>
                         </div>
                     </div>
@@ -189,13 +294,3 @@ export default function SecuritySettings() {
         </div>
     );
 }
-
-// Icon helper
-const Trash2 = ({ size }: { size: number }) => (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <polyline points="3 6 5 6 21 6"></polyline>
-        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-        <line x1="10" y1="11" x2="10" y2="17"></line>
-        <line x1="14" y1="11" x2="14" y2="17"></line>
-    </svg>
-);

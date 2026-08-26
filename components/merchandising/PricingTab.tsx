@@ -22,16 +22,18 @@ export const PricingTab: React.FC = () => {
       applyBulkSale
    } = useMerchandising();
 
+   const activeFilterCount = Object.values(filters).filter(v => Array.isArray(v) ? v.length > 0 : v !== null && v !== '').length;
+
    return (
-      <div className="glass-panel overflow-hidden animate-in fade-in">
-         <div className="p-6 border-b border-[#E2DCCE]/60 dark:border-[#A9CBA2]/[0.06] bg-stone-50/50 dark:bg-[#1E2822]/30">
-            <div className="flex flex-wrap gap-4 items-center">
-               {/* Refined Search Bar */}
-               <div className="relative flex-1 min-w-[300px] max-w-md">
-                  <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400 dark:text-stone-500" />
+      <div className="bg-white/85 dark:bg-[#18201B]/60 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-3xl shadow-sm overflow-hidden transition-all duration-300">
+         <div className="p-5 sm:p-6 border-b border-[#E2DCCE]/60 dark:border-white/5 bg-[#FAF8F5]/80 dark:bg-black/20">
+            <div className="flex flex-wrap gap-3.5 items-center justify-between">
+               {/* Search Bar */}
+               <div className="relative flex-1 min-w-[260px] max-w-md">
+                  <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400" />
                   <input
-                     className="woody-input pl-11"
-                     placeholder="Search inventory system..."
+                     className="w-full bg-white dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-2xl pl-10 pr-4 py-2.5 text-xs text-[#1E3F27] dark:text-white focus:border-[#2C5E3B] outline-none placeholder:text-stone-400 font-bold transition-all"
+                     placeholder="Search inventory system by product or SKU..."
                      value={searchTerm}
                      onChange={(e) => setSearchTerm(e.target.value)}
                      aria-label="Search product"
@@ -40,62 +42,66 @@ export const PricingTab: React.FC = () => {
 
                {/* Advanced Filter Toggle */}
                <button
+                  type="button"
                   onClick={() => setIsFilterPanelOpen(!isFilterPanelOpen)}
-                  className={`px-5 py-2.5 rounded-2xl border flex items-center gap-3 text-sm font-semibold transition-all duration-300 ${
-                     isFilterPanelOpen || Object.values(filters).some(v => Array.isArray(v) ? v.length > 0 : v !== null && v !== '')
-                        ? 'bg-[#2C5E3B] text-white dark:bg-[#A9CBA2] dark:text-[#1E3B24] border-transparent shadow-sm'
-                        : 'bg-white/80 dark:bg-[#18201B]/70 border border-[#E2DCCE] dark:border-emerald-950/20 text-[#2C4D35] dark:text-[#A9CBA2] hover:text-[#1E3F27] dark:hover:text-white'
+                  className={`px-4 py-2.5 rounded-2xl border flex items-center gap-2.5 text-xs font-bold transition-all cursor-pointer ${
+                     isFilterPanelOpen || activeFilterCount > 0
+                        ? 'bg-[#2C5E3B] text-white border-[#2C5E3B] shadow-sm'
+                        : 'bg-white dark:bg-black/30 border-[#E2DCCE] dark:border-white/10 text-stone-700 dark:text-stone-300 hover:border-[#2C5E3B]'
                   }`}
                >
-                  <SlidersHorizontal size={18} />
-                  <span className="tracking-wide">Filter Studio</span>
-                  {Object.values(filters).filter(v => Array.isArray(v) ? v.length > 0 : v !== null && v !== '').length > 0 && (
+                  <SlidersHorizontal size={14} />
+                  <span>Filter Studio</span>
+                  {activeFilterCount > 0 && (
                      <span
-                        className={`text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-bold ${
+                        className={`text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-black ${
                            isFilterPanelOpen
-                              ? 'bg-white text-[#2C5E3B] dark:bg-[#1E3B24] dark:text-[#A9CBA2]'
-                              : 'bg-[#2C5E3B] text-white dark:bg-[#A9CBA2] dark:text-[#1E3B24]'
+                              ? 'bg-white text-[#2C5E3B]'
+                              : 'bg-[#2C5E3B] text-white'
                         }`}
                      >
-                        {Object.values(filters).filter(v => Array.isArray(v) ? v.length > 0 : v !== null && v !== '').length}
+                        {activeFilterCount}
                      </span>
                   )}
                </button>
 
                {/* Quick Action Tools */}
-               <div className="flex gap-3 ml-auto">
+               <div className="flex items-center gap-2.5">
                   <button
+                     type="button"
                      onClick={() => applyPsychologicalPricing('5')}
                      disabled={isSubmitting}
-                     className="px-4 py-2.5 bg-stone-100 hover:bg-stone-200 dark:bg-white/5 dark:hover:bg-white/10 text-stone-700 dark:text-[#A9CBA2] border border-[#E2DCCE] dark:border-emerald-950/20 rounded-2xl text-xs font-semibold flex items-center gap-2 disabled:opacity-50 transition-all active:scale-95"
-                     title="Shave prices to end in 5 (e.g., 700 -> 695)"
+                     className="px-3.5 py-2.5 bg-white dark:bg-black/30 hover:bg-[#FAF8F5] dark:hover:bg-white/5 text-stone-700 dark:text-stone-300 border border-[#E2DCCE] dark:border-white/10 rounded-2xl text-xs font-bold flex items-center gap-1.5 disabled:opacity-50 transition-all cursor-pointer"
+                     title="Round prices to end in 5 (e.g., 700 -> 695)"
                   >
                      {isSubmitting ? (
-                        <Loader2 size={14} className="animate-spin" />
+                        <Loader2 size={13} className="animate-spin" />
                      ) : (
-                        <Zap size={14} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
+                        <Zap size={13} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
                      )}
-                     {isSubmitting ? 'Optimizing...' : 'Ending in 5'}
+                     <span>Ending in 5</span>
                   </button>
                   <button
+                     type="button"
                      onClick={() => applyPsychologicalPricing('0')}
                      disabled={isSubmitting}
-                     className="px-4 py-2.5 bg-stone-100 hover:bg-stone-200 dark:bg-white/5 dark:hover:bg-white/10 text-stone-700 dark:text-[#A9CBA2] border border-[#E2DCCE] dark:border-emerald-950/20 rounded-2xl text-xs font-semibold flex items-center gap-2 disabled:opacity-50 transition-all active:scale-95"
-                     title="Shave prices to end in 0 (e.g., 700 -> 690)"
+                     className="px-3.5 py-2.5 bg-white dark:bg-black/30 hover:bg-[#FAF8F5] dark:hover:bg-white/5 text-stone-700 dark:text-stone-300 border border-[#E2DCCE] dark:border-white/10 rounded-2xl text-xs font-bold flex items-center gap-1.5 disabled:opacity-50 transition-all cursor-pointer"
+                     title="Round prices to end in 0 (e.g., 700 -> 690)"
                   >
                      {isSubmitting ? (
-                        <Loader2 size={14} className="animate-spin" />
+                        <Loader2 size={13} className="animate-spin" />
                      ) : (
-                        <Zap size={14} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
+                        <Zap size={13} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
                      )}
-                     {isSubmitting ? 'Optimizing...' : 'Ending in 0'}
+                     <span>Ending in 0</span>
                   </button>
                   {selectedIds.size > 0 && (
                      <button
+                        type="button"
                         onClick={applyBulkSale}
-                        className="px-4 py-2.5 bg-[#2C5E3B] text-white dark:bg-[#A9CBA2] dark:text-[#1E3B24] rounded-2xl text-xs font-bold flex items-center gap-2 animate-in fade-in zoom-in duration-300 shadow-sm"
+                        className="woody-btn-primary px-4 py-2.5 rounded-2xl text-xs font-black flex items-center gap-2 cursor-pointer shadow-sm"
                      >
-                        <Percent size={14} /> Global Batch ({selectedIds.size})
+                        <Percent size={13} /> Bulk Promo ({selectedIds.size})
                      </button>
                   )}
                </div>
@@ -113,4 +119,5 @@ export const PricingTab: React.FC = () => {
       </div>
    );
 };
+
 export default PricingTab;

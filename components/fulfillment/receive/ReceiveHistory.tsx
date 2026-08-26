@@ -77,8 +77,12 @@ export const ReceiveHistory: React.FC<ReceiveHistoryProps> = ({
 
             return true;
         }).map(o => {
-            // Resolve User Name
-            const userId = o.approvedBy || o.createdBy;
+            // Find matching receive job if available to get actual completing worker
+            const matchingJob = jobs?.find(j => j.type === 'RECEIVE' && (j.orderRef === o.id || (o.poNumber && j.jobNumber === o.poNumber))) ||
+                historicalJobs?.find(j => j.type === 'RECEIVE' && (j.orderRef === o.id || (o.poNumber && j.jobNumber === o.poNumber)));
+
+            // Resolve User Name: Prioritize the person who actually completed/received the goods
+            const userId = o.receivedBy || (o as any).received_by || matchingJob?.completedBy || (matchingJob as any)?.completed_by || (o as any).completedBy || o.approvedBy || o.createdBy;
             const isUUID = (str: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
             let userObj = employees.find(e => 
                 e.id === userId || 
@@ -147,8 +151,8 @@ export const ReceiveHistory: React.FC<ReceiveHistoryProps> = ({
             if (isStaffWithLimitedAccess && j.assignedTo !== employeeId) return false;
             return true;
         }).map(j => {
-            // Resolve User Name
-            const userId = j.completedBy || j.createdBy || j.assignedTo;
+            // Resolve User Name: Prioritize the person who actually completed the job!
+            const userId = j.completedBy || (j as any).completed_by || j.receivedBy || (j as any).received_by || j.assignedTo || j.createdBy;
             const isUUID = (str: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
             let userObj = employees.find(e => 
                 e.id === userId || 

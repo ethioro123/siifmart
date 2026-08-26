@@ -14,6 +14,7 @@ import { useStore } from '../../contexts/CentralStore';
 import { productsService, inventoryRequestsService } from '../../services/supabase.service';
 import { ProductAttributesPanel } from './components/ProductAttributesPanel';
 import { ProductLocationBreakdown } from './components/ProductLocationBreakdown';
+import { ProductProfileHeader } from './components/ProductProfileHeader';
 
 interface ProductDetailsModalProps {
     product: Product | null;
@@ -170,16 +171,6 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
     const discountAmt = price - salePrice;
     const discountPct = price > 0 ? (discountAmt / price) * 100 : 0;
 
-    let healthColor = 'text-green-500 border-green-500/25 bg-green-500/5';
-    let healthLabel = 'Optimal Level';
-    if (product.stock === 0) {
-        healthColor = 'text-red-500 border-red-500/25 bg-red-500/5';
-        healthLabel = 'Out of Stock';
-    } else if (product.minStock && product.stock < product.minStock) {
-        healthColor = product.stock <= product.minStock * 0.5 ? 'text-red-500 border-red-500/25 bg-red-500/5' : 'text-amber-500 border-amber-500/25 bg-amber-500/5';
-        healthLabel = 'Low Stock';
-    }
-
     let expiryAlert = '';
     let expiryColor = '';
     if (product.expiryDate) {
@@ -206,45 +197,8 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
     return (
         <Modal isOpen={isOpen} onClose={onClose} title="Product Profile & Inventory Console" size="xl" footer={modalFooter}>
             <div className="flex flex-col gap-6 text-[#1E3F27] dark:text-[#EAE5D9]">
-                <div className="flex flex-col md:flex-row gap-6 items-center justify-between pb-6 border-b border-stone-200 dark:border-white/5">
-                    <div className="flex flex-col sm:flex-row gap-4 items-center sm:items-start flex-1 min-w-0">
-                        <div className="w-16 h-16 rounded-xl bg-stone-100 dark:bg-black/40 border border-stone-200 dark:border-white/10 flex items-center justify-center flex-shrink-0 overflow-hidden">
-                            {product.image && !product.image.includes('placeholder.com') ? (
-                                <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
-                            ) : (
-                                <Package size={24} className="text-[#2C5E3B]/40 dark:text-[#A9CBA2]/40" />
-                            )}
-                        </div>
-                        <div className="flex-1 min-w-0 text-center sm:text-left">
-                            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-1.5">
-                                <span className="text-[9px] font-extrabold uppercase tracking-widest text-[#2C5E3B] dark:text-[#A9CBA2]">
-                                    {product.category || 'Uncategorised'}
-                                </span>
-                                <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest border ${healthColor}`}>
-                                    {healthLabel}
-                                </span>
-                            </div>
-                            <h2 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tight mt-1 leading-none">
-                                {product.brand && !brandAlreadyInName && <span className="text-[#2C5E3B] dark:text-[#A9CBA2] font-black">{product.brand} </span>}
-                                {product.name}
-                            </h2>
-                        </div>
-                    </div>
-                    <div className="flex gap-8 items-center self-stretch md:self-auto justify-around text-center md:text-right min-w-[200px]">
-                        <div>
-                            <p className="text-xl font-black font-mono text-[#2C5E3B] dark:text-[#A9CBA2] tracking-tighter">
-                                {CURRENCY_SYMBOL}{formatPriceValue(product.price)}
-                            </p>
-                            <p className="text-[9px] text-gray-500 font-bold uppercase tracking-wider mt-0.5">Retail Price</p>
-                        </div>
-                        <div>
-                            <p className={`text-xl font-black font-mono tracking-tighter ${product.stock > 0 ? 'text-green-500' : 'text-red-500'}`}>
-                                {formatStockDisplay(product.stock, product)}
-                            </p>
-                            <p className="text-[9px] text-gray-500 font-bold uppercase tracking-wider mt-0.5">Stock Level</p>
-                        </div>
-                    </div>
-                </div>
+                {/* Executive Hero Product Profile Header */}
+                <ProductProfileHeader product={product} showCostPrice={showCostPrice} />
 
                 {/* Multi-Site & Store Stock Locations */}
                 <ProductLocationBreakdown product={product} locationBreakdown={locationBreakdown} />

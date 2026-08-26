@@ -280,9 +280,13 @@ export const PutawayJobModal: React.FC<PutawayJobModalProps> = ({
                                                             onStartPutaway(job);
                                                         }}
                                                         disabled={isSubmitting}
-                                                        className="woody-btn-primary h-10 sm:h-12 px-4 sm:px-6 text-[10px] sm:text-[11px]"
+                                                        className="woody-btn-primary h-10 sm:h-12 px-4 sm:px-6 text-[10px] sm:text-[11px] flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
                                                     >
-                                                        {t('warehouse.startJob')}
+                                                        {isSubmitting ? (
+                                                            <Loader2 size={14} className="animate-spin" />
+                                                        ) : (
+                                                            t('warehouse.startJob')
+                                                        )}
                                                     </button>
                                                 )}
                                             </div>

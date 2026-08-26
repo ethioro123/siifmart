@@ -117,17 +117,6 @@ export const wmsJobsService = {
         if (activeRes.error) throw activeRes.error;
         if (historyRes.error) throw historyRes.error;
 
-        // DEBUG: Log first few completed jobs to verify completed_by is in DB
-        const completedJobs = historyRes.data?.filter((j: any) => j.status === 'Completed').slice(0, 3);
-        if (completedJobs?.length) {
-            console.log('🔍 [wmsJobsService] Sample completed jobs from DB:', completedJobs.map((j: any) => ({
-                id: j.id,
-                status: j.status,
-                completed_by: j.completed_by,
-                completed_at: j.completed_at
-            })));
-        }
-
         // Combine datasets
         const combinedData = [...(activeRes.data || []), ...(historyRes.data || [])];
 

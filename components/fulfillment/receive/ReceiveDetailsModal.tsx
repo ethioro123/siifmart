@@ -23,7 +23,7 @@ export const ReceiveDetailsModal: React.FC<ReceiveDetailsModalProps> = ({
     sites,
     t
 }) => {
-    const { addNotification, isSubmitting, setIsSubmitting, employees, user } = useFulfillment();
+    const { addNotification, isSubmitting, setIsSubmitting, employees, user, jobs, historicalJobs } = useFulfillment();
     const [printingId, setPrintingId] = useState<string | null>(null);
 
     const isPO = (item: any): item is PurchaseOrder => {
@@ -46,6 +46,11 @@ export const ReceiveDetailsModal: React.FC<ReceiveDetailsModalProps> = ({
         };
     };
 
+    const matchingJob = isPO(selectedItem)
+        ? (jobs?.find(j => j.type === 'RECEIVE' && (j.orderRef === selectedItem.id || (selectedItem.poNumber && j.jobNumber === selectedItem.poNumber))) ||
+           historicalJobs?.find(j => j.type === 'RECEIVE' && (j.orderRef === selectedItem.id || (selectedItem.poNumber && j.jobNumber === selectedItem.poNumber))))
+        : null;
+
     const data = isPO(selectedItem) ? {
         type: 'PO',
         id: selectedItem.id,
@@ -53,7 +58,7 @@ export const ReceiveDetailsModal: React.FC<ReceiveDetailsModalProps> = ({
         title: selectedItem.supplierName || 'Unknown Supplier',
         status: selectedItem.status,
         date: selectedItem.updatedAt || selectedItem.createdAt,
-        user: resolveUser((selectedItem as any).receivedBy || selectedItem.createdBy),
+        user: resolveUser((selectedItem as any).receivedBy || (selectedItem as any).received_by || matchingJob?.completedBy || (matchingJob as any)?.completed_by || (selectedItem as any).completedBy || selectedItem.createdBy),
         items: selectedItem.lineItems || []
     } : {
         type: 'JOB',
@@ -62,7 +67,7 @@ export const ReceiveDetailsModal: React.FC<ReceiveDetailsModalProps> = ({
         title: selectedItem.type === 'PUTAWAY' ? 'Item Receipt' : selectedItem.type,
         status: selectedItem.status,
         date: selectedItem.completedAt || selectedItem.updatedAt || selectedItem.createdAt,
-        user: resolveUser(selectedItem.completedBy || selectedItem.createdBy),
+        user: resolveUser(selectedItem.completedBy || (selectedItem as any).completed_by || (selectedItem as any).receivedBy || (selectedItem as any).received_by || selectedItem.assignedTo || selectedItem.createdBy),
         items: selectedItem.lineItems || [],
         destination: sites.find(s => s.id === (selectedItem as any).siteId)?.name || 'Unknown'
     };

@@ -4,10 +4,10 @@ import { WMSJob, Product } from '../../../types';
 import { playBeep } from '../../../utils/audioUtils';
 import { normalizeLocation } from '../../../utils/locationTracking';
 import { formatJobId } from '../../../utils/jobIdFormatter';
-import { decodeLocation, isLocationBarcode, extractPrefixFromBarcode, extractSkuFromScan, parseLocationParts } from '../../../utils/locationEncoder';
+import { decodeLocation, isLocationBarcode, extractPrefixFromBarcode, extractSkuFromScan } from '../../../utils/locationEncoder';
 import { useScanOnly } from '../../../hooks/useScanOnly';
 import { logger } from '../../../utils/logger';
-import { PutawayScannerOverflowPanel } from './components/PutawayScannerOverflowPanel';
+import { PutawayScannerLocationCard } from './components/PutawayScannerLocationCard';
 
 const normalizeSku = (s: string) => s.replace(/[-\/\s]/g, '').toUpperCase();
 
@@ -258,119 +258,92 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
     };
 
     return (
-        <div className="fixed inset-0 z-[200] bg-white dark:bg-black flex flex-col transition-colors duration-500">
-            {/* Top Bar */}
-            <div className="p-4 bg-[#FAF8F5] dark:bg-[#1C2620]/80 border-b border-[#E2DCCE]/60 dark:border-white/10 flex justify-between items-center">
+        <div className="fixed inset-0 z-[200] bg-stone-50 dark:bg-black flex flex-col transition-colors duration-500 overflow-hidden">
+            {/* Top Navigation Bar */}
+            <div className="p-3.5 sm:p-4 bg-[#FAF8F5]/90 dark:bg-[#1C2620]/90 border-b border-[#E2DCCE]/60 dark:border-white/10 flex justify-between items-center backdrop-blur-md shrink-0">
                 <div className="flex items-center gap-3">
-                    <button onClick={onClose} className="p-2 -ml-2 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-all shadow-sm active:scale-95" aria-label={t('warehouse.dismiss')}>
-                        <X size={24} />
+                    <button onClick={onClose} className="p-2 -ml-1 text-stone-500 hover:text-stone-900 dark:text-stone-400 dark:hover:text-white transition-all rounded-xl hover:bg-stone-100 dark:hover:bg-white/10 active:scale-95" aria-label={t('warehouse.dismiss')}>
+                        <X size={22} />
                     </button>
                     <div>
-                        <h3 className="font-black text-gray-900 dark:text-white text-lg uppercase tracking-tight">{step === 'LOCATION' ? t('warehouse.scanLocation') : t('warehouse.scanSkuToConfirm')}</h3>
-                        <p className="text-[10px] text-[#2C5E3B] dark:text-[#A9CBA2] font-black uppercase tracking-widest mt-0.5">JOB: {formatJobId(job)}</p>
+                        <h3 className="font-black text-stone-900 dark:text-white text-base sm:text-lg uppercase tracking-tight">
+                            {step === 'LOCATION' ? t('warehouse.scanLocation') : t('warehouse.scanSkuToConfirm')}
+                        </h3>
+                        <p className="text-[10px] text-[#2C5E3B] dark:text-[#A9CBA2] font-black uppercase tracking-widest">
+                            JOB: {formatJobId(job)}
+                        </p>
                     </div>
                 </div>
                 <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-black uppercase tracking-widest bg-[#E2DCCE]/30 dark:bg-white/10 px-3 py-1.5 rounded-full text-slate-755 dark:text-gray-300 border border-[#E2DCCE]/60 dark:border-white/10">
-                        STEP {step === 'LOCATION' ? '1' : '2'}
+                    <span className="text-[10px] font-black uppercase tracking-widest bg-stone-200/70 dark:bg-white/10 px-3 py-1.5 rounded-full text-stone-700 dark:text-stone-300 border border-stone-300/40 dark:border-white/10">
+                        STEP {step === 'LOCATION' ? '1' : '2'} OF 2
                     </span>
                 </div>
             </div>
 
-            {/* Main View */}
-            <div className="flex-1 relative w-full overflow-hidden flex flex-col">
+            {/* Main View Area */}
+            <div className="flex-1 relative w-full overflow-y-auto custom-scrollbar">
                 <div className={`absolute inset-0 opacity-10 blur-[100px] transition-colors duration-1000 pointer-events-none ${step === 'LOCATION' ? 'bg-[#2C5E3B]' : 'bg-emerald-600'} `} />
 
-                <div className="absolute inset-0 overflow-y-auto flex flex-col items-center p-6 pb-32 transition-all">
-                    {/* Status Orb */}
-                    <div className={`w-32 h-32 rounded-[2.5rem] border-4 flex items-center justify-center mb-10 shadow-2xl z-10 transition-all duration-700 ${showSuccess ? 'border-emerald-400 bg-emerald-400/20 shadow-emerald-500/40 scale-110' : showError ? 'border-rose-500 bg-rose-500/20 shadow-rose-500/40 scale-110 animate-shake' : step === 'LOCATION' ? 'border-[#2C5E3B] bg-[#2C5E3B]/10 shadow-[#2C5E3B]/20' : 'border-emerald-500 bg-emerald-500/10 shadow-emerald-500/20'}`}>
-                        {showSuccess ? <CheckCircle size={64} className="text-emerald-400 animate-bounce" /> : showError ? <AlertTriangle size={64} className="text-rose-500" /> : step === 'LOCATION' ? <MapIcon size={64} className="text-[#2C5E3B] dark:text-[#A9CBA2] drop-shadow-[0_0_15px_rgba(44,94,59,0.5)]" /> : <Box size={64} className="text-emerald-500 drop-shadow-[0_0_15px_rgba(16,185,129,0.5)]" />}
+                <div className="relative min-h-full flex flex-col items-center justify-start p-4 sm:p-6 pb-32 max-w-lg mx-auto">
+                    {/* Status Orb - Responsive height */}
+                    <div className={`w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-3xl sm:rounded-[2rem] border-3 sm:border-4 flex items-center justify-center mb-3 sm:mb-4 shadow-lg transition-all duration-500 shrink-0 ${
+                        showSuccess 
+                            ? 'border-emerald-400 bg-emerald-400/20 shadow-emerald-500/30 scale-105' 
+                            : showError 
+                                ? 'border-rose-500 bg-rose-500/20 shadow-rose-500/30 scale-105 animate-shake' 
+                                : step === 'LOCATION' 
+                                    ? 'border-[#2C5E3B] bg-[#2C5E3B]/10 dark:border-[#A9CBA2] dark:bg-[#A9CBA2]/10 shadow-[#2C5E3B]/20' 
+                                    : 'border-emerald-500 bg-emerald-500/10 shadow-emerald-500/20'
+                    }`}>
+                        {showSuccess ? (
+                            <CheckCircle size={36} className="text-emerald-400 animate-bounce" />
+                        ) : showError ? (
+                            <AlertTriangle size={36} className="text-rose-500" />
+                        ) : step === 'LOCATION' ? (
+                            <MapIcon size={36} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
+                        ) : (
+                            <Box size={36} className="text-emerald-500" />
+                        )}
                     </div>
 
-                    <h1 className={`text-4xl md:text-5xl font-black text-gray-900 dark:text-white text-center uppercase tracking-tight mb-4 z-10 transition-all duration-700 ${isStrictlyValid ? 'text-[#2C5E3B] dark:text-[#A9CBA2] scale-105' : showError ? 'text-rose-500' : ''}`}>
-                        {showSuccess ? 'Success!' : showError ? 'Error' : step === 'LOCATION' ? (isStrictlyValid ? t('warehouse.putaway.confirmLocation') : t('warehouse.scanLocation')) : t('warehouse.scanSkuToConfirm')}
+                    <h1 className={`text-xl sm:text-2xl md:text-3xl font-black text-stone-900 dark:text-white text-center uppercase tracking-tight mb-3 sm:mb-4 transition-all duration-300 ${isStrictlyValid ? 'text-[#2C5E3B] dark:text-[#A9CBA2]' : showError ? 'text-rose-500' : ''}`}>
+                        {showSuccess ? 'Success!' : showError ? 'Scan Error' : step === 'LOCATION' ? (isStrictlyValid ? t('warehouse.putaway.confirmLocation') : t('warehouse.scanLocation')) : t('warehouse.scanSkuToConfirm')}
                     </h1>
 
                     {showSuccess ? (
-                        <div className="text-center z-10 mb-8 animate-in fade-in zoom-in duration-300">
-                            <p className="text-emerald-500 text-xl font-black uppercase tracking-widest drop-shadow-sm">{successMsg}</p>
+                        <div className="text-center mb-6 animate-in fade-in zoom-in duration-300">
+                            <p className="text-emerald-500 text-lg font-black uppercase tracking-widest drop-shadow-sm">{successMsg}</p>
                         </div>
                     ) : showError ? (
-                        <div className="text-center z-10 mb-8 animate-in fade-in zoom-in duration-300">
-                            <p className="text-rose-500 text-xl font-black uppercase tracking-widest drop-shadow-sm">{errorMsg}</p>
+                        <div className="text-center mb-6 animate-in fade-in zoom-in duration-300">
+                            <p className="text-rose-500 text-lg font-black uppercase tracking-widest drop-shadow-sm">{errorMsg}</p>
                         </div>
                     ) : step === 'LOCATION' ? (
-                        <div className="text-center z-10 mb-10 w-full max-w-sm">
-                            <div className="text-center mb-8 relative">
-                                <p className="text-gray-400 dark:text-gray-500 text-[10px] font-black uppercase tracking-[0.2em] mb-4">
-                                    {recommendation?.type === 'ASSIGNED' ? 'Assigned Location' : recommendation?.type === 'SUGGESTED' ? 'Suggested Location' : 'Awaiting Scan'}
-                                </p>
-
-                                <div className={`relative inline-block px-10 py-6 rounded-3xl border-2 transition-all duration-700 ${recommendation?.type === 'ASSIGNED'
-                                    ? 'bg-amber-50 dark:bg-amber-500/10 border-amber-400 text-amber-700 dark:text-amber-400 shadow-xl shadow-amber-500/10'
-                                    : recommendation?.type === 'SUGGESTED'
-                                        ? 'bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/5 border-[#2C5E3B]/30 dark:border-[#A9CBA2]/50 text-[#2C5E3B] dark:text-[#A9CBA2] shadow-xl shadow-[#2C5E3B]/10'
-                                        : 'bg-[#FAF8F5] dark:bg-white/5 border-[#E2DCCE]/60 dark:border-white/10 text-gray-900 dark:text-white'
-                                    }`}>
-                                    <p className={`font-mono font-black tracking-[0.1em] leading-none ${isStrictlyValid ? 'text-6xl md:text-7xl text-[#2C5E3B] dark:text-[#A9CBA2]' : (recommendation?.location?.length || 0) > 10 ? 'text-2xl' : 'text-5xl'}`}>
-                                        {isStrictlyValid
-                                            ? decodeLocation(inputVal.trim().toUpperCase())
-                                            : (normalizeLocation(inputVal) || recommendation?.location || currentProduct?.location || '—')}
-                                    </p>
-
-                                    {(() => {
-                                        const locStr = isStrictlyValid
-                                            ? decodeLocation(inputVal.trim().toUpperCase())
-                                            : (normalizeLocation(inputVal) || recommendation?.location || currentProduct?.location || '');
-                                        const parts = parseLocationParts(locStr);
-                                        if (!parts) return null;
-                                        return (
-                                            <div className="grid grid-cols-3 gap-2 mt-4 pt-4 border-t border-current/15">
-                                                <div className="bg-white/60 dark:bg-black/30 p-2 rounded-2xl border border-current/10 flex flex-col items-center">
-                                                    <span className="text-[9px] font-black uppercase tracking-wider opacity-60">Zone</span>
-                                                    <span className="text-base font-black font-mono">{parts.zone}</span>
-                                                </div>
-                                                <div className="bg-white/60 dark:bg-black/30 p-2 rounded-2xl border border-current/10 flex flex-col items-center">
-                                                    <span className="text-[9px] font-black uppercase tracking-wider opacity-60">Aisle</span>
-                                                    <span className="text-base font-black font-mono">{parts.aisle}</span>
-                                                </div>
-                                                <div className="bg-white/60 dark:bg-black/30 p-2 rounded-2xl border border-current/10 flex flex-col items-center">
-                                                    <span className="text-[9px] font-black uppercase tracking-wider opacity-60">Bay</span>
-                                                    <span className="text-base font-black font-mono">{parts.bin}</span>
-                                                </div>
-                                            </div>
-                                        );
-                                    })()}
-
-                                    {recommendation?.type === 'SUGGESTED' && !normalizeLocation(inputVal) && (
-                                        <div className="mt-4 border-t-2 border-[#E2DCCE]/60 dark:border-white/5 pt-3">
-                                            <p className="text-[10px] text-[#2C5E3B] dark:text-[#A9CBA2] font-black uppercase tracking-widest mb-1">
-                                                {currentProduct?.category || 'General Inventory'}
-                                            </p>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-
-                                <PutawayScannerOverflowPanel
-                                    isOverflowMode={isOverflowMode}
-                                    setIsOverflowMode={setIsOverflowMode}
-                                    setAwaitingMismatchConfirmation={setAwaitingMismatchConfirmation}
-                                    existingSkuLocations={existingSkuLocations}
-                                    handleSelectLocation={handleSelectLocation}
-                                    currentItem={currentItem}
-                                    currentOccupants={currentOccupants}
-                                    t={t}
-                                />
-                            </div>
+                        <div className="w-full mb-6">
+                            <PutawayScannerLocationCard
+                                isStrictlyValid={isStrictlyValid}
+                                inputVal={inputVal}
+                                recommendation={recommendation}
+                                currentProduct={currentProduct}
+                                currentItem={currentItem}
+                                isOverflowMode={isOverflowMode}
+                                setIsOverflowMode={setIsOverflowMode}
+                                setAwaitingMismatchConfirmation={setAwaitingMismatchConfirmation}
+                                existingSkuLocations={existingSkuLocations}
+                                handleSelectLocation={handleSelectLocation}
+                                currentOccupants={currentOccupants}
+                                t={t}
+                            />
+                        </div>
                     ) : (
-                        <div className="text-center z-10 mb-10 w-full max-w-sm">
-                            <p className="text-gray-400 dark:text-gray-500 text-[10px] font-black uppercase tracking-[0.2em] mb-4">Item Verification</p>
-                            <div className="bg-emerald-50 dark:bg-emerald-500/5 border-2 border-emerald-400/30 rounded-3xl p-8 mb-8 shadow-xl shadow-emerald-500/5">
-                                <p className="text-3xl text-gray-900 dark:text-white font-black uppercase tracking-tight leading-none mb-4">
-                                    {currentItem?.name}
+                        <div className="text-center mb-6 w-full max-w-md">
+                            <p className="text-stone-400 dark:text-stone-500 text-[10px] font-black uppercase tracking-[0.2em] mb-3">Item Verification</p>
+                            <div className="bg-emerald-50/80 dark:bg-emerald-950/20 border-2 border-emerald-400/40 rounded-3xl p-6 shadow-lg">
+                                <p className="text-2xl text-stone-900 dark:text-white font-black uppercase tracking-tight leading-snug mb-3">
+                                    {currentItem?.name || currentItem?.productName}
                                 </p>
-                                <div className="inline-block px-4 py-2 bg-emerald-500 text-white font-black font-mono text-lg rounded-xl shadow-lg shadow-emerald-500/20 tracking-widest mb-4">
+                                <div className="inline-block px-4 py-2 bg-emerald-600 text-white font-black font-mono text-base rounded-xl shadow-md shadow-emerald-600/20 tracking-widest mb-3">
                                     {currentItem?.sku}
                                 </div>
                                 
@@ -394,91 +367,113 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
                     )}
 
                     {/* Input Area */}
-                    <form onSubmit={handleScan} className="w-full max-w-md relative z-20 group">
-                        <div className="absolute inset-0 bg-gradient-to-r from-[#2C5E3B] to-[#1E3B24] rounded-3xl blur-[20px] opacity-10 group-focus-within:opacity-30 transition-opacity" />
-                        <input
-                            ref={inputRef}
-                            type="text"
-                            aria-label="Scan location or SKU barcode"
-                            title="Scan location or SKU barcode"
-                            value={inputVal}
-                            onChange={(e) => setInputVal(e.target.value)}
-                            onKeyDown={step === 'ITEM' ? scanOnlyHandlers.onKeyDown : undefined}
-                            onPaste={scanOnlyHandlers.onPaste}
-                            className={`w-full bg-white dark:bg-gray-900/90 border-4 rounded-3xl py-8 px-6 text-center text-4xl font-black font-mono text-gray-900 dark:text-white placeholder:text-gray-200 dark:placeholder:text-gray-800 focus:outline-none relative z-10 shadow-2xl transition-all duration-300 ${awaitingOccupancyConfirmation || awaitingMismatchConfirmation ? 'border-amber-400 shadow-amber-500/30' : 'border-[#E2DCCE]/60 dark:border-white/10 focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2]/50'}`}
-                            placeholder={step === 'LOCATION' ? 'SCAN BAY' : 'SCAN SKU'}
-                            autoFocus
-                            disabled={isProcessing}
-                        />
+                    <form onSubmit={handleScan} className="w-full max-w-md relative z-20 group space-y-4">
+                        <div className="relative">
+                            <input
+                                ref={inputRef}
+                                type="text"
+                                aria-label="Scan location or SKU barcode"
+                                title="Scan location or SKU barcode"
+                                value={inputVal}
+                                onChange={(e) => setInputVal(e.target.value)}
+                                onKeyDown={step === 'ITEM' ? scanOnlyHandlers.onKeyDown : undefined}
+                                onPaste={scanOnlyHandlers.onPaste}
+                                className={`w-full bg-white dark:bg-[#1C2620] border-2 sm:border-3 rounded-2xl py-4 sm:py-5 px-4 text-center text-2xl sm:text-3xl font-black font-mono text-stone-900 dark:text-white placeholder:text-stone-300 dark:placeholder:text-stone-700 focus:outline-none shadow-xl transition-all duration-300 ${
+                                    awaitingOccupancyConfirmation || awaitingMismatchConfirmation 
+                                        ? 'border-amber-400 shadow-amber-500/25 ring-2 ring-amber-400/30' 
+                                        : 'border-[#E2DCCE] dark:border-white/10 focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2]'
+                                }`}
+                                placeholder={step === 'LOCATION' ? 'SCAN LOCATION' : 'SCAN SKU'}
+                                autoFocus
+                                disabled={isProcessing}
+                            />
+                        </div>
 
                         {step === 'LOCATION' && inputVal.trim() && (
-                            <div className="mt-4 text-center animate-in fade-in slide-in-from-bottom-2 duration-300">
-                                <p className="text-[10px] font-black uppercase tracking-[0.4em] text-[#2C5E3B] dark:text-[#A9CBA2] flex items-center justify-center gap-3">
+                            <div className="text-center animate-in fade-in slide-in-from-bottom-1 duration-200">
+                                <p className="text-[10px] font-black uppercase tracking-wider text-[#2C5E3B] dark:text-[#A9CBA2] flex items-center justify-center gap-2">
                                     {isStrictlyValid ? `DETECTED: ${decodeLocation(inputVal.trim().toUpperCase())}` : 'Scan a location barcode'}
                                 </p>
                             </div>
                         )}
 
-                        {/* OCCUPANCY WARNING */}
+                        {/* Occupancy Warning */}
                         {awaitingOccupancyConfirmation && !isPlacementBlocked && (
-                            <div className="mt-8 p-6 rounded-3xl bg-amber-50 dark:bg-amber-500/10 border-2 border-amber-400/50 animate-in zoom-in duration-500 shadow-xl shadow-amber-500/5">
-                                <div className="flex items-center gap-3 text-amber-600 dark:text-amber-400 mb-3">
-                                    <AlertTriangle size={24} className="stroke-[3]" />
-                                    <span className="font-black uppercase tracking-widest text-sm">Stock Merge Required</span>
+                            <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-500/10 border border-amber-400/50 animate-in zoom-in-95 duration-300 shadow-sm text-left">
+                                <div className="flex items-center gap-2 text-amber-700 dark:text-amber-400 mb-1">
+                                    <AlertTriangle size={18} className="shrink-0 stroke-[2.5]" />
+                                    <span className="font-black uppercase tracking-wider text-xs">Stock Merge Required</span>
                                 </div>
-                                <p className="text-xs text-amber-700 dark:text-amber-200/80 font-bold leading-relaxed text-left">
-                                    Existing stock of this item is already at this location. Scan again to confirm and merge.
+                                <p className="text-[11px] text-stone-700 dark:text-stone-300 leading-relaxed">
+                                    Existing stock of this item is already at this location. Scan or submit again to confirm merge.
                                 </p>
                             </div>
                         )}
 
-                        {/* STRICT BLOCK WARNING */}
+                        {/* Mismatch Warning */}
+                        {awaitingMismatchConfirmation && (
+                            <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-500/10 border border-amber-400/50 animate-in zoom-in-95 duration-300 shadow-sm text-left">
+                                <div className="flex items-center gap-2 text-amber-700 dark:text-amber-400 mb-1">
+                                    <AlertTriangle size={18} className="shrink-0 stroke-[2.5]" />
+                                    <span className="font-black uppercase tracking-wider text-xs">Alternate Location Scanned</span>
+                                </div>
+                                <p className="text-[11px] text-stone-700 dark:text-stone-300 leading-relaxed">
+                                    You scanned a different location from the suggested bay. Tap submit again to confirm placement here.
+                                </p>
+                            </div>
+                        )}
+
+                        {/* Strict Block Warning */}
                         {isPlacementBlocked && (
-                            <div className="mt-8 p-8 rounded-3xl bg-rose-50 dark:bg-rose-950/50 border-4 border-rose-500 animate-in zoom-in duration-500 shadow-2xl shadow-rose-500/10">
-                                <div className="flex items-center gap-4 text-rose-600 dark:text-rose-500 mb-4">
-                                    <X size={32} className="stroke-[4]" />
-                                    <span className="font-black uppercase tracking-[0.1em] text-lg border-b-4 border-rose-600/30 dark:border-rose-500/30 pb-1">Placement Blocked</span>
+                            <div className="p-5 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border-2 border-rose-500 animate-in zoom-in-95 duration-300 shadow-md text-left">
+                                <div className="flex items-center gap-2 text-rose-600 dark:text-rose-400 mb-2">
+                                    <X size={20} className="shrink-0 stroke-[3]" />
+                                    <span className="font-black uppercase tracking-wider text-sm">Placement Blocked</span>
                                 </div>
-                                <p className="text-sm font-black text-rose-800 dark:text-rose-200 leading-relaxed text-left mb-4 uppercase tracking-tight">
-                                    Incompatible inventory detected: <span className="text-white bg-rose-600 px-2 py-0.5 rounded-lg shadow-lg font-mono">{conflictingOccupants[0]?.sku}</span>
+                                <p className="text-xs font-black text-rose-900 dark:text-rose-200 leading-relaxed mb-2">
+                                    Incompatible inventory detected: <span className="bg-rose-600 text-white px-2 py-0.5 rounded-lg font-mono">{conflictingOccupants[0]?.sku}</span>
                                 </p>
-                                <div className="flex items-center gap-3 bg-rose-600/10 p-3 rounded-2xl text-[10px] font-black uppercase text-rose-600 dark:text-rose-300 tracking-widest border border-rose-600/20">
-                                    <AlertTriangle size={14} />
-                                    <span>Mixed SKU storage is not allowed at this location.</span>
-                                </div>
+                                <p className="text-[10px] text-rose-700 dark:text-rose-300 uppercase font-bold tracking-wider">
+                                    Mixed SKU storage is not allowed at this location.
+                                </p>
                             </div>
                         )}
 
-                        {/* MOBILE ACTION BUTTON */}
+                        {/* Action Button */}
                         <button
                             type="submit"
                             disabled={!inputVal.trim() || isProcessing || isPlacementBlocked}
-                            className={`mt-10 w-full py-8 rounded-3xl flex items-center justify-center gap-4 transition-all duration-700 active:scale-95 shadow-2xl border-4 relative z-30 pointer-events-auto ${!inputVal.trim() || isProcessing
-                                ? 'bg-gray-100 dark:bg-gray-800/50 border-gray-200 dark:border-white/5 text-gray-300 dark:text-gray-700 opacity-60 cursor-not-allowed'
-                                : isPlacementBlocked
-                                    ? 'bg-rose-50 dark:bg-rose-600/20 border-rose-200 dark:border-rose-500/50 text-rose-500 cursor-not-allowed'
-                                    : !isStrictlyValid
-                                        ? 'bg-gray-900 border-transparent text-white'
+                            className={`w-full py-4 sm:py-5 rounded-2xl flex items-center justify-center gap-3 transition-all duration-300 min-h-[52px] active:scale-[0.98] shadow-lg border-2 ${
+                                !inputVal.trim() || isProcessing
+                                    ? 'bg-stone-200 dark:bg-stone-800 border-stone-300/40 dark:border-white/5 text-stone-400 dark:text-stone-600 cursor-not-allowed opacity-70'
+                                    : isPlacementBlocked
+                                        ? 'bg-rose-500 border-rose-400 text-white cursor-not-allowed'
                                         : awaitingOccupancyConfirmation || awaitingMismatchConfirmation
-                                            ? 'bg-amber-500 border-amber-300 text-white font-black uppercase tracking-[0.2em] shadow-amber-500/40 animate-pulse'
-                                            : 'bg-[#2C5E3B] hover:bg-[#1E3B24] border-[#2C5E3B] text-white font-black uppercase tracking-[0.2em] shadow-md'
-                                }`}
+                                            ? 'bg-amber-600 hover:bg-amber-700 border-amber-500 text-white font-black uppercase tracking-wider shadow-amber-500/30 animate-pulse'
+                                            : 'bg-[#2C5E3B] hover:bg-[#1E3B24] border-[#2C5E3B] text-white font-black uppercase tracking-wider shadow-[#2C5E3B]/20'
+                            }`}
                         >
                             {isProcessing ? (
-                                <RotateCcw size={28} className="animate-spin" />
-                            ) : isPlacementBlocked ? (
-                                <X size={28} className="stroke-[3]" />
+                                <RotateCcw size={22} className="animate-spin" />
                             ) : (
-                                <CheckCircle size={28} className="stroke-[3]" />
+                                <CheckCircle size={22} className="stroke-[2.5]" />
                             )}
-                            <span className="text-xs font-black">
-                                {isProcessing ? 'Processing...' : isPlacementBlocked ? 'BLOCKED' : awaitingOccupancyConfirmation ? 'CONFIRM MERGE' : awaitingMismatchConfirmation ? 'CONFIRM LOCATION' : 'SUBMIT'}
+                            <span className="text-xs sm:text-sm font-black uppercase tracking-wider">
+                                {isProcessing 
+                                    ? 'Processing...' 
+                                    : isPlacementBlocked 
+                                        ? 'BLOCKED' 
+                                        : awaitingOccupancyConfirmation 
+                                            ? 'CONFIRM MERGE' 
+                                            : awaitingMismatchConfirmation 
+                                                ? 'CONFIRM LOCATION' 
+                                                : 'SUBMIT'}
                             </span>
                         </button>
                     </form>
 
-                    <p className="mt-12 text-gray-400 dark:text-gray-600 text-[10px] font-black font-mono uppercase tracking-[0.4em] z-10 text-center opacity-40">
-                        Warehouse Scanner • Secure Connection
+                    <p className="mt-8 text-stone-400 dark:text-stone-600 text-[10px] font-black font-mono uppercase tracking-[0.3em] text-center opacity-60">
+                        Warehouse Scanner • Active Mode
                     </p>
                 </div>
             </div>

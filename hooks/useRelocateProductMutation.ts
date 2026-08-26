@@ -28,9 +28,11 @@ export function useRelocateProductMutation() {
             }
 
             queryClient.invalidateQueries({ queryKey: ['products'] });
+            const prod = allProducts.find(p => p.id === result.productId);
+            const prodLabel = prod?.name || result.productId;
             logSystemEvent(
                 'Product Relocated',
-                `Product ${result.productId} added to location ${result.newLocation}`,
+                `Product "${prodLabel}" added to location ${result.newLocation}`,
                 result.user!,
                 'Inventory'
             );

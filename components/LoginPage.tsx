@@ -104,7 +104,7 @@ export default function LoginPage() {
     window.location.hostname === '127.0.0.1' ||
     window.location.hostname === '::1' ||
     window.location.hostname.endsWith('.localhost')
-  );
+  ) && !window.location.hostname.includes('vercel.app') && !window.location.hostname.includes('siifmart.com') && !window.location.hostname.includes('netlify.app') && !window.location.hostname.includes('github.io');
 
   const handleQuickLogin = async (quickEmail: string, quickPass: string) => {
     setEmail(quickEmail);

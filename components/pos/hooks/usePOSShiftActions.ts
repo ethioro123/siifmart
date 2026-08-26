@@ -82,9 +82,22 @@ export const usePOSShiftActions = ({
                 status: 'Closed'
             };
             await closeShift(record);
+            if (Math.abs(record.variance) > 0.01) {
+                try {
+                    const { systemLogsService } = await import('../../../services/supabase.service');
+                    await systemLogsService.create({
+                        module: 'POS_CASH_DRAWER',
+                        action: 'SHIFT_VARIANCE_LOGGED',
+                        user_name: activeShift.cashierName || 'Cashier',
+                        details: `Shift closed with variance: ${record.variance > 0 ? '+' : ''}${record.variance}. Counted: ${record.actualCash}, Expected: ${record.expectedCash}. Reason: ${record.discrepancyReason || 'N/A'}`
+                    });
+                } catch {
+                    // Non-blocking audit log
+                }
+            }
             setIsProcessing(false);
             setIsShiftModalOpen(false);
-            addNotification('success', "Shift Closed Successfully.");
+            addNotification('success', "Shift Closed & Reconciled Successfully.");
             logout();
             navigate('/');
         } catch (e) {

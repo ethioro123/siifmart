@@ -58,11 +58,12 @@ export function useEmployeeActions(deps: UseEmployeeActionsDeps) {
     const startShift = useCallback(async (cashierId: string, openingFloat: number) => {
         try {
             const cashier = employees.find(e => e.id === cashierId);
+            const staffName = cashier?.name || 'Staff Member';
             const shift: ShiftRecord = {
                 id: crypto.randomUUID(),
                 siteId: activeSiteId || '',
                 cashierId,
-                cashierName: cashier?.name || 'Unknown',
+                cashierName: staffName,
                 startTime: new Date().toISOString(),
                 status: 'Open',
                 openingFloat,
@@ -74,7 +75,7 @@ export function useEmployeeActions(deps: UseEmployeeActionsDeps) {
             };
             setShifts(prev => [shift, ...prev]);
             addNotification('success', 'Shift started');
-            logSystemEvent('Start Shift', `Started shift for ${cashierId}`, cashierId, 'HR');
+            logSystemEvent('Start Shift', `Started shift for ${staffName}`, staffName, 'HR');
         } catch (error) {
             logger.error('useEmployeeActions', 'Failed to start shift:', error as Error);
             addNotification('alert', 'Failed to start shift');
@@ -83,14 +84,16 @@ export function useEmployeeActions(deps: UseEmployeeActionsDeps) {
 
     const closeShift = useCallback(async (shift: ShiftRecord) => {
         try {
+            const cashier = employees.find(e => e.id === shift.cashierId);
+            const staffName = shift.cashierName || cashier?.name || 'Staff Member';
             setShifts(prev => prev.map(s => s.id === shift.id ? { ...s, ...shift, status: 'Closed', endTime: new Date().toISOString() } : s));
             addNotification('success', 'Shift closed');
-            logSystemEvent('Close Shift', `Closed shift ${shift.id}`, shift.cashierId, 'HR');
+            logSystemEvent('Close Shift', `Closed shift for ${staffName}`, staffName, 'HR');
         } catch (error) {
             logger.error('useEmployeeActions', 'Failed to close shift:', error as Error);
             addNotification('alert', 'Failed to close shift');
         }
-    }, [addNotification, logSystemEvent]);
+    }, [employees, addNotification, logSystemEvent]);
 
     return { addEmployee, updateEmployee, deleteEmployee, startShift, closeShift };
 }

@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import {
-    Monitor, Receipt, Lock,
-    Plus, Globe, Sparkles, List, Shield, Loader2
+    Monitor, Receipt, Plus, Globe, Sparkles, Shield
 } from 'lucide-react';
 import { useData } from '../../contexts/DataContext';
 import { useStore } from '../../contexts/CentralStore';
 import { SystemConfig } from '../../types';
-import { NavButton } from './POSSettingsUI';
 import { ReceiptPreview } from './ReceiptPreview';
 import { POSStationTab } from './POSStationTab';
 import { POSConnectivityTab } from './POSConnectivityTab';
@@ -14,8 +12,8 @@ import { POSIdentityTab } from './POSIdentityTab';
 import { logger } from '../../utils/logger';
 
 export default function POSSettings() {
-    const { user } = useStore();
-    const { settings, updateSettings, addNotification } = useData();
+    const { user, showToast } = useStore();
+    const { settings, updateSettings } = useData();
 
     // Local States
     const [workflow, setWorkflow] = useState<{
@@ -117,18 +115,6 @@ export default function POSSettings() {
         }
     }, [settings]);
 
-    // --- KEYBOARD SHORTCUTS ---
-    useEffect(() => {
-        const handleKeyDown = (e: KeyboardEvent) => {
-            if ((e.metaKey || e.ctrlKey) && e.key === 's') {
-                e.preventDefault();
-                handleSaveSection(activeTab === 'station' ? 'workflow' : activeTab === 'connectivity' ? 'payments' : 'branding');
-            }
-        };
-        window.addEventListener('keydown', handleKeyDown);
-        return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [activeTab, workflow, payments, receiptBranding]);
-
     const handleSaveSection = async (section: 'workflow' | 'payments' | 'branding') => {
         const setSaving = section === 'workflow' ? setIsSavingWorkflow : section === 'payments' ? setIsSavingPayments : setIsSavingBranding;
         const data = section === 'workflow' ? workflow : section === 'payments' ? payments : receiptBranding;
@@ -136,114 +122,53 @@ export default function POSSettings() {
         setSaving(true);
         try {
             await updateSettings(data as Partial<SystemConfig>, user?.name || 'Admin');
-            addNotification('success', `${section.charAt(0).toUpperCase() + section.slice(1)} settings saved successfully!`);
+            showToast(`${section.charAt(0).toUpperCase() + section.slice(1)} settings saved successfully!`, 'success');
         } catch (err) {
             logger.error('POSSettings', `Failed to save ${section} settings:`, err);
-            addNotification('alert', `Failed to save ${section} settings.`);
+            showToast(`Failed to save ${section} settings.`, 'error');
         } finally {
             setSaving(false);
         }
     };
 
     return (
-        <div className="w-full flex flex-col gap-8 animate-in fade-in slide-in-from-right-4 duration-500 relative">
+        <div className="w-full flex flex-col gap-6 animate-in fade-in slide-in-from-right-4 duration-500 relative">
 
-            {/* Floating Live Preview Toggle (Right) */}
+            {/* Top Tab Bar */}
+            <div className="flex items-center gap-2 p-1.5 bg-[#FAF8F5] dark:bg-black/40 rounded-2xl border border-[#E2DCCE] dark:border-white/10">
+                {[
+                    { id: 'station', label: 'Retail Station', icon: Monitor },
+                    { id: 'connectivity', label: 'Tender & Connectivity', icon: Globe },
+                    { id: 'identity', label: 'Receipt Branding', icon: Sparkles },
+                ].map(tab => {
+                    const Icon = tab.icon;
+                    const active = activeTab === tab.id;
+                    return (
+                        <button
+                            key={tab.id}
+                            onClick={() => setActiveTab(tab.id as any)}
+                            className={`flex-1 px-4 py-2.5 rounded-xl text-xs font-black tracking-widest uppercase transition-all flex items-center justify-center gap-2 cursor-pointer ${active
+                                ? 'bg-[#2C5E3B] text-white shadow-md'
+                                : 'text-stone-500 dark:text-gray-400 hover:text-[#1E3F27] dark:hover:text-white hover:bg-white/50 dark:hover:bg-white/5'
+                                }`}
+                        >
+                            <Icon size={16} /> {tab.label}
+                        </button>
+                    );
+                })}
+            </div>
+
+            {/* Floating Live Preview Toggle */}
             {activeTab === 'identity' && (
                 <button
                     onClick={() => setIsPreviewOpen(!isPreviewOpen)}
                     title="Toggle Receipt Preview"
-                    className={`fixed bottom-8 right-8 p-4 rounded-3xl z-[60] transition-all duration-500 hover:scale-110 active:scale-95 shadow-2xl flex items-center gap-3 overflow-hidden ${isPreviewOpen
-                        ? 'bg-black text-white border border-white/10'
-                        : 'bg-cyber-primary text-black'}`}
+                    className="fixed bottom-8 right-8 p-3.5 px-5 rounded-2xl z-[60] bg-[#2C5E3B] text-white shadow-2xl flex items-center gap-2.5 hover:opacity-90 active:scale-95 transition-all cursor-pointer"
                 >
-                    <div className="relative z-10 flex items-center gap-3">
-                        <Receipt size={24} className={isPreviewOpen ? 'text-cyber-primary' : 'text-black'} />
-                        <span className="text-[10px] font-black uppercase tracking-[0.2em]">{isPreviewOpen ? 'Hide' : 'Live Preview'}</span>
-                    </div>
-                    {!isPreviewOpen && (
-                        <div className="absolute inset-0 bg-cyber-primary rounded-3xl animate-pulse opacity-20" />
-                    )}
+                    <Receipt size={20} />
+                    <span className="text-xs font-black uppercase tracking-wider">{isPreviewOpen ? 'Hide Preview' : 'Live Receipt Preview'}</span>
                 </button>
             )}
-
-            {/* Breadcrumb Header (Non-sticky, integrated) */}
-            <div className="flex items-center gap-4 mb-6 pb-6 border-b border-white/[0.05] animate-in slide-in-from-top-4 duration-1000">
-                <div className="flex items-center gap-4">
-                    <button
-                        onClick={() => setIsNavOpen(true)}
-                        title="Open POS Module Menu"
-                        className="p-3 bg-white/5 rounded-2xl text-gray-400 hover:text-cyber-primary hover:bg-cyber-primary/10 transition-all border border-white/5 active:scale-95"
-                    >
-                        <List size={20} />
-                    </button>
-                    <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-cyber-primary border border-white/10">
-                        <Monitor size={18} />
-                    </div>
-                </div>
-                <div>
-                    <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-600 mb-0.5">POS Module</h4>
-                    <div className="flex items-center gap-2">
-                        <span className="text-sm text-white font-bold">{activeTab === 'station' ? 'Retail Station' : activeTab === 'connectivity' ? 'Connectivity' : 'Brand Identity'}</span>
-                        <div className="w-1 h-1 rounded-full bg-cyber-primary opacity-50" />
-                        <span className="text-[10px] text-gray-500 uppercase font-black tracking-widest leading-none">{activeTab === 'station' ? 'Logic & Auth' : activeTab === 'connectivity' ? 'Network & Pay' : 'Storefront CMS'}</span>
-                    </div>
-                </div>
-            </div>
-
-            {/* LEFT SIDEBAR NAVIGATION */}
-            <div className={`
-                fixed inset-y-0 left-0 w-72 z-40
-                transition-all duration-500 ease-out transform
-                ${isNavOpen ? 'translate-x-0' : '-translate-x-full'}
-            `}>
-                <div className="p-4 bg-cyber-gray h-full shadow-2xl border-r border-white/5">
-                    {/* Toolbar */}
-                    <div className="p-4 border-b border-white/5 flex justify-between items-center bg-cyber-gray z-10 sticky top-0">
-                        <div className="flex items-center gap-3">
-                            <Monitor size={20} className="text-cyber-primary" />
-                            <span className="text-xs font-black text-white uppercase tracking-widest">Station Config</span>
-                        </div>
-                        <button onClick={() => setIsNavOpen(false)} title="Close Menu" className="text-gray-500 hover:text-white">
-                            <Plus className="rotate-45" size={24} />
-                        </button>
-                    </div>
-
-                    <div className="space-y-1">
-                        <NavButton
-                            label="Retail Station"
-                            icon={Monitor}
-                            active={activeTab === 'station'}
-                            onClick={() => { setActiveTab('station'); setIsNavOpen(false); }}
-                        />
-                        <NavButton
-                            label="Connectivity"
-                            icon={Globe}
-                            active={activeTab === 'connectivity'}
-                            onClick={() => { setActiveTab('connectivity'); setIsNavOpen(false); }}
-                        />
-                        <NavButton
-                            label="Brand Identity"
-                            icon={Sparkles}
-                            active={activeTab === 'identity'}
-                            onClick={() => { setActiveTab('identity'); setIsNavOpen(false); }}
-                        />
-                    </div>
-
-                    <div className="mt-8 pt-8 border-t border-white/5">
-                        <div className="p-4 bg-cyber-primary/5 border border-cyber-primary/10 rounded-2xl flex items-start gap-3">
-                            <Shield className="text-cyber-primary shrink-0 mt-0.5" size={16} />
-                            <div>
-                                <h5 className="text-[10px] text-cyber-primary font-black uppercase tracking-wider">Secure Station</h5>
-                                <p className="text-[9px] text-gray-500 mt-1 leading-relaxed">
-                                    Configuration changes are logged and audited in the system logs.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
 
             {/* MAIN CONTENT AREA */}
             <div className="flex-1 min-w-0 pb-12">
@@ -279,51 +204,34 @@ export default function POSSettings() {
                 )}
             </div>
 
-            {/* Re-integrated Floating Side Preview Panel - High Contrast Solid for Sharpness */}
+            {/* Floating Side Preview Panel */}
             <div className={`
-                                fixed top-0 right-0 h-screen w-full sm:w-[500px] bg-cyber-dark z-[70] border-l border-white/10
-                                transform transition-transform duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] shadow-[-20px_0_50px_rgba(0,0,0,0.5)]
-                                ${isPreviewOpen ? 'translate-x-0' : 'translate-x-full'}
-                            `}>
-                <div className="h-full flex flex-col p-8 sm:p-12 pt-24 overflow-y-auto custom-scrollbar relative">
+                fixed top-0 right-0 h-screen w-full sm:w-[480px] bg-white dark:bg-[#18201B] z-[70] border-l border-[#E2DCCE] dark:border-white/10
+                transform transition-transform duration-500 ease-out shadow-2xl
+                ${isPreviewOpen ? 'translate-x-0' : 'translate-x-full'}
+            `}>
+                <div className="h-full flex flex-col p-6 sm:p-8 pt-16 overflow-y-auto relative">
                     <button
                         onClick={() => setIsPreviewOpen(false)}
                         title="Close Live Preview"
-                        className="absolute top-8 right-8 p-3 bg-white/5 rounded-2xl text-gray-500 hover:text-white transition-all hover:bg-white/10 active:scale-95"
+                        className="absolute top-6 right-6 p-2.5 bg-stone-100 dark:bg-white/10 rounded-2xl text-stone-500 hover:text-[#1E3F27] dark:hover:text-white transition-all cursor-pointer"
                     >
-                        <Plus className="rotate-45" size={24} />
+                        <Plus className="rotate-45" size={22} />
                     </button>
 
-                    <div className="mb-12 text-center space-y-2">
-                        <h2 className="text-2xl font-black text-white uppercase tracking-tighter">Live Perspective</h2>
-                        <p className="text-[10px] text-cyber-primary font-black uppercase tracking-[0.4em]">High-Fidelity Perspective</p>
-                        {/* Optimization: Centered Receipt without Device Frame or distracting glows */}
-                        <div className="relative group/preview mx-auto w-full flex justify-center py-4">
-                            {/* Glow removed for sub-pixel rendering clarity */}
+                    <div className="mb-6 text-center space-y-1">
+                        <h2 className="text-xl font-black text-[#1E3F27] dark:text-white uppercase tracking-tight">Thermal Slip Preview</h2>
+                        <p className="text-[10px] text-[#2C5E3B] dark:text-[#A9CBA2] font-black uppercase tracking-widest">{receiptBranding.posReceiptWidth} Standard ESC/POS</p>
+                    </div>
 
-                            {/* Pure Receipt Container - Vertical scrollable & Sharp Rendering */}
-                            <div className="relative z-20 max-w-full flex-1 w-full flex justify-center overflow-visible translate-z-0">
-                                {/* Subtle paper texture background for the preview area */}
-                                {/* eslint-disable-next-line react/forbid-dom-props */}
-                                <div
-                                    className="absolute inset-0 opacity-[0.03] pointer-events-none rounded-xl"
-                                    ref={(el) => { if (el) el.style.backgroundImage = 'url("https://www.transparenttextures.com/patterns/natural-paper.png")'; }}
-                                />
-
-                                <div className="relative z-30 antialiased transform-none">
-                                    <ReceiptPreview settings={receiptBranding} />
-                                </div>
+                    <div className="relative mx-auto w-full flex justify-center py-2">
+                        <div className="relative z-20 max-w-full flex-1 w-full flex justify-center overflow-visible">
+                            <div className="relative z-30 antialiased">
+                                <ReceiptPreview settings={receiptBranding} />
                             </div>
-                        </div>
-
-                        <div className="mt-12 p-6 bg-white/5 border border-white/10 rounded-3xl text-center">
-                            <p className="text-[10px] text-gray-400 font-bold leading-relaxed px-4">
-                                Representing exact {receiptBranding.posReceiptWidth} thermal geometry.
-                            </p>
                         </div>
                     </div>
                 </div>
-
             </div>
         </div>
     );

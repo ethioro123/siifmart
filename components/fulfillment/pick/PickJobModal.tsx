@@ -112,6 +112,17 @@ export const PickJobModal: React.FC<PickJobModalProps> = ({
     }).length || 0;
     const progressPercent = totalItems > 0 ? (completedItems / totalItems) * 100 : 0;
 
+    const sortedLineItems = React.useMemo(() => {
+        if (!job.lineItems) return [];
+        return [...job.lineItems].sort((a, b) => {
+            const prodA = getProduct(a);
+            const prodB = getProduct(b);
+            const locA = a.location || prodA?.location || 'ZZZ';
+            const locB = b.location || prodB?.location || 'ZZZ';
+            return locA.localeCompare(locB, undefined, { numeric: true });
+        });
+    }, [job.lineItems, products]);
+
     return (
         <div className="fixed inset-0 z-[150] flex items-center justify-center p-2 md:p-4 bg-black/80 overflow-x-hidden">
             <div className="bg-[#FAF8F5] dark:bg-[#1C2620] w-full max-w-4xl max-h-[95vh] md:max-h-[90vh] rounded-3xl border border-[#E2DCCE] dark:border-emerald-950/20 shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200 relative">
@@ -138,45 +149,46 @@ export const PickJobModal: React.FC<PickJobModalProps> = ({
                                         #{formatJobId(job)}
                                     </span>
                                 </div>
-                                <div className="flex flex-wrap items-center gap-1.5 md:gap-4 text-[9px] md:text-xs font-medium text-gray-550 dark:text-gray-400">
-                                    <span className={`px-1.5 md:px-2 py-0.5 rounded text-[8px] md:text-[10px] uppercase font-black tracking-widest border ${job.priority === 'Critical' ? 'border-red-200 dark:border-red-500/30 text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/10' :
-                                        job.priority === 'High' ? 'border-amber-200 dark:border-amber-500/30 text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10' :
-                                            'border-gray-200 dark:border-white/10 text-gray-500 dark:text-gray-400'
-                                        }`}>
-                                        {job.priority} {t('warehouse.prioritySort')}
+                                <div className="flex items-center gap-2 md:gap-3 text-[10px] md:text-xs text-gray-500 flex-wrap">
+                                    <span className="flex items-center gap-1 font-mono text-[9px] md:text-[10px] uppercase tracking-wider bg-gray-100 dark:bg-white/5 px-2 py-0.5 rounded border border-gray-200 dark:border-white/10">
+                                        <MapPin size={10} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
+                                        {sourceSite?.name || t('warehouse.thisWarehouse')}
                                     </span>
-                                    <span className="flex items-center gap-1.5">
-                                        <MapPin size={12} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
-                                        <span className="break-words leading-tight text-gray-700 dark:text-gray-400">
-                                            {sourceSite ? (
-                                                <>
-                                                    {sourceSite.name} <span className="text-gray-500 dark:text-zinc-600 font-normal lowercase">({sourceSite.code || sourceSite.id})</span>
-                                                </>
-                                            ) : t('warehouse.picking.localSite')}
+                                    {job.orderRef && (
+                                        <span className="font-mono text-[9px] md:text-[10px] text-gray-655 dark:text-gray-500 uppercase tracking-widest hidden xs:inline">
+                                            Ref: {resolveOrderRef(job.orderRef)}
                                         </span>
-                                    </span>
-                                    <span className="flex items-center gap-1.5 text-gray-500">
-                                        <Clock size={10} className="md:w-3 md:h-3 text-gray-400" />
-                                        {new Date(job.createdAt || (job as any).date || '').toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}
-                                    </span>
+                                    )}
                                 </div>
                             </div>
                         </div>
-                        <button onClick={onClose} aria-label={t('warehouse.dismiss')} className="p-1.5 md:p-2 hover:bg-gray-200 dark:hover:bg-white/10 rounded-xl text-gray-400 dark:text-gray-600 hover:text-gray-900 dark:hover:text-white transition-colors shrink-0">
-                            <X size={20} className="md:w-6 md:h-6" />
-                        </button>
+
+                        <div className="flex items-center gap-2">
+                            <span className={`px-2 py-1 rounded-xl text-[9px] font-black uppercase tracking-wider border ${
+                                job.priority === 'Critical' ? 'bg-red-500/10 text-red-600 border-red-500/30' :
+                                job.priority === 'High' ? 'bg-amber-500/10 text-amber-600 border-amber-500/30' :
+                                'bg-[#2C5E3B]/10 text-[#2C5E3B] dark:text-[#A9CBA2] border-[#2C5E3B]/20'
+                            }`}>
+                                {job.priority || 'Normal'} Priority
+                            </span>
+                            <button onClick={onClose} className="p-2 text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-xl hover:bg-gray-100 dark:hover:bg-white/5 transition-colors">
+                                <X size={20} />
+                            </button>
+                        </div>
                     </div>
                 </div>
 
-                <div className="flex-1 overflow-y-auto p-3 md:p-6 space-y-3 md:space-y-6 custom-scrollbar dark:bg-[radial-gradient(circle_at_50%_0%,rgba(44,94,59,0.03),transparent)]">
-                    <div className="hidden md:grid grid-cols-1 md:grid-cols-3 gap-4 shrink-0">
+                {/* Content */}
+                <div className="p-3 md:p-6 overflow-y-auto space-y-4 md:space-y-6 flex-1 custom-scrollbar">
+                    {/* Metrics Strip */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
                         <div className="bg-[#FAF8F5]/50 dark:bg-white/[0.02] border border-[#E2DCCE]/65 dark:border-white/5 p-4 rounded-2xl">
-                            <span className="text-[10px] text-gray-550 dark:text-gray-500 font-black uppercase tracking-widest block mb-2">{t('warehouse.putaway.progress')}</span>
-                            <div className="flex items-end justify-between mb-2">
-                                <span className="text-2xl font-mono font-black text-gray-900 dark:text-white">{Math.round(progressPercent)}%</span>
-                                <span className="text-xs text-gray-500 dark:text-gray-400 font-bold">{completedItems} / {totalItems} SKU's</span>
+                            <span className="text-[10px] text-gray-550 dark:text-gray-500 font-black uppercase tracking-widest block mb-2">{t('warehouse.progress')}</span>
+                            <div className="flex items-center justify-between text-sm font-bold text-gray-900 dark:text-white mb-2">
+                                <span className="font-mono">{Math.round(progressPercent)}%</span>
+                                <span className="text-[10px] font-black text-gray-500 uppercase">{completedItems} / {totalItems} SKU's</span>
                             </div>
-                            <div className="w-full h-1.5 bg-gray-200 dark:bg-white/5 rounded-full overflow-hidden">
+                            <div className="w-full h-1.5 bg-gray-200 dark:bg-white/10 rounded-full overflow-hidden">
                                 <div ref={(el) => { if (el) el.style.width = `${progressPercent}%`; }} className="h-full bg-[#2C5E3B] dark:bg-[#A9CBA2] transition-all duration-1000 ease-out" />
                             </div>
                         </div>
@@ -204,7 +216,7 @@ export const PickJobModal: React.FC<PickJobModalProps> = ({
                         <div className="flex items-center justify-between mb-2 md:mb-4 shrink-0">
                             <h3 className="font-bold text-gray-900 dark:text-white flex items-center gap-1.5 md:gap-2 text-[10px] md:text-sm uppercase tracking-widest">
                                 <Box size={14} className="text-[#2C5E3B] dark:text-[#A9CBA2] md:w-4 md:h-4" />
-                                {t('warehouse.pickJobs')}
+                                <span>{t('warehouse.pickJobs')} (Smart Route Sequence)</span>
                             </h3>
                             <span className="text-[8px] md:text-[10px] font-black text-gray-500 bg-[#FAF8F5] dark:bg-white/5 px-1.5 md:px-2 py-0.5 md:py-1 rounded border border-[#E2DCCE]/60 dark:border-white/5 uppercase">
                                 {totalItems} {t('warehouse.itemPlural')}
@@ -212,39 +224,44 @@ export const PickJobModal: React.FC<PickJobModalProps> = ({
                         </div>
 
                         <div className="space-y-2 md:space-y-3">
-                            {job.lineItems?.map((item, idx) => {
+                            {sortedLineItems.map((item, idx) => {
                                 const product = getProduct(item);
                                 const isDone = item.status === 'Completed' || item.status === 'Picked';
 
                                 return (
                                     <div key={idx} className={`group relative bg-white dark:bg-white/[0.02] border ${isDone ? 'border-green-200 dark:border-green-500/20 bg-green-50 dark:bg-green-500/[0.01]' : 'border-[#E2DCCE]/60 dark:border-white/5'} rounded-xl md:rounded-2xl p-2 md:p-4 flex flex-col md:flex-row items-start md:items-center justify-between hover:bg-[#FAF8F5] dark:hover:bg-white/[0.04] transition-all duration-300 gap-2 md:gap-0 shadow-sm dark:shadow-none`}>
 
-                                        <div className="flex items-center gap-2 md:gap-5 w-full md:w-auto">
-                                            <div className="hidden md:flex relative w-16 h-16 rounded-xl bg-gray-100 dark:bg-black/40 border border-gray-200 dark:border-white/10 items-center justify-center overflow-hidden shrink-0">
+                                        <div className="flex items-center gap-2 md:gap-4 w-full md:w-auto">
+                                            {/* Stop sequence badge */}
+                                            <div className="flex flex-col items-center justify-center shrink-0 w-8 h-8 rounded-lg bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 border border-[#2C5E3B]/20 text-[#2C5E3B] dark:text-[#A9CBA2] font-mono text-[10px] font-black">
+                                                #{idx + 1}
+                                            </div>
+
+                                            <div className="hidden md:flex relative w-14 h-14 rounded-xl bg-gray-100 dark:bg-black/40 border border-gray-200 dark:border-white/10 items-center justify-center overflow-hidden shrink-0">
                                                 {product?.image ? (
                                                     <img src={product.image} alt={item.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                                                 ) : (
                                                     <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-white/20">
-                                                        <Package size={28} strokeWidth={1.5} />
+                                                        <Package size={24} strokeWidth={1.5} />
                                                     </div>
                                                 )}
                                                 {isDone && (
                                                     <div className="absolute inset-0 bg-green-100/50 dark:bg-green-500/20 backdrop-blur-[1px] flex items-center justify-center">
-                                                        <CheckCircle size={20} className="text-green-600 dark:text-green-400" />
+                                                        <CheckCircle size={18} className="text-green-600 dark:text-green-400" />
                                                     </div>
                                                 )}
                                             </div>
 
                                             <div className="min-w-0">
-                                                <h4 className={`text-xs md:text-base font-bold tracking-tight mb-0.5 md:mb-1 group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] transition-colors truncate ${isDone ? 'line-through text-gray-500' : 'text-gray-900 dark:text-white'}`}>
+                                                <h4 className={`text-xs md:text-sm font-bold tracking-tight mb-0.5 group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] transition-colors truncate ${isDone ? 'line-through text-gray-500' : 'text-gray-900 dark:text-white'}`}>
                                                     {item.name || product?.name || t('warehouse.picking.unknownSKU')}
                                                 </h4>
                                                 <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-3">
-                                                    <span className="text-[8px] md:text-[10px] font-mono font-black text-gray-955 dark:text-[#A9CBA2] bg-stone-50 dark:bg-black/40 px-1.5 md:px-2 py-0.5 rounded border border-[#E2DCCE]/60 dark:border-white/5 uppercase tracking-tighter w-fit">
+                                                    <span className="text-[8px] md:text-[9px] font-mono font-black text-gray-955 dark:text-[#A9CBA2] bg-stone-50 dark:bg-black/40 px-1.5 md:px-2 py-0.5 rounded border border-[#E2DCCE]/60 dark:border-white/5 uppercase tracking-tighter w-fit">
                                                         {item.sku || product?.sku || t('warehouse.picking.noSKUCaps')}
                                                     </span>
                                                     {product?.barcode && (
-                                                        <div className="flex items-center gap-1 md:gap-1.5 text-[8px] md:text-[10px] text-[#2C5E3B] dark:text-[#A9CBA2] font-bold uppercase tracking-widest w-fit">
+                                                        <div className="flex items-center gap-1 md:gap-1.5 text-[8px] md:text-[9px] text-[#2C5E3B] dark:text-[#A9CBA2] font-bold uppercase tracking-widest w-fit font-mono">
                                                             <Barcode size={8} className="md:w-[10px] md:h-[10px]" />
                                                             {product.barcode}
                                                         </div>

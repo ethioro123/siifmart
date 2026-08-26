@@ -30,6 +30,7 @@ import { PackTab } from './PackTab';
 import { PickTab } from './PickTab';
 import { ReceiveTab } from './ReceiveTab';
 import { AssignTask } from './AssignTask';
+import { LabelsTab } from './LabelsTab';
 
 import { TransferTab } from './TransferTab';
 import { CURRENCY_SYMBOL } from '../../constants';
@@ -53,6 +54,7 @@ const TAB_PERMISSIONS: Record<OpTab, string[]> = {
     WASTE: ['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'inventory_specialist', 'inventory_manager'],
     RETURNS: ['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher', 'logistics_manager', 'inventory_manager'],
     ASSIGN: ['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher', 'logistics_manager', 'inventory_manager'], // Job assignment center
+    LABELS: ['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher', 'inventory_specialist', 'picker', 'packer', 'driver', 'receiver', 'logistics_manager', 'inventory_manager'], // Label printing hub
 };
 
 export const FulfillmentContent: React.FC = () => {
@@ -240,6 +242,9 @@ export const FulfillmentContent: React.FC = () => {
                 jobAssignments={jobAssignments}
             />
             }
+
+            {/* --- LABELS TAB --- */}
+            {activeTab === 'LABELS' && canAccessTab('LABELS') && <LabelsTab />}
 
             {/* --- PUTAWAY TAB --- */}
             {

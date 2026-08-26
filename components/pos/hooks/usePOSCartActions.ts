@@ -39,6 +39,10 @@ export const usePOSCartActions = ({
 }: UsePOSCartActionsProps) => {
 
     const addToCart = React.useCallback((product: Product) => {
+        if ((product.stock ?? 0) <= 0) {
+            addNotification('alert', `${product.name} is out of stock.`);
+            return;
+        }
         if (needsQuantityPrompt(product.unit)) {
             setWeightPromptProduct(product);
             return;
@@ -138,6 +142,26 @@ export const usePOSCartActions = ({
     }, [setCart]);
 
     const clearCart = React.useCallback(() => {
+        if (cart.length > 0) {
+            const cartTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const itemsList = cart.map(i => `${i.quantity}x ${i.name}`).join(', ');
+            
+            // Background audit log for Loss Prevention tracking
+            (async () => {
+                try {
+                    const { systemLogsService } = await import('../../../services/supabase.service');
+                    await systemLogsService.create({
+                        module: 'POS_VOID_AUDIT',
+                        action: 'CART_CLEARED_OR_VOIDED',
+                        user_name: 'Cashier',
+                        details: `Cart containing ${cart.length} item types (${itemsList}) worth ETB ${cartTotal.toLocaleString()} was cleared/voided.`
+                    });
+                } catch {
+                    // Non-blocking log
+                }
+            })();
+        }
+
         setCart([]);
         setCartDiscount(0);
         setAppliedDiscountCode(null);
@@ -145,7 +169,7 @@ export const usePOSCartActions = ({
         setDiscountCodeInput('');
         setDiscountCodeError('');
         setIsRoundingEnabled(true);
-    }, [setCart, setCartDiscount, setAppliedDiscountCode, setAppliedDiscountCodeDetails, setDiscountCodeInput, setDiscountCodeError, setIsRoundingEnabled]);
+    }, [cart, setCart, setCartDiscount, setAppliedDiscountCode, setAppliedDiscountCodeDetails, setDiscountCodeInput, setDiscountCodeError, setIsRoundingEnabled]);
 
     return {
         addToCart,

@@ -138,6 +138,10 @@ export interface SystemConfig {
   defaultCreditLimit?: number;
   receivingLogic?: 'blind' | 'verified';
   qcSamplingRate?: number;
+  managerSecurityPin?: string;
+  blindCloseEnforced?: boolean;
+  requireRefundManagerPin?: boolean;
+  highValueBarcodeLockThreshold?: number;
   qcBlockOnFailure?: boolean;
   putawayLogic?: 'manual' | 'system';
   rotationPolicy?: 'fifo' | 'fefo' | 'lifo';

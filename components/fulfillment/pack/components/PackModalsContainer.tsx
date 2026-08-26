@@ -195,7 +195,10 @@ export const PackModalsContainer: React.FC<PackModalsContainerProps> = ({
                         user={user}
                         sites={sites}
                         products={filteredProducts}
-                        onStartPack={() => { }}
+                        onStartPack={() => {
+                            setIsPackModalOpen(false);
+                            setIsScannerOpen(true);
+                        }}
                         onUpdateItemQty={handleUpdateItemQty}
                         onCompleteJob={handleCompleteJob}
                         onPrintLabel={(boxDetails) => handlePrintLabel(selectedPackJob, boxDetails)}

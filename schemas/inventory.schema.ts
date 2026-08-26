@@ -34,12 +34,12 @@ export const ProductSchema = z.object({
 }).passthrough();
 
 export const BarcodeApprovalSchema = z.object({
-    id: z.string().uuid(),
-    product_id: z.string().uuid(),
+    id: z.string().min(1),
+    product_id: z.string().min(1),
     barcode: z.string().min(1),
     image_url: optionalString,
-    status: z.enum(['pending', 'approved', 'rejected', 'logged']).default('pending'),
-    site_id: z.string().uuid().optional(),
+    status: z.enum(['pending', 'approved', 'rejected', 'logged', 'Synced', 'Active']).default('approved'),
+    site_id: optionalString,
     created_by: optionalString,
     created_at: optionalString,
     reviewed_by: optionalString,

@@ -1,14 +1,30 @@
 import React from 'react';
 import { usePOSCommand } from '../POSCommandContext';
 import { useLanguage } from '../../../contexts/LanguageContext';
+import { useStore } from '../../../contexts/CentralStore';
 import { CURRENCY_SYMBOL } from '../../../constants';
+import { ShieldCheck, CheckCircle2, Zap } from 'lucide-react';
 
 export const ShiftProgress: React.FC = () => {
     const { t } = useLanguage();
-    const { totalRevenue, getShiftSummary } = usePOSCommand();
+    const { user } = useStore();
+    const { totalRevenue, getShiftSummary, txCount } = usePOSCommand();
 
-    const dailyTarget = 5000;
-    const progressPercent = Math.min((totalRevenue / dailyTarget) * 100, 100);
+    const isManagerOrAdmin = [
+        'super_admin',
+        'admin',
+        'store_manager',
+        'operations_manager',
+        'ceo'
+    ].includes(user?.role?.toLowerCase() || '');
+
+    // For managers: Financial goal (ETB 5,000). For cashiers: Transaction goal (50 Orders).
+    const dailyRevenueTarget = 5000;
+    const dailyTxTarget = 50;
+
+    const progressPercent = isManagerOrAdmin
+        ? Math.min((totalRevenue / dailyRevenueTarget) * 100, 100)
+        : Math.min((txCount / dailyTxTarget) * 100, 100);
 
     return (
         <div className="bg-white/85 dark:bg-[#18201B]/60 lg:backdrop-blur-2xl border border-[#E2DCCE] dark:border-emerald-950/20 rounded-[32px] p-8 relative overflow-hidden shadow-[0_24px_80px_-12px_rgba(34,50,38,0.06)] dark:shadow-[0_32px_96px_-12px_rgba(5,8,6,0.65)]">
@@ -25,15 +41,30 @@ export const ShiftProgress: React.FC = () => {
                     <div>
                         <div className="flex items-center gap-2.5 mb-2">
                             <div className="w-2 h-2 rounded-full bg-[#2C5E3B] dark:bg-[#A9CBA2] animate-pulse shadow-[0_0_8px_rgba(44,94,59,0.6)]" />
-                            <h3 className="text-[#4D6E56] dark:text-[#7A9E83] text-xs font-black uppercase tracking-[0.2em] select-none">{t('posCommand.shiftTarget')}</h3>
+                            <h3 className="text-[#4D6E56] dark:text-[#7A9E83] text-xs font-black uppercase tracking-[0.2em] select-none">
+                                {isManagerOrAdmin ? t('posCommand.shiftTarget') : "Shift Order Target"}
+                            </h3>
                         </div>
                         <div className="flex items-baseline gap-3">
-                            <span className="text-4xl font-mono font-black tracking-tighter text-[#1E3F27] dark:text-[#EAE5D9]">
-                                {CURRENCY_SYMBOL} {totalRevenue.toLocaleString()}
-                            </span>
-                            <span className="text-[#4D6E56]/60 dark:text-gray-500 font-mono text-lg font-bold tracking-tighter">
-                                / {CURRENCY_SYMBOL} {dailyTarget.toLocaleString()}
-                            </span>
+                            {isManagerOrAdmin ? (
+                                <>
+                                    <span className="text-4xl font-mono font-black tracking-tighter text-[#1E3F27] dark:text-[#EAE5D9]">
+                                        {CURRENCY_SYMBOL} {totalRevenue.toLocaleString()}
+                                    </span>
+                                    <span className="text-[#4D6E56]/60 dark:text-gray-500 font-mono text-lg font-bold tracking-tighter">
+                                        / {CURRENCY_SYMBOL} {dailyRevenueTarget.toLocaleString()}
+                                    </span>
+                                </>
+                            ) : (
+                                <>
+                                    <span className="text-4xl font-mono font-black tracking-tighter text-[#1E3F27] dark:text-[#EAE5D9]">
+                                        {txCount} Orders
+                                    </span>
+                                    <span className="text-[#4D6E56]/60 dark:text-gray-500 font-mono text-lg font-bold tracking-tighter">
+                                        / {dailyTxTarget} Target
+                                    </span>
+                                </>
+                            )}
                         </div>
                     </div>
 
@@ -57,26 +88,35 @@ export const ShiftProgress: React.FC = () => {
 
                 {/* HUD modules */}
                 <div className="grid grid-cols-3 gap-4">
-                    {[
-                        { label: t('pos.cash'),        amount: getShiftSummary().cash,   accent: '#2C5E3B' },
-                        { label: t('pos.card'),        amount: getShiftSummary().card,   accent: '#A9CBA2' },
-                        { label: t('pos.mobileMoney'), amount: getShiftSummary().mobile, accent: '#2C5E3B' },
-                    ].map(({ label, amount, accent }) => (
-                        <div key={label} className="group/hud relative bg-[#FAF8F5] dark:bg-black/20 border border-[#E2DCCE] dark:border-white/5 rounded-2xl p-5 hover:border-[#2C5E3B]/30 dark:hover:border-[#2C5E3B]/20 transition-all hover:shadow-sm">
-                            {/* Corner accent on hover */}
-                            <div className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-[#2C5E3B]/40 rounded-tl-2xl opacity-0 group-hover/hud:opacity-100 transition-opacity" />
-                            <div className="flex items-center gap-2 mb-2">
-                                <div
-                                    className="w-1.5 h-1.5 rounded-full shadow-sm"
-                                    ref={(el) => { if (el) el.style.backgroundColor = accent; }}
-                                />
-                                <p className="text-[#4D6E56] dark:text-[#7A9E83] text-[10px] uppercase font-black tracking-[0.2em] select-none">{label}</p>
+                    {isManagerOrAdmin ? (
+                        [
+                            { label: t('pos.cash'), display: `${CURRENCY_SYMBOL} ${getShiftSummary().cash.toLocaleString()}`, accent: '#2C5E3B' },
+                            { label: t('pos.card'), display: `${CURRENCY_SYMBOL} ${getShiftSummary().card.toLocaleString()}`, accent: '#A9CBA2' },
+                            { label: t('pos.mobileMoney'), display: `${CURRENCY_SYMBOL} ${getShiftSummary().mobile.toLocaleString()}`, accent: '#2C5E3B' },
+                        ].map(({ label, display, accent }) => (
+                            <div key={label} className="group/hud relative bg-[#FAF8F5] dark:bg-black/20 border border-[#E2DCCE] dark:border-white/5 rounded-2xl p-5 hover:border-[#2C5E3B]/30 dark:hover:border-[#2C5E3B]/20 transition-all hover:shadow-sm">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <div className="w-1.5 h-1.5 rounded-full shadow-sm" ref={(el) => { if (el) el.style.backgroundColor = accent; }} />
+                                    <p className="text-[#4D6E56] dark:text-[#7A9E83] text-[10px] uppercase font-black tracking-[0.2em] select-none">{label}</p>
+                                </div>
+                                <p className="text-xl font-mono font-bold tracking-tight text-[#1E3F27] dark:text-[#A9CBA2]">{display}</p>
                             </div>
-                            <p className="text-xl font-mono font-bold tracking-tight text-[#1E3F27] dark:text-[#A9CBA2]">
-                                {CURRENCY_SYMBOL} {amount.toLocaleString()}
-                            </p>
-                        </div>
-                    ))}
+                        ))
+                    ) : (
+                        [
+                            { label: "Completed Orders", display: `${txCount} Processed`, icon: CheckCircle2, accent: '#2C5E3B' },
+                            { label: "Speed & Pace", display: "On Schedule", icon: Zap, accent: '#A9CBA2' },
+                            { label: "Drawer Protocol", display: "Blind Active 🔒", icon: ShieldCheck, accent: '#2C5E3B' },
+                        ].map(({ label, display, icon: Icon, accent }) => (
+                            <div key={label} className="group/hud relative bg-[#FAF8F5] dark:bg-black/20 border border-[#E2DCCE] dark:border-white/5 rounded-2xl p-5 hover:border-[#2C5E3B]/30 dark:hover:border-[#2C5E3B]/20 transition-all hover:shadow-sm">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <Icon size={14} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
+                                    <p className="text-[#4D6E56] dark:text-[#7A9E83] text-[10px] uppercase font-black tracking-[0.2em] select-none">{label}</p>
+                                </div>
+                                <p className="text-sm font-black tracking-tight text-[#1E3F27] dark:text-[#A9CBA2] font-mono">{display}</p>
+                            </div>
+                        ))
+                    )}
                 </div>
             </div>
         </div>

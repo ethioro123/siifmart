@@ -12,6 +12,7 @@ export const core: TranslationBlock = {
         waste: { en: 'WASTE', am: 'ብክነት', or: 'Qaraxa Badde / Hafe' },
         returns: { en: 'RETURNS', am: 'ምላሾች', or: 'Deebitoota' },
         assign: { en: 'MISSION CONTROL', am: 'የተግባር ማዕከል', or: 'Wiirtuu Hojii' },
+        labels: { en: 'LABEL PRINTING', am: 'የመለያ ማተሚያ', or: 'Maxxansa Maqaalee' },
         transfer: { en: 'TRANSFER', am: 'ማስተላለፍ', or: 'Gara Birootti Dabarsuu' },
         my_points: { en: 'MY POINTS', am: 'የእኔ ነጥቦች', or: 'Qabxiiwwan Koo' },
         driver: { en: 'DRIVER HUB', am: 'የአሽከርካሪ ማእከል', or: 'Wiirtuu Konkolaachisaa' },

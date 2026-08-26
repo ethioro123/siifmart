@@ -32,7 +32,7 @@ import { usePutawayStock } from '../components/fulfillment/receive/hooks/usePuta
 import { logger } from '../utils/logger';
 
 
-type OpTab = 'DOCKS' | 'RECEIVE' | 'PUTAWAY' | 'PICK' | 'PACK' | 'REPLENISH' | 'COUNT' | 'WASTE' | 'RETURNS' | 'ASSIGN' | 'TRANSFER' | 'DRIVER';
+type OpTab = 'DOCKS' | 'RECEIVE' | 'PUTAWAY' | 'PICK' | 'PACK' | 'REPLENISH' | 'COUNT' | 'WASTE' | 'RETURNS' | 'ASSIGN' | 'LABELS' | 'TRANSFER' | 'DRIVER';
 
 
 

@@ -1,12 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { WMSJob, Site, Product, Employee, WarehouseZone } from '../../types';
+import React, { useState } from 'react';
+import { WMSJob, Site, Product, Employee } from '../../types';
 import { AssignHeader } from './assign/AssignHeader';
 import { AssignPendingJobs } from './assign/AssignPendingJobs';
 import { AssignAvailableWorkers } from './assign/AssignAvailableWorkers';
 import { AssignJobDetails } from './assign/AssignJobDetails';
 import { AssignActiveMatrix } from './assign/AssignActiveMatrix';
-import { AssignLabelHub } from './assign/AssignLabelHub';
-import { warehouseZonesService } from '../../services/supabase.service';
 
 // Constants
 const ASSIGN_ITEMS_PER_PAGE = 20;
@@ -57,21 +55,6 @@ export const AssignTask: React.FC<AssignTaskProps> = ({
     activeSite,
     user
 }) => {
-    // --- ASSIGN-specific state ---
-    const [zones, setZones] = useState<WarehouseZone[]>([]);
-
-    // Fetch zones when site changes
-    useEffect(() => {
-        if (activeSite?.id) {
-            loadZones();
-        }
-    }, [activeSite?.id]);
-
-    const loadZones = async () => {
-        if (!activeSite?.id) return;
-        const data = await warehouseZonesService.getAll(activeSite.id);
-        setZones(data);
-    };
 
     // Search and filter state
     // Search and filter state
@@ -166,17 +149,6 @@ export const AssignTask: React.FC<AssignTaskProps> = ({
                 filteredJobs={filteredJobs}
                 selectedJob={selectedJob}
                 setSelectedJob={setSelectedJob}
-            />
-
-            {/* LABEL PRINTING HUB */}
-            <AssignLabelHub
-                filteredProducts={filteredProducts}
-                addNotification={addNotification}
-                t={t}
-                zones={zones}
-                onZoneUpdate={loadZones}
-                user={user}
-                activeSite={activeSite}
             />
 
         </div>

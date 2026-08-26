@@ -26,105 +26,106 @@ export const TaxZoneCard: React.FC<TaxZoneCardProps> = ({
     const effectiveRate = zone.rules.reduce((sum: number, r: any) => sum + (r.rate || 0), 0);
 
     return (
-        <div className="bg-black/40 border border-white/10 rounded-xl p-4 hover:border-white/20 transition-all group">
+        <div className="bg-[#FAF8F5] dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-3xl p-5 hover:border-[#2C5E3B]/40 transition-all group">
             <div className="flex justify-between items-start mb-4">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-cyber-primary/10 flex items-center justify-center text-cyber-primary">
+                    <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-[#2C5E3B] dark:bg-[#2C5E3B]/20 dark:text-[#A9CBA2] flex items-center justify-center border border-emerald-200 dark:border-emerald-950/30">
                         <Globe size={18} />
                     </div>
                     <div>
-                        <h4 className="font-bold text-white">{zone.name}</h4>
+                        <h4 className="font-black text-sm text-[#1E3F27] dark:text-white">{zone.name}</h4>
                         <div className="flex items-center gap-2 mt-1">
-                            <span className="text-[10px] uppercase tracking-wide text-gray-500 bg-white/5 px-2 py-0.5 rounded">{zone.type}</span>
+                            <span className="text-[9px] uppercase font-black tracking-wide text-stone-500 bg-white/60 dark:bg-white/5 px-2 py-0.5 rounded-lg">{zone.type}</span>
                             {zone.rules.length > 0 && (
-                                <span className="text-[10px] font-mono font-bold text-cyber-primary bg-cyber-primary/10 px-2 py-0.5 rounded">
+                                <span className="text-[10px] font-mono font-bold text-[#2C5E3B] dark:text-[#A9CBA2] bg-emerald-50 dark:bg-[#2C5E3B]/20 px-2 py-0.5 rounded-lg">
                                     {effectiveRate.toFixed(1)}% Total
                                 </span>
                             )}
                         </div>
                     </div>
                 </div>
-                <button onClick={onDelete} title="Delete Jurisdiction" className="text-gray-600 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all">
+                <button onClick={onDelete} title="Delete Jurisdiction" className="text-stone-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-all p-1.5 rounded-lg cursor-pointer">
                     <Trash2 size={16} />
                 </button>
             </div>
 
             {/* Assigned Sites */}
             <div className="mb-4">
-                <p className="text-[10px] text-gray-500 uppercase font-black mb-2 flex items-center gap-1">
-                    <MapPin size={10} /> Assigned Sites ({assignedSites.length})
+                <p className="text-[10px] text-stone-500 dark:text-gray-400 uppercase font-black mb-2 flex items-center gap-1">
+                    <MapPin size={10} /> Assigned Locations ({assignedSites.length})
                 </p>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-1.5">
                     {assignedSites.length === 0 && (
-                        <span className="text-[10px] text-yellow-500/70 italic">No sites assigned</span>
+                        <span className="text-[10px] text-amber-700 dark:text-amber-400 italic">No locations linked</span>
                     )}
                     {assignedSites.map((s: any) => (
-                        <div key={s.id} className="flex items-center gap-1.5 bg-cyber-primary/5 border border-cyber-primary/20 rounded-full px-2 py-1 group/site">
-                            <span className="text-[10px] text-cyber-primary font-bold">{s.name}</span>
+                        <span key={s.id} className="text-[10px] font-bold bg-white dark:bg-white/5 border border-[#E2DCCE] dark:border-white/10 px-2 py-1 rounded-xl text-[#1E3F27] dark:text-gray-300 flex items-center gap-1.5">
+                            {s.name}
                             <button
                                 onClick={() => onUnassignSite(s.id)}
-                                title={`Unassign ${s.name} from jurisdiction`}
-                                className="text-cyber-primary/40 hover:text-red-400 transition-colors"
+                                className="text-stone-400 hover:text-red-600 font-black cursor-pointer"
+                                title="Unassign"
                             >
-                                <Plus size={10} className="rotate-45" />
+                                ×
                             </button>
-                        </div>
+                        </span>
                     ))}
-                    {availableSites.length > 0 && (
-                        <select
-                            title="Assign site to this jurisdiction"
-                            onChange={(e) => {
-                                if (e.target.value) {
-                                    onAssignSite(e.target.value, zone.id);
-                                    e.target.value = "";
-                                }
-                            }}
-                            className="bg-transparent border border-dashed border-white/10 rounded-full px-2 py-0.5 text-[10px] text-gray-500 hover:border-cyber-primary/30 outline-none cursor-pointer"
-                        >
-                            <option value="">+ Assign Site</option>
-                            {availableSites.map((s: any) => (
-                                <option key={s.id} value={s.id}>{s.name}</option>
-                            ))}
-                        </select>
-                    )}
                 </div>
             </div>
 
-            <div className="space-y-2">
-                <p className="text-[10px] text-gray-500 uppercase font-black flex items-center gap-1">
-                    <Percent size={10} /> Tax Rules ({zone.rules.length})
-                </p>
-                {zone.rules.length === 0 && (
-                    <p className="text-[10px] text-gray-600 italic py-2">No rules defined yet</p>
-                )}
-                {zone.rules.map((rule: any, idx: number) => (
-                    <div key={idx} className="flex justify-between items-center p-2 bg-white/5 rounded-lg border border-white/5 hover:border-white/10 group/rule">
-                        <div className="flex items-center gap-2">
-                            {rule.compound ? <Layers size={14} className="text-purple-400" /> : <Percent size={14} className="text-cyber-primary" />}
-                            <span className="text-xs text-gray-300">{rule.name}</span>
-                            {rule.compound && <span className="text-[8px] text-purple-400 uppercase">compound</span>}
+            {/* Rules */}
+            <div className="space-y-2 mb-4">
+                <div className="flex justify-between items-center">
+                    <p className="text-[10px] text-stone-500 dark:text-gray-400 uppercase font-black flex items-center gap-1">
+                        <Layers size={10} /> Tax Rules ({zone.rules.length})
+                    </p>
+                    <button
+                        onClick={onAddRule}
+                        className="text-[10px] text-[#2C5E3B] dark:text-[#A9CBA2] font-black uppercase tracking-wider flex items-center gap-1 hover:underline cursor-pointer"
+                    >
+                        <Plus size={10} /> Add Rule
+                    </button>
+                </div>
+
+                <div className="space-y-1.5">
+                    {zone.rules.map((rule: any, idx: number) => (
+                        <div key={idx} className="flex justify-between items-center p-2 bg-white/70 dark:bg-black/20 rounded-xl border border-[#E2DCCE]/60 dark:border-white/5 text-xs">
+                            <span className="text-stone-700 dark:text-gray-300 font-bold">{rule.name}</span>
+                            <div className="flex items-center gap-2">
+                                <span className="font-mono font-bold text-[#2C5E3B] dark:text-[#A9CBA2]">{rule.rate}%</span>
+                                <button
+                                    onClick={() => onDeleteRule(zone.id, idx)}
+                                    className="text-stone-400 hover:text-red-600 cursor-pointer"
+                                    title="Delete rule"
+                                >
+                                    ×
+                                </button>
+                            </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                            <span className="text-sm font-mono font-bold text-white">{rule.rate}%</span>
-                            <button
-                                onClick={() => onDeleteRule(zone.id, idx)}
-                                title="Delete Rule"
-                                className="text-gray-600 hover:text-red-400 opacity-0 group-hover/rule:opacity-100 transition-all"
-                            >
-                                <Trash2 size={12} />
-                            </button>
-                        </div>
-                    </div>
-                ))}
-                <button
-                    onClick={onAddRule}
-                    title="Add Tax Rule"
-                    className="w-full py-2 border border-dashed border-white/10 rounded-lg text-xs text-gray-500 hover:text-cyber-primary hover:border-cyber-primary/30 transition-colors flex items-center justify-center gap-1"
-                >
-                    <Plus size={12} /> Add Rule
-                </button>
+                    ))}
+                </div>
             </div>
+
+            {/* Quick Assign Dropdown */}
+            {availableSites.length > 0 && (
+                <div className="pt-3 border-t border-[#E2DCCE]/60 dark:border-white/10 flex items-center gap-2">
+                    <select
+                        onChange={(e) => {
+                            if (e.target.value) {
+                                onAssignSite(e.target.value, zone.id);
+                                e.target.value = '';
+                            }
+                        }}
+                        className="w-full bg-white dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-xl px-3 py-1.5 text-xs text-stone-600 dark:text-gray-300 font-medium outline-none focus:border-[#2C5E3B]"
+                        defaultValue=""
+                    >
+                        <option value="" disabled>+ Assign Location...</option>
+                        {availableSites.map((s: any) => (
+                            <option key={s.id} value={s.id}>{s.name}</option>
+                        ))}
+                    </select>
+                </div>
+            )}
         </div>
     );
 };
-export default TaxZoneCard;

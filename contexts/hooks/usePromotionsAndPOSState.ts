@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { posDB } from '../../services/db/pos.db';
+import { MOCK_PROMOTIONS } from '../../constants/mock-data';
 import type { Promotion, HeldOrder } from '../../types';
 
 interface UsePromotionsAndPOSStateProps {
@@ -7,7 +8,7 @@ interface UsePromotionsAndPOSStateProps {
 }
 
 export function usePromotionsAndPOSState({ addNotification }: UsePromotionsAndPOSStateProps) {
-  const [promotions, setPromotions] = useState<Promotion[]>([]);
+  const [promotions, setPromotions] = useState<Promotion[]>(MOCK_PROMOTIONS);
   const [heldOrders, setHeldOrders] = useState<HeldOrder[]>([]);
 
   // Restore held orders from IndexedDB on mount (this is handled inside DataContext or here)

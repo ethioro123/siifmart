@@ -15,7 +15,7 @@ interface POSupplierLogisticsProps {
 
     // Logistics State
     destinationSiteIds: string[];
-    setDestinationSiteIds: React.Dispatch<React.SetStateAction<string[]>>; // Use exact type from useState
+    setDestinationSiteIds: React.Dispatch<React.SetStateAction<string[]>>;
     isSiteDropdownOpen: boolean;
     setIsSiteDropdownOpen: (val: boolean) => void;
     sites: Site[];
@@ -28,7 +28,6 @@ interface POSupplierLogisticsProps {
 }
 
 export const POSupplierLogistics: React.FC<POSupplierLogisticsProps> = ({
-
     isManualVendor, setIsManualVendor,
     newPOSupplier, setNewPOSupplier,
     manualVendorName, setManualVendorName,
@@ -40,11 +39,9 @@ export const POSupplierLogistics: React.FC<POSupplierLogisticsProps> = ({
     expectedDate, setExpectedDate,
     poPriority, setPoPriority
 }) => {
-    logger.debug('POSupplierLogistics', 'allSuppliers in POSupplierLogistics');
-
     const siteDropdownRef = useRef<HTMLDivElement>(null);
 
-    // Click Outside Listener for Site Dropdown - Moved inside this component
+    // Click Outside Listener for Site Dropdown
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (siteDropdownRef.current && !siteDropdownRef.current.contains(event.target as Node)) {
@@ -60,237 +57,211 @@ export const POSupplierLogistics: React.FC<POSupplierLogisticsProps> = ({
         };
     }, [isSiteDropdownOpen, setIsSiteDropdownOpen]);
 
+    const cardBase = "bg-white/85 dark:bg-[#18201B]/60 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-3xl p-6 shadow-sm";
 
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Supplier Section */}
-            <div className="relative overflow-hidden rounded-xl p-[1px] group">
-                <div className="absolute inset-0 bg-gradient-to-br from-[#2C5E3B]/10 via-transparent to-amber-500/5 dark:from-[#2C5E3B]/20 dark:via-transparent dark:to-amber-500/5 opacity-40"></div>
-                <div className="relative bg-white dark:bg-black/60 backdrop-blur-xl rounded-xl p-6 h-full border border-gray-200 dark:border-white/5 transition-all hover:bg-gray-50/50 dark:hover:bg-black/50 shadow-sm dark:shadow-none">
-                    <div className="absolute top-0 right-0 p-4 opacity-30 group-hover:opacity-100 transition-opacity">
-                        <Truck size={20} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
-                    </div>
-
-                    <div className="flex items-center gap-3 mb-6 pb-2 border-b border-gray-100 dark:border-white/10">
-                        <div className="w-1.5 h-1.5 rounded-full bg-[#2C5E3B] dark:bg-[#A9CBA2] shadow-[0_0_8px_rgba(44,94,59,0.3)] dark:shadow-[0_0_8px_rgba(169,203,162,0.4)]"></div>
-                        <h3 className="text-xs font-black text-gray-900 dark:text-white uppercase tracking-widest">Supplier Data</h3>
-                    </div>
-
-                    <div className="space-y-6">
-                        <div className="flex bg-gray-100 dark:bg-black/40 p-1 rounded-lg border border-gray-200 dark:border-white/10">
-                            <button
-                                onClick={() => setIsManualVendor(false)}
-                                className={`flex-1 py-1.5 text-[10px] font-black rounded-md transition-all ${!isManualVendor ? 'bg-[#2C5E3B] dark:bg-[#A9CBA2] text-white dark:text-[#18201B] shadow-sm' : 'text-gray-500 dark:text-gray-500 hover:text-gray-900 dark:hover:text-gray-300 hover:bg-white dark:hover:bg-white/5'}`}
-                            >
-                                REGISTERED
-                            </button>
-                            <button
-                                onClick={() => setIsManualVendor(true)}
-                                className={`flex-1 py-1.5 text-[10px] font-black rounded-md transition-all ${isManualVendor ? 'bg-[#2C5E3B] dark:bg-[#A9CBA2] text-white dark:text-[#18201B] shadow-sm' : 'text-gray-500 dark:text-gray-500 hover:text-gray-900 dark:hover:text-gray-300 hover:bg-white dark:hover:bg-white/5'}`}
-                            >
-                                EXTERNAL
-                            </button>
+            <div className={cardBase}>
+                <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#E2DCCE]/60 dark:border-white/5">
+                    <div className="flex items-center gap-2">
+                        <div className="p-1.5 bg-emerald-50 text-[#2C5E3B] dark:bg-[#2C5E3B]/20 dark:text-[#A9CBA2] rounded-xl border border-emerald-200 dark:border-emerald-950/30">
+                            <Truck size={16} />
                         </div>
-
-                        {!isManualVendor ? (
-                            <div className="space-y-2">
-                                <label className="text-[10px] text-gray-500 uppercase font-bold ml-1">Select Supplier</label>
-                                <div className="relative">
-                                    <select
-                                        className="w-full bg-gray-50 dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-lg px-4 py-3 text-sm text-gray-900 dark:text-white focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:ring-2 focus:ring-[#2C5E3B]/10 dark:focus:ring-[#A9CBA2]/10 outline-none transition-all appearance-none cursor-pointer font-bold"
-                                        value={newPOSupplier}
-                                        onChange={(e) => setNewPOSupplier(e.target.value)}
-                                        title="Select Supplier"
-                                    >
-                                        <option value="" className="bg-white dark:bg-gray-900 text-gray-500 text-xs">Choose from directory...</option>
-                                        {allSuppliers.map(s => <option key={s.id} value={s.id} className="bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-xs">{s.name}</option>)}
-                                    </select>
-                                    <ChevronDown size={14} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 pointer-events-none" />
-                                </div>
-                            </div>
-                        ) : (
-                             <div className="space-y-2 animate-fadeIn text-left">
-                                <label className="text-[10px] text-gray-500 uppercase font-bold ml-1">Commercial Name</label>
-                                 <input
-                                    type="text"
-                                    placeholder="Enter vendor identity..."
-                                    className="w-full bg-gray-50 dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-lg px-4 py-3 text-sm text-gray-900 dark:text-white focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:ring-2 focus:ring-[#2C5E3B]/10 dark:focus:ring-[#A9CBA2]/10 outline-none transition-all placeholder-gray-400 dark:placeholder-gray-700 font-bold"
-                                    value={manualVendorName}
-                                    onChange={(e) => setManualVendorName(e.target.value)}
-                                />
-                            </div>
-                        )}
-
-                        {(newPOSupplier || manualVendorName) && (
-                            <div className="pt-2 flex items-start gap-3 text-[10px] text-gray-400 bg-white/5 p-3 rounded-lg border border-white/5">
-                                <Info size={14} className="mt-0.5 text-[#2C5E3B] dark:text-[#A9CBA2] flex-shrink-0" />
-                                <p className="leading-relaxed">
-                                    Entity verified. Procurement protocols and payment conditions will be applied per profile settings.
-                                </p>
-                            </div>
-                        )}
+                        <h3 className="text-xs font-black text-[#1E3F27] dark:text-[#EAE5D9] uppercase tracking-wider">Supplier Information</h3>
                     </div>
+                </div>
+
+                <div className="space-y-4">
+                    {/* Toggle Supplier Type */}
+                    <div className="flex bg-[#FAF8F5] dark:bg-black/30 p-1 rounded-2xl border border-[#E2DCCE] dark:border-white/10">
+                        <button
+                            type="button"
+                            onClick={() => setIsManualVendor(false)}
+                            className={`flex-1 py-2 text-xs font-black rounded-xl transition-all cursor-pointer ${!isManualVendor ? 'bg-[#2C5E3B] text-white shadow-sm' : 'text-stone-500 hover:text-stone-900 dark:hover:text-white'}`}
+                        >
+                            REGISTERED VENDOR
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setIsManualVendor(true)}
+                            className={`flex-1 py-2 text-xs font-black rounded-xl transition-all cursor-pointer ${isManualVendor ? 'bg-[#2C5E3B] text-white shadow-sm' : 'text-stone-500 hover:text-stone-900 dark:hover:text-white'}`}
+                        >
+                            ONE-OFF / EXTERNAL
+                        </button>
+                    </div>
+
+                    {!isManualVendor ? (
+                        <div className="space-y-1.5">
+                            <label className="text-[10px] text-stone-500 dark:text-gray-400 uppercase font-bold tracking-wider block">Select Supplier</label>
+                            <div className="relative">
+                                <select
+                                    className="w-full bg-[#FAF8F5] dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-2xl px-4 py-2.5 text-xs text-[#1E3F27] dark:text-white focus:border-[#2C5E3B] outline-none transition-all appearance-none cursor-pointer font-bold"
+                                    value={newPOSupplier}
+                                    onChange={(e) => setNewPOSupplier(e.target.value)}
+                                    title="Select Supplier"
+                                >
+                                    <option value="" className="text-stone-400">Choose from vendor directory...</option>
+                                    {allSuppliers.map(s => <option key={s.id} value={s.id} className="text-stone-900 dark:text-white">{s.name}</option>)}
+                                </select>
+                                <ChevronDown size={14} className="absolute right-4 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none" />
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="space-y-1.5">
+                            <label className="text-[10px] text-stone-500 dark:text-gray-400 uppercase font-bold tracking-wider block">Vendor Name</label>
+                            <input
+                                type="text"
+                                placeholder="Enter external vendor name..."
+                                className="w-full bg-[#FAF8F5] dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-2xl px-4 py-2.5 text-xs text-[#1E3F27] dark:text-white focus:border-[#2C5E3B] outline-none transition-all placeholder:text-stone-400 font-bold"
+                                value={manualVendorName}
+                                onChange={(e) => setManualVendorName(e.target.value)}
+                            />
+                        </div>
+                    )}
+
+                    {(newPOSupplier || manualVendorName) && (
+                        <div className="flex items-start gap-2.5 text-[11px] text-[#2C5E3B] dark:text-[#A9CBA2] bg-emerald-50 dark:bg-[#2C5E3B]/20 p-3 rounded-2xl border border-emerald-200 dark:border-emerald-950/30">
+                            <Info size={14} className="mt-0.5 shrink-0" />
+                            <p className="leading-relaxed">
+                                Vendor selected. Standard procurement terms and default tax rules will apply.
+                            </p>
+                        </div>
+                    )}
                 </div>
             </div>
 
-             {/* Logistics Section */}
-            <div className="relative rounded-xl p-[1px] group">
-                <div className="absolute inset-0 bg-gradient-to-bl from-amber-500/10 via-transparent to-[#2C5E3B]/10 dark:from-amber-500/15 dark:via-transparent dark:to-[#2C5E3B]/10 rounded-xl opacity-40"></div>
-                <div className="relative bg-white dark:bg-black/60 backdrop-blur-xl rounded-xl p-6 h-full border border-gray-200 dark:border-white/5 transition-all hover:bg-gray-50/50 dark:hover:bg-black/50 shadow-sm dark:shadow-none">
-                    <div className="absolute top-0 right-0 p-4 opacity-30 group-hover:opacity-100 transition-opacity">
-                        <MapPin size={20} className="text-amber-700 dark:text-amber-500" />
+            {/* Logistics Section */}
+            <div className={cardBase}>
+                <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#E2DCCE]/60 dark:border-white/5">
+                    <div className="flex items-center gap-2">
+                        <div className="p-1.5 bg-amber-50 text-amber-700 dark:bg-amber-950/30 dark:text-amber-400 rounded-xl border border-amber-200 dark:border-amber-900/30">
+                            <MapPin size={16} />
+                        </div>
+                        <h3 className="text-xs font-black text-[#1E3F27] dark:text-[#EAE5D9] uppercase tracking-wider">Logistics & Receiving</h3>
                     </div>
+                </div>
 
-                    <div className="flex items-center gap-3 mb-6 pb-2 border-b border-gray-100 dark:border-white/10">
-                        <div className="w-1.5 h-1.5 rounded-full bg-amber-600 dark:bg-amber-500 shadow-[0_0_8px_rgba(217,119,6,0.3)] dark:shadow-[0_0_8px_rgba(217,119,6,0.4)]"></div>
-                        <h3 className="text-xs font-black text-gray-900 dark:text-white uppercase tracking-widest">Logistics Engine</h3>
-                    </div>
+                <div className="space-y-4">
+                    {/* Destination Dropdown */}
+                    <div className="space-y-1.5 relative" ref={siteDropdownRef}>
+                        <label className="text-[10px] text-stone-500 dark:text-gray-400 uppercase font-bold tracking-wider block">Receiving Destination</label>
 
-                    <div className="space-y-5">
-                        {/* Destination Dropdown */}
-                        <div className="space-y-2 relative" ref={siteDropdownRef}>
-                            <label className="text-[10px] text-gray-500 uppercase font-bold ml-1">Deployment Sites</label>
+                        <div
+                            className={`w-full bg-[#FAF8F5] dark:bg-black/30 border rounded-2xl px-4 py-2.5 text-xs text-[#1E3F27] dark:text-white cursor-pointer flex justify-between items-center transition-all ${isSiteDropdownOpen ? 'border-[#2C5E3B]' : 'border-[#E2DCCE] dark:border-white/10'}`}
+                            onClick={() => setIsSiteDropdownOpen(!isSiteDropdownOpen)}
+                        >
+                            <span className={destinationSiteIds.length === 0 ? 'text-stone-400 text-xs' : 'font-black text-[#1E3F27] dark:text-white'}>
+                                {destinationSiteIds.length === 0
+                                    ? 'Select receiving destination...'
+                                    : `${destinationSiteIds.length} location(s) assigned`}
+                            </span>
+                            {isSiteDropdownOpen ? <ChevronUp size={14} className="text-[#2C5E3B] dark:text-[#A9CBA2]" /> : <ChevronDown size={14} className="text-stone-400" />}
+                        </div>
 
-                            <div
-                                className={`w-full bg-gray-50 dark:bg-black/40 border rounded-lg px-4 py-3 text-sm text-gray-900 dark:text-white cursor-pointer flex justify-between items-center transition-all ${isSiteDropdownOpen ? 'border-amber-500/50 shadow-[0_0_10px_rgba(217,119,6,0.15)] focus:ring-2 focus:ring-amber-500/10' : 'border-gray-200 dark:border-white/10 hover:border-gray-300 dark:hover:border-white/20'}`}
-                                onClick={() => setIsSiteDropdownOpen(!isSiteDropdownOpen)}
-                            >
-                                <span className={destinationSiteIds.length === 0 ? 'text-gray-400 dark:text-gray-500 text-xs' : 'text-gray-900 dark:text-white font-black'}>
-                                    {destinationSiteIds.length === 0
-                                        ? 'Select drop-off locations...'
-                                        : `${destinationSiteIds.length} location(s) assigned`}
-                                </span>
-                                {isSiteDropdownOpen ? <ChevronUp size={16} className="text-amber-700 dark:text-amber-500" /> : <ChevronDown size={16} className="text-gray-400 dark:text-gray-600" />}
-                            </div>
-
-                            {/* Dropdown Menu */}
-                            {isSiteDropdownOpen && (
-                                <div className="absolute z-50 w-full mt-2 bg-white dark:bg-[#1E2822] border border-[#E2DCCE] dark:border-emerald-950/20 rounded-xl shadow-2xl backdrop-blur-2xl max-h-60 overflow-y-auto custom-scrollbar p-2 ring-1 ring-black/5 dark:ring-white/10">
-                                    <div className="flex justify-between items-center px-2 py-1.5 border-b border-gray-100 dark:border-white/5 mb-1.5">
-                                        <div className="text-[9px] text-gray-400 dark:text-gray-500 uppercase font-black tracking-tighter">Available Warehouses</div>
-                                        <div className="flex gap-2">
-                                            <button
-                                                type="button"
-                                                onClick={() => {
-                                                    const warehouseIds = sites.filter(s => s.type === 'Warehouse' || s.type === 'Distribution Center').map(s => s.id);
-                                                    setDestinationSiteIds(warehouseIds);
-                                                }}
-                                                className="text-[9px] text-[#2C5E3B] dark:text-[#A9CBA2] font-black uppercase hover:underline cursor-pointer"
-                                            >
-                                                Select All
-                                            </button>
-                                            <span className="text-[9px] text-gray-300 dark:text-gray-700">|</span>
-                                            <button
-                                                type="button"
-                                                onClick={() => setDestinationSiteIds([])}
-                                                className="text-[9px] text-red-500 dark:text-red-400 font-black uppercase hover:underline cursor-pointer"
-                                            >
-                                                Clear
-                                            </button>
-                                        </div>
-                                    </div>
-                                    {sites.filter(s => s.type === 'Warehouse' || s.type === 'Distribution Center').map(s => (
-                                        <div
-                                            key={s.id}
+                        {/* Dropdown Menu */}
+                        {isSiteDropdownOpen && (
+                            <div className="absolute z-50 w-full mt-2 bg-white dark:bg-[#18201B] border border-[#E2DCCE] dark:border-emerald-950/20 rounded-2xl shadow-xl p-2 max-h-56 overflow-y-auto">
+                                <div className="flex justify-between items-center px-2 py-1 border-b border-[#E2DCCE]/60 dark:border-white/5 mb-1.5">
+                                    <span className="text-[10px] text-stone-400 font-bold uppercase">Available Warehouses</span>
+                                    <div className="flex gap-2">
+                                        <button
+                                            type="button"
                                             onClick={() => {
-                                                setDestinationSiteIds(prev =>
-                                                    prev.includes(s.id)
-                                                        ? prev.filter(id => id !== s.id)
-                                                        : [...prev, s.id]
-                                                );
+                                                const warehouseIds = sites.filter(s => s.type === 'Warehouse' || s.type === 'Distribution Center').map(s => s.id);
+                                                setDestinationSiteIds(warehouseIds);
                                             }}
-                                            className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all ${destinationSiteIds.includes(s.id)
-                                                ? 'bg-amber-500/10 text-amber-700 dark:text-white'
-                                                : 'hover:bg-gray-50 dark:hover:bg-white/5 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-                                                }`}
+                                            className="text-[10px] text-[#2C5E3B] dark:text-[#A9CBA2] font-black hover:underline cursor-pointer"
                                         >
-                                            <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${destinationSiteIds.includes(s.id)
-                                                ? 'bg-amber-600 border-amber-600 shadow-[0_0_10px_rgba(217,119,6,0.3)]'
-                                                : 'border-gray-700'
-                                                }`}>
-                                                {destinationSiteIds.includes(s.id) && <Check size={10} className="text-white" />}
-                                            </div>
-                                            <span className="text-xs font-semibold uppercase tracking-tight">{s.name}</span>
+                                            Select All
+                                        </button>
+                                        <span className="text-stone-300">|</span>
+                                        <button
+                                            type="button"
+                                            onClick={() => setDestinationSiteIds([])}
+                                            className="text-[10px] text-red-600 font-black hover:underline cursor-pointer"
+                                        >
+                                            Clear
+                                        </button>
+                                    </div>
+                                </div>
+                                {sites.filter(s => s.type === 'Warehouse' || s.type === 'Distribution Center').map(s => (
+                                    <div
+                                        key={s.id}
+                                        onClick={() => {
+                                            setDestinationSiteIds(prev =>
+                                                prev.includes(s.id)
+                                                    ? prev.filter(id => id !== s.id)
+                                                    : [...prev, s.id]
+                                            );
+                                        }}
+                                        className={`flex items-center gap-2.5 p-2.5 rounded-xl cursor-pointer transition-colors ${destinationSiteIds.includes(s.id)
+                                            ? 'bg-emerald-50 dark:bg-[#2C5E3B]/20 text-[#2C5E3B] dark:text-[#A9CBA2] font-bold'
+                                            : 'hover:bg-[#FAF8F5] dark:hover:bg-white/5 text-stone-600 dark:text-stone-300'
+                                            }`}
+                                    >
+                                        <div className={`w-4 h-4 rounded-md border flex items-center justify-center transition-all ${destinationSiteIds.includes(s.id)
+                                            ? 'bg-[#2C5E3B] border-[#2C5E3B] text-white'
+                                            : 'border-stone-300 dark:border-stone-600'
+                                            }`}>
+                                            {destinationSiteIds.includes(s.id) && <Check size={10} />}
                                         </div>
-                                    ))}
-                                    {sites.filter(s => s.type === 'Warehouse' || s.type === 'Distribution Center').length === 0 && (
-                                        <div className="p-4 text-center text-gray-600 text-[10px] italic">
-                                            No accessible nodes found.
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-
-                            {/* Selected Tags */}
-                            {destinationSiteIds.length > 0 && (
-                                <div className="flex flex-wrap gap-1.5 pt-1">
-                                    {destinationSiteIds.map(id => {
-                                        const site = sites.find(s => s.id === id);
-                                        return (
-                                            <span key={id} className="text-[9px] bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-300 px-2 py-1 rounded flex items-center gap-1.5 font-bold tracking-tight">
-                                                {site?.name}
-                                                <X
-                                                    size={10}
-                                                    className="cursor-pointer hover:text-white transition-colors"
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        setDestinationSiteIds(prev => prev.filter(sid => sid !== id));
-                                                    }}
-                                                />
-                                            </span>
-                                        );
-                                    })}
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Date & Priority */}
-                        <div className="grid grid-cols-2 gap-4">
-                             <div className="space-y-2">
-                                <label className="text-[10px] text-gray-500 uppercase font-bold ml-1">Deadline Date</label>
-                                <input
-                                    type="date"
-                                    className="w-full bg-gray-50 dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-lg px-3 py-2 text-xs text-gray-900 dark:text-white focus:border-amber-500/50 focus:ring-2 focus:ring-amber-500/10 outline-none transition-all cursor-text font-bold"
-                                    value={expectedDate}
-                                    onChange={(e) => setExpectedDate(e.target.value)}
-                                    title="Deadline Date"
-                                />
+                                        <span className="text-xs">{s.name}</span>
+                                    </div>
+                                ))}
                             </div>
-                             <div className="space-y-2">
-                                 <label className="text-[10px] text-gray-500 uppercase font-bold ml-1">Order Priority</label>
-                                 <div className="relative">
-                                     <select
-                                         className="w-full bg-gray-50 dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-lg px-3 py-2 text-xs text-gray-900 dark:text-white focus:border-amber-500/50 focus:ring-2 focus:ring-amber-500/10 outline-none transition-all appearance-none font-bold"
-                                         value={poPriority}
-                                         onChange={(e) => setPoPriority(e.target.value as any)}
-                                         title="Priority"
-                                     >
-                                         <option value="Low" className="bg-white dark:bg-gray-900">Low</option>
-                                         <option value="Normal" className="bg-white dark:bg-gray-900">Normal</option>
-                                         <option value="High" className="bg-white dark:bg-gray-900">High (Priority)</option>
-                                         <option value="Urgent" className="bg-white dark:bg-gray-900">Urgent (Critical)</option>
-                                     </select>
-                                    <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-600 pointer-events-none" />
-                                </div>
-                            </div>
-                        </div>
+                        )}
 
-                        {/* Distribution Mode */}
-                          <div className="space-y-2">
-                            <label className="text-[10px] text-gray-500 uppercase font-bold ml-1">Allocation Protocol</label>
-                            <div className="flex bg-gray-100 dark:bg-black/40 p-1 rounded-lg border border-gray-200 dark:border-white/10">
-                                <button
-                                    onClick={() => setQuantityDistribution('per-store')}
-                                    className={`flex-1 py-1.5 text-[9px] font-black rounded transition-all ${quantityDistribution === 'per-store' ? 'bg-white dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-gray-200 dark:border-amber-500/30 shadow-sm dark:shadow-[0_0_10px_rgba(217,119,6,0.1)]' : 'text-gray-500 dark:text-gray-500 hover:text-gray-900 dark:hover:text-gray-300'}`}
+                        {/* Selected Tags */}
+                        {destinationSiteIds.length > 0 && (
+                            <div className="flex flex-wrap gap-1.5 pt-1">
+                                {destinationSiteIds.map(id => {
+                                    const site = sites.find(s => s.id === id);
+                                    return (
+                                        <span key={id} className="text-[10px] bg-emerald-50 dark:bg-[#2C5E3B]/20 border border-emerald-200 dark:border-emerald-950/30 text-[#2C5E3B] dark:text-[#A9CBA2] px-2.5 py-0.5 rounded-lg flex items-center gap-1.5 font-bold">
+                                            {site?.name}
+                                            <X
+                                                size={11}
+                                                className="cursor-pointer hover:text-red-600"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setDestinationSiteIds(prev => prev.filter(sid => sid !== id));
+                                                }}
+                                            />
+                                        </span>
+                                    );
+                                })}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Date & Priority */}
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-1.5">
+                            <label className="text-[10px] text-stone-500 dark:text-gray-400 uppercase font-bold tracking-wider block">Expected Delivery</label>
+                            <input
+                                type="date"
+                                className="w-full bg-[#FAF8F5] dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-2xl px-3.5 py-2 text-xs text-[#1E3F27] dark:text-white focus:border-[#2C5E3B] outline-none font-bold"
+                                value={expectedDate}
+                                onChange={(e) => setExpectedDate(e.target.value)}
+                                title="Expected Delivery Date"
+                            />
+                        </div>
+                        <div className="space-y-1.5">
+                            <label className="text-[10px] text-stone-500 dark:text-gray-400 uppercase font-bold tracking-wider block">Order Priority</label>
+                            <div className="relative">
+                                <select
+                                    className="w-full bg-[#FAF8F5] dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-2xl px-3.5 py-2 text-xs text-[#1E3F27] dark:text-white focus:border-[#2C5E3B] outline-none appearance-none font-bold cursor-pointer"
+                                    value={poPriority}
+                                    onChange={(e) => setPoPriority(e.target.value as any)}
+                                    title="Priority"
                                 >
-                                    PER NODE
-                                </button>
-                                <button
-                                    onClick={() => setQuantityDistribution('total-split')}
-                                    className={`flex-1 py-1.5 text-[9px] font-black rounded transition-all ${quantityDistribution === 'total-split' ? 'bg-white dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-gray-200 dark:border-amber-500/30 shadow-sm dark:shadow-[0_0_10px_rgba(217,119,6,0.1)]' : 'text-gray-500 dark:text-gray-500 hover:text-gray-900 dark:hover:text-gray-300'}`}
-                                >
-                                    AUTO SPLIT
-                                </button>
+                                    <option value="Low">Low</option>
+                                    <option value="Normal">Normal</option>
+                                    <option value="High">High Priority</option>
+                                    <option value="Urgent">Urgent (Critical)</option>
+                                </select>
+                                <ChevronDown size={14} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none" />
                             </div>
                         </div>
                     </div>

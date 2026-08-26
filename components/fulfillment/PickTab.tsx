@@ -40,11 +40,24 @@ export const PickTab: React.FC = () => {
     const [showSuccessScreen, setShowSuccessScreen] = useState(false);
     const [completedJobInfo, setCompletedJobInfo] = useState<any>(null);
 
-    // Derived state for the scanner
+    // Derived state for the scanner (Sequenced along the optimal warehouse picking path)
     const currentScannerItem = useMemo(() => {
-        if (!selectedJob || selectedJob.type !== 'PICK') return null;
-        return selectedJob.lineItems?.find((i: any) => (i.status || '').toLowerCase() !== 'completed' && (i.status || '').toLowerCase() !== 'picked');
-    }, [selectedJob]);
+        if (!selectedJob || selectedJob.type !== 'PICK' || !selectedJob.lineItems) return null;
+        const targetSiteId = selectedJob.siteId || (selectedJob as any).site_id;
+        const pending = selectedJob.lineItems.filter((i: any) => 
+            (i.status || '').toLowerCase() !== 'completed' && (i.status || '').toLowerCase() !== 'picked'
+        );
+        if (pending.length === 0) return null;
+
+        // Smart Location Path Sequencing (Zone -> Aisle -> Bay)
+        return [...pending].sort((a: any, b: any) => {
+            const prodA = products.find(p => (p.id === a.productId || p.sku === a.sku) && (p.siteId === targetSiteId || p.site_id === targetSiteId));
+            const prodB = products.find(p => (p.id === b.productId || p.sku === b.sku) && (p.siteId === targetSiteId || p.site_id === targetSiteId));
+            const locA = a.location || prodA?.location || 'ZZZ';
+            const locB = b.location || prodB?.location || 'ZZZ';
+            return locA.localeCompare(locB, undefined, { numeric: true });
+        })[0];
+    }, [selectedJob, products]);
 
     const currentScannerProduct = useMemo(() => {
         if (!currentScannerItem || !selectedJob) return undefined;

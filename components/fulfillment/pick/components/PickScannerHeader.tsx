@@ -39,6 +39,18 @@ export const PickScannerHeader: React.FC<PickScannerHeaderProps> = ({
     getItemMeasureQty,
     t,
 }) => {
+    // When mission is complete (no current item left to pick)
+    if (!currentItem) {
+        return (
+            <PickScannerSummary
+                job={job}
+                getProduct={getProduct}
+                getItemMeasureQty={getItemMeasureQty}
+                t={t}
+            />
+        );
+    }
+
     return (
         <>
             {/* Icon Circle */}
@@ -46,11 +58,9 @@ export const PickScannerHeader: React.FC<PickScannerHeaderProps> = ({
                 ? 'border-green-400 bg-green-500/20 shadow-green-500/40 scale-110'
                 : showError
                     ? 'border-red-500 bg-red-500/20 shadow-red-500/40 scale-110 animate-shake'
-                    : !currentItem
-                        ? 'border-green-500 bg-green-500/10 shadow-green-500/20'
-                        : step === 'LOCATION'
-                            ? 'border-[#2C5E3B] bg-[#2C5E3B]/10 shadow-[#2C5E3B]/20'
-                            : 'border-[#A9CBA2] bg-[#A9CBA2]/10 shadow-[#A9CBA2]/40'
+                    : step === 'LOCATION'
+                        ? 'border-[#2C5E3B] bg-[#2C5E3B]/10 shadow-[#2C5E3B]/20'
+                        : 'border-[#A9CBA2] bg-[#A9CBA2]/10 shadow-[#A9CBA2]/40'
                 }`}>
                 {showSuccess ? (
                     <CheckCircle size={64} className="text-green-500 dark:text-green-400 animate-bounce" />
@@ -65,7 +75,7 @@ export const PickScannerHeader: React.FC<PickScannerHeaderProps> = ({
 
             {/* Instruction Header */}
             <h1 className={`text-3xl md:text-5xl font-black text-gray-900 dark:text-[#EAE5D9] text-center uppercase italic tracking-tight mb-2 z-10 transition-all duration-300 ${isLocationBarcode(inputVal.trim().toUpperCase()) ? 'text-[#2C5E3B] dark:text-[#A9CBA2] scale-105' : showError ? 'text-red-600 dark:text-red-500 animate-pulse' : ''}`}>
-                {showSuccess ? t('warehouse.picking.successCaps') : showError ? t('warehouse.picking.errorCaps') : !currentItem ? t('warehouse.picking.missionComplete') : step === 'LOCATION' ? (isLocationBarcode(inputVal.trim().toUpperCase()) ? t('warehouse.picking.locationIdentified') : t('warehouse.scanLocation')) : step === 'QUANTITY' ? t('warehouse.confirmQty') : t('warehouse.scanSkuToConfirm')}
+                {showSuccess ? t('warehouse.picking.successCaps') : showError ? t('warehouse.picking.errorCaps') : step === 'LOCATION' ? (isLocationBarcode(inputVal.trim().toUpperCase()) ? t('warehouse.picking.locationIdentified') : t('warehouse.scanLocation')) : step === 'QUANTITY' ? t('warehouse.confirmQty') : t('warehouse.scanSkuToConfirm')}
             </h1>
 
             {showSuccess ? (
@@ -76,13 +86,6 @@ export const PickScannerHeader: React.FC<PickScannerHeaderProps> = ({
                 <div className="text-center z-10 mb-8 animate-in fade-in zoom-in duration-300">
                     <p className="text-red-600 dark:text-red-500 text-xl font-bold uppercase tracking-widest">{errorMsg}</p>
                 </div>
-            ) : !currentItem ? (
-                <PickScannerSummary
-                    job={job}
-                    getProduct={getProduct}
-                    getItemMeasureQty={getItemMeasureQty}
-                    t={t}
-                />
             ) : (
                 <PickScannerInstructionPanel
                     step={step}

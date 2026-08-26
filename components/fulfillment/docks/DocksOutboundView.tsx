@@ -5,6 +5,7 @@ import { DocksOutboundHistory } from './DocksOutboundHistory';
 import { useFulfillment } from '../FulfillmentContext';
 import { DocksOutboundDepartures } from './components/DocksOutboundDepartures';
 import { DocksOutboundStaging } from './components/DocksOutboundStaging';
+import { DockAssignModal } from './components/DockAssignModal';
 
 // ────────────────────────────────────────────────────────────────
 //  CONSTANTS — single source of truth for dock bay identifiers
@@ -90,9 +91,30 @@ export const DocksOutboundView: React.FC<DocksOutboundViewProps> = ({
     const isMgr = ['super_admin', 'admin', 'regional_manager', 'operations_manager', 'warehouse_manager'].includes((user?.role || '').toLowerCase());
     const isOpStaff = isMgr || (user?.role || '').toLowerCase() === 'dispatcher';
 
+    const [selectedEmptyDock, setSelectedEmptyDock] = React.useState<string | null>(null);
+    const [isAssigning, setIsAssigning] = React.useState(false);
+
     const checkControlAccess = (actionName = 'Control actions') => {
         if (!isOpStaff) { addNotification('alert', `${actionName} requires Dispatcher or Warehouse Manager role.`); return false; }
         return true;
+    };
+
+    const handleAssignJobToDock = async (jobId: string, dockName: string) => {
+        if (!checkControlAccess('Dock loading')) return;
+        setIsAssigning(true);
+        try {
+            await wmsJobsService.update(jobId, {
+                status: 'In-Progress',
+                location: `Dock ${dockName}`,
+                transferStatus: 'Packed'
+            } as any);
+            await refreshData();
+            addNotification('success', `Assigned shipment to Dock ${dockName}`);
+        } catch (err) {
+            addNotification('alert', 'Failed to assign dock');
+        } finally {
+            setIsAssigning(false);
+        }
     };
 
     const handleDelete = async (e: React.MouseEvent, jobId: string) => {
@@ -131,18 +153,24 @@ export const DocksOutboundView: React.FC<DocksOutboundViewProps> = ({
                                                 if (assignedJob) {
                                                     setSelectedJob(assignedJob);
                                                     setIsDetailsOpen(true);
+                                                } else {
+                                                    if (!checkControlAccess('Dock loading')) return;
+                                                    setSelectedEmptyDock(dock);
                                                 }
                                             }}
-                                            className={`relative flex flex-col rounded-[2.5rem] border-2 transition-all duration-500 overflow-hidden shadow-sm dark:shadow-2xl group cursor-pointer ${!isOccupied ? 'border-dashed border-[#E2DCCE]/60 dark:border-[#A9CBA2]/10 bg-[#FAF8F5]/30 dark:bg-[#18201B]/20' : 'border-[#2C5E3B]/30 bg-[#2C5E3B]/5 dark:bg-[#A9CBA2]/5 hover:bg-[#2C5E3B]/10 dark:hover:bg-[#A9CBA2]/10'}`}
+                                            className={`relative flex flex-col rounded-[2.5rem] border-2 transition-all duration-500 overflow-hidden shadow-sm dark:shadow-2xl group cursor-pointer ${!isOccupied ? 'border-dashed border-[#E2DCCE]/60 dark:border-[#A9CBA2]/10 bg-[#FAF8F5]/30 dark:bg-[#18201B]/20 hover:border-[#2C5E3B]/40 hover:bg-[#FAF8F5]/60' : 'border-[#2C5E3B]/30 bg-[#2C5E3B]/5 dark:bg-[#A9CBA2]/5 hover:bg-[#2C5E3B]/10 dark:hover:bg-[#A9CBA2]/10'}`}
                                         >
                                             <span className="absolute top-4 left-5 font-black text-slate-200 dark:text-white/10 text-xl tracking-tighter z-0">{dock}</span>
 
                                             {!isOccupied ? (
-                                                <div className="flex-1 flex flex-col items-center justify-center p-8 gap-4 opacity-40 group-hover:opacity-60 transition-opacity">
-                                                    <div className="w-16 h-16 rounded-3xl border-2 border-dashed border-[#E2DCCE]/60 dark:border-[#A9CBA2]/10 flex items-center justify-center">
-                                                        <Upload size={24} className="text-gray-600" />
+                                                <div className="flex-1 flex flex-col items-center justify-center p-8 gap-4 opacity-40 group-hover:opacity-100 transition-opacity">
+                                                    <div className="w-16 h-16 rounded-3xl border-2 border-dashed border-[#E2DCCE]/60 dark:border-[#A9CBA2]/10 flex items-center justify-center group-hover:border-[#2C5E3B]/40 group-hover:bg-[#2C5E3B]/10 transition-all">
+                                                        <Upload size={24} className="text-gray-600 group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2]" />
                                                     </div>
-                                                    <span className="text-[10px] font-black uppercase tracking-widest text-gray-500">{t('warehouse.docks.empty')}</span>
+                                                    <div className="text-center">
+                                                        <span className="text-[10px] font-black uppercase tracking-widest text-gray-500 block">{t('warehouse.docks.empty')}</span>
+                                                        <span className="text-[8px] font-bold text-[#2C5E3B] dark:text-[#A9CBA2] uppercase tracking-wider block mt-1">+ Click to Load</span>
+                                                    </div>
                                                 </div>
                                             ) : (
                                                 <div className="flex-1 flex flex-col p-6 z-10">
@@ -270,61 +298,86 @@ export const DocksOutboundView: React.FC<DocksOutboundViewProps> = ({
                                                             <div className="flex items-center gap-2 mb-2">
                                                                 <UserIcon size={12} className="text-gray-500" />
                                                                 <span className="text-[9px] text-gray-500 font-black uppercase tracking-widest">
-                                                                    {assignedJob.deliveryMethod === 'External' ? 'External Driver' : 'Assign Driver'}
+                                                                    {assignedJob.deliveryMethod === 'External' ? 'External Courier / Carrier' : 'Warehouse Driver'}
                                                                 </span>
                                                             </div>
                                                             
                                                             {assignedJob.deliveryMethod === 'External' ? (
-                                                                <input
-                                                                    type="text"
-                                                                    placeholder="Enter Driver Name..."
-                                                                    aria-label="External Driver Name"
-                                                                    title="External Driver Name"
-                                                                    defaultValue={assignedJob.externalCarrierName || ''}
-                                                                    key={`carrier-${assignedJob.id}-${assignedJob.deliveryMethod}`}
-                                                                    onBlur={async (e) => {
-                                                                        if (!checkControlAccess('External carrier update')) return;
-                                                                        const carrierName = e.target.value;
-                                                                        try {
-                                                                            await wmsJobsService.update(assignedJob.id, { 
-                                                                                externalCarrierName: carrierName,
-                                                                                assignedBy: user?.name || 'Unknown'
-                                                                            } as any);
-                                                                            await refreshData();
-                                                                        } catch (err) {
-                                                                            addNotification('alert', 'Save Failed');
-                                                                        }
-                                                                    }}
-                                                                    className="woody-input w-full px-3 py-2 text-[10px]"
-                                                                />
+                                                                <div className="space-y-1.5">
+                                                                    <input
+                                                                        type="text"
+                                                                        list={`couriers-${assignedJob.id}`}
+                                                                        placeholder="Courier name or 3PL (e.g. DHL, EMS)..."
+                                                                        aria-label="External Courier Name"
+                                                                        title="External Courier Name"
+                                                                        defaultValue={assignedJob.externalCarrierName || ''}
+                                                                        key={`carrier-${assignedJob.id}-${assignedJob.deliveryMethod}`}
+                                                                        onBlur={async (e) => {
+                                                                            if (!checkControlAccess('External carrier update')) return;
+                                                                            const carrierName = e.target.value.trim();
+                                                                            try {
+                                                                                await wmsJobsService.update(assignedJob.id, { 
+                                                                                    externalCarrierName: carrierName,
+                                                                                    assignedBy: user?.name || 'Unknown'
+                                                                                } as any);
+                                                                                await refreshData();
+                                                                            } catch (err) {
+                                                                                addNotification('alert', 'Save Failed');
+                                                                            }
+                                                                        }}
+                                                                        className="woody-input w-full px-3 py-2 text-[10px]"
+                                                                    />
+                                                                    <datalist id={`couriers-${assignedJob.id}`}>
+                                                                        <option value="DHL Express" />
+                                                                        <option value="FedEx / TNT" />
+                                                                        <option value="EMS Ethiopia" />
+                                                                        <option value="Aramex" />
+                                                                        <option value="Local 3PL Freight" />
+                                                                        <option value="External Private Driver" />
+                                                                    </datalist>
+                                                                </div>
                                                             ) : (
-                                                                <select
-                                                                    title="Assign Driver"
-                                                                    aria-label="Assign Driver"
-                                                                    value={assignedJob.assignedTo || ''}
-                                                                    onChange={async (e) => {
-                                                                        if (!checkControlAccess('Driver assignment')) return;
-                                                                        const driverId = e.target.value || null;
-                                                                        try {
-                                                                            await wmsJobsService.update(assignedJob.id, { 
-                                                                                assignedTo: driverId,
-                                                                                assignedBy: user?.name || 'Unknown'
-                                                                            } as any);
-                                                                            await refreshData();
-                                                                            addNotification('success', `Assigned to Driver`);
-                                                                        } catch (err) {
-                                                                            addNotification('alert', 'Assignment Failed');
-                                                                        }
-                                                                    }}
-                                                                    className="woody-input w-full px-3 py-2 text-[10px] appearance-none cursor-pointer"
-                                                                >
-                                                                    <option value="">Select Driver...</option>
-                                                                    {employees
-                                                                        .filter(e => ['driver', 'dispatcher', 'warehouse_manager'].includes(e.role?.toLowerCase() || '') && (e as any).status === 'Active')
-                                                                        .map(e => (
-                                                                            <option key={e.id} value={e.id}>{e.name} ({e.role.toUpperCase()})</option>
-                                                                        ))}
-                                                                </select>
+                                                                (() => {
+                                                                    const targetSiteId = assignedJob.siteId || activeSite?.id;
+                                                                    const siteDrivers = employees.filter(e => {
+                                                                        const isDriverRole = ['driver', 'dispatcher'].includes(e.role?.toLowerCase() || '');
+                                                                        const isActive = (e as any).status !== 'Inactive' && (e as any).status !== 'Terminated';
+                                                                        const isSiteMatch = !e.siteId || e.siteId === targetSiteId;
+                                                                        return isDriverRole && isActive && isSiteMatch;
+                                                                    });
+
+                                                                    return (
+                                                                        <select
+                                                                            title="Assign Warehouse Driver"
+                                                                            aria-label="Assign Warehouse Driver"
+                                                                            value={assignedJob.assignedTo || ''}
+                                                                            onChange={async (e) => {
+                                                                                if (!checkControlAccess('Driver assignment')) return;
+                                                                                const driverId = e.target.value || null;
+                                                                                try {
+                                                                                    await wmsJobsService.update(assignedJob.id, { 
+                                                                                        assignedTo: driverId,
+                                                                                        assignedBy: user?.name || 'Unknown'
+                                                                                    } as any);
+                                                                                    await refreshData();
+                                                                                    addNotification('success', `Assigned to Warehouse Driver`);
+                                                                                } catch (err) {
+                                                                                    addNotification('alert', 'Assignment Failed');
+                                                                                }
+                                                                            }}
+                                                                            className="woody-input w-full px-3 py-2 text-[10px] appearance-none cursor-pointer"
+                                                                        >
+                                                                            <option value="">Select Warehouse Driver...</option>
+                                                                            {siteDrivers.length === 0 ? (
+                                                                                <option value="" disabled>No drivers registered for this warehouse</option>
+                                                                            ) : (
+                                                                                siteDrivers.map(e => (
+                                                                                    <option key={e.id} value={e.id}>{e.name} ({e.role.toUpperCase()})</option>
+                                                                                ))
+                                                                            )}
+                                                                        </select>
+                                                                    );
+                                                                })()
                                                             )}
                                                         </div>
 
@@ -416,6 +469,19 @@ export const DocksOutboundView: React.FC<DocksOutboundViewProps> = ({
                     />
                 </div>
             )}
+
+            {/* Quick Dock Bay Assignment Modal */}
+            <DockAssignModal
+                isOpen={!!selectedEmptyDock}
+                onClose={() => setSelectedEmptyDock(null)}
+                targetDock={selectedEmptyDock}
+                stagingJobs={stagingJobs}
+                sites={sites}
+                employees={employees}
+                formatJobId={formatJobId}
+                onAssignJobToDock={handleAssignJobToDock}
+                isSubmitting={isAssigning}
+            />
         </div>
     );
 };

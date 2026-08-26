@@ -45,7 +45,7 @@ export const PickScannerSubmitButton: React.FC<PickScannerSubmitButtonProps> = (
             {isProcessing
                 ? t('warehouse.picking.validating')
                 : !currentItem
-                    ? t('warehouse.completed')
+                    ? 'Finalize Mission & Create Pack Job →'
                     : step === 'QUANTITY'
                         ? t('warehouse.picking.confirmPick')
                         : isItemMatched

@@ -1,7 +1,7 @@
 import React, { createContext, useContext } from 'react';
 import { WMSJob, Product, PurchaseOrder, User, StockMovement, TransferRecord, SaleRecord, Site, WarehouseZone } from '../../types';
 
-export type OpTab = 'DOCKS' | 'RECEIVE' | 'PUTAWAY' | 'PICK' | 'PACK' | 'REPLENISH' | 'COUNT' | 'WASTE' | 'RETURNS' | 'ASSIGN' | 'TRANSFER' | 'DRIVER';
+export type OpTab = 'DOCKS' | 'RECEIVE' | 'PUTAWAY' | 'PICK' | 'PACK' | 'REPLENISH' | 'COUNT' | 'WASTE' | 'RETURNS' | 'ASSIGN' | 'LABELS' | 'TRANSFER' | 'DRIVER';
 
 export interface FulfillmentContextType {
     // --- Core Data (from DataContext / CentralStore) ---

@@ -4,6 +4,7 @@ import { MOCK_PRICING_RULES } from '../../constants';
 import type { Product, Promotion, PricingRule } from '../../types';
 import type { MerchandisingContextType, MerchandisingTab } from './MerchandisingContext';
 import { useMerchandisingFilters } from './hooks/useMerchandisingFilters';
+import { matchRuleProduct, calculateRulePrice } from './utils/ruleEvaluator';
 import { logger } from '../../utils/logger';
 
 const getMargin = (price: number, cost: number) => {
@@ -260,15 +261,10 @@ export const useMerchandisingState = (): MerchandisingContextType => {
          let updatedCount = 0;
          const updates: Promise<any>[] = [];
          products.forEach(p => {
-            if (p.category === rule.targetCategory) {
-               let shouldApply = false;
-               if (rule.condition === 'Stock > X' && p.stock > rule.threshold) shouldApply = true;
-               if (rule.condition === 'Expiry < X Days' && rule.threshold > 10) shouldApply = true;
-               if (shouldApply) {
-                  updatedCount++;
-                  let newPrice = rule.action === 'Decrease Price %' ? p.price * (1 - (rule.value / 100)) : p.price * (1 + (rule.value / 100));
-                  updates.push(updateProduct({ ...p, price: parseFloat(newPrice.toFixed(2)) }));
-               }
+            if (matchRuleProduct(p, rule)) {
+               updatedCount++;
+               const newPrice = calculateRulePrice(p, rule);
+               updates.push(updateProduct({ ...p, price: parseFloat(newPrice.toFixed(2)) }));
             }
          });
          await Promise.all(updates);
@@ -289,24 +285,42 @@ export const useMerchandisingState = (): MerchandisingContextType => {
 
    const handleRunSimulation = async () => {
       setIsSimulating(true);
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      let totalImpactRevenue = 0, totalImpactMargin = 0, impactedCount = 0;
+      await new Promise(resolve => setTimeout(resolve, 800));
+      let totalCurrentRevenue = 0, totalProjectedRevenue = 0, totalCurrentMargin = 0, totalProjectedMargin = 0, impactedCount = 0;
       const activeRules = pricingRules.filter(r => r.isActive);
 
-      activeRules.forEach(rule => {
-         products.forEach(p => {
-            if (p.category === rule.targetCategory && rule.condition === 'Stock > X' && p.stock > rule.threshold) {
-               impactedCount++;
-               let newPrice = rule.action === 'Decrease Price %' ? p.price * (1 - (rule.value / 100)) : p.price * (1 + (rule.value / 100));
-               const estSales = p.salesVelocity === 'High' ? 20 : p.salesVelocity === 'Medium' ? 10 : 2;
-               totalImpactRevenue += (newPrice - p.price) * estSales;
-               totalImpactMargin += (newPrice - (p.costPrice || p.price * 0.7) - (p.price - (p.costPrice || p.price * 0.7))) * estSales;
-            }
-         });
+      products.forEach(p => {
+         const cost = p.costPrice || (p.price * 0.7);
+         const estSales = p.salesVelocity === 'High' ? 35 : p.salesVelocity === 'Medium' ? 18 : 6;
+         const currentRev = p.price * estSales;
+         const currentMarg = (p.price - cost) * estSales;
+
+         totalCurrentRevenue += currentRev;
+         totalCurrentMargin += currentMarg;
+
+         const matchingRule = activeRules.find(r => matchRuleProduct(p, r));
+         if (matchingRule) {
+            impactedCount++;
+            const newPrice = calculateRulePrice(p, matchingRule);
+            // Price elasticity multiplier: price drop increases volume, price hike softens volume
+            const elasticityFactor = newPrice < p.price ? 1.25 : 0.88;
+            const projectedSales = Math.round(estSales * elasticityFactor);
+            const projRev = newPrice * projectedSales;
+            const projMarg = (newPrice - cost) * projectedSales;
+            totalProjectedRevenue += projRev;
+            totalProjectedMargin += projMarg;
+         } else {
+            totalProjectedRevenue += currentRev;
+            totalProjectedMargin += currentMarg;
+         }
       });
-      setSimResult({ rev: parseFloat((totalImpactRevenue / 1000).toFixed(1)), margin: parseFloat((totalImpactMargin / 1000).toFixed(1)) });
+
+      const revDeltaPct = totalCurrentRevenue > 0 ? parseFloat((((totalProjectedRevenue - totalCurrentRevenue) / totalCurrentRevenue) * 100).toFixed(1)) : 0;
+      const margDeltaPct = totalCurrentMargin > 0 ? parseFloat((((totalProjectedMargin - totalCurrentMargin) / totalCurrentMargin) * 100).toFixed(1)) : 0;
+
+      setSimResult({ rev: revDeltaPct, margin: margDeltaPct });
       setIsSimulating(false);
-      addNotification('success', `Simulation complete. rules would affect ${impactedCount} products.`);
+      addNotification('success', `Simulation complete: Analyzed ${impactedCount} affected SKUs.`);
    };
 
    const handleShelfSwap = (productId: string) => {

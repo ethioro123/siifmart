@@ -58,7 +58,12 @@ export const productsService = {
                 if (filters.status === 'Active') query = query.eq('status', 'active');
                 else if (filters.status === 'Low Stock') query = query.eq('status', 'low_stock');
                 else if (filters.status === 'Out of Stock') query = query.eq('status', 'out_of_stock');
+                else if (filters.status === 'Archived') query = query.eq('status', 'archived');
+            } else if (!filters.includeArchived) {
+                query = query.neq('status', 'archived');
             }
+        } else {
+            query = query.neq('status', 'archived');
         }
 
         if (limit) {

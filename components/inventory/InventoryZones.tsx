@@ -213,13 +213,35 @@ export const InventoryZones: React.FC = () => {
                     <p className="text-sm text-stone-400 dark:text-gray-500 font-bold uppercase tracking-wider">Loading storage zones from database...</p>
                 </div>
             ) : zones.length === 0 ? (
-                <div className="flex flex-col items-center justify-center p-16 text-center bg-white/70 dark:bg-[#18201B]/30 rounded-3xl border border-[#E2DCCE] dark:border-emerald-950/20 shadow-sm space-y-4">
-                    <AlertCircle size={48} className="text-amber-500" />
+                <div className="flex flex-col items-center justify-center p-12 sm:p-16 text-center bg-white/85 dark:bg-[#18201B]/60 rounded-3xl border border-[#E2DCCE] dark:border-emerald-950/20 shadow-sm space-y-4">
+                    <div className="w-14 h-14 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/30 flex items-center justify-center text-amber-600 dark:text-amber-400">
+                        <AlertCircle size={28} />
+                    </div>
                     <div>
-                        <h3 className="text-lg font-black text-[#1E3F27] dark:text-[#EAE5D9] uppercase">No Zones Configured</h3>
-                        <p className="text-sm text-stone-400 dark:text-gray-500 mt-1 max-w-md">
-                            There are currently no zones defined for this location. Click "Initialize Default Zones" or use "Add New Zone" to define the layout.
+                        <h3 className="text-base font-black text-[#1E3F27] dark:text-[#EAE5D9] uppercase tracking-wide">No Zones Configured</h3>
+                        <p className="text-xs text-stone-500 dark:text-stone-400 mt-1 max-w-md mx-auto">
+                            There are currently no storage zones defined for {activeSite?.name || 'this facility'}. Initialize standard zones or define a custom layout.
                         </p>
+                    </div>
+                    <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+                        <button
+                            type="button"
+                            onClick={handleInitializeDefaults}
+                            disabled={isLoading}
+                            className="woody-btn-primary px-5 py-2.5 rounded-2xl text-xs font-black flex items-center gap-2 cursor-pointer shadow-sm disabled:opacity-50"
+                        >
+                            <RefreshCw size={14} className={isLoading ? 'animate-spin' : ''} />
+                            <span>Initialize Default Zones</span>
+                        </button>
+                        {(user?.role === 'super_admin' || user?.role === 'warehouse_manager' || user?.role === 'store_manager') && (
+                            <button
+                                type="button"
+                                onClick={() => setIsCreateOpen(true)}
+                                className="px-5 py-2.5 bg-[#FAF8F5] hover:bg-[#EAE5D9] dark:bg-black/30 dark:hover:bg-white/10 text-[#1E3F27] dark:text-white border border-[#E2DCCE] dark:border-white/10 rounded-2xl text-xs font-black flex items-center gap-2 transition-all cursor-pointer"
+                            >
+                                <span>Add Custom Zone</span>
+                            </button>
+                        )}
                     </div>
                 </div>
             ) : (

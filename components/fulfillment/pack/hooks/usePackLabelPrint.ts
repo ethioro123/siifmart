@@ -77,10 +77,14 @@ export const usePackLabelPrint = (deps: UsePackLabelPrintDeps) => {
                 totalPackages: totalItems,
                 customerName: (selectedPackJob as any).customerName,
                 shippingAddress: (selectedPackJob as any).shippingAddress || boxDetails.destSite?.address,
-                city: (selectedPackJob as any).city,
-                packDate: new Date().toISOString(),
-                packerName: user?.name,
-                specialHandling: { coldChain: boxDetails.hasColdItems, fragile: boxDetails.packingMaterials?.bubbleWrap || boxDetails.packingMaterials?.fragileStickers, perishable: boxDetails.hasColdItems },
+                specialHandling: {
+                    coldChain: !!boxDetails.hasIcePack || boxDetails.boxSize === 'Thermal Cool Box',
+                    fragile: !!boxDetails.packingMaterials?.fragileStickers,
+                    bubbleWrap: !!boxDetails.packingMaterials?.bubbleWrap,
+                    thisSideUp: !!boxDetails.packingMaterials?.thisSideUp,
+                    securitySeal: !!boxDetails.packingMaterials?.securitySeal,
+                    perishable: false
+                },
                 destSiteName: boxDetails.destSite?.name || boxDetails.destSiteName,
                 lineItems: selectedPackJob.lineItems?.map((i: any) => {
                     const product = products.find(p => p.sku === i.sku || p.id === i.productId);
@@ -99,6 +103,8 @@ export const usePackLabelPrint = (deps: UsePackLabelPrintDeps) => {
             if (boxDetails.boxSize === 'Medium') labelSize = 'Medium';
             if (boxDetails.boxSize === 'Large') labelSize = 'Large';
             if (boxDetails.boxSize === 'Extra Large') labelSize = 'XL';
+            if (boxDetails.boxSize === 'Poly Mailer') labelSize = 'Medium';
+            if (boxDetails.boxSize === 'Thermal Cool Box') labelSize = 'Large';
 
             const html = await generatePackLabelHTML(packLabelData, { size: labelSize, format: 'Both' });
 

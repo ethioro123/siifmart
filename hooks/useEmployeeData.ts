@@ -43,8 +43,10 @@ export function useEmployeeData({
          setIsLoadingEmployees(true);
          try {
             // Apply Site Context/Filter
-            let querySiteId = restricted ? (user?.siteId || 'NONE') : activeSite?.id;
-            if (!restricted && !querySiteId && filterSite !== 'All') {
+            let querySiteId: string | undefined = undefined;
+            if (restricted) {
+               querySiteId = user?.siteId || 'NONE';
+            } else if (filterSite && filterSite !== 'All') {
                querySiteId = filterSite;
             }
 

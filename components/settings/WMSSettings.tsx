@@ -1,31 +1,23 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import {
-    Shield, Truck, Package, RotateCw, AlertTriangle, Scan, Search,
-    Barcode, ClipboardCheck, ArrowRight, Layers, Save, Globe, Clock,
-    Play, CheckCircle, MapPin, Printer
+    Shield, Package, RotateCw, AlertTriangle, Scan, Search,
+    ClipboardCheck, ArrowRight, Save, MapPin
 } from 'lucide-react';
 import { useData } from '../../contexts/DataContext';
 import { useStore } from '../../contexts/CentralStore';
-import Button from '../shared/Button';
-import { FulfillmentStrategy } from '../../types';
-import { sitesService, warehouseZonesService } from '../../services/supabase.service';
-import { formatDateTime } from '../../utils/formatting';
-import { BarcodeGenerator } from './BarcodeGenerator';
 import { logger } from '../../utils/logger';
 import { SectionHeader, RadioGroup, SliderGroup, ToggleRow } from './components/SettingFormControls';
 import SmartRoutingConfig from './components/SmartRoutingConfig';
-
-
+import { WMSPickControlTab } from './components/WMSPickControlTab';
 
 export default function WMSSettings() {
-    const { user } = useStore();
+    const { user, showToast } = useStore();
     const {
-        settings, updateSettings, addNotification,
+        settings, updateSettings,
         sites, allSales, releaseOrder, refreshData
     } = useData();
 
     const [activeTab, setActiveTab] = useState<'rules' | 'pick-control' | 'smart-routing'>('rules');
-    const [activePickSubTab, setActivePickSubTab] = useState<'strategies' | 'zones' | 'release'>('strategies');
 
     // --- GENERAL RULES STATE ---
     const [inbound, setInbound] = useState({
@@ -46,8 +38,6 @@ export default function WMSSettings() {
         strictScanning: true,
         bayScan: true
     });
-
-
 
     const [isSaving, setIsSaving] = useState<string | null>(null);
 
@@ -70,140 +60,80 @@ export default function WMSSettings() {
                 strictScanning: settings.strictScanning ?? true,
                 bayScan: settings.bayScan ?? true
             });
-
         }
     }, [settings]);
 
     const handleSaveSection = async (section: 'inbound' | 'health' | 'outbound') => {
-        const data = 
-            section === 'inbound' ? inbound : 
-            section === 'health' ? health : 
-            outbound;
+        const data =
+            section === 'inbound' ? inbound :
+                section === 'health' ? health :
+                    outbound;
         setIsSaving(section);
         try {
             await updateSettings(data as any, user?.name || 'Admin');
-            addNotification('success', `${section.charAt(0).toUpperCase() + section.slice(1)} settings saved`);
+            showToast(`${section.charAt(0).toUpperCase() + section.slice(1)} settings saved`, 'success');
         } catch (err) {
             logger.error('WMSSettings', 'caught error', err as Error);
-            addNotification('alert', `Failed to save ${section} settings`);
+            showToast(`Failed to save ${section} settings`, 'error');
         } finally {
             setIsSaving(null);
         }
     };
 
-    // --- PICK CONTROL LOGIC ---
     const fulfillmentSites = useMemo(() =>
         sites.filter(s => s.type === 'Warehouse' || s.type === 'Store' || s.type === 'Distribution Center' || s.type === 'Dark Store'),
         [sites]
     );
-
-    const handleStrategyChange = async (siteId: string, strategy: FulfillmentStrategy) => {
-        setIsSaving(siteId);
-        try {
-            await sitesService.update(siteId, { fulfillmentStrategy: strategy });
-            addNotification('success', 'Fulfillment strategy updated');
-            refreshData();
-        } catch (error) {
-            logger.error('WMSSettings', 'caught error', error as Error);
-            addNotification('alert', 'Failed to update strategy');
-        } finally {
-            setIsSaving(null);
-        }
-    };
-
-    const handleToggleFulfillmentNode = async (siteId: string, isNode: boolean) => {
-        setIsSaving(siteId);
-        try {
-            await sitesService.update(siteId, { isFulfillmentNode: isNode });
-            addNotification('success', 'Fulfillment node status updated');
-            refreshData();
-        } catch (error) {
-            logger.error('WMSSettings', 'caught error', error as Error);
-            addNotification('alert', 'Failed to update node status');
-        } finally {
-            setIsSaving(null);
-        }
-    };
-
-    const [selectedSiteId, setSelectedSiteId] = useState<string>(fulfillmentSites[0]?.id || '');
-    // Fetch zones for selected site
-    const [siteZones, setSiteZones] = useState<any[]>([]);
-
-    useEffect(() => {
-        if (!selectedSiteId) return;
-        warehouseZonesService.getAll(selectedSiteId).then(setSiteZones);
-    }, [selectedSiteId]);
-
-    const handlePriorityChange = async (zoneId: string, priority: number) => {
-        setIsSaving(zoneId);
-        try {
-            await warehouseZonesService.update(zoneId, { pickingPriority: priority });
-            addNotification('success', 'Zone priority updated');
-            refreshData();
-        } catch (error) {
-            logger.error('WMSSettings', 'caught error', error as Error);
-            addNotification('alert', 'Failed to update zone priority');
-        } finally {
-            setIsSaving(null);
-        }
-    };
 
     const pendingOrders = useMemo(() =>
         allSales.filter(s => s.release_status === 'PENDING'),
         [allSales]
     );
 
-    const handleReleaseOrder = async (saleId: string) => {
-        setIsSaving(saleId);
-        try {
-            await releaseOrder(saleId);
-        } catch (error) {
-            logger.error('WMSSettings', 'caught error', error as Error);
-        } finally {
-            setIsSaving(null);
-        }
-    };
+    const cardBase = "bg-white/85 dark:bg-[#18201B]/60 lg:backdrop-blur-2xl border border-[#E2DCCE] dark:border-emerald-950/20 rounded-[32px] p-6 lg:p-8 shadow-[0_4px_24px_-4px_rgba(34,50,38,0.04)] dark:shadow-[0_8px_32px_-4px_rgba(5,8,6,0.5)]";
 
     return (
         <div className="w-full max-w-full space-y-6 animate-in fade-in slide-in-from-right-4">
 
             {/* Tab Switcher */}
-            <div className="flex items-center gap-2 p-1 bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 mb-6">
-                <button
-                    onClick={() => setActiveTab('rules')}
-                    className={`flex-1 px-4 py-2.5 rounded-xl text-xs font-black tracking-widest uppercase transition-all flex items-center justify-center gap-2 ${activeTab === 'rules' ? 'bg-cyber-primary text-black' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
-                >
-                    <Package size={16} /> Fulfillment Rules
-                </button>
-                <button
-                    onClick={() => setActiveTab('pick-control')}
-                    className={`flex-1 px-4 py-2.5 rounded-xl text-xs font-black tracking-widest uppercase transition-all flex items-center justify-center gap-2 ${activeTab === 'pick-control' ? 'bg-cyber-primary text-black' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
-                >
-                    <Scan size={16} /> Pick Control Hub
-                </button>
-                <button
-                    onClick={() => setActiveTab('smart-routing')}
-                    className={`flex-1 px-4 py-2.5 rounded-xl text-xs font-black tracking-widest uppercase transition-all flex items-center justify-center gap-2 ${activeTab === 'smart-routing' ? 'bg-cyber-primary text-black' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
-                >
-                    <MapPin size={16} /> Smart Routing
-                </button>
+            <div className="flex items-center gap-2 p-1.5 bg-[#FAF8F5] dark:bg-black/40 rounded-2xl border border-[#E2DCCE] dark:border-white/10 mb-6">
+                {[
+                    { id: 'rules', label: 'Fulfillment Rules', icon: Package },
+                    { id: 'pick-control', label: 'Pick Control Hub', icon: Scan },
+                    { id: 'smart-routing', label: 'Smart Routing', icon: MapPin },
+                ].map(tab => {
+                    const Icon = tab.icon;
+                    const active = activeTab === tab.id;
+                    return (
+                        <button
+                            key={tab.id}
+                            onClick={() => setActiveTab(tab.id as any)}
+                            className={`flex-1 px-4 py-2.5 rounded-xl text-xs font-black tracking-widest uppercase transition-all flex items-center justify-center gap-2 cursor-pointer ${active
+                                ? 'bg-[#2C5E3B] text-white shadow-md'
+                                : 'text-stone-500 dark:text-gray-400 hover:text-[#1E3F27] dark:hover:text-white hover:bg-white/50 dark:hover:bg-white/5'
+                                }`}
+                        >
+                            <Icon size={16} /> {tab.label}
+                        </button>
+                    );
+                })}
             </div>
 
             {activeTab === 'rules' && (
                 <div className="space-y-6">
-                    <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-xl flex items-start gap-3">
-                        <Shield className="text-blue-400 shrink-0 mt-0.5" size={20} />
+                    <div className="p-4 bg-emerald-50 dark:bg-[#2C5E3B]/20 border border-emerald-200 dark:border-emerald-950/30 rounded-2xl flex items-start gap-3">
+                        <Shield className="text-[#2C5E3B] dark:text-[#A9CBA2] shrink-0 mt-0.5" size={20} />
                         <div>
-                            <h4 className="text-blue-400 font-bold text-sm">Enterprise WMS Engine</h4>
-                            <p className="text-xs text-gray-400 mt-1 leading-relaxed">
-                                Configure the base logic for inbound and inventory movement.
+                            <h4 className="text-[#1E3F27] dark:text-white font-bold text-sm">Enterprise WMS Engine</h4>
+                            <p className="text-xs text-[#4D6E56] dark:text-[#7A9E83] mt-0.5 leading-relaxed">
+                                Configure the base rules for receiving inspection, FEFO/FIFO rotation, and pick scanning verification.
                             </p>
                         </div>
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         {/* INBOUND STRATEGY */}
-                        <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-3xl p-6 hover:border-white/20 transition-all">
+                        <div className={cardBase}>
                             <SectionHeader title="Inbound Strategy" desc="Receiving, QC, and Putaway" />
                             <div className="space-y-6">
                                 <RadioGroup
@@ -216,7 +146,7 @@ export default function WMSSettings() {
                                     value={inbound.receivingLogic}
                                     onChange={(val: 'blind' | 'verified') => setInbound(prev => ({ ...prev, receivingLogic: val }))}
                                 />
-                                <div className="p-4 bg-black/20 rounded-xl border border-white/5 space-y-4">
+                                <div className="p-4 bg-[#FAF8F5] dark:bg-black/20 rounded-2xl border border-[#E2DCCE] dark:border-white/5 space-y-4">
                                     <SliderGroup
                                         label="QC Sampling Rate"
                                         icon={Search}
@@ -241,15 +171,23 @@ export default function WMSSettings() {
                                     value={inbound.putawayLogic}
                                     onChange={(val: 'manual' | 'system') => setInbound(prev => ({ ...prev, putawayLogic: val }))}
                                 />
-                                <div className="pt-6 border-t border-white/5 flex justify-end">
-                                    <Button onClick={() => handleSaveSection('inbound')} loading={isSaving === 'inbound'} icon={<Save size={16} />}>Save Inbound</Button>
+                                <div className="pt-4 border-t border-[#E2DCCE]/60 dark:border-white/10 flex justify-end">
+                                    <button
+                                        type="button"
+                                        onClick={() => handleSaveSection('inbound')}
+                                        disabled={isSaving === 'inbound'}
+                                        className="px-6 py-2.5 bg-[#2C5E3B] hover:opacity-90 text-white font-bold rounded-xl text-xs uppercase tracking-wider flex items-center gap-2 shadow-md cursor-pointer transition-all disabled:opacity-50"
+                                    >
+                                        {isSaving === 'inbound' ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save size={14} />}
+                                        Save Inbound
+                                    </button>
                                 </div>
                             </div>
                         </div>
 
                         <div className="space-y-6">
                             {/* HEALTH */}
-                            <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-3xl p-6 hover:border-white/20 transition-all">
+                            <div className={cardBase}>
                                 <SectionHeader title="Inventory Health" desc="Rotation and Counting Policies" />
                                 <div className="space-y-6">
                                     <RadioGroup
@@ -279,14 +217,22 @@ export default function WMSSettings() {
                                         value={health.cycleCountStrategy}
                                         onChange={(val: 'abc' | 'random') => setHealth(prev => ({ ...prev, cycleCountStrategy: val }))}
                                     />
-                                    <div className="pt-6 border-t border-white/5 flex justify-end">
-                                        <Button onClick={() => handleSaveSection('health')} loading={isSaving === 'health'} icon={<Save size={16} />}>Save Health</Button>
+                                    <div className="pt-4 border-t border-[#E2DCCE]/60 dark:border-white/10 flex justify-end">
+                                        <button
+                                            type="button"
+                                            onClick={() => handleSaveSection('health')}
+                                            disabled={isSaving === 'health'}
+                                            className="px-6 py-2.5 bg-[#2C5E3B] hover:opacity-90 text-white font-bold rounded-xl text-xs uppercase tracking-wider flex items-center gap-2 shadow-md cursor-pointer transition-all disabled:opacity-50"
+                                        >
+                                            {isSaving === 'health' ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save size={14} />}
+                                            Save Health
+                                        </button>
                                     </div>
                                 </div>
                             </div>
 
                             {/* OUTBOUND */}
-                            <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-3xl p-6 hover:border-white/20 transition-all">
+                            <div className={cardBase}>
                                 <SectionHeader title="Outbound Efficiency" desc="Picking and Compliance" />
                                 <div className="space-y-6">
                                     <RadioGroup
@@ -300,7 +246,7 @@ export default function WMSSettings() {
                                         value={outbound.pickingMethod}
                                         onChange={(val: 'order' | 'wave' | 'zone') => setOutbound(prev => ({ ...prev, pickingMethod: val }))}
                                     />
-                                    <div className="p-4 bg-red-500/5 rounded-xl border border-red-500/10 space-y-3">
+                                    <div className="p-4 bg-[#FAF8F5] dark:bg-black/20 rounded-2xl border border-[#E2DCCE] dark:border-white/5 space-y-3">
                                         <ToggleRow
                                             label="Strict Barcode Validation"
                                             checked={outbound.strictScanning}
@@ -313,12 +259,19 @@ export default function WMSSettings() {
                                             warning="Disabling increases errors"
                                         />
                                     </div>
-                                    <div className="pt-6 border-t border-white/5 flex justify-end">
-                                        <Button onClick={() => handleSaveSection('outbound')} loading={isSaving === 'outbound'} icon={<Save size={16} />}>Save Outbound</Button>
+                                    <div className="pt-4 border-t border-[#E2DCCE]/60 dark:border-white/10 flex justify-end">
+                                        <button
+                                            type="button"
+                                            onClick={() => handleSaveSection('outbound')}
+                                            disabled={isSaving === 'outbound'}
+                                            className="px-6 py-2.5 bg-[#2C5E3B] hover:opacity-90 text-white font-bold rounded-xl text-xs uppercase tracking-wider flex items-center gap-2 shadow-md cursor-pointer transition-all disabled:opacity-50"
+                                        >
+                                            {isSaving === 'outbound' ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save size={14} />}
+                                            Save Outbound
+                                        </button>
                                     </div>
                                 </div>
                             </div>
-
                         </div>
                     </div>
                 </div>
@@ -326,152 +279,18 @@ export default function WMSSettings() {
 
             {activeTab === 'smart-routing' && (
                 <div className="space-y-6">
-                    <SmartRoutingConfig siteId={selectedSiteId} />
+                    <SmartRoutingConfig siteId={fulfillmentSites[0]?.id || ''} />
                 </div>
             )}
 
             {activeTab === 'pick-control' && (
-                    <div className="space-y-6">
-                        <div className="flex items-center gap-2 p-1 bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 mb-6">
-                            <button
-                                onClick={() => setActivePickSubTab('strategies')}
-                                className={`flex-1 px-4 py-2 rounded-xl text-[10px] font-black tracking-widest uppercase transition-all flex items-center justify-center gap-2 ${activePickSubTab === 'strategies' ? 'bg-cyber-primary text-black' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
-                            >
-                                <Globe size={14} /> Strategies
-                            </button>
-                            <button
-                                onClick={() => setActivePickSubTab('zones')}
-                                className={`flex-1 px-4 py-2 rounded-xl text-[10px] font-black tracking-widest uppercase transition-all flex items-center justify-center gap-2 ${activePickSubTab === 'zones' ? 'bg-cyber-primary text-black' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
-                            >
-                                <Layers size={14} /> Zone Priority
-                            </button>
-                            <button
-                                onClick={() => setActivePickSubTab('release')}
-                                className={`flex-1 px-4 py-2 rounded-xl text-[10px] font-black tracking-widest uppercase transition-all flex items-center justify-center gap-2 ${activePickSubTab === 'release' ? 'bg-cyber-primary text-black' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
-                            >
-                                <Clock size={14} /> Order Release
-                                {pendingOrders.length > 0 && <span className="px-1.5 py-0.5 bg-red-500 text-white rounded-md text-[8px] animate-pulse">{pendingOrders.length}</span>}
-                            </button>
-                        </div>
-
-                        {activePickSubTab === 'strategies' && (
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                {fulfillmentSites.map(site => (
-                                    <div key={site.id} className={`p-5 rounded-2xl border transition-all duration-300 ${isSaving === site.id ? 'border-cyber-primary bg-cyber-primary/5' : 'border-white/5 bg-black/20'}`}>
-                                        <div className="flex items-center justify-between mb-4">
-                                            <div className="flex items-center gap-3">
-                                                <div className={`p-2 rounded-lg ${site.type === 'Warehouse' ? 'bg-blue-500/10 text-blue-400' : 'bg-green-500/10 text-green-400'}`}>
-                                                    <MapPin size={18} />
-                                                </div>
-                                                <div>
-                                                    <p className="text-sm font-bold text-white">{site.name}</p>
-                                                    <p className="text-[10px] text-gray-500 font-bold uppercase">{site.type}</p>
-                                                </div>
-                                            </div>
-                                            <button
-                                                onClick={() => handleToggleFulfillmentNode(site.id, !site.isFulfillmentNode)}
-                                                disabled={!!isSaving}
-                                                title={`Toggle node for ${site.name}`}
-                                                className={`w-10 h-5 rounded-full relative transition-all ${site.isFulfillmentNode ? 'bg-cyber-primary' : 'bg-white/10 opacity-50'}`}
-                                            >
-                                                <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-all ${site.isFulfillmentNode ? 'left-6 bg-black' : 'left-1'}`} />
-                                            </button>
-                                        </div>
-                                        <div className="space-y-3">
-                                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block">Operational Strategy</label>
-                                            <select
-                                                value={site.fulfillmentStrategy || 'NEAREST'}
-                                                onChange={(e) => handleStrategyChange(site.id, e.target.value as FulfillmentStrategy)}
-                                                disabled={!!isSaving}
-                                                title={`Select strategy for ${site.name}`}
-                                                className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-xs font-bold text-white outline-none focus:border-cyber-primary transition-all disabled:opacity-50"
-                                            >
-                                                <option value="NEAREST">Nearest Warehouse</option>
-                                                <option value="LOCAL_ONLY">Local Only</option>
-                                                <option value="SPLIT">Split (Cross-Site)</option>
-                                                <option value="MANUAL">Manual Control</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-
-                        {activePickSubTab === 'zones' && (
-                            <div className="space-y-6">
-                                <div className="flex items-center gap-4 bg-white/5 p-4 rounded-2xl border border-white/10">
-                                    <Layers size={20} className="text-cyber-primary" />
-                                    <select
-                                        value={selectedSiteId}
-                                        onChange={(e) => setSelectedSiteId(e.target.value)}
-                                        title="Select site"
-                                        className="bg-black/40 border border-white/10 rounded-xl px-4 py-2 text-xs font-bold text-white outline-none focus:border-cyber-primary transition-all"
-                                    >
-                                        {fulfillmentSites.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-                                    </select>
-                                </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    {siteZones.map(zone => (
-                                        <div key={zone.id} className={`p-5 rounded-2xl border transition-all ${isSaving === zone.id ? 'border-cyber-primary bg-cyber-primary/5' : 'border-white/5 bg-black/20'}`}>
-                                            <div className="flex items-center justify-between mb-4">
-                                                <div>
-                                                    <h4 className="text-sm font-black text-white uppercase">{zone.name}</h4>
-                                                    <span className="text-[9px] font-black px-1.5 py-0.5 bg-cyber-primary/10 text-cyber-primary rounded uppercase mt-1 inline-block">{zone.zoneType || 'Standard'}</span>
-                                                </div>
-                                                <input
-                                                    type="number"
-                                                    min="1" max="100"
-                                                    title={`Priority for ${zone.name}`}
-                                                    value={zone.pickingPriority || 10}
-                                                    onChange={(e) => handlePriorityChange(zone.id, parseInt(e.target.value))}
-                                                    className="w-16 bg-black/40 border border-white/10 rounded-lg px-2 py-1 text-center text-xs font-bold text-cyber-primary outline-none focus:border-cyber-primary"
-                                                />
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-
-                        {activePickSubTab === 'release' && (
-                            <div className="bg-black/20 border border-white/5 rounded-2xl overflow-hidden">
-                                <div className="p-4 border-b border-white/5 flex items-center justify-between bg-white/5">
-                                    <h3 className="text-xs font-black text-white uppercase tracking-widest flex items-center gap-2">
-                                        <Clock size={16} className="text-cyber-primary" /> Pending Release
-                                    </h3>
-                                </div>
-                                <div className="overflow-x-auto text-xs">
-                                    <table className="w-full text-left border-collapse">
-                                        <thead>
-                                            <tr className="bg-white/5 border-b border-white/5 text-[10px] font-black text-gray-500 uppercase">
-                                                <th className="px-6 py-4">Order Ref</th>
-                                                <th className="px-6 py-4">Date</th>
-                                                <th className="px-6 py-4">Items</th>
-                                                <th className="px-6 py-4 text-right">Action</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="divide-y divide-white/5">
-                                            {pendingOrders.map(sale => (
-                                                <tr key={sale.id} className="hover:bg-white/[0.02] transition-colors">
-                                                    <td className="px-6 py-4"><div className="font-bold text-white">{sale.receiptNumber}</div></td>
-                                                    <td className="px-6 py-4 text-gray-400">{formatDateTime(sale.date || sale.created_at || '')}</td>
-                                                    <td className="px-6 py-4"><span className="bg-white/5 px-2 py-1 rounded border border-white/10 text-white">{sale.items.length} units</span></td>
-                                                    <td className="px-6 py-4 text-right">
-                                                        <Button onClick={() => handleReleaseOrder(sale.id)} loading={isSaving === sale.id} icon={<Play size={12} />} className="text-[9px] font-black uppercase tracking-widest h-8 px-4 rounded-lg">Release</Button>
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                            {pendingOrders.length === 0 && (
-                                                <tr><td colSpan={4} className="px-6 py-12 text-center text-gray-600 uppercase text-[10px] font-black tracking-widest">Queue Clear</td></tr>
-                                            )}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                )
-            }
+                <WMSPickControlTab
+                    fulfillmentSites={fulfillmentSites}
+                    pendingOrders={pendingOrders}
+                    onReleaseOrder={releaseOrder}
+                    refreshData={refreshData}
+                />
+            )}
         </div>
     );
 }

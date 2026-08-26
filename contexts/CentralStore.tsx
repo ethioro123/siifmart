@@ -83,7 +83,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   // Hydrate user profile from database to ensure metadata is sync'd
   // IMPORTANT: Wrapped with timeout to prevent infinite loading on production
   const syncUserProfile = async (presetLocation?: string) => {
-    const SYNC_TIMEOUT_MS = 5000; // 5 seconds max for profile sync
+    const SYNC_TIMEOUT_MS = 12000; // 12 seconds max for profile sync on mobile/cellular
 
     try {
       logger.debug('CentralStore', 'CentralStore: Syncing user profile from database...');
@@ -215,7 +215,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       }
     } catch (error: any) {
       if (error?.message === 'Profile sync timeout') {
-        logger.warn('CentralStore', '⚠️ CentralStore: Profile sync timed out after 5s - continuing without blocking');
+        logger.debug('CentralStore', 'CentralStore: Profile sync deferred, continuing with cached session');
       } else {
         logger.error('CentralStore', 'CentralStore: Sync failed', error);
       }

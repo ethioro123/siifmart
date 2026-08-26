@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { X, CheckCircle, AlertTriangle, FileText } from 'lucide-react';
+import { X, CheckCircle, AlertTriangle, FileText, Loader2 } from 'lucide-react';
 import { PurchaseOrder, WMSJob } from '../../../types';
 import { useFulfillment } from '../../fulfillment/FulfillmentContext';
 import { convertToSellableUnits } from '../useReceiving';
@@ -196,9 +196,14 @@ export const ReceiveReviewModal: React.FC<ReceiveReviewModalProps> = ({
                     <button
                         onClick={onFinalize}
                         disabled={isSubmitting}
-                        className="woody-btn-primary w-full md:w-auto px-10 py-3.5 text-[10px] uppercase tracking-widest flex items-center justify-center gap-3 order-1 md:order-2"
+                        className="woody-btn-primary w-full md:w-auto px-10 py-3.5 text-[10px] uppercase tracking-widest flex items-center justify-center gap-3 order-1 md:order-2 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        {isSubmitting ? `${t('warehouse.processingStatus')}...` : (
+                        {isSubmitting ? (
+                            <>
+                                <Loader2 size={16} className="animate-spin" />
+                                <span>{t('warehouse.processingStatus')}...</span>
+                            </>
+                        ) : (
                             <>
                                 <CheckCircle size={14} />
                                 {isFullyReceived ? t('warehouse.finalizeManifest') : t('warehouse.confirmPartialReceipt')}

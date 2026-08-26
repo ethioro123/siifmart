@@ -126,6 +126,7 @@ export const PackHistory: React.FC<PackHistoryProps> = ({
                 noteStr.includes(q) ||
                 statusStr.includes(q) ||
                 jobNum.includes(q) ||
+                (j.trackingNumber || '').toLowerCase().includes(q) ||
                 matchesItems
             );
         }).sort((a, b) => {

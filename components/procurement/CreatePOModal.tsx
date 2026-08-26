@@ -333,31 +333,26 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
             <div className="flex items-center gap-4">
                 <div className="h-8 w-[1px] bg-gray-200 dark:bg-white/10 hidden md:block"></div>
                 <div className="flex flex-col">
-                    <span className="text-[10px] text-gray-500 dark:text-gray-500 uppercase font-black tracking-widest leading-none">Total Value</span>
+                    <span className="text-[10px] text-stone-500 dark:text-stone-400 uppercase font-bold tracking-wider leading-none">Total Value</span>
                     <span className="text-lg font-mono text-[#2C5E3B] dark:text-[#A9CBA2] tracking-tight font-black">
                         {CURRENCY_SYMBOL} {formatCompactNumber(poTotal)}
                     </span>
                 </div>
             </div>
-            <div className="flex gap-4">
+            <div className="flex items-center gap-3">
                 <button
                     onClick={onClose}
-                    className="px-6 py-2.5 rounded-xl text-xs font-black transition-all text-gray-500 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 border border-transparent hover:border-gray-200 dark:hover:border-white/10 uppercase tracking-widest"
+                    className="px-5 py-2.5 rounded-2xl text-xs font-bold transition-colors text-stone-600 hover:text-stone-900 dark:text-stone-300 dark:hover:text-white hover:bg-stone-100 dark:hover:bg-white/5 border border-stone-200 dark:border-white/10 cursor-pointer"
                 >
                     Cancel
                 </button>
                 <button
                     onClick={handleCreatePO}
                     disabled={isSubmitting || newPOItems.length === 0}
-                    className="relative group px-10 py-2.5 bg-[#2C5E3B] hover:bg-[#1E3B24] dark:bg-[#A9CBA2] dark:hover:bg-[#A9CBA2]/90 text-white dark:text-black font-black rounded-xl text-xs transition-all shadow-md dark:shadow-[0_4px_12px_rgba(169,203,162,0.15)] hover:shadow-lg transform hover:scale-[1.02] disabled:opacity-30 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none flex items-center gap-3 uppercase tracking-widest overflow-hidden"
+                    className="woody-btn-primary px-8 py-2.5 rounded-2xl text-xs font-black transition-all flex items-center gap-2.5 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
                 >
-                    <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-                    {isSubmitting ? (
-                        <Loader2 size={16} className="animate-spin" />
-                    ) : (
-                        <div className="w-1.5 h-1.5 rounded-full bg-white dark:bg-black shadow-[0_0_5px_rgba(0,0,0,0.5)]"></div>
-                    )}
-                    {editingPO ? 'Sync Directive' : 'Authorize Order'}
+                    {isSubmitting && <Loader2 size={15} className="animate-spin" />}
+                    {editingPO ? 'Save Changes' : 'Create Purchase Order'}
                 </button>
             </div>
         </div>
@@ -367,7 +362,7 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
         <Modal
             isOpen={isOpen}
             onClose={onClose}
-            title={editingPO ? "Edit Procurement Directive" : "Initiate Procurement Request"}
+            title={editingPO ? "Edit Purchase Order" : "Initiate Purchase Order"}
             size="4xl"
             footer={createPOFooter}
         >

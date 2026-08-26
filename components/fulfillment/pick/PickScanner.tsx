@@ -386,13 +386,15 @@ export const PickScanner: React.FC<PickScannerProps> = ({
                         t={t}
                     />
 
-                    {/* PICKED SO FAR */}
-                    <PickScannerPickedList
-                        job={job}
-                        getProduct={getProduct}
-                        getItemMeasureQty={getItemMeasureQty}
-                        t={t}
-                    />
+                    {/* PICKED SO FAR (Only while active picking) */}
+                    {!!currentItem && (
+                        <PickScannerPickedList
+                            job={job}
+                            getProduct={getProduct}
+                            getItemMeasureQty={getItemMeasureQty}
+                            t={t}
+                        />
+                    )}
 
                     <p className="mt-8 text-gray-550 text-[10px] font-mono font-bold uppercase tracking-widest z-10 text-center opacity-60">
                         {t('warehouse.picking.checksumVerifiedInfo')}

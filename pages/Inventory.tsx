@@ -26,8 +26,7 @@ import { InventoryBarcodeAudit } from '../components/inventory/InventoryBarcodeA
 import { InventoryPending } from '../components/inventory/InventoryPending';
 
 // --- MODALS ---
-import { ProductForm } from '../components/ProductForm';
-import Modal from '../components/Modal';
+import { InventoryProductModal } from '../components/inventory/modals/InventoryProductModal';
 import LabelPrintModal from '../components/LabelPrintModal';
 import { AdjustStockModal } from '../components/inventory/modals/AdjustStockModal';
 import { DeleteProductConfirmModal } from '../components/inventory/modals/DeleteProductConfirmModal';
@@ -172,17 +171,23 @@ export default function Inventory() {
         fetchMetrics();
     }, [activeSite?.id, activeTab, filters.siteId, localProducts.length]);
 
-    const totalInventoryValueCost = serverMetrics?.total_value_cost || 0;
-    const totalInventoryValueRetail = serverMetrics?.total_value_retail || 0;
+    const activeSiteProducts = useMemo(() => {
+        if (!activeSite?.id) return allProducts;
+        return allProducts.filter(p => p.siteId === activeSite.id || p.site_id === activeSite.id);
+    }, [allProducts, activeSite?.id]);
+
+    const totalInventoryValueCost = serverMetrics?.total_value_cost || activeSiteProducts.reduce((sum, p) => sum + ((p.stock || 0) * (p.costPrice || (p.price || 0) * 0.7)), 0);
+    const totalInventoryValueRetail = serverMetrics?.total_value_retail || activeSiteProducts.reduce((sum, p) => sum + ((p.stock || 0) * (p.price || 0)), 0);
 
     // Define permission helper
     const canApprove = user?.role === 'super_admin';
 
-    const { categoryData, abcData } = useInventoryOverviewData({
+    const { stockTurnoverRate, deadStockValue, lowStockCount, categoryData, abcData } = useInventoryOverviewData({
         theme,
         serverMetrics,
-        filteredProducts,
-        totalInventoryValueCost
+        filteredProducts: activeSiteProducts,
+        totalInventoryValueCost,
+        totalInventoryValueRetail
     });
 
 
@@ -258,35 +263,24 @@ export default function Inventory() {
     };
 
     // Pending Handlers
+    const makePendingChange = (product: Product): PendingInventoryChange => ({
+        id: 'view-only',
+        productId: product.id,
+        changeType: 'create',
+        proposedChanges: product,
+        productName: product.name,
+        productSku: product.sku,
+        requestedBy: product.createdBy || 'Unknown',
+        requestedAt: product.createdAt || new Date().toISOString(),
+        status: 'pending',
+        siteId: product.siteId || ''
+    });
+
     const handleApproveProduct = async (product: Product) => {
-        const change: PendingInventoryChange = {
-            id: 'view-only',
-            productId: product.id,
-            changeType: 'create',
-            proposedChanges: product,
-            productName: product.name,
-            productSku: product.sku,
-            requestedBy: product.createdBy || 'Unknown',
-            requestedAt: product.createdAt || new Date().toISOString(),
-            status: 'pending',
-            siteId: product.siteId || ''
-        };
-        try { await approveRequestMutation.mutateAsync(change); refreshData(); } catch (e) { }
+        try { await approveRequestMutation.mutateAsync(makePendingChange(product)); refreshData(); } catch (e) { }
     };
     const handleRejectProduct = async (product: Product, reason: string) => {
-        const change: PendingInventoryChange = {
-            id: 'view-only',
-            productId: product.id,
-            changeType: 'create',
-            proposedChanges: product,
-            productName: product.name,
-            productSku: product.sku,
-            requestedBy: product.createdBy || 'Unknown',
-            requestedAt: product.createdAt || new Date().toISOString(),
-            status: 'pending',
-            siteId: product.siteId || ''
-        };
-        try { await rejectRequestMutation.mutateAsync({ change, reason }); refreshData(); } catch (e) { }
+        try { await rejectRequestMutation.mutateAsync({ change: makePendingChange(product), reason }); refreshData(); } catch (e) { }
     };
     const handleApproveChange = async (change: PendingInventoryChange) => {
         try { await approveRequestMutation.mutateAsync(change); loadPendingRequests(); refreshData(); } catch (e) { }
@@ -383,7 +377,17 @@ export default function Inventory() {
             {/* --- CONTENT --- */}
             <div className="flex-1 px-4 sm:px-6 md:px-8 pb-8 flex flex-col">
                 {activeTab === 'overview' && (
-                    <InventoryOverview serverMetrics={serverMetrics || null} categoryData={categoryData} abcData={abcData} totalInventoryValueCost={totalInventoryValueCost} totalInventoryValueRetail={totalInventoryValueRetail} filteredProducts={localProducts} />
+                    <InventoryOverview
+                        serverMetrics={serverMetrics || null}
+                        categoryData={categoryData}
+                        abcData={abcData}
+                        totalInventoryValueCost={totalInventoryValueCost}
+                        totalInventoryValueRetail={totalInventoryValueRetail}
+                        filteredProducts={activeSiteProducts}
+                        stockTurnoverRate={stockTurnoverRate}
+                        deadStockValue={deadStockValue}
+                        lowStockCount={lowStockCount}
+                    />
                 )}
                 {activeTab === 'stock' && (
                     <InventoryStockList
@@ -420,44 +424,44 @@ export default function Inventory() {
             </div>
 
             {/* --- MODALS --- */}
-            <Modal isOpen={isProductModalOpen} onClose={() => setIsProductModalOpen(false)} title={editingProduct ? "Edit Product" : "Add New Product"} size="2xl">
-                <div className="max-h-[85vh] overflow-y-auto custom-scrollbar p-1">
-                    <ProductForm
-                        initialData={editingProduct || undefined}
-                        onSubmit={async (data) => {
-                            try {
-                                const isNew = !editingProduct;
-                                await saveProductMutation.mutateAsync({
-                                    product: {
-                                        ...(editingProduct || {}),
-                                        ...data,
-                                        siteId: activeSite?.id || editingProduct?.siteId || ''
-                                    },
-                                    isNew,
-                                    activeSite: activeSite as any,
-                                    user,
-                                    canApprove: canApprove,
-                                    stockToAdjust: data.stock || 0
-                                });
-                                if (!canApprove) {
-                                    addNotification('info', `Request submitted for approval: ${data.name}`);
-                                } else {
-                                    addNotification('success', editingProduct ? 'Product updated' : 'Product created');
-                                }
-                                setIsProductModalOpen(false);
-                                fetchProducts();
-                                refreshData();
-                            } catch (error: any) {
-                                logger.error('Inventory', 'Failed to save product:', error);
-                                addNotification('alert', error.message || 'Failed to save product');
-                            }
-                        }}
-                        onCancel={() => setIsProductModalOpen(false)}
-                        isSubmitting={saveProductMutation.isPending}
-                        isReadOnly={isReadOnly}
-                    />
-                </div>
-            </Modal>
+            <InventoryProductModal
+                isOpen={isProductModalOpen}
+                onClose={() => setIsProductModalOpen(false)}
+                editingProduct={editingProduct}
+                activeSite={activeSite}
+                user={user}
+                canApprove={canApprove}
+                isReadOnly={isReadOnly}
+                isSubmitting={saveProductMutation.isPending}
+                onSave={async (data) => {
+                    try {
+                        const isNew = !editingProduct;
+                        await saveProductMutation.mutateAsync({
+                            product: {
+                                ...(editingProduct || {}),
+                                ...data,
+                                siteId: activeSite?.id || editingProduct?.siteId || ''
+                            },
+                            isNew,
+                            activeSite: activeSite as any,
+                            user,
+                            canApprove: canApprove,
+                            stockToAdjust: data.stock || 0
+                        });
+                        if (!canApprove) {
+                            addNotification('info', `Request submitted for approval: ${data.name}`);
+                        } else {
+                            addNotification('success', editingProduct ? 'Product updated' : 'Product created');
+                        }
+                        setIsProductModalOpen(false);
+                        fetchProducts();
+                        refreshData();
+                    } catch (error: any) {
+                        logger.error('Inventory', 'Failed to save product:', error);
+                        addNotification('alert', error.message || 'Failed to save product');
+                    }
+                }}
+            />
 
             <AdjustStockModal
                 isOpen={isAdjustModalOpen}

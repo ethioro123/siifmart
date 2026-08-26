@@ -90,16 +90,16 @@ export function POSStationTab({
           />
         </div>
 
-        <div className="mt-12 flex justify-end">
-          <Button
+        <div className="mt-10 pt-6 border-t border-[#E2DCCE]/60 dark:border-white/10 flex justify-end">
+          <button
+            type="button"
             onClick={() => handleSaveSection('workflow')}
-            loading={isSavingWorkflow}
-            icon={<Save size={18} />}
-            variant="primary"
-            className="px-10 h-12 shadow-[0_0_20px_rgba(0,255,157,0.15)] rounded-2xl"
+            disabled={isSavingWorkflow}
+            className="px-8 py-3 bg-[#2C5E3B] hover:opacity-90 text-white font-bold rounded-2xl text-xs uppercase tracking-wider flex items-center gap-2 shadow-md cursor-pointer transition-all disabled:opacity-50"
           >
+            {isSavingWorkflow ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save size={16} />}
             Apply Changes
-          </Button>
+          </button>
         </div>
       </GlassCard>
     </div>

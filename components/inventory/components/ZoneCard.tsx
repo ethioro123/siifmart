@@ -31,10 +31,10 @@ export const ZoneCard: React.FC<ZoneCardProps> = ({
 
     return (
         <div 
-            className={`glass-panel p-6 relative overflow-hidden group border transition-all duration-300 rounded-3xl shadow-sm ${
+            className={`p-6 relative overflow-hidden group border transition-all duration-300 rounded-3xl shadow-sm ${
                 isLockedState 
                     ? 'border-red-500/20 bg-red-500/5 hover:border-red-500/35' 
-                    : 'hover:border-[#2C5E3B]/25 dark:hover:border-[#A9CBA2]/25 hover:scale-[1.005] hover:shadow-md'
+                    : 'bg-white/85 dark:bg-[#18201B]/60 border-[#E2DCCE] dark:border-emerald-950/20 hover:border-[#2C5E3B]/40 hover:shadow-md'
             }`}
         >
             <div className="flex justify-between items-start mb-5 relative z-10">

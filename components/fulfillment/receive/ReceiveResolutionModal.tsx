@@ -1,5 +1,5 @@
-import React from 'react';
-import { X, Search, ChevronRight } from 'lucide-react';
+import React, { useState } from 'react';
+import { X, Search, ChevronRight, Loader2 } from 'lucide-react';
 import { Product } from '../../../types';
 import { productsService } from '../../../services/supabase.service';
 
@@ -28,6 +28,8 @@ export const ReceiveResolutionModal: React.FC<ReceiveResolutionModalProps> = ({
     isSubmitting,
     t
 }) => {
+    const [mappingProductId, setMappingProductId] = useState<string | null>(null);
+
     return (
         <div className="fixed inset-0 bg-black/80 z-[100] flex items-center justify-center p-2 sm:p-4 overflow-x-hidden">
             <div className="glass-panel rounded-3xl w-full max-w-2xl overflow-hidden relative">
@@ -51,52 +53,66 @@ export const ReceiveResolutionModal: React.FC<ReceiveResolutionModalProps> = ({
                         />
                     </div>
                     <div className="max-h-72 overflow-y-auto space-y-3 pr-2 custom-scrollbar">
-                        {products.filter(p => !resolutionSearch || p.name.toLowerCase().includes(resolutionSearch.toLowerCase()) || p.sku.toLowerCase().includes(resolutionSearch.toLowerCase())).slice(0, 10).map(product => (
-                            <div key={product.id} onClick={async () => {
-                                if (isSubmitting) return;
+                        {products.filter(p => !resolutionSearch || p.name.toLowerCase().includes(resolutionSearch.toLowerCase()) || p.sku.toLowerCase().includes(resolutionSearch.toLowerCase())).slice(0, 10).map(product => {
+                            const isMapping = mappingProductId === product.id;
+                            const isBusy = isSubmitting || isMapping || mappingProductId !== null;
 
-                                const getBarcodesArray = (barcodes: any): string[] => {
-                                    if (!barcodes) return [];
-                                    if (Array.isArray(barcodes)) return barcodes.filter(b => typeof b === 'string');
-                                    if (typeof barcodes === 'string') {
-                                        let clean = barcodes.trim();
-                                        if (clean.startsWith('{') && clean.endsWith('}')) {
-                                            return clean.substring(1, clean.length - 1).split(',').map(s => s.trim().replace(/^"|"$/g, ''));
-                                        }
-                                        if (clean.startsWith('[') && clean.endsWith(']')) {
-                                            try {
-                                                return JSON.parse(clean);
-                                            } catch (e) {
-                                                return clean.substring(1, clean.length - 1).split(',').map(s => s.trim().replace(/^"|"$/g, ''));
+                            return (
+                                <div key={product.id} onClick={async () => {
+                                    if (isBusy) return;
+                                    setMappingProductId(product.id);
+
+                                    try {
+                                        const getBarcodesArray = (barcodes: any): string[] => {
+                                            if (!barcodes) return [];
+                                            if (Array.isArray(barcodes)) return barcodes.filter(b => typeof b === 'string');
+                                            if (typeof barcodes === 'string') {
+                                                let clean = barcodes.trim();
+                                                if (clean.startsWith('{') && clean.endsWith('}')) {
+                                                    return clean.substring(1, clean.length - 1).split(',').map(s => s.trim().replace(/^"|"$/g, ''));
+                                                }
+                                                if (clean.startsWith('[') && clean.endsWith(']')) {
+                                                    try {
+                                                        return JSON.parse(clean);
+                                                    } catch (e) {
+                                                        return clean.substring(1, clean.length - 1).split(',').map(s => s.trim().replace(/^"|"$/g, ''));
+                                                    }
+                                                }
+                                                return [clean];
                                             }
+                                            return [];
+                                        };
+
+                                        const currentBarcodes = getBarcodesArray(product.barcodes);
+                                        let updatedBarcodes = currentBarcodes;
+                                        const newBarcode = resolvingBarcode.barcode.trim();
+                                        if (!currentBarcodes.includes(newBarcode)) {
+                                            updatedBarcodes = [...currentBarcodes, newBarcode];
                                         }
-                                        return [clean];
+
+                                        await productsService.update(product.id, { barcodes: updatedBarcodes });
+                                        setUnresolvedScans(prev => prev.filter(s => s.barcode !== resolvingBarcode.barcode));
+                                        setResolvingBarcode(null);
+                                        addNotification('success', `Mapped to ${product.name}`);
+                                        await refreshData();
+                                    } finally {
+                                        setMappingProductId(null);
                                     }
-                                    return [];
-                                };
-
-                                const currentBarcodes = getBarcodesArray(product.barcodes);
-                                let updatedBarcodes = currentBarcodes;
-                                const newBarcode = resolvingBarcode.barcode.trim();
-                                if (!currentBarcodes.includes(newBarcode)) {
-                                    updatedBarcodes = [...currentBarcodes, newBarcode];
-                                }
-
-                                await productsService.update(product.id, { barcodes: updatedBarcodes });
-                                setUnresolvedScans(prev => prev.filter(s => s.barcode !== resolvingBarcode.barcode));
-                                setResolvingBarcode(null);
-                                addNotification('success', `Mapped to ${product.name}`);
-                                refreshData();
-                            }} className={`p-4 bg-white/40 dark:bg-[#1C2620]/40 border border-[#E2DCCE]/60 dark:border-[#A9CBA2]/[0.06] rounded-2xl flex justify-between items-center group transition-all hover:scale-[1.01] shadow-sm hover:border-[#2C5E3B]/30 dark:hover:border-[#A9CBA2]/30 ${isSubmitting ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:bg-[#FAF8F5]/80 dark:hover:bg-[#2C5E3B]/10'}`}>
-                                <div>
-                                    <p className="font-black text-slate-900 dark:text-zinc-100 uppercase tracking-tight text-xs group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] transition-colors">{product.name}</p>
-                                    <p className="text-[9px] text-slate-400 dark:text-zinc-600 tracking-[0.2em] uppercase mt-1 font-mono transition-colors group-hover:text-[#2C5E3B]/60 dark:group-hover:text-[#A9CBA2]/60">{product.sku}</p>
+                                }} className={`p-4 bg-white/40 dark:bg-[#1C2620]/40 border border-[#E2DCCE]/60 dark:border-[#A9CBA2]/[0.06] rounded-2xl flex justify-between items-center group transition-all hover:scale-[1.01] shadow-sm hover:border-[#2C5E3B]/30 dark:hover:border-[#A9CBA2]/30 ${isBusy ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer hover:bg-[#FAF8F5]/80 dark:hover:bg-[#2C5E3B]/10'}`}>
+                                    <div>
+                                        <p className="font-black text-slate-900 dark:text-zinc-100 uppercase tracking-tight text-xs group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] transition-colors">{product.name}</p>
+                                        <p className="text-[9px] text-slate-400 dark:text-zinc-600 tracking-[0.2em] uppercase mt-1 font-mono transition-colors group-hover:text-[#2C5E3B]/60 dark:group-hover:text-[#A9CBA2]/60">{product.sku}</p>
+                                    </div>
+                                    <div className="p-2 bg-[#FAF8F5] dark:bg-[#1C2620]/30 rounded-lg group-hover:bg-[#2C5E3B] dark:group-hover:bg-[#A9CBA2] transition-all border border-[#E2DCCE] dark:border-emerald-950/20">
+                                        {isMapping ? (
+                                            <Loader2 size={16} className="animate-spin text-[#2C5E3B] dark:text-[#A9CBA2]" />
+                                        ) : (
+                                            <ChevronRight size={16} className="text-[#2C5E3B] dark:text-[#A9CBA2] group-hover:text-white dark:group-hover:text-[#1E3B24]" />
+                                        )}
+                                    </div>
                                 </div>
-                                <div className="p-2 bg-[#FAF8F5] dark:bg-[#1C2620]/30 rounded-lg group-hover:bg-[#2C5E3B] dark:group-hover:bg-[#A9CBA2] transition-all border border-[#E2DCCE] dark:border-emerald-950/20">
-                                    <ChevronRight size={16} className="text-[#2C5E3B] dark:text-[#A9CBA2] group-hover:text-white dark:group-hover:text-[#1E3B24]" />
-                                </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 </div>
             </div>

@@ -280,35 +280,30 @@ export const POItemForm: React.FC<POItemFormProps> = ({
        ═══════════════════════════════════════════════════ */
 
     return (
-        <div id="po-item-form-container" className="glass-panel p-5 relative overflow-hidden group shadow-sm dark:shadow-none">
-            <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-[#2C5E3B] to-[#1E3B24] dark:from-[#A9CBA2] dark:to-[#7A9E83] opacity-80 group-hover:opacity-100 transition-opacity" />
-            <div className="absolute top-0 right-0 p-4 opacity-10">
-                <Package size={80} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
-            </div>
-
-            <h3 className="text-sm font-black text-gray-900 dark:text-white mb-6 flex items-center gap-2 relative z-10 transition-colors">
-                <div className="p-1.5 bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/20 rounded-lg">
-                    <Plus size={16} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
+        <div id="po-item-form-container" className="bg-white/85 dark:bg-[#18201B]/60 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-3xl p-6 shadow-sm relative overflow-hidden group">
+            <h3 className="text-xs font-black text-[#1E3F27] dark:text-[#EAE5D9] uppercase tracking-wider mb-4 flex items-center gap-2 relative z-10">
+                <div className="p-1.5 bg-emerald-50 text-[#2C5E3B] dark:bg-[#2C5E3B]/20 dark:text-[#A9CBA2] rounded-xl border border-emerald-200 dark:border-emerald-950/30">
+                    <Plus size={15} />
                 </div>
-                {editingItem ? 'EDIT PRODUCT' : 'ADD PRODUCTS'}
+                {editingItem ? 'Edit Product Item' : 'Add Products'}
             </h3>
 
             {/* ─── Type Toggle ───────────────────────────── */}
-            <div className="flex gap-6 mb-6 border-b border-gray-100 dark:border-white/5 pb-4 relative z-10">
-                <label className="flex items-center cursor-pointer gap-3 group/toggle">
-                    <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-colors ${productType === 'catalog' ? 'border-[#2C5E3B] dark:border-[#A9CBA2]' : 'border-gray-300 dark:border-gray-600'}`}>
-                        {productType === 'catalog' && <div className="w-2 h-2 rounded-full bg-[#2C5E3B] dark:bg-[#A9CBA2]" />}
-                    </div>
-                    <input type="radio" checked={productType === 'catalog'} onChange={() => setProductType('catalog')} className="hidden" />
-                    <span className={`text-xs font-black tracking-widest ${productType === 'catalog' ? 'text-gray-900 dark:text-white' : 'text-gray-400 dark:text-gray-500'}`}>CATALOG</span>
-                </label>
-                <label className="flex items-center cursor-pointer gap-3 group/toggle">
-                    <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-colors ${productType === 'new' ? 'border-[#2C5E3B] dark:border-[#A9CBA2]' : 'border-gray-300 dark:border-gray-600'}`}>
-                        {productType === 'new' && <div className="w-2 h-2 rounded-full bg-[#2C5E3B] dark:bg-[#A9CBA2]" />}
-                    </div>
-                    <input type="radio" checked={productType === 'new'} onChange={() => setProductType('new')} className="hidden" />
-                    <span className={`text-xs font-black tracking-widest ${productType === 'new' ? 'text-gray-900 dark:text-white' : 'text-gray-400 dark:text-gray-500'}`}>CUSTOM</span>
-                </label>
+            <div className="flex gap-4 mb-5 border-b border-[#E2DCCE]/60 dark:border-white/5 pb-3.5 relative z-10">
+                <button
+                    type="button"
+                    onClick={() => setProductType('catalog')}
+                    className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${productType === 'catalog' ? 'bg-[#2C5E3B] text-white shadow-sm' : 'text-stone-500 hover:text-stone-900 dark:hover:text-white bg-[#FAF8F5] dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10'}`}
+                >
+                    CATALOG SEARCH
+                </button>
+                <button
+                    type="button"
+                    onClick={() => setProductType('new')}
+                    className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${productType === 'new' ? 'bg-[#2C5E3B] text-white shadow-sm' : 'text-stone-500 hover:text-stone-900 dark:hover:text-white bg-[#FAF8F5] dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10'}`}
+                >
+                    CUSTOM ITEM
+                </button>
             </div>
 
             {/* ─── Preview Banner ────────────────────────── */}
@@ -383,12 +378,12 @@ export const POItemForm: React.FC<POItemFormProps> = ({
                 )}
 
                 {/* ─── ORDER ROW (Buying: Qty + Cost) + Submit ── */}
-                <div className="grid grid-cols-12 gap-4 relative z-10 pt-4 border-t border-gray-100 dark:border-white/5">
+                <div className="grid grid-cols-12 gap-4 relative z-10 pt-4 border-t border-[#E2DCCE]/60 dark:border-white/5">
                     <div className="col-span-4 space-y-1">
-                        <label className="text-[10px] text-gray-500 uppercase tracking-widest font-bold ml-1 block">
+                        <label className="text-[10px] text-stone-500 dark:text-stone-400 uppercase tracking-wider font-bold ml-1 block">
                             Order Qty{' '}
                             {unitSuffix
-                                ? <span className="text-[#2C5E3B]/70 dark:text-[#A9CBA2]/70 normal-case font-bold text-[9px]">{unitSuffix}</span>
+                                ? <span className="text-[#2C5E3B]/80 dark:text-[#A9CBA2] normal-case font-bold text-[9px]">{unitSuffix}</span>
                                 : null
                             }{' '}
                             <span className="text-red-500">*</span>
@@ -397,34 +392,32 @@ export const POItemForm: React.FC<POItemFormProps> = ({
                             type="number"
                             step="1"
                             min="1"
-                            className={`w-full bg-white dark:bg-black/40 border ${errors.qty ? 'border-red-500/50' : 'border-gray-200 dark:border-white/10'} rounded-lg px-4 py-3 text-sm text-gray-900 dark:text-white font-mono focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:ring-2 focus:ring-[#2C5E3B]/10 dark:focus:ring-[#A9CBA2]/10 text-center font-black shadow-sm`}
+                            className={`w-full bg-[#FAF8F5] dark:bg-black/30 border ${errors.qty ? 'border-red-500/50' : 'border-[#E2DCCE] dark:border-white/10'} rounded-2xl px-4 py-2.5 text-xs text-[#1E3F27] dark:text-white font-mono focus:border-[#2C5E3B] text-center font-black`}
                             value={currentQty || ''}
                             onChange={e => { const val = parseInt(e.target.value) || 0; setCurrentQty(val); if (errors.qty) setErrors({ ...errors, qty: '' }); }}
                             placeholder="0"
                         />
                         {showConversion && (
-                            <span className="text-[9px] text-[#2C5E3B]/60 dark:text-[#A9CBA2]/60 block text-center">
+                            <span className="text-[9px] text-[#2C5E3B] dark:text-[#A9CBA2] block text-center font-bold">
                                 = {totalUnits.toLocaleString()} sellable units
                             </span>
                         )}
                         {errors.qty && <span className="text-[9px] text-red-500 block text-center">{errors.qty}</span>}
                     </div>
                     <div className="col-span-4 space-y-1">
-                        {/* Label clarifies WHAT the cost refers to: per case, per pack, or per unit */}
-                        <label className="text-[10px] text-gray-500 uppercase tracking-widest font-bold ml-1 block">
+                        <label className="text-[10px] text-stone-500 dark:text-stone-400 uppercase tracking-wider font-bold ml-1 block">
                             Cost{hasCases ? ' / Case' : hasPacks ? ' / Pack' : ' / Unit'}{' '}
                             <span className="text-red-500">*</span>
                         </label>
                         <input
                             type="number"
-                            className={`w-full bg-white dark:bg-black/40 border ${errors.cost ? 'border-red-500/50' : 'border-gray-200 dark:border-white/10'} rounded-lg px-4 py-3 text-sm text-gray-900 dark:text-white font-mono focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:ring-2 focus:ring-[#2C5E3B]/10 dark:focus:ring-[#A9CBA2]/10 text-center font-black shadow-sm`}
+                            className={`w-full bg-[#FAF8F5] dark:bg-black/30 border ${errors.cost ? 'border-red-500/50' : 'border-[#E2DCCE] dark:border-white/10'} rounded-2xl px-4 py-2.5 text-xs text-[#1E3F27] dark:text-white font-mono focus:border-[#2C5E3B] text-center font-black`}
                             value={currentCost || ''}
                             onChange={e => { setCurrentCost(parseFloat(e.target.value) || 0); if (errors.cost) setErrors({ ...errors, cost: '' }); }}
                             placeholder="0.00"
                         />
-                        {/* Show cost per sellable unit when ordering in cases/packs */}
                         {currentCost > 0 && unitsPerOrderUnit > 1 && (
-                            <span className="text-[9px] text-[#2C5E3B]/60 dark:text-[#A9CBA2]/60 block text-center">
+                            <span className="text-[9px] text-[#2C5E3B] dark:text-[#A9CBA2] block text-center font-bold">
                                 = {(currentCost / unitsPerOrderUnit).toFixed(2)} / unit
                             </span>
                         )}
@@ -433,31 +426,30 @@ export const POItemForm: React.FC<POItemFormProps> = ({
                     {/* Margin indicator */}
                     {productType !== 'new' && (
                         <div className="col-span-4 space-y-1 relative">
-                            <label className="text-[10px] text-gray-500 uppercase tracking-widest font-bold ml-1 block">
+                            <label className="text-[10px] text-stone-500 dark:text-stone-400 uppercase tracking-wider font-bold ml-1 block">
                                 Retail{customItemUnit && getSellUnit(customItemUnit).category !== 'count' ? ` /${getSellUnit(customItemUnit).shortLabel}` : ''} <span className="text-red-500">*</span>
                             </label>
                             <div className="relative">
                                 {(() => {
-                                    // Use cost-per-sell-unit for margin calc, not raw currentCost (which is per case/pack)
                                     const costPerUnit = unitsPerOrderUnit > 1
                                         ? currentCost / unitsPerOrderUnit
                                         : currentCost;
                                     if (!currentRetailPrice || !costPerUnit) return null;
                                     const marginPct = ((currentRetailPrice - costPerUnit) / currentRetailPrice) * 100;
                                     const badgeClass = marginPct >= 40
-                                        ? 'bg-green-500/20 text-green-500 dark:text-green-400 border border-green-500/30'
+                                        ? 'bg-emerald-50 text-[#2C5E3B] dark:bg-[#2C5E3B]/20 dark:text-[#A9CBA2] border border-emerald-200 dark:border-emerald-950/30'
                                         : marginPct >= 20
-                                        ? 'bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30'
-                                        : 'bg-red-500/20 text-red-500 dark:text-red-400 border border-red-500/30';
+                                        ? 'bg-amber-50 text-amber-700 dark:bg-amber-950/30 dark:text-amber-400 border border-amber-200 dark:border-amber-900/30'
+                                        : 'bg-red-50 text-red-600 dark:bg-red-950/30 dark:text-red-400 border border-red-200 dark:border-red-900/30';
                                     return (
-                                        <div className={`absolute left-2 top-1/2 -translate-y-1/2 text-[10px] font-bold px-1.5 py-0.5 rounded ${badgeClass}`}>
+                                        <div className={`absolute left-2 top-1/2 -translate-y-1/2 text-[10px] font-black px-1.5 py-0.5 rounded-lg ${badgeClass}`}>
                                             {parseFloat(marginPct.toFixed(2))}%
                                         </div>
                                     );
                                 })()}
                                 <input
                                     type="number"
-                                    className={`w-full bg-white dark:bg-black/40 border ${errors.retail ? 'border-red-500/50' : 'border-gray-200 dark:border-white/10'} rounded-lg py-3 text-sm text-gray-900 dark:text-white font-mono focus:border-green-500/50 dark:focus:border-green-400/50 text-center font-black shadow-sm ${currentRetailPrice > 0 && currentCost > 0 ? 'pl-14 pr-2' : 'px-4'}`}
+                                    className={`w-full bg-[#FAF8F5] dark:bg-black/30 border ${errors.retail ? 'border-red-500/50' : 'border-[#E2DCCE] dark:border-white/10'} rounded-2xl py-2.5 text-xs text-[#1E3F27] dark:text-white font-mono focus:border-[#2C5E3B] text-center font-black ${currentRetailPrice > 0 && currentCost > 0 ? 'pl-14 pr-2' : 'px-4'}`}
                                     value={currentRetailPrice || ''}
                                     onChange={e => { setCurrentRetailPrice(Math.round(parseFloat(e.target.value) || 0)); if (errors.retail) setErrors({ ...errors, retail: '' }); }}
                                     placeholder="0"
@@ -471,14 +463,14 @@ export const POItemForm: React.FC<POItemFormProps> = ({
                     <div className={`${productType === 'new' ? 'col-span-4' : 'col-span-12'} flex items-end`}>
                         {editingItem ? (
                             <div className="flex w-full gap-2 font-black">
-                                <button onClick={onCancelEdit} className="w-1/3 py-3 bg-gray-200 dark:bg-white/10 hover:bg-gray-300 dark:hover:bg-white/20 text-gray-900 dark:text-white rounded-lg transition-all shadow-sm">Cancel</button>
-                                <button onClick={handleAddItem} className="w-2/3 py-3 bg-[#2C5E3B] hover:bg-[#1E3B24] dark:bg-[#A9CBA2] dark:hover:bg-[#A9CBA2]/90 text-white dark:text-black font-black rounded-lg transition-all flex items-center justify-center gap-2 shadow-md dark:shadow-[0_4px_12px_rgba(169,203,162,0.15)]">
-                                    <Save size={16} /> Update
+                                <button onClick={onCancelEdit} className="w-1/3 py-2.5 bg-stone-100 dark:bg-white/10 hover:bg-stone-200 dark:hover:bg-white/20 text-stone-700 dark:text-white rounded-2xl transition-colors cursor-pointer text-xs font-bold">Cancel</button>
+                                <button onClick={handleAddItem} className="w-2/3 py-2.5 woody-btn-primary rounded-2xl transition-all flex items-center justify-center gap-2 cursor-pointer text-xs font-black">
+                                    <Save size={15} /> Update Item
                                 </button>
                             </div>
                         ) : (
-                            <button onClick={handleAddItem} className="w-full py-3 bg-[#2C5E3B] hover:bg-[#1E3B24] dark:bg-[#A9CBA2] dark:hover:bg-[#A9CBA2]/90 text-white dark:text-black font-black rounded-lg transition-all flex items-center justify-center gap-2 shadow-md dark:shadow-[0_4px_12px_rgba(169,203,162,0.15)]">
-                                <Plus size={16} /> Add Item
+                            <button onClick={handleAddItem} className="w-full py-2.5 woody-btn-primary rounded-2xl transition-all flex items-center justify-center gap-2 cursor-pointer text-xs font-black">
+                                <Plus size={15} /> Add Item to Order
                             </button>
                         )}
                     </div>

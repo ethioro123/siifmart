@@ -72,8 +72,9 @@ export function useProductActions(deps: UseProductActionsDeps) {
                 old ? [...old, newProduct] : [newProduct]
             );
 
+            const siteLabel = targetSite?.name || activeSite?.name || 'Active Site';
             addNotification('success', `Product ${product.name} added`);
-            logSystemEvent('Product Added', `Product "${product.name}" (SKU: ${product.sku}) created in site ${targetSiteId}`, user?.name || 'System', 'Inventory');
+            logSystemEvent('Product Added', `Product "${product.name}" (SKU: ${product.sku}) created in site "${siteLabel}"`, user?.name || 'System', 'Inventory');
             return newProduct;
         } catch (error: any) {
             logger.error('useProductActions', 'Error adding product:', error as Error);
@@ -205,7 +206,9 @@ export function useProductActions(deps: UseProductActionsDeps) {
             const updatedLocation = newLocation.trim();
             await productsService.update(productId, { location: updatedLocation });
             queryClient.invalidateQueries({ queryKey: ['products'] });
-            logSystemEvent('Product Relocated', `Product ${productId} added to location ${newLocation}`, user, 'Inventory');
+            const prod = allProducts.find(p => p.id === productId);
+            const prodLabel = prod?.name || productId;
+            logSystemEvent('Product Relocated', `Product "${prodLabel}" added to location ${newLocation}`, user, 'Inventory');
         } catch (error) {
             logger.error('useProductActions', 'caught error', error as Error);;
             addNotification('alert', 'Failed to relocate product');

@@ -23,7 +23,7 @@ export const PricingFiltersPanel: React.FC = () => {
     }
 
     return (
-        <div className="mt-4 p-8 glass-panel grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 shadow-2xl animate-in slide-in-from-top-4 duration-500">
+        <div className="mt-4 p-6 bg-white/95 dark:bg-[#18201B]/80 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-3xl grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 shadow-md animate-in slide-in-from-top-3 duration-300">
             {/* Categories Section */}
             <div className="space-y-4">
                 <div className="flex items-center gap-2 pb-2 border-b border-[#E2DCCE]/50 dark:border-emerald-950/20">

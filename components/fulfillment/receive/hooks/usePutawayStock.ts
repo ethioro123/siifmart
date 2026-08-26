@@ -93,12 +93,21 @@ export function usePutawayStock() {
                     throw new Error(`Product definition for SKU ${params.sku} not found`);
                 }
 
-                // [FIX] Check if source is a "ghost" placeholder (On Order/Empty & 0 Stock)
+                // [FIX] Check if target site has a "ghost" placeholder (On Order/Empty & 0 Stock)
                 // If so, MOVE/RECYCLE it instead of creating a duplicate.
-                const isPlaceholder = (sourceProduct.location === 'On Order' || !sourceProduct.location) && sourceProduct.stock === 0;
+                let placeholderRecord = (sourceProduct?.location === 'On Order' || !sourceProduct?.location) && (!sourceProduct?.stock || sourceProduct?.stock === 0) && (sourceProduct?.siteId === params.siteId || (sourceProduct as any)?.site_id === params.siteId) ? sourceProduct : null;
+                
+                if (!placeholderRecord) {
+                    try {
+                        const existingPlaceholder = await productsService.getBySkuAndLocation(params.sku, 'On Order', params.siteId);
+                        if (existingPlaceholder && (!existingPlaceholder.stock || existingPlaceholder.stock === 0)) {
+                            placeholderRecord = existingPlaceholder;
+                        }
+                    } catch (e) { }
+                }
 
-                if (isPlaceholder && params.sourceProductId === sourceProduct.id) {
-                    logger.debug('Fulfillment', `♻️ Recycling placeholder product ${sourceProduct.id} from '${sourceProduct.location}' to '${params.location}'`);
+                if (placeholderRecord) {
+                    logger.debug('Fulfillment', `♻️ Recycling placeholder product ${placeholderRecord.id} from '${placeholderRecord.location}' to '${params.location}'`);
 
                     // Update the existing placeholder to be the real record
                     const updates: Partial<Product> = {
@@ -106,21 +115,21 @@ export function usePutawayStock() {
                         stock: params.quantity,
                         status: 'active'
                     };
-                    if (params.expiryDate || sourceProduct.expiryDate) updates.expiryDate = params.expiryDate || sourceProduct.expiryDate;
-                    if (params.batchNumber || sourceProduct.batchNumber) updates.batchNumber = params.batchNumber || sourceProduct.batchNumber;
+                    if (params.expiryDate || placeholderRecord.expiryDate) updates.expiryDate = params.expiryDate || placeholderRecord.expiryDate;
+                    if (params.batchNumber || placeholderRecord.batchNumber) updates.batchNumber = params.batchNumber || placeholderRecord.batchNumber;
 
                     // Sync PO line item details if missing on placeholder
-                    if (!sourceProduct.size && params.size) updates.size = params.size;
-                    if (!sourceProduct.brand && params.brand) updates.brand = params.brand;
-                    if (!sourceProduct.unit && params.unit) updates.unit = params.unit;
-                    if (!sourceProduct.packQuantity && params.packQuantity) updates.packQuantity = params.packQuantity;
-                    if (!sourceProduct.category && params.category) updates.category = params.category;
-                    if (!sourceProduct.customAttributes && params.customAttributes) updates.customAttributes = params.customAttributes;
-                    if (!sourceProduct.description && params.description) updates.description = params.description;
-                    if (!sourceProduct.minStock && params.minStock) updates.minStock = params.minStock;
-                    if (!sourceProduct.maxStock && params.maxStock) updates.maxStock = params.maxStock;
+                    if (!placeholderRecord.size && params.size) updates.size = params.size;
+                    if (!placeholderRecord.brand && params.brand) updates.brand = params.brand;
+                    if (!placeholderRecord.unit && params.unit) updates.unit = params.unit;
+                    if (!placeholderRecord.packQuantity && params.packQuantity) updates.packQuantity = params.packQuantity;
+                    if (!placeholderRecord.category && params.category) updates.category = params.category;
+                    if (!placeholderRecord.customAttributes && params.customAttributes) updates.customAttributes = params.customAttributes;
+                    if (!placeholderRecord.description && params.description) updates.description = params.description;
+                    if (!placeholderRecord.minStock && params.minStock) updates.minStock = params.minStock;
+                    if (!placeholderRecord.maxStock && params.maxStock) updates.maxStock = params.maxStock;
 
-                    const updated = await productsService.update(sourceProduct.id, updates);
+                    const updated = await productsService.update(placeholderRecord.id, updates);
                     destProductId = updated.id;
 
                     // [FIX] Log Movement for Recycled Record
