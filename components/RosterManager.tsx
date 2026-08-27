@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import {
     Calendar, Clock, User, Plus, Trash2, Edit2,
@@ -42,20 +41,27 @@ export default function RosterManager({ className = "" }: RosterManagerProps) {
     // New Schedule Form State
     const [formState, setFormState] = useState({
         employeeId: '',
-        startTime: '09:00',
+        startTime: '08:00',
         endTime: '17:00',
         role: '',
         notes: ''
     });
 
-    const daySchedules = useMemo(() => {
-        return schedules.filter(s => s.date === selectedDate);
-    }, [schedules, selectedDate]);
-
+    // Strictly appointed staff for the active site
     const siteEmployees = useMemo(() => {
         if (!activeSite) return [];
         return employees.filter(e => e.siteId === activeSite.id || (e as any).site_id === activeSite.id);
     }, [employees, activeSite]);
+
+    // Strictly filter day schedules to active site and appointed staff
+    const daySchedules = useMemo(() => {
+        if (!activeSite) return [];
+        const validEmployeeIds = new Set(siteEmployees.map(e => e.id));
+        return schedules.filter(s => 
+            s.date === selectedDate && 
+            (s.siteId === activeSite.id || validEmployeeIds.has(s.employeeId))
+        );
+    }, [schedules, selectedDate, activeSite, siteEmployees]);
 
     const handleOpenModal = (schedule?: StaffSchedule) => {
         if (schedule) {
@@ -70,10 +76,10 @@ export default function RosterManager({ className = "" }: RosterManagerProps) {
         } else {
             setEditingSchedule(null);
             setFormState({
-                employeeId: '',
-                startTime: '09:00',
+                employeeId: siteEmployees[0]?.id || '',
+                startTime: '08:00',
                 endTime: '17:00',
-                role: '',
+                role: siteEmployees[0]?.role ? siteEmployees[0].role.replace('_', ' ') : '',
                 notes: ''
             });
         }
@@ -101,7 +107,7 @@ export default function RosterManager({ className = "" }: RosterManagerProps) {
                 date: selectedDate,
                 startTime: formState.startTime,
                 endTime: formState.endTime,
-                role: formState.role || employee.role,
+                role: formState.role || employee.role.replace('_', ' '),
                 notes: formState.notes,
                 status: 'Scheduled'
             };
@@ -123,31 +129,32 @@ export default function RosterManager({ className = "" }: RosterManagerProps) {
             {/* Header with Date Navigation */}
             <div className="flex items-center justify-between mb-2">
                 <div>
-                    <h3 className="text-xl font-black dark:text-white text-slate-900 flex items-center gap-3 uppercase tracking-tighter">
-                        <div className="p-2.5 rounded-xl dark:bg-cyber-primary/10 bg-cyber-primary/5 border dark:border-cyber-primary/20 border-black/5 shadow-inner">
-                            <Calendar size={22} className="text-cyber-primary" />
+                    <h3 className="text-xl font-black dark:text-[#EAE5D9] text-[#1E3F27] flex items-center gap-3 uppercase tracking-tight">
+                        <div className="p-2.5 rounded-2xl bg-emerald-50 text-[#2C5E3B] dark:bg-[#2C5E3B]/20 dark:text-[#A9CBA2] border border-emerald-200 dark:border-emerald-950/30 shadow-inner">
+                            <Calendar size={22} />
                         </div>
                         {t('posCommand.rosterManager')}
                     </h3>
-                    <p className="dark:text-gray-500 text-slate-400 text-[10px] mt-2 font-bold uppercase tracking-[0.2em] opacity-60">
-                        {t('posCommand.shiftAssignment')}
+                    <p className="text-stone-500 dark:text-stone-400 text-[10px] mt-1.5 font-bold uppercase tracking-wider">
+                        {t('posCommand.shiftAssignment')} • {siteEmployees.length} Staff Stationed at {activeSite.name}
                     </p>
                 </div>
 
-                <div className="flex items-center gap-4 bg-white/5 p-1.5 rounded-2xl border border-white/5">
+                <div className="flex items-center gap-2 bg-white/80 dark:bg-black/30 p-1.5 rounded-2xl border border-[#E2DCCE] dark:border-white/10 shadow-xs">
                     <button
                         onClick={() => changeDate(-1)}
                         title="Previous Day"
-                        className="p-2 hover:bg-white/10 rounded-xl transition-colors text-gray-400 hover:text-white"
+                        aria-label="Previous Day"
+                        className="p-2 hover:bg-stone-100 dark:hover:bg-white/10 rounded-xl transition-colors text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white"
                     >
-                        <ChevronLeft size={20} />
+                        <ChevronLeft size={18} />
                     </button>
 
-                    <div className="flex flex-col items-center min-w-[120px]">
-                        <span className="text-xs font-black dark:text-white text-slate-900 uppercase">
-                            {new Date(selectedDate).toLocaleDateString(locale, { weekday: 'long' })}
+                    <div className="flex flex-col items-center min-w-[120px] px-1">
+                        <span className="text-xs font-black dark:text-white text-stone-900 uppercase tracking-tight">
+                            {new Date(selectedDate).toLocaleDateString(locale, { weekday: 'short', month: 'short', day: 'numeric' })}
                         </span>
-                        <span className="text-[10px] dark:text-cyber-primary text-cyber-primary font-mono font-bold">
+                        <span className="text-[10px] text-[#2C5E3B] dark:text-[#A9CBA2] font-mono font-bold">
                             {selectedDate}
                         </span>
                     </div>
@@ -155,67 +162,71 @@ export default function RosterManager({ className = "" }: RosterManagerProps) {
                     <button
                         onClick={() => changeDate(1)}
                         title="Next Day"
-                        className="p-2 hover:bg-white/10 rounded-xl transition-colors text-gray-400 hover:text-white"
+                        aria-label="Next Day"
+                        className="p-2 hover:bg-stone-100 dark:hover:bg-white/10 rounded-xl transition-colors text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white"
                     >
-                        <ChevronRight size={20} />
+                        <ChevronRight size={18} />
                     </button>
                 </div>
             </div>
 
             {/* Roster Grid/List */}
-            <div className="grid grid-cols-1 gap-4">
+            <div className="grid grid-cols-1 gap-3">
                 {daySchedules.length > 0 ? (
                     daySchedules.map((schedule) => (
                         <div
                             key={schedule.id}
-                            className="group p-5 rounded-[2rem] dark:bg-white/[0.03] bg-white border dark:border-white/5 border-black/[0.03] flex items-center justify-between hover:bg-white/[0.05] transition-all"
+                            className="group p-4 sm:p-5 rounded-2xl bg-white/90 dark:bg-[#18201B]/80 border border-[#E2DCCE] dark:border-emerald-950/20 flex items-center justify-between hover:border-[#2C5E3B]/40 dark:hover:border-[#A9CBA2]/30 transition-all shadow-xs"
                         >
-                            <div className="flex items-center gap-6">
-                                <div className="w-12 h-12 rounded-2xl dark:bg-black/40 bg-slate-50 flex items-center justify-center border dark:border-white/10 border-black/5 overflow-hidden shadow-xl">
-                                    <User size={24} className="dark:text-white/20 text-slate-300" />
+                            <div className="flex items-center gap-4 sm:gap-5 min-w-0">
+                                <div className="w-11 h-11 rounded-2xl bg-stone-100 dark:bg-black/40 flex items-center justify-center border border-[#E2DCCE] dark:border-white/10 overflow-hidden shadow-sm shrink-0">
+                                    <User size={20} className="text-stone-400 dark:text-stone-500" />
                                 </div>
-                                <div>
-                                    <h4 className="text-sm font-black dark:text-white text-slate-900 tracking-tight">{schedule.employeeName}</h4>
-                                    <div className="flex items-center gap-3 mt-1">
-                                        <span className="text-[9px] dark:text-gray-500 text-slate-400 font-bold uppercase tracking-widest flex items-center gap-1.5">
-                                            <Briefcase size={10} className="text-cyber-primary" />
+                                <div className="min-w-0">
+                                    <h4 className="text-sm font-black dark:text-[#EAE5D9] text-[#1E3F27] tracking-tight truncate">{schedule.employeeName}</h4>
+                                    <div className="flex items-center gap-2.5 mt-1 flex-wrap">
+                                        <span className="text-[9px] text-stone-500 dark:text-stone-400 font-bold uppercase tracking-wider flex items-center gap-1">
+                                            <Briefcase size={10} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
                                             {schedule.role}
                                         </span>
-                                        <span className="text-[9px] dark:text-gray-500 text-slate-400 font-bold uppercase tracking-widest flex items-center gap-1.5">
-                                            <Clock size={10} className="text-cyber-primary" />
+                                        <span className="text-[9px] text-stone-500 dark:text-stone-400 font-mono font-bold uppercase tracking-wider flex items-center gap-1">
+                                            <Clock size={10} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
                                             {schedule.startTime} - {schedule.endTime}
                                         </span>
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <div className="flex items-center gap-1.5 opacity-80 group-hover:opacity-100 transition-opacity shrink-0">
                                 <button
                                     onClick={() => handleOpenModal(schedule)}
                                     title="Edit Shift"
-                                    className="p-2.5 rounded-xl dark:bg-white/5 bg-slate-100 dark:text-gray-400 text-slate-500 hover:text-cyber-primary hover:dark:bg-white/10 transition-all shadow-sm"
+                                    aria-label="Edit Shift"
+                                    className="p-2 rounded-xl bg-stone-100 dark:bg-white/5 text-stone-600 dark:text-stone-400 hover:text-[#2C5E3B] hover:bg-stone-200 dark:hover:bg-white/10 transition-all shadow-xs"
                                 >
-                                    <Edit2 size={16} />
+                                    <Edit2 size={14} />
                                 </button>
                                 <button
                                     onClick={() => deleteSchedule(schedule.id, user?.name || 'Manager')}
                                     title="Delete Shift"
-                                    className="p-2.5 rounded-xl dark:bg-red-500/10 bg-red-50 dark:text-red-400 text-red-500 hover:bg-red-500/20 transition-all shadow-sm"
+                                    aria-label="Delete Shift"
+                                    className="p-2 rounded-xl bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-500/20 transition-all shadow-xs"
                                 >
-                                    <Trash2 size={16} />
+                                    <Trash2 size={14} />
                                 </button>
                             </div>
                         </div>
                     ))
                 ) : (
-                    <div className="py-20 text-center dark:bg-white/[0.01] bg-slate-50/50 rounded-[3rem] border border-dashed dark:border-white/5 border-black/5">
-                        <Calendar size={48} className="mx-auto text-gray-400/20 mb-4" />
-                        <p className="text-xs dark:text-gray-600 text-slate-400 font-bold uppercase tracking-[0.2em]">{t('posCommand.noTasks')}</p>
+                    <div className="py-16 text-center bg-stone-50/60 dark:bg-white/[0.01] rounded-3xl border border-dashed border-[#E2DCCE] dark:border-white/10 p-6">
+                        <Calendar size={40} className="mx-auto text-stone-300 dark:text-stone-600 mb-3" />
+                        <p className="text-xs text-stone-500 dark:text-stone-400 font-black uppercase tracking-wider">{t('posCommand.noTasks')}</p>
+                        <p className="text-[10px] text-stone-400 dark:text-stone-500 mt-1">No staff shifts scheduled for {activeSite.name} on this date.</p>
                         <button
                             onClick={() => handleOpenModal()}
-                            className="mt-6 px-8 py-3 dark:bg-cyber-primary/10 bg-cyber-primary/5 dark:text-cyber-primary text-cyber-primary rounded-2xl text-[10px] font-black uppercase tracking-widest border border-cyber-primary/20 hover:bg-cyber-primary/20 transition-all"
+                            className="mt-5 px-6 py-2.5 bg-[#2C5E3B] hover:bg-[#234b2f] text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all shadow-xs cursor-pointer active:scale-95"
                         >
-                            {t('common.add')}
+                            {t('common.add')} Shift
                         </button>
                     </div>
                 )}
@@ -224,10 +235,10 @@ export default function RosterManager({ className = "" }: RosterManagerProps) {
                 {daySchedules.length > 0 && (
                     <button
                         onClick={() => handleOpenModal()}
-                        className="w-full flex items-center justify-center gap-3 p-5 rounded-[2rem] border-2 border-dashed dark:border-white/5 border-black/5 dark:text-gray-500 text-slate-400 hover:dark:border-cyber-primary/40 hover:border-cyber-primary/30 hover:text-cyber-primary transition-all group"
+                        className="w-full flex items-center justify-center gap-2 py-3.5 px-4 rounded-2xl border-2 border-dashed border-[#E2DCCE] dark:border-white/10 text-stone-500 dark:text-stone-400 hover:border-[#2C5E3B] dark:hover:border-[#A9CBA2] hover:text-[#2C5E3B] dark:hover:text-[#A9CBA2] transition-all group font-black text-xs uppercase tracking-wider cursor-pointer"
                     >
-                        <Plus size={20} className="group-hover:scale-125 transition-transform" />
-                        <span className="text-[10px] font-black uppercase tracking-widest">Add Shift Node</span>
+                        <Plus size={16} className="group-hover:scale-110 transition-transform" />
+                        <span>Schedule Shift for {activeSite.name}</span>
                     </button>
                 )}
             </div>
@@ -236,94 +247,104 @@ export default function RosterManager({ className = "" }: RosterManagerProps) {
             <Modal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
-                title={editingSchedule ? "Modify Shift Allocation" : "New Shift Allocation"}
+                title={editingSchedule ? "Modify Shift Schedule" : "Schedule Staff Shift"}
                 variant="side"
             >
-                <form onSubmit={handleSubmit} className="space-y-6">
-                    <div className="grid grid-cols-1 gap-6">
+                <form onSubmit={handleSubmit} className="space-y-5">
+                    <div className="space-y-4">
                         {/* Employee Selection */}
                         <div>
-                            <label className="block text-[10px] font-black dark:text-gray-500 text-slate-400 uppercase tracking-widest mb-2">Personnel Node</label>
+                            <label className="block text-[10px] font-black text-stone-500 dark:text-stone-400 uppercase tracking-widest mb-1.5">
+                                Appointed Staff Member ({siteEmployees.length} at {activeSite.name})
+                            </label>
                             <select
                                 value={formState.employeeId}
-                                onChange={(e) => setFormState({ ...formState, employeeId: e.target.value })}
+                                onChange={(e) => {
+                                    const empId = e.target.value;
+                                    const emp = siteEmployees.find(p => p.id === empId);
+                                    setFormState(prev => ({
+                                        ...prev,
+                                        employeeId: empId,
+                                        role: emp ? emp.role.replace('_', ' ') : prev.role
+                                    }));
+                                }}
                                 required
-                                title="Select Personnel Node"
-                                className="w-full bg-black/40 border border-white/10 rounded-2xl px-4 py-3 text-white text-sm focus:border-cyber-primary transition-all"
+                                title="Select Staff Member"
+                                className="w-full bg-white dark:bg-black/40 border border-[#E2DCCE] dark:border-white/10 rounded-xl px-4 py-2.5 text-stone-900 dark:text-white text-xs font-bold focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:outline-none transition-all shadow-xs"
                             >
-                                <option value="">Select Employee...</option>
+                                <option value="">Select Appointed Staff Member...</option>
                                 {siteEmployees.map(emp => (
-                                    <option key={emp.id} value={emp.id}>{emp.name} ({emp.role})</option>
+                                    <option key={emp.id} value={emp.id}>{emp.name} ({emp.role.replace('_', ' ')})</option>
                                 ))}
                             </select>
                         </div>
 
                         {/* Time Grid */}
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-2 gap-3">
                             <div>
-                                <label className="block text-[10px] font-black dark:text-gray-500 text-slate-400 uppercase tracking-widest mb-2">Activation Time</label>
+                                <label className="block text-[10px] font-black text-stone-500 dark:text-stone-400 uppercase tracking-widest mb-1.5">Shift Start</label>
                                 <input
                                     type="time"
                                     value={formState.startTime}
                                     onChange={(e) => setFormState({ ...formState, startTime: e.target.value })}
                                     required
-                                    title="Activation Time"
-                                    className="w-full bg-black/40 border border-white/10 rounded-2xl px-4 py-3 text-white text-sm focus:border-cyber-primary transition-all"
+                                    title="Shift Start Time"
+                                    className="w-full bg-white dark:bg-black/40 border border-[#E2DCCE] dark:border-white/10 rounded-xl px-4 py-2 text-stone-900 dark:text-white text-xs font-mono font-bold focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:outline-none transition-all shadow-xs"
                                 />
                             </div>
                             <div>
-                                <label className="block text-[10px] font-black dark:text-gray-500 text-slate-400 uppercase tracking-widest mb-2">Deactivation Time</label>
+                                <label className="block text-[10px] font-black text-stone-500 dark:text-stone-400 uppercase tracking-widest mb-1.5">Shift End</label>
                                 <input
                                     type="time"
                                     value={formState.endTime}
                                     onChange={(e) => setFormState({ ...formState, endTime: e.target.value })}
                                     required
-                                    title="Deactivation Time"
-                                    className="w-full bg-black/40 border border-white/10 rounded-2xl px-4 py-3 text-white text-sm focus:border-cyber-primary transition-all"
+                                    title="Shift End Time"
+                                    className="w-full bg-white dark:bg-black/40 border border-[#E2DCCE] dark:border-white/10 rounded-xl px-4 py-2 text-stone-900 dark:text-white text-xs font-mono font-bold focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:outline-none transition-all shadow-xs"
                                 />
                             </div>
                         </div>
 
                         {/* Custom Role */}
                         <div>
-                            <label className="block text-[10px] font-black dark:text-gray-500 text-slate-400 uppercase tracking-widest mb-2">Operational Role (Optional)</label>
+                            <label className="block text-[10px] font-black text-stone-500 dark:text-stone-400 uppercase tracking-widest mb-1.5">Assigned Role / Function (Optional)</label>
                             <input
                                 type="text"
-                                placeholder="Leave blank to use default role"
+                                placeholder="e.g. Inbound Receiver, Order Picker, Lead Dispatcher"
                                 value={formState.role}
                                 onChange={(e) => setFormState({ ...formState, role: e.target.value })}
-                                title="Operational Role"
-                                className="w-full bg-black/40 border border-white/10 rounded-2xl px-4 py-3 text-white text-sm focus:border-cyber-primary transition-all"
+                                title="Assigned Role"
+                                className="w-full bg-white dark:bg-black/40 border border-[#E2DCCE] dark:border-white/10 rounded-xl px-4 py-2 text-stone-900 dark:text-white text-xs focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:outline-none transition-all shadow-xs"
                             />
                         </div>
 
                         {/* Notes */}
                         <div>
-                            <label className="block text-[10px] font-black dark:text-gray-500 text-slate-400 uppercase tracking-widest mb-2">Operational Notes</label>
+                            <label className="block text-[10px] font-black text-stone-500 dark:text-stone-400 uppercase tracking-widest mb-1.5">Shift Notes & Instructions</label>
                             <textarea
                                 rows={3}
                                 value={formState.notes}
                                 onChange={(e) => setFormState({ ...formState, notes: e.target.value })}
-                                className="w-full bg-black/40 border border-white/10 rounded-2xl px-4 py-3 text-white text-sm focus:border-cyber-primary transition-all"
-                                placeholder="Mission parameters or specific instructions..."
-                                title="Operational Notes"
+                                className="w-full bg-white dark:bg-black/40 border border-[#E2DCCE] dark:border-white/10 rounded-xl px-4 py-2 text-stone-900 dark:text-white text-xs focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:outline-none transition-all shadow-xs"
+                                placeholder="Station assignment, task details or specific notes..."
+                                title="Shift Notes"
                             />
                         </div>
                     </div>
 
-                    <div className="flex gap-4 pt-4">
+                    <div className="flex gap-3 pt-3 border-t border-[#E2DCCE]/60 dark:border-white/10">
                         <button
                             type="button"
                             onClick={() => setIsModalOpen(false)}
-                            className="flex-1 py-4 bg-white/5 border border-white/10 rounded-2xl text-[10px] font-black text-gray-400 uppercase tracking-widest hover:bg-white/10 transition-all"
+                            className="flex-1 py-3 bg-stone-100 dark:bg-white/5 border border-[#E2DCCE] dark:border-white/10 rounded-xl text-xs font-black text-stone-600 dark:text-stone-400 uppercase tracking-wider hover:bg-stone-200 dark:hover:bg-white/10 transition-all"
                         >
-                            Abort Mission
+                            Cancel
                         </button>
                         <button
                             type="submit"
-                            className="flex-1 py-4 bg-cyber-primary text-black rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-cyber-primary/90 transition-all shadow-[0_0_20px_rgba(0,255,157,0.3)]"
+                            className="flex-1 py-3 bg-[#2C5E3B] hover:bg-[#234b2f] text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all shadow-xs"
                         >
-                            Confirm Allocation
+                            Save Shift
                         </button>
                     </div>
                 </form>
@@ -331,3 +352,4 @@ export default function RosterManager({ className = "" }: RosterManagerProps) {
         </div>
     );
 }
+

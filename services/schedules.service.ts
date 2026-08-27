@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabase';
 import type { StaffSchedule } from '../types';
+import { logger } from '../utils/logger';
 
 export const schedulesService = {
     async getAll(siteId?: string): Promise<StaffSchedule[]> {
@@ -8,7 +9,7 @@ export const schedulesService = {
 
         const { data, error } = await query.order('date', { ascending: true });
         if (error) {
-            console.warn('staff_schedules table unreachable:', error.message);
+            logger.warn('schedules.service', 'staff_schedules table unreachable', { error: error.message });
             return [];
         }
         return (data || []).map(this._mapSchedule);

@@ -40,10 +40,10 @@ export default function SiteRoster({
                 level: points?.level || 1,
                 levelTitle: points?.levelTitle || 'Rookie',
                 rank: points?.rank || 0,
-                isRostered: schedules.some(s => s.employeeId === emp.id && s.date === new Date().toISOString().split('T')[0])
+                isRostered: schedules.some(s => s.employeeId === emp.id && s.date === new Date().toISOString().split('T')[0] && (s.siteId === activeSite?.id || !s.siteId))
             };
         }).sort((a, b) => b.points - a.points);
-    }, [siteEmployees, getWorkerPoints, schedules]);
+    }, [siteEmployees, getWorkerPoints, schedules, activeSite]);
 
     const displayEmployees = limit ? sortedEmployees.slice(0, limit) : sortedEmployees;
 

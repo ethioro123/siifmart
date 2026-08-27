@@ -205,7 +205,7 @@ export const posCommand: TranslationBlock = {
     completeTxToEarn: { en: 'Complete transactions to earn team points', am: 'የቡድን ነጥቦችን ለማግኘት ሽያጭ ያጠናቅቁ', or: 'Gurgurtaa Xumuri → Qabxii Garee Argatta!' },
     topPerformers: { en: 'Top Performers', am: 'ከፍተኛ አፈጻጸም ያላቸው', or: 'Hojjettoota Caalaa' },
     thisWeek: { en: 'This Week', am: 'በዚህ ሳምንት', or: 'Torbee Kana' },
-    noTasks: { en: 'No Tasks Scheduled Today', am: 'ዛሬ ምንም የታቀደ ስራ የለም', or: 'Hojii Tokkollee Hin Qabne Guyyaa Kana' },
+    noTasks: { en: 'No Tasks Scheduled Today', am: 'ዛሬ ምንም የታቀደ ስራ የለም', or: 'Hojiin Har\'aa Karoorfame Hin Jiru' },
     ptsThisWeek: { en: 'PTS THIS WEEK', am: 'የዚህ ሳምንት ነጥቦች', or: 'Qabxii Torbee Kanaa' },
     thisMonth: { en: 'This Month', am: 'በዚህ ወር', or: 'Ji\'a Kanaa Keessatti' },
 
