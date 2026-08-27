@@ -96,25 +96,8 @@ export const PickScannerForm: React.FC<PickScannerFormProps> = ({
                             title="Scan barcode"
                             value={inputVal}
                             onChange={(e) => setInputVal(e.target.value)}
-                            onKeyDown={(e) => {
-                                if (step === 'LOCATION') {
-                                    const now = Date.now();
-                                    if (now - lastKeyTime.current > 300 && e.key !== 'Enter') {
-                                        lastKeyTime.current = now;
-                                        return;
-                                    }
-                                    lastKeyTime.current = now;
-                                } else {
-                                    scanOnlyHandlers.onKeyDown(e);
-                                }
-                            }}
-                            onPaste={(e) => {
-                                e.preventDefault();
-                                playBeep('error');
-                                setErrorMsg(t('warehouse.picking.scanOnlyNoPasting'));
-                                setShowError(true);
-                                setTimeout(() => setShowError(false), 2000);
-                            }}
+                            onKeyDown={scanOnlyHandlers.onKeyDown}
+                            onPaste={scanOnlyHandlers.onPaste}
                             className={`w-full bg-white/90 dark:bg-[#1C2620]/90 border-2 rounded-2xl py-6 px-4 text-center text-xl md:text-3xl font-mono text-gray-900 dark:text-[#EAE5D9] placeholder:text-gray-400 dark:placeholder:text-gray-600 focus:outline-none relative z-10 shadow-xl transition-all border-[#E2DCCE] dark:border-[#A9CBA2]/10 focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2]/40`}
                             placeholder={step === 'LOCATION' ? t('warehouse.picking.scan15DigitBarcode') : t('warehouse.picking.scanSkuBarcode')}
                             autoFocus

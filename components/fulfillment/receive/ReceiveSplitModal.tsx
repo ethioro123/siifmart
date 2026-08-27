@@ -4,6 +4,7 @@ import { Product, PurchaseOrder, WMSJob } from '../../../types';
 import Badge from '../../shared/Badge';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useStore } from '../../../contexts/CentralStore';
+import { useScanOnly } from '../../../hooks/useScanOnly';
 import { logger } from '../../../utils/logger';
 
 interface ReceiveSplitModalProps {
@@ -54,7 +55,13 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
     t
 }) => {
     const { user } = useStore();
-    const [barcodeInput, setBarcodeInput] = useState<Record<string, string>>({});
+    const [barcodeInput, setBarcodeInput] = useState<{ [variantId: string]: string }>({});
+    const [activeVariantForScan, setActiveVariantForScan] = useState<string | null>(null);
+    const scanOnlyHandlers = useScanOnly((val) => {
+        if (activeVariantForScan) {
+            setBarcodeInput(prev => ({ ...prev, [activeVariantForScan]: val }));
+        }
+    });
     const [localSubmitting, setLocalSubmitting] = useState(false);
 
     const handleAddBarcode = (variantId: string) => {
@@ -281,13 +288,16 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
                                                     <input
                                                         type="text"
                                                         value={barcodeInput[variant.id] || ''}
+                                                        onFocus={() => setActiveVariantForScan(variant.id)}
                                                         onChange={(e) => setBarcodeInput(prev => ({ ...prev, [variant.id]: e.target.value }))}
                                                         onKeyDown={(e) => {
+                                                            scanOnlyHandlers.onKeyDown(e);
                                                             if (e.key === 'Enter') {
                                                                 e.preventDefault();
                                                                 handleAddBarcode(variant.id);
                                                             }
                                                         }}
+                                                        onPaste={scanOnlyHandlers.onPaste}
                                                         placeholder={t('warehouse.scanBarcodePlaceholder')}
                                                         className="woody-input !pl-10 font-mono py-2"
                                                         aria-label="New Barcode Input"

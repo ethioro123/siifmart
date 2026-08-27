@@ -376,7 +376,7 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
                                 title="Scan location or SKU barcode"
                                 value={inputVal}
                                 onChange={(e) => setInputVal(e.target.value)}
-                                onKeyDown={step === 'ITEM' ? scanOnlyHandlers.onKeyDown : undefined}
+                                onKeyDown={scanOnlyHandlers.onKeyDown}
                                 onPaste={scanOnlyHandlers.onPaste}
                                 className={`w-full bg-white dark:bg-[#1C2620] border-2 sm:border-3 rounded-2xl py-4 sm:py-5 px-4 text-center text-2xl sm:text-3xl font-black font-mono text-stone-900 dark:text-white placeholder:text-stone-300 dark:placeholder:text-stone-700 focus:outline-none shadow-xl transition-all duration-300 ${
                                     awaitingOccupancyConfirmation || awaitingMismatchConfirmation 
