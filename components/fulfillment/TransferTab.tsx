@@ -264,30 +264,42 @@ export const TransferTab: React.FC<TransferTabProps> = ({
 
 
     const renderTransferCenterTabs = () => (
-        <div className="flex bg-white/5 rounded-xl p-1 gap-1">
+        <div className="flex bg-stone-200/60 dark:bg-black/40 rounded-xl p-1 gap-1 border border-[#E2DCCE]/60 dark:border-white/5">
             {(activeSite?.type === 'HQ' || activeSite?.type === 'Administration' || ['super_admin', 'admin', 'warehouse_manager'].includes(user?.role || '')) && (
                 <button
                     onClick={() => { setTransferCenterTab('smart'); }}
-                    className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-bold transition-all ${transferCenterTab === 'smart' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
+                    className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all ${
+                        transferCenterTab === 'smart'
+                            ? 'bg-[#2C5E3B] text-white shadow-xs'
+                            : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white hover:bg-white/40 dark:hover:bg-white/5'
+                    }`}
                 >
-                    <Layout size={14} />
+                    <Layout size={13} />
                     Smart Replenish
                 </button>
             )}
             {(activeSite?.type === 'HQ' || activeSite?.type === 'Administration' || activeSite?.type === 'Warehouse' || activeSite?.type === 'Distribution Center' || ['super_admin', 'admin', 'warehouse_manager'].includes(user?.role || '')) && (
                 <button
                     onClick={() => setTransferCenterTab('bulk')}
-                    className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-bold transition-all ${transferCenterTab === 'bulk' ? 'bg-[#2C5E3B]/20 text-[#A9CBA2] border border-[#2C5E3B]/30' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
+                    className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all ${
+                        transferCenterTab === 'bulk'
+                            ? 'bg-[#2C5E3B] text-white shadow-xs'
+                            : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white hover:bg-white/40 dark:hover:bg-white/5'
+                    }`}
                 >
-                    <Layers size={14} />
+                    <Layers size={13} />
                     Bulk Push
                 </button>
             )}
             <button
                 onClick={() => setTransferCenterTab('request')}
-                className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-bold transition-all ${transferCenterTab === 'request' ? 'bg-cyber-primary/20 text-cyber-primary border border-cyber-primary/30' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
+                className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all ${
+                    transferCenterTab === 'request'
+                        ? 'bg-[#2C5E3B] text-white shadow-xs'
+                        : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white hover:bg-white/40 dark:hover:bg-white/5'
+                }`}
             >
-                <Plus size={14} />
+                <Plus size={13} />
                 Request
             </button>
         </div>

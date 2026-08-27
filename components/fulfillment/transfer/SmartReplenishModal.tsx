@@ -74,22 +74,22 @@ export const SmartReplenishModal: React.FC<SmartReplenishModalProps> = ({
         return true;
     });
 
+    const criticalCount = state.distHubLowStockItems.filter(item => (item.stock / (item.minStock || 1)) <= 0.3).length;
+    const stagedCount = state.dbDraftJobs.length;
+
     return (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/95 backdrop-blur-xl animate-in fade-in duration-300">
-            <div className="w-full h-full md:p-8 flex flex-col">
-                <div className="flex-1 bg-cyber-gray md:rounded-3xl border border-amber-500/20 shadow-[0_0_100px_rgba(245,158,11,0.1)] flex flex-col overflow-hidden relative">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-stone-950/80 backdrop-blur-md animate-in fade-in duration-200">
+            <div className="w-full h-full md:p-6 lg:p-8 flex flex-col max-w-[1700px] max-h-[1000px]">
+                <div className="flex-1 bg-stone-50 dark:bg-[#151D18] md:rounded-3xl border border-[#E2DCCE] dark:border-white/10 shadow-2xl flex flex-col overflow-hidden relative">
                     
                     {/* Header bar */}
                     <SmartReplenishHeader
                         distHubSectorIntegrity={state.distHubSectorIntegrity}
-                        formatMissionTime={state.formatMissionTime}
-                        distHubTimer={state.distHubTimer}
+                        criticalCount={criticalCount}
+                        stagedCount={stagedCount}
                         renderTabs={renderTabs}
                         onClose={onClose}
                     />
-
-                    {/* Tactical background Grid layout */}
-                    <div className="absolute inset-0 z-0 opacity-10 pointer-events-none bg-[linear-gradient(rgba(245,158,11,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(245,158,11,0.1)_1px,transparent_1px)] bg-[length:40px_40px]" />
 
                     <div className="flex-1 flex flex-col lg:flex-row overflow-hidden relative z-10">
                         {/* Left Panel: Store Needs List */}
@@ -142,3 +142,4 @@ export const SmartReplenishModal: React.FC<SmartReplenishModalProps> = ({
         </div>
     );
 };
+

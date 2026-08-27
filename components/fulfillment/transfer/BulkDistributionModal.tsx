@@ -272,21 +272,23 @@ export const BulkDistributionModal: React.FC<BulkDistributionModalProps> = ({
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/95 backdrop-blur-xl animate-in fade-in duration-300">
-            <div className="w-full h-full md:p-8 flex flex-col">
-                <div className="flex-1 bg-cyber-gray md:rounded-3xl border border-white/10 shadow-[0_0_100px_rgba(59,130,246,0.1)] flex flex-col overflow-hidden relative">
-                    <div className="p-6 border-b border-white/10 flex justify-between items-center bg-black/20">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-stone-950/80 backdrop-blur-md animate-in fade-in duration-200">
+            <div className="w-full h-full md:p-6 lg:p-8 flex flex-col max-w-[1700px] max-h-[1000px]">
+                <div className="flex-1 bg-stone-50 dark:bg-[#151D18] md:rounded-3xl border border-[#E2DCCE] dark:border-white/10 shadow-2xl flex flex-col overflow-hidden relative">
+                    <div className="p-4 md:p-6 border-b border-[#E2DCCE] dark:border-white/10 flex justify-between items-center bg-[#FAF8F5] dark:bg-[#1A231E]/80 shrink-0">
                         <div>
-                            <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                                <Layers className="text-[#A9CBA2]" />
-                                Bulk Distribution Center
+                            <h2 className="text-lg md:text-xl font-black text-stone-900 dark:text-white flex items-center gap-2 uppercase tracking-tight">
+                                <Layers className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
+                                Bulk Distribution <span className="text-[#2C5E3B] dark:text-[#A9CBA2]">Push</span>
                             </h2>
-                            <p className="text-gray-400 text-xs mt-1">Push stock to multiple locations simultaneously</p>
+                            <p className="text-stone-500 dark:text-stone-400 text-xs font-bold uppercase tracking-wider mt-0.5">Push stock from warehouse to multiple stores simultaneously</p>
                         </div>
-                        {renderTabs()}
-                        <button onClick={onClose} aria-label="Close Modal" className="p-2 hover:bg-white/10 rounded-lg text-gray-400 hover:text-white transition-colors">
-                            <X size={20} />
-                        </button>
+                        <div className="flex items-center gap-3">
+                            {renderTabs()}
+                            <button onClick={onClose} aria-label="Close Modal" className="w-9 h-9 flex items-center justify-center bg-white/80 dark:bg-white/5 hover:bg-stone-200 dark:hover:bg-white/10 rounded-xl text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white transition-colors border border-[#E2DCCE] dark:border-white/10 shadow-xs">
+                                <X size={16} />
+                            </button>
+                        </div>
                     </div>
 
                     <div className="p-6 space-y-6 overflow-y-auto flex-1 custom-scrollbar">
