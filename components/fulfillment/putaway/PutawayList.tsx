@@ -137,15 +137,15 @@ export const PutawayList: React.FC<PutawayListProps> = ({
                                         )}
                                     </div>
                                     <div className="flex items-center gap-2 mt-2 font-mono">
-                                        <div className="flex items-center gap-1.5 px-2.5 py-1 bg-stone-50 dark:bg-white/5 rounded-lg border border-stone-100 dark:border-white/5">
+                                        <div className="flex items-center gap-1.5 px-2.5 py-1 bg-stone-50 dark:bg-white/5 rounded-lg border border-[#E2DCCE]/60 dark:border-white/10">
                                             <div className="w-1.5 h-1.5 rounded-full bg-[#2C5E3B] dark:bg-[#A9CBA2] shadow-[0_0_8px_rgba(44,94,59,0.4)]" />
-                                            <span className="text-[9px] text-gray-550 dark:text-gray-450 font-black uppercase tracking-widest">
+                                            <span className="text-[9px] text-stone-700 dark:text-stone-300 font-black uppercase tracking-widest">
                                                 {job.items} {t('warehouse.items')}
                                             </span>
                                         </div>
-                                        <div className="flex items-center gap-1.5 px-2.5 py-1 bg-stone-50 dark:bg-white/5 rounded-lg border border-stone-100 dark:border-white/5">
-                                            <MapPin size={10} className="text-gray-400 dark:text-gray-500" />
-                                            <span className="text-[9px] text-gray-550 dark:text-gray-450 font-black uppercase tracking-widest truncate max-w-[120px]">
+                                        <div className="flex items-center gap-1.5 px-2.5 py-1 bg-stone-50 dark:bg-white/5 rounded-lg border border-[#E2DCCE]/60 dark:border-white/10">
+                                            <MapPin size={10} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
+                                            <span className="text-[9px] text-stone-700 dark:text-stone-300 font-black uppercase tracking-widest truncate max-w-[120px]">
                                                 {(() => {
                                                     const loc = (job as any).zone || job.location;
                                                     if (!loc) return t('warehouse.putaway.unassigned');
@@ -216,26 +216,26 @@ export const PutawayList: React.FC<PutawayListProps> = ({
                                                                 <span className="text-[11px] font-black text-white dark:text-[#A9CBA2]">{displayInitial}</span>
                                                             </div>
                                                             <div>
-                                                                <p className="text-[8px] font-black text-gray-450 dark:text-zinc-550 uppercase tracking-widest mb-0.5">{t('warehouse.putaway.worker')}</p>
-                                                                <p className="text-[10px] font-black text-gray-900 dark:text-[#EAE5D9] uppercase tracking-tight">{displayName}</p>
+                                                                <p className="text-[8px] font-black text-stone-400 dark:text-stone-500 uppercase tracking-widest mb-0.5">{t('warehouse.putaway.worker')}</p>
+                                                                <p className="text-[10px] font-black text-[#1E3F27] dark:text-[#EAE5D9] uppercase tracking-tight">{displayName}</p>
                                                             </div>
                                                         </div>
                                                     );
                                                 })()
                                             ) : (
                                                 <div className="flex items-center gap-3">
-                                                    <div className="w-9 h-9 rounded-xl bg-stone-200 dark:bg-white/5 flex items-center justify-center border border-stone-300 dark:border-white/10">
-                                                        <User size={18} className="text-gray-400 dark:text-gray-600" />
+                                                    <div className="w-9 h-9 rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/30 flex items-center justify-center">
+                                                        <User size={18} className="text-amber-600 dark:text-amber-400" />
                                                     </div>
                                                     <div>
-                                                        <p className="text-[8px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-0.5">{t('warehouse.assignedTo')}</p>
-                                                        <p className="text-[10px] font-black text-stone-400 dark:text-gray-800 uppercase italic">{t('warehouse.putaway.unassigned')}</p>
+                                                        <p className="text-[8px] font-black text-stone-400 dark:text-stone-500 uppercase tracking-widest mb-0.5">{t('warehouse.assignedTo')}</p>
+                                                        <p className="text-[10px] font-black text-amber-700 dark:text-amber-400 uppercase tracking-tight">{t('warehouse.putaway.unassigned')}</p>
                                                     </div>
                                                 </div>
                                             )}
                                         </div>
                                         <div className="flex flex-col items-end">
-                                            <p className="text-[8px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-0.5">Registered</p>
+                                            <p className="text-[8px] font-black text-stone-400 dark:text-stone-500 uppercase tracking-widest mb-0.5">{t('warehouse.putaway.registered')}</p>
                                             <div className="flex items-center gap-1.5 text-gray-900 dark:text-white">
                                                 <Clock size={12} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
                                                 <span className="text-[10px] font-black font-mono">
@@ -257,7 +257,7 @@ export const PutawayList: React.FC<PutawayListProps> = ({
                                     <button
                                         onClick={() => onShowDetails(job)}
                                         disabled={isSubmitting}
-                                        className="woody-btn-primary w-full h-14 text-[10px] uppercase tracking-[0.25em] flex items-center justify-center gap-3 active:scale-[0.98] group"
+                                        className="woody-btn-primary w-full h-14 text-[10px] uppercase tracking-[0.2em] flex items-center justify-center gap-3 active:scale-[0.98] group font-black"
                                     >
                                         {isSubmitting ? (
                                             <Loader2 size={20} className="animate-spin" />

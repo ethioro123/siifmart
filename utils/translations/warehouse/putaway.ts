@@ -9,7 +9,8 @@ export const putaway: TranslationBlock = {
     putawayOperations: { en: 'Putaway Operations', am: 'የማስቀመጫ ስራዎች', or: 'Hojiiwwan Meeshaa Bakka Kaa\'uu' },
     putawayJobs: { en: 'Putaway Jobs', am: 'የማስቀመጫ ስራዎች', or: 'Hojiiwwan Bakka Kaa\'uu' },
     itemsToPutaway: { en: 'Items to Putaway', am: 'ለማስቀመጥ ዕቃዎች', or: 'Meeshalee Bakka Kaa\'aman' },
-    storeReceivedGoods: { en: 'Store received goods in warehouse locations', am: 'የተቀበሉ እቃዎችን በመጋዘን ቦታዎች ውስጥ አከማች', or: 'Meeshalee fudhataman iddoo kuusaa keessa kaa\'i' },
+    storeReceivedGoods: { en: 'Start Putaway', am: 'ማስቀመጥ ጀምር', or: 'Bakka Kaa\'uu Jalqabi' },
+    registered: { en: 'Registered', am: 'የተመዘገበ', or: 'Galmaa\'e' },
 
     // Putaway Hub
     hubTitle: { en: 'Putaway Operations Hub', am: 'የማስቀመጫ ስራዎች ማዕከል', or: 'Wiirtuu Meeshaa Bakka Kaa\'uu' },
