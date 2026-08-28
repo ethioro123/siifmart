@@ -148,27 +148,32 @@ export function useSaleActions(deps: UseSaleActionsDeps) {
                 }
             }
 
-            // 5. Loyalty (Online Only for now)
-            if (customerId && settings.enableLoyalty !== false && navigator.onLine) {
-                try {
-                    const customer = customers.find(c => c.id === customerId);
-                    if (customer) {
-                        const loyaltyRate = settings.loyaltyPointsRate || 0;
-                        const pointsEarned = loyaltyRate > 0 ? Math.floor(subtotal / loyaltyRate) : 0;
-                        const currentPoints = customer.loyaltyPoints || 0;
-                        const redeemed = pointsRedeemed || 0;
-                        const newLoyaltyPoints = Math.max(0, currentPoints + pointsEarned - redeemed);
+            // 5. Loyalty Points (Optimistic local calculation + online sync)
+            if (customerId && settings.enableLoyalty !== false) {
+                const customer = customers.find(c => c.id === customerId);
+                if (customer) {
+                    const loyaltyRate = settings.loyaltyPointsRate || 0;
+                    const pointsEarned = loyaltyRate > 0 ? Math.floor(subtotal / loyaltyRate) : 0;
+                    const currentPoints = customer.loyaltyPoints || 0;
+                    const redeemed = pointsRedeemed || 0;
+                    const newLoyaltyPoints = Math.max(0, currentPoints + pointsEarned - redeemed);
+                    const newTotalSpent = (customer.totalSpent || 0) + total;
 
-                        await customersService.update(customerId, {
-                            loyaltyPoints: newLoyaltyPoints,
-                            totalSpent: (customer.totalSpent || 0) + total,
-                            lastVisit: new Date().toISOString()
-                        });
+                    setCustomers(prev => prev.map(c =>
+                        c.id === customerId ? { ...c, loyaltyPoints: newLoyaltyPoints, totalSpent: newTotalSpent, lastVisit: new Date().toISOString() } : c
+                    ));
 
-                        setCustomers(prev => prev.map(c => c.id === customerId ? { ...c, loyaltyPoints: newLoyaltyPoints, totalSpent: (c.totalSpent || 0) + total, lastVisit: new Date().toISOString() } : c));
+                    if (navigator.onLine) {
+                        try {
+                            await customersService.update(customerId, {
+                                loyaltyPoints: newLoyaltyPoints,
+                                totalSpent: newTotalSpent,
+                                lastVisit: new Date().toISOString()
+                            });
+                        } catch (e) {
+                            logger.warn('useSaleActions', "Online loyalty sync failed, queued for background sync", { error: String(e) });
+                        }
                     }
-                } catch (e) {
-                    logger.error('useSaleActions', "Loyalty update failed", e);
                 }
             }
 

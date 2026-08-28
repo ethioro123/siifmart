@@ -34,10 +34,22 @@ interface POSDB extends DBSchema {
         value: HeldOrder;
         indexes: { 'by-time': string };
     };
+    cached_products: {
+        key: string;
+        value: { siteId: string; products: any[]; updatedAt: string };
+    };
+    cached_customers: {
+        key: string;
+        value: { customers: any[]; updatedAt: string };
+    };
+    cached_settings: {
+        key: string;
+        value: { settings: any; updatedAt: string };
+    };
 }
 
 const DB_NAME = 'siifmart-pos-db-v2';
-const DB_VERSION = 3;
+const DB_VERSION = 4;
 
 class POSDBService {
     private db: IDBPDatabase<POSDB> | null = null;
@@ -107,6 +119,18 @@ class POSDBService {
                         if (!db.objectStoreNames.contains('held_orders')) {
                             const holdStore = db.createObjectStore('held_orders', { keyPath: 'id' });
                             holdStore.createIndex('by-time', 'time');
+                        }
+                        // Offline Products Store
+                        if (!db.objectStoreNames.contains('cached_products')) {
+                            db.createObjectStore('cached_products', { keyPath: 'siteId' });
+                        }
+                        // Offline Customers Store
+                        if (!db.objectStoreNames.contains('cached_customers')) {
+                            db.createObjectStore('cached_customers');
+                        }
+                        // Offline Settings Store
+                        if (!db.objectStoreNames.contains('cached_settings')) {
+                            db.createObjectStore('cached_settings');
                         }
                     },
                     blocked: () => {
@@ -345,7 +369,83 @@ class POSDBService {
             console.warn(`POSDB: Gracefully skipping removeHeldOrder(${id})`);
         }
     }
-}
 
+    // ═══════════════════════════════════════════════════════════════
+    // OFFLINE CATALOG & CACHE OPERATIONS
+    // ═══════════════════════════════════════════════════════════════
+
+    async cacheProducts(siteId: string, products: any[]) {
+        if (DISABLE_IDB || this.disabled || !siteId) return;
+        try {
+            const db = await this.getDB();
+            await db.put('cached_products', {
+                siteId,
+                products,
+                updatedAt: new Date().toISOString()
+            });
+        } catch {
+            console.warn('POSDB: Gracefully skipping cacheProducts');
+        }
+    }
+
+    async getCachedProducts(siteId: string): Promise<any[]> {
+        if (DISABLE_IDB || this.disabled || !siteId) return [];
+        try {
+            const db = await this.getDB();
+            const record = await db.get('cached_products', siteId);
+            return record?.products || [];
+        } catch {
+            return [];
+        }
+    }
+
+    async cacheCustomers(customers: any[]) {
+        if (DISABLE_IDB || this.disabled) return;
+        try {
+            const db = await this.getDB();
+            await db.put('cached_customers', {
+                customers,
+                updatedAt: new Date().toISOString()
+            }, 'all');
+        } catch {
+            console.warn('POSDB: Gracefully skipping cacheCustomers');
+        }
+    }
+
+    async getCachedCustomers(): Promise<any[]> {
+        if (DISABLE_IDB || this.disabled) return [];
+        try {
+            const db = await this.getDB();
+            const record = await db.get('cached_customers', 'all');
+            return record?.customers || [];
+        } catch {
+            return [];
+        }
+    }
+
+    async cacheSettings(settings: any) {
+        if (DISABLE_IDB || this.disabled) return;
+        try {
+            const db = await this.getDB();
+            await db.put('cached_settings', {
+                settings,
+                updatedAt: new Date().toISOString()
+            }, 'all');
+        } catch {
+            console.warn('POSDB: Gracefully skipping cacheSettings');
+        }
+    }
+
+    async getCachedSettings(): Promise<any | null> {
+        if (DISABLE_IDB || this.disabled) return null;
+        try {
+            const db = await this.getDB();
+            const record = await db.get('cached_settings', 'all');
+            return record?.settings || null;
+        } catch {
+            return null;
+        }
+    }
+}
 
 export const posDB = new POSDBService();

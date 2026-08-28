@@ -1,15 +1,44 @@
-
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { posDB } from '../services/db/pos.db';
-import { salesService } from '../services/supabase.service';
+import { salesService, customersService } from '../services/supabase.service';
 import { supabase } from '../lib/supabase';
 import { logger } from '../utils/logger';
 
 export type SyncStatus = 'synced' | 'syncing' | 'offline' | 'error' | 'pending';
 
-export const usePosSync = (onSyncComplete?: (count: number) => void) => {
-    const [syncStatus, setSyncStatus] = useState<SyncStatus>('synced');
-    const [pendingCount, setPendingCount] = useState(0);
+export interface UsePosSyncReturn {
+    syncStatus: SyncStatus;
+    pendingCount: number;
+    lastSyncedAt: string | null;
+    isOnline: boolean;
+    triggerSync: () => Promise<void>;
+    checkQueue: () => Promise<void>;
+}
+
+export const usePosSync = (onSyncComplete?: (count: number) => void): UsePosSyncReturn => {
+    const [syncStatus, setSyncStatus] = useState<SyncStatus>(navigator.onLine ? 'synced' : 'offline');
+    const [pendingCount, setPendingCount] = useState<number>(0);
+    const [lastSyncedAt, setLastSyncedAt] = useState<string | null>(null);
+    const [isOnline, setIsOnline] = useState<boolean>(navigator.onLine);
+    const isSyncingRef = useRef<boolean>(false);
+
+    // Active heartbeat to verify genuine internet reachability
+    const pingServer = useCallback(async (): Promise<boolean> => {
+        if (!navigator.onLine) return false;
+        try {
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), 4000);
+            const res = await fetch('/favicon.svg?ping=' + Date.now(), {
+                method: 'HEAD',
+                cache: 'no-store',
+                signal: controller.signal
+            });
+            clearTimeout(timeout);
+            return res.ok || res.status === 304;
+        } catch {
+            return false;
+        }
+    }, []);
 
     // Check queue status
     const checkQueue = useCallback(async () => {
@@ -21,34 +50,46 @@ export const usePosSync = (onSyncComplete?: (count: number) => void) => {
                 if (pending.length > 0 && navigator.onLine && prev !== 'syncing') {
                     return 'pending';
                 }
+                if (!navigator.onLine) return 'offline';
+                if (pending.length === 0 && prev !== 'syncing') return 'synced';
                 return prev;
             });
         } catch (err: any) {
-            // If DB is disabled, silently ignore
-            if (err?.message?.includes('disabled')) {
-                return;
-            }
-            // Otherwise log only once (not on every interval)
-            if (Math.random() < 0.1) { // 10% sampling to reduce spam
-                logger.warn('usePosSync', 'POS sync queue check failed:');
-            }
+            if (err?.message?.includes('disabled')) return;
+            logger.warn('usePosSync', 'POS sync queue check failed');
         }
     }, []);
 
     // Main Sync Process
     const processQueue = useCallback(async () => {
+        if (isSyncingRef.current) return;
+
         if (!navigator.onLine) {
+            setIsOnline(false);
             setSyncStatus('offline');
             return;
         }
 
         try {
+            isSyncingRef.current = true;
             const pending = await posDB.getPendingOperations();
+            setPendingCount(pending.length);
+
             if (pending.length === 0) {
                 setSyncStatus('synced');
+                setIsOnline(true);
                 return;
             }
 
+            // Verify live reachability before starting bulk sync
+            const reachable = await pingServer();
+            if (!reachable) {
+                setIsOnline(false);
+                setSyncStatus('offline');
+                return;
+            }
+
+            setIsOnline(true);
             setSyncStatus('syncing');
 
             let successfulSyncs = 0;
@@ -56,16 +97,13 @@ export const usePosSync = (onSyncComplete?: (count: number) => void) => {
             for (const op of pending) {
                 try {
                     if (op.type === 'CREATE_SALE') {
-                        // Extract payload
                         const salePayload = op.payload;
                         const { items, ...saleData } = salePayload;
 
-                        // Send sale to Supabase
+                        // 1. Send sale to Supabase
                         await salesService.create(saleData, items);
 
-                        // Atomically decrement stock per item using a DB-level RPC.
-                        // This is safe for concurrent offline terminals — uses GREATEST(0, stock - qty)
-                        // so two terminals selling the same item offline won't double-deduct.
+                        // 2. Atomic stock decrement per item
                         if (items && Array.isArray(items)) {
                             for (const item of items) {
                                 try {
@@ -79,11 +117,30 @@ export const usePosSync = (onSyncComplete?: (count: number) => void) => {
                                         p_sale_date: salePayload.date || new Date().toISOString()
                                     });
                                     if (rpcErr) {
-                                        logger.warn('usePosSync', `⚠️ Atomic stock decrement failed for ${item.name || item.id} (non-blocking):`);
+                                        logger.warn('usePosSync', `⚠️ Stock decrement failed for ${item.name || item.id}`);
                                     }
                                 } catch (stockErr) {
-                                    logger.warn('usePosSync', `⚠️ Stock decrement failed for ${item.name || item.id} during sync (non-blocking):`);
+                                    logger.warn('usePosSync', `⚠️ Stock decrement failed for ${item.name || item.id}`);
                                 }
+                            }
+                        }
+
+                        // 3. Customer loyalty points reconciliation
+                        if (salePayload.customerId && salePayload.total) {
+                            try {
+                                const customer = await customersService.getById(salePayload.customerId);
+                                if (customer) {
+                                    const loyaltyRate = 100; // 1 point per 100 spent
+                                    const earned = Math.floor(salePayload.total / loyaltyRate);
+                                    const updatedPoints = (customer.loyaltyPoints || 0) + earned;
+                                    await customersService.update(salePayload.customerId, {
+                                        loyaltyPoints: updatedPoints,
+                                        totalSpent: (customer.totalSpent || 0) + salePayload.total,
+                                        lastVisit: salePayload.date || new Date().toISOString()
+                                    });
+                                }
+                            } catch (custErr) {
+                                logger.warn('usePosSync', 'Failed to update customer loyalty on sync');
                             }
                         }
                     }
@@ -95,21 +152,11 @@ export const usePosSync = (onSyncComplete?: (count: number) => void) => {
                 } catch (err: any) {
                     logger.error('usePosSync', `Failed to sync POS op ${op.id}`, err);
 
-                    // If it's a constraint violation (corrupted data), remove it from queue
-                    if (err?.code === '23502' || err?.message?.includes('violates not-null constraint')) {
-                        logger.warn('usePosSync', `⚠️ Removing corrupted sync entry ${op.id} - data integrity issue`);
-                        if (op.id) await posDB.removeOperation(op.id);
-                        // Don't count corrupted data drops as "successful syncs" for the UI alert
-                    }
-                    // If it's a duplicate key error (sale already synced previously), treat as success
-                    else if (err?.code === '23505' || err?.message?.includes('duplicate key')) {
-                        logger.warn('usePosSync', `✅ Removing duplicate sync entry ${op.id} - sale already exists in database`);
+                    // If it's a duplicate key or constraint error, gracefully remove
+                    if (err?.code === '23505' || err?.message?.includes('duplicate key')) {
                         if (op.id) await posDB.removeOperation(op.id);
                         successfulSyncs++;
-                    }
-                    // If it's an RLS violation (sale was partially created by a previous attempt), remove the stuck entry
-                    else if (err?.code === '42501' || err?.message?.includes('row-level security')) {
-                        logger.warn('usePosSync', `✅ Removing stuck sync entry ${op.id} - RLS conflict (sale likely already exists)`);
+                    } else if (err?.code === '23502' || err?.code === '42501') {
                         if (op.id) await posDB.removeOperation(op.id);
                         successfulSyncs++;
                     }
@@ -120,45 +167,51 @@ export const usePosSync = (onSyncComplete?: (count: number) => void) => {
             const remaining = await posDB.getPendingOperations();
             setPendingCount(remaining.length);
             setSyncStatus(remaining.length === 0 ? 'synced' : 'error');
+            setLastSyncedAt(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
 
             if (successfulSyncs > 0 && remaining.length === 0 && onSyncComplete) {
                 onSyncComplete(successfulSyncs);
             }
 
         } catch (err: any) {
-            // If DB is disabled, silently set to synced (online-only mode)
             if (err?.message?.includes('disabled')) {
                 setSyncStatus('synced');
                 return;
             }
             logger.error('usePosSync', 'Core POS sync process failed', err as Error);
             setSyncStatus('error');
+        } finally {
+            isSyncingRef.current = false;
         }
-    }, []);
+    }, [pingServer, onSyncComplete]);
 
-    // Effect: Network Listeners
+    // Effect: Network Listeners & Periodic Sync
     useEffect(() => {
         const handleOnline = () => {
+            setIsOnline(true);
             setSyncStatus('pending');
             processQueue();
         };
-        const handleOffline = () => setSyncStatus('offline');
+        const handleOffline = () => {
+            setIsOnline(false);
+            setSyncStatus('offline');
+        };
 
         window.addEventListener('online', handleOnline);
         window.addEventListener('offline', handleOffline);
 
-        // Initial check
         checkQueue();
         if (navigator.onLine) {
             processQueue();
         } else {
+            setIsOnline(false);
             setSyncStatus('offline');
         }
 
-        // Periodic check (every 30s)
+        // Periodic sync check every 25s
         const interval = setInterval(() => {
             if (navigator.onLine) processQueue();
-        }, 30000);
+        }, 25000);
 
         return () => {
             window.removeEventListener('online', handleOnline);
@@ -167,15 +220,17 @@ export const usePosSync = (onSyncComplete?: (count: number) => void) => {
         };
     }, [checkQueue, processQueue]);
 
-    // Force Sync function
-    const triggerSync = () => {
-        if (navigator.onLine) processQueue();
+    const triggerSync = async () => {
+        await processQueue();
     };
 
     return {
         syncStatus,
         pendingCount,
+        lastSyncedAt,
+        isOnline,
         triggerSync,
         checkQueue
     };
 };
+

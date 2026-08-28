@@ -8,6 +8,7 @@ import { POSHeader } from './components/POSHeader';
 import { POSDepartments } from './components/POSDepartments';
 import { POSCatalog } from './components/POSCatalog';
 import { POSFilterSidebar } from './components/POSFilterSidebar';
+import { POSOfflineBanner } from './components/POSOfflineBanner';
 
 const ITEMS_PER_PAGE = 24;
 
@@ -39,10 +40,9 @@ export const POSProductGrid: React.FC = () => {
 
     const activeFiltersCount = useMemo(() => {
         let count = 0;
-        if (selectedDepartment !== 'All') count++;
-        if (selectedCategory !== 'All') count++;
-        if (minPriceFilter !== '') count++;
-        if (maxPriceFilter !== '') count++;
+        if (selectedDepartment) count++;
+        if (selectedCategory) count++;
+        if (minPriceFilter || maxPriceFilter) count++;
         if (selectedBrands.length > 0) count++;
         if (selectedVelocities.length > 0) count++;
         if (stockStatusFilter !== 'all') count++;
@@ -65,6 +65,7 @@ export const POSProductGrid: React.FC = () => {
 
     return (
         <div className="flex-1 flex flex-col bg-white/85 dark:bg-[#18201B]/60 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-[32px] overflow-hidden pb-20 lg:pb-0 shadow-[0_24px_80px_-12px_rgba(34,50,38,0.06)] dark:shadow-[0_32px_96px_-12px_rgba(5,8,6,0.65)] lg:backdrop-blur-2xl transition-all duration-300 relative">
+            <POSOfflineBanner />
             <div className="absolute inset-0 bg-gradient-to-b from-[#2C5E3B]/5 to-transparent pointer-events-none" />
             <div className="p-4 border-b border-white/5 space-y-4">
                 {/* Header elements search barcode warnings and trophy sync badges */}

@@ -171,6 +171,7 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
         p.category?.toLowerCase() === 'alcohol' ? { ...p, category: 'Beverages' } : p
       );
       setProducts(finalProducts);
+      if (activeSiteId) posDB.cacheProducts(activeSiteId, finalProducts);
     }
     if (queries.employees.data) setEmployees(queries.employees.data);
     if (queries.orders.data) setOrders(queries.orders.data);
@@ -181,15 +182,14 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
       }));
       setSales(sanitizedSales);
     }
-    if (queries.customers.data) setCustomers(queries.customers.data);
+    if (queries.customers.data) {
+      setCustomers(queries.customers.data);
+      posDB.cacheCustomers(queries.customers.data);
+    }
     if (queries.suppliers.data) setSuppliers(queries.suppliers.data);
-
     if (queries.movements.data) setMovements(queries.movements.data);
-
-
     if (queries.storePoints.data) setStorePoints(queries.storePoints.data);
     if (queries.tasks.data) setTasks(queries.tasks.data);
-
     if (queries.expenses.data) setExpenses(queries.expenses.data);
     if (queries.systemLogs.data) setSystemLogs(queries.systemLogs.data);
 
@@ -203,6 +203,18 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
     queries.systemLogs.data, queries.suppliers.data, queries.customers.data,
     queries.movements.data, queries.isLoadingCritical, activeSiteId, sites
   ]);
+
+  // Offline cold-start hydration from posDB
+  useEffect(() => {
+    if (!navigator.onLine && activeSiteId) {
+      posDB.getCachedProducts(activeSiteId).then(cached => {
+        if (cached && cached.length > 0) setProducts(cached);
+      });
+      posDB.getCachedCustomers().then(cached => {
+        if (cached && cached.length > 0) setCustomers(cached);
+      });
+    }
+  }, [activeSiteId]);
 
 
 
