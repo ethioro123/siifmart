@@ -1,7 +1,7 @@
 # SIIFMART Enterprise WMS & POS
 
 > **Retail & Warehouse Operating System**
-> Unified Multi-Platform Application: **Web App** • **PC Desktop App** • **Android Mobile App**
+> Unified Multi-Platform Application: **Web App** • **PC Desktop App** • **Android Mobile App** • **iOS (iPhone/iPad) App**
 
 ---
 
@@ -68,6 +68,24 @@ Mobile & handheld scanner app for warehouse picking, packing, receiving, dispatc
 
 ---
 
+### 4. 🍏 iOS App for iPhone & iPad (Capacitor + Xcode)
+Native iOS app for iPhone & iPad with native camera barcode scanning, haptics, and offline storage.
+
+- **Sync Web Assets to iOS**:
+  ```bash
+  npm run ios:sync
+  ```
+- **Open Project in Xcode (Run on iPhone / Simulator)**:
+  ```bash
+  npm run ios:open
+  ```
+- **Build iOS Project via CLI**:
+  ```bash
+  npm run ios:build
+  ```
+
+---
+
 ## 🧪 Testing & Code Quality
 
 - **Run Unit Tests**:
@@ -88,7 +106,8 @@ Mobile & handheld scanner app for warehouse picking, packing, receiving, dispatc
 ## 📁 Repository Structure
 
 ```
-├── android/          → Official Capacitor Android Project
+├── android/          → Official Capacitor Android Native Project
+├── ios/              → Official Capacitor iOS (iPhone/iPad) Native Project
 ├── components/       → Reusable UI & Feature Components
 ├── contexts/         → Global Central Store & Data Contexts
 ├── electron/         → Native Electron Main, Preload & Printer Process
