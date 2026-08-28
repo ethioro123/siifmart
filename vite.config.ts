@@ -19,7 +19,15 @@ export default defineConfig(() => {
         // Use polling to prevent rapid file change detection
         usePolling: true,
         interval: 5000, // Check every 5 seconds instead of instantly
-        ignored: ['**/node_modules/**', '**/.git/**', '**/dist/**', '**/dist-electron/**'],
+        ignored: [
+          '**/node_modules/**',
+          '**/.git/**',
+          '**/dist/**',
+          '**/dist-electron/**',
+          '**/scratch/**',
+          '**/release/**',
+          '**/build/**'
+        ],
       },
       hmr: {
         overlay: true,
