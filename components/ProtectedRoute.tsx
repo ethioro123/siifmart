@@ -3,6 +3,7 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { useStore } from '../contexts/CentralStore';
 import { useData } from '../contexts/DataContext';
 import { canAccessModule, hasPermission, PERMISSIONS } from '../utils/permissions';
+import { native } from '../utils/native';
 import { logger } from '../utils/logger';
 
 interface ProtectedRouteProps {
@@ -30,6 +31,16 @@ export function ProtectedRoute({
   // 1. Check authentication
   if (!user) {
     return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  // 1.5. Clean Mobile / Android Mode: Strictly limit to Fulfillment and POS
+  if (native.isCleanMobileMode()) {
+    const allowedMobileModules = ['warehouse', 'pos', 'inventory', 'profile', 'location'];
+    if (module && !allowedMobileModules.includes(module)) {
+      const siteType = activeSite?.type || '';
+      const isWarehouse = ['Warehouse', 'Distribution Center', 'WMS', 'Fulfillment Center'].includes(siteType);
+      return <Navigate to={redirectTo || (isWarehouse ? "/wms-ops" : "/pos")} replace />;
+    }
   }
 
   // 2. Check site-type content isolation (NOT for CEO/super_admin — they see all modules)

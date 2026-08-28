@@ -28,6 +28,18 @@ const queryClient = new QueryClient({
 
 const persister = createIDBPersister();
 
+// Automatically purge stale Service Worker registrations when running on native Android/Capacitor
+if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator) {
+  const isCapacitor = (window as any).Capacitor?.isNativePlatform?.() || (window as any).Capacitor?.getPlatform?.() === 'android';
+  if (isCapacitor) {
+    navigator.serviceWorker.getRegistrations().then(registrations => {
+      for (const reg of registrations) {
+        reg.unregister();
+      }
+    });
+  }
+}
+
 const rootElement = document.getElementById('root');
 if (!rootElement) {
   throw new Error("Could not find root element to mount to");

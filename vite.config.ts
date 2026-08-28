@@ -8,6 +8,7 @@ import renderer from 'vite-plugin-electron-renderer';
 
 export default defineConfig(() => {
   const isElectron = process.env.ELECTRON === 'true' || process.env.npm_lifecycle_event?.includes('electron');
+  const isCapacitor = process.env.CAPACITOR === 'true' || process.env.npm_lifecycle_event?.includes('android');
 
   return {
     base: isElectron ? './' : '/',
@@ -56,7 +57,7 @@ export default defineConfig(() => {
           }
         ]),
         renderer()
-      ] : [
+      ] : isCapacitor ? [] : [
         VitePWA({
           registerType: 'autoUpdate',
           includeAssets: ['favicon.svg', 'robots.txt'],

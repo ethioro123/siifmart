@@ -122,7 +122,10 @@ export default function Sidebar() {
       const isWarehouse = ['Warehouse', 'Distribution Center', 'WMS', 'Fulfillment Center'].includes(siteType);
       const isHQ = !isStore && !isWarehouse;
 
-      let isAllowedForSite = true;
+      if (native.isCleanMobileMode()) {
+        // On Mobile/Android: strictly provide Fulfillment, POS, and Inventory
+        return hasRole && ['/wms-ops', '/pos', '/inventory', '/pos-dashboard', '/wms-dashboard'].includes(item.to);
+      }
 
       if (isWarehouse) {
         // In WMS site: strictly WMS & Inventory menu options ONLY. Hide Administration HQ & POS.
@@ -143,12 +146,6 @@ export default function Sidebar() {
 
       return hasRole && isAllowedForSite;
     });
-
-    // --- ANDROID & CLEAN MOBILE RESTRICTIONS (FULFILLMENT & POS ONLY) ---
-    if (native.isCleanMobileMode()) {
-      const allowedMobilePaths = ['/wms-ops', '/pos', '/inventory', '/pos-dashboard', '/wms-dashboard'];
-      filteredItems = filteredItems.filter(item => allowedMobilePaths.includes(item.to));
-    }
 
     return filteredItems;
   };
