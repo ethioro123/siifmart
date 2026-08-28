@@ -25,8 +25,7 @@ class MainActivity : AppCompatActivity() {
     // For real device: Use your computer's IP address on same WiFi network
     // For emulator: Use http://10.0.2.2:3000
     // For production: Use your deployed URL
-    private val webAppUrl = "http://192.168.0.241:3000" // Local development
-    // private val webAppUrl = "http://10.0.2.2:3000" // Android Emulator
+    private val webAppUrl = "http://10.0.2.2:3000" // Android Emulator localhost alias
     // private val webAppUrl = "https://siifmart-app.vercel.app" // Production URL
 
     
