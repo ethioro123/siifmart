@@ -11,6 +11,7 @@ node_modules
 dist
 dist-ssr
 dist-electron
+dev-dist
 release
 *.local
 
@@ -25,8 +26,9 @@ release
 *.sln
 *.sw?
 
-# Android App (optional - can be kept in repo or excluded)
-# android-app/
+# Scratch scripts (keep .gitkeep only)
+scratch/*
+!scratch/.gitkeep
 
 # API Keys and Secrets
 docs/OPENROUTER_API_KEY.md
@@ -34,5 +36,5 @@ docs/*_API_KEY.md
 .env.local
 .env.*.local
 
-# AI Session Backups
+# Backups
 .backups/

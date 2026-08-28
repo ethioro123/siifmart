@@ -1,20 +1,104 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# SIIFMART Enterprise WMS & POS
 
-# Run and deploy your AI Studio app
+> **Retail & Warehouse Operating System**
+> Unified Multi-Platform Application: **Web App** • **PC Desktop App** • **Android Mobile App**
 
-This contains everything you need to run your app locally.
+---
 
-View your app in AI Studio: https://ai.studio/apps/drive/1vM241d1FEEi_7R-1GMGXQDJz1K3hL_Ui
+## 🎯 Supported Platform Targets
 
-## Run Locally
+### 1. 🌐 Web App (Vite + React SPA / PWA)
+- **Development Server**:
+  ```bash
+  npm run dev
+  ```
+- **Production Build**:
+  ```bash
+  npm run build
+  ```
+- **Local Preview**:
+  ```bash
+  npm run preview
+  ```
 
-**Prerequisites:**  Node.js
+---
 
+### 2. 🖥️ PC Desktop App (Electron)
+Cross-platform desktop application for Cashier POS stations, Manager HQ, and Warehouse terminals.
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+- **Desktop Development Mode**:
+  ```bash
+  npm run electron:dev
+  ```
+- **Build All Desktop Installers**:
+  ```bash
+  npm run electron:build
+  ```
+- **Platform-Specific Builds**:
+  - **macOS** (`.dmg`, `.zip` with Apple Silicon & Intel support):
+    ```bash
+    npm run electron:build:mac
+    ```
+  - **Windows** (NSIS installer & portable `.exe`):
+    ```bash
+    npm run electron:build:win
+    ```
+  - **Linux** (`.AppImage`, `.deb`, `.rpm`):
+    ```bash
+    npm run electron:build:linux
+    ```
+
+---
+
+### 3. 📱 Android Mobile App (Capacitor)
+Mobile & handheld scanner app for warehouse picking, packing, receiving, dispatch, and mobile POS.
+
+- **Sync Web Assets to Android**:
+  ```bash
+  npm run android:sync
+  ```
+- **Build Android APK**:
+  ```bash
+  npm run android:build
+  ```
+- **Open in Android Studio**:
+  ```bash
+  npm run android:open
+  ```
+
+---
+
+## 🧪 Testing & Code Quality
+
+- **Run Unit Tests**:
+  ```bash
+  npm test
+  ```
+- **Type Checking**:
+  ```bash
+  npx tsc --noEmit
+  ```
+- **File Size Verification (Strict 500-line limit)**:
+  ```bash
+  npm run lint:size
+  ```
+
+---
+
+## 📁 Repository Structure
+
+```
+├── android/          → Official Capacitor Android Project
+├── components/       → Reusable UI & Feature Components
+├── contexts/         → Global Central Store & Data Contexts
+├── electron/         → Native Electron Main, Preload & Printer Process
+├── hooks/            → React Custom Mutation & Query Hooks
+├── migrations/       → Supabase SQL Schema Migrations
+├── pages/            → Lazy-loaded Page Routes
+├── public/           → Vector SVGs, Web Icons, Favicons & Manifest
+├── schemas/          → Database & Validation Schema Registry
+├── services/         → Supabase & Offline Service Layer
+├── tests/            → Vitest Unit & Playwright E2E Tests
+├── types/            → Strict TypeScript Types & Interfaces
+└── utils/            → Shared Business Logic, Role & Formatting Utils
+```
