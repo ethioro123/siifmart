@@ -46,63 +46,141 @@ export const DesktopAppDownloadModal: React.FC<DesktopAppDownloadModalProps> = (
     }, []);
 
     const [selectedOS, setSelectedOS] = useState<OSPlatform>(detectedOS.os);
+    const [selectedVariant, setSelectedVariant] = useState<string>('default');
     const [copiedCommand, setCopiedCommand] = useState(false);
 
-    const platforms: Record<OSPlatform, PlatformInfo> = {
+    const platforms: Record<OSPlatform, {
+        label: string;
+        icon: any;
+        variants: Array<{
+            id: string;
+            label: string;
+            filename: string;
+            downloadUrl: string;
+            format: string;
+            size: string;
+            recommended?: boolean;
+        }>;
+        instructions: string[];
+    }> = {
         mac: {
-            os: 'mac',
-            arch: detectedOS.arch,
-            label: detectedOS.arch === 'arm64' ? 'macOS (Apple Silicon M1/M2/M3/M4)' : 'macOS (Intel Core)',
+            label: 'macOS',
             icon: Apple,
-            filename: `SIIFMART WMS & POS-3.5.3-${detectedOS.arch}.dmg`,
-            downloadUrl: `/release/SIIFMART WMS & POS-3.5.3-${detectedOS.arch}.dmg`,
-            format: 'Apple Disk Image (.dmg)',
-            size: '~154 MB',
+            variants: [
+                {
+                    id: 'arm64',
+                    label: 'Apple Silicon (M1/M2/M3/M4)',
+                    filename: 'SIIFMART WMS & POS-3.5.3-arm64.dmg',
+                    downloadUrl: '/release/SIIFMART WMS & POS-3.5.3-arm64.dmg',
+                    format: 'Apple Disk Image (.dmg)',
+                    size: '~154 MB',
+                    recommended: detectedOS.arch === 'arm64'
+                },
+                {
+                    id: 'zip-arm64',
+                    label: 'Apple Silicon (Standalone ZIP)',
+                    filename: 'SIIFMART WMS & POS-3.5.3-arm64-mac.zip',
+                    downloadUrl: '/release/SIIFMART WMS & POS-3.5.3-arm64-mac.zip',
+                    format: 'Portable ZIP Archive (.zip)',
+                    size: '~154 MB'
+                },
+                {
+                    id: 'x64',
+                    label: 'Intel Mac (x64)',
+                    filename: 'SIIFMART WMS & POS-3.5.3-x64.dmg',
+                    downloadUrl: '/release/SIIFMART WMS & POS-3.5.3-x64.dmg',
+                    format: 'Apple Disk Image (.dmg)',
+                    size: '~158 MB',
+                    recommended: detectedOS.arch === 'x64'
+                }
+            ],
             instructions: [
-                'Download and open the .dmg installer file',
-                'Drag the SIIFMART icon into your Applications folder',
-                'Launch SIIFMART WMS & POS from Spotlight or Launchpad'
+                'Download the .dmg installer package for your Mac',
+                'Open the DMG and drag SIIFMART into your Applications folder',
+                'Launch from Launchpad or Spotlight search'
             ]
         },
         windows: {
-            os: 'windows',
-            arch: 'x64',
-            label: 'Windows 10 / 11 (64-bit)',
+            label: 'Windows',
             icon: Monitor,
-            filename: 'SIIFMART WMS & POS Setup 3.5.3.exe',
-            downloadUrl: '/release/SIIFMART WMS & POS Setup 3.5.3.exe',
-            format: 'NSIS Windows Installer (.exe)',
-            size: '~148 MB',
+            variants: [
+                {
+                    id: 'nsis-x64',
+                    label: 'Windows 64-bit Installer',
+                    filename: 'SIIFMART WMS & POS Setup 3.5.3.exe',
+                    downloadUrl: '/release/SIIFMART WMS & POS Setup 3.5.3.exe',
+                    format: 'NSIS Setup (.exe)',
+                    size: '~148 MB',
+                    recommended: true
+                },
+                {
+                    id: 'portable-x64',
+                    label: 'Windows Portable (No Install)',
+                    filename: 'SIIFMART-WMS-POS-3.5.3-Portable.exe',
+                    downloadUrl: '/release/SIIFMART-WMS-POS-3.5.3-Portable.exe',
+                    format: 'Standalone (.exe)',
+                    size: '~140 MB'
+                },
+                {
+                    id: 'arm64',
+                    label: 'Windows on ARM (Surface Pro)',
+                    filename: 'SIIFMART WMS & POS Setup 3.5.3-arm64.exe',
+                    downloadUrl: '/release/SIIFMART WMS & POS Setup 3.5.3-arm64.exe',
+                    format: 'ARM64 Setup (.exe)',
+                    size: '~146 MB'
+                }
+            ],
             instructions: [
-                'Download and run the .exe setup installer',
-                'Follow the setup wizard to install desktop shortcuts',
-                'Launch SIIFMART to connect to local receipt printers & COM cash drawers'
+                'Download the .exe installer',
+                'Run the setup wizard to install desktop & start menu shortcuts',
+                'Connects automatically to local receipt printers and COM drawers'
             ]
         },
         linux: {
-            os: 'linux',
-            arch: 'x64',
-            label: 'Linux (Ubuntu, Debian, Fedora)',
+            label: 'Linux',
             icon: Terminal,
-            filename: 'SIIFMART-WMS-POS-3.5.3.AppImage',
-            downloadUrl: '/release/SIIFMART-WMS-POS-3.5.3.AppImage',
-            format: 'Universal AppImage (.AppImage) / .deb',
-            size: '~142 MB',
+            variants: [
+                {
+                    id: 'appimage',
+                    label: 'Universal AppImage (All Distros)',
+                    filename: 'SIIFMART-WMS-POS-3.5.3.AppImage',
+                    downloadUrl: '/release/SIIFMART-WMS-POS-3.5.3.AppImage',
+                    format: 'Universal AppImage (.AppImage)',
+                    size: '~142 MB',
+                    recommended: true
+                },
+                {
+                    id: 'deb',
+                    label: 'Debian / Ubuntu Package',
+                    filename: 'siifmart-wms-pos_3.5.3_amd64.deb',
+                    downloadUrl: '/release/siifmart-wms-pos_3.5.3_amd64.deb',
+                    format: 'Debian Package (.deb)',
+                    size: '~138 MB'
+                },
+                {
+                    id: 'rpm',
+                    label: 'RedHat / Fedora / openSUSE',
+                    filename: 'siifmart-wms-pos-3.5.3.x86_64.rpm',
+                    downloadUrl: '/release/siifmart-wms-pos-3.5.3.x86_64.rpm',
+                    format: 'RPM Package (.rpm)',
+                    size: '~140 MB'
+                }
+            ],
             instructions: [
-                'Download the .AppImage package',
-                'Make it executable: chmod +x SIIFMART-*.AppImage',
-                'Run ./SIIFMART-*.AppImage directly without root installation'
+                'Download the package format for your distribution',
+                'For AppImage: chmod +x SIIFMART-*.AppImage && ./SIIFMART-*.AppImage',
+                'For Ubuntu/Debian: sudo dpkg -i siifmart-wms-pos_*.deb'
             ]
         }
     };
 
     const currentPlatform = platforms[selectedOS];
+    const currentVariant = currentPlatform.variants.find(v => v.id === selectedVariant) || currentPlatform.variants[0];
 
     const handleDownload = () => {
-        // Trigger browser download of packaged file from release directory
         const a = document.createElement('a');
-        a.href = currentPlatform.downloadUrl;
-        a.download = currentPlatform.filename;
+        a.href = currentVariant.downloadUrl;
+        a.download = currentVariant.filename;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -208,7 +286,7 @@ export const DesktopAppDownloadModal: React.FC<DesktopAppDownloadModalProps> = (
                                             {osKey === 'mac' ? 'macOS' : osKey === 'windows' ? 'Windows' : 'Linux'}
                                         </div>
                                         <div className="text-[10px] text-stone-400 font-mono mt-0.5">
-                                            {p.format.split(' ')[0]}
+                                            {p.variants[0].format.split(' ')[0]}
                                         </div>
                                     </button>
                                 );
@@ -221,15 +299,41 @@ export const DesktopAppDownloadModal: React.FC<DesktopAppDownloadModalProps> = (
                         <div className="flex items-center justify-between">
                             <div>
                                 <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                                    {currentPlatform.label}
+                                    {currentVariant.label}
                                 </h3>
                                 <p className="text-[11px] text-stone-400 mt-0.5">
-                                    File: <span className="font-mono text-stone-300">{currentPlatform.filename}</span> ({currentPlatform.size})
+                                    File: <span className="font-mono text-stone-300">{currentVariant.filename}</span> ({currentVariant.size})
                                 </p>
                             </div>
                             <span className="text-[10px] font-mono font-bold px-2 py-1 rounded bg-[#2C5E3B]/40 text-[#A9CBA2] border border-[#2C5E3B]/60">
-                                {currentPlatform.format}
+                                {currentVariant.format}
                             </span>
+                        </div>
+
+                        {/* Architecture / Package Format Variants */}
+                        <div className="space-y-1.5">
+                            <label className="text-[10px] font-bold uppercase tracking-wider text-stone-400">
+                                Choose Package Format:
+                            </label>
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                                {currentPlatform.variants.map(v => {
+                                    const isVarSelected = (currentVariant.id === v.id);
+                                    return (
+                                        <button
+                                            key={v.id}
+                                            onClick={() => setSelectedVariant(v.id)}
+                                            className={`px-3 py-2 rounded-xl text-left border transition-all text-xs flex flex-col justify-between ${
+                                                isVarSelected
+                                                    ? 'bg-[#2C5E3B]/40 border-[#A9CBA2] text-white shadow-sm'
+                                                    : 'bg-black/20 border-white/10 hover:bg-white/10 text-stone-300'
+                                            }`}
+                                        >
+                                            <span className="font-bold text-[11px] leading-tight truncate">{v.label}</span>
+                                            <span className="text-[9px] font-mono text-stone-400 mt-1">{v.size}</span>
+                                        </button>
+                                    );
+                                })}
+                            </div>
                         </div>
 
                         {/* Download CTA Button */}
@@ -239,7 +343,7 @@ export const DesktopAppDownloadModal: React.FC<DesktopAppDownloadModalProps> = (
                                 className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-[#2C5E3B] to-[#1E3F27] hover:from-[#357248] hover:to-[#244b2f] active:scale-[0.98] border border-[#A9CBA2]/40 text-white font-bold text-xs shadow-lg shadow-[#2C5E3B]/25 flex items-center justify-center gap-2 transition"
                             >
                                 <Download size={16} />
-                                Download for {selectedOS === 'mac' ? 'macOS' : selectedOS === 'windows' ? 'Windows' : 'Linux'}
+                                Download {currentVariant.label.split(' ')[0]} ({currentVariant.format.split(' ')[0]})
                             </button>
 
                             <button

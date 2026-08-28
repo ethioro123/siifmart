@@ -12,8 +12,14 @@
   ],
   "mac": {
     "target": [
-      "dmg",
-      "zip"
+      {
+        "target": "dmg",
+        "arch": ["arm64", "x64"]
+      },
+      {
+        "target": "zip",
+        "arch": ["arm64", "x64"]
+      }
     ],
     "category": "public.app-category.business",
     "identity": null,
@@ -21,20 +27,37 @@
   },
   "win": {
     "target": [
-      "nsis",
-      "portable"
+      {
+        "target": "nsis",
+        "arch": ["x64", "arm64"]
+      },
+      {
+        "target": "portable",
+        "arch": ["x64"]
+      }
     ]
   },
   "nsis": {
     "oneClick": false,
     "allowToChangeInstallationDirectory": true,
     "createDesktopShortcut": true,
-    "createStartMenuShortcut": true
+    "createStartMenuShortcut": true,
+    "shortcutName": "SIIFMART WMS & POS"
   },
   "linux": {
     "target": [
-      "AppImage",
-      "deb"
+      {
+        "target": "AppImage",
+        "arch": ["x64", "arm64"]
+      },
+      {
+        "target": "deb",
+        "arch": ["x64", "arm64"]
+      },
+      {
+        "target": "rpm",
+        "arch": ["x64"]
+      }
     ],
     "category": "Office"
   }
