@@ -1,0 +1,24 @@
+<svg width="2048" height="2048" viewBox="0 0 2048 2048" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="2048" height="2048" fill="#151D18"/>
+  
+  <g transform="translate(724, 624)">
+    <rect width="600" height="600" rx="150" fill="#1E3F27"/>
+    <rect x="2" y="2" width="596" height="596" rx="148" stroke="#00FF9D" stroke-opacity="0.3" stroke-width="4"/>
+    
+    <rect x="140" y="140" width="140" height="140" rx="32" fill="#00FF9D"/>
+    <rect x="320" y="140" width="140" height="140" rx="32" fill="#F59E0B"/>
+    <rect x="140" y="320" width="140" height="140" rx="32" fill="#10B981"/>
+    <rect x="320" y="320" width="140" height="140" rx="32" fill="#00FF9D"/>
+    
+    <circle cx="300" cy="300" r="40" fill="#FFFFFF"/>
+    <circle cx="300" cy="300" r="24" fill="#1E3F27"/>
+    <circle cx="300" cy="300" r="12" fill="#00FF9D"/>
+  </g>
+
+  <text x="1024" y="1380" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="96" font-weight="900" text-anchor="middle" fill="#FFFFFF" letter-spacing="4">
+    SIIF<tspan fill="#00FF9D">MART</tspan>
+  </text>
+  <text x="1024" y="1450" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="32" font-weight="700" text-anchor="middle" fill="#7A9E83" letter-spacing="8">
+    RETAIL &amp; WAREHOUSE OPERATING SYSTEM
+  </text>
+</svg>

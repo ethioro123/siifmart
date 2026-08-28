@@ -43,6 +43,7 @@ function createWindow(): void {
         minHeight: 700,
         backgroundColor: '#151D18',
         title: 'SIIFMART',
+        icon: path.join(__dirname, '../public/icon.png'),
         show: false, // Wait until ready-to-show to prevent white flash
         webPreferences: {
             preload: path.join(__dirname, 'preload.js'),

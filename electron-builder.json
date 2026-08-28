@@ -11,6 +11,7 @@
     "package.json"
   ],
   "mac": {
+    "icon": "build/icon.icns",
     "target": [
       {
         "target": "dmg",
@@ -25,7 +26,11 @@
     "identity": null,
     "gatekeeperAssess": false
   },
+  "dmg": {
+    "icon": "build/icon.icns"
+  },
   "win": {
+    "icon": "build/icon.ico",
     "target": [
       {
         "target": "nsis",
@@ -45,6 +50,7 @@
     "shortcutName": "SIIFMART WMS & POS"
   },
   "linux": {
+    "icon": "build/icon.png",
     "target": [
       {
         "target": "AppImage",
