@@ -22,6 +22,7 @@ import { EthiopianDateWidget } from '../components/dashboard/widgets/EthiopianDa
 import { SystemTicker } from '../components/dashboard/widgets/SystemTicker';
 import { SystemLoadWidget } from '../components/dashboard/widgets/SystemLoadWidget';
 import { ActivityLogWidget } from '../components/dashboard/widgets/ActivityLogWidget';
+import { DesktopDownloadButton } from '../components/dashboard/widgets/DesktopDownloadButton';
 import { DashboardSection } from '../components/dashboard/widgets/DashboardSection';
 import { FinancialSection } from '../components/dashboard/sections/FinancialSection';
 import { InventorySection } from '../components/dashboard/sections/InventorySection';
@@ -264,6 +265,8 @@ export default function CentralOperations() {
                         <p className="text-[10px] text-gray-500 font-bold uppercase leading-none mb-0.5">Active Sites</p>
                         <p className="text-xl font-mono font-bold text-gray-900 dark:text-white leading-none">{totalSites}</p>
                     </div>
+
+                    <DesktopDownloadButton />
 
                     <button
                         onClick={handleGenerateReport}
