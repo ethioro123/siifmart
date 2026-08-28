@@ -127,6 +127,8 @@ export default function Sidebar() {
         return hasRole && ['/wms-ops', '/pos', '/inventory', '/pos-dashboard', '/wms-dashboard'].includes(item.to);
       }
 
+      let isAllowedForSite = true;
+
       if (isWarehouse) {
         // In WMS site: strictly WMS & Inventory menu options ONLY. Hide Administration HQ & POS.
         if (item.to === '/admin' || ['pos', 'pricing', 'finance', 'settings', 'customers'].includes(item.section)) {
