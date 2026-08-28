@@ -136,18 +136,18 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
     return (
         <div className="flex flex-col h-full">
             {/* Header */}
-            <div className="bg-cyber-gray border border-white/5 rounded-2xl p-6 mb-6">
+            <div className="bg-white/85 dark:bg-[#18201B]/80 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-2xl p-6 mb-6 shadow-xs">
                 <div className="flex items-center justify-between gap-4">
                     <div>
-                        <h3 className="font-bold text-white flex items-center gap-2 text-lg">
-                            <ArrowDown className="text-green-500" size={24} />
+                        <h3 className="font-black text-stone-900 dark:text-white flex items-center gap-2 text-lg uppercase tracking-tight">
+                            <ArrowDown className="text-[#2C5E3B] dark:text-[#A9CBA2]" size={22} />
                             {t('warehouse.shipmentReceiving')}
                         </h3>
                         {activeTransferJob && (
                             <div className="flex items-center gap-2 mt-1">
-                                <span className="text-cyber-primary font-mono text-xs">{formatJobId(activeTransferJob)}</span>
-                                <span className="text-gray-500 text-xs">•</span>
-                                <span className="text-gray-400 text-xs">{activeTransferJob.items} {t('warehouse.itemPlural')}</span>
+                                <span className="text-[#2C5E3B] dark:text-[#A9CBA2] font-mono text-xs font-bold">{formatJobId(activeTransferJob)}</span>
+                                <span className="text-stone-400 text-xs">•</span>
+                                <span className="text-stone-500 dark:text-stone-400 text-xs font-bold">{activeTransferJob.items} {t('warehouse.itemPlural')}</span>
                             </div>
                         )}
                     </div>
@@ -157,7 +157,7 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
                             setActiveTransferJob(null);
                             setTransferReceiveItems([]);
                         }}
-                        className="px-4 py-2 bg-white/5 text-gray-400 hover:text-white rounded-lg font-bold transition-all text-xs"
+                        className="px-4 py-2 bg-stone-100 dark:bg-white/5 text-stone-600 hover:text-stone-900 dark:text-gray-400 dark:hover:text-white rounded-xl font-bold transition-all text-xs"
                     >
                         {t('warehouse.dismiss')}
                     </button>
@@ -165,38 +165,38 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
             </div>
 
             {/* Receive List */}
-            <div className="flex-1 bg-cyber-gray border border-white/5 rounded-2xl p-6 overflow-hidden flex flex-col">
+            <div className="flex-1 bg-white/85 dark:bg-[#18201B]/80 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-2xl p-6 overflow-hidden flex flex-col shadow-xs">
                 <div className="overflow-y-auto space-y-4 custom-scrollbar flex-1 pb-4">
                     {transferReceiveItems.map((item, idx) => {
                         const product = allProducts.find(p => p.id === item.productId);
                         return (
-                            <div key={idx} className="bg-white/[0.02] border border-white/5 rounded-xl p-4 flex gap-4">
-                                <div className="w-16 h-16 bg-black/40 rounded-lg flex items-center justify-center shrink-0">
+                            <div key={idx} className="bg-stone-50 dark:bg-white/[0.02] border border-[#E2DCCE]/60 dark:border-white/5 rounded-xl p-4 flex gap-4">
+                                <div className="w-16 h-16 bg-stone-100 dark:bg-black/40 rounded-lg flex items-center justify-center shrink-0 border border-[#E2DCCE]/60 dark:border-white/5">
                                     {product?.image ? (
                                         <img src={product.image} alt={product.name} className="w-full h-full object-cover rounded-lg opacity-80" />
                                     ) : (
-                                        <Box className="text-gray-600" size={24} />
+                                        <Box className="text-stone-400 dark:text-stone-600" size={24} />
                                     )}
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <div className="flex justify-between items-start mb-2">
                                         <div>
-                                            <h4 className="font-bold text-white truncate text-sm">{product?.name || 'Unknown Item'}</h4>
-                                            <p className="text-[10px] text-gray-500 font-mono">{product?.sku}</p>
+                                            <h4 className="font-black text-stone-900 dark:text-white truncate text-sm">{product?.name || 'Unknown Item'}</h4>
+                                            <p className="text-[10px] text-stone-500 font-mono">{product?.sku}</p>
                                         </div>
                                         <div className="text-right">
-                                            <span className="text-[10px] text-gray-500 uppercase font-black tracking-widest">{t('warehouse.expected')}</span>
-                                            <p className="font-mono text-white font-bold">
+                                            <span className="text-[10px] text-stone-400 dark:text-stone-500 uppercase font-black tracking-widest">{t('warehouse.expected')}</span>
+                                            <p className="font-mono text-stone-900 dark:text-white font-bold">
                                                 {item.expectedQty}
                                                 {product?.unit && getSellUnit(product.unit).code !== 'UNIT' && (
-                                                    <span className="text-[10px] text-gray-500 font-bold ml-1 uppercase">{getSellUnit(product.unit).shortLabel}</span>
+                                                    <span className="text-[10px] text-stone-500 font-bold ml-1 uppercase">{getSellUnit(product.unit).shortLabel}</span>
                                                 )}
                                             </p>
                                         </div>
                                     </div>
                                     <div className="grid grid-cols-2 gap-4 mt-3">
                                         <div>
-                                            <label htmlFor={`received-qty-${idx}`} className="text-[10px] text-gray-500 uppercase font-black mb-1 block">
+                                            <label htmlFor={`received-qty-${idx}`} className="text-[10px] text-stone-500 uppercase font-black mb-1 block">
                                                 {t('warehouse.received')}{product?.unit && getSellUnit(product.unit).code !== 'UNIT' ? ` (${getSellUnit(product.unit).shortLabel})` : ''}
                                             </label>
                                             <input
@@ -210,12 +210,12 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
                                                     newItems[idx].receivedQty = unitDef.allowDecimal ? parseFloat(e.target.value) || 0 : parseInt(e.target.value) || 0;
                                                     setTransferReceiveItems(newItems);
                                                 }}
-                                                className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-cyber-primary focus:outline-none"
+                                                className="w-full bg-white dark:bg-black/40 border border-[#E2DCCE] dark:border-white/10 rounded-lg px-3 py-2 text-sm text-stone-900 dark:text-white focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:outline-none"
                                                 aria-label={`Received quantity for ${product?.name || 'item'}`}
                                             />
                                         </div>
                                         <div>
-                                            <label htmlFor={`condition-${idx}`} className="text-[10px] text-gray-500 uppercase font-black mb-1 block">{t('warehouse.returnCondition')}</label>
+                                            <label htmlFor={`condition-${idx}`} className="text-[10px] text-stone-500 uppercase font-black mb-1 block">{t('warehouse.returnCondition')}</label>
                                             <select
                                                 id={`condition-${idx}`}
                                                 value={item.condition}
@@ -224,7 +224,7 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
                                                     newItems[idx].condition = e.target.value as any;
                                                     setTransferReceiveItems(newItems);
                                                 }}
-                                                className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-cyber-primary focus:outline-none"
+                                                className="w-full bg-white dark:bg-black/40 border border-[#E2DCCE] dark:border-white/10 rounded-lg px-3 py-2 text-sm text-stone-900 dark:text-white focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:outline-none"
                                                 aria-label={`Condition for ${product?.name || 'item'}`}
                                             >
                                                 <option value="Good">{t('warehouse.good')}</option>

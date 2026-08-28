@@ -173,21 +173,23 @@ export const TransferRequestModal: React.FC<TransferRequestModalProps> = ({
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/95 backdrop-blur-xl animate-in fade-in duration-300">
-            <div className="w-full h-full md:p-8 flex flex-col">
-                <div className="flex-1 bg-cyber-gray md:rounded-3xl border border-white/10 shadow-[0_0_100px_rgba(168,85,247,0.1)] flex flex-col overflow-hidden relative">
-                    <div className="p-6 border-b border-white/10 flex justify-between items-center bg-black/20">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-stone-950/80 backdrop-blur-md animate-in fade-in duration-200">
+            <div className="w-full h-full md:p-6 lg:p-8 flex flex-col max-w-[1700px] max-h-[1000px]">
+                <div className="flex-1 bg-stone-50 dark:bg-[#151D18] md:rounded-3xl border border-[#E2DCCE] dark:border-white/10 shadow-2xl flex flex-col overflow-hidden relative">
+                    <div className="p-4 md:p-6 border-b border-[#E2DCCE] dark:border-white/10 flex justify-between items-center bg-[#FAF8F5] dark:bg-[#1A231E]/80 shrink-0">
                         <div>
-                            <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                                <Truck className="text-cyber-primary" />
+                            <h2 className="text-lg md:text-xl font-black text-stone-900 dark:text-white flex items-center gap-2 uppercase tracking-tight">
+                                <Truck className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
                                 {t('warehouse.createTransferRequest')}
                             </h2>
-                            <p className="text-gray-400 text-xs mt-1">{t('warehouse.requestManageTransfers')}</p>
+                            <p className="text-stone-500 dark:text-stone-400 text-xs font-bold uppercase tracking-wider mt-0.5">{t('warehouse.requestManageTransfers')}</p>
                         </div>
-                        {renderTabs()}
-                        <button onClick={onClose} aria-label={t('warehouse.dismiss')} className="p-2 hover:bg-white/10 rounded-lg text-gray-400 hover:text-white transition-colors">
-                            <X size={20} />
-                        </button>
+                        <div className="flex items-center gap-3">
+                            {renderTabs()}
+                            <button onClick={onClose} aria-label={t('warehouse.dismiss')} className="w-9 h-9 flex items-center justify-center bg-white/80 dark:bg-white/5 hover:bg-stone-200 dark:hover:bg-white/10 rounded-xl text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white transition-colors border border-[#E2DCCE] dark:border-white/10 shadow-xs">
+                                <X size={16} />
+                            </button>
+                        </div>
                     </div>
 
                     <div className="p-6 space-y-6 overflow-y-auto flex-1 custom-scrollbar">
@@ -211,15 +213,15 @@ export const TransferRequestModal: React.FC<TransferRequestModalProps> = ({
                                 {/* Source & Dest */}
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label htmlFor="source-site-select" className="block text-xs font-bold text-gray-400 uppercase mb-1.5">{t('warehouse.from')} (Source)</label>
+                                        <label htmlFor="source-site-select" className="block text-xs font-bold text-stone-500 dark:text-stone-400 uppercase mb-1.5">{t('warehouse.from')} (Source)</label>
                                         <select
                                             id="source-site-select"
                                             value={transferSourceSite}
                                             onChange={(e) => setTransferSourceSite(e.target.value)}
-                                            className={`w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm focus:outline-none ${
+                                            className={`w-full bg-white dark:bg-black/40 border border-[#E2DCCE] dark:border-white/10 rounded-xl px-3 py-2 text-sm focus:outline-none ${
                                                 isRestricted 
-                                                    ? 'text-white/55 cursor-not-allowed' 
-                                                    : 'text-white focus:border-cyber-primary'
+                                                    ? 'text-stone-400 cursor-not-allowed' 
+                                                    : 'text-stone-900 dark:text-white focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2]'
                                             }`}
                                             disabled={isRestricted}
                                             aria-label="Select Source Site"
@@ -237,12 +239,12 @@ export const TransferRequestModal: React.FC<TransferRequestModalProps> = ({
                                         </select>
                                     </div>
                                     <div>
-                                        <label htmlFor="dest-site-select" className="block text-xs font-bold text-gray-400 uppercase mb-1.5">{t('warehouse.to')} (Target)</label>
+                                        <label htmlFor="dest-site-select" className="block text-xs font-bold text-stone-500 dark:text-stone-400 uppercase mb-1.5">{t('warehouse.to')} (Target)</label>
                                         <select
                                             id="dest-site-select"
                                             value={transferDestSite}
                                             onChange={(e) => setTransferDestSite(e.target.value)}
-                                            className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-cyber-primary focus:outline-none"
+                                            className="w-full bg-white dark:bg-black/40 border border-[#E2DCCE] dark:border-white/10 rounded-xl px-3 py-2 text-sm text-stone-900 dark:text-white focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:outline-none"
                                             aria-label="Select Destination Site"
                                         >
                                             <option value="">Select Destination</option>
@@ -310,7 +312,7 @@ export const TransferRequestModal: React.FC<TransferRequestModalProps> = ({
                                                                     newItems[idx].quantity = parseFloat(e.target.value) || 1;
                                                                     setTransferItems(newItems);
                                                                 }}
-                                                                className="w-16 bg-black/40 border border-white/10 rounded px-2 py-1 text-sm text-white text-center focus:border-cyber-primary focus:outline-none"
+                                                                className="w-16 bg-white dark:bg-black/40 border border-[#E2DCCE] dark:border-white/10 rounded-lg px-2 py-1 text-sm text-stone-900 dark:text-white text-center focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:outline-none"
                                                                 aria-label={`Quantity for ${prod?.name || 'item'}`}
                                                             />
                                                             {(() => {
@@ -325,7 +327,7 @@ export const TransferRequestModal: React.FC<TransferRequestModalProps> = ({
                                                                                 newItems[idx].isMeasure = e.target.value === 'measure';
                                                                                 setTransferItems(newItems);
                                                                             }}
-                                                                            className="bg-black/40 border border-white/10 rounded px-2 py-1 text-[10px] font-bold uppercase text-white focus:border-cyber-primary focus:outline-none ml-1 cursor-pointer hover:bg-white/5 transition-colors"
+                                                                            className="bg-white dark:bg-black/40 border border-[#E2DCCE] dark:border-white/10 rounded-lg px-2 py-1 text-[10px] font-bold uppercase text-stone-900 dark:text-white focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:outline-none ml-1 cursor-pointer hover:bg-stone-100 dark:hover:bg-white/5 transition-colors"
                                                                             aria-label="Select unit format"
                                                                         >
                                                                             <option value="units">Units</option>
@@ -373,7 +375,7 @@ export const TransferRequestModal: React.FC<TransferRequestModalProps> = ({
                                         ) : (
                                             <button
                                                 onClick={() => setIsSearchingProduct(true)}
-                                                className="w-full py-3 border border-dashed border-white/20 rounded-xl text-gray-400 hover:text-white hover:border-white/40 hover:bg-white/5 transition-all flex items-center justify-center gap-2"
+                                                className="w-full py-3 border border-dashed border-[#E2DCCE] dark:border-white/20 rounded-xl text-stone-500 dark:text-gray-400 hover:text-stone-900 dark:hover:text-white hover:border-[#2C5E3B] dark:hover:border-white/40 hover:bg-stone-100 dark:hover:bg-white/5 transition-all flex items-center justify-center gap-2 font-bold text-xs uppercase tracking-wider"
                                             >
                                                 <Plus size={16} /> {t('warehouse.addTransferItem')}
                                             </button>
@@ -384,12 +386,12 @@ export const TransferRequestModal: React.FC<TransferRequestModalProps> = ({
                                 {/* Metadata */}
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label htmlFor="priority-select" className="block text-xs font-bold text-gray-400 uppercase mb-1.5">{t('warehouse.priority')}</label>
+                                        <label htmlFor="priority-select" className="block text-xs font-bold text-stone-500 dark:text-gray-400 uppercase mb-1.5">{t('warehouse.priority')}</label>
                                         <select
                                             id="priority-select"
                                             value={transferPriority}
                                             onChange={(e) => setTransferPriority(e.target.value as any)}
-                                            className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-cyber-primary focus:outline-none"
+                                            className="w-full bg-white dark:bg-black/40 border border-[#E2DCCE] dark:border-white/10 rounded-xl px-3 py-2 text-sm text-stone-900 dark:text-white focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:outline-none"
                                             aria-label="Select Transfer Priority"
                                         >
                                             <option value="Low">Low</option>
@@ -399,13 +401,13 @@ export const TransferRequestModal: React.FC<TransferRequestModalProps> = ({
                                         </select>
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-bold text-gray-400 uppercase mb-1.5">{t('warehouse.putaway.jobDetails')}</label>
+                                        <label className="block text-xs font-bold text-stone-500 dark:text-gray-400 uppercase mb-1.5">{t('warehouse.putaway.jobDetails')}</label>
                                         <input
                                             type="text"
                                             value={transferNote}
                                             onChange={(e) => setTransferNote(e.target.value)}
                                             placeholder="Reason for transfer..."
-                                            className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-cyber-primary focus:outline-none"
+                                            className="w-full bg-white dark:bg-black/40 border border-[#E2DCCE] dark:border-white/10 rounded-xl px-3 py-2 text-sm text-stone-900 dark:text-white focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:outline-none"
                                         />
                                     </div>
                                 </div>
@@ -413,19 +415,19 @@ export const TransferRequestModal: React.FC<TransferRequestModalProps> = ({
                         )}
                     </div>
 
-                    <div className="p-6 border-t border-white/10 bg-black/20 flex gap-3 justify-end">
+                    <div className="p-4 md:p-6 border-t border-[#E2DCCE] dark:border-white/10 bg-[#FAF8F5] dark:bg-black/20 flex gap-3 justify-end shrink-0">
                         {isReviewMode ? (
                             <>
                                 <button
                                     onClick={() => setIsReviewMode(false)}
-                                    className="px-4 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-white/10 font-bold text-sm transition-colors"
+                                    className="px-4 py-2 rounded-xl text-stone-500 hover:text-stone-900 dark:text-gray-400 dark:hover:text-white hover:bg-stone-200 dark:hover:bg-white/10 font-bold text-xs uppercase tracking-wider transition-colors"
                                 >
                                     Back to Edit
                                 </button>
                                 <button
                                     onClick={handleCreateTransfer}
                                     disabled={isSubmitting}
-                                    className="px-6 py-2 bg-cyber-primary text-black rounded-lg font-bold text-sm hover:bg-cyber-accent transition-colors shadow-lg shadow-cyber-primary/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                    className="px-6 py-2.5 bg-[#2C5E3B] hover:bg-[#234b2f] text-white rounded-xl font-black text-xs uppercase tracking-wider transition-all shadow-xs disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 active:scale-95 cursor-pointer"
                                 >
                                     {isSubmitting ? 'Confirming...' : t('warehouse.confirm')}
                                     <ArrowRight size={16} />

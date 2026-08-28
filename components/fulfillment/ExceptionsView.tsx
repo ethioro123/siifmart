@@ -59,7 +59,7 @@ export function ExceptionsView({ currentUser, activeSite, onResolve }: Exception
 
             {loading ? (
                 <div className="flex-1 flex items-center justify-center">
-                    <Loader2 className="animate-spin text-cyber-primary" size={48} />
+                    <Loader2 className="animate-spin text-[#2C5E3B] dark:text-[#A9CBA2]" size={48} />
                 </div>
             ) : discrepancies.length === 0 ? (
                 <div className="flex-1 flex flex-col items-center justify-center text-gray-500 opacity-50">
@@ -130,7 +130,7 @@ export function ExceptionsView({ currentUser, activeSite, onResolve }: Exception
                                     <td className="p-4 text-right">
                                         <button
                                             onClick={() => onResolve(d.job, d.item, d.index)}
-                                            className="px-4 py-2 bg-cyber-primary text-black font-bold text-xs rounded hover:bg-cyber-primary/90 transition-colors uppercase tracking-wider shadow-lg shadow-cyber-primary/20"
+                                            className="px-4 py-2 bg-[#2C5E3B] hover:bg-[#234b2f] text-white font-black text-xs rounded-xl transition-all uppercase tracking-wider shadow-xs cursor-pointer active:scale-95"
                                         >
                                             Resolve
                                         </button>

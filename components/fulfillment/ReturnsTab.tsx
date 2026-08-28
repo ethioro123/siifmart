@@ -35,7 +35,7 @@ export const ReturnsTab: React.FC<ReturnsTabProps> = ({
     // --- RENDER ---
     return (
         <div className="flex-1 overflow-y-auto space-y-6">
-            <div className="bg-cyber-gray border border-white/5 rounded-2xl p-6 min-h-[600px] flex flex-col">
+            <div className="bg-white/85 dark:bg-[#18201B]/80 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-2xl p-6 min-h-[600px] flex flex-col shadow-xs">
                 {/* Header */}
                 <ReturnsHeader
                     returnViewMode={returnViewMode}

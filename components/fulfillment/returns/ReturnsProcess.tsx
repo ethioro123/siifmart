@@ -106,7 +106,7 @@ export const ReturnsProcess: React.FC<ReturnsProcessProps> = ({
                         </div>
                         <div className="text-right">
                             <p className="text-sm text-gray-400">Total Paid</p>
-                            <p className="font-bold text-cyber-primary text-xl">{formatCompactNumber(foundSale.total, { currency: CURRENCY_SYMBOL })}</p>
+                            <p className="font-bold text-[#2C5E3B] dark:text-[#A9CBA2] text-xl">{formatCompactNumber(foundSale.total, { currency: CURRENCY_SYMBOL })}</p>
                         </div>
                     </div>
 
@@ -311,7 +311,7 @@ export const ReturnsProcess: React.FC<ReturnsProcessProps> = ({
                                             </div>
                                             <div className="flex justify-between text-white font-bold text-lg pt-4 border-t border-white/10">
                                                 <span>Total Refund</span>
-                                                <span className="text-cyber-primary">{formatCompactNumber(total, { currency: CURRENCY_SYMBOL })}</span>
+                                                <span className="text-[#2C5E3B] dark:text-[#A9CBA2]">{formatCompactNumber(total, { currency: CURRENCY_SYMBOL })}</span>
                                             </div>
                                         </div>
                                     );

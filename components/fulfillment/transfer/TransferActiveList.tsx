@@ -153,14 +153,14 @@ export const TransferActiveList: React.FC<TransferActiveListProps> = ({
     };
 
     return (
-        <div className="bg-cyber-gray border border-white/5 rounded-2xl p-4 md:p-6">
+        <div className="bg-transparent space-y-4">
             <div className="flex items-center justify-between mb-4 gap-2">
                 <div className="flex items-center gap-2 flex-wrap">
                     <select
                         aria-label={t('warehouse.putaway.search')}
                         value={transferStatusFilter}
                         onChange={(e) => setTransferStatusFilter(e.target.value as any)}
-                        className="bg-black/60 border border-white/10 rounded-lg px-3 py-2 text-xs font-bold text-white focus:border-cyber-primary focus:outline-none"
+                        className="bg-white dark:bg-black/60 border border-[#E2DCCE] dark:border-white/10 rounded-xl px-3 py-2 text-xs font-bold text-stone-900 dark:text-white focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:outline-none shadow-xs"
                     >
                         <option value="ALL">{t('warehouse.allTransfers')}</option>
                         <option value="Requested">📋 {t('warehouse.requested')}</option>

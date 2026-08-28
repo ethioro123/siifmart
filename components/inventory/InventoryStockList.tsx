@@ -19,7 +19,7 @@ interface InventoryStockListProps {
     filters: any;
     setFilters: (filters: any) => void;
     sortConfig: { key: string, direction: 'asc' | 'desc' } | null;
-    handleSort: (key: string) => void;
+    handleSort: (key: string, direction?: 'asc' | 'desc') => void;
     searchTerm: string;
     setSearchTerm: (term: string) => void;
     selectedIds: Set<string>;
@@ -120,6 +120,8 @@ export const InventoryStockList: React.FC<InventoryStockListProps> = ({
                     setSearchTerm={setSearchTerm}
                     filters={filters}
                     setFilters={setFilters}
+                    sortConfig={sortConfig}
+                    handleSort={handleSort}
                     activeSite={activeSite}
                     isReadOnly={isReadOnly}
                     sites={sites}

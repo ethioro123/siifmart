@@ -67,7 +67,7 @@ export const ReturnsHistory: React.FC<ReturnsHistoryProps> = ({ sales }) => {
                         placeholder="Search history..."
                         value={returnHistorySearch}
                         onChange={(e) => setReturnHistorySearch(e.target.value)}
-                        className="w-full bg-black/40 border border-white/10 rounded-xl pl-9 pr-4 py-2 text-xs text-white focus:outline-none focus:border-cyber-primary/50 transition-all"
+                        className="w-full bg-black/40 border border-white/10 rounded-xl pl-9 pr-4 py-2 text-xs text-white focus:outline-none focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] transition-all"
                     />
                 </div>
             </div>

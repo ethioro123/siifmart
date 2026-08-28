@@ -38,8 +38,8 @@ export const TransferRequestReview: React.FC<TransferRequestReviewProps> = ({
 
     return (
         <div className="space-y-6">
-            <div className="bg-cyber-primary/10 border border-cyber-primary/20 rounded-xl p-6">
-                <h3 className="font-bold text-cyber-primary mb-4 flex items-center gap-2">
+            <div className="bg-[#2C5E3B]/10 border border-[#2C5E3B]/20 rounded-xl p-6">
+                <h3 className="font-black text-[#2C5E3B] dark:text-[#A9CBA2] mb-4 flex items-center gap-2 uppercase tracking-tight">
                     <Truck size={18} /> {t('warehouse.transferRequest')}
                 </h3>
                 {isCrossZone && settings?.enforceRegionalZoning && (
@@ -94,7 +94,7 @@ export const TransferRequestReview: React.FC<TransferRequestReviewProps> = ({
                                     <span className="text-[10px] text-gray-550 font-mono bg-white/5 px-2 py-1 rounded">{prod?.sku}</span>
                                     <span className="text-sm font-medium text-white">{prod?.name}</span>
                                 </div>
-                                <div className="font-mono text-cyber-primary font-bold">
+                                <div className="font-mono text-[#2C5E3B] dark:text-[#A9CBA2] font-bold">
                                     {displayQty}
                                 </div>
                             </div>
@@ -102,7 +102,7 @@ export const TransferRequestReview: React.FC<TransferRequestReviewProps> = ({
                     })}
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 mt-6 pt-4 border-t border-cyber-primary/20">
+                <div className="grid grid-cols-2 gap-4 mt-6 pt-4 border-t border-[#2C5E3B]/20">
                     <div>
                         <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-1">{t('warehouse.priority')}</p>
                         <span className={`text-xs px-2 py-1 rounded font-bold uppercase ${transferPriority === 'Critical' ? 'bg-red-500/20 text-red-400' :

@@ -158,3 +158,34 @@ describe('getEffectivePackageSize', () => {
   });
 });
 
+// ============================================================================
+// INVENTORY VALUE & ABC CLASSIFICATION
+// ============================================================================
+import { getInventoryValue, getABCClass } from '../../components/inventory/utils/inventoryHelpers';
+
+describe('getInventoryValue & getABCClass', () => {
+  it('calculates inventory asset value correctly for standard unit', () => {
+    const prod = makeProduct({ price: 150, stock: 10, unit: 'piece' });
+    expect(getInventoryValue(prod)).toBe(1500);
+  });
+
+  it('returns 0 when stock is 0 or price is 0', () => {
+    const prod1 = makeProduct({ price: 150, stock: 0 });
+    const prod2 = makeProduct({ price: 0, stock: 20 });
+    expect(getInventoryValue(prod1)).toBe(0);
+    expect(getInventoryValue(prod2)).toBe(0);
+  });
+
+  it('correctly classifies high value products into Class A, B, or C', () => {
+    const prodA = makeProduct({ price: 1000, stock: 10 }); // value 10,000 (10% of 100,000 -> A)
+    const prodB = makeProduct({ price: 300, stock: 10 });  // value 3,000 (3% of 100,000 -> B)
+    const prodC = makeProduct({ price: 50, stock: 10 });   // value 500 (0.5% of 100,000 -> C)
+    const totalInventoryValue = 100000;
+
+    expect(getABCClass(prodA, totalInventoryValue)).toBe('A');
+    expect(getABCClass(prodB, totalInventoryValue)).toBe('B');
+    expect(getABCClass(prodC, totalInventoryValue)).toBe('C');
+  });
+});
+
+

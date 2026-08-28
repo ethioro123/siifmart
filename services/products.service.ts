@@ -30,11 +30,8 @@ export const productsService = {
             else if (sort.key === 'costPrice') column = 'cost_price';
             else if (sort.key === 'salePrice') column = 'sale_price';
             else if (sort.key === 'siteId') column = 'site_id';
-            if (sort.key === 'assetValue') {
-                column = 'cost_price';
-            } else if (sort.key === 'abc') {
-                column = 'price';
-            }
+            else if (sort.key === 'assetValue') column = 'cost_price';
+            else if (sort.key === 'abc') column = 'price';
             query = query.order(column, { ascending: sort.direction === 'asc' });
         } else {
             query = query.order('created_at', { ascending: false });
@@ -48,16 +45,49 @@ export const productsService = {
             if (filters.search) {
                 const cleanSearch = filters.search.trim().replace(/['"\\]/g, '');
                 if (cleanSearch) {
-                    query = query.or(`name.ilike.%${cleanSearch}%,sku.ilike.%${cleanSearch}%,location.ilike.%${cleanSearch}%,barcode.ilike.%${cleanSearch}%`);
+                    query = query.or(`name.ilike.%${cleanSearch}%,sku.ilike.%${cleanSearch}%,location.ilike.%${cleanSearch}%,barcode.ilike.%${cleanSearch}%,brand.ilike.%${cleanSearch}%`);
                 }
             }
             if (filters.category && filters.category !== 'All') {
                 query = query.eq('category', filters.category);
             }
-            if (filters.status && filters.status !== 'All') {
-                if (filters.status === 'Active') query = query.eq('status', 'active');
-                else if (filters.status === 'Low Stock') query = query.eq('status', 'low_stock');
-                else if (filters.status === 'Out of Stock') query = query.eq('status', 'out_of_stock');
+            if (filters.brand && filters.brand !== 'All' && filters.brand.trim() !== '') {
+                query = query.ilike('brand', `%${filters.brand.trim()}%`);
+            }
+            if (filters.minPrice !== undefined && filters.minPrice !== '' && !isNaN(Number(filters.minPrice))) {
+                query = query.gte('price', Number(filters.minPrice));
+            }
+            if (filters.maxPrice !== undefined && filters.maxPrice !== '' && !isNaN(Number(filters.maxPrice))) {
+                query = query.lte('price', Number(filters.maxPrice));
+            }
+            if (filters.minStock !== undefined && filters.minStock !== '' && !isNaN(Number(filters.minStock))) {
+                query = query.gte('stock', Number(filters.minStock));
+            }
+            if (filters.maxStock !== undefined && filters.maxStock !== '' && !isNaN(Number(filters.maxStock))) {
+                query = query.lte('stock', Number(filters.maxStock));
+            }
+            if (filters.locationStatus === 'missing') {
+                query = query.or('location.is.null,location.eq.');
+            } else if (filters.locationStatus === 'assigned') {
+                query = query.not('location', 'is', null).neq('location', '');
+            }
+            if (filters.approvalStatus && filters.approvalStatus !== 'All') {
+                query = query.eq('approval_status', filters.approvalStatus);
+            }
+            if (filters.hasBarcode === 'with_barcode') {
+                query = query.not('barcode', 'is', null).neq('barcode', '');
+            } else if (filters.hasBarcode === 'no_barcode') {
+                query = query.or('barcode.is.null,barcode.eq.');
+            }
+            if (filters.stockHealth && filters.stockHealth !== 'All') {
+                if (filters.stockHealth === 'out_of_stock') query = query.eq('stock', 0);
+                else if (filters.stockHealth === 'low_stock') query = query.or('status.eq.low_stock,and(stock.gt.0,stock.lte.10)');
+                else if (filters.stockHealth === 'in_stock') query = query.gt('stock', 0);
+                else if (filters.stockHealth === 'overstocked') query = query.gte('stock', 100);
+            } else if (filters.status && filters.status !== 'All') {
+                if (filters.status === 'Active' || filters.status === 'In Stock') query = query.gt('stock', 0);
+                else if (filters.status === 'Low Stock') query = query.or('status.eq.low_stock,and(stock.gt.0,stock.lte.10)');
+                else if (filters.status === 'Out of Stock') query = query.eq('stock', 0);
                 else if (filters.status === 'Archived') query = query.eq('status', 'archived');
             } else if (!filters.includeArchived) {
                 query = query.neq('status', 'archived');

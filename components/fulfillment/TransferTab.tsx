@@ -325,7 +325,7 @@ export const TransferTab: React.FC<TransferTabProps> = ({
                     />
 
                     {/* Content */}
-                    <div className="bg-cyber-gray border border-white/5 rounded-2xl p-4 md:p-6">
+                    <div className="bg-white/85 dark:bg-[#18201B]/80 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-2xl p-4 md:p-6 shadow-xs">
                         {viewMode === 'Process' ? (
                             <TransferActiveList
                                 filteredJobs={filteredJobs}

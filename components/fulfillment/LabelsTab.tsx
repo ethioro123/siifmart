@@ -3,6 +3,7 @@ import { useFulfillment } from './FulfillmentContext';
 import { AssignLabelHub } from './assign/AssignLabelHub';
 import { warehouseZonesService } from '../../services/supabase.service';
 import { WarehouseZone } from '../../types';
+import { logger } from '../../utils/logger';
 
 export const LabelsTab: React.FC = () => {
     const {
@@ -21,7 +22,7 @@ export const LabelsTab: React.FC = () => {
             const data = await warehouseZonesService.getAll(activeSite.id);
             setZones(data);
         } catch (error) {
-            console.error('Failed to load zones for LabelsTab:', error);
+            logger.error('LabelsTab', 'Failed to load zones for LabelsTab', error as Error);
         }
     }, [activeSite?.id]);
 
