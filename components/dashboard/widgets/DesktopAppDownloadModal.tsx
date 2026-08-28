@@ -5,12 +5,14 @@ import {
 } from 'lucide-react';
 import { useElectron } from '../../../hooks/useElectron';
 
-type OSPlatform = 'mac' | 'windows' | 'linux' | 'android';
-
-export const DesktopAppDownloadModal: React.FC<{
+interface DesktopAppDownloadModalProps {
     isOpen: boolean;
     onClose: () => void;
-}> = ({ isOpen, onClose }) => {
+}
+
+type OSPlatform = 'mac' | 'windows' | 'linux' | 'android';
+
+export const DesktopAppDownloadModal: React.FC<DesktopAppDownloadModalProps> = ({ isOpen, onClose }) => {
     const { isElectron, appVersion } = useElectron();
 
     // Detect visitor OS and Architecture
