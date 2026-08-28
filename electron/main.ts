@@ -53,7 +53,18 @@ function createWindow(): void {
     // Show when ready
     mainWindow.once('ready-to-show', () => {
         mainWindow?.show();
+        mainWindow?.focus();
+        if (app.dock) app.dock.show();
     });
+
+    // Fallback: force show within 1.5s if ready-to-show is delayed
+    setTimeout(() => {
+        if (mainWindow && !mainWindow.isVisible()) {
+            mainWindow.show();
+            mainWindow.focus();
+            if (app.dock) app.dock.show();
+        }
+    }, 1500);
 
     // Load dev server or production dist
     if (process.env.VITE_DEV_SERVER_URL) {

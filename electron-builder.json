@@ -16,15 +16,14 @@
       "zip"
     ],
     "category": "public.app-category.business",
-    "hardenedRuntime": true,
+    "identity": null,
     "gatekeeperAssess": false
   },
   "win": {
     "target": [
       "nsis",
       "portable"
-    ],
-    "publisherName": "SIIFMART"
+    ]
   },
   "nsis": {
     "oneClick": false,

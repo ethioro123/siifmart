@@ -2,6 +2,8 @@
   "name": "siifmart",
   "private": true,
   "version": "3.5.3",
+  "description": "SIIFMART WMS & POS Enterprise Desktop Application",
+  "author": "SIIFMART",
   "type": "module",
   "main": "dist-electron/main.js",
   "scripts": {
