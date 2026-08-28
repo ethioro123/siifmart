@@ -81,7 +81,7 @@ export default function StaffProfileView(props: StaffProfileViewProps) {
                 {profile.activeProfileTab === 'timeoff' && <TimeOffTab isOwnProfile={isOwnProfile} onRequestTimeOff={() => profile.setIsTimeOffModalOpen(true)} />}
                 {profile.activeProfileTab === 'docs' && <DocumentsTab documentInputRef={profile.documentInputRef} handleDocumentUpload={() => {}} />}
                 {profile.activeProfileTab === 'payroll' && <PayrollTab employee={employee} canManageEmployees={canManage && !isOwnProfile} handleEditSalary={() => profile.setIsSalaryModalOpen(true)} handleDownloadPayslip={() => {}} />}
-                {profile.activeProfileTab === 'settings' && <SettingsTab employee={employee} sites={sites} currentPasswordInput={''} setCurrentPasswordInput={() => {}} newPasswordInput={profile.newPasswordInput} setNewPasswordInput={profile.setNewPasswordInput} confirmPasswordInput={profile.confirmPasswordInput} setConfirmPasswordInput={profile.setConfirmPasswordInput} isChangingPassword={profile.isChangingPassword} handleUpdatePassword={profile.handleUpdatePassword} />}
+                {profile.activeProfileTab === 'settings' && <SettingsTab employee={employee} sites={sites} canEditStaff={canManage && !isOwnProfile && userRoleLevel > targetRoleLevel} currentUser={user} updateEmployee={updateEmployee} currentPasswordInput={''} setCurrentPasswordInput={() => {}} newPasswordInput={profile.newPasswordInput} setNewPasswordInput={profile.setNewPasswordInput} confirmPasswordInput={profile.confirmPasswordInput} setConfirmPasswordInput={profile.setConfirmPasswordInput} isChangingPassword={profile.isChangingPassword} handleUpdatePassword={profile.handleUpdatePassword} />}
             </div>
 
             {/* ACTION MODALS */}

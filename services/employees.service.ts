@@ -225,15 +225,38 @@ export const employeesService = {
     },
 
     async update(id: string, updates: Partial<Employee>) {
-        const dbUpdates: any = { ...updates };
-        if (updates.siteId !== undefined) { dbUpdates.site_id = updates.siteId; delete dbUpdates.siteId; }
-        if (updates.joinDate !== undefined) { dbUpdates.join_date = updates.joinDate; delete dbUpdates.joinDate; }
-        if (updates.performanceScore !== undefined) { dbUpdates.performance_score = updates.performanceScore; delete dbUpdates.performanceScore; }
-        if (updates.attendanceRate !== undefined) { dbUpdates.attendance_rate = updates.attendanceRate; delete dbUpdates.attendanceRate; }
-        if (updates.lastLoginGps !== undefined) { dbUpdates.last_login_gps = updates.lastLoginGps; delete dbUpdates.lastLoginGps; }
-        if (updates.lastLoginAt !== undefined) { dbUpdates.last_login_at = updates.lastLoginAt; delete dbUpdates.lastLoginAt; }
-        if (updates.lastLoginDevice !== undefined) { dbUpdates.last_login_device = updates.lastLoginDevice; delete dbUpdates.lastLoginDevice; }
-        if (updates.loginHistory !== undefined) { dbUpdates.login_history = updates.loginHistory; delete dbUpdates.loginHistory; }
+        // Explicit allowlist — only send columns that exist in the DB
+        const FIELD_MAP: Record<string, string> = {
+            name: 'name',
+            role: 'role',
+            email: 'email',
+            phone: 'phone',
+            status: 'status',
+            department: 'department',
+            avatar: 'avatar',
+            specialization: 'specialization',
+            salary: 'salary',
+            badges: 'badges',
+            code: 'code',
+            // camelCase → snake_case mappings
+            siteId: 'site_id',
+            joinDate: 'join_date',
+            performanceScore: 'performance_score',
+            attendanceRate: 'attendance_rate',
+            lastLoginGps: 'last_login_gps',
+            lastLoginAt: 'last_login_at',
+            lastLoginDevice: 'last_login_device',
+            loginHistory: 'login_history',
+            emergencyContact: 'emergency_contact',
+            address: 'address',
+        };
+
+        const dbUpdates: Record<string, unknown> = {};
+        for (const [tsKey, dbCol] of Object.entries(FIELD_MAP)) {
+            if ((updates as Record<string, unknown>)[tsKey] !== undefined) {
+                dbUpdates[dbCol] = (updates as Record<string, unknown>)[tsKey];
+            }
+        }
 
         const { data, error } = await supabase
             .from('employees')
