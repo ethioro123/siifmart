@@ -144,10 +144,10 @@ export default function Sidebar() {
       return hasRole && isAllowedForSite;
     });
 
-    // --- NATIVE APP RESTRICTIONS ---
-    if (native.isNative()) {
-      const allowedNativePaths = ['/pos', '/inventory', '/wms-ops'];
-      filteredItems = filteredItems.filter(item => allowedNativePaths.includes(item.to));
+    // --- ANDROID & CLEAN MOBILE RESTRICTIONS (FULFILLMENT & POS ONLY) ---
+    if (native.isCleanMobileMode()) {
+      const allowedMobilePaths = ['/wms-ops', '/pos', '/inventory', '/pos-dashboard', '/wms-dashboard'];
+      filteredItems = filteredItems.filter(item => allowedMobilePaths.includes(item.to));
     }
 
     return filteredItems;

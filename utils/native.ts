@@ -1,23 +1,42 @@
 /**
- * Native Android Interface Bridge
+ * Native Android & Capacitor Interface Bridge
  * Allows the web app to communicate with the Android wrapper
  */
 
 export const native = {
     /**
-     * Check if running in the native Android app
+     * Check if running in native Android or Capacitor app
      */
     isNative: (): boolean => {
-        return !!window.AndroidNative || !!window.isNativeApp;
+        if (typeof window === 'undefined') return false;
+        const isCapacitor = (window as any).Capacitor?.isNativePlatform?.() || (window as any).Capacitor?.getPlatform?.() === 'android';
+        return !!(window as any).AndroidNative || !!(window as any).isNativeApp || !!isCapacitor;
+    },
+
+    /**
+     * Check if running specifically on Android Mobile / Scanner
+     */
+    isAndroid: (): boolean => {
+        if (typeof window === 'undefined') return false;
+        const isCapacitorAndroid = (window as any).Capacitor?.getPlatform?.() === 'android';
+        const isUserAgentAndroid = /android/i.test(navigator.userAgent || '');
+        const isElectron = !!(window as any).electronAPI;
+        return (isCapacitorAndroid || isUserAgentAndroid || !!(window as any).AndroidNative) && !isElectron;
+    },
+
+    /**
+     * Returns true if app should be locked to Clean Fulfillment + POS mode
+     */
+    isCleanMobileMode: (): boolean => {
+        return native.isAndroid() || native.isNative();
     },
 
     /**
      * Show a native Android toast message
      */
     toast: (message: string) => {
-        if (window.AndroidNative) {
-            window.AndroidNative.showToast(message);
-        } else {
+        if (typeof window !== 'undefined' && (window as any).AndroidNative?.showToast) {
+            (window as any).AndroidNative.showToast(message);
         }
     },
 
@@ -25,9 +44,9 @@ export const native = {
      * Vibrate the device
      */
     vibrate: (milliseconds: number = 200) => {
-        if (window.AndroidNative) {
-            window.AndroidNative.vibrate(milliseconds);
-        } else if (navigator.vibrate) {
+        if (typeof window !== 'undefined' && (window as any).AndroidNative?.vibrate) {
+            (window as any).AndroidNative.vibrate(milliseconds);
+        } else if (typeof navigator !== 'undefined' && navigator.vibrate) {
             navigator.vibrate(milliseconds);
         }
     },
@@ -36,8 +55,8 @@ export const native = {
      * Get the unique Android device ID
      */
     getDeviceId: (): string | null => {
-        if (window.AndroidNative) {
-            return window.AndroidNative.getDeviceId();
+        if (typeof window !== 'undefined' && (window as any).AndroidNative?.getDeviceId) {
+            return (window as any).AndroidNative.getDeviceId();
         }
         return null;
     }

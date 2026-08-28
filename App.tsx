@@ -191,7 +191,11 @@ export default function App() {
                 {(() => {
                   const activeSiteType = activeSite?.type || '';
                   const isWarehouse = ['Warehouse', 'Distribution Center', 'WMS', 'Fulfillment Center'].includes(activeSiteType);
-                  const isStore = ['Store', 'Dark Store', 'Retail', 'POS'].includes(activeSiteType);
+                  // 0. Clean Mobile / Android Mode: strictly route to WMS Fulfillment or POS Terminal
+                  if (native.isCleanMobileMode()) {
+                    if (isWarehouse) return <Navigate to="/wms-ops" replace />;
+                    return <Navigate to="/pos" replace />;
+                  }
 
                   // 1. CEO Default Landing -> Administration Access (/admin) unless scoped to a WMS or POS site
                   if (user?.role === 'super_admin' || (user?.role as string) === 'CEO') {
