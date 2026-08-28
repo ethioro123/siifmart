@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import {
     Monitor, Download, Apple, Check, ShieldCheck,
-    Terminal, Printer, WifiOff, Sparkles, ExternalLink, X, ChevronRight
+    Terminal, Printer, WifiOff, Sparkles, Smartphone, X
 } from 'lucide-react';
 import { useElectron } from '../../../hooks/useElectron';
 
@@ -10,19 +10,7 @@ interface DesktopAppDownloadModalProps {
     onClose: () => void;
 }
 
-type OSPlatform = 'mac' | 'windows' | 'linux';
-
-interface PlatformInfo {
-    os: OSPlatform;
-    arch: 'arm64' | 'x64';
-    label: string;
-    icon: any;
-    filename: string;
-    downloadUrl: string;
-    instructions: string[];
-    format: string;
-    size: string;
-}
+type OSPlatform = 'mac' | 'windows' | 'linux' | 'android';
 
 export const DesktopAppDownloadModal: React.FC<DesktopAppDownloadModalProps> = ({ isOpen, onClose }) => {
     const { isElectron, appVersion } = useElectron();
@@ -33,15 +21,17 @@ export const DesktopAppDownloadModal: React.FC<DesktopAppDownloadModalProps> = (
         const ua = navigator.userAgent.toLowerCase();
         const platform = (navigator.platform || '').toLowerCase();
 
+        const isAndroid = ua.includes('android');
         const isMac = platform.includes('mac') || ua.includes('macintosh');
         const isWindows = platform.includes('win') || ua.includes('windows');
         const isLinux = platform.includes('linux') || ua.includes('x11');
 
-        // Check Apple Silicon / ARM
-        const isArm = ua.includes('arm') || (isMac && (navigator.maxTouchPoints > 0 || (window.screen && window.screen.colorDepth >= 30)));
-
+        if (isAndroid) return { os: 'android', arch: 'arm64' };
         if (isWindows) return { os: 'windows', arch: 'x64' };
         if (isLinux) return { os: 'linux', arch: 'x64' };
+
+        // Check Apple Silicon / ARM
+        const isArm = ua.includes('arm') || (isMac && (navigator.maxTouchPoints > 0 || (window.screen && window.screen.colorDepth >= 30)));
         return { os: 'mac', arch: isArm ? 'arm64' : 'x64' };
     }, []);
 
@@ -171,6 +161,42 @@ export const DesktopAppDownloadModal: React.FC<DesktopAppDownloadModalProps> = (
                 'For AppImage: chmod +x SIIFMART-*.AppImage && ./SIIFMART-*.AppImage',
                 'For Ubuntu/Debian: sudo dpkg -i siifmart-wms-pos_*.deb'
             ]
+        },
+        android: {
+            label: 'Android (APK)',
+            icon: Smartphone,
+            variants: [
+                {
+                    id: 'apk-universal',
+                    label: 'Universal Android APK',
+                    filename: 'SIIFMART-3.5.3-universal.apk',
+                    downloadUrl: '/release/SIIFMART-3.5.3-universal.apk',
+                    format: 'Android Package (.apk)',
+                    size: '~18 MB',
+                    recommended: true
+                },
+                {
+                    id: 'apk-arm64',
+                    label: 'ARM64 Phone & Tablet APK',
+                    filename: 'SIIFMART-3.5.3-arm64.apk',
+                    downloadUrl: '/release/SIIFMART-3.5.3-arm64.apk',
+                    format: 'Android Package (.apk)',
+                    size: '~14 MB'
+                },
+                {
+                    id: 'apk-handheld',
+                    label: 'Rugged Handheld Scanners',
+                    filename: 'SIIFMART-3.5.3-scanner.apk',
+                    downloadUrl: '/release/SIIFMART-3.5.3-scanner.apk',
+                    format: 'Handheld Terminal (.apk)',
+                    size: '~16 MB'
+                }
+            ],
+            instructions: [
+                'Download the .apk file directly on your Android phone, tablet, or warehouse scanner',
+                'Allow "Install from Unknown Sources" if prompted in Android Settings',
+                'Tap the downloaded APK notification to complete installation'
+            ]
         }
     };
 
@@ -191,6 +217,8 @@ export const DesktopAppDownloadModal: React.FC<DesktopAppDownloadModalProps> = (
             ? 'npm run electron:build -- --mac'
             : selectedOS === 'windows'
             ? 'npm run electron:build -- --win'
+            : selectedOS === 'android'
+            ? 'npm run android:build'
             : 'npm run electron:build -- --linux';
         navigator.clipboard.writeText(cmd);
         setCopiedCommand(true);
@@ -214,14 +242,14 @@ export const DesktopAppDownloadModal: React.FC<DesktopAppDownloadModalProps> = (
                         <div>
                             <div className="flex items-center gap-2">
                                 <h2 className="text-xl font-bold tracking-tight text-white">
-                                    Download SIIFMART Desktop App
+                                    Download SIIFMART Apps
                                 </h2>
                                 <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[#A9CBA2]/20 text-[#A9CBA2] border border-[#A9CBA2]/30">
                                     v3.5.3
                                 </span>
                             </div>
                             <p className="text-xs text-stone-400 mt-0.5">
-                                Enterprise desktop terminal with hardware printing, cash drawer kick, and offline mode.
+                                Native desktop and mobile terminal apps with offline capability & hardware printing.
                             </p>
                         </div>
                     </div>
@@ -255,10 +283,10 @@ export const DesktopAppDownloadModal: React.FC<DesktopAppDownloadModalProps> = (
                     {/* OS Selector Tabs */}
                     <div>
                         <label className="text-[11px] font-bold uppercase tracking-wider text-stone-400 block mb-2">
-                            Select Operating System
+                            Select Operating System / Device
                         </label>
-                        <div className="grid grid-cols-3 gap-2.5">
-                            {(['mac', 'windows', 'linux'] as OSPlatform[]).map(osKey => {
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                            {(['mac', 'windows', 'linux', 'android'] as OSPlatform[]).map(osKey => {
                                 const isSelected = selectedOS === osKey;
                                 const isDetected = detectedOS.os === osKey;
                                 const p = platforms[osKey];
@@ -283,7 +311,7 @@ export const DesktopAppDownloadModal: React.FC<DesktopAppDownloadModalProps> = (
                                             )}
                                         </div>
                                         <div className="font-bold text-xs capitalize">
-                                            {osKey === 'mac' ? 'macOS' : osKey === 'windows' ? 'Windows' : 'Linux'}
+                                            {osKey === 'mac' ? 'macOS' : osKey === 'windows' ? 'Windows' : osKey === 'android' ? 'Android' : 'Linux'}
                                         </div>
                                         <div className="text-[10px] text-stone-400 font-mono mt-0.5">
                                             {p.variants[0].format.split(' ')[0]}
