@@ -331,8 +331,12 @@ export default function TopBar() {
    return (
       <header className="h-14 md:h-16 sticky top-0 z-[100] px-2 sm:px-4 md:px-6 flex items-center justify-between transition-colors duration-500">
          <div className="flex items-center space-x-2 sm:space-x-4">
-            <button onClick={toggleSidebar} className="text-[#4D6E56] dark:text-[#A9CBA2] hover:text-[#1E3F27] dark:hover:text-white p-1 cursor-pointer transition-colors" aria-label="Toggle sidebar">
-               <Menu size={20} className="md:w-6 md:h-6" />
+            <button
+               onClick={toggleSidebar}
+               className="text-[#4D6E56] dark:text-[#A9CBA2] hover:text-[#1E3F27] dark:hover:text-white p-2 min-w-[44px] min-h-[44px] flex items-center justify-center cursor-pointer transition-colors rounded-lg active:bg-black/10 dark:active:bg-white/10"
+               aria-label="Toggle sidebar"
+            >
+               <Menu size={22} className="md:w-6 md:h-6" />
             </button>
             
             {/* Logo / Brand */}

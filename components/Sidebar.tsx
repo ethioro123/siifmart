@@ -89,10 +89,10 @@ export default function Sidebar() {
       { to: "/admin", icon: Activity, label: "Central Operations", section: "dashboard", roles: ['super_admin'] },
 
       // POS
-      { to: "/pos", icon: ShoppingCart, label: "POS Terminal", section: "pos", roles: ['store_manager', 'assistant_manager', 'shift_lead', 'pos', 'store_supervisor'] },
+      { to: "/pos", icon: ShoppingCart, label: "POS Terminal", section: "pos", roles: ['super_admin', 'store_manager', 'assistant_manager', 'shift_lead', 'pos', 'store_supervisor'] },
 
       // POS COMMAND CENTER - Store management
-      { to: "/pos-dashboard", icon: Eye, label: "POS Command", section: "pos", roles: ['store_manager', 'assistant_manager', 'shift_lead', 'pos', 'store_supervisor'] },
+      { to: "/pos-dashboard", icon: Eye, label: "POS Command", section: "pos", roles: ['super_admin', 'store_manager', 'assistant_manager', 'shift_lead', 'pos', 'store_supervisor'] },
 
       // SALES
       { to: "/sales", icon: FileText, label: "Sales History", section: "sales", roles: ['super_admin', 'store_manager', 'assistant_manager', 'shift_lead', 'pos', 'auditor', 'finance_manager', 'cs_manager', 'store_supervisor'] },
@@ -123,8 +123,9 @@ export default function Sidebar() {
       const isHQ = !isStore && !isWarehouse;
 
       if (native.isCleanMobileMode()) {
-        // On Mobile/Android: strictly provide Fulfillment, POS, and Inventory
-        return hasRole && ['/wms-ops', '/pos', '/inventory', '/pos-dashboard', '/wms-dashboard'].includes(item.to);
+        // On Mobile/Android: strictly provide WMS Fulfillment, POS, and Inventory navigations
+        const mobileAllowed = ['/wms-ops', '/wms-dashboard', '/pos', '/pos-dashboard', '/inventory', '/sales'];
+        return mobileAllowed.includes(item.to);
       }
 
       let isAllowedForSite = true;

@@ -4,7 +4,6 @@ import Sidebar from './Sidebar';
 import TopBar from './TopBar';
 import NetworkStatusIndicator from './NetworkStatusIndicator';
 import { GhostModeBanner } from './GhostModeBanner';
-import { MobileBottomNav } from './MobileBottomNav';
 import { useData } from '../contexts/DataContext';
 import { native } from '../utils/native';
 
@@ -52,12 +51,11 @@ export default function Layout({ children }: { children?: React.ReactNode }) {
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <GhostModeBanner />
         <TopBar />
-        <main className={`flex-1 overflow-y-auto p-4 lg:p-6 scroll-smooth ${native.isCleanMobileMode() ? 'pb-24' : ''}`}>
+        <main className="flex-1 overflow-y-auto p-4 lg:p-6 scroll-smooth">
           <div className="w-full space-y-6">
             {children}
           </div>
         </main>
-        <MobileBottomNav />
       </div>
     </div>
   );
