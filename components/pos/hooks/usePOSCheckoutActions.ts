@@ -212,6 +212,12 @@ export const usePOSCheckoutActions = ({
                 setEarnedPointsData(pointsResult);
                 setShowPointsPopup(true);
             }
+
+            // ⚡️ Electron Desktop: Auto-kick cash drawer on cash payments
+            if (selectedPaymentMethod === 'Cash' && typeof window !== 'undefined' && window.electronAPI?.isElectron) {
+                window.electronAPI.openCashDrawer().catch(() => {});
+            }
+
             setIsProcessing(false);
             setIsPaymentModalOpen(false);
             setIsReceiptModalOpen(true);
@@ -319,7 +325,17 @@ export const usePOSCheckoutActions = ({
     }, [emailReceiptAddress, lastSale, setIsProcessing, addNotification, setIsEmailReceiptModalOpen]);
 
     const handleOpenDrawer = React.useCallback(() => {
-        addNotification('info', "SYSTEM: Trigger sent to Cash Drawer (COM3) [KICK_DRAWER]");
+        if (typeof window !== 'undefined' && window.electronAPI?.isElectron) {
+            window.electronAPI.openCashDrawer().then(res => {
+                if (res.success) {
+                    addNotification('success', "Cash Drawer Opened");
+                } else {
+                    addNotification('alert', `Drawer pulse sent (${res.error || 'Check printer/drawer cable'})`);
+                }
+            });
+        } else {
+            addNotification('info', "SYSTEM: Trigger sent to Cash Drawer (COM3) [KICK_DRAWER]");
+        }
     }, [addNotification]);
 
     const handleReprintLast = React.useCallback(() => {

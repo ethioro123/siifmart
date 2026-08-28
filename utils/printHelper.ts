@@ -270,8 +270,20 @@ export const printHtmlContent = (htmlContent: string): void => {
         ''
     );
 
+    // ⚡️ Electron Desktop: Direct silent hardware printing (no browser dialogs!)
+    if (typeof window !== 'undefined' && window.electronAPI?.isElectron) {
+        window.electronAPI.printDirect(sanitized, {
+            silent: true,
+            printBackground: true
+        }).catch((err) => {
+            console.error('[Electron:PrintHelper] Silent print failed, falling back to iframe:', err);
+            printViaIframe(sanitized);
+        });
+        return;
+    }
+
     if (!isMobileBrowser()) {
-        // ✅ Desktop: iframe strategy (most reliable on all desktop browsers)
+        // ✅ Desktop Browser: iframe strategy (most reliable on all desktop browsers)
         printViaIframe(sanitized);
         return;
     }

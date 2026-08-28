@@ -3,9 +3,14 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 import tailwindcss from '@tailwindcss/vite';
+import electron from 'vite-plugin-electron';
+import renderer from 'vite-plugin-electron-renderer';
 
 export default defineConfig(() => {
+  const isElectron = process.env.ELECTRON === 'true' || process.env.npm_lifecycle_event?.includes('electron');
+
   return {
+    base: isElectron ? './' : '/',
     server: {
       port: 3000,
       host: '0.0.0.0',
@@ -13,7 +18,7 @@ export default defineConfig(() => {
         // Use polling to prevent rapid file change detection
         usePolling: true,
         interval: 5000, // Check every 5 seconds instead of instantly
-        ignored: ['**/node_modules/**', '**/.git/**', '**/dist/**'],
+        ignored: ['**/node_modules/**', '**/.git/**', '**/dist/**', '**/dist-electron/**'],
       },
       hmr: {
         overlay: true,
@@ -22,44 +27,75 @@ export default defineConfig(() => {
     plugins: [
       react(),
       tailwindcss(),
-      VitePWA({
-        registerType: 'autoUpdate',
-        includeAssets: ['favicon.svg', 'robots.txt'],
-        manifest: {
-          name: 'SiifMart WMS',
-          short_name: 'SiifMart',
-          description: 'Warehouse Management System',
-          theme_color: '#000000',
-          background_color: '#000000',
-          display: 'standalone',
-          orientation: 'portrait',
-          icons: [
-            {
-              src: 'favicon.svg',
-              sizes: '192x192',
-              type: 'image/svg+xml'
-            },
-            {
-              src: 'favicon.svg',
-              sizes: '512x512',
-              type: 'image/svg+xml'
-            },
-            {
-              src: 'favicon.svg',
-              sizes: 'any',
-              type: 'image/svg+xml',
-              purpose: 'any maskable'
+      ...(isElectron ? [
+        electron([
+          {
+            entry: 'electron/main.ts',
+            vite: {
+              build: {
+                outDir: 'dist-electron',
+                rollupOptions: {
+                  external: ['electron']
+                }
+              }
             }
-          ]
-        },
-        workbox: {
-          maximumFileSizeToCacheInBytes: 6000000 // Increase limit for larger assets if needed
-        },
-        devOptions: {
-          enabled: true,
-          type: 'module'
-        }
-      })
+          },
+          {
+            entry: 'electron/preload.ts',
+            onstart(args) {
+              args.reload();
+            },
+            vite: {
+              build: {
+                outDir: 'dist-electron',
+                rollupOptions: {
+                  external: ['electron']
+                }
+              }
+            }
+          }
+        ]),
+        renderer()
+      ] : [
+        VitePWA({
+          registerType: 'autoUpdate',
+          includeAssets: ['favicon.svg', 'robots.txt'],
+          manifest: {
+            name: 'SiifMart WMS',
+            short_name: 'SiifMart',
+            description: 'Warehouse Management System',
+            theme_color: '#000000',
+            background_color: '#000000',
+            display: 'standalone',
+            orientation: 'portrait',
+            icons: [
+              {
+                src: 'favicon.svg',
+                sizes: '192x192',
+                type: 'image/svg+xml'
+              },
+              {
+                src: 'favicon.svg',
+                sizes: '512x512',
+                type: 'image/svg+xml'
+              },
+              {
+                src: 'favicon.svg',
+                sizes: 'any',
+                type: 'image/svg+xml',
+                purpose: 'any maskable'
+              }
+            ]
+          },
+          workbox: {
+            maximumFileSizeToCacheInBytes: 6000000
+          },
+          devOptions: {
+            enabled: true,
+            type: 'module'
+          }
+        })
+      ])
     ],
     // SECURITY: API keys must NEVER be injected into the client bundle.
     // Route AI requests through Supabase Edge Functions instead.

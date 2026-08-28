@@ -1,0 +1,42 @@
+{
+  "appId": "com.siifmart.app",
+  "productName": "SIIFMART WMS & POS",
+  "copyright": "Copyright © 2026 SIIFMART",
+  "directories": {
+    "output": "release"
+  },
+  "files": [
+    "dist/**/*",
+    "dist-electron/**/*",
+    "package.json"
+  ],
+  "mac": {
+    "target": [
+      "dmg",
+      "zip"
+    ],
+    "category": "public.app-category.business",
+    "hardenedRuntime": true,
+    "gatekeeperAssess": false
+  },
+  "win": {
+    "target": [
+      "nsis",
+      "portable"
+    ],
+    "publisherName": "SIIFMART"
+  },
+  "nsis": {
+    "oneClick": false,
+    "allowToChangeInstallationDirectory": true,
+    "createDesktopShortcut": true,
+    "createStartMenuShortcut": true
+  },
+  "linux": {
+    "target": [
+      "AppImage",
+      "deb"
+    ],
+    "category": "Office"
+  }
+}

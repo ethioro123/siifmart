@@ -3,6 +3,7 @@
   "private": true,
   "version": "3.5.3",
   "type": "module",
+  "main": "dist-electron/main.js",
   "scripts": {
     "dev": "vite",
     "dev:safe": "npm run auto-save & vite",
@@ -10,6 +11,9 @@
     "backup": "./scripts/pre-ai-backup.sh",
     "build": "vite build",
     "preview": "vite preview",
+    "electron:dev": "ELECTRON=true vite",
+    "electron:build": "ELECTRON=true vite build && electron-builder",
+    "electron:preview": "electron .",
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:e2e": "playwright test",
@@ -69,10 +73,16 @@
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.0.0",
+    "concurrently": "^10.0.5",
+    "electron": "^44.0.0",
+    "electron-builder": "^26.15.3",
     "jsdom": "^27.0.1",
     "typescript": "~5.8.2",
     "vite": "^6.2.0",
+    "vite-plugin-electron": "^1.1.1",
+    "vite-plugin-electron-renderer": "^1.0.0",
     "vite-plugin-pwa": "^1.2.0",
-    "vitest": "^3.2.4"
+    "vitest": "^3.2.4",
+    "wait-on": "^9.1.0"
   }
 }
