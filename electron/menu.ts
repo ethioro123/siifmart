@@ -6,17 +6,17 @@ export function setupAppMenu(mainWindow: BrowserWindow): void {
     const template: Electron.MenuItemConstructorOptions[] = [
         // App Menu (macOS only)
         ...(isMac ? [{
-            label: app.name,
+            label: 'SIIFMART',
             submenu: [
-                { role: 'about' as const },
+                { label: 'About SIIFMART', role: 'about' as const },
                 { type: 'separator' as const },
                 { role: 'services' as const },
                 { type: 'separator' as const },
-                { role: 'hide' as const },
+                { label: 'Hide SIIFMART', role: 'hide' as const },
                 { role: 'hideOthers' as const },
                 { role: 'unhide' as const },
                 { type: 'separator' as const },
-                { role: 'quit' as const }
+                { label: 'Quit SIIFMART', role: 'quit' as const }
             ]
         }] : []),
 

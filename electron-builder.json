@@ -1,6 +1,6 @@
 {
   "appId": "com.siifmart.app",
-  "productName": "SIIFMART WMS & POS",
+  "productName": "SIIFMART",
   "copyright": "Copyright © 2026 SIIFMART",
   "directories": {
     "output": "release"

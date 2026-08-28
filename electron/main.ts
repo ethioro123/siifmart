@@ -7,6 +7,12 @@ import { getSystemPrinters, printHtmlDirect, openCashDrawer, ElectronPrintOption
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Explicitly set Application Name for macOS Menu Bar & Task Manager
+app.setName('SIIFMART');
+if (process.platform === 'win32') {
+    app.setAppUserModelId('com.siifmart.app');
+}
+
 // Disable GPU acceleration if needed for low-power POS terminals, or keep hardware acceleration enabled by default
 app.commandLine.appendSwitch('disable-color-correct-rendering');
 
@@ -36,7 +42,7 @@ function createWindow(): void {
         minWidth: 1024,
         minHeight: 700,
         backgroundColor: '#151D18',
-        title: 'SIIFMART WMS & POS Enterprise',
+        title: 'SIIFMART',
         show: false, // Wait until ready-to-show to prevent white flash
         webPreferences: {
             preload: path.join(__dirname, 'preload.js'),

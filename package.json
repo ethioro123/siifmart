@@ -1,5 +1,6 @@
 {
   "name": "siifmart",
+  "productName": "SIIFMART",
   "private": true,
   "version": "3.5.3",
   "description": "SIIFMART WMS & POS Enterprise Desktop Application",
