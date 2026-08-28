@@ -129,6 +129,7 @@ export interface DataContextType {
   };
   posSyncStatus?: 'synced' | 'syncing' | 'offline' | 'error' | 'pending';
   posPendingSyncCount?: number;
+  posLatencyMs?: number | null;
   calculateWorkerBonusShare?: (...args: any[]) => any;
   updatePromotion?: (promo: Partial<Promotion> & { id: string }) => void;
 }

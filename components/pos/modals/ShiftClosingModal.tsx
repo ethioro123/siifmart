@@ -7,6 +7,7 @@ import Modal from '../../Modal';
 import PinPad from '../PinPad';
 import { CURRENCY_SYMBOL } from '../../../constants';
 import { formatShiftId } from '../../../utils/jobIdFormatter';
+import { audioFeedback } from '../../../utils/audioFeedback';
 import { CheckCircle, DollarSign, CreditCard, Smartphone, Archive, ArrowLeft, AlertTriangle, Loader2, LogOut, ShieldAlert, EyeOff, Lock, CheckCircle2 } from 'lucide-react';
 
 export const ShiftClosingModal: React.FC = () => {
@@ -51,8 +52,10 @@ export const ShiftClosingModal: React.FC = () => {
     const handleFinalizeClick = () => {
         // If there is a variance and user is not manager, require supervisor PIN sign-off
         if (hasVariance && !isManagerOrAdmin) {
+            audioFeedback.playWarning();
             setIsManagerPinRequired(true);
         } else {
+            audioFeedback.playSaleComplete();
             handleSubmitShift();
         }
     };
@@ -62,8 +65,10 @@ export const ShiftClosingModal: React.FC = () => {
             setPinError('');
             setIsManagerPinRequired(false);
             setManagerPin('');
+            audioFeedback.playSaleComplete();
             handleSubmitShift();
         } else {
+            audioFeedback.playScanError();
             setPinError('Invalid Manager PIN. Variance authorization rejected.');
             setManagerPin('');
         }
@@ -198,7 +203,14 @@ export const ShiftClosingModal: React.FC = () => {
 
                                 <button
                                     type="button"
-                                    onClick={() => setClosingStep(2)}
+                                    onClick={() => {
+                                        if (hasVariance) {
+                                            audioFeedback.playWarning();
+                                        } else {
+                                            audioFeedback.playScanSuccess();
+                                        }
+                                        setClosingStep(2);
+                                    }}
                                     className="w-full py-4 bg-gradient-to-br from-[#224429] to-[#2C5E3B] hover:opacity-90 text-white font-bold rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
                                 >
                                     Lock Count & Proceed to Reconciliation <ArrowLeft className="rotate-180" size={18} />

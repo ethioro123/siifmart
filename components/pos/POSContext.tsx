@@ -23,6 +23,7 @@ import { POSContextType } from './types';
 import { getParentCategory } from './utils/posUtils';
 
 import { logger } from '../../utils/logger';
+import { audioFeedback } from '../../utils/audioFeedback';
 
 const POSContext = createContext<POSContextType | undefined>(undefined);
 
@@ -322,6 +323,7 @@ export const POSProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
                 if (serverResults.length > 0) {
                     const sp = serverResults[0];
                     addToCart(sp);
+                    audioFeedback.playScanSuccess();
                     addNotification('success', `Added ${sp.name} (Found via server)`);
                     return true;
                 }
@@ -330,6 +332,7 @@ export const POSProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
             if (barcode.trim().length > 0) {
                 setUnknownBarcode(barcode);
                 setSearchTerm('');
+                audioFeedback.playScanError();
                 addNotification('alert', `Unknown Barcode: ${barcode}. Click 'Link Item' to map it.`);
             }
             return false;
@@ -337,6 +340,7 @@ export const POSProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
         if (unknownBarcode) setUnknownBarcode('');
         addToCart(product);
+        audioFeedback.playScanSuccess();
         addNotification('success', `Added ${product.name}`);
         return true;
     }, [products, activeSite, addNotification, unknownBarcode, setCart, addToCart]);

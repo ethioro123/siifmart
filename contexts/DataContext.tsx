@@ -152,9 +152,7 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
     [sites, activeSiteId]
   );
 
-  // --- NOTIFICATION PERSISTENCE ---
-
-  const { syncStatus, pendingCount, triggerSync: posTriggerSync, checkQueue: posCheckQueue } = usePosSync((count) => {
+  const { syncStatus, pendingCount, latencyMs: posLatencyMs, triggerSync: posTriggerSync, checkQueue: posCheckQueue } = usePosSync((count) => {
     addNotification('success', `Successfully synced ${count} offline sale${count !== 1 ? 's' : ''} to database`);
   });
   const queries = useDataQueries({
@@ -462,13 +460,14 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
     validateDiscountCode,
     useDiscountCode,
     posSyncStatus: syncStatus,
-    posPendingSyncCount: pendingCount
+    posPendingSyncCount: pendingCount,
+    posLatencyMs
   }), [
     settings, products, orders, suppliers, sales, expenses, movements,
     employees, customers, shifts, heldOrders, sites, activeSite,
     notifications, systemLogs, promotions,
     tasks, storePoints, allProducts,
-    allSales, allOrders, discountCodes, isDataInitialLoading, loadError, syncStatus, pendingCount,
+    allSales, allOrders, discountCodes, isDataInitialLoading, loadError, syncStatus, pendingCount, posLatencyMs,
     siteActions, productActions, poActions, saleActions, employeeActions, customerActions, financeActions, gamificationActions,
     triggerSync, holdOrder, releaseHold, markNotificationsRead, addNotification, clearNotification, clearAllNotifications,
     logSystemEvent, exportSystemData, resetData, refreshData, addPromotion, updatePromotion, deletePromotion,

@@ -7,6 +7,7 @@ import { WMSJob, User, Site, Product, Employee } from '../../../types';
 import { formatJobId } from '../../../utils/jobIdFormatter';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { isWeightBased, isVolumeBased } from '../../../utils/units';
+import { sortPickItemsByOptimalRoute } from '../../../utils/fulfillmentRoute';
 
 export const formatBeautifulLocation = (loc: string | undefined, theme: 'purple' | 'cyan' | 'woody' = 'woody', t?: (key: string) => string) => {
     if (!loc || loc === 'PENDING') {
@@ -114,12 +115,9 @@ export const PickJobModal: React.FC<PickJobModalProps> = ({
 
     const sortedLineItems = React.useMemo(() => {
         if (!job.lineItems) return [];
-        return [...job.lineItems].sort((a, b) => {
-            const prodA = getProduct(a);
-            const prodB = getProduct(b);
-            const locA = a.location || prodA?.location || 'ZZZ';
-            const locB = b.location || prodB?.location || 'ZZZ';
-            return locA.localeCompare(locB, undefined, { numeric: true });
+        return sortPickItemsByOptimalRoute(job.lineItems, (item) => {
+            const prod = getProduct(item);
+            return item.location || prod?.location;
         });
     }, [job.lineItems, products]);
 

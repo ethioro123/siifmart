@@ -38,7 +38,7 @@ export const POSHeader: React.FC<POSHeaderProps> = ({ setIsFilterPanelOpen, acti
         markPriceUpdatesAsRead
     } = usePOS();
 
-    const { triggerSync, posSyncStatus, posPendingSyncCount, settings, products, activeSite } = useData();
+    const { triggerSync, posSyncStatus, posPendingSyncCount, posLatencyMs, settings, products, activeSite } = useData();
 
     // Calculate unseen price changes in active site (last 7 days)
     const siteId = activeSite?.id;
@@ -173,7 +173,7 @@ export const POSHeader: React.FC<POSHeaderProps> = ({ setIsFilterPanelOpen, acti
             </Protected>
 
             <div className="hidden md:block">
-                {/* Sync Status Badge */}
+                {/* Sync Status & Latency Badge */}
                 <button
                     onClick={() => triggerSync()}
                     className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold border transition-all duration-300 hover:scale-105 active:scale-95 ${posSyncStatus === 'offline' ? 'bg-red-500/10 border-red-500/20 text-red-500' :
@@ -181,6 +181,7 @@ export const POSHeader: React.FC<POSHeaderProps> = ({ setIsFilterPanelOpen, acti
                             (posPendingSyncCount || 0) > 0 ? 'bg-yellow-500/10 border-yellow-500/20 text-yellow-500' :
                                 'bg-[#2C5E3B]/10 border-[#2C5E3B]/20 text-[#2C5E3B] dark:text-[#A9CBA2]'
                          }`}
+                    title={posLatencyMs ? `Server Latency: ${posLatencyMs}ms (Click to force sync)` : 'Click to force sync'}
                 >
                     {posSyncStatus === 'syncing' ? (
                         <RefreshCw size={14} className="animate-spin" />
@@ -189,13 +190,13 @@ export const POSHeader: React.FC<POSHeaderProps> = ({ setIsFilterPanelOpen, acti
                     ) : (posPendingSyncCount || 0) > 0 ? (
                         <CloudOff size={14} />
                     ) : (
-                        <CheckCircle size={14} />
+                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                     )}
                     <span>
                         {posSyncStatus === 'offline' ? t('pos.offline') :
                             posSyncStatus === 'syncing' ? t('pos.syncing') :
                                 (posPendingSyncCount || 0) > 0 ? t('pos.syncPending') :
-                                    t('pos.online')}
+                                    posLatencyMs ? `${posLatencyMs}ms` : t('pos.online')}
                         {((posPendingSyncCount || 0) > 0) && ` (${posPendingSyncCount} ${t('pos.queued')})`}
                     </span>
                 </button>

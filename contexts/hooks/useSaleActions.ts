@@ -7,6 +7,7 @@ import { customersService, productsService, salesService } from '../../services/
 import { posDB } from '../../services/db/pos.db';
 import { CURRENCY_SYMBOL } from '../../constants';
 import { logger } from '../../utils/logger';
+import { audioFeedback } from '../../utils/audioFeedback';
 
 interface UseSaleActionsDeps {
     activeSite: Site | undefined;
@@ -208,6 +209,7 @@ export function useSaleActions(deps: UseSaleActionsDeps) {
                 }
             }
 
+            audioFeedback.playSaleComplete();
             addNotification('success', 'Sale processed successfully');
             return { saleId, pointsResult };
 

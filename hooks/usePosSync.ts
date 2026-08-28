@@ -11,6 +11,7 @@ export interface UsePosSyncReturn {
     pendingCount: number;
     lastSyncedAt: string | null;
     isOnline: boolean;
+    latencyMs: number | null;
     triggerSync: () => Promise<void>;
     checkQueue: () => Promise<void>;
 }
@@ -20,22 +21,31 @@ export const usePosSync = (onSyncComplete?: (count: number) => void): UsePosSync
     const [pendingCount, setPendingCount] = useState<number>(0);
     const [lastSyncedAt, setLastSyncedAt] = useState<string | null>(null);
     const [isOnline, setIsOnline] = useState<boolean>(navigator.onLine);
+    const [latencyMs, setLatencyMs] = useState<number | null>(null);
     const isSyncingRef = useRef<boolean>(false);
 
-    // Active heartbeat to verify genuine internet reachability
+    // Active heartbeat to verify genuine internet reachability and measure latency
     const pingServer = useCallback(async (): Promise<boolean> => {
-        if (!navigator.onLine) return false;
+        if (!navigator.onLine) {
+            setLatencyMs(null);
+            return false;
+        }
         try {
             const controller = new AbortController();
             const timeout = setTimeout(() => controller.abort(), 4000);
+            const t0 = performance.now();
             const res = await fetch('/favicon.svg?ping=' + Date.now(), {
                 method: 'HEAD',
                 cache: 'no-store',
                 signal: controller.signal
             });
             clearTimeout(timeout);
-            return res.ok || res.status === 304;
+            const rtt = Math.round(performance.now() - t0);
+            const isReachable = res.ok || res.status === 304;
+            setLatencyMs(isReachable ? rtt : null);
+            return isReachable;
         } catch {
+            setLatencyMs(null);
             return false;
         }
     }, []);
@@ -229,6 +239,7 @@ export const usePosSync = (onSyncComplete?: (count: number) => void): UsePosSync
         pendingCount,
         lastSyncedAt,
         isOnline,
+        latencyMs,
         triggerSync,
         checkQueue
     };

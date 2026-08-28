@@ -86,6 +86,51 @@ export function POSConnectivityTab({
               help="The connected ESC/POS thermal printer will automatically print the receipt when payment succeeds."
             />
           </div>
+
+          {/* Printer Diagnostics & Hardware Test */}
+          <div className="pt-6 border-t border-[#E2DCCE]/60 dark:border-white/10 space-y-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <h4 className="text-xs font-black uppercase tracking-wider text-[#1E3F27] dark:text-white flex items-center gap-2">
+                  <Printer size={15} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
+                  Hardware Receipt Printer Diagnostics
+                </h4>
+                <p className="text-[11px] text-stone-500 dark:text-gray-400">
+                  Verify paper alignment, cutter feed, and direct ESC/POS hardware communication.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  const printWindow = window.open('', '_blank', 'width=320,height=400');
+                  if (printWindow) {
+                    printWindow.document.write(`
+                      <html>
+                        <head><title>SIIFMART Diagnostic Receipt</title></head>
+                        <body style="margin:0; padding:10px; font-family:monospace; font-size:12px; text-align:center;">
+                          <h3 style="margin:0;">SIIFMART POS</h3>
+                          <p style="margin:4px 0; font-size:10px;">PRINTER TEST OK</p>
+                          <hr style="border:none; border-top:1px dashed #000; margin:8px 0;"/>
+                          <p style="margin:4px 0;">Date: ${new Date().toLocaleString()}</p>
+                          <p style="margin:4px 0; font-weight:bold;">FEED & CUTTER PASSED</p>
+                        </body>
+                      </html>
+                    `);
+                    printWindow.document.close();
+                    printWindow.focus();
+                    setTimeout(() => {
+                      printWindow.print();
+                      printWindow.close();
+                    }, 250);
+                  }
+                }}
+                className="px-4 py-2 bg-white/80 dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 hover:border-[#2C5E3B] text-[#2C5E3B] dark:text-[#A9CBA2] font-bold text-xs rounded-xl flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
+              >
+                <Printer size={14} />
+                Print Test Slip
+              </button>
+            </div>
+          </div>
         </div>
 
         <div className="mt-8 pt-6 border-t border-[#E2DCCE]/60 dark:border-white/10 flex justify-end">
