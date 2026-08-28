@@ -62,7 +62,7 @@ export const POSHeader: React.FC<POSHeaderProps> = ({ setIsFilterPanelOpen, acti
                 icon={<ArrowLeft size={20} />}
                 title={t('pos.exitDashboard')}
                 aria-label="Exit to Dashboard"
-                className="p-3 bg-white/90 dark:bg-black/25 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-2xl text-[#2C4D35] dark:text-[#A9CBA2] hover:text-[#1E3F27] dark:hover:text-white hover:scale-105 active:scale-95 transition-all shadow-[0_2px_12px_rgba(44,94,59,0.03)] dark:shadow-none"
+                className="hidden lg:flex p-3 bg-white/90 dark:bg-black/25 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-2xl text-[#2C4D35] dark:text-[#A9CBA2] hover:text-[#1E3F27] dark:hover:text-white hover:scale-105 active:scale-95 transition-all shadow-[0_2px_12px_rgba(44,94,59,0.03)] dark:shadow-none"
             />
             <div className="flex-1 relative">
                 <div className="flex items-center bg-white/90 dark:bg-black/25 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-2xl px-4 py-2.5 focus-within:border-[#2C5E3B] dark:focus-within:border-[#A9CBA2] focus-within:ring-4 focus-within:ring-[#2C5E3B]/10 dark:focus-within:ring-[#A9CBA2]/10 transition-all duration-300 group">
@@ -76,19 +76,19 @@ export const POSHeader: React.FC<POSHeaderProps> = ({ setIsFilterPanelOpen, acti
                         onChange={(e) => setSearchTerm(e.target.value)}
                         onKeyDown={handleSearchKeyDown}
                     />
-                    {searchTerm.trim() && (
+                    {searchTerm.trim() ? (
                         <button
+                            type="button"
                             onClick={() => {
-                                const inputValue = searchInputRef.current?.value?.trim() || searchTerm.trim();
-                                if (inputValue) {
-                                    handleScanProduct(inputValue);
-                                }
+                                setSearchTerm('');
+                                if (searchInputRef.current) searchInputRef.current.value = '';
                             }}
-                            className="ml-2 p-1.5 rounded-xl bg-[#2C5E3B]/10 hover:bg-[#2C5E3B]/20 text-[#2C5E3B] dark:text-[#A9CBA2] transition-colors flex-shrink-0"
-                            aria-label="Search"
+                            className="ml-1.5 p-1 rounded-lg hover:bg-stone-200 dark:hover:bg-white/10 text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 transition-colors flex-shrink-0"
+                            aria-label="Clear Search"
                         >
+                            <X size={16} />
                         </button>
-                    )}
+                    ) : null}
                     {unseenPriceChanges.length > 0 && (
                         <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-blue-500/10 border border-blue-400/30 text-blue-700 dark:text-blue-300 ml-2 flex-shrink-0">
                             <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />

@@ -142,7 +142,10 @@ export const POSProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }, [activeShift, user, startShift]);
 
     useEffect(() => {
-        if (searchInputRef.current) searchInputRef.current.focus();
+        // Only autofocus search input on desktop/USB-scanner environments; avoid popping virtual keyboard on mobile
+        if (!native.isCleanMobileMode() && searchInputRef.current) {
+            searchInputRef.current.focus();
+        }
     }, []);
 
     useEffect(() => {

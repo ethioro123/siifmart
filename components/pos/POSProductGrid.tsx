@@ -64,7 +64,7 @@ export const POSProductGrid: React.FC = () => {
     }, [searchTerm, selectedCategory, selectedDepartment, minPriceFilter, maxPriceFilter, selectedBrands, selectedVelocities, stockStatusFilter, onSaleOnly, competitorMatchedOnly, sortBy]);
 
     return (
-        <div className="flex-1 flex flex-col bg-white/85 dark:bg-[#18201B]/60 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-[32px] overflow-hidden pb-20 lg:pb-0 shadow-[0_24px_80px_-12px_rgba(34,50,38,0.06)] dark:shadow-[0_32px_96px_-12px_rgba(5,8,6,0.65)] lg:backdrop-blur-2xl transition-all duration-300 relative">
+        <div className="flex-1 flex flex-col bg-white/85 dark:bg-[#18201B]/60 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-[32px] overflow-hidden pb-24 lg:pb-0 shadow-[0_24px_80px_-12px_rgba(34,50,38,0.06)] dark:shadow-[0_32px_96px_-12px_rgba(5,8,6,0.65)] lg:backdrop-blur-2xl transition-all duration-300 relative">
             <POSOfflineBanner />
             <div className="absolute inset-0 bg-gradient-to-b from-[#2C5E3B]/5 to-transparent pointer-events-none" />
             <div className="p-4 border-b border-white/5 space-y-4">

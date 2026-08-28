@@ -41,6 +41,20 @@ export const native = {
     },
 
     /**
+     * Trigger light haptic feedback on mobile touch
+     */
+    haptic: () => {
+        if (typeof window !== 'undefined') {
+            const Haptics = (window as any).Capacitor?.Plugins?.Haptics;
+            if (Haptics?.impact) {
+                Haptics.impact({ style: 'LIGHT' }).catch(() => {});
+                return;
+            }
+        }
+        native.vibrate(30);
+    },
+
+    /**
      * Vibrate the device
      */
     vibrate: (milliseconds: number = 200) => {

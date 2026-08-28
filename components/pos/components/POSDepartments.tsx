@@ -1,6 +1,7 @@
 import React from 'react';
 import { X, RotateCcw } from 'lucide-react';
 import { usePOS } from '../POSContext';
+import { native } from '../../../utils/native';
 
 export const POSDepartments: React.FC = () => {
     const {
@@ -28,6 +29,8 @@ export const POSDepartments: React.FC = () => {
         resetAllFilters
     } = usePOS();
 
+    const isMobile = native.isCleanMobileMode();
+
     const activeFiltersCount = React.useMemo(() => {
         let count = 0;
         if (selectedDepartment !== 'All') count++;
@@ -42,6 +45,27 @@ export const POSDepartments: React.FC = () => {
         if (sortBy !== 'default') count++;
         return count;
     }, [selectedDepartment, selectedCategory, minPriceFilter, maxPriceFilter, selectedBrands, selectedVelocities, stockStatusFilter, onSaleOnly, competitorMatchedOnly, sortBy]);
+
+    if (isMobile) {
+        return (
+            <div className="pt-1 border-t border-stone-200/40 dark:border-white/5">
+                <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide px-1 -mx-2">
+                    {categories.map(cat => (
+                        <button
+                            key={cat}
+                            onClick={() => setSelectedCategory(cat)}
+                            className={`px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all active:scale-95 ${selectedCategory === cat
+                                ? 'bg-[#2C5E3B] text-white shadow-sm'
+                                : 'text-[#4D6E56] dark:text-stone-300 hover:text-[#2C5E3B] dark:hover:text-white bg-white/90 dark:bg-black/30 border border-[#E2DCCE] dark:border-emerald-950/20'
+                                }`}
+                        >
+                            {cat}
+                        </button>
+                    ))}
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-2">

@@ -8,6 +8,7 @@ import { formatPriceValue } from '../../../utils/formatting';
 import { getSellUnit, formatStockDisplay } from '../../../utils/units';
 import { formatPackBadge } from '../../procurement/utils';
 import { Product } from '../../../types';
+import { native } from '../../../utils/native';
 
 interface POSCatalogProps {
     currentPage: number;
@@ -26,10 +27,7 @@ export const POSCatalog: React.FC<POSCatalogProps> = ({
 }) => {
     const { t } = useLanguage();
     const navigate = useNavigate();
-    const { filteredProducts, addToCart, lastSeenPriceUpdate } = usePOS();
-
-    const isNativeApp = typeof window !== 'undefined' && (window as any).Neutralino;
-    const native = isNativeApp ? (window as any).Neutralino.os : null;
+    const { filteredProducts, addToCart, lastSeenPriceUpdate, cart } = usePOS();
 
     return (
         <div className="flex-1 overflow-y-auto p-4">
@@ -50,26 +48,26 @@ export const POSCatalog: React.FC<POSCatalogProps> = ({
                 </div>
             ) : (
                 <>
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                        {paginatedProducts.map(product => (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-2 sm:gap-2.5">
+                        {paginatedProducts.map(product => {
+                            const inCartItem = cart.find(i => i.id === product.id || (i as any).productId === product.id);
+                            return (
                             <button
                                 key={product.id}
                                 onClick={() => {
                                     addToCart(product);
-                                    if (isNativeApp && native) {
-                                        native.vibrate(50);
-                                    }
+                                    native.haptic();
                                 }}
                                 disabled={product.stock === 0}
-                                className={`text-left bg-white/70 dark:bg-[#18201B]/30 border rounded-2xl p-4 hover:bg-white dark:hover:bg-[#18201B]/50 transition-all duration-300 group relative overflow-hidden flex flex-col h-full active:scale-[0.98] shadow-sm hover:shadow-md ${product.stock <= 0 ? 'border-red-500/80 dark:border-red-500/60 opacity-60 cursor-not-allowed' : 'border-[#E2DCCE] dark:border-emerald-950/10 hover:border-[#2C5E3B]/40 dark:hover:border-[#A9CBA2]/30'}`}
+                                className={`text-left bg-white/80 dark:bg-[#18201B]/40 border rounded-xl p-2 sm:p-2.5 hover:bg-white dark:hover:bg-[#18201B]/60 transition-colors group relative overflow-hidden flex flex-col h-full active:scale-[0.98] shadow-xs hover:shadow-sm ${product.stock <= 0 ? 'border-red-500/80 dark:border-red-500/60 opacity-60 cursor-not-allowed' : inCartItem ? 'border-[#2C5E3B] dark:border-[#A9CBA2]/60 ring-1 ring-[#2C5E3B]/30' : 'border-[#E2DCCE]/80 dark:border-emerald-950/20 hover:border-[#2C5E3B]/40 dark:hover:border-[#A9CBA2]/30'}`}
                             >
-                                <div className="aspect-square rounded-xl bg-[#F4F0E6] dark:bg-black/35 mb-4 overflow-hidden relative border border-[#E2DCCE]/40 dark:border-white/5 flex items-center justify-center">
+                                <div className="aspect-[4/3] rounded-lg bg-[#F4F0E6] dark:bg-black/35 mb-2 overflow-hidden relative border border-[#E2DCCE]/40 dark:border-white/5 flex items-center justify-center">
                                     {product.image && !product.image.includes('placeholder.com') ? (
                                         <>
                                             <img
                                                 src={product.image}
                                                 alt={product.name}
-                                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                                                 loading="lazy"
                                                 onError={(e) => {
                                                     e.currentTarget.style.display = 'none';
@@ -78,12 +76,12 @@ export const POSCatalog: React.FC<POSCatalogProps> = ({
                                                 }}
                                             />
                                             <div className="w-full h-full bg-[#F4F0E6] dark:bg-black/35 items-center justify-center hidden">
-                                                <Package size={32} className="text-[#2C5E3B]/20 dark:text-[#A9CBA2]/25" />
+                                                <Package size={22} className="text-[#2C5E3B]/20 dark:text-[#A9CBA2]/25" />
                                             </div>
                                         </>
                                     ) : (
                                         <div className="w-full h-full bg-[#F4F0E6] dark:bg-black/35 flex items-center justify-center">
-                                            <Package size={32} className="text-[#2C5E3B]/20 dark:text-[#A9CBA2]/25" />
+                                            <Package size={22} className="text-[#2C5E3B]/20 dark:text-[#A9CBA2]/25" />
                                         </div>
                                     )}
 
@@ -93,15 +91,15 @@ export const POSCatalog: React.FC<POSCatalogProps> = ({
                                         const isOutOfStock = product.stock <= 0;
                                         const isLowStock = product.stock < threshold;
                                         
-                                        let colorClasses = 'bg-white/80 dark:bg-black/50 text-[#4D6E56] dark:text-gray-300 border-[#E2DCCE]/60 dark:border-white/10';
+                                        let colorClasses = 'bg-white/90 dark:bg-black/70 text-[#4D6E56] dark:text-gray-300 border-[#E2DCCE]/60 dark:border-white/10';
                                         if (isOutOfStock) {
                                             colorClasses = 'bg-red-600 dark:bg-red-700 text-white border-transparent shadow-none';
                                         } else if (isLowStock) {
-                                            colorClasses = 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/35';
+                                            colorClasses = 'bg-amber-500/20 text-amber-700 dark:text-amber-300 border-amber-500/35';
                                         }
 
                                         return (
-                                            <div className={`absolute top-2.5 right-2.5 px-2 py-0.5 rounded-lg text-[9px] font-extrabold tracking-wider backdrop-blur-md border shadow-sm flex items-center gap-1 ${colorClasses}`}>
+                                            <div className={`absolute top-1.5 right-1.5 px-1.5 py-0.5 rounded-md text-[8px] font-extrabold tracking-wider border shadow-xs flex items-center gap-0.5 ${colorClasses}`}>
                                                 {isOutOfStock ? (
                                                     <span>{t('common.outOfStock')}</span>
                                                 ) : (
@@ -111,43 +109,43 @@ export const POSCatalog: React.FC<POSCatalogProps> = ({
                                         );
                                     })()}
 
-                                     {(() => {
-                                         const priceTime = (product as any).priceUpdatedAt || (product as any).price_updated_at || (product as any).updatedAt || (product as any).updated_at;
-                                         const cutoff = Date.now() - 7 * 24 * 60 * 60 * 1000;
-                                         if (priceTime) {
-                                             const ts = new Date(priceTime).getTime();
-                                             if (ts > cutoff && ts > (lastSeenPriceUpdate || 0)) {
-                                                 return (
-                                                     <div className="absolute top-2.5 left-2.5 bg-blue-600 text-white px-2 py-0.5 rounded-lg text-[8px] font-black uppercase tracking-wider shadow-md flex items-center gap-1 z-10">
-                                                         <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-                                                         Price Changed
-                                                     </div>
-                                                 );
-                                             }
-                                         }
-                                         if (product.isOnSale) {
-                                             return (
-                                                 <div className="absolute top-2.5 left-2.5 bg-gradient-to-r from-amber-500 to-amber-600 px-2 py-0.5 rounded-lg text-[7px] font-black text-white uppercase tracking-wider shadow-sm">
-                                                     {t('pos.sale')}
-                                                 </div>
-                                             );
-                                         }
-                                         return null;
-                                     })()}
+                                    {(() => {
+                                        const priceTime = (product as any).priceUpdatedAt || (product as any).price_updated_at || (product as any).updatedAt || (product as any).updated_at;
+                                        const cutoff = Date.now() - 7 * 24 * 60 * 60 * 1000;
+                                        if (priceTime) {
+                                            const ts = new Date(priceTime).getTime();
+                                            if (ts > cutoff && ts > (lastSeenPriceUpdate || 0)) {
+                                                return (
+                                                    <div className="absolute top-1.5 left-1.5 bg-blue-600 text-white px-1.5 py-0.5 rounded-md text-[7px] font-black uppercase tracking-wider shadow-xs flex items-center gap-1 z-10">
+                                                        <span className="w-1 h-1 rounded-full bg-white animate-pulse" />
+                                                        Changed
+                                                    </div>
+                                                );
+                                            }
+                                        }
+                                        if (product.isOnSale) {
+                                            return (
+                                                <div className="absolute top-1.5 left-1.5 bg-gradient-to-r from-amber-500 to-amber-600 px-1.5 py-0.5 rounded-md text-[7px] font-black text-white uppercase tracking-wider shadow-xs">
+                                                    {t('pos.sale')}
+                                                </div>
+                                            );
+                                        }
+                                        return null;
+                                    })()}
                                 </div>
 
                                 <div className="flex-1 flex flex-col min-w-0">
-                                    <h3 className="font-extrabold text-[#1E3F27] dark:text-[#EAE5D9] text-xs md:text-sm line-clamp-2 min-h-[2.5rem] leading-tight mb-1 group-hover:text-[#2C5E3B] dark:group-hover:text-white transition-colors">{product.name}</h3>
+                                    <h3 className="font-bold text-[#1E3F27] dark:text-[#EAE5D9] text-xs line-clamp-2 min-h-[1.75rem] leading-tight mb-1 group-hover:text-[#2C5E3B] dark:group-hover:text-white transition-colors">{product.name}</h3>
                                     {(() => {
                                         const badge = formatPackBadge(product);
                                         return badge ? (
-                                            <span className="inline-block mb-1.5 px-1.5 py-0.5 rounded bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400 text-[8px] font-black uppercase tracking-widest">
+                                            <span className="inline-block mb-1 px-1 py-0.2 rounded bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400 text-[7px] font-black uppercase tracking-widest max-w-fit">
                                                 {badge}
                                             </span>
                                         ) : null;
                                     })()}
-                                    <div className="mt-auto pt-1.5 flex items-center justify-between border-t border-[#E2DCCE]/30 dark:border-white/5">
-                                        <div className="flex flex-col">
+                                    <div className="mt-auto pt-1 flex items-center justify-between border-t border-[#E2DCCE]/30 dark:border-white/5">
+                                        <div className="flex flex-col min-w-0 pr-1">
                                             {(() => {
                                                 const priceTime = (product as any).priceUpdatedAt || (product as any).price_updated_at || (product as any).updatedAt || (product as any).updated_at;
                                                 const cutoff = Date.now() - 7 * 24 * 60 * 60 * 1000;
@@ -155,33 +153,38 @@ export const POSCatalog: React.FC<POSCatalogProps> = ({
                                                     const ts = new Date(priceTime).getTime();
                                                     if (ts > cutoff && ts > (lastSeenPriceUpdate || 0)) {
                                                         return (
-                                                            <span className="inline-flex items-center gap-1 text-[8px] font-black text-blue-600 dark:text-blue-400 uppercase mb-0.5 tracking-wider">
-                                                                <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
-                                                                Price Updated
+                                                            <span className="inline-flex items-center gap-0.5 text-[7px] font-black text-blue-600 dark:text-blue-400 uppercase mb-0.5 tracking-wider">
+                                                                <span className="w-1 h-1 rounded-full bg-blue-500 animate-pulse" />
+                                                                Updated
                                                             </span>
                                                         );
                                                     }
                                                 }
                                                 return null;
                                             })()}
-                                            <div className="flex items-baseline gap-1.5">
+                                            <div className="flex items-baseline gap-1 flex-wrap">
                                                 {product.isOnSale && product.salePrice ? (
                                                     <>
-                                                        <p className="text-amber-600 dark:text-amber-400 font-extrabold text-base tracking-tight">{CURRENCY_SYMBOL} {formatPriceValue(product.salePrice)}{product.unit && getSellUnit(product.unit).code !== 'UNIT' ? <span className="text-[8px] text-amber-600/60 dark:text-amber-400/60 font-bold">/{getSellUnit(product.unit).shortLabel}</span> : null}</p>
-                                                        <p className="text-stone-400 dark:text-gray-600 text-[10px] line-through">{CURRENCY_SYMBOL} {formatPriceValue(product.price)}</p>
+                                                        <p className="text-amber-600 dark:text-amber-400 font-black text-xs sm:text-sm tracking-tight">{CURRENCY_SYMBOL} {formatPriceValue(product.salePrice)}{product.unit && getSellUnit(product.unit).code !== 'UNIT' ? <span className="text-[7px] text-amber-600/60 dark:text-amber-400/60 font-bold">/{getSellUnit(product.unit).shortLabel}</span> : null}</p>
+                                                        <p className="text-stone-400 dark:text-gray-600 text-[9px] line-through">{CURRENCY_SYMBOL} {formatPriceValue(product.price)}</p>
                                                     </>
                                                 ) : (
-                                                    <p className="text-[#2C5E3B] dark:text-[#A9CBA2] font-black text-base tracking-tight">{CURRENCY_SYMBOL} {formatPriceValue(product.price)}{product.unit && getSellUnit(product.unit).code !== 'UNIT' ? <span className="text-[8px] text-[#4D6E56]/60 dark:text-gray-500 font-bold">/{getSellUnit(product.unit).shortLabel}</span> : null}</p>
+                                                    <p className="text-[#2C5E3B] dark:text-[#A9CBA2] font-black text-xs sm:text-sm tracking-tight">{CURRENCY_SYMBOL} {formatPriceValue(product.price)}{product.unit && getSellUnit(product.unit).code !== 'UNIT' ? <span className="text-[7px] text-[#4D6E56]/60 dark:text-gray-500 font-bold">/{getSellUnit(product.unit).shortLabel}</span> : null}</p>
                                                 )}
                                             </div>
                                         </div>
-                                        <div className="w-8 h-8 rounded-xl bg-[#2C5E3B]/10 dark:bg-white/5 border border-[#2C5E3B]/20 dark:border-white/10 flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:bg-[#2C5E3B]/20 dark:group-hover:bg-white/10">
-                                            <Plus size={14} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
+                                        <div className={`w-7 h-7 rounded-lg flex items-center justify-center transition-transform group-hover:scale-105 shrink-0 ${inCartItem ? 'bg-[#2C5E3B] text-white' : 'bg-[#2C5E3B]/10 dark:bg-white/5 border border-[#2C5E3B]/20 dark:border-white/10 group-hover:bg-[#2C5E3B]/20 dark:group-hover:bg-white/10'}`}>
+                                            {inCartItem ? (
+                                                <span className="text-[11px] font-black text-white">{inCartItem.quantity}</span>
+                                            ) : (
+                                                <Plus size={13} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
+                                            )}
                                         </div>
                                     </div>
                                 </div>
                             </button>
-                        ))}
+                        );
+                    })}
                     </div>
 
                     {/* Pagination Controls */}
