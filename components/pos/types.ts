@@ -215,7 +215,7 @@ export interface POSContextType {
     handleSubmitShift: () => Promise<void>;
     handleSearchForReturn: () => void;
     updateReturnConfig: (itemId: string, field: string, value: any) => void;
-    handleProcessReturn: () => Promise<void>;
+    handleProcessReturn: (refundMethod?: string, customerPhone?: string, hqOtp?: string) => Promise<void>;
     handleSearchKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => Promise<void>;
     handleSelectCustomer: (customer: Customer) => void;
     getCustomerHistory: (customerId: string) => SaleRecord[];

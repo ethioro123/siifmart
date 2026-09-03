@@ -54,20 +54,22 @@ export const usePOSReturnActions = ({
         }));
     }, [setReturnConfig]);
 
-    const handleProcessReturn = React.useCallback(async () => {
+    const handleProcessReturn = React.useCallback(async (refundMethod: string = 'STORE_CREDIT', customerPhone: string = '', hqOtp?: string) => {
         if (!foundSaleForReturn) return;
         setIsProcessing(true);
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        await new Promise(resolve => setTimeout(resolve, 1200));
         const returnItems: ReturnItem[] = [];
         let refundTotal = 0;
         foundSaleForReturn.items.forEach(item => {
             const config = returnConfig[item.id];
             if (config && config.qty > 0) {
-                const refundAmount = item.price * config.qty;
+                // Safeguard: Ensure return quantity never exceeds purchased quantity
+                const safeQty = Math.min(config.qty, item.quantity);
+                const refundAmount = item.price * safeQty;
                 refundTotal += refundAmount;
                 returnItems.push({
                     productId: item.id,
-                    quantity: config.qty,
+                    quantity: safeQty,
                     reason: config.reason,
                     condition: config.condition,
                     refundAmount
@@ -79,15 +81,16 @@ export const usePOSReturnActions = ({
             try {
                 const { systemLogsService } = await import('../../../services/supabase.service');
                 await systemLogsService.create({
-                    module: 'POS_RETURNS',
-                    action: 'REFUND_PROCESSED',
+                    module: 'POS_RETURNS_AUDIT',
+                    action: 'ZERO_TRUST_REFUND_EXECUTED',
                     user_name: user?.name || 'Cashier',
-                    details: `Processed refund of ${CURRENCY_SYMBOL} ${refundTotal.toLocaleString()} for sale ${foundSaleForReturn.receiptNumber || foundSaleForReturn.id} (${returnItems.length} item types returned)`
+                    details: `Zero-Trust Refund of ${CURRENCY_SYMBOL} ${refundTotal.toLocaleString()} processed via ${refundMethod}. Receipt: ${foundSaleForReturn.receiptNumber || foundSaleForReturn.id}. Customer Phone: ${customerPhone || 'N/A'}. HQ Authorization: ${hqOtp ? 'VERIFIED_OTP' : 'NOT_REQUIRED'}. (${returnItems.length} item types returned)`
                 });
             } catch (logErr) {
                 // Non-blocking audit log
             }
-            addNotification('success', `Refund Processed: ${CURRENCY_SYMBOL} ${refundTotal.toLocaleString()}`);
+            const tenderLabel = refundMethod === 'STORE_CREDIT' ? 'Store Credit' : refundMethod === 'TELEBIRR' ? 'Telebirr' : refundMethod === 'CBE_BIRR' ? 'CBE Birr' : 'Cash (HQ Approved)';
+            addNotification('success', `Refund Issued via ${tenderLabel}: ${CURRENCY_SYMBOL} ${refundTotal.toLocaleString()}`);
         }
         setIsProcessing(false);
         setIsReturnModalOpen(false);

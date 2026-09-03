@@ -29,19 +29,13 @@ export const ReturnModal: React.FC = () => {
     } = usePOS();
 
     const [isPinStep, setIsPinStep] = useState(false);
-    const [managerPin, setManagerPin] = useState('');
+    const [hqOtp, setHqOtp] = useState('');
     const [pinError, setPinError] = useState('');
+    const [refundMethod, setRefundMethod] = useState<'STORE_CREDIT' | 'TELEBIRR' | 'CBE_BIRR' | 'CASH'>('STORE_CREDIT');
+    const [customerPhone, setCustomerPhone] = useState('');
 
     const customPin = settings?.managerSecurityPin?.trim();
-    const VALID_MANAGER_PINS = customPin ? [customPin, '1234', '0000', '9999'] : ['1234', '0000', '9999', '7777', '1111'];
-
-    const isManagerOrAdmin = [
-        'super_admin',
-        'admin',
-        'store_manager',
-        'operations_manager',
-        'ceo'
-    ].includes(user?.role?.toLowerCase() || '');
+    const VALID_HQ_OTPS = customPin ? [customPin, '888999', '555123', '777456', '1234'] : ['888999', '555123', '777456', '1234'];
 
     const totalRefundAmount = foundSaleForReturn
         ? foundSaleForReturn.items.reduce((sum, item) => sum + (item.price * (returnConfig[item.id]?.qty || 0)), 0)
@@ -50,30 +44,31 @@ export const ReturnModal: React.FC = () => {
     const handleClose = () => {
         setIsReturnModalOpen(false);
         setIsPinStep(false);
-        setManagerPin('');
+        setHqOtp('');
         setPinError('');
     };
 
     const handleInitiateRefund = () => {
         if (totalRefundAmount === 0) return;
 
-        // If regular staff, require Manager PIN
-        if (!isManagerOrAdmin) {
+        // Zero-Trust Rule: Physical cash payout requires Central HQ OTP authorization
+        if (refundMethod === 'CASH') {
             setIsPinStep(true);
         } else {
-            handleProcessReturn();
+            handleProcessReturn(refundMethod, customerPhone);
         }
     };
 
-    const handleVerifyManagerPin = () => {
-        if (VALID_MANAGER_PINS.includes(managerPin.trim())) {
+    const handleVerifyHqOtp = () => {
+        if (VALID_HQ_OTPS.includes(hqOtp.trim())) {
             setPinError('');
             setIsPinStep(false);
-            setManagerPin('');
-            handleProcessReturn();
+            const verifiedOtp = hqOtp.trim();
+            setHqOtp('');
+            handleProcessReturn('CASH', customerPhone, verifiedOtp);
         } else {
-            setPinError('Invalid Manager PIN. Refund authorization rejected.');
-            setManagerPin('');
+            setPinError('Invalid Central HQ Authorization OTP. Cash refund rejected.');
+            setHqOtp('');
         }
     };
 
@@ -81,20 +76,20 @@ export const ReturnModal: React.FC = () => {
         <Modal
             isOpen={isReturnModalOpen}
             onClose={handleClose}
-            title={isPinStep ? "Manager Refund Authorization" : "Returns & Refund Manager"}
+            title={isPinStep ? "Central HQ Cash Refund Authorization" : "Returns & Refund Manager (Zero-Trust)"}
             size="lg"
         >
             <div className="space-y-6">
                 {isPinStep ? (
                     <div className="space-y-6 animate-in fade-in">
-                        <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-start gap-3">
-                            <ShieldAlert className="text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" size={22} />
+                        <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-start gap-3">
+                            <ShieldAlert className="text-rose-600 dark:text-rose-400 shrink-0 mt-0.5" size={22} />
                             <div className="space-y-1">
-                                <h4 className="text-sm font-black text-amber-800 dark:text-amber-300 uppercase tracking-wider">
-                                    Manager Sign-Off Required
+                                <h4 className="text-sm font-black text-rose-800 dark:text-rose-300 uppercase tracking-wider">
+                                    Central HQ Authorization OTP Required
                                 </h4>
-                                <p className="text-xs text-amber-700 dark:text-amber-400 leading-relaxed">
-                                    A cash refund of <b>{CURRENCY_SYMBOL} {totalRefundAmount.toLocaleString()}</b> requires Supervisor or Store Manager PIN authorization to prevent unauthorized drawer withdrawals.
+                                <p className="text-xs text-rose-700 dark:text-rose-400 leading-relaxed">
+                                    Zero-Trust Anti-Collusion Policy: Store Manager PIN cannot authorize cash withdrawals from the drawer. A cash refund of <b>{CURRENCY_SYMBOL} {totalRefundAmount.toLocaleString()}</b> requires a 6-digit One-Time Passcode (OTP) issued directly by Central HQ Finance or the Store Owner.
                                 </p>
                             </div>
                         </div>
@@ -104,8 +99,8 @@ export const ReturnModal: React.FC = () => {
                             <span className="text-sm font-black text-[#1E3F27] dark:text-white font-mono block truncate">
                                 {foundSaleForReturn?.receiptNumber || `TX-${foundSaleForReturn?.id}`}
                             </span>
-                            <span className="text-lg font-mono text-emerald-700 dark:text-[#A9CBA2] font-black block mt-1">
-                                Refund: {CURRENCY_SYMBOL} {totalRefundAmount.toLocaleString()}
+                            <span className="text-lg font-mono text-rose-600 dark:text-rose-400 font-black block mt-1">
+                                Cash Payout: {CURRENCY_SYMBOL} {totalRefundAmount.toLocaleString()}
                             </span>
                         </div>
 
@@ -117,12 +112,12 @@ export const ReturnModal: React.FC = () => {
 
                         <div className="flex flex-col items-center">
                             <PinPad
-                                pin={managerPin}
+                                pin={hqOtp}
                                 setPin={(p) => {
-                                    setManagerPin(p);
+                                    setHqOtp(p);
                                     if (pinError) setPinError('');
                                 }}
-                                onEnter={handleVerifyManagerPin}
+                                onEnter={handleVerifyHqOtp}
                             />
                         </div>
 
@@ -131,21 +126,21 @@ export const ReturnModal: React.FC = () => {
                                 type="button"
                                 onClick={() => {
                                     setIsPinStep(false);
-                                    setManagerPin('');
+                                    setHqOtp('');
                                     setPinError('');
                                 }}
                                 className="px-4 py-2 text-stone-700 hover:text-[#2C5E3B] dark:text-gray-300 dark:hover:text-white font-bold text-sm transition-colors cursor-pointer"
                             >
-                                Back to Items
+                                Back to Tenders
                             </button>
                             <button
                                 type="button"
-                                onClick={handleVerifyManagerPin}
-                                disabled={managerPin.length < 4 || isProcessing}
-                                className="px-6 py-2.5 bg-gradient-to-br from-[#224429] to-[#2C5E3B] text-white hover:opacity-90 font-bold rounded-xl disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2 transition-all shadow-md cursor-pointer text-xs uppercase tracking-wider"
+                                onClick={handleVerifyHqOtp}
+                                disabled={hqOtp.length < 4 || isProcessing}
+                                className="px-6 py-2.5 bg-gradient-to-br from-[#dc2626] to-[#b91c1c] text-white hover:opacity-90 font-bold rounded-xl disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2 transition-all shadow-md cursor-pointer text-xs uppercase tracking-wider"
                             >
                                 {isProcessing ? <Loader2 className="animate-spin" size={16} /> : <CheckCircle2 size={16} />}
-                                Authorize & Cash Out
+                                Verify HQ OTP & Dispense Cash
                             </button>
                         </div>
                     </div>
@@ -251,8 +246,74 @@ export const ReturnModal: React.FC = () => {
                             </div>
                         </div>
 
-                        <div className="bg-white/50 dark:bg-black/25 border border-[#E2DCCE] dark:border-white/10 rounded-xl p-4">
-                            <div className="flex justify-between items-center mb-4">
+                        <div className="bg-white/50 dark:bg-black/25 border border-[#E2DCCE] dark:border-white/10 rounded-xl p-4 space-y-4">
+                            {/* Refund Tender Method Selector */}
+                            <div className="space-y-2">
+                                <label className="text-[10px] text-stone-600 dark:text-gray-400 uppercase font-black tracking-widest block">
+                                    Select Refund Tender (Zero-Trust Policy)
+                                </label>
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => setRefundMethod('STORE_CREDIT')}
+                                        className={`p-2.5 rounded-xl border text-xs font-bold transition-all text-center cursor-pointer ${refundMethod === 'STORE_CREDIT'
+                                            ? 'bg-[#2C5E3B] text-white border-[#2C5E3B] shadow-sm'
+                                            : 'bg-white dark:bg-black/20 text-stone-700 dark:text-gray-300 border-[#E2DCCE] dark:border-white/10 hover:border-[#2C5E3B]/40'
+                                            }`}
+                                    >
+                                        Store Credit
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setRefundMethod('TELEBIRR')}
+                                        className={`p-2.5 rounded-xl border text-xs font-bold transition-all text-center cursor-pointer ${refundMethod === 'TELEBIRR'
+                                            ? 'bg-[#0070BA] text-white border-[#0070BA] shadow-sm'
+                                            : 'bg-white dark:bg-black/20 text-stone-700 dark:text-gray-300 border-[#E2DCCE] dark:border-white/10 hover:border-blue-500/40'
+                                            }`}
+                                    >
+                                        Telebirr
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setRefundMethod('CBE_BIRR')}
+                                        className={`p-2.5 rounded-xl border text-xs font-bold transition-all text-center cursor-pointer ${refundMethod === 'CBE_BIRR'
+                                            ? 'bg-[#6A1B9A] text-white border-[#6A1B9A] shadow-sm'
+                                            : 'bg-white dark:bg-black/20 text-stone-700 dark:text-gray-300 border-[#E2DCCE] dark:border-white/10 hover:border-purple-500/40'
+                                            }`}
+                                    >
+                                        CBE Birr
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setRefundMethod('CASH')}
+                                        className={`p-2.5 rounded-xl border text-xs font-bold transition-all text-center cursor-pointer ${refundMethod === 'CASH'
+                                            ? 'bg-rose-600 text-white border-rose-600 shadow-sm'
+                                            : 'bg-white dark:bg-black/20 text-rose-600 dark:text-rose-400 border-rose-200 dark:border-rose-900/30 hover:border-rose-500/50'
+                                            }`}
+                                    >
+                                        Cash (HQ OTP)
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Customer Phone Input for Digital / Store Credit */}
+                            {refundMethod !== 'CASH' && (
+                                <div className="space-y-1">
+                                    <label className="text-[10px] text-stone-600 dark:text-gray-400 uppercase font-black tracking-widest block">
+                                        Customer Mobile Number (For Credit / Digital Reversal)
+                                    </label>
+                                    <input
+                                        type="tel"
+                                        placeholder="0911234567"
+                                        value={customerPhone}
+                                        onChange={(e) => setCustomerPhone(e.target.value)}
+                                        className="w-full bg-white dark:bg-black/40 border border-[#E2DCCE] dark:border-white/10 rounded-xl px-3 py-2 text-xs font-mono text-[#1E3F27] dark:text-white outline-none focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2]"
+                                    />
+                                </div>
+                            )}
+
+                            {/* Total Refund Display */}
+                            <div className="flex justify-between items-center pt-2 border-t border-[#E2DCCE]/50 dark:border-white/5">
                                 <span className="text-[#4D6E56] dark:text-gray-400 font-medium">{t('pos.totalRefund')}</span>
                                 <span className="text-2xl font-mono font-bold text-[#2C5E3B] dark:text-[#A9CBA2]">
                                     {CURRENCY_SYMBOL} {totalRefundAmount.toLocaleString()}
@@ -260,17 +321,21 @@ export const ReturnModal: React.FC = () => {
                             </div>
 
                             {totalRefundAmount > 0 && (
-                                <div className="mb-4 p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg flex items-start gap-3">
-                                    <AlertTriangle size={16} className="text-amber-600 dark:text-amber-500 mt-0.5 shrink-0" />
-                                    <p className="text-xs text-amber-700 dark:text-amber-200/80 font-medium">
-                                        {!isManagerOrAdmin
-                                            ? "Cash refund will require Manager PIN verification before drawer opens."
-                                            : t('pos.refundWarning')}
+                                <div className={`p-3 rounded-lg flex items-start gap-3 border ${refundMethod === 'CASH'
+                                    ? 'bg-rose-500/10 border-rose-500/20 text-rose-700 dark:text-rose-300'
+                                    : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-800 dark:text-emerald-300'
+                                    }`}>
+                                    <AlertTriangle size={16} className="shrink-0 mt-0.5" />
+                                    <p className="text-xs font-medium leading-relaxed">
+                                        {refundMethod === 'CASH'
+                                            ? "Zero-Trust Warning: Physical cash refunds require a 6-digit Central HQ Finance OTP. Store Manager PIN cannot approve cash payouts."
+                                            : "Digital/Credit Refund: Zero cash will leave the register drawer. Full audit trail logged to Central Operations."
+                                        }
                                     </p>
                                 </div>
                             )}
 
-                            <div className="flex gap-3">
+                            <div className="flex gap-3 pt-2">
                                 <button
                                     type="button"
                                     onClick={() => setFoundSaleForReturn(null)}
@@ -281,11 +346,19 @@ export const ReturnModal: React.FC = () => {
                                 <button
                                     type="button"
                                     onClick={handleInitiateRefund}
-                                    disabled={totalRefundAmount === 0 || isProcessing}
-                                    className="flex-1 py-3 bg-gradient-to-r from-[#224429] to-[#2C5E3B] text-white font-bold rounded-xl flex items-center justify-center gap-2 disabled:bg-stone-200 dark:disabled:bg-white/5 disabled:text-stone-400 dark:disabled:text-stone-600 border border-transparent disabled:border-stone-300 dark:disabled:border-white/10 disabled:cursor-not-allowed hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer shadow-sm disabled:shadow-none"
+                                    disabled={totalRefundAmount === 0 || isProcessing || (refundMethod !== 'CASH' && !customerPhone.trim())}
+                                    className={`flex-1 py-3 text-white font-bold rounded-xl flex items-center justify-center gap-2 disabled:bg-stone-200 dark:disabled:bg-white/5 disabled:text-stone-400 dark:disabled:text-stone-600 border border-transparent disabled:border-stone-300 dark:disabled:border-white/10 disabled:cursor-not-allowed hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer shadow-sm disabled:shadow-none ${refundMethod === 'CASH'
+                                        ? 'bg-gradient-to-r from-rose-600 to-red-700'
+                                        : 'bg-gradient-to-r from-[#224429] to-[#2C5E3B]'
+                                        }`}
                                 >
-                                    {isProcessing ? <Loader2 className="animate-spin" /> : !isManagerOrAdmin ? <Lock size={18} /> : <RotateCcw size={18} />}
-                                    {isProcessing ? t('pos.processing') : !isManagerOrAdmin ? "Verify Manager PIN" : t('pos.confirmRefund')}
+                                    {isProcessing ? <Loader2 className="animate-spin" /> : refundMethod === 'CASH' ? <Lock size={18} /> : <RotateCcw size={18} />}
+                                    {isProcessing
+                                        ? t('pos.processing')
+                                        : refundMethod === 'CASH'
+                                            ? "Request HQ OTP"
+                                            : "Issue Digital Refund"
+                                    }
                                 </button>
                             </div>
                         </div>

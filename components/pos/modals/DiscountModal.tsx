@@ -116,11 +116,14 @@ export const DiscountModal: React.FC = () => {
                             </button>
                         </div>
 
-                        {/* Info Section */}
-                        <div className="bg-[#FAF8F5] dark:bg-black/30 rounded-xl p-4 border border-[#E2DCCE] dark:border-white/10">
+                        {/* Anti-Fraud Security Policy Section */}
+                        <div className="bg-[#FAF8F5] dark:bg-black/30 rounded-xl p-4 border border-[#E2DCCE] dark:border-white/10 space-y-1.5">
+                            <div className="flex items-center gap-1.5 text-xs font-bold text-[#1E3F27] dark:text-[#EAE5D9]">
+                                <Tag className="w-3.5 h-3.5 text-[#2C5E3B] dark:text-[#A9CBA2]" />
+                                Zero-Trust Promotion Policy
+                            </div>
                             <p className="text-xs text-[#4D6E56] dark:text-[#7A9E83] leading-relaxed">
-                                <strong className="text-[#1E3F27] dark:text-[#EAE5D9]">Note:</strong> Discount codes must be obtained from management or marketing campaigns.
-                                Ask the customer for their discount code or promotional number.
+                                Arbitrary manual cashier or manager discounts are strictly disabled. Discounts can only be redeemed through verified promotional campaign codes generated and audited centrally by HQ Finance.
                             </p>
                         </div>
 

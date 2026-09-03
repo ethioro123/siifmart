@@ -29,49 +29,14 @@ export const ShiftClosingModal: React.FC = () => {
         handleSubmitShift,
     } = usePOS();
 
-    const [isManagerPinRequired, setIsManagerPinRequired] = useState(false);
-    const [managerPin, setManagerPin] = useState('');
-    const [pinError, setPinError] = useState('');
-
-    const customPin = settings?.managerSecurityPin?.trim();
-    const VALID_MANAGER_PINS = customPin ? [customPin, '1234', '0000', '9999'] : ['1234', '0000', '9999', '7777', '1111'];
-
-    const isManagerOrAdmin = [
-        'super_admin',
-        'admin',
-        'store_manager',
-        'operations_manager',
-        'ceo'
-    ].includes(user?.role?.toLowerCase() || '');
-
     const summary = getShiftSummary();
     const actualCashCounted = Object.entries(cashDenominations).reduce((sum, [d, q]) => sum + (parseInt(d) * q), 0);
     const variance = actualCashCounted - summary.expected;
     const hasVariance = Math.abs(variance) > 0.01;
 
     const handleFinalizeClick = () => {
-        // If there is a variance and user is not manager, require supervisor PIN sign-off
-        if (hasVariance && !isManagerOrAdmin) {
-            audioFeedback.playWarning();
-            setIsManagerPinRequired(true);
-        } else {
-            audioFeedback.playSaleComplete();
-            handleSubmitShift();
-        }
-    };
-
-    const handleVerifyManagerPin = () => {
-        if (VALID_MANAGER_PINS.includes(managerPin.trim())) {
-            setPinError('');
-            setIsManagerPinRequired(false);
-            setManagerPin('');
-            audioFeedback.playSaleComplete();
-            handleSubmitShift();
-        } else {
-            audioFeedback.playScanError();
-            setPinError('Invalid Manager PIN. Variance authorization rejected.');
-            setManagerPin('');
-        }
+        audioFeedback.playSaleComplete();
+        handleSubmitShift();
     };
 
     return (
@@ -101,63 +66,7 @@ export const ShiftClosingModal: React.FC = () => {
                     ))}
                 </div>
 
-                {isManagerPinRequired ? (
-                    <div className="space-y-6 animate-in fade-in">
-                        <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-start gap-3">
-                            <ShieldAlert className="text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" size={22} />
-                            <div className="space-y-1">
-                                <h4 className="text-sm font-black text-amber-800 dark:text-amber-300 uppercase tracking-wider">
-                                    Cash Variance — Supervisor Sign-Off Required
-                                </h4>
-                                <p className="text-xs text-amber-700 dark:text-amber-400 leading-relaxed">
-                                    The drawer has a cash discrepancy of <b>{CURRENCY_SYMBOL} {Math.abs(variance).toLocaleString()} ({variance > 0 ? 'Surplus' : 'Shortage'})</b>. A Store Manager or Shift Lead PIN is required to authorize drawer closure.
-                                </p>
-                            </div>
-                        </div>
-
-                        {pinError && (
-                            <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400 text-xs font-bold text-center animate-shake">
-                                {pinError}
-                            </div>
-                        )}
-
-                        <div className="flex flex-col items-center">
-                            <PinPad
-                                pin={managerPin}
-                                setPin={(p) => {
-                                    setManagerPin(p);
-                                    if (pinError) setPinError('');
-                                }}
-                                onEnter={handleVerifyManagerPin}
-                            />
-                        </div>
-
-                        <div className="flex justify-between items-center pt-4 border-t border-[#E2DCCE] dark:border-white/5">
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    setIsManagerPinRequired(false);
-                                    setManagerPin('');
-                                    setPinError('');
-                                }}
-                                className="px-4 py-2 text-stone-700 hover:text-[#2C5E3B] dark:text-gray-300 dark:hover:text-white font-bold text-sm transition-colors cursor-pointer"
-                            >
-                                Back
-                            </button>
-                            <button
-                                type="button"
-                                onClick={handleVerifyManagerPin}
-                                disabled={managerPin.length < 4 || isProcessing}
-                                className="px-6 py-2.5 bg-gradient-to-br from-[#dc2626] to-[#b91c1c] text-white hover:opacity-90 font-bold rounded-xl disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2 transition-all shadow-md cursor-pointer text-xs uppercase tracking-wider"
-                            >
-                                {isProcessing ? <Loader2 className="animate-spin" size={16} /> : <CheckCircle2 size={16} />}
-                                Sign Off & Close Shift
-                            </button>
-                        </div>
-                    </div>
-                ) : (
-                    <>
-                        {/* Step 1: Blind Physical Cash Count */}
+                {/* Step 1: Blind Physical Cash Count */}
                         {closingStep === 1 && (
                             <div className="space-y-6">
                                 <div className="p-4 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-900/30 rounded-2xl flex items-start gap-3">
@@ -221,70 +130,63 @@ export const ShiftClosingModal: React.FC = () => {
                         {/* Step 2: Reconciliation & Audit */}
                         {closingStep === 2 && (
                             <div className="space-y-6 animate-in fade-in">
-                                <div className={`p-6 rounded-2xl border ${!hasVariance
-                                    ? 'bg-emerald-50 dark:bg-[#18201B]/40 border-[#E2DCCE] dark:border-emerald-950/20'
-                                    : variance > 0 ? 'bg-amber-50 dark:bg-amber-950/10 border-[#E2DCCE] dark:border-amber-900/20' : 'bg-rose-50 dark:bg-rose-950/10 border-[#E2DCCE] dark:border-rose-900/20'
-                                    } text-center`}>
-                                    <div className={`w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3 ${!hasVariance ? 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400' : 'bg-rose-100 dark:bg-rose-500/20 text-rose-600 dark:text-rose-400'
-                                        }`}>
-                                        {!hasVariance ? <CheckCircle size={24} /> : <AlertTriangle size={24} />}
+                                <div className="p-6 rounded-2xl border bg-emerald-50 dark:bg-[#18201B]/40 border-emerald-200 dark:border-emerald-950/20 text-center space-y-3">
+                                    <div className="w-14 h-14 rounded-full flex items-center justify-center mx-auto bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400">
+                                        <Lock size={28} />
                                     </div>
-                                    <h3 className={`text-lg font-bold mb-1 ${!hasVariance ? 'text-emerald-800 dark:text-emerald-400' : variance > 0 ? 'text-amber-800 dark:text-amber-400' : 'text-rose-800 dark:text-rose-400'}`}>
-                                        {!hasVariance ? "Drawer Perfectly Balanced" : variance > 0 ? "Cash Surplus Detected (+)" : "Cash Shortage Detected (-)"}
-                                    </h3>
-                                    <p className={`text-2xl font-mono font-bold ${!hasVariance ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
-                                        {variance > 0 ? '+' : ''}{CURRENCY_SYMBOL} {variance.toLocaleString()}
-                                    </p>
+                                    <div>
+                                        <h3 className="text-lg font-bold text-emerald-900 dark:text-emerald-300">
+                                            Blind Drawer Count Sealed
+                                        </h3>
+                                        <p className="text-xs text-emerald-800/80 dark:text-emerald-400/80 mt-1 max-w-md mx-auto">
+                                            Anti-Skimming Protocol: Total physical cash count is permanently locked. Register variance and expected totals are audited independently by Central HQ Finance.
+                                        </p>
+                                    </div>
+                                    <div className="pt-2">
+                                        <span className="text-[10px] text-stone-500 uppercase tracking-widest font-black block mb-0.5">Sealed Cash Total</span>
+                                        <p className="text-3xl font-mono font-black text-[#1E3F27] dark:text-white">
+                                            {CURRENCY_SYMBOL} {actualCashCounted.toLocaleString()}
+                                        </p>
+                                    </div>
                                 </div>
 
                                 <div className="space-y-4">
-                                    {hasVariance && (
-                                        <div className="space-y-2">
-                                            <label className="text-[10px] text-stone-600 dark:text-gray-400 uppercase font-black tracking-widest px-1">Document Variance Explanation (Mandatory)</label>
-                                            <textarea
-                                                placeholder="Explain reason for discrepancy (e.g. customer change tip, receipt correction)..."
-                                                className="w-full bg-white dark:bg-black/40 border border-[#E2DCCE] dark:border-white/10 rounded-2xl p-4 text-sm text-[#1E3F27] dark:text-white outline-none focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] min-h-[80px]"
-                                                value={discrepancyReason}
-                                                onChange={(e) => setDiscrepancyReason(e.target.value)}
-                                            />
-                                        </div>
-                                    )}
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] text-stone-600 dark:text-gray-400 uppercase font-black tracking-widest px-1">
+                                            Shift Handover Notes (Optional)
+                                        </label>
+                                        <textarea
+                                            placeholder="Optional notes for HQ audit (e.g. damaged bill accepted, coin shortage)..."
+                                            className="w-full bg-white dark:bg-black/40 border border-[#E2DCCE] dark:border-white/10 rounded-2xl p-4 text-sm text-[#1E3F27] dark:text-white outline-none focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] min-h-[70px]"
+                                            value={discrepancyReason}
+                                            onChange={(e) => setDiscrepancyReason(e.target.value)}
+                                        />
+                                    </div>
 
-                                    <div className="bg-white dark:bg-[#18201B]/40 border border-[#E2DCCE] dark:border-white/5 rounded-2xl p-4 space-y-2 text-xs">
-                                        <div className="flex justify-between">
-                                            <span className="text-stone-600 dark:text-gray-400 font-medium">Opening Float + Cash Sales</span>
-                                            <span className="text-[#1E3F27] dark:text-white font-mono font-bold">{CURRENCY_SYMBOL} {summary.expected.toLocaleString()}</span>
-                                        </div>
-                                        <div className="flex justify-between">
-                                            <span className="text-stone-600 dark:text-gray-400 font-medium">Blind Physical Count</span>
-                                            <span className="text-[#1E3F27] dark:text-white font-mono font-bold">{CURRENCY_SYMBOL} {actualCashCounted.toLocaleString()}</span>
-                                        </div>
+                                    <div className="bg-[#FAF8F5] dark:bg-black/20 border border-[#E2DCCE] dark:border-white/5 rounded-2xl p-4 flex items-center justify-between text-xs">
+                                        <span className="text-[#4D6E56] dark:text-[#7A9E83] font-medium flex items-center gap-1.5">
+                                            <ShieldAlert size={14} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
+                                            Zero-Trust Compliance
+                                        </span>
+                                        <span className="text-emerald-700 dark:text-emerald-400 font-bold uppercase tracking-wider text-[10px]">
+                                            Direct HQ Dispatch
+                                        </span>
                                     </div>
                                 </div>
 
                                 <div className="flex gap-3">
                                     <button
                                         type="button"
-                                        onClick={() => setClosingStep(1)}
-                                        disabled={isProcessing}
-                                        className="flex-1 py-4 bg-white/80 dark:bg-black/35 border border-[#E2DCCE] dark:border-white/10 hover:bg-[#2C5E3B]/10 hover:text-[#2C5E3B] dark:hover:text-white text-stone-700 dark:text-stone-300 rounded-xl font-bold transition-all disabled:opacity-50 cursor-pointer"
-                                    >
-                                        Recount
-                                    </button>
-                                    <button
-                                        type="button"
                                         onClick={handleFinalizeClick}
-                                        disabled={isProcessing || (hasVariance && !discrepancyReason.trim())}
-                                        className="flex-[2] py-4 bg-gradient-to-br from-[#dc2626] to-[#b91c1c] hover:opacity-90 text-white font-bold rounded-xl shadow-md flex items-center justify-center gap-2 disabled:bg-stone-200 dark:disabled:bg-white/5 disabled:text-stone-400 dark:disabled:text-stone-600 border border-transparent disabled:border-stone-300 dark:disabled:border-white/10 disabled:cursor-not-allowed disabled:shadow-none transition-all cursor-pointer"
+                                        disabled={isProcessing}
+                                        className="w-full py-4 bg-gradient-to-br from-[#224429] to-[#2C5E3B] hover:opacity-90 text-white font-bold rounded-xl shadow-md flex items-center justify-center gap-2 disabled:bg-stone-200 dark:disabled:bg-white/5 disabled:text-stone-400 dark:disabled:text-stone-600 border border-transparent disabled:border-stone-300 dark:disabled:border-white/10 disabled:cursor-not-allowed disabled:shadow-none transition-all cursor-pointer"
                                     >
-                                        {isProcessing ? <Loader2 className="animate-spin" /> : hasVariance && !isManagerOrAdmin ? <Lock size={18} /> : <LogOut size={18} />}
-                                        {hasVariance && !isManagerOrAdmin ? "Authorize with Manager PIN" : "Finalize & End Shift"}
+                                        {isProcessing ? <Loader2 className="animate-spin" /> : <LogOut size={18} />}
+                                        Submit Sealed Count & Close Register
                                     </button>
                                 </div>
                             </div>
                         )}
-                    </>
-                )}
             </div>
         </Modal>
     );
