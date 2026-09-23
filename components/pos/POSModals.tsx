@@ -16,6 +16,7 @@ import { MiscItemModal } from './modals/MiscItemModal';
 import { EmailReceiptModal } from './modals/EmailReceiptModal';
 import { ReceiptPreviewModal } from './modals/ReceiptPreviewModal';
 import { PriceUpdatesModal } from './modals/PriceUpdatesModal';
+import { StartShiftModal } from './modals/StartShiftModal';
 
 // Shared
 import UnknownBarcodeModal from '../UnknownBarcodeModal';
@@ -51,6 +52,7 @@ export const POSModals: React.FC = () => {
             <EmailReceiptModal />
             <ReceiptPreviewModal />
             <PriceUpdatesModal />
+            <StartShiftModal />
 
             {/* Unknown Barcode Mapping Modal */}
             <UnknownBarcodeModal

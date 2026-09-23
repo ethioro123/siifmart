@@ -111,7 +111,7 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                     }) || false;
 
                     return (
-                        <div key={po.id} className={`group glass-panel p-4 md:p-6 relative overflow-hidden active:scale-[0.995] ${allItemsReceived ? 'border-[#2C5E3B] dark:border-[#A9CBA2]' : 'hover:border-[#2C5E3B]/40 dark:hover:border-[#A9CBA2]/30 hover:shadow-[0_8px_30px_rgba(44,94,59,0.05)]'}`}>
+                        <div key={po.id} className={`group glass-panel p-3 sm:p-4 md:p-6 relative overflow-hidden active:scale-[0.995] ${allItemsReceived ? 'border-[#2C5E3B] dark:border-[#A9CBA2]' : 'hover:border-[#2C5E3B]/40 dark:hover:border-[#A9CBA2]/30 hover:shadow-[0_8px_30px_rgba(44,94,59,0.05)]'}`}>
                             {/* 🌟 Card Ambient Glow — hidden on mobile */}
                             <div className="hidden md:block absolute -top-24 -right-24 w-48 h-48 bg-[#2C5E3B]/10 dark:bg-[#1E3F27]/5 blur-3xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
                             <div className="flex flex-col sm:flex-row justify-between items-start gap-3 md:gap-4 mb-4 md:mb-6 relative z-10">
@@ -120,7 +120,7 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                                         <Layers size={20} className={allItemsReceived ? 'text-[#FAF8F5] dark:text-[#1E3B24]' : 'text-stone-400 dark:text-stone-500 group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2]'} />
                                     </div>
                                     <div className="min-w-0 flex-1">
-                                        <h3 className="text-base md:text-xl font-black text-[#1E3F27] dark:text-[#EAE5D9] uppercase tracking-tight truncate drop-shadow-sm">{po.supplierName}</h3>
+                                        <h3 className="text-sm sm:text-base md:text-xl font-black text-[#1E3F27] dark:text-[#EAE5D9] uppercase tracking-tight truncate drop-shadow-sm">{po.supplierName}</h3>
                                         <div className="flex items-center gap-3 mt-1.5 flex-wrap">
                                             <span className="text-[10px] text-stone-500 dark:text-stone-400 font-black uppercase tracking-widest font-mono">#{po.po_number || po.id.slice(0, 8)}</span>
                                             <span className="w-1 h-1 rounded-full bg-stone-300 dark:bg-stone-800" />
@@ -162,9 +162,9 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                                     const isAllowedToReceive = isAssigned || hasPermission(user?.role, 'RECEIVE_PO');
 
                                     return (
-                                        <div key={item.productId || idx} className={`p-4 md:p-5 rounded-xl border transition-all group/item ${isComplete ? 'glass-panel-pushed opacity-60 shadow-inner' : 'bg-[#FAF8F5]/85 dark:bg-[#1C2620]/30 border-[#E2DCCE]/60 dark:border-[#A9CBA2]/[0.06] shadow-sm hover:border-[#2C5E3B]/40 dark:hover:border-[#A9CBA2]/30 active:scale-[0.99] cursor-pointer'}`}>
+                                        <div key={item.productId || idx} className={`p-3 sm:p-4 md:p-5 rounded-xl border transition-colors group/item ${isComplete ? 'glass-panel-pushed opacity-60 shadow-inner' : 'bg-[#FAF8F5]/85 dark:bg-[#1C2620]/30 border-[#E2DCCE]/60 dark:border-[#A9CBA2]/[0.06] shadow-sm hover:border-[#2C5E3B]/40 dark:hover:border-[#A9CBA2]/30 active:scale-[0.99] cursor-pointer'}`}>
                                             <div className="flex flex-col gap-5">
-                                                <div className="flex justify-between items-start gap-3">
+                                                <div className="flex justify-between items-start gap-2">
                                                     <div className="flex-1 min-w-0">
                                                         <p className={`text-[11px] md:text-xs font-black uppercase tracking-tight truncate ${isComplete ? 'text-stone-400 dark:text-stone-500' : 'text-slate-900 dark:text-white'}`}>{formatPOItemDescription(item)}</p>
                                                         {(() => {
@@ -259,7 +259,7 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                                                                 setIsSplitReceiving(true);
                                                             }}
                                                                 disabled={isSubmitting}
-                                                                className="w-full h-12 md:h-11 bg-[#224429] dark:bg-[#EAE5D9] hover:bg-[#1B3520] dark:hover:bg-[#DFD9CA] text-[#FAF8F5] dark:text-[#1E3B24] text-[10px] font-black uppercase tracking-widest rounded-xl flex items-center justify-center gap-2 shadow-sm active:scale-[0.98] transition-all border border-transparent dark:border-[#EAE5D9]/20 disabled:opacity-50 disabled:cursor-not-allowed">
+                                                                className="w-full h-12 bg-[#224429] dark:bg-[#EAE5D9] hover:bg-[#1B3520] dark:hover:bg-[#DFD9CA] text-[#FAF8F5] dark:text-[#1E3B24] text-[10px] font-black uppercase tracking-widest rounded-xl flex items-center justify-center gap-2 shadow-sm active:scale-[0.98] transition-colors border border-transparent dark:border-[#EAE5D9]/20 disabled:opacity-50 disabled:cursor-not-allowed">
                                                                 {isSubmitting ? (
                                                                     <Loader2 size={16} className="animate-spin" />
                                                                 ) : (
@@ -296,7 +296,7 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                                         <button
                                             onClick={() => { setReviewPO(po); setShowReviewModal(true); }}
                                             disabled={isSubmitting}
-                                            className="w-full sm:w-auto px-10 py-4 bg-[#224429] dark:bg-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24] hover:bg-[#1B3520] dark:hover:bg-[#DFD9CA] text-[10px] font-black uppercase tracking-widest rounded-2xl shadow-sm active:scale-[0.98] transition-all border border-transparent dark:border-[#EAE5D9]/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3">
+                                            className="w-full sm:w-auto px-8 sm:px-10 py-3.5 sm:py-4 bg-[#224429] dark:bg-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24] hover:bg-[#1B3520] dark:hover:bg-[#DFD9CA] text-[10px] font-black uppercase tracking-widest rounded-2xl shadow-sm active:scale-[0.98] transition-colors border border-transparent dark:border-[#EAE5D9]/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 min-h-[48px]">
                                             {isSubmitting ? (
                                                 <Loader2 size={18} className="animate-spin" />
                                             ) : (

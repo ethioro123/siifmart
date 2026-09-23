@@ -9,6 +9,7 @@ import { formatDateTime, formatRole } from '../utils/formatting';
 import { useStore } from '../contexts/CentralStore';
 import { brainstormService } from '../services/supabase.service';
 import { KnowledgeEntry, DEPARTMENTS, ENTRY_TYPES, STATUSES, mapDBToLocal } from '../components/roadmap/RoadmapTypes';
+import { DEFAULT_ROADMAP_POLICIES } from '../components/roadmap/defaultRoadmapPolicies';
 import { RoadmapDetailView } from '../components/roadmap/RoadmapDetailView';
 import { RoadmapCreateModal } from '../components/roadmap/RoadmapCreateModal';
 import { logger } from '../utils/logger';
@@ -53,12 +54,54 @@ export default function Roadmap() {
         const dataPromise = brainstormService.getAll();
         const data = await Promise.race([dataPromise, timeoutPromise]) as any[];
         if (isMounted) {
-          setEntries(data.map(mapDBToLocal));
+          const dbEntries = (data || []).map(mapDBToLocal);
+          const normalize = (t: string) => (t || '').toLowerCase().replace(/\s*\(sop-[a-z0-9-]+\)\s*/i, '').replace(/[^a-z0-9]/g, '');
+          const combined = [...dbEntries];
+
+          DEFAULT_ROADMAP_POLICIES.forEach(dp => {
+            const existingIdx = combined.findIndex(e =>
+              e.id === dp.id ||
+              normalize(e.title) === normalize(dp.title) ||
+              (e.title && dp.title && (e.title.toLowerCase().includes(dp.title.toLowerCase()) || dp.title.toLowerCase().includes(e.title.toLowerCase())))
+            );
+
+            if (existingIdx !== -1) {
+              const existing = combined[existingIdx];
+              const needsEnrichment = !existing.description ||
+                existing.description.trim() === 'No description' ||
+                !existing.content ||
+                existing.content.length < 50;
+
+              if (needsEnrichment) {
+                const enriched: KnowledgeEntry = {
+                  ...existing,
+                  description: existing.description && existing.description !== 'No description' ? existing.description : dp.description,
+                  content: existing.content && existing.content.length >= 50 ? existing.content : dp.content,
+                  department: dp.department || existing.department,
+                  type: dp.type || existing.type,
+                  priority: dp.priority || existing.priority,
+                  tags: Array.from(new Set([...(existing.tags || []), ...(dp.tags || [])]))
+                };
+                combined[existingIdx] = enriched;
+
+                brainstormService.update(existing.id, {
+                  description: enriched.description,
+                  notes: enriched.content,
+                  department: enriched.department,
+                  priority: enriched.priority,
+                  tags: enriched.tags
+                }).catch(() => {});
+              }
+            } else {
+              combined.push(dp);
+            }
+          });
+          setEntries(combined);
         }
       } catch (error) {
-        logger.warn('Roadmap', 'Failed to load knowledge base:');
+        logger.warn('Roadmap', 'Failed to load knowledge base from Supabase, loading default policies:');
         if (isMounted) {
-          setEntries([]);
+          setEntries(DEFAULT_ROADMAP_POLICIES);
         }
       } finally {
         if (isMounted) {

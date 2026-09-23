@@ -10,11 +10,8 @@ export const ShiftProgress: React.FC = () => {
     const { user } = useStore();
     const { totalRevenue, getShiftSummary, txCount } = usePOSCommand();
 
-    const isManagerOrAdmin = [
+    const isCentralHQ = [
         'super_admin',
-        'admin',
-        'store_manager',
-        'operations_manager',
         'ceo'
     ].includes(user?.role?.toLowerCase() || '');
 
@@ -22,7 +19,7 @@ export const ShiftProgress: React.FC = () => {
     const dailyRevenueTarget = 5000;
     const dailyTxTarget = 50;
 
-    const progressPercent = isManagerOrAdmin
+    const progressPercent = isCentralHQ
         ? Math.min((totalRevenue / dailyRevenueTarget) * 100, 100)
         : Math.min((txCount / dailyTxTarget) * 100, 100);
 
@@ -42,11 +39,11 @@ export const ShiftProgress: React.FC = () => {
                         <div className="flex items-center gap-2.5 mb-2">
                             <div className="w-2 h-2 rounded-full bg-[#2C5E3B] dark:bg-[#A9CBA2] animate-pulse shadow-[0_0_8px_rgba(44,94,59,0.6)]" />
                             <h3 className="text-[#4D6E56] dark:text-[#7A9E83] text-xs font-black uppercase tracking-[0.2em] select-none">
-                                {isManagerOrAdmin ? t('posCommand.shiftTarget') : "Shift Order Target"}
+                                {isCentralHQ ? t('posCommand.shiftTarget') : "Shift Order Target"}
                             </h3>
                         </div>
                         <div className="flex items-baseline gap-3">
-                            {isManagerOrAdmin ? (
+                            {isCentralHQ ? (
                                 <>
                                     <span className="text-4xl font-mono font-black tracking-tighter text-[#1E3F27] dark:text-[#EAE5D9]">
                                         {CURRENCY_SYMBOL} {totalRevenue.toLocaleString()}
@@ -88,7 +85,7 @@ export const ShiftProgress: React.FC = () => {
 
                 {/* HUD modules */}
                 <div className="grid grid-cols-3 gap-4">
-                    {isManagerOrAdmin ? (
+                    {isCentralHQ ? (
                         [
                             { label: t('pos.cash'), display: `${CURRENCY_SYMBOL} ${getShiftSummary().cash.toLocaleString()}`, accent: '#2C5E3B' },
                             { label: t('pos.card'), display: `${CURRENCY_SYMBOL} ${getShiftSummary().card.toLocaleString()}`, accent: '#A9CBA2' },

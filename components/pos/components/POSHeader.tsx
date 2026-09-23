@@ -11,6 +11,7 @@ import { Protected } from '../../Protected';
 import Button from '../../shared/Button';
 import { CURRENCY_SYMBOL } from '../../../constants';
 import { formatCompactNumber } from '../../../utils/formatting';
+import { native } from '../../../utils/native';
 
 interface POSHeaderProps {
     setIsFilterPanelOpen: (open: boolean) => void;
@@ -35,7 +36,8 @@ export const POSHeader: React.FC<POSHeaderProps> = ({ setIsFilterPanelOpen, acti
         storeBonus,
         userBonusShare,
         lastSeenPriceUpdate,
-        markPriceUpdatesAsRead
+        markPriceUpdatesAsRead,
+        setIsPriceUpdatesModalOpen
     } = usePOS();
 
     const { triggerSync, posSyncStatus, posPendingSyncCount, posLatencyMs, settings, products, activeSite } = useData();
@@ -91,10 +93,20 @@ export const POSHeader: React.FC<POSHeaderProps> = ({ setIsFilterPanelOpen, acti
                     ) : null}
                     {unseenPriceChanges.length > 0 && (
                         <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-blue-500/10 border border-blue-400/30 text-blue-700 dark:text-blue-300 ml-2 flex-shrink-0">
-                            <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
-                            <span className="text-[10px] font-black uppercase tracking-wider">
-                                {unseenPriceChanges.length} Price {unseenPriceChanges.length === 1 ? 'Change' : 'Changes'}
-                            </span>
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setIsPriceUpdatesModalOpen(true);
+                                    native.haptic();
+                                }}
+                                className="flex items-center gap-1.5 hover:underline cursor-pointer transition-transform active:scale-95"
+                                title="Review and confirm product price updates"
+                            >
+                                <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
+                                <span className="text-[10px] font-black uppercase tracking-wider">
+                                    {unseenPriceChanges.length} Price {unseenPriceChanges.length === 1 ? 'Change' : 'Changes'}
+                                </span>
+                            </button>
                             <button
                                 type="button"
                                 onClick={markPriceUpdatesAsRead}

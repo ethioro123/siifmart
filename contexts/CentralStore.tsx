@@ -159,11 +159,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
             const device = getDeviceDetails();
             const timestamp = new Date().toISOString();
 
-            // Append to login history, limit to last 20 entries
+            // Append to login history, limit to last 10 entries
             const updatedHistory = [
               { timestamp, location, device },
               ...currentHistory
-            ].slice(0, 20);
+            ].slice(0, 10);
 
             await employeesService.update(profile.id, {
               lastLoginGps: location,

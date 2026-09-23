@@ -31,7 +31,7 @@ import { InventoryProductModal } from '../components/inventory/modals/InventoryP
 import LabelPrintModal from '../components/LabelPrintModal';
 import { AdjustStockModal } from '../components/inventory/modals/AdjustStockModal';
 import { DeleteProductConfirmModal } from '../components/inventory/modals/DeleteProductConfirmModal';
-import { filterBySite } from '../utils/locationAccess';
+import { filterBySite, isMultiSiteRole } from '../utils/locationAccess';
 import { useInventoryOverviewData } from '../hooks/useInventoryOverviewData';
 // Constants
 import { CURRENCY_SYMBOL } from '../constants';
@@ -202,8 +202,8 @@ export default function Inventory() {
     const totalInventoryValueCost = serverMetrics?.total_value_cost || activeSiteProducts.reduce((sum, p) => sum + ((p.stock || 0) * (p.costPrice || (p.price || 0) * 0.7)), 0);
     const totalInventoryValueRetail = serverMetrics?.total_value_retail || activeSiteProducts.reduce((sum, p) => sum + ((p.stock || 0) * (p.price || 0)), 0);
 
-    // Define permission helper
-    const canApprove = user?.role === 'super_admin';
+    // Define permission helper (Only CEO approves changes to products in inventory)
+    const canApprove = user?.role === 'super_admin' || (user?.role as string)?.toLowerCase() === 'ceo';
 
     const { stockTurnoverRate, deadStockValue, lowStockCount, categoryData, abcData } = useInventoryOverviewData({
         theme,
@@ -257,7 +257,7 @@ export default function Inventory() {
     };
     const handleAdjustStock = async () => {
         if (!editingProduct || !adjustQty) return;
-        const qty = parseInt(adjustQty);
+        const qty = parseFloat(adjustQty);
         if (isNaN(qty) || qty <= 0) { addNotification('alert', 'Invalid quantity'); return; }
         try {
             await adjustStockMutation.mutateAsync({

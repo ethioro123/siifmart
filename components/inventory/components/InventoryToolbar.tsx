@@ -220,7 +220,7 @@ export const InventoryToolbar: React.FC<InventoryToolbarProps> = ({
                                     className="appearance-none bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl pl-8 pr-8 py-2 text-xs font-bold text-gray-700 dark:text-gray-300 outline-none cursor-pointer hover:bg-gray-50 dark:hover:bg-white/10 hover:border-blue-500/30 transition-all max-w-[150px]"
                                 >
                                     <option value="All">All Sites</option>
-                                    {sites.filter(s => s.type !== 'Store' && s.type !== 'Administration').map(s => (
+                                    {sites.filter(s => s.type !== 'Store' && s.type !== 'Administration' && s.type !== 'Administrative').map(s => (
                                         <option key={s.id} value={s.id}>{s.name}</option>
                                     ))}
                                 </select>

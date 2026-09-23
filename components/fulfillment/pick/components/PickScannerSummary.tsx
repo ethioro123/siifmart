@@ -58,7 +58,7 @@ export const PickScannerSummary: React.FC<PickScannerSummaryProps> = ({
                         return (
                             <div
                                 key={idx}
-                                className="flex items-center justify-between p-3 rounded-2xl bg-stone-50 dark:bg-white/[0.03] border border-stone-200/60 dark:border-white/5 hover:border-emerald-500/30 transition-all gap-3"
+                                className="flex items-center justify-between p-3 rounded-2xl bg-stone-50 dark:bg-white/[0.03] border border-stone-200/60 dark:border-white/5 hover:border-emerald-500/30 transition-colors gap-3"
                             >
                                 <div className="min-w-0 flex-1">
                                     <div className="flex items-center gap-2 mb-0.5">

@@ -2,6 +2,8 @@ import { useCallback } from 'react';
 import type { StorePoints, Site } from '../../types';
 import { POINTS_CONFIG, DEFAULT_POS_ROLE_DISTRIBUTION, DEFAULT_POS_BONUS_TIERS } from '../../types';
 import { calculateStoreBonus } from '../../components/StoreBonusDisplay';
+import { storePointsService, pointsTransactionsService } from '../../services/supabase.service';
+import { logger } from '../../utils/logger';
 
 interface UseGamificationActionsDeps {
     sites: Site[];
@@ -18,22 +20,44 @@ export function useGamificationActions(deps: UseGamificationActionsDeps) {
     }, [storePoints]);
 
     const awardStorePoints = useCallback((siteId: string, points: number, revenue: number, transactionCount: number = 1) => {
+        const bonusTiers = settings?.posBonusTiers && settings.posBonusTiers.length > 0
+            ? settings.posBonusTiers
+            : DEFAULT_POS_BONUS_TIERS;
+
+        let recordToPersist: StorePoints | null = null;
+        const nowIso = new Date().toISOString();
+
         setStorePoints(prev => {
             const existing = prev.find(sp => sp.siteId === siteId);
             if (existing) {
-                return prev.map(sp => sp.siteId === siteId ? {
-                    ...sp,
-                    totalPoints: (sp.totalPoints || 0) + points,
-                    todayPoints: (sp.todayPoints || 0) + points,
-                    weeklyPoints: (sp.weeklyPoints || 0) + points,
-                    monthlyPoints: (sp.monthlyPoints || 0) + points,
-                    totalRevenue: (sp.totalRevenue || 0) + revenue,
-                    totalTransactions: (sp.totalTransactions || 0) + transactionCount,
-                    lastUpdated: new Date().toISOString()
-                } : sp);
+                const newTotalPoints = (existing.totalPoints || 0) + points;
+                const newMonthlyPoints = (existing.monthlyPoints || 0) + points;
+                const newRevenue = (existing.totalRevenue || 0) + revenue;
+                const newTransactions = (existing.totalTransactions || 0) + transactionCount;
+                const newAvgTicket = newTransactions > 0 ? Number((newRevenue / newTransactions).toFixed(2)) : 0;
+                const { tier, bonus } = calculateStoreBonus(newMonthlyPoints, bonusTiers);
+
+                const updated: StorePoints = {
+                    ...existing,
+                    totalPoints: newTotalPoints,
+                    todayPoints: (existing.todayPoints || 0) + points,
+                    weeklyPoints: (existing.weeklyPoints || 0) + points,
+                    monthlyPoints: newMonthlyPoints,
+                    totalRevenue: newRevenue,
+                    totalTransactions: newTransactions,
+                    averageTicketSize: newAvgTicket,
+                    currentTier: tier.tierName,
+                    estimatedBonus: bonus,
+                    lastTransactionAt: nowIso,
+                    lastUpdated: nowIso
+                };
+                recordToPersist = updated;
+                return prev.map(sp => sp.siteId === siteId ? updated : sp);
             } else {
                 const siteName = sites.find(s => s.id === siteId)?.name || 'Unknown Site';
-                return [...prev, {
+                const { tier, bonus } = calculateStoreBonus(points, bonusTiers);
+
+                const created: StorePoints = {
                     id: crypto.randomUUID(),
                     siteId,
                     siteName,
@@ -43,13 +67,38 @@ export function useGamificationActions(deps: UseGamificationActionsDeps) {
                     monthlyPoints: points,
                     totalTransactions: transactionCount,
                     totalRevenue: revenue,
-                    averageTicketSize: transactionCount > 0 ? revenue / transactionCount : 0,
+                    averageTicketSize: transactionCount > 0 ? Number((revenue / transactionCount).toFixed(2)) : 0,
                     customerSatisfaction: 100,
-                    lastUpdated: new Date().toISOString()
-                }];
+                    currentTier: tier.tierName,
+                    estimatedBonus: bonus,
+                    lastTransactionAt: nowIso,
+                    lastUpdated: nowIso
+                };
+                recordToPersist = created;
+                return [...prev, created];
             }
         });
-    }, [sites]);
+
+        // Asynchronously persist to Supabase
+        if (recordToPersist) {
+            const toSave = recordToPersist;
+            storePointsService.upsertBySite(toSave).catch(err => {
+                logger.error('useGamificationActions', 'Failed to persist store points to Supabase', err);
+            });
+
+            pointsTransactionsService.create({
+                id: crypto.randomUUID(),
+                employeeId: `STORE-${siteId}`,
+                points,
+                type: 'BONUS',
+                description: `POS Sales Award: +${points} pts (${revenue.toLocaleString()} ETB)`,
+                timestamp: nowIso
+            }).catch(err => {
+                logger.error('useGamificationActions', 'Failed to log store points transaction', err);
+            });
+        }
+    }, [sites, settings]);
+
     const calculateWorkerBonusShare = useCallback((siteId: string, employeeRole: string) => {
         const site = sites.find(s => s.id === siteId);
         if (!site) return undefined;

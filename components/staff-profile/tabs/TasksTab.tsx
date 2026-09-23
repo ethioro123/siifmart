@@ -28,20 +28,21 @@ export default function TasksTab({
     return (
         <div className="space-y-6 animate-in fade-in">
             {(canManageEmployees || isOwnProfile) && (
-                <div className="flex flex-col sm:flex-row gap-3 mb-6 p-4 bg-gray-50 dark:bg-white/5 rounded-xl border border-gray-100 dark:border-white/10">
+                <div className="flex flex-col sm:flex-row gap-3 mb-6 p-4 bg-[#FAF8F5] dark:bg-black/30 rounded-2xl border border-[#E2DCCE] dark:border-white/10">
                     <div className="flex-1 relative">
-                        <ClipboardList className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={18} />
+                        <ClipboardList className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" size={18} />
                         <input
                             value={newTaskTitle}
                             onChange={(e) => setNewTaskTitle(e.target.value)}
+                            onKeyDown={(e) => { if (e.key === 'Enter') handleAddTask(); }}
                             placeholder="Assign or note a new task..."
-                            className="w-full bg-white dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-xl pl-10 pr-4 py-3 text-gray-900 dark:text-white outline-none focus:border-cyber-primary transition-all placeholder:text-gray-400"
+                            className="w-full bg-white dark:bg-black/40 border border-[#E2DCCE] dark:border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-stone-900 dark:text-white outline-none focus:border-[#2C5E3B] dark:focus:border-emerald-500 transition-all placeholder:text-stone-400 text-sm"
                         />
                     </div>
                     <select
                         value={newTaskPriority}
                         onChange={(e) => setNewTaskPriority(e.target.value as any)}
-                        className="bg-white dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 text-gray-900 dark:text-white outline-none focus:border-cyber-primary"
+                        className="bg-white dark:bg-black/40 border border-[#E2DCCE] dark:border-white/10 rounded-xl px-3 py-2.5 text-stone-900 dark:text-white outline-none focus:border-[#2C5E3B] dark:focus:border-emerald-500 text-xs font-bold"
                         title="Select Task Priority"
                     >
                         <option value="Low">Low Priority</option>
@@ -50,9 +51,9 @@ export default function TasksTab({
                     </select>
                     <button
                         onClick={handleAddTask}
-                        className="bg-cyber-primary text-black px-6 py-3 rounded-xl font-black hover:bg-cyber-accent transition-all flex items-center justify-center gap-2"
+                        className="woody-btn-primary px-5 py-2.5 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer shrink-0"
                     >
-                        <Plus size={20} /> Add Task
+                        <Plus size={16} /> Add Task
                     </button>
                 </div>
             )}

@@ -347,7 +347,7 @@ export const PackScanner: React.FC<PackScannerProps> = ({
                                         onChange={(e) => setInputVal(e.target.value)}
                                         onKeyDown={scanOnlyHandlers.onKeyDown}
                                         onPaste={scanOnlyHandlers.onPaste}
-                                        className="w-full bg-[#FAF8F5] dark:bg-[#1C2620]/90 border-2 rounded-xl py-3 px-4 text-center text-lg md:text-xl font-mono text-gray-900 dark:text-[#EAE5D9] placeholder:text-gray-300 dark:placeholder:text-[#A9CBA2]/30 focus:outline-none relative z-10 shadow-md transition-all border-[#E2DCCE] dark:border-[#A9CBA2]/10 focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2]/40"
+                                        className="w-full bg-[#FAF8F5] dark:bg-[#1C2620]/90 border-2 rounded-xl py-3 px-4 text-center text-lg md:text-xl font-mono text-gray-900 dark:text-[#EAE5D9] placeholder:text-gray-300 dark:placeholder:text-[#A9CBA2]/30 focus:outline-none relative z-10 shadow-md transition-colors border-[#E2DCCE] dark:border-[#A9CBA2]/10 focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2]/40 min-h-[48px]"
                                         placeholder="SCAN BARCODE"
                                         autoFocus
                                         disabled={isProcessing}
@@ -367,7 +367,7 @@ export const PackScanner: React.FC<PackScannerProps> = ({
                             type={isFullyPacked ? 'button' : 'submit'}
                             onClick={isFullyPacked ? onCompleteJob : undefined}
                             disabled={(!isFullyPacked && step === 'SCAN' && !inputVal.trim()) || isProcessing || isSubmitting}
-                            className={`mt-3 w-full py-3.5 md:py-4 rounded-xl flex items-center justify-center gap-2 transition-all duration-300 active:scale-95 shadow-md border relative z-30 font-black text-xs md:text-sm uppercase tracking-widest ${
+                            className={`mt-3 w-full py-3.5 md:py-4 px-3 min-h-[50px] rounded-xl flex items-center justify-center gap-2 transition-colors active:scale-95 shadow-md border relative z-30 font-black text-xs md:text-sm uppercase tracking-widest ${
                                 isProcessing || isSubmitting
                                     ? 'bg-gray-100 dark:bg-[#1C2620]/50 border-gray-200 dark:border-white/5 text-gray-400 dark:text-gray-600 opacity-50 cursor-not-allowed'
                                     : isFullyPacked

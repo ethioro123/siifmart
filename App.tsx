@@ -49,12 +49,14 @@ function ModuleLoader() {
 
 import { native } from './utils/native';
 import { runAutoMigration } from './utils/autoMigrate';
+import { useCapacitor } from './hooks/useCapacitor';
 
 import { useData } from './contexts/DataContext';
 import { systemConfigService } from './services/supabase.service';
 import { initializeAvatarsBucket } from './services/imageStorage.service';
 
 export default function App() {
+  useCapacitor();
   const { user, loading } = useStore();
   const { activeSite, cleanupAdminProducts, isDataInitialLoading, loadError, loadingProgress } = useData();
 
@@ -202,7 +204,7 @@ export default function App() {
                   // 1. CEO Default Landing -> Administration Access (/admin) unless scoped to a WMS or POS site
                   if (user?.role === 'super_admin' || (user?.role as string) === 'CEO') {
                     if (isWarehouse) return <Navigate to="/wms-ops" replace />;
-                    if (isStore) return <Navigate to="/pos-dashboard" replace />;
+                    if (isStore) return <Navigate to={native.isCleanMobileMode() ? "/pos" : "/pos-dashboard"} replace />;
                     return <Navigate to="/admin" replace />;
                   }
 
@@ -211,7 +213,7 @@ export default function App() {
                     return <Navigate to="/wms-ops" replace />;
                   }
                   if (isStore) {
-                    return <Navigate to="/pos-dashboard" replace />;
+                    return <Navigate to={native.isCleanMobileMode() ? "/pos" : "/pos-dashboard"} replace />;
                   }
 
                   // L2 Specialized Directors
@@ -243,6 +245,7 @@ export default function App() {
                 </ModuleErrorBoundary>
               </ProtectedRoute>
             } />
+            <Route path="/pos/terminal" element={<Navigate to="/pos" replace />} />
 
             {/* POS Command Center - Store staff only, NOT super_admin */}
             <Route path="/pos-dashboard" element={

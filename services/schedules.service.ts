@@ -31,7 +31,7 @@ export const schedulesService = {
         const { data, error } = await supabase
             .from('staff_schedules')
             .insert(dbSchedule)
-            .select()
+            .select('id, site_id, employee_id, employee_name, date, start_time, end_time, role, notes, status, created_at, updated_at')
             .single();
 
         if (error) throw error;
@@ -51,11 +51,59 @@ export const schedulesService = {
             .from('staff_schedules')
             .update(dbUpdates)
             .eq('id', id)
-            .select()
+            .select('id, site_id, employee_id, employee_name, date, start_time, end_time, role, notes, status, created_at, updated_at')
             .single();
 
         if (error) throw error;
         return this._mapSchedule(data);
+    },
+
+    async getByDateRange(startDate: string, endDate: string, siteId?: string): Promise<StaffSchedule[]> {
+        let query = supabase.from('staff_schedules')
+            .select('*')
+            .gte('date', startDate)
+            .lte('date', endDate);
+        if (siteId && siteId !== 'All') {
+            query = query.eq('site_id', siteId);
+        }
+
+        const { data, error } = await query.order('date', { ascending: true });
+        if (error) {
+            logger.warn('schedules.service', 'Failed to fetch schedules by date range', { error: error.message });
+            return [];
+        }
+        return (data || []).map(this._mapSchedule);
+    },
+
+    async upsertBatch(schedules: (Partial<StaffSchedule> & { siteId: string; employeeId: string; date: string })[]): Promise<void> {
+        if (!schedules.length) return;
+        const dbRows = schedules.map(s => ({
+            id: s.id || crypto.randomUUID(),
+            site_id: s.siteId,
+            employee_id: s.employeeId,
+            employee_name: s.employeeName || 'Staff Member',
+            date: s.date,
+            start_time: s.startTime || '08:00',
+            end_time: s.endTime || '16:00',
+            role: s.role || 'Staff',
+            notes: s.notes || '',
+            status: s.status || 'Scheduled'
+        }));
+
+        const { error } = await supabase
+            .from('staff_schedules')
+            .upsert(dbRows, { onConflict: 'id' });
+
+        if (error) throw error;
+    },
+
+    async deleteByEmployeeAndDate(employeeId: string, date: string): Promise<void> {
+        const { error } = await supabase
+            .from('staff_schedules')
+            .delete()
+            .eq('employee_id', employeeId)
+            .eq('date', date);
+        if (error) throw error;
     },
 
     async delete(id: string): Promise<void> {

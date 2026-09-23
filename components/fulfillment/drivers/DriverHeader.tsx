@@ -25,8 +25,8 @@ export const DriverHeader: React.FC<DriverHeaderProps> = ({
     refreshData
 }) => {
     return (
-        <div className="bg-white dark:bg-[#121214] border border-gray-200 dark:border-white/10 rounded-2xl p-3 shadow-xl flex items-center justify-between sticky top-0 z-50">
-            <div className="flex items-center gap-3 overflow-hidden">
+        <div className="bg-white dark:bg-[#121214] border border-gray-200 dark:border-white/10 rounded-2xl p-2.5 sm:p-3 shadow-xl flex items-center justify-between sticky top-0 z-50 gap-2 overflow-hidden">
+            <div className="flex items-center gap-2 sm:gap-3 overflow-hidden min-w-0">
                 <div className="p-2 bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 rounded-xl border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20 shrink-0">
                     <Truck className="text-[#2C5E3B] dark:text-[#A9CBA2]" size={18} />
                 </div>
@@ -37,23 +37,23 @@ export const DriverHeader: React.FC<DriverHeaderProps> = ({
                         </h2>
                         <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse shrink-0" />
                     </div>
-                    <p className="text-[9px] text-gray-550 dark:text-gray-400 font-bold uppercase tracking-widest mt-0.5 truncate leading-tight">
+                    <p className="text-[8px] sm:text-[9px] text-gray-550 dark:text-gray-400 font-bold uppercase tracking-widest mt-0.5 truncate leading-tight max-w-[180px] sm:max-w-none">
                         {user?.name || t('warehouse.driverFallback')} • {activeSite?.name || t('warehouse.centralOpsArea')}
                     </p>
                 </div>
             </div>
  
             <div className="flex items-center gap-2">
-                <div className="bg-gray-100 dark:bg-black/40 p-1 rounded-xl border border-gray-200 dark:border-white/5 flex gap-1 shadow-inner">
+                <div className="bg-gray-100 dark:bg-black/40 p-0.5 sm:p-1 rounded-xl border border-gray-200 dark:border-white/5 flex gap-0.5 sm:gap-1 shadow-inner">
                     <button
                         onClick={() => setViewMode('Active')}
-                        className={`px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-wider transition-all ${viewMode === 'Active' ? 'bg-[#2C5E3B] text-white shadow-md shadow-[#2C5E3B]/20' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
+                        className={`px-2.5 sm:px-3 py-2 sm:py-1.5 rounded-lg text-[8px] sm:text-[9px] font-bold uppercase tracking-wider transition-colors min-h-[36px] flex items-center ${viewMode === 'Active' ? 'bg-[#2C5E3B] text-white shadow-md shadow-[#2C5E3B]/20' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
                     >
                         {t('warehouse.driverHub.activeDeliveries')}
                     </button>
                     <button
                         onClick={() => setViewMode('History')}
-                        className={`px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-wider transition-all ${viewMode === 'History' ? 'bg-[#2C5E3B]/80 text-white shadow-md shadow-[#2C5E3B]/20' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
+                        className={`px-2.5 sm:px-3 py-2 sm:py-1.5 rounded-lg text-[8px] sm:text-[9px] font-bold uppercase tracking-wider transition-colors min-h-[36px] flex items-center ${viewMode === 'History' ? 'bg-[#2C5E3B]/80 text-white shadow-md shadow-[#2C5E3B]/20' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
                     >
                         {t('warehouse.driverHub.history')}
                     </button>
@@ -63,7 +63,7 @@ export const DriverHeader: React.FC<DriverHeaderProps> = ({
                     disabled={isSubmitting}
                     aria-label="Refresh Data"
                     title="Refresh Data"
-                    className="p-2 bg-gray-100 dark:bg-white/5 hover:bg-[#2C5E3B] hover:text-white rounded-lg text-[#2C5E3B] dark:text-[#A9CBA2] transition-all border border-gray-200 dark:border-white/5 shadow-sm"
+                    className="p-2.5 min-w-[40px] min-h-[40px] bg-gray-100 dark:bg-white/5 hover:bg-[#2C5E3B] hover:text-white rounded-lg text-[#2C5E3B] dark:text-[#A9CBA2] transition-colors border border-gray-200 dark:border-white/5 shadow-sm flex items-center justify-center shrink-0"
                 >
                     <RefreshCw size={14} className={isSubmitting ? 'animate-spin' : ''} />
                 </button>

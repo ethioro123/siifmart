@@ -1,14 +1,41 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { WorkerPoints, PointsTransaction, WorkerBonusShare, POINTS_CONFIG, DEFAULT_POS_BONUS_TIERS, DEFAULT_POS_ROLE_DISTRIBUTION } from '../types';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
+import {
+    WorkerPoints,
+    PointsTransaction,
+    WorkerBonusShare,
+    DEFAULT_BONUS_TIERS,
+    DEFAULT_POS_BONUS_TIERS,
+    DEFAULT_POS_ROLE_DISTRIBUTION
+} from '../types';
 import { workerPointsService, pointsTransactionsService } from '../services/supabase.service';
 import { useData } from './DataContext';
 import { calculateStoreBonus } from '../components/StoreBonusDisplay';
+import { calculateBonus, getLevelInfo } from '../components/settings/gamification/workerPointsHelpers';
+import {
+    calculateWarehousePoints,
+    calculateStreakUpdate,
+    evaluateAchievements
+} from '../utils/warehouseGamification';
 import { logger } from '../utils/logger';
 
 interface GamificationContextType {
     workerPoints: WorkerPoints[];
     getWorkerPoints: (employeeId: string) => WorkerPoints | undefined;
-    awardPoints: (employeeId: string, points: number, type: PointsTransaction['type'], description: string, jobId?: string) => void;
+    awardPoints: (
+        employeeId: string,
+        points: number,
+        type: PointsTransaction['type'],
+        description: string,
+        jobId?: string,
+        meta?: {
+            employeeName?: string;
+            employeeAvatar?: string;
+            siteId?: string;
+            itemsPicked?: number;
+            accuracy?: number;
+            jobDurationMinutes?: number;
+        }
+    ) => Promise<void>;
     getLeaderboard: (siteId?: string, period?: 'today' | 'week' | 'month' | 'all') => WorkerPoints[];
     calculateWorkerBonusShare: (siteId: string, employeeRole: string) => WorkerBonusShare | undefined;
 }
@@ -16,7 +43,7 @@ interface GamificationContextType {
 const GamificationContext = createContext<GamificationContextType | undefined>(undefined);
 
 export const GamificationProvider = ({ children }: { children: ReactNode }) => {
-    const { activeSite, settings, addNotification, sites, getStorePoints } = useData();
+    const { activeSite, settings, addNotification, sites, employees, getStorePoints } = useData();
     const activeSiteId = activeSite?.id;
     const [workerPoints, setWorkerPoints] = useState<WorkerPoints[]>([]);
 
@@ -28,94 +55,133 @@ export const GamificationProvider = ({ children }: { children: ReactNode }) => {
                 const data = await workerPointsService.getAll(activeSiteId);
                 setWorkerPoints(data);
             } catch (error) {
-                logger.error('GamificationContext', "Failed to load points", error);
+                logger.error('GamificationContext', 'Failed to load worker points', error);
             }
         };
 
         loadPoints();
     }, [activeSiteId]);
 
-    // Listen for fulfillment events (Decoupled Logic)
-    useEffect(() => {
-        const handleJobCompletion = (event: CustomEvent) => {
-            logger.debug('GamificationContext', '🏆 Gamification: Job Completion Event Received', event.detail);
-            const { job, userId, employeeId } = event.detail;
-
-            if (!employeeId) {
-                logger.warn('GamificationContext', '⚠️ No employeeId provided for gamification event');
-                return;
-            }
-
-            // Calculate points based on job type and complexity
-            let points = 10; // Base points
-            if (job.type === 'PICK') points += (job.items || 0) * 2;
-            if (job.type === 'PACK') points += (job.items || 0) * 1;
-            if (job.type === 'PUTAWAY') points += (job.items || 0) * 3;
-            if (job.priority === 'High' || job.priority === 'Urgent') points = Math.round(points * 1.5);
-
-            awardPoints(
-                employeeId,
-                points,
-                'JOB_COMPLETE',
-                `Completed ${job.type} job: ${job.jobNumber || job.id}`,
-                job.id
-            );
-        };
-
-        window.addEventListener('fulfillment:job-completed', handleJobCompletion as EventListener);
-        return () => window.removeEventListener('fulfillment:job-completed', handleJobCompletion as EventListener);
-    }, [activeSiteId]);
-
-    const getWorkerPoints = (employeeId: string) => {
+    const getWorkerPoints = useCallback((employeeId: string) => {
         return workerPoints.find(wp => wp.employeeId === employeeId);
-    };
+    }, [workerPoints]);
 
-    const awardPoints = async (employeeId: string, points: number, type: PointsTransaction['type'], description: string, jobId?: string) => {
+    const awardPoints = useCallback(async (
+        employeeId: string,
+        points: number,
+        type: PointsTransaction['type'],
+        description: string,
+        jobId?: string,
+        meta?: {
+            employeeName?: string;
+            employeeAvatar?: string;
+            siteId?: string;
+            itemsPicked?: number;
+            accuracy?: number;
+            jobDurationMinutes?: number;
+        }
+    ) => {
         try {
-            // Optimistic update
             const currentPoints = workerPoints.find(wp => wp.employeeId === employeeId);
-            const newTotal = (currentPoints?.totalPoints || 0) + points;
-            const newLevelInfo = getLevelFromPoints(newTotal);
+            const empRecord = employees.find(e => e.id === employeeId || e.name === meta?.employeeName);
+            const employeeName = meta?.employeeName || empRecord?.name || currentPoints?.employeeName || 'Warehouse Worker';
+            const employeeAvatar = meta?.employeeAvatar || empRecord?.avatar || currentPoints?.employeeAvatar || '';
+            const targetSiteId = meta?.siteId || empRecord?.siteId || currentPoints?.siteId || activeSiteId || 'SITE-001';
+
+            const activeBonusTiers = settings?.bonusTiers && settings.bonusTiers.length > 0
+                ? settings.bonusTiers
+                : DEFAULT_BONUS_TIERS;
+            const activeWarehouseRules = settings?.warehousePointRules;
+
+            // 1. Streak updates
+            const streakInfo = calculateStreakUpdate(
+                currentPoints?.lastJobCompletedAt,
+                currentPoints?.currentStreak || 0,
+                currentPoints?.longestStreak || 0,
+                activeWarehouseRules
+            );
+
+            // 2. Total points calculation including streak bonus
+            const baseAndStreakPoints = points + streakInfo.streakBonus;
+            const newTotalJobs = type === 'JOB_COMPLETE'
+                ? (currentPoints?.totalJobsCompleted || 0) + 1
+                : (currentPoints?.totalJobsCompleted || 0);
+
+            // 3. Evaluate achievements
+            const accuracyVal = meta?.accuracy !== undefined ? meta.accuracy : (currentPoints?.averageAccuracy || 100);
+            const achResult = evaluateAchievements(
+                currentPoints?.achievements || [],
+                {
+                    totalJobsCompleted: newTotalJobs,
+                    currentStreak: streakInfo.currentStreak,
+                    accuracy: accuracyVal,
+                    jobDurationMinutes: meta?.jobDurationMinutes
+                }
+            );
+
+            const totalPointsToAdd = baseAndStreakPoints + achResult.pointsAwarded;
+            const newTotal = (currentPoints?.totalPoints || 0) + totalPointsToAdd;
+            const newMonthly = (currentPoints?.monthlyPoints || 0) + totalPointsToAdd;
+            const newToday = (currentPoints?.todayPoints || 0) + totalPointsToAdd;
+            const newWeekly = (currentPoints?.weeklyPoints || 0) + totalPointsToAdd;
+
+            const newLevelInfo = getLevelInfo(newTotal);
+            const bonusInfo = calculateBonus(newMonthly, activeBonusTiers);
             const timestamp = new Date().toISOString();
+
+            const itemsPickedToAdd = meta?.itemsPicked || 0;
+            const newItemsPicked = (currentPoints?.totalItemsPicked || 0) + itemsPickedToAdd;
 
             let optimisticUpdate: WorkerPoints;
 
             if (currentPoints) {
                 optimisticUpdate = {
                     ...currentPoints,
+                    employeeName,
+                    employeeAvatar,
                     totalPoints: newTotal,
-                    todayPoints: (currentPoints.todayPoints || 0) + points,
-                    weeklyPoints: (currentPoints.weeklyPoints || 0) + points,
-                    monthlyPoints: (currentPoints.monthlyPoints || 0) + points,
-                    totalJobsCompleted: type === 'JOB_COMPLETE' ? (currentPoints.totalJobsCompleted || 0) + 1 : (currentPoints.totalJobsCompleted || 0),
-                    level: newLevelInfo.level,
-                    levelTitle: newLevelInfo.title,
-                    lastUpdated: timestamp,
-                    lastJobCompletedAt: type === 'JOB_COMPLETE' ? timestamp : currentPoints.lastJobCompletedAt
+                    todayPoints: newToday,
+                    weeklyPoints: newWeekly,
+                    monthlyPoints: newMonthly,
+                    totalJobsCompleted: newTotalJobs,
+                    totalItemsPicked: newItemsPicked,
+                    currentStreak: streakInfo.currentStreak,
+                    longestStreak: streakInfo.longestStreak,
+                    level: newLevelInfo.currentLevel.level,
+                    levelTitle: newLevelInfo.currentLevel.title,
+                    currentBonusTier: bonusInfo.tier.tierName,
+                    estimatedBonus: bonusInfo.bonus,
+                    bonusPeriodPoints: newMonthly,
+                    achievements: achResult.allAchievements,
+                    lastJobCompletedAt: type === 'JOB_COMPLETE' ? timestamp : currentPoints.lastJobCompletedAt,
+                    lastUpdated: timestamp
                 };
             } else {
-                // New entry
                 optimisticUpdate = {
                     id: 'temp-' + crypto.randomUUID(),
-                    siteId: activeSiteId!,
+                    siteId: targetSiteId,
                     employeeId,
-                    employeeName: 'Unknown', // TODO: Fetch from EmployeeService if needed
+                    employeeName,
+                    employeeAvatar,
                     totalPoints: newTotal,
-                    weeklyPoints: points,
-                    monthlyPoints: points,
-                    todayPoints: points,
-                    totalJobsCompleted: type === 'JOB_COMPLETE' ? 1 : 0,
-                    totalItemsPicked: 0,
-                    averageAccuracy: 100, // Default start
+                    weeklyPoints: newWeekly,
+                    monthlyPoints: newMonthly,
+                    todayPoints: newToday,
+                    totalJobsCompleted: newTotalJobs,
+                    totalItemsPicked: newItemsPicked,
+                    averageAccuracy: accuracyVal,
                     averageTimePerJob: 0,
-                    currentStreak: 1,
-                    longestStreak: 1,
-                    achievements: [],
+                    currentStreak: streakInfo.currentStreak,
+                    longestStreak: streakInfo.longestStreak,
+                    achievements: achResult.allAchievements,
                     rank: 0,
-                    level: newLevelInfo.level,
-                    levelTitle: newLevelInfo.title,
-                    lastUpdated: timestamp,
-                    lastJobCompletedAt: type === 'JOB_COMPLETE' ? timestamp : undefined
+                    level: newLevelInfo.currentLevel.level,
+                    levelTitle: newLevelInfo.currentLevel.title,
+                    currentBonusTier: bonusInfo.tier.tierName,
+                    estimatedBonus: bonusInfo.bonus,
+                    bonusPeriodPoints: newMonthly,
+                    lastJobCompletedAt: type === 'JOB_COMPLETE' ? timestamp : undefined,
+                    lastUpdated: timestamp
                 };
             }
 
@@ -129,79 +195,151 @@ export const GamificationProvider = ({ children }: { children: ReactNode }) => {
                 return [...prev, optimisticUpdate];
             });
 
-            // DB Updates
+            // Persist to Supabase
             if (currentPoints) {
                 await workerPointsService.update(currentPoints.id, {
-                    totalPoints: newTotal,
-                    level: newLevelInfo.level,
-                    levelTitle: newLevelInfo.title,
+                    totalPoints: optimisticUpdate.totalPoints,
                     todayPoints: optimisticUpdate.todayPoints,
                     weeklyPoints: optimisticUpdate.weeklyPoints,
                     monthlyPoints: optimisticUpdate.monthlyPoints,
                     totalJobsCompleted: optimisticUpdate.totalJobsCompleted,
+                    totalItemsPicked: optimisticUpdate.totalItemsPicked,
+                    currentStreak: optimisticUpdate.currentStreak,
+                    longestStreak: optimisticUpdate.longestStreak,
+                    level: optimisticUpdate.level,
+                    levelTitle: optimisticUpdate.levelTitle,
+                    currentBonusTier: optimisticUpdate.currentBonusTier,
+                    estimatedBonus: optimisticUpdate.estimatedBonus,
+                    bonusPeriodPoints: optimisticUpdate.bonusPeriodPoints,
+                    achievements: optimisticUpdate.achievements,
                     lastJobCompletedAt: optimisticUpdate.lastJobCompletedAt,
                     lastUpdated: timestamp
                 });
             } else {
-                // For create, we pass the full object which satisfies the WorkerPoints interface
-                // The service will ignore the temp ID and generate a real one
                 await workerPointsService.create(optimisticUpdate);
             }
 
+            // Audit transaction record
             await pointsTransactionsService.create({
                 id: crypto.randomUUID(),
                 employeeId,
-                points,
+                points: totalPointsToAdd,
                 type,
                 description,
                 jobId,
                 timestamp
             });
 
+            // Trigger notification for streak milestone or achievement
+            if (streakInfo.streakMilestone) {
+                addNotification('success', `🔥 Streak Milestone: ${streakInfo.streakMilestone} (+${streakInfo.streakBonus} pts)`);
+            }
+            if (achResult.newAchievements.length > 0) {
+                achResult.newAchievements.forEach(a => {
+                    addNotification('success', `🏆 Achievement Unlocked: ${a.name}! (+${a.pointsAwarded} pts)`);
+                });
+            }
         } catch (error) {
-            logger.error('GamificationContext', 'Failed to award points', error);
+            logger.error('GamificationContext', 'Failed to award worker points', error);
             addNotification('alert', 'Failed to update points');
         }
-    };
+    }, [workerPoints, employees, activeSiteId, settings, addNotification]);
 
-    const getLevelFromPoints = (totalPoints: number) => {
-        const levels = POINTS_CONFIG.LEVELS;
-        let currentLevel = levels[0];
-        for (let i = levels.length - 1; i >= 0; i--) {
-            if (totalPoints >= levels[i].points) {
-                currentLevel = levels[i];
-                break;
+    // Decoupled listener for job completions
+    useEffect(() => {
+        const handleJobCompletion = (event: CustomEvent) => {
+            logger.debug('GamificationContext', '🏆 Gamification: Job Completion Event Received', event.detail);
+            const { job, employeeId, employeeName, pointsResult, accuracy } = event.detail || {};
+
+            if (!employeeId) {
+                logger.warn('GamificationContext', '⚠️ No employeeId provided for gamification event');
+                return;
             }
-        }
-        return currentLevel;
-    };
 
-    const getLeaderboard = (siteId?: string, period: 'today' | 'week' | 'month' | 'all' = 'all') => {
-        let filtered = workerPoints;
+            // Check if site and settings allow warehouse bonus
+            const targetSiteId = job?.siteId || activeSiteId;
+            const targetSite = sites.find(s => s.id === targetSiteId);
+            const isWarehouseBonusAllowed = settings.bonusEnabled !== false &&
+                targetSite?.warehouseBonusEnabled !== false &&
+                (targetSite as any)?.warehouse_bonus_enabled !== false;
+
+            if (!isWarehouseBonusAllowed) {
+                logger.debug('GamificationContext', 'Warehouse bonus disabled for this site or globally.');
+                return;
+            }
+
+            // Use calculated points from completion, or compute from active rules
+            const resolvedPointsResult = pointsResult || calculateWarehousePoints(
+                job,
+                settings.warehousePointRules,
+                accuracy !== undefined ? accuracy : 100
+            );
+
+            const pickedCount = job.type === 'PICK'
+                ? (job.items || job.lineItems?.reduce((sum: number, i: any) => sum + (i.pickedQty || 0), 0) || 0)
+                : 0;
+
+            awardPoints(
+                employeeId,
+                resolvedPointsResult.points,
+                'JOB_COMPLETE',
+                `Completed ${job.type} job: ${job.jobNumber || job.id}`,
+                job.id,
+                {
+                    employeeName,
+                    siteId: targetSiteId,
+                    itemsPicked: pickedCount,
+                    accuracy: accuracy !== undefined ? accuracy : 100
+                }
+            );
+        };
+
+        window.addEventListener('fulfillment:job-completed', handleJobCompletion as EventListener);
+        return () => window.removeEventListener('fulfillment:job-completed', handleJobCompletion as EventListener);
+    }, [activeSiteId, settings, sites, awardPoints]);
+
+    const getLeaderboard = useCallback((siteId?: string, period: 'today' | 'week' | 'month' | 'all' = 'all') => {
+        let filtered = [...workerPoints];
         if (siteId) {
             filtered = filtered.filter(wp => wp.siteId === siteId);
         }
-        // Fix sort to use totalPoints
-        return filtered.sort((a, b) => b.totalPoints - a.totalPoints);
-    };
 
-    const calculateWorkerBonusShare = (siteId: string, employeeRole: string): WorkerBonusShare | undefined => {
+        switch (period) {
+            case 'today':
+                filtered.sort((a, b) => (b.todayPoints || 0) - (a.todayPoints || 0));
+                break;
+            case 'week':
+                filtered.sort((a, b) => (b.weeklyPoints || 0) - (a.weeklyPoints || 0));
+                break;
+            case 'month':
+                filtered.sort((a, b) => (b.monthlyPoints || 0) - (a.monthlyPoints || 0));
+                break;
+            case 'all':
+            default:
+                filtered.sort((a, b) => (b.totalPoints || 0) - (a.totalPoints || 0));
+                break;
+        }
+
+        return filtered.map((wp, idx) => ({
+            ...wp,
+            rank: idx + 1
+        }));
+    }, [workerPoints]);
+
+    const calculateWorkerBonusShare = useCallback((siteId: string, employeeRole: string): WorkerBonusShare | undefined => {
         if (!settings.bonusEnabled) return undefined;
 
         const site = sites.find(s => s.id === siteId);
         if (!site) return undefined;
 
-        // Fetch store points
         const storePointsData = getStorePoints ? getStorePoints(siteId) : undefined;
         const monthlyPoints = storePointsData?.monthlyPoints || 0;
 
         const bonusTiers = settings.posBonusTiers || DEFAULT_POS_BONUS_TIERS;
         const roleDistribution = settings.posRoleDistribution || DEFAULT_POS_ROLE_DISTRIBUTION;
 
-        // Calculate store bonus
         const { bonus: storeBonus } = calculateStoreBonus(monthlyPoints, bonusTiers);
 
-        // Find role percentage share
         const roleConfig = roleDistribution.find((r: any) =>
             r.role.toLowerCase() === employeeRole.toLowerCase()
         );
@@ -217,7 +355,7 @@ export const GamificationProvider = ({ children }: { children: ReactNode }) => {
             personalShare,
             siteId
         };
-    };
+    }, [settings, sites, getStorePoints]);
 
     return (
         <GamificationContext.Provider value={{

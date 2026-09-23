@@ -379,30 +379,30 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
                     </div>
                 </div>
 
-                <div className="p-4 md:p-6 border-t border-[#E2DCCE]/60 dark:border-emerald-950/20 bg-[#FAF8F5]/50 dark:bg-zinc-950/40 flex items-center justify-between gap-3 shrink-0 relative z-20">
+                <div className="p-3 sm:p-4 md:p-6 border-t border-[#E2DCCE]/60 dark:border-emerald-950/20 bg-[#FAF8F5]/50 dark:bg-zinc-950/40 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-3 shrink-0 relative z-20">
                     <div className="flex items-center gap-2 md:gap-4 shrink-0">
                         <button
                             onClick={() => onPrintLabel(boxDetails)}
                             disabled={isSubmitting}
-                            className="p-2.5 md:px-6 md:py-3.5 bg-white/80 dark:bg-[#18201B]/70 border border-[#E2DCCE] dark:border-[#EAE5D9]/25 text-[#2C4D35] dark:text-[#A9CBA2] hover:text-[#1E3F27] dark:hover:text-white hover:scale-105 active:scale-95 transition-all rounded-xl md:rounded-2xl font-black text-xs md:text-sm uppercase tracking-widest md:flex items-center gap-2 disabled:opacity-50"
+                            className="flex-1 sm:flex-none min-h-[44px] px-3.5 md:px-6 py-2.5 md:py-3.5 bg-white/80 dark:bg-[#18201B]/70 border border-[#E2DCCE] dark:border-[#EAE5D9]/25 text-[#2C4D35] dark:text-[#A9CBA2] hover:text-[#1E3F27] dark:hover:text-white active:scale-95 transition-colors rounded-xl md:rounded-2xl font-black text-xs md:text-sm uppercase tracking-widest flex items-center justify-center gap-2 disabled:opacity-50"
                         >
-                            <Printer size={18} className="md:w-4 md:h-4" /> <span className="hidden md:inline">{t('warehouse.printLabel')}</span>
+                            <Printer size={16} className="md:w-4 md:h-4" /> <span>{t('warehouse.printLabel')}</span>
                         </button>
                         {/* Flag Discrepancy — packer count doesn't match manifest */}
                         {onFlagDiscrepancy && job.status !== 'Completed' && (
                             <button
                                 onClick={onFlagDiscrepancy}
-                                className="p-2.5 md:px-6 md:py-3.5 bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/20 text-orange-600 dark:text-orange-400 hover:scale-105 active:scale-95 transition-all rounded-xl md:rounded-2xl font-black text-xs md:text-sm uppercase tracking-widest md:flex items-center gap-2"
+                                className="flex-1 sm:flex-none min-h-[44px] px-3.5 md:px-6 py-2.5 md:py-3.5 bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/20 text-orange-600 dark:text-orange-400 active:scale-95 transition-colors rounded-xl md:rounded-2xl font-black text-xs md:text-sm uppercase tracking-widest flex items-center justify-center gap-2"
                             >
-                                <AlertTriangle size={18} className="md:w-4 md:h-4" /> <span className="hidden md:inline">{t('warehouse.packing.flagCountIssue')}</span>
+                                <AlertTriangle size={16} className="md:w-4 md:h-4" /> <span>{t('warehouse.packing.flagCountIssue')}</span>
                             </button>
                         )}
                     </div>
 
-                    <div className="flex items-center gap-2 md:gap-3 flex-1 justify-end">
+                    <div className="flex items-center gap-2 md:gap-3 sm:flex-1 justify-end">
                         <button
                             onClick={onClose}
-                            className="px-5 py-3 md:px-7 md:py-3.5 rounded-xl md:rounded-2xl bg-white/80 dark:bg-[#18201B]/70 border border-[#E2DCCE] dark:border-emerald-950/20 text-gray-700 dark:text-[#A9CBA2] hover:text-[#1E3F27] dark:hover:text-white font-black text-xs uppercase tracking-widest transition-all active:scale-95 cursor-pointer"
+                            className="flex-1 sm:flex-none min-h-[44px] px-4 py-2.5 md:px-7 md:py-3.5 rounded-xl md:rounded-2xl bg-white/80 dark:bg-[#18201B]/70 border border-[#E2DCCE] dark:border-emerald-950/20 text-gray-700 dark:text-[#A9CBA2] hover:text-[#1E3F27] dark:hover:text-white font-black text-xs uppercase tracking-widest transition-colors active:scale-95 cursor-pointer flex items-center justify-center"
                         >
                             {t('warehouse.dismiss')}
                         </button>
@@ -415,7 +415,7 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
                                         else onStartPack(job);
                                     }}
                                     disabled={isSubmitting}
-                                    className="px-5 py-3 md:px-8 md:py-3.5 rounded-xl md:rounded-2xl font-black text-xs md:text-sm uppercase tracking-widest shadow-md transition-all flex items-center gap-2 active:scale-95 bg-[#2C5E3B] hover:bg-[#1B3520] text-white border border-[#2C5E3B]/20 shadow-[#2C5E3B]/20 cursor-pointer"
+                                    className="flex-1 sm:flex-none min-h-[44px] px-4 py-2.5 md:px-8 md:py-3.5 rounded-xl md:rounded-2xl font-black text-xs md:text-sm uppercase tracking-widest shadow-md transition-colors flex items-center justify-center gap-2 active:scale-95 bg-[#2C5E3B] hover:bg-[#1B3520] text-white border border-[#2C5E3B]/20 shadow-[#2C5E3B]/20 cursor-pointer"
                                 >
                                     <span>Start Packing</span>
                                     <ArrowRight size={16} />
@@ -430,7 +430,7 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
                                         onCompleteJob(boxDetails);
                                     }}
                                     disabled={isSubmitting}
-                                    className="px-5 py-3 md:px-8 md:py-3.5 rounded-xl md:rounded-2xl font-black text-xs md:text-sm uppercase tracking-widest shadow-md transition-all flex items-center gap-2 active:scale-95 bg-green-600 hover:bg-green-500 border border-green-400/50 text-white shadow-green-500/25 cursor-pointer"
+                                    className="flex-1 sm:flex-none min-h-[44px] px-4 py-2.5 md:px-8 md:py-3.5 rounded-xl md:rounded-2xl font-black text-xs md:text-sm uppercase tracking-widest shadow-md transition-colors flex items-center justify-center gap-2 active:scale-95 bg-green-600 hover:bg-green-500 border border-green-400/50 text-white shadow-green-500/25 cursor-pointer"
                                 >
                                     {isSubmitting ? <Loader2 size={16} className="animate-spin md:w-[18px] md:h-[18px]" /> : (
                                         <>

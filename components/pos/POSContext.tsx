@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useMemo, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useMemo, useEffect, useCallback, ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CURRENCY_SYMBOL } from '../../constants';
 import { formatCompactNumber, formatDateTime } from '../../utils/formatting';
@@ -67,29 +67,19 @@ export const POSProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const [amountTendered, setAmountTendered] = useState<string>('');
     const [isProcessing, setIsProcessing] = useState(false);
     const [lastSale, setLastSale] = useState<SaleRecord | null>(null);
-    const [showPointsPopup, setShowPointsPopup] = useState(false);
-    const [earnedPointsData, setEarnedPointsData] = useState<any>(null);
-    const [isRecallModalOpen, setIsRecallModalOpen] = useState(false);
-    const [cartDiscount, setCartDiscount] = useState(0);
-    const [appliedDiscountCode, setAppliedDiscountCode] = useState<string | null>(null);
-    const [appliedDiscountCodeDetails, setAppliedDiscountCodeDetails] = useState<any | null>(null);
+    const [showPointsPopup, setShowPointsPopup] = useState(false), [earnedPointsData, setEarnedPointsData] = useState<any>(null);
+    const [isRecallModalOpen, setIsRecallModalOpen] = useState(false), [cartDiscount, setCartDiscount] = useState(0);
+    const [appliedDiscountCode, setAppliedDiscountCode] = useState<string | null>(null), [appliedDiscountCodeDetails, setAppliedDiscountCodeDetails] = useState<any | null>(null);
     const [isDiscountModalOpen, setIsDiscountModalOpen] = useState(false);
-    const [discountCodeInput, setDiscountCodeInput] = useState('');
-    const [discountCodeError, setDiscountCodeError] = useState('');
-    const [isValidatingCode, setIsValidatingCode] = useState(false);
-    const [isMiscItemModalOpen, setIsMiscItemModalOpen] = useState(false);
-    const [miscItem, setMiscItem] = useState({ name: 'Misc Item', price: '' });
-    const [isRoundingEnabled, setIsRoundingEnabled] = useState(true);
-    const [isReturnModalOpen, setIsReturnModalOpen] = useState(false);
-    const [returnSearchId, setReturnSearchId] = useState('');
-    const [foundSaleForReturn, setFoundSaleForReturn] = useState<SaleRecord | null>(null);
+    const [discountCodeInput, setDiscountCodeInput] = useState(''), [discountCodeError, setDiscountCodeError] = useState(''), [isValidatingCode, setIsValidatingCode] = useState(false);
+    const [isMiscItemModalOpen, setIsMiscItemModalOpen] = useState(false), [miscItem, setMiscItem] = useState({ name: 'Misc Item', price: '' });
+    const [isRoundingEnabled, setIsRoundingEnabled] = useState(true), [isReturnModalOpen, setIsReturnModalOpen] = useState(false);
+    const [returnSearchId, setReturnSearchId] = useState(''), [foundSaleForReturn, setFoundSaleForReturn] = useState<SaleRecord | null>(null);
     const [returnConfig, setReturnConfig] = useState<Record<string, { qty: number, condition: ReturnCondition, reason: ReturnReason }>>({});
-    const [isShiftModalOpen, setIsShiftModalOpen] = useState(false);
-    const [closingStep, setClosingStep] = useState(1);
+    const [isStartShiftModalOpen, setIsStartShiftModalOpen] = useState(false);
+    const [isShiftModalOpen, setIsShiftModalOpen] = useState(false), [closingStep, setClosingStep] = useState(1);
     const [cashDenominations, setCashDenominations] = useState<Record<string, number>>({ '200': 0, '100': 0, '50': 0, '10': 0, '5': 0, '1': 0 });
-    const [discrepancyReason, setDiscrepancyReason] = useState('');
-    const [countedCash, setCountedCash] = useState('');
-    const [shiftNotes, setShiftNotes] = useState('');
+    const [discrepancyReason, setDiscrepancyReason] = useState(''), [countedCash, setCountedCash] = useState(''), [shiftNotes, setShiftNotes] = useState('');
     const activeShift = shifts.find((s: ShiftRecord) => s.cashierId === user?.id && s.status === 'Open');
     const [shiftStartTime, setShiftStartTime] = useState(activeShift?.startTime || new Date().toISOString());
 
@@ -105,41 +95,36 @@ export const POSProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         localStorage.setItem('siifmart_pos_terminal_price_seen', String(now));
     };
 
-    const [isReceivingModalOpen, setIsReceivingModalOpen] = useState(false);
-    const [scannedBarcode, setScannedBarcode] = useState('');
-    const [receivedItems, setReceivedItems] = useState<Array<{ product: Product; qty: number; timestamp: string }>>([]);
-    const [isQRScannerOpen, setIsQRScannerOpen] = useState(false);
+    const [isReceivingModalOpen, setIsReceivingModalOpen] = useState(false), [scannedBarcode, setScannedBarcode] = useState('');
+    const [receivedItems, setReceivedItems] = useState<Array<{ product: Product; qty: number; timestamp: string }>>([]), [isQRScannerOpen, setIsQRScannerOpen] = useState(false);
     const [receivingMode, setReceivingMode] = useState<'TRANSFERS' | 'MANUAL'>('TRANSFERS');
-    const [selectedTransferForReceiving, setSelectedTransferForReceiving] = useState<string | null>(null);
-    const [transferReceivingItems, setTransferReceivingItems] = useState<any[]>([]);
-    const [isConfirmingReceive, setIsConfirmingReceive] = useState(false);
-    const [isHoldOrderModalOpen, setIsHoldOrderModalOpen] = useState(false);
-    const [holdOrderNote, setHoldOrderNote] = useState('');
-    const [isOverwriteCartModalOpen, setIsOverwriteCartModalOpen] = useState(false);
-    const [pendingRecallOrderId, setPendingRecallOrderId] = useState<string | null>(null);
-    const [isEmailReceiptModalOpen, setIsEmailReceiptModalOpen] = useState(false);
-    const [emailReceiptAddress, setEmailReceiptAddress] = useState('');
+    const [selectedTransferForReceiving, setSelectedTransferForReceiving] = useState<string | null>(null), [transferReceivingItems, setTransferReceivingItems] = useState<any[]>([]);
+    const [isConfirmingReceive, setIsConfirmingReceive] = useState(false), [isHoldOrderModalOpen, setIsHoldOrderModalOpen] = useState(false), [holdOrderNote, setHoldOrderNote] = useState('');
+    const [isOverwriteCartModalOpen, setIsOverwriteCartModalOpen] = useState(false), [pendingRecallOrderId, setPendingRecallOrderId] = useState<string | null>(null);
+    const [isEmailReceiptModalOpen, setIsEmailReceiptModalOpen] = useState(false), [emailReceiptAddress, setEmailReceiptAddress] = useState('');
     const [showCart, setShowCart] = useState(false);
     const isNativeApp = native.isNative();
-    const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
-    const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
-    const [customerSearchTerm, setCustomerSearchTerm] = useState('');
-    const [isReceiptPreviewOpen, setIsReceiptPreviewOpen] = useState(false);
-    const [receiptPreviewHTML, setReceiptPreviewHTML] = useState('');
-    const [isUnknownBarcodeModalOpen, setIsUnknownBarcodeModalOpen] = useState(false);
-    const [unknownBarcode, setUnknownBarcode] = useState('');
-    const [capturedBarcodeForModal, setCapturedBarcodeForModal] = useState('');
+    const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null), [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false), [customerSearchTerm, setCustomerSearchTerm] = useState('');
+    const [isReceiptPreviewOpen, setIsReceiptPreviewOpen] = useState(false), [receiptPreviewHTML, setReceiptPreviewHTML] = useState('');
+    const [isUnknownBarcodeModalOpen, setIsUnknownBarcodeModalOpen] = useState(false), [unknownBarcode, setUnknownBarcode] = useState(''), [capturedBarcodeForModal, setCapturedBarcodeForModal] = useState('');
     const searchInputRef = React.useRef<HTMLInputElement>(null);
     const [weightPromptProduct, setWeightPromptProduct] = useState<Product | null>(null);
+
+    const handleStartShift = useCallback((openingFloat: number) => {
+        if (!user) return;
+        startShift(user.id, openingFloat);
+        setIsStartShiftModalOpen(false);
+    }, [user, startShift]);
 
     // --- Effects ---
     useEffect(() => {
         if (activeShift) {
             setShiftStartTime(activeShift.startTime);
+            setIsStartShiftModalOpen(false);
         } else if (user) {
-            startShift(user.id, 2000);
+            setIsStartShiftModalOpen(true);
         }
-    }, [activeShift, user, startShift]);
+    }, [activeShift, user]);
 
     useEffect(() => {
         // Only autofocus search input on desktop/USB-scanner environments; avoid popping virtual keyboard on mobile
@@ -267,7 +252,7 @@ export const POSProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         isEmailReceiptModalOpen, setIsEmailReceiptModalOpen, emailReceiptAddress, setEmailReceiptAddress,
         isReceiptPreviewOpen, setIsReceiptPreviewOpen, receiptPreviewHTML, setReceiptPreviewHTML,
         activeSite, user, settings, subtotal, tax, taxBreakdown, total, changeDue, isPaymentValid,
-        processSale, clearCart, addNotification, sales,
+        processSale, clearCart, setShowCart, addNotification, sales,
         cartDiscount, setCartDiscount, setAppliedDiscountCode, setAppliedDiscountCodeDetails,
         setIsDiscountModalOpen, discountCodeInput, setDiscountCodeInput, setDiscountCodeError,
         setIsValidatingCode, validateDiscountCode, useDiscountCode
@@ -441,10 +426,8 @@ export const POSProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         isValidatingCode, setIsValidatingCode, isMiscItemModalOpen, setIsMiscItemModalOpen,
         miscItem, setMiscItem, isRoundingEnabled, setIsRoundingEnabled, roundingAdjustment, isReturnModalOpen, setIsReturnModalOpen,
         returnSearchId, setReturnSearchId, foundSaleForReturn, setFoundSaleForReturn, returnConfig,
-        setReturnConfig,
-        priceUpdatedProducts,
-        isPriceUpdatesModalOpen,
-        setIsPriceUpdatesModalOpen,
+        setReturnConfig, priceUpdatedProducts, isPriceUpdatesModalOpen, setIsPriceUpdatesModalOpen,
+        isStartShiftModalOpen, setIsStartShiftModalOpen, handleStartShift,
         isShiftModalOpen, setIsShiftModalOpen, closingStep, setClosingStep, cashDenominations, setCashDenominations,
         discrepancyReason, setDiscrepancyReason, countedCash, setCountedCash, shiftNotes, setShiftNotes,
         lastSeenPriceUpdate, markPriceUpdatesAsRead,
@@ -480,7 +463,7 @@ export const POSProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         appliedDiscountCodeDetails, isDiscountModalOpen, discountCodeInput, discountCodeError,
         isValidatingCode, isMiscItemModalOpen, miscItem, isRoundingEnabled, roundingAdjustment,
         isReturnModalOpen, returnSearchId, foundSaleForReturn, returnConfig, priceUpdatedProducts,
-        isPriceUpdatesModalOpen, lastSeenPriceUpdate, isShiftModalOpen, closingStep, cashDenominations,
+        isPriceUpdatesModalOpen, lastSeenPriceUpdate, isStartShiftModalOpen, isShiftModalOpen, closingStep, cashDenominations,
         discrepancyReason, countedCash, shiftNotes, activeShift, shiftStartTime,
         isReceivingModalOpen, scannedBarcode, receivedItems, isQRScannerOpen, receivingMode,
         selectedTransferForReceiving, transferReceivingItems, isConfirmingReceive,
@@ -493,7 +476,7 @@ export const POSProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         subtotal, tax, taxBreakdown, rawTotal, total, changeDue, isPaymentValid,
         filteredCustomers, needsStoreSelection, weightPromptProduct, isNativeApp,
         // Callbacks (stable via useCallback)
-        addToCart, handleScanProduct, confirmWeightEntry
+        addToCart, handleScanProduct, confirmWeightEntry, handleStartShift
     ]);
 
     return <POSContext.Provider value={value}>{children}</POSContext.Provider>;

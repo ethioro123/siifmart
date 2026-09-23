@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChevronDown, Trophy, TrendingUp, Zap, Crown, ClipboardList, Archive, PackageCheck, Truck, BoxIcon, User, MapPin, Globe, LogOut } from 'lucide-react';
+import { ChevronDown, Trophy, TrendingUp, Zap, Crown, ClipboardList, Archive, PackageCheck, Truck, BoxIcon, User, MapPin, Globe, LogOut, Sun, Moon, RefreshCw } from 'lucide-react';
 import { formatRole } from '../../utils/formatting';
 
 interface UserMenuProps {
@@ -14,6 +14,9 @@ interface UserMenuProps {
    language: string;
    setLanguage: (lang: any) => void;
    dropdownRef: React.RefObject<HTMLDivElement | null>;
+   theme?: string;
+   toggleTheme?: () => void;
+   onRefresh?: () => void;
 }
 
 export function UserMenu({
@@ -27,15 +30,18 @@ export function UserMenu({
    navigate,
    language,
    setLanguage,
-   dropdownRef
+   dropdownRef,
+   theme,
+   toggleTheme,
+   onRefresh
 }: UserMenuProps) {
    if (!user) return null;
 
    return (
-      <div className="relative" ref={dropdownRef}>
+      <div className="relative flex-shrink-0" ref={dropdownRef}>
          <div
             onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-            className={`flex items-center gap-1.5 sm:gap-2 md:gap-3 px-1.5 sm:px-2 md:px-4 py-1 sm:py-1.5 md:py-2 rounded-full border transition-all duration-300 cursor-pointer ${isUserMenuOpen
+            className={`flex items-center gap-1.5 sm:gap-2 md:gap-3 px-1 sm:px-2 md:px-4 py-1 sm:py-1.5 md:py-2 rounded-full border transition-all duration-300 cursor-pointer flex-shrink-0 ${isUserMenuOpen
                ? 'bg-[#2C5E3B]/10 dark:bg-white/10 border-[#2C5E3B]/40 dark:border-[#A9CBA2]/30'
                : 'bg-white/60 dark:bg-white/5 border-[#E2DCCE] dark:border-white/10 hover:border-[#2C5E3B]/40 dark:hover:border-[#A9CBA2]/30'
             }`}
@@ -162,7 +168,7 @@ export function UserMenu({
                         <span>My Profile</span>
                      </button>
 
-                     {user.role === 'super_admin' && (
+                     {(user.role === 'super_admin' || (user.role as string) === 'CEO') && (
                         <button
                            onClick={() => { navigate('/location-select'); setIsUserMenuOpen(false); }}
                            className="w-full flex items-center gap-3 px-3 py-2 text-sm text-stone-600 dark:text-gray-300 hover:text-[#2C5E3B] dark:hover:text-white hover:bg-stone-100 dark:hover:bg-white/5 rounded-lg transition-colors"
@@ -192,7 +198,34 @@ export function UserMenu({
                            </select>
                         </div>
                      </div>
-                  </div>
+                      {/* Theme and Refresh shortcuts */}
+                      <div className="mt-2 pt-2 border-t border-[#E2DCCE] dark:border-white/5 space-y-1">
+                         {toggleTheme && (
+                            <button
+                               type="button"
+                               onClick={toggleTheme}
+                               className="w-full flex items-center justify-between px-3 py-2 text-sm text-stone-600 dark:text-gray-300 hover:text-[#2C5E3B] dark:hover:text-white hover:bg-stone-100 dark:hover:bg-white/5 rounded-lg transition-colors cursor-pointer"
+                            >
+                               <div className="flex items-center gap-3">
+                                  {theme === 'dark' ? <Sun size={16} className="text-amber-500" /> : <Moon size={16} className="text-stone-500" />}
+                                  <span>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
+                               </div>
+                               <span className="text-[10px] font-mono text-stone-400 dark:text-gray-500 uppercase">{theme}</span>
+                            </button>
+                         )}
+
+                         {onRefresh && (
+                            <button
+                               type="button"
+                               onClick={onRefresh}
+                               className="w-full flex items-center gap-3 px-3 py-2 text-sm text-stone-600 dark:text-gray-300 hover:text-[#2C5E3B] dark:hover:text-white hover:bg-stone-100 dark:hover:bg-white/5 rounded-lg transition-colors cursor-pointer"
+                            >
+                               <RefreshCw size={16} />
+                               <span>Reload Data</span>
+                            </button>
+                         )}
+                      </div>
+                   </div>
 
                   <div className="p-2 border-t border-[#E2DCCE] dark:border-white/5">
                      <button

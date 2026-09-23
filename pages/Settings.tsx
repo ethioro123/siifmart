@@ -142,18 +142,62 @@ export default function SettingsPage() {
 
                 <div className="p-6 lg:p-8 overflow-y-auto custom-scrollbar flex-1">
                     {activeTab === 'general' && <GeneralSettings />}
-                    {activeTab === 'locations' && <LocationSettings />}
-                    {activeTab === 'pos' && <POSSettings />}
-                    {activeTab === 'discounts' && <DiscountCodesSettings />}
-                    {activeTab === 'finance' && <FinanceSettings />}
-                    {activeTab === 'roles' && <RoleSettings />}
-                    {activeTab === 'integrations' && <IntegrationsSettings />}
-                    {activeTab === 'security' && <SecuritySettings />}
-                    {activeTab === 'audit' && <AuditSettings />}
+                    {activeTab === 'locations' && (
+                        <Protected permission="MANAGE_WAREHOUSE">
+                            <LocationSettings />
+                        </Protected>
+                    )}
+                    {activeTab === 'pos' && (
+                        <Protected permission="EDIT_OPERATIONAL_SETTINGS">
+                            <POSSettings />
+                        </Protected>
+                    )}
+                    {activeTab === 'discounts' && (
+                        <Protected permission="EDIT_OPERATIONAL_SETTINGS">
+                            <DiscountCodesSettings />
+                        </Protected>
+                    )}
+                    {activeTab === 'finance' && (
+                        <Protected permission="ACCESS_FINANCE">
+                            <FinanceSettings />
+                        </Protected>
+                    )}
+                    {activeTab === 'roles' && (
+                        <Protected permission="MANAGE_ROLES">
+                            <RoleSettings />
+                        </Protected>
+                    )}
+                    {activeTab === 'integrations' && (
+                        <Protected permission="EDIT_SYSTEM_SETTINGS">
+                            <IntegrationsSettings />
+                        </Protected>
+                    )}
+                    {activeTab === 'security' && (
+                        <Protected permission="EDIT_SYSTEM_SETTINGS">
+                            <SecuritySettings />
+                        </Protected>
+                    )}
+                    {activeTab === 'audit' && (
+                        <Protected permission="VIEW_AUDIT_LOGS">
+                            <AuditSettings />
+                        </Protected>
+                    )}
                     {activeTab === 'notifications' && <NotificationSettings />}
-                    {activeTab === 'inventory' && <WMSSettings />}
-                    {activeTab === 'infrastructure' && <InfrastructureSettings />}
-                    {activeTab === 'data' && <DataSettings />}
+                    {activeTab === 'inventory' && (
+                        <Protected permission="MANAGE_WAREHOUSE">
+                            <WMSSettings />
+                        </Protected>
+                    )}
+                    {activeTab === 'infrastructure' && (
+                        <Protected permission="EDIT_SYSTEM_SETTINGS">
+                            <InfrastructureSettings />
+                        </Protected>
+                    )}
+                    {activeTab === 'data' && (
+                        <Protected permission="EDIT_SYSTEM_SETTINGS">
+                            <DataSettings />
+                        </Protected>
+                    )}
                     {activeTab === 'gamification' && <GamificationSettings />}
                 </div>
             </div>

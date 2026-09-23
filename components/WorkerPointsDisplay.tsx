@@ -356,7 +356,11 @@ function AchievementBadge({ achievement }: { achievement: WorkerAchievement }) {
 // Compact leaderboard widget
 export function LeaderboardWidget({ workers, currentUserId }: { workers: WorkerPoints[]; currentUserId?: string }) {
     const sortedWorkers = useMemo(() =>
-        [...workers].sort((a, b) => b.totalPoints - a.totalPoints).slice(0, 5),
+        [...workers].sort((a, b) => {
+            const diffWeekly = (b.weeklyPoints || 0) - (a.weeklyPoints || 0);
+            if (diffWeekly !== 0) return diffWeekly;
+            return (b.totalPoints || 0) - (a.totalPoints || 0);
+        }).slice(0, 5),
         [workers]
     );
 

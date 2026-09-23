@@ -315,18 +315,18 @@ export const PickScanner: React.FC<PickScannerProps> = ({
     return (
         <div className="fixed inset-0 z-[200] bg-[#FAF8F5] dark:bg-[#1C2620] flex flex-col overflow-hidden max-w-full">
             {/* Top Bar */}
-            <div className="p-4 bg-[#EAE5D9] dark:bg-[#1C2620]/80 border-b border-[#E2DCCE] dark:border-[#A9CBA2]/10 flex justify-between items-center text-gray-900 dark:text-[#EAE5D9] transition-colors">
-                <div className="flex items-center gap-3">
-                    <button onClick={onClose} className="p-2 -ml-2 text-gray-500 dark:text-[#A9CBA2]/70 hover:text-gray-900 dark:hover:text-[#EAE5D9] transition-colors" aria-label={t('warehouse.dismiss')}>
+            <div className="p-3 sm:p-4 bg-[#EAE5D9] dark:bg-[#1C2620]/80 border-b border-[#E2DCCE] dark:border-[#A9CBA2]/10 flex justify-between items-center text-gray-900 dark:text-[#EAE5D9] transition-colors">
+                <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                    <button onClick={onClose} className="p-2 -ml-1 text-gray-500 dark:text-[#A9CBA2]/70 hover:text-gray-900 dark:hover:text-[#EAE5D9] transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center shrink-0" aria-label={t('warehouse.dismiss')}>
                         <X size={24} />
                     </button>
-                    <div>
-                        <h3 className="font-bold text-lg uppercase tracking-wider">{step === 'LOCATION' ? t('warehouse.putaway.confirmLocation') : t('warehouse.scanProductBarcode')}</h3>
-                        <p className="text-xs text-[#2C5E3B] dark:text-[#A9CBA2] font-mono font-black">JOB: {formatJobId(job)}</p>
+                    <div className="min-w-0">
+                        <h3 className="font-bold text-base sm:text-lg uppercase tracking-wider truncate">{step === 'LOCATION' ? t('warehouse.putaway.confirmLocation') : t('warehouse.scanProductBarcode')}</h3>
+                        <p className="text-xs text-[#2C5E3B] dark:text-[#A9CBA2] font-mono font-black truncate">JOB: {formatJobId(job)}</p>
                     </div>
                 </div>
-                <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold bg-[#E2DCCE] dark:bg-[#2C5E3B]/20 px-2 py-1 rounded text-gray-600 dark:text-[#A9CBA2]">
+                <div className="flex items-center gap-2 shrink-0">
+                    <span className="text-xs font-bold bg-[#E2DCCE] dark:bg-[#2C5E3B]/20 px-2.5 py-1 rounded text-gray-600 dark:text-[#A9CBA2]">
                         {step === 'LOCATION' ? '1/3' : step === 'ITEM' ? '2/3' : '3/3'}
                     </span>
                 </div>
@@ -335,10 +335,10 @@ export const PickScanner: React.FC<PickScannerProps> = ({
             {/* Main View */}
             <div className="flex-1 relative w-full overflow-hidden flex flex-col transition-colors">
                 {/* Background Decoration */}
-                <div className={`absolute inset-0 opacity-[0.05] dark:opacity-20 blur-3xl transition-colors duration-700 pointer-events-none ${step === 'LOCATION' ? 'bg-[#2C5E3B]' : 'bg-[#A9CBA2]'}`} />
+                <div className={`absolute inset-0 opacity-[0.03] dark:opacity-10 pointer-events-none transition-colors duration-500 ${step === 'LOCATION' ? 'bg-[#2C5E3B]' : 'bg-[#A9CBA2]'}`} />
 
                 {/* Scrollable Content Container */}
-                <div className="absolute inset-0 overflow-y-auto overflow-x-hidden flex flex-col items-center p-6 pb-32 w-full">
+                <div className="absolute inset-0 overflow-y-auto overflow-x-hidden flex flex-col items-center p-3 sm:p-6 pb-32 w-full max-w-full">
 
                     {/* Header & Status Instruction View */}
                     <PickScannerHeader

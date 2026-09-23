@@ -13,12 +13,18 @@ export const PrintReceiptModal: React.FC = () => {
         lastSale,
         handlePrintReceipt,
         handleEmailReceipt,
+        setShowCart,
     } = usePOS();
+
+    const handleCloseReceipt = () => {
+        setIsReceiptModalOpen(false);
+        setShowCart(false);
+    };
 
     return (
         <Modal
             isOpen={isReceiptModalOpen}
-            onClose={() => setIsReceiptModalOpen(false)}
+            onClose={handleCloseReceipt}
             title="Payment Success"
             size="md"
         >
@@ -51,7 +57,7 @@ export const PrintReceiptModal: React.FC = () => {
                     <button
                         onClick={() => {
                             handlePrintReceipt();
-                            setIsReceiptModalOpen(false);
+                            handleCloseReceipt();
                         }}
                         className="flex flex-col items-center justify-center gap-3 p-6 bg-white dark:bg-black/25 border border-[#E2DCCE] dark:border-white/10 hover:bg-[#2C5E3B]/5 dark:hover:bg-white/5 rounded-[2.5rem] text-[#1E3F27] dark:text-gray-300 transition-all group active:scale-95"
                     >
@@ -72,7 +78,7 @@ export const PrintReceiptModal: React.FC = () => {
                 </div>
 
                 <button
-                    onClick={() => setIsReceiptModalOpen(false)}
+                    onClick={handleCloseReceipt}
                     className="mt-10 p-4 w-[calc(100%-3rem)] bg-gradient-to-br from-[#224429] to-[#2C5E3B] text-white font-black uppercase tracking-[0.3em] text-xs rounded-[1.5rem] hover:opacity-90 shadow-md transition-all active:scale-[0.98]"
                 >
                     {t('pos.newOrder')}

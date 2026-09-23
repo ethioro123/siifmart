@@ -1,0 +1,102 @@
+import React from 'react';
+import { Users, Clock, AlertTriangle, ShieldCheck } from 'lucide-react';
+import { WeekDayInfo } from '../../utils/shiftPlanner';
+
+interface ShiftCoverageBarProps {
+    weekDays: WeekDayInfo[];
+    dailyCoverage: { date: string; headcount: number; totalHours: number }[];
+    totalWeekHours: number;
+    employeeWeeklyHours: Map<string, number>;
+}
+
+export const ShiftCoverageBar: React.FC<ShiftCoverageBarProps> = ({
+    weekDays,
+    dailyCoverage,
+    totalWeekHours,
+    employeeWeeklyHours
+}) => {
+    // Count employees with overtime (> 40h)
+    let overtimeCount = 0;
+    employeeWeeklyHours.forEach(hours => {
+        if (hours > 40) overtimeCount++;
+    });
+
+    const totalScheduledShifts = dailyCoverage.reduce((sum, d) => sum + d.headcount, 0);
+
+    return (
+        <div className="bg-white/90 dark:bg-black/30 p-4 rounded-2xl border border-[#E2DCCE] dark:border-emerald-950/30 shadow-xs space-y-3">
+            {/* Header / Summary Strip */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#E2DCCE] dark:border-white/10">
+                <div className="flex items-center gap-2">
+                    <div className="p-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 text-[#2C5E3B] dark:text-[#A9CBA2]">
+                        <Users size={18} />
+                    </div>
+                    <div>
+                        <h4 className="font-bold text-sm text-[#1E3F27] dark:text-[#EAE5D9]">
+                            Labor & Coverage Summary
+                        </h4>
+                        <p className="text-[11px] text-stone-500 font-medium">
+                            Daily staffing headcount and scheduled working hours
+                        </p>
+                    </div>
+                </div>
+
+                <div className="flex items-center gap-4 text-xs font-bold">
+                    <div className="flex items-center gap-1.5 text-[#2C5E3B] dark:text-[#A9CBA2]">
+                        <Clock size={15} />
+                        <span>{totalWeekHours} Total Weekly Hours</span>
+                    </div>
+
+                    <div className="flex items-center gap-1.5 text-stone-600 dark:text-stone-300">
+                        <ShieldCheck size={15} className="text-emerald-500" />
+                        <span>{totalScheduledShifts} Shifts</span>
+                    </div>
+
+                    {overtimeCount > 0 ? (
+                        <div className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 px-2.5 py-1 rounded-lg border border-amber-200 dark:border-amber-800/40">
+                            <AlertTriangle size={14} />
+                            <span>{overtimeCount} Overtime ({'>'}40h)</span>
+                        </div>
+                    ) : (
+                        <div className="text-[11px] text-emerald-600 dark:text-emerald-400 hidden sm:block">
+                            ✓ No Overtime
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            {/* 7-Day Mini Cards */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
+                {weekDays.map((day, idx) => {
+                    const cov = dailyCoverage[idx] || { headcount: 0, totalHours: 0 };
+                    const isZero = cov.headcount === 0;
+
+                    return (
+                        <div
+                            key={day.date}
+                            className={`p-2.5 rounded-xl border text-center transition-colors ${
+                                day.isToday
+                                    ? 'bg-emerald-500/10 border-emerald-500/30'
+                                    : isZero
+                                    ? 'bg-stone-100/50 dark:bg-white/5 border-dashed border-stone-200 dark:border-stone-800'
+                                    : 'bg-white dark:bg-black/20 border-[#E2DCCE] dark:border-white/10'
+                            }`}
+                        >
+                            <p className="text-[11px] font-bold text-stone-500 uppercase tracking-wider">
+                                {day.dayName} {day.dayNumber}
+                            </p>
+                            <p className={`text-base font-extrabold my-0.5 ${
+                                isZero ? 'text-stone-400' : 'text-[#1E3F27] dark:text-[#EAE5D9]'
+                            }`}>
+                                {cov.headcount} <span className="text-[11px] font-semibold text-stone-400">staff</span>
+                            </p>
+                            <p className="text-[10px] font-mono font-bold text-[#2C5E3B] dark:text-[#A9CBA2]">
+                                {cov.totalHours} hrs
+                            </p>
+                        </div>
+                    );
+                })}
+            </div>
+        </div>
+    );
+};

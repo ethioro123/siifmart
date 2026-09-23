@@ -37,7 +37,7 @@ export const PackScannerStatusView: React.FC<PackScannerStatusViewProps> = ({
     return (
         <>
             {/* Icon Circle */}
-            <div className={`w-12 h-12 md:w-16 md:h-16 rounded-full border-2 flex items-center justify-center mb-2 shadow-md z-10 transition-all duration-300 ${
+            <div className={`w-12 h-12 md:w-16 md:h-16 rounded-full border-2 flex items-center justify-center mb-2 shadow-md z-10 transition-colors duration-200 ${
                 showSuccess
                     ? 'border-green-400 bg-green-400/20 shadow-green-400/30 scale-105'
                     : showError
@@ -62,7 +62,7 @@ export const PackScannerStatusView: React.FC<PackScannerStatusViewProps> = ({
             </div>
 
             {/* Instruction / Status heading */}
-            <h1 className={`text-xl md:text-2xl font-black text-gray-900 dark:text-[#EAE5D9] text-center uppercase italic tracking-tight mb-1 z-10 transition-all duration-300 ${
+            <h1 className={`text-xl md:text-2xl font-black text-gray-900 dark:text-[#EAE5D9] text-center uppercase italic tracking-tight mb-1 z-10 transition-colors duration-200 ${
                 showError ? 'text-red-500 animate-pulse' : ''
             }`}>
                 {showSuccess ? 'Packed!' : showError ? 'Error!' : isFullyPacked
@@ -174,12 +174,12 @@ export const PackScannerStatusView: React.FC<PackScannerStatusViewProps> = ({
                 </div>
             ) : (
                 /* SCAN VIEW — guidance without repeating */
-                <div className="text-center z-10 mb-4">
+                <div className="text-center z-10 mb-4 w-full max-w-md px-2">
                     <p className="text-gray-400 text-xs font-bold uppercase tracking-wider">{t('warehouse.scanProductBarcode')}</p>
                     {nextUnpackedItem && (
-                        <div className="mt-2 bg-white/60 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-2 inline-flex items-center gap-3">
-                            <span className="text-gray-900 dark:text-[#EAE5D9] text-xs font-bold">{nextUnpackedItem.name}</span>
-                            <span className="text-[#2C5E3B] dark:text-[#A9CBA2] font-mono text-[10px] font-bold bg-stone-100 dark:bg-black/40 px-2 py-0.5 rounded">{nextUnpackedItem.sku}</span>
+                        <div className="mt-2 bg-white/60 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl px-3 sm:px-4 py-2 flex items-center justify-center gap-2 sm:gap-3 max-w-full">
+                            <span className="text-gray-900 dark:text-[#EAE5D9] text-xs font-bold truncate max-w-[200px]">{nextUnpackedItem.name}</span>
+                            <span className="text-[#2C5E3B] dark:text-[#A9CBA2] font-mono text-[10px] font-bold bg-stone-100 dark:bg-black/40 px-2 py-0.5 rounded shrink-0">{nextUnpackedItem.sku}</span>
                         </div>
                     )}
                 </div>

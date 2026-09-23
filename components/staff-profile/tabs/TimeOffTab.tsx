@@ -1,63 +1,181 @@
-import React from 'react';
-import { Star, Calendar } from 'lucide-react';
+import React, { useMemo } from 'react';
+import { Calendar, Plus, Clock, CheckCircle2, XCircle, AlertCircle } from 'lucide-react';
+import { LeaveRequest } from '../../../utils/employeeProfileData';
 
 interface TimeOffTabProps {
     isOwnProfile: boolean;
+    canManageEmployees?: boolean;
+    leaveRequests: LeaveRequest[];
     onRequestTimeOff: () => void;
+    onApproveRequest?: (requestId: string) => void;
+    onRejectRequest?: (requestId: string) => void;
 }
 
-export default function TimeOffTab({ isOwnProfile, onRequestTimeOff }: TimeOffTabProps) {
+export default function TimeOffTab({
+    isOwnProfile,
+    canManageEmployees = false,
+    leaveRequests,
+    onRequestTimeOff,
+    onApproveRequest,
+    onRejectRequest
+}: TimeOffTabProps) {
+    // Total allowances
+    const TOTAL_ANNUAL = 20;
+    const TOTAL_SICK = 10;
+
+    // Calculate used days from approved leaves
+    const usedAnnual = useMemo(() => {
+        return leaveRequests
+            .filter(r => r.type === 'Annual Leave' && r.status === 'Approved')
+            .reduce((sum, r) => sum + r.days, 0);
+    }, [leaveRequests]);
+
+    const usedSick = useMemo(() => {
+        return leaveRequests
+            .filter(r => r.type === 'Sick Leave' && r.status === 'Approved')
+            .reduce((sum, r) => sum + r.days, 0);
+    }, [leaveRequests]);
+
+    const remainingAnnual = Math.max(0, TOTAL_ANNUAL - usedAnnual);
+    const remainingSick = Math.max(0, TOTAL_SICK - usedSick);
+
     return (
-        <div className="space-y-8 animate-in fade-in">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="p-6 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/10">
-                    <div className="flex justify-between items-center mb-4">
-                        <span className="text-sm text-gray-900 dark:text-white font-black uppercase tracking-widest">Annual Leave</span>
-                        <span className="text-xs text-gray-500 dark:text-gray-400 font-mono">12 / 20 Days Remaining</span>
+        <div className="space-y-6 animate-in fade-in">
+            {/* Leave Balance Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="p-6 bg-[#FAF8F5] dark:bg-black/30 rounded-2xl border border-[#E2DCCE] dark:border-white/10 shadow-xs">
+                    <div className="flex justify-between items-center mb-3">
+                        <span className="text-xs font-black uppercase tracking-wider text-[#1E3F27] dark:text-[#EAE5D9]">
+                            Annual Vacation Leave
+                        </span>
+                        <span className="text-xs text-stone-500 font-mono font-bold">
+                            {remainingAnnual} of {TOTAL_ANNUAL} Days Left
+                        </span>
                     </div>
-                    <div className="w-full h-3 bg-gray-200 dark:bg-black/50 rounded-full overflow-hidden border border-transparent dark:border-white/5">
-                        <div className="h-full bg-gradient-to-r from-cyber-primary to-green-500 w-[60%] shadow-[0_0_10px_rgba(0,255,157,0.3)]"></div>
+                    <div className="w-full h-3 bg-stone-200 dark:bg-white/10 rounded-full overflow-hidden">
+                        <div
+                            className="h-full bg-[#2C5E3B] transition-all rounded-full"
+                            style={{ width: `${Math.min(100, (remainingAnnual / TOTAL_ANNUAL) * 100)}%` }}
+                        />
                     </div>
+                    <p className="text-[11px] text-stone-400 mt-2 font-medium">
+                        {usedAnnual} days taken this calendar year
+                    </p>
                 </div>
-                <div className="p-6 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/10">
-                    <div className="flex justify-between items-center mb-4">
-                        <span className="text-sm text-gray-900 dark:text-white font-black uppercase tracking-widest">Sick Leave</span>
-                        <span className="text-xs text-gray-500 dark:text-gray-400 font-mono">2 / 10 Days Remaining</span>
+
+                <div className="p-6 bg-[#FAF8F5] dark:bg-black/30 rounded-2xl border border-[#E2DCCE] dark:border-white/10 shadow-xs">
+                    <div className="flex justify-between items-center mb-3">
+                        <span className="text-xs font-black uppercase tracking-wider text-[#1E3F27] dark:text-[#EAE5D9]">
+                            Medical & Sick Leave
+                        </span>
+                        <span className="text-xs text-stone-500 font-mono font-bold">
+                            {remainingSick} of {TOTAL_SICK} Days Left
+                        </span>
                     </div>
-                    <div className="w-full h-3 bg-gray-200 dark:bg-black/50 rounded-full overflow-hidden border border-transparent dark:border-white/5">
-                        <div className="h-full bg-gradient-to-r from-yellow-400 to-orange-500 w-[20%] shadow-[0_0_10px_rgba(234,179,8,0.3)]"></div>
+                    <div className="w-full h-3 bg-stone-200 dark:bg-white/10 rounded-full overflow-hidden">
+                        <div
+                            className="h-full bg-amber-500 transition-all rounded-full"
+                            style={{ width: `${Math.min(100, (remainingSick / TOTAL_SICK) * 100)}%` }}
+                        />
                     </div>
+                    <p className="text-[11px] text-stone-400 mt-2 font-medium">
+                        {usedSick} days medical leave taken
+                    </p>
                 </div>
             </div>
 
-            <div>
-                <h4 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-widest mb-4 flex items-center gap-2">
-                    <Star size={16} className="text-yellow-500 dark:text-yellow-400" /> Recent Leave Requests
-                </h4>
+            {/* Leave Requests Header & Action */}
+            <div className="flex items-center justify-between pt-2">
+                <div>
+                    <h4 className="text-sm font-black text-[#1E3F27] dark:text-[#EAE5D9] uppercase tracking-wider">
+                        Leave & Time-Off History
+                    </h4>
+                    <p className="text-xs text-stone-500">
+                        Formal leave applications, medical time-off, and status
+                    </p>
+                </div>
+
+                {(isOwnProfile || canManageEmployees) && (
+                    <button
+                        onClick={onRequestTimeOff}
+                        className="woody-btn-primary px-4 py-2 text-xs font-bold rounded-xl flex items-center gap-1.5 cursor-pointer shadow-xs"
+                    >
+                        <Plus size={15} />
+                        <span>Request Time Off</span>
+                    </button>
+                )}
+            </div>
+
+            {/* Leave Requests List */}
+            {leaveRequests.length === 0 ? (
+                <div className="text-center py-12 bg-[#FAF8F5] dark:bg-black/20 rounded-2xl border border-dashed border-[#E2DCCE] dark:border-white/10 space-y-2">
+                    <Calendar size={36} className="mx-auto text-stone-300 dark:text-stone-600" />
+                    <p className="font-bold text-sm text-[#1E3F27] dark:text-[#EAE5D9]">
+                        No Leave Requests Submitted
+                    </p>
+                    <p className="text-xs text-stone-400">
+                        Submitted vacation, medical, or personal leave requests will appear here.
+                    </p>
+                </div>
+            ) : (
                 <div className="space-y-3">
-                    <div className="flex justify-between items-center p-4 bg-gray-50 dark:bg-white/5 rounded-xl border border-gray-100 dark:border-white/5">
-                        <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 rounded-lg bg-green-100 dark:bg-green-500/20 flex items-center justify-center text-green-600 dark:text-green-500">
-                                <Calendar size={20} />
-                            </div>
-                            <div>
-                                <p className="text-sm text-gray-900 dark:text-white font-bold">Annual Vacation</p>
-                                <p className="text-xs text-gray-500 dark:text-gray-500 font-mono">Aug 12 - Aug 15 (4 Days)</p>
-                            </div>
-                        </div>
-                        <span className="text-[10px] font-black uppercase bg-green-100 dark:bg-green-500/20 text-green-600 dark:text-green-400 border border-green-200 dark:border-green-500/30 px-3 py-1 rounded-full">Approved</span>
-                    </div>
-                    <p className="text-center text-xs text-gray-500 dark:text-gray-600 py-4">Higher management view would show more history</p>
-                </div>
-            </div>
+                    {leaveRequests.map(req => {
+                        const statusColors = {
+                            Approved: 'bg-emerald-50 text-emerald-800 dark:bg-emerald-950/20 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800/40',
+                            Pending: 'bg-amber-50 text-amber-800 dark:bg-amber-950/20 dark:text-amber-300 border-amber-200 dark:border-amber-800/40',
+                            Rejected: 'bg-red-50 text-red-800 dark:bg-red-950/20 dark:text-red-300 border-red-200 dark:border-red-800/40'
+                        }[req.status];
 
-            {isOwnProfile && (
-                <button
-                    onClick={onRequestTimeOff}
-                    className="w-full py-4 bg-cyber-primary hover:bg-cyber-accent text-black font-black uppercase tracking-widest rounded-2xl shadow-xl transition-all active:scale-[0.98]"
-                >
-                    Request Time Off
-                </button>
+                        return (
+                            <div
+                                key={req.id}
+                                className="p-4 bg-[#FAF8F5] dark:bg-black/30 rounded-2xl border border-[#E2DCCE] dark:border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs"
+                            >
+                                <div className="flex items-start gap-3">
+                                    <div className="p-2.5 rounded-xl bg-white dark:bg-white/5 border border-[#E2DCCE] dark:border-white/10 text-[#2C5E3B] dark:text-[#A9CBA2] mt-0.5">
+                                        <Calendar size={18} />
+                                    </div>
+                                    <div>
+                                        <div className="flex items-center gap-2">
+                                            <h5 className="font-bold text-sm text-[#1E3F27] dark:text-[#EAE5D9]">
+                                                {req.type}
+                                            </h5>
+                                            <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-lg border ${statusColors}`}>
+                                                {req.status}
+                                            </span>
+                                        </div>
+                                        <p className="text-xs text-stone-600 dark:text-stone-400 mt-0.5">
+                                            {req.startDate} to {req.endDate} ({req.days} {req.days === 1 ? 'day' : 'days'})
+                                        </p>
+                                        {req.reason && (
+                                            <p className="text-xs text-stone-500 italic mt-1">
+                                                "{req.reason}"
+                                            </p>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* Manager Approval Controls */}
+                                {canManageEmployees && req.status === 'Pending' && onApproveRequest && onRejectRequest && (
+                                    <div className="flex items-center gap-2 shrink-0">
+                                        <button
+                                            onClick={() => onRejectRequest(req.id)}
+                                            className="px-3 py-1.5 rounded-xl text-xs font-bold text-red-700 bg-red-50 dark:bg-red-950/20 border border-red-200 hover:bg-red-100 transition-colors cursor-pointer"
+                                        >
+                                            Reject
+                                        </button>
+                                        <button
+                                            onClick={() => onApproveRequest(req.id)}
+                                            className="woody-btn-primary px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer"
+                                        >
+                                            Approve
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    })}
+                </div>
             )}
         </div>
     );

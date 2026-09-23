@@ -27,7 +27,7 @@ export const POSCatalog: React.FC<POSCatalogProps> = ({
 }) => {
     const { t } = useLanguage();
     const navigate = useNavigate();
-    const { filteredProducts, addToCart, lastSeenPriceUpdate, cart } = usePOS();
+    const { filteredProducts, addToCart, lastSeenPriceUpdate, cart, setIsPriceUpdatesModalOpen } = usePOS();
 
     return (
         <div className="flex-1 overflow-y-auto p-4">
@@ -38,12 +38,14 @@ export const POSCatalog: React.FC<POSCatalogProps> = ({
                     <p className="text-[#4D6E56] dark:text-[#7A9E83] max-w-md">
                         {t('pos.productsWillAppear')}
                         <br />
-                        <button
-                            onClick={() => navigate('/pos-dashboard')}
-                            className="text-[#2C5E3B] dark:text-[#A9CBA2] hover:underline mt-2 font-medium"
-                        >
-                            {t('pos.goToPOSCommand')}
-                        </button>
+                        {!native.isCleanMobileMode() && (
+                            <button
+                                onClick={() => navigate('/pos-dashboard')}
+                                className="text-[#2C5E3B] dark:text-[#A9CBA2] hover:underline mt-2 font-medium"
+                            >
+                                {t('pos.goToPOSCommand')}
+                            </button>
+                        )}
                     </p>
                 </div>
             ) : (
@@ -116,10 +118,19 @@ export const POSCatalog: React.FC<POSCatalogProps> = ({
                                             const ts = new Date(priceTime).getTime();
                                             if (ts > cutoff && ts > (lastSeenPriceUpdate || 0)) {
                                                 return (
-                                                    <div className="absolute top-1.5 left-1.5 bg-blue-600 text-white px-1.5 py-0.5 rounded-md text-[7px] font-black uppercase tracking-wider shadow-xs flex items-center gap-1 z-10">
+                                                    <button
+                                                        type="button"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            setIsPriceUpdatesModalOpen(true);
+                                                            native.haptic();
+                                                        }}
+                                                        className="absolute top-1.5 left-1.5 bg-blue-600 hover:bg-blue-700 text-white px-1.5 py-0.5 rounded-md text-[7px] font-black uppercase tracking-wider shadow-xs flex items-center gap-1 z-10 transition-colors cursor-pointer active:scale-95"
+                                                        title="Price updated recently - tap to confirm"
+                                                    >
                                                         <span className="w-1 h-1 rounded-full bg-white animate-pulse" />
                                                         Changed
-                                                    </div>
+                                                    </button>
                                                 );
                                             }
                                         }
@@ -153,10 +164,19 @@ export const POSCatalog: React.FC<POSCatalogProps> = ({
                                                     const ts = new Date(priceTime).getTime();
                                                     if (ts > cutoff && ts > (lastSeenPriceUpdate || 0)) {
                                                         return (
-                                                            <span className="inline-flex items-center gap-0.5 text-[7px] font-black text-blue-600 dark:text-blue-400 uppercase mb-0.5 tracking-wider">
+                                                            <button
+                                                                type="button"
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    setIsPriceUpdatesModalOpen(true);
+                                                                    native.haptic();
+                                                                }}
+                                                                className="inline-flex items-center gap-0.5 text-[7px] font-black text-blue-600 dark:text-blue-400 hover:underline uppercase mb-0.5 tracking-wider cursor-pointer"
+                                                                title="Price updated recently - tap to confirm"
+                                                            >
                                                                 <span className="w-1 h-1 rounded-full bg-blue-500 animate-pulse" />
                                                                 Updated
-                                                            </span>
+                                                            </button>
                                                         );
                                                     }
                                                 }
@@ -189,7 +209,7 @@ export const POSCatalog: React.FC<POSCatalogProps> = ({
 
                     {/* Pagination Controls */}
                     {totalPages > 1 && (
-                        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 pb-8 border-t border-[#E2DCCE]/40 dark:border-white/5 mt-6 px-1">
+                        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 pb-28 lg:pb-8 border-t border-[#E2DCCE]/40 dark:border-white/5 mt-6 px-1">
                             <span className="text-xs text-[#4D6E56] dark:text-stone-400 font-semibold">
                                 Showing <span className="font-extrabold text-[#1E3F27] dark:text-[#EAE5D9]">{(currentPage - 1) * ITEMS_PER_PAGE + 1}</span> to{' '}
                                 <span className="font-extrabold text-[#1E3F27] dark:text-[#EAE5D9]">
@@ -198,19 +218,29 @@ export const POSCatalog: React.FC<POSCatalogProps> = ({
                                 of <span className="font-extrabold text-[#1E3F27] dark:text-[#EAE5D9]">{filteredProducts.length}</span> products
                             </span>
                             
-                            <div className="flex items-center gap-1">
+                            <div className="flex items-center gap-1.5 touch-manipulation">
                                 <button
+                                    type="button"
+                                    aria-label="First page"
                                     disabled={currentPage === 1}
-                                    onClick={() => setCurrentPage(1)}
-                                    className="w-8 h-8 rounded-lg flex items-center justify-center border border-[#E2DCCE] dark:border-emerald-950/20 text-[#2C5E3B] dark:text-[#A9CBA2] hover:bg-[#2C5E3B] hover:text-white disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-inherit transition-all font-bold text-xs cursor-pointer"
+                                    onClick={() => {
+                                        setCurrentPage(1);
+                                        native.haptic();
+                                    }}
+                                    className="hidden sm:flex min-w-[40px] min-h-[40px] h-10 w-10 rounded-xl items-center justify-center border border-[#E2DCCE] dark:border-emerald-950/20 text-[#2C5E3B] dark:text-[#A9CBA2] hover:bg-[#2C5E3B] hover:text-white disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-inherit transition-colors font-bold text-sm cursor-pointer active:scale-95"
                                 >
                                     &laquo;
                                 </button>
                                 
                                 <button
+                                    type="button"
+                                    aria-label="Previous page"
                                     disabled={currentPage === 1}
-                                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                                    className="w-8 h-8 rounded-lg flex items-center justify-center border border-[#E2DCCE] dark:border-emerald-950/20 text-[#2C5E3B] dark:text-[#A9CBA2] hover:bg-[#2C5E3B] hover:text-white disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-inherit transition-all font-bold text-xs cursor-pointer"
+                                    onClick={() => {
+                                        setCurrentPage(prev => Math.max(prev - 1, 1));
+                                        native.haptic();
+                                    }}
+                                    className="min-w-[40px] min-h-[40px] h-10 w-10 rounded-xl flex items-center justify-center border border-[#E2DCCE] dark:border-emerald-950/20 text-[#2C5E3B] dark:text-[#A9CBA2] hover:bg-[#2C5E3B] hover:text-white disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-inherit transition-colors font-bold text-base cursor-pointer active:scale-95"
                                 >
                                     &lsaquo;
                                 </button>
@@ -228,9 +258,15 @@ export const POSCatalog: React.FC<POSCatalogProps> = ({
                                     for (let p = startPage; p <= endPage; p++) {
                                         pages.push(
                                             <button
+                                                type="button"
                                                 key={p}
-                                                onClick={() => setCurrentPage(p)}
-                                                className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs border transition-all cursor-pointer ${currentPage === p
+                                                aria-label={`Page ${p}`}
+                                                aria-current={currentPage === p ? 'page' : undefined}
+                                                onClick={() => {
+                                                    setCurrentPage(p);
+                                                    native.haptic();
+                                                }}
+                                                className={`min-w-[40px] min-h-[40px] h-10 w-10 rounded-xl flex items-center justify-center font-bold text-xs sm:text-sm border transition-colors cursor-pointer active:scale-95 ${currentPage === p
                                                     ? 'bg-[#2C5E3B] border-[#2C5E3B] text-white shadow-sm'
                                                     : 'bg-white dark:bg-black/25 border-[#E2DCCE] dark:border-emerald-950/20 text-[#4D6E56] dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-black/40'
                                                 }`}
@@ -243,17 +279,27 @@ export const POSCatalog: React.FC<POSCatalogProps> = ({
                                 })()}
 
                                 <button
+                                    type="button"
+                                    aria-label="Next page"
                                     disabled={currentPage === totalPages}
-                                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                                    className="w-8 h-8 rounded-lg flex items-center justify-center border border-[#E2DCCE] dark:border-emerald-950/20 text-[#2C5E3B] dark:text-[#A9CBA2] hover:bg-[#2C5E3B] hover:text-white disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-inherit transition-all font-bold text-xs cursor-pointer"
+                                    onClick={() => {
+                                        setCurrentPage(prev => Math.min(prev + 1, totalPages));
+                                        native.haptic();
+                                    }}
+                                    className="min-w-[40px] min-h-[40px] h-10 w-10 rounded-xl flex items-center justify-center border border-[#E2DCCE] dark:border-emerald-950/20 text-[#2C5E3B] dark:text-[#A9CBA2] hover:bg-[#2C5E3B] hover:text-white disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-inherit transition-colors font-bold text-base cursor-pointer active:scale-95"
                                 >
                                     &rsaquo;
                                 </button>
                                 
                                 <button
+                                    type="button"
+                                    aria-label="Last page"
                                     disabled={currentPage === totalPages}
-                                    onClick={() => setCurrentPage(totalPages)}
-                                    className="w-8 h-8 rounded-lg flex items-center justify-center border border-[#E2DCCE] dark:border-emerald-950/20 text-[#2C5E3B] dark:text-[#A9CBA2] hover:bg-[#2C5E3B] hover:text-white disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-inherit transition-all font-bold text-xs cursor-pointer"
+                                    onClick={() => {
+                                        setCurrentPage(totalPages);
+                                        native.haptic();
+                                    }}
+                                    className="hidden sm:flex min-w-[40px] min-h-[40px] h-10 w-10 rounded-xl items-center justify-center border border-[#E2DCCE] dark:border-emerald-950/20 text-[#2C5E3B] dark:text-[#A9CBA2] hover:bg-[#2C5E3B] hover:text-white disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-inherit transition-colors font-bold text-sm cursor-pointer active:scale-95"
                                 >
                                     &raquo;
                                 </button>

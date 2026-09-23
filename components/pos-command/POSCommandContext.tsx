@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useMemo } from 'react';
 import { useStore } from '../../contexts/CentralStore';
 import { useData } from '../../contexts/DataContext';
 import { useFulfillmentData } from '../fulfillment/FulfillmentDataProvider';
@@ -7,6 +7,8 @@ import { useDateFilter, DateRangeOption } from '../../hooks/useDateFilter';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { formatJobId } from '../../utils/jobIdFormatter';
+import { printHtmlContent } from '../../utils/printHelper';
+import { CURRENCY_SYMBOL } from '../../constants';
 
 // Hooks
 import { usePOSReceiving } from './hooks/usePOSReceiving';
@@ -105,14 +107,23 @@ export const POSCommandProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     const { user, logout } = useStore();
     const {
         sales, addNotification, activeSite, shifts,
-        allProducts, adjustStock, addProduct, refreshData, closeShift
+        allProducts, adjustStock, addProduct, refreshData, closeShift, logSystemEvent
     } = useData();
     const { jobs, transfers, refreshJobs } = useFulfillmentData();
     const { workerPoints } = useGamification();
 
-    // --- DATE FILTER ---
+    const isCentralHQ = ['super_admin', 'ceo', 'admin'].includes(user?.role?.toLowerCase() || '');
+
+    // --- DATE FILTER & SITE SCOPING ---
     const { dateRange, setDateRange, isWithinRange } = useDateFilter('This Quarter');
-    const filteredSales = sales.filter(s => isWithinRange(s.date));
+    const filteredSales = useMemo(() => {
+        const siteId = activeSite?.id || user?.siteId;
+        return sales.filter(s => {
+            const matchesDate = isWithinRange(s.date);
+            const matchesSite = isCentralHQ || !siteId || s.siteId === siteId || (s as any).site_id === siteId;
+            return matchesDate && matchesSite;
+        });
+    }, [sales, isWithinRange, activeSite?.id, user?.siteId, isCentralHQ]);
 
     // --- LOCAL STATE ---
     const [isLocked, setIsLocked] = useState(false);
@@ -163,73 +174,217 @@ export const POSCommandProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     });
 
     // --- COMPUTED DATA ---
-    const activeShift = shifts.find(s => s.cashierId === user?.id && s.status === 'Open');
+    // Prioritize current cashier's active shift. If user is central manager/admin without an active shift, view site's shift.
+    const activeShift = shifts.find(s => s.cashierId === user?.id && s.status === 'Open')
+        || (isCentralHQ ? shifts.find(s => s.siteId === activeSite?.id && s.status === 'Open') : undefined);
 
     const getShiftSummary = () => {
-        if (!activeShift) return { cash: 0, card: 0, mobile: 0, total: 0, expected: 0 };
-        const startTime = new Date(activeShift.startTime).getTime();
-        const currentShiftSales = sales.filter(s => new Date(s.date).getTime() >= startTime);
+        const todayStart = new Date();
+        todayStart.setHours(0, 0, 0, 0);
+        const startTime = activeShift ? new Date(activeShift.startTime).getTime() : todayStart.getTime();
 
-        const cash = currentShiftSales.filter(s => s.method === 'Cash').reduce((sum, s) => sum + s.total, 0);
-        const card = currentShiftSales.filter(s => s.method === 'Card').reduce((sum, s) => sum + s.total, 0);
-        const mobile = currentShiftSales.filter(s => s.method === 'Mobile Money').reduce((sum, s) => sum + s.total, 0);
+        const currentShiftSales = sales.filter(s => {
+            const saleTime = new Date(s.date).getTime();
+            if (saleTime < startTime) return false;
+
+            // Site Scoping: Never aggregate sales from other branches
+            const siteId = activeShift?.siteId || activeSite?.id;
+            if (siteId && s.siteId !== siteId && (s as any).site_id !== siteId) return false;
+
+            // Cashier Scoping: If not central HQ reviewing site, limit to cashier's sales
+            if (activeShift?.cashierId && !isCentralHQ) {
+                const matchesCashier = s.cashierName === activeShift.cashierName || (s as any).cashierId === activeShift.cashierId;
+                if (!matchesCashier) return false;
+            }
+
+            return (s.status as string) !== 'Cancelled';
+        });
+
+        const normalizeMethod = (m?: string) => (m || '').trim().toLowerCase();
+
+        const cash = currentShiftSales
+            .filter(s => {
+                const m = normalizeMethod(s.method);
+                return (m === 'cash' || m.includes('cash')) && s.status !== 'Refunded';
+            })
+            .reduce((sum, s) => sum + (Number(s.total) || 0), 0);
+
+        const card = currentShiftSales
+            .filter(s => {
+                const m = normalizeMethod(s.method);
+                return (m === 'card' || m.includes('card') || m.includes('visa') || m.includes('master')) && s.status !== 'Refunded';
+            })
+            .reduce((sum, s) => sum + (Number(s.total) || 0), 0);
+
+        const mobile = currentShiftSales
+            .filter(s => {
+                const m = normalizeMethod(s.method);
+                return (m.includes('mobile') || m.includes('telebirr') || m.includes('cbe') || m.includes('wallet')) && s.status !== 'Refunded';
+            })
+            .reduce((sum, s) => sum + (Number(s.total) || 0), 0);
 
         return {
             cash,
             card,
             mobile,
             total: cash + card + mobile,
-            expected: (activeShift.openingFloat || 0) + cash
+            expected: Math.max(0, (activeShift?.openingFloat || 0) + cash)
         };
     };
 
     const shiftSummary = getShiftSummary();
     const cashInDrawer = shiftSummary.expected;
     const personalSales = shiftSummary.total;
-    const txCount = sales.filter(s =>
-        new Date(s.date).getTime() >= (activeShift ? new Date(activeShift.startTime).getTime() : 0) &&
-        s.cashierName === user?.name
-    ).length;
-    const returnCount = sales.filter(s =>
-        new Date(s.date).getTime() >= (activeShift ? new Date(activeShift.startTime).getTime() : 0) &&
-        s.status === 'Refunded'
-    ).length;
+
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    const shiftStartTime = activeShift ? new Date(activeShift.startTime).getTime() : todayStart.getTime();
+
+    const txCount = sales.filter(s => {
+        const saleTime = new Date(s.date).getTime();
+        const matchesTime = saleTime >= shiftStartTime;
+        const siteId = activeShift?.siteId || activeSite?.id;
+        const matchesSite = !siteId || s.siteId === siteId || (s as any).site_id === siteId;
+        const matchesCashier = isCentralHQ || !user?.name || s.cashierName === user?.name || (s as any).cashierId === user?.id;
+        return matchesTime && matchesSite && matchesCashier && (s.status as string) !== 'Cancelled';
+    }).length;
+
+    const returnCount = sales.filter(s => {
+        const saleTime = new Date(s.date).getTime();
+        const matchesTime = saleTime >= shiftStartTime;
+        const siteId = activeShift?.siteId || activeSite?.id;
+        const matchesSite = !siteId || s.siteId === siteId || (s as any).site_id === siteId;
+        return matchesTime && matchesSite && (s.status === 'Refunded' || s.status === 'Partially Refunded');
+    }).length;
+
     const totalRevenue = personalSales;
 
     // Gamification & Charts
     const myPoints = workerPoints.find(wp => wp.employeeId === user?.id || wp.employeeName === user?.name);
     const siteWorkerPoints = workerPoints.filter(wp => wp.siteId === activeSite?.id);
 
-    const methodStats = filteredSales.reduce((acc: any, curr) => {
-        acc[curr.method] = (acc[curr.method] || 0) + 1;
+    const methodBuckets = filteredSales.reduce((acc: { cash: number; card: number; mobile: number }, curr) => {
+        const m = (curr.method || '').toLowerCase();
+        if (m === 'cash' || m.includes('cash')) {
+            acc.cash += 1;
+        } else if (m === 'card' || m.includes('card') || m.includes('visa') || m.includes('master')) {
+            acc.card += 1;
+        } else if (m.includes('mobile') || m.includes('telebirr') || m.includes('cbe') || m.includes('wallet')) {
+            acc.mobile += 1;
+        } else {
+            acc.cash += 1;
+        }
         return acc;
-    }, {});
+    }, { cash: 0, card: 0, mobile: 0 });
 
     const totalFilteredSales = filteredSales.length;
-    const paymentChartData = Object.keys(methodStats).map(key => {
-        let translatedName = key;
-        if (key === 'Cash') translatedName = t('pos.cashSales');
-        else if (key === 'Card') translatedName = t('pos.cardSales');
-        else if (key === 'Mobile Money') translatedName = t('pos.mobileSales');
+    const paymentChartData = [
+        { name: t('pos.cashSales'), value: totalFilteredSales > 0 ? Math.round((methodBuckets.cash / totalFilteredSales) * 100) : 0 },
+        { name: t('pos.cardSales'), value: totalFilteredSales > 0 ? Math.round((methodBuckets.card / totalFilteredSales) * 100) : 0 },
+        { name: t('pos.mobileSales'), value: totalFilteredSales > 0 ? Math.round((methodBuckets.mobile / totalFilteredSales) * 100) : 0 },
+    ].filter(entry => entry.value > 0);
 
-        return {
-            name: translatedName,
-            value: totalFilteredSales > 0 ? Math.round((methodStats[key] / totalFilteredSales) * 100) : 0
-        };
+    // Convenience store hours: 07:00 to 23:00 (covers morning opening through late night closing)
+    const hourlyCounts: Record<string, { count: number; amount: number }> = {};
+    for (let h = 7; h <= 23; h++) {
+        hourlyCounts[`${h.toString().padStart(2, '0')}:00`] = { count: 0, amount: 0 };
+    }
+
+    filteredSales.forEach(s => {
+        if ((s.status as string) === 'Cancelled') return;
+        const d = new Date(s.date);
+        const h = d.getHours();
+        const slot = `${h.toString().padStart(2, '0')}:00`;
+        if (hourlyCounts[slot]) {
+            hourlyCounts[slot].count += 1;
+            hourlyCounts[slot].amount += Number(s.total) || 0;
+        }
     });
 
-    const hourlyData = [
-        { name: '09:00', amount: totalRevenue * 0.1, label: t('posCommand.salesAmount') },
-        { name: '10:00', amount: totalRevenue * 0.15, label: t('posCommand.salesAmount') },
-        { name: '11:00', amount: totalRevenue * 0.2, label: t('posCommand.salesAmount') },
-        { name: '12:00', amount: totalRevenue * 0.25, label: t('posCommand.salesAmount') },
-        { name: '13:00', amount: totalRevenue * 0.1, label: t('posCommand.salesAmount') },
-        { name: '14:00', amount: totalRevenue * 0.2, label: t('posCommand.salesAmount') },
-    ];
+    const hourlyData = Object.entries(hourlyCounts).map(([hour, val]) => ({
+        hour,
+        name: hour,
+        count: val.count,
+        amount: val.amount,
+        label: t('posCommand.salesAmount')
+    }));
 
     // --- OTHER HANDLERS ---
     const handleLockScreen = () => setIsLocked(true);
-    const handleReprint = () => addNotification('info', t('posCommand.printingReceipt'));
+    const handleReprint = () => {
+        const siteId = activeShift?.siteId || activeSite?.id || user?.siteId;
+        const siteSales = sales.filter(s => !siteId || s.siteId === siteId || (s as any).site_id === siteId);
+        const lastSale = siteSales[0];
+        if (!lastSale) {
+            addNotification('alert', t('posCommand.noSalesFound') || 'No recent sales found to reprint.');
+            return;
+        }
+
+        const receiptHTML = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Receipt - ${lastSale.receiptNumber || lastSale.id}</title>
+        <style>
+          @page { size: 80mm auto; margin: 0; }
+          body { font-family: system-ui, -apple-system, sans-serif; width: 80mm; margin: 0; padding: 20px; color: #000; background: #fff; font-size: 11px; }
+          .text-center { text-align: center; } .text-right { text-align: right; }
+          .flex { display: flex; } .justify-between { justify-content: space-between; }
+          .font-bold { font-weight: 700; } .font-black { font-weight: 900; }
+          .border-b { border-bottom: 1px dashed #999; } .my-2 { margin: 8px 0; } .py-1 { padding: 4px 0; }
+        </style>
+      </head>
+      <body>
+        <div class="text-center">
+          <h2 style="margin: 0; font-size: 16px;">${activeSite?.name || 'SIIFMART'}</h2>
+          <p style="margin: 2px 0; font-size: 10px; color: #555;">REPRINT RECEIPT</p>
+          <p style="margin: 2px 0; font-size: 10px;">${lastSale.receiptNumber || `REC-${lastSale.id.slice(0, 8).toUpperCase()}`}</p>
+          <p style="margin: 2px 0; font-size: 9px; color: #666;">${new Date(lastSale.date).toLocaleString()}</p>
+        </div>
+        <div class="border-b my-2"></div>
+        <div>
+          ${(lastSale.items || []).map((item: any) => `
+            <div class="flex justify-between py-1">
+              <span>${item.quantity}x ${item.name}</span>
+              <span class="font-bold">${CURRENCY_SYMBOL} ${(item.price * item.quantity).toLocaleString()}</span>
+            </div>
+          `).join('')}
+        </div>
+        <div class="border-b my-2"></div>
+        <div class="flex justify-between py-1">
+          <span>Subtotal:</span>
+          <span>${CURRENCY_SYMBOL} ${(lastSale.subtotal || lastSale.total).toLocaleString()}</span>
+        </div>
+        <div class="flex justify-between py-1">
+          <span>Tax:</span>
+          <span>${CURRENCY_SYMBOL} ${(lastSale.tax || 0).toLocaleString()}</span>
+        </div>
+        <div class="flex justify-between py-1 font-black" style="font-size: 13px;">
+          <span>TOTAL:</span>
+          <span>${CURRENCY_SYMBOL} ${lastSale.total.toLocaleString()}</span>
+        </div>
+        <div class="flex justify-between py-1">
+          <span>Payment (${lastSale.method}):</span>
+          <span>${CURRENCY_SYMBOL} ${(lastSale.amountTendered || lastSale.total).toLocaleString()}</span>
+        </div>
+        ${lastSale.change ? `
+          <div class="flex justify-between py-1">
+            <span>Change:</span>
+            <span>${CURRENCY_SYMBOL} ${lastSale.change.toLocaleString()}</span>
+          </div>
+        ` : ''}
+        <div class="border-b my-2"></div>
+        <div class="text-center" style="font-size: 9px; color: #777; margin-top: 10px;">
+          <p>Cashier: ${lastSale.cashierName || user?.name || 'Staff'}</p>
+          <p>Thank you for shopping with SIIFMART!</p>
+        </div>
+      </body>
+      </html>
+        `;
+
+        printHtmlContent(receiptHTML);
+        addNotification('success', `Reprinted receipt #${lastSale.receiptNumber || lastSale.id.slice(0, 8)}`);
+    };
 
     const handleEndShift = () => {
         if (!activeShift) {
@@ -266,6 +421,14 @@ export const POSCommandProvider: React.FC<{ children: React.ReactNode }> = ({ ch
             };
 
             await closeShift(record);
+            if (Math.abs(record.variance) > 0.01) {
+                logSystemEvent(
+                    'BLIND_SHIFT_CLOSE_VARIANCE',
+                    `Shift closed with blind variance: ${record.variance > 0 ? '+' : ''}${record.variance} ETB. Expected: ${record.expectedCash}, Counted: ${record.actualCash}. Notes: ${discrepancyReason || 'None'}`,
+                    user?.name || 'Cashier',
+                    'POS'
+                );
+            }
             addNotification('success', t('posCommand.shiftClosedSuccess'));
             setIsClosingShift(false);
             logout();

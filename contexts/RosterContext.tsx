@@ -9,6 +9,7 @@ interface RosterContextType {
     addSchedule: (schedule: StaffSchedule, user: string) => Promise<void>;
     updateSchedule: (id: string, updates: Partial<StaffSchedule>, user: string) => Promise<void>;
     deleteSchedule: (id: string, user: string) => Promise<void>;
+    refreshSchedules: () => Promise<void>;
 }
 
 const RosterContext = createContext<RosterContextType | undefined>(undefined);
@@ -18,25 +19,32 @@ export const RosterProvider = ({ children }: { children: ReactNode }) => {
     const activeSiteId = activeSite?.id;
     const [schedules, setSchedules] = useState<StaffSchedule[]>([]);
 
-    useEffect(() => {
+    const loadSchedules = async () => {
         if (!activeSiteId) return;
+        try {
+            const data = await schedulesService.getAll(activeSiteId);
+            setSchedules(data);
+        } catch (error) {
+            logger.error('RosterContext', 'Failed to load schedules', error as Error);
+        }
+    };
 
-        const loadSchedules = async () => {
-            try {
-                const data = await schedulesService.getAll(activeSiteId);
-                setSchedules(data);
-            } catch (error) {
-                logger.error('RosterContext', 'Failed to load schedules', error as Error);
-            }
+    useEffect(() => {
+        loadSchedules();
+
+        const handleRosterUpdate = () => {
+            loadSchedules();
         };
 
-        loadSchedules();
+        window.addEventListener('roster-updated', handleRosterUpdate);
+        return () => window.removeEventListener('roster-updated', handleRosterUpdate);
     }, [activeSiteId]);
 
     const addSchedule = async (schedule: StaffSchedule, user: string) => {
         try {
             await schedulesService.create(schedule);
             setSchedules(prev => [...prev, schedule]);
+            window.dispatchEvent(new CustomEvent('roster-updated'));
             addNotification('success', 'Shift added');
         } catch (error) {
             logger.error('RosterContext', 'caught error', error as Error);
@@ -48,6 +56,7 @@ export const RosterProvider = ({ children }: { children: ReactNode }) => {
         try {
             await schedulesService.update(id, updates);
             setSchedules(prev => prev.map(s => s.id === id ? { ...s, ...updates } : s));
+            window.dispatchEvent(new CustomEvent('roster-updated'));
             addNotification('success', 'Shift updated');
         } catch (error) {
             logger.error('RosterContext', 'caught error', error as Error);
@@ -59,6 +68,7 @@ export const RosterProvider = ({ children }: { children: ReactNode }) => {
         try {
             await schedulesService.delete(id);
             setSchedules(prev => prev.filter(s => s.id !== id));
+            window.dispatchEvent(new CustomEvent('roster-updated'));
             addNotification('success', 'Shift deleted');
         } catch (error) {
             logger.error('RosterContext', 'caught error', error as Error);
@@ -71,7 +81,8 @@ export const RosterProvider = ({ children }: { children: ReactNode }) => {
             schedules,
             addSchedule,
             updateSchedule,
-            deleteSchedule
+            deleteSchedule,
+            refreshSchedules: loadSchedules
         }}>
             {children}
         </RosterContext.Provider>

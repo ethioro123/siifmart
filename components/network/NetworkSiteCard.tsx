@@ -5,6 +5,8 @@ import {
 import { Site, Product } from '../../types';
 import { CURRENCY_SYMBOL } from '../../constants';
 import { formatCompactNumber } from '../../utils/formatting';
+import { useStore } from '../../contexts/CentralStore';
+import { hasPermission } from '../../utils/permissions';
 
 const PRODUCTS_PER_PAGE = 9;
 
@@ -26,6 +28,7 @@ interface NetworkSiteCardProps {
     onPageChange: (page: number) => void;
     onSelectProduct: (product: Product) => void;
     isLowStockFilterActive: boolean;
+    searchTerm?: string;
 }
 
 export const NetworkSiteCard: React.FC<NetworkSiteCardProps> = ({
@@ -37,15 +40,30 @@ export const NetworkSiteCard: React.FC<NetworkSiteCardProps> = ({
     currentPage,
     onPageChange,
     onSelectProduct,
-    isLowStockFilterActive
+    isLowStockFilterActive,
+    searchTerm
 }) => {
+    const { user } = useStore();
+    const canViewCost = hasPermission(user?.role, 'VIEW_COST_PRICE');
     const isWarehouse = site.type === 'Warehouse' || site.type === 'Distribution Center';
-    const displayedProducts = isLowStockFilterActive
-        ? siteProducts.filter(p => p.stock <= (p.minStock || 10))
-        : siteProducts;
+    const displayedProducts = React.useMemo(() => {
+        let prods = siteProducts;
+        if (isLowStockFilterActive) {
+            prods = prods.filter(p => p.stock <= (p.minStock || 10));
+        }
+        if (searchTerm && searchTerm.trim().length > 0) {
+            const term = searchTerm.trim().toLowerCase();
+            prods = prods.filter(p =>
+                p.name.toLowerCase().includes(term) ||
+                (p.sku && p.sku.toLowerCase().includes(term)) ||
+                (p.barcode && p.barcode.toLowerCase().includes(term))
+            );
+        }
+        return prods;
+    }, [siteProducts, isLowStockFilterActive, searchTerm]);
 
     const getStockStatusColor = (stock: number, minStock: number = 10) => {
-        if (stock === 0) return 'text-red-700 bg-red-50 dark:bg-red-950/30 dark:text-red-400 border-red-200 dark:border-red-900/30';
+        if (stock <= 0) return 'text-red-700 bg-red-50 dark:bg-red-950/30 dark:text-red-400 border-red-200 dark:border-red-900/30';
         if (stock <= minStock) return 'text-amber-800 bg-amber-50 dark:bg-amber-950/30 dark:text-amber-300 border-amber-200 dark:border-amber-900/30';
         if (stock < 50) return 'text-blue-700 bg-blue-50 dark:bg-blue-950/30 dark:text-blue-300 border-blue-200 dark:border-blue-900/30';
         return 'text-[#2C5E3B] bg-emerald-50 dark:bg-[#2C5E3B]/20 dark:text-[#A9CBA2] border-emerald-200 dark:border-emerald-950/30';
@@ -113,7 +131,7 @@ export const NetworkSiteCard: React.FC<NetworkSiteCardProps> = ({
                         <div className="text-left sm:text-right">
                             <p className="text-[10px] text-stone-400 uppercase font-bold tracking-wider">Asset Value</p>
                             <p className="text-base sm:text-lg font-black text-[#1E3F27] dark:text-white font-mono">
-                                {formatCompactNumber(metrics.totalValue, { currency: CURRENCY_SYMBOL })}
+                                {canViewCost ? formatCompactNumber(metrics.totalValue, { currency: CURRENCY_SYMBOL }) : '••••••'}
                             </p>
                         </div>
                         <button

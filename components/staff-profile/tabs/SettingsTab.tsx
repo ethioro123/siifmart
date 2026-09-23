@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Key, User, Shield, MapPin, Building, Briefcase, DollarSign, Save, Loader2, ChevronDown, Star } from 'lucide-react';
+import { Key, User, Shield, MapPin, Building, Briefcase, DollarSign, Save, Loader2, ChevronDown, Star, Phone, Home, PhoneCall } from 'lucide-react';
 import { Employee, UserRole } from '../../../types';
 import { SYSTEM_ROLES, getRoleHierarchy } from '../../../utils/roles';
 import { autoSelectSiteForRole, getRecommendedDepartment, canRoleBeAtSiteType } from '../../../utils/roleSegregation';
@@ -14,6 +14,7 @@ interface SettingsTabProps {
     employee: Employee;
     sites: any[];
     canEditStaff?: boolean;
+    isOwnProfile?: boolean;
     currentUser?: any;
     updateEmployee?: (emp: Employee, user: string) => Promise<void> | void;
     currentPasswordInput: string;
@@ -30,6 +31,7 @@ export default function SettingsTab({
     employee,
     sites,
     canEditStaff = false,
+    isOwnProfile = false,
     currentUser,
     updateEmployee,
     currentPasswordInput,
@@ -48,6 +50,9 @@ export default function SettingsTab({
     const [editSpecialization, setEditSpecialization] = useState(employee.specialization || '');
     const [editSalary, setEditSalary] = useState(employee.salary?.toString() || '0');
     const [editStatus, setEditStatus] = useState<EmployeeStatus>(employee.status || 'Active');
+    const [editPhone, setEditPhone] = useState(employee.phone || '');
+    const [editAddress, setEditAddress] = useState(employee.address || '');
+    const [editEmergencyContact, setEditEmergencyContact] = useState(employee.emergencyContact || '');
     const [isSaving, setIsSaving] = useState(false);
     const [saveSuccess, setSaveSuccess] = useState(false);
 
@@ -59,6 +64,9 @@ export default function SettingsTab({
         setEditSpecialization(employee.specialization || '');
         setEditSalary(employee.salary?.toString() || '0');
         setEditStatus((employee.status || 'Active') as EmployeeStatus);
+        setEditPhone(employee.phone || '');
+        setEditAddress(employee.address || '');
+        setEditEmergencyContact(employee.emergencyContact || '');
     }, [employee.id]);
 
     // ---------- Role logic ----------
@@ -84,12 +92,17 @@ export default function SettingsTab({
         }
     };
 
+    const canEditContact = canEditStaff || isOwnProfile;
+
     const hasChanges = editRole !== employee.role ||
         editDepartment !== (employee.department || 'Retail Operations') ||
         editSiteId !== (employee.siteId || employee.site_id || '') ||
         editSpecialization !== (employee.specialization || '') ||
         editSalary !== (employee.salary?.toString() || '0') ||
-        editStatus !== (employee.status || 'Active');
+        editStatus !== (employee.status || 'Active') ||
+        editPhone !== (employee.phone || '') ||
+        editAddress !== (employee.address || '') ||
+        editEmergencyContact !== (employee.emergencyContact || '');
 
     const handleSave = async () => {
         if (!updateEmployee || !hasChanges) return;
@@ -104,6 +117,9 @@ export default function SettingsTab({
                 specialization: editSpecialization,
                 salary: parseFloat(editSalary) || 0,
                 status: editStatus,
+                phone: editPhone,
+                address: editAddress,
+                emergencyContact: editEmergencyContact,
             };
             const result = updateEmployee(updatedEmployee, currentUser?.name || 'HR Admin');
             if (result instanceof Promise) await result;
@@ -356,8 +372,87 @@ export default function SettingsTab({
                             </div>
                         ) : null}
 
+                        {/* CONTACT DETAILS */}
+                        <div className="pt-3 border-t border-gray-200 dark:border-white/10 space-y-4">
+                            <p className="text-[10px] font-black uppercase tracking-widest text-[#1E3F27] dark:text-[#EAE5D9]">
+                                Contact & Residence Information
+                            </p>
+
+                            {/* Phone */}
+                            {canEditContact ? (
+                                <div>
+                                    <label className={labelClasses}>
+                                        <Phone size={10} className="inline mr-1" /> Phone Number
+                                    </label>
+                                    <input
+                                        type="tel"
+                                        value={editPhone}
+                                        onChange={(e) => setEditPhone(e.target.value)}
+                                        placeholder="+251 91 234 5678"
+                                        className={inputClasses}
+                                    />
+                                </div>
+                            ) : (
+                                <div className={readOnlyClasses}>
+                                    <div>
+                                        <p className="text-[10px] text-gray-500 uppercase font-bold tracking-widest">Phone Number</p>
+                                        <p className="text-gray-900 dark:text-white font-mono text-sm">{employee.phone || 'Not set'}</p>
+                                    </div>
+                                    <Phone size={16} className="text-[#2C5E3B] dark:text-emerald-400" />
+                                </div>
+                            )}
+
+                            {/* Residence Address */}
+                            {canEditContact ? (
+                                <div>
+                                    <label className={labelClasses}>
+                                        <Home size={10} className="inline mr-1" /> Residence Address
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={editAddress}
+                                        onChange={(e) => setEditAddress(e.target.value)}
+                                        placeholder="Subcity, Woreda, House No."
+                                        className={inputClasses}
+                                    />
+                                </div>
+                            ) : (
+                                <div className={readOnlyClasses}>
+                                    <div>
+                                        <p className="text-[10px] text-gray-500 uppercase font-bold tracking-widest">Residence Address</p>
+                                        <p className="text-gray-900 dark:text-white text-sm">{employee.address || 'Not set'}</p>
+                                    </div>
+                                    <Home size={16} className="text-[#2C5E3B] dark:text-emerald-400" />
+                                </div>
+                            )}
+
+                            {/* Emergency Contact */}
+                            {canEditContact ? (
+                                <div>
+                                    <label className={labelClasses}>
+                                        <PhoneCall size={10} className="inline mr-1" /> Emergency Contact
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={editEmergencyContact}
+                                        onChange={(e) => setEditEmergencyContact(e.target.value)}
+                                        placeholder="e.g. Spouse +251 91 122 3344"
+                                        className={inputClasses}
+                                    />
+                                </div>
+                            ) : (
+                                <div className={readOnlyClasses}>
+                                    <div>
+                                        <p className="text-[10px] text-gray-500 uppercase font-bold tracking-widest">Emergency Contact</p>
+                                        <p className="text-gray-900 dark:text-white text-sm">{employee.emergencyContact || 'Not set'}</p>
+                                    </div>
+                                    <PhoneCall size={16} className="text-[#2C5E3B] dark:text-emerald-400" />
+                                </div>
+                            )}
+                        </div>
+
                         {/* SAVE BUTTON */}
-                        {canEditStaff && (
+                        {(canEditStaff || isOwnProfile) && (
                             <button
                                 onClick={handleSave}
                                 disabled={isSaving || !hasChanges}

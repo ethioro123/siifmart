@@ -11,35 +11,32 @@ export const DashboardKPIs: React.FC = () => {
     const { cashInDrawer, personalSales, txCount, returnCount } = usePOSCommand();
     const [isRevealed, setIsRevealed] = useState(false);
 
-    const isManagerOrAdmin = [
+    const isCentralHQ = [
         'super_admin',
-        'admin',
-        'store_manager',
-        'operations_manager',
         'ceo'
     ].includes(user?.role?.toLowerCase() || '');
 
     return (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-            {/* Card 1: Cash in Drawer (Concealed for Cashiers) */}
+            {/* Card 1: Cash in Drawer (Concealed for Store Staff & Store Managers) */}
             <KPICard
                 title={t('pos.cashInDrawer')}
                 value={
-                    isManagerOrAdmin
+                    isCentralHQ
                         ? isRevealed ? `${CURRENCY_SYMBOL} ${cashInDrawer.toLocaleString()}` : '••••••••'
                         : 'Protected (Blind)'
                 }
-                subtitle={!isManagerOrAdmin ? "Anti-Skimming Lock Active" : isRevealed ? "Manager Visible" : "Click eye to reveal"}
-                color={!isManagerOrAdmin ? "forest" : "green"}
+                subtitle={!isCentralHQ ? "Anti-Skimming Lock Active" : isRevealed ? "Central HQ Visible" : "Click eye to reveal"}
+                color={!isCentralHQ ? "forest" : "green"}
                 icon={
-                    !isManagerOrAdmin ? (
+                    !isCentralHQ ? (
                         <ShieldCheck size={22} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
                     ) : (
                         <DollarSign size={22} className="text-emerald-600 dark:text-emerald-400 group-hover:scale-110 transition-transform" />
                     )
                 }
                 action={
-                    isManagerOrAdmin ? (
+                    isCentralHQ ? (
                         <button
                             onClick={() => setIsRevealed(!isRevealed)}
                             title={isRevealed ? "Hide Cash Total" : "Reveal Cash Total"}
@@ -51,18 +48,18 @@ export const DashboardKPIs: React.FC = () => {
                 }
             />
 
-            {/* Card 2: Shift Performance (Items count for Cashier, Revenue for Manager) */}
+            {/* Card 2: Shift Performance (Items count for Store Staff, Revenue for Central HQ) */}
             <KPICard
-                title={isManagerOrAdmin ? t('pos.personalSales') : "Shift Activity"}
+                title={isCentralHQ ? t('pos.personalSales') : "Shift Activity"}
                 value={
-                    isManagerOrAdmin
+                    isCentralHQ
                         ? isRevealed ? `${CURRENCY_SYMBOL} ${personalSales.toLocaleString()}` : '••••••••'
                         : `${txCount} Completed Orders`
                 }
-                subtitle={isManagerOrAdmin ? t('pos.todayShift') : "Current Active Shift"}
+                subtitle={isCentralHQ ? t('pos.todayShift') : "Current Active Shift"}
                 color="forest"
                 icon={
-                    isManagerOrAdmin ? (
+                    isCentralHQ ? (
                         <UserCheck size={22} className="text-[#2C5E3B] dark:text-[#A9CBA2] group-hover:scale-110 transition-transform" />
                     ) : (
                         <PackageCheck size={22} className="text-[#2C5E3B] dark:text-[#A9CBA2] group-hover:scale-110 transition-transform" />

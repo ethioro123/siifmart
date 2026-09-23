@@ -88,7 +88,9 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
 
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [customers, setCustomers] = useState<Customer[]>([]);
-  const [shifts, setShifts] = useState<ShiftRecord[]>([]);
+  const [shifts, setShifts] = useState<ShiftRecord[]>(() => {
+    try { const s = localStorage.getItem('siifmart_pos_shifts'); return s ? JSON.parse(s) : []; } catch { return []; }
+  });
 
 
   const {

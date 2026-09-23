@@ -29,16 +29,16 @@ export const formatBeautifulLocation = (loc: string | undefined, theme: 'purple'
                 : 'bg-amber-50 dark:bg-amber-500/10 text-amber-600/80 dark:text-amber-300/80 border-amber-100 dark:border-amber-500/20';
 
         return (
-            <div className="flex items-center gap-1.5 mt-0.5">
-                <span className={`px-2 py-0.5 rounded text-xs font-bold border whitespace-nowrap ${themeClass}`}>
+            <div className="flex items-center gap-1 sm:gap-1.5 mt-0.5 flex-wrap">
+                <span className={`px-2 py-0.5 rounded text-[10px] sm:text-xs font-bold border whitespace-nowrap ${themeClass}`}>
                     {t ? t('warehouse.zone') : 'Zone'} {parts[0]}
                 </span>
                 <span className="text-gray-400 dark:text-gray-600/50 font-black text-[10px]">-</span>
-                <span className={`px-2 py-0.5 rounded text-xs font-bold border whitespace-nowrap ${dimThemeClass}`}>
+                <span className={`px-2 py-0.5 rounded text-[10px] sm:text-xs font-bold border whitespace-nowrap ${dimThemeClass}`}>
                     {t ? t('warehouse.aisle') : 'Aisle'} {parts[1]}
                 </span>
                 <span className="text-gray-400 dark:text-gray-600/50 font-black text-[10px]">-</span>
-                <span className={`px-2 py-0.5 rounded text-xs font-bold border whitespace-nowrap ${dimThemeClass}`}>
+                <span className={`px-2 py-0.5 rounded text-[10px] sm:text-xs font-bold border whitespace-nowrap ${dimThemeClass}`}>
                     {t ? t('warehouse.bay') : 'Bay'} {parts[2]}
                 </span>
             </div>
@@ -179,31 +179,31 @@ export const PickJobModal: React.FC<PickJobModalProps> = ({
                 {/* Content */}
                 <div className="p-3 md:p-6 overflow-y-auto space-y-4 md:space-y-6 flex-1 custom-scrollbar">
                     {/* Metrics Strip */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
-                        <div className="bg-[#FAF8F5]/50 dark:bg-white/[0.02] border border-[#E2DCCE]/65 dark:border-white/5 p-4 rounded-2xl">
-                            <span className="text-[10px] text-gray-550 dark:text-gray-500 font-black uppercase tracking-widest block mb-2">{t('warehouse.progress')}</span>
-                            <div className="flex items-center justify-between text-sm font-bold text-gray-900 dark:text-white mb-2">
+                    <div className="grid grid-cols-3 gap-2 sm:gap-4">
+                        <div className="bg-[#FAF8F5]/50 dark:bg-white/[0.02] border border-[#E2DCCE]/65 dark:border-white/5 p-2.5 sm:p-4 rounded-xl sm:rounded-2xl min-w-0">
+                            <span className="text-[9px] sm:text-[10px] text-gray-550 dark:text-gray-500 font-black uppercase tracking-wider block mb-1 sm:mb-2 truncate">{t('warehouse.progress')}</span>
+                            <div className="flex items-center justify-between text-xs sm:text-sm font-bold text-gray-900 dark:text-white mb-1.5">
                                 <span className="font-mono">{Math.round(progressPercent)}%</span>
-                                <span className="text-[10px] font-black text-gray-500 uppercase">{completedItems} / {totalItems} SKU's</span>
+                                <span className="text-[8px] sm:text-[10px] font-black text-gray-500 uppercase truncate">{completedItems}/{totalItems}</span>
                             </div>
                             <div className="w-full h-1.5 bg-gray-200 dark:bg-white/10 rounded-full overflow-hidden">
-                                <div ref={(el) => { if (el) el.style.width = `${progressPercent}%`; }} className="h-full bg-[#2C5E3B] dark:bg-[#A9CBA2] transition-all duration-1000 ease-out" />
+                                <div ref={(el) => { if (el) el.style.width = `${progressPercent}%`; }} className="h-full bg-[#2C5E3B] dark:bg-[#A9CBA2] transition-colors duration-500 ease-out" />
                             </div>
                         </div>
-                        <div className="bg-[#FAF8F5]/50 dark:bg-white/[0.02] border border-[#E2DCCE]/65 dark:border-white/5 p-4 rounded-2xl">
-                            <span className="text-[10px] text-gray-550 dark:text-gray-500 font-black uppercase tracking-widest block mb-2">{t('warehouse.status')}</span>
-                            <div className="flex items-center gap-2 mt-1">
-                                <div className={`w-2 h-2 rounded-full animate-pulse ${job.status === 'Completed' ? 'bg-green-500' : 'bg-[#2C5E3B] dark:bg-[#A9CBA2]'}`} />
-                                <span className={`text-lg font-bold uppercase tracking-tight ${job.status === 'Completed' ? 'text-green-600 dark:text-green-400' : 'text-[#2C5E3B] dark:text-[#A9CBA2]'}`}>
+                        <div className="bg-[#FAF8F5]/50 dark:bg-white/[0.02] border border-[#E2DCCE]/65 dark:border-white/5 p-2.5 sm:p-4 rounded-xl sm:rounded-2xl min-w-0">
+                            <span className="text-[9px] sm:text-[10px] text-gray-550 dark:text-gray-500 font-black uppercase tracking-wider block mb-1 sm:mb-2 truncate">{t('warehouse.status')}</span>
+                            <div className="flex items-center gap-1.5 sm:gap-2 mt-0.5 sm:mt-1">
+                                <div className={`w-2 h-2 rounded-full animate-pulse shrink-0 ${job.status === 'Completed' ? 'bg-green-500' : 'bg-[#2C5E3B] dark:bg-[#A9CBA2]'}`} />
+                                <span className={`text-xs sm:text-lg font-bold uppercase tracking-tight truncate ${job.status === 'Completed' ? 'text-green-600 dark:text-green-400' : 'text-[#2C5E3B] dark:text-[#A9CBA2]'}`}>
                                     {job.status}
                                 </span>
                             </div>
                         </div>
-                        <div className="bg-[#FAF8F5]/50 dark:bg-white/[0.02] border border-[#E2DCCE]/65 dark:border-white/5 p-4 rounded-2xl">
-                            <span className="text-[10px] text-gray-550 dark:text-gray-500 font-black uppercase tracking-widest block mb-2">{t('warehouse.jobId')}</span>
-                            <div className="flex items-center gap-2 mt-1">
-                                <Info size={16} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
-                                <span className="text-lg font-mono font-bold text-gray-900 dark:text-white truncate">
+                        <div className="bg-[#FAF8F5]/50 dark:bg-white/[0.02] border border-[#E2DCCE]/65 dark:border-white/5 p-2.5 sm:p-4 rounded-xl sm:rounded-2xl min-w-0">
+                            <span className="text-[9px] sm:text-[10px] text-gray-550 dark:text-gray-500 font-black uppercase tracking-wider block mb-1 sm:mb-2 truncate">{t('warehouse.jobId')}</span>
+                            <div className="flex items-center gap-1.5 sm:gap-2 mt-0.5 sm:mt-1 min-w-0">
+                                <Info size={14} className="text-[#2C5E3B] dark:text-[#A9CBA2] shrink-0" />
+                                <span className="text-xs sm:text-lg font-mono font-bold text-gray-900 dark:text-white truncate">
                                     {formatJobId(job)}
                                 </span>
                             </div>
@@ -227,7 +227,7 @@ export const PickJobModal: React.FC<PickJobModalProps> = ({
                                 const isDone = item.status === 'Completed' || item.status === 'Picked';
 
                                 return (
-                                    <div key={idx} className={`group relative bg-white dark:bg-white/[0.02] border ${isDone ? 'border-green-200 dark:border-green-500/20 bg-green-50 dark:bg-green-500/[0.01]' : 'border-[#E2DCCE]/60 dark:border-white/5'} rounded-xl md:rounded-2xl p-2 md:p-4 flex flex-col md:flex-row items-start md:items-center justify-between hover:bg-[#FAF8F5] dark:hover:bg-white/[0.04] transition-all duration-300 gap-2 md:gap-0 shadow-sm dark:shadow-none`}>
+                                    <div key={idx} className={`group relative bg-white dark:bg-white/[0.02] border ${isDone ? 'border-green-200 dark:border-green-500/20 bg-green-50 dark:bg-green-500/[0.01]' : 'border-[#E2DCCE]/60 dark:border-white/5'} rounded-xl md:rounded-2xl p-2.5 md:p-4 flex flex-col md:flex-row items-start md:items-center justify-between hover:bg-[#FAF8F5] dark:hover:bg-white/[0.04] transition-colors duration-150 gap-2 md:gap-0 shadow-sm dark:shadow-none`}>
 
                                         <div className="flex items-center gap-2 md:gap-4 w-full md:w-auto">
                                             {/* Stop sequence badge */}
@@ -237,14 +237,14 @@ export const PickJobModal: React.FC<PickJobModalProps> = ({
 
                                             <div className="hidden md:flex relative w-14 h-14 rounded-xl bg-gray-100 dark:bg-black/40 border border-gray-200 dark:border-white/10 items-center justify-center overflow-hidden shrink-0">
                                                 {product?.image ? (
-                                                    <img src={product.image} alt={item.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                                                    <img src={product.image} alt={item.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />
                                                 ) : (
                                                     <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-white/20">
                                                         <Package size={24} strokeWidth={1.5} />
                                                     </div>
                                                 )}
                                                 {isDone && (
-                                                    <div className="absolute inset-0 bg-green-100/50 dark:bg-green-500/20 backdrop-blur-[1px] flex items-center justify-center">
+                                                    <div className="absolute inset-0 bg-green-100/90 dark:bg-green-950/90 flex items-center justify-center">
                                                         <CheckCircle size={18} className="text-green-600 dark:text-green-400" />
                                                     </div>
                                                 )}
@@ -309,76 +309,76 @@ export const PickJobModal: React.FC<PickJobModalProps> = ({
                                                         })()}
                                                     </div>
                                                 ) : (
-                                                    <button
-                                                        onClick={(e) => { e.stopPropagation(); onStartPick(job); }}
-                                                        disabled={isSubmitting}
-                                                        className="woody-btn-primary h-8 md:h-10 px-3 md:px-4 text-[8px] md:text-[10px]"
-                                                    >
-                                                        {t('warehouse.pickJobs').split(' ')[0]}
-                                                    </button>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </div>
-                </div>
+                                                     <button
+                                                         onClick={(e) => { e.stopPropagation(); onStartPick(job); }}
+                                                         disabled={isSubmitting}
+                                                         className="woody-btn-primary min-h-[38px] sm:min-h-[44px] px-3 md:px-4 text-[10px] md:text-xs"
+                                                     >
+                                                         {t('warehouse.pickJobs').split(' ')[0]}
+                                                     </button>
+                                                 )}
+                                             </div>
+                                         </div>
+                                     </div>
+                                 );
+                             })}
+                         </div>
+                     </div>
+                 </div>
 
-                {/* Footer */}
-                <div className="p-3 md:p-6 border-t border-[#E2DCCE]/60 dark:border-emerald-950/20 bg-[#FAF8F5]/50 dark:bg-zinc-950/40 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 md:gap-4 shrink-0 relative z-20">
-                    <div className="hidden md:flex items-center gap-4">
-                        <div className="flex flex-col">
-                            <span className="text-[10px] text-gray-550 font-black uppercase tracking-widest">{t('warehouse.putaway.jobDetails').split(' ')[0]} {t('warehouse.assignedTo') || 'Assigned'}</span>
-                            <span className="text-sm font-bold text-gray-900 dark:text-gray-300">
-                                {(() => {
-                                    if (!job.assignedTo) return t('warehouse.putaway.unassigned') || 'Unassigned / Available';
-                                    const emp = employees.find(e => e.id === job.assignedTo || e.name === job.assignedTo || (e as any).email === job.assignedTo);
-                                    return emp?.name || job.assignedTo.slice(-8).toUpperCase();
-                                })()}
-                            </span>
-                        </div>
-                    </div>
+                 {/* Footer */}
+                 <div className="p-3 md:p-6 border-t border-[#E2DCCE]/60 dark:border-emerald-950/20 bg-[#FAF8F5]/50 dark:bg-zinc-950/40 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 md:gap-4 shrink-0 relative z-20">
+                     <div className="hidden md:flex items-center gap-4">
+                         <div className="flex flex-col">
+                             <span className="text-[10px] text-gray-550 font-black uppercase tracking-widest">{t('warehouse.putaway.jobDetails').split(' ')[0]} {t('warehouse.assignedTo') || 'Assigned'}</span>
+                             <span className="text-sm font-bold text-gray-900 dark:text-gray-300">
+                                 {(() => {
+                                     if (!job.assignedTo) return t('warehouse.putaway.unassigned') || 'Unassigned / Available';
+                                     const emp = employees.find(e => e.id === job.assignedTo || e.name === job.assignedTo || (e as any).email === job.assignedTo);
+                                     return emp?.name || job.assignedTo.slice(-8).toUpperCase();
+                                 })()}
+                             </span>
+                         </div>
+                     </div>
 
-                    <div className="flex flex-col-reverse md:flex-row items-stretch md:items-center gap-2 md:gap-3">
-                        <button
-                            onClick={onClose}
-                            className="woody-btn-secondary px-4 md:px-6 py-3 min-h-[44px] text-[10px] md:text-xs flex items-center justify-center"
-                        >
-                            {t('warehouse.dismiss')}
-                        </button>
+                     <div className="flex flex-col-reverse md:flex-row items-stretch md:items-center gap-2 md:gap-3">
+                         <button
+                             onClick={onClose}
+                             className="woody-btn-secondary px-4 md:px-6 py-3 min-h-[44px] text-[10px] md:text-xs flex items-center justify-center"
+                         >
+                             {t('warehouse.dismiss')}
+                         </button>
 
-                        {job.status !== 'Completed' && (
-                            <>
-                                {progressPercent >= 100 ? (
-                                    <button
-                                        onClick={() => onCompleteJob(job)}
-                                        disabled={isSubmitting}
-                                        className="justify-center px-4 md:px-8 py-3 min-h-[44px] bg-emerald-600 hover:bg-emerald-700 dark:hover:bg-emerald-500 text-white rounded-xl md:rounded-2xl font-black text-[10px] md:text-sm uppercase tracking-widest shadow-md border border-emerald-400/50 transition-all flex items-center gap-2 md:gap-3 active:scale-95 disabled:opacity-50"
-                                    >
-                                        {isSubmitting ? <Loader2 size={16} className="animate-spin md:w-[18px] md:h-[18px]" /> : <><CheckCircle size={16} className="md:w-[18px] md:h-[18px]" /> {t('warehouse.completed')}</>}
-                                    </button>
-                                ) : (
-                                    <button
-                                        onClick={() => onStartPick(job)}
-                                        disabled={isSubmitting}
-                                        className="woody-btn-primary px-4 md:px-8 py-3 min-h-[44px] text-[10px] md:text-sm flex items-center justify-center gap-2"
-                                    >
-                                        {isSubmitting ? (
-                                            <Loader2 size={16} className="animate-spin md:w-[18px] md:h-[18px]" />
-                                        ) : (
-                                            <>
-                                                {job.status === 'In-Progress' ? t('warehouse.continueArrow') : t('warehouse.startArrow')}
-                                                <ArrowRight size={16} className="md:w-[18px] md:h-[18px] group-hover:translate-x-1 transition-transform" />
-                                            </>
-                                        )}
-                                    </button>
-                                )}
-                            </>
-                        )}
-                    </div>
-                </div>
+                         {job.status !== 'Completed' && (
+                             <>
+                                 {progressPercent >= 100 ? (
+                                     <button
+                                         onClick={() => onCompleteJob(job)}
+                                         disabled={isSubmitting}
+                                         className="justify-center px-4 md:px-8 py-3 min-h-[44px] bg-emerald-600 hover:bg-emerald-700 dark:hover:bg-emerald-500 text-white rounded-xl md:rounded-2xl font-black text-[10px] md:text-sm uppercase tracking-widest shadow-md border border-emerald-400/50 transition-colors flex items-center gap-2 md:gap-3 active:scale-95 disabled:opacity-50"
+                                     >
+                                         {isSubmitting ? <Loader2 size={16} className="animate-spin md:w-[18px] md:h-[18px]" /> : <><CheckCircle size={16} className="md:w-[18px] md:h-[18px]" /> {t('warehouse.completed')}</>}
+                                     </button>
+                                 ) : (
+                                     <button
+                                         onClick={() => onStartPick(job)}
+                                         disabled={isSubmitting}
+                                         className="woody-btn-primary px-4 md:px-8 py-3 min-h-[44px] text-[10px] md:text-sm flex items-center justify-center gap-2"
+                                     >
+                                         {isSubmitting ? (
+                                             <Loader2 size={16} className="animate-spin md:w-[18px] md:h-[18px]" />
+                                         ) : (
+                                             <>
+                                                 {job.status === 'In-Progress' ? t('warehouse.continueArrow') : t('warehouse.startArrow')}
+                                                 <ArrowRight size={16} className="md:w-[18px] md:h-[18px] group-hover:translate-x-1 transition-transform" />
+                                             </>
+                                         )}
+                                     </button>
+                                 )}
+                             </>
+                         )}
+                     </div>
+                 </div>
 
             </div>
         </div>

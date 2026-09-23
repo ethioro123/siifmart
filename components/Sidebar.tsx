@@ -70,8 +70,8 @@ export default function Sidebar() {
       // WMS DASHBOARD - Overview (Managers Only)
       { to: "/wms-dashboard", icon: LayoutDashboard, label: "WMS Dashboard", section: "warehouse", roles: ['super_admin', 'warehouse_manager', 'dispatcher', 'inventory_specialist'] },
 
-      // NETWORK INVENTORY - All users can view (Except low-level ops)
-      { to: "/network-inventory", icon: Globe, label: "Network View", section: "inventory", roles: ['super_admin', 'warehouse_manager', 'dispatcher', 'dispatch_manager', 'pos', 'hr', 'auditor', 'finance_manager', 'procurement_manager', 'store_supervisor', 'inventory_specialist', 'cs_manager', 'it_support'] },
+      // NETWORK INVENTORY - Executive & Supply Chain Leadership
+      { to: "/network-inventory", icon: Globe, label: "Network View", section: "inventory", roles: ['super_admin', 'admin', 'supply_chain_manager', 'operations_manager', 'finance_manager', 'procurement_manager', 'auditor'] },
 
       // INVENTORY
       { to: "/inventory", icon: Package, label: "Inventory", section: "inventory", roles: ['super_admin', 'store_manager', 'assistant_manager', 'shift_lead', 'warehouse_manager', 'dispatcher', 'dispatch_manager', 'auditor', 'procurement_manager', 'inventory_specialist', 'store_supervisor', 'pos'] },
@@ -82,8 +82,8 @@ export default function Sidebar() {
       // PROCUREMENT - Warehouse and procurement only
       { to: "/procurement", icon: Truck, label: "Procurement", section: "procurement", roles: ['super_admin', 'warehouse_manager', 'dispatcher', 'procurement_manager', 'finance_manager'] },
 
-      // ROADMAP
-      { to: "/roadmap", icon: Map, label: "Roadmap", section: "dashboard", roles: ['super_admin', 'admin', 'store_manager', 'assistant_manager', 'shift_lead', 'warehouse_manager', 'dispatcher', 'dispatch_manager', 'pos', 'hr', 'auditor', 'finance_manager', 'procurement_manager', 'store_supervisor', 'inventory_specialist', 'cs_manager', 'it_support'] },
+      // ROADMAP - CEO Only (Confidential Strategic Canvas)
+      { to: "/roadmap", icon: Map, label: "Roadmap", section: "dashboard", roles: ['super_admin'] },
 
       // CENTRAL OPERATIONS - CEO Only (handled separately via handleAdminClick)
       { to: "/admin", icon: Activity, label: "Central Operations", section: "dashboard", roles: ['super_admin'] },
@@ -94,8 +94,8 @@ export default function Sidebar() {
       // POS COMMAND CENTER - Store management
       { to: "/pos-dashboard", icon: Eye, label: "POS Command", section: "pos", roles: ['super_admin', 'store_manager', 'assistant_manager', 'shift_lead', 'pos', 'store_supervisor'] },
 
-      // SALES
-      { to: "/sales", icon: FileText, label: "Sales History", section: "sales", roles: ['super_admin', 'store_manager', 'assistant_manager', 'shift_lead', 'pos', 'auditor', 'finance_manager', 'cs_manager', 'store_supervisor'] },
+      // SALES - Management & Auditing (Cashiers blocked from historical revenue)
+      { to: "/sales", icon: FileText, label: "Sales History", section: "sales", roles: ['super_admin', 'store_manager', 'assistant_manager', 'shift_lead', 'auditor', 'finance_manager', 'cs_manager', 'store_supervisor'] },
 
       // MERCHANDISING
       { to: "/pricing", icon: Tags, label: "Merchandising", section: "pricing", roles: ['super_admin', 'finance_manager', 'procurement_manager'] },
@@ -115,7 +115,8 @@ export default function Sidebar() {
 
     // Filter by role AND site-type context
     let filteredItems = allItems.filter(item => {
-      const hasRole = item.roles.includes(userRole) || userRole === 'super_admin';
+      const isSuperAdminOrCeo = userRole === 'super_admin' || (userRole as string)?.toLowerCase() === 'ceo';
+      const hasRole = item.roles.includes(userRole) || isSuperAdminOrCeo;
 
       const siteType = activeSite?.type || '';
       const isStore = ['Store', 'Dark Store', 'Retail', 'POS'].includes(siteType);
@@ -123,8 +124,11 @@ export default function Sidebar() {
       const isHQ = !isStore && !isWarehouse;
 
       if (native.isCleanMobileMode()) {
-        // On Mobile/Android: strictly provide WMS Fulfillment, POS, and Inventory navigations
-        const mobileAllowed = ['/wms-ops', '/wms-dashboard', '/pos', '/pos-dashboard', '/inventory', '/sales'];
+        // On Mobile/Android: retail stores get POS & sales; warehouses get WMS & inventory
+        if (isStore) {
+          return ['/pos', '/pos-dashboard', '/sales'].includes(item.to);
+        }
+        const mobileAllowed = ['/wms-ops', '/wms-dashboard', '/inventory', '/sales'];
         return mobileAllowed.includes(item.to);
       }
 
@@ -136,8 +140,8 @@ export default function Sidebar() {
           isAllowedForSite = false;
         }
       } else if (isStore) {
-        // In POS store site: strictly POS, Sales & Customers menu options ONLY. Hide Administration HQ & WMS.
-        if (item.to === '/admin' || ['warehouse', 'procurement', 'finance', 'pricing', 'settings'].includes(item.section)) {
+        // In POS store site: strictly POS, Sales & Customers menu options ONLY. Hide Administration HQ, WMS, and Central Inventory.
+        if (item.to === '/admin' || ['warehouse', 'inventory', 'procurement', 'finance', 'pricing', 'settings'].includes(item.section)) {
           isAllowedForSite = false;
         }
       } else if (isHQ) {
@@ -147,7 +151,8 @@ export default function Sidebar() {
         }
       }
 
-      return hasRole && isAllowedForSite;
+      const isSectionAllowed = availableSections.includes(item.section) || availableSections.includes('*');
+      return hasRole && isAllowedForSite && isSectionAllowed;
     });
 
     return filteredItems;

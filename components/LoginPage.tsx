@@ -157,7 +157,10 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center p-4 relative overflow-hidden bg-gradient-to-br from-[#FAF8F5] via-[#F4F0E6] to-[#FAF8F5] dark:from-[#0B0F0D] dark:via-[#131915] dark:to-[#0B0F0D] transition-colors duration-500">
+    <div
+      className="min-h-screen w-full flex items-center justify-center p-4 relative overflow-hidden bg-gradient-to-br from-[#FAF8F5] via-[#F4F0E6] to-[#FAF8F5] dark:from-[#0B0F0D] dark:via-[#131915] dark:to-[#0B0F0D] transition-colors duration-500"
+      style={{ paddingTop: 'max(env(safe-area-inset-top, 0px), 1rem)' }}
+    >
       
       {/* Premium Decorative Ambient Glows — DESKTOP ONLY (blur kills mobile GPU) */}
       <div className="hidden lg:block absolute top-[-10%] left-[10%] w-[45vw] h-[45vw] rounded-full bg-[#2C5E3B]/10 dark:bg-[#1E3F27]/5 blur-[120px] pointer-events-none animate-pulse-slow" />
@@ -170,7 +173,8 @@ export default function LoginPage() {
       <button 
         onClick={toggleTheme} 
         aria-label="Toggle Theme"
-        className="absolute top-6 right-6 p-3 rounded-2xl bg-white/80 dark:bg-[#18201B]/70 border border-[#E2DCCE] dark:border-emerald-950/20 text-[#2C4D35] dark:text-[#A9CBA2] hover:text-[#1E3F27] dark:hover:text-white hover:scale-105 active:scale-95 transition-all shadow-[0_2px_12px_rgba(44,94,59,0.03)] dark:shadow-none lg:backdrop-blur-md z-20 cursor-pointer"
+        className="absolute right-6 p-3 rounded-2xl bg-white/80 dark:bg-[#18201B]/70 border border-[#E2DCCE] dark:border-emerald-950/20 text-[#2C4D35] dark:text-[#A9CBA2] hover:text-[#1E3F27] dark:hover:text-white hover:scale-105 active:scale-95 transition-all shadow-[0_2px_12px_rgba(44,94,59,0.03)] dark:shadow-none lg:backdrop-blur-md z-20 cursor-pointer"
+        style={{ top: 'calc(1.5rem + env(safe-area-inset-top, 0px))' }}
       >
         {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
       </button>

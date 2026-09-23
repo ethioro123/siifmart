@@ -2,7 +2,9 @@ import React, { useState } from 'react';
 import { Layout, ChevronDown } from 'lucide-react';
 import { WMSJob } from '../../types';
 import { OpTab } from './FulfillmentContext';
-import { PointsEarnedPopup } from '../WorkerPointsDisplay';
+import WorkerPointsDisplay, { PointsEarnedPopup } from '../WorkerPointsDisplay';
+import { useStore } from '../../contexts/CentralStore';
+import { useGamification } from '../../contexts/GamificationContext';
 
 interface TabSelectorProps {
     activeTab: OpTab;
@@ -31,20 +33,20 @@ export const MobileTabSelector: React.FC<TabSelectorProps> = ({
         <div className="md:hidden relative z-[60] mb-2">
             <button
                 onClick={() => setIsMobileTabMenuOpen(!isMobileTabMenuOpen)}
-                className="w-full glass-panel p-3.5 flex items-center justify-between active:scale-[0.98] transition-all group"
+                className="w-full glass-panel p-3.5 min-h-[48px] flex items-center justify-between active:scale-[0.98] transition-transform group"
             >
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
                     <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#2C5E3B] to-[#1E3F27] dark:from-[#A9CBA2]/20 dark:to-[#A9CBA2]/5 flex items-center justify-center text-white dark:text-[#A9CBA2] border border-[#E2DCCE]/30 dark:border-[#A9CBA2]/10 shrink-0">
                         <Layout size={20} />
                     </div>
-                    <div className="text-left min-w-0">
+                    <div className="text-left min-w-0 flex-1">
                         <p className="text-[9px] text-stone-400 dark:text-stone-500 font-bold uppercase tracking-[0.2em]">Current Section</p>
-                        <p className="text-lg font-black text-stone-900 dark:text-[#EAE5D9] uppercase tracking-tighter truncate">
+                        <p className="text-base sm:text-lg font-black text-stone-900 dark:text-[#EAE5D9] uppercase tracking-tighter truncate">
                             {t(`warehouse.tabs.${activeTab.toLowerCase()}`)}
                         </p>
                     </div>
                 </div>
-                <div className={`w-8 h-8 rounded-full bg-stone-100/60 dark:bg-[#1C2620]/30 border border-[#E2DCCE]/30 dark:border-[#A9CBA2]/10 flex items-center justify-center transition-transform duration-300 shrink-0 ${isMobileTabMenuOpen ? 'rotate-180 bg-[#2C5E3B]/20 text-[#2C5E3B] dark:text-[#A9CBA2] border-[#2C5E3B]/30' : 'text-stone-400'}`}>
+                <div className={`w-8 h-8 rounded-full bg-stone-100/60 dark:bg-[#1C2620]/30 border border-[#E2DCCE]/30 dark:border-[#A9CBA2]/10 flex items-center justify-center transition-transform duration-300 shrink-0 ml-2 ${isMobileTabMenuOpen ? 'rotate-180 bg-[#2C5E3B]/20 text-[#2C5E3B] dark:text-[#A9CBA2] border-[#2C5E3B]/30' : 'text-stone-400'}`}>
                     <ChevronDown size={16} />
                 </div>
             </button>
@@ -52,8 +54,8 @@ export const MobileTabSelector: React.FC<TabSelectorProps> = ({
             {/* Mobile Dropdown Grid */}
             {isMobileTabMenuOpen && (
                 <>
-                    <div className="fixed inset-0 bg-black/40 dark:bg-black/80 backdrop-blur-sm z-[65]" onClick={() => setIsMobileTabMenuOpen(false)} />
-                    <div className="absolute top-full left-0 right-0 mt-3 glass-panel p-4 grid grid-cols-2 gap-3 z-[70] animate-in fade-in zoom-in-95 duration-200 max-h-[70vh] overflow-y-auto custom-scrollbar">
+                    <div className="fixed inset-0 bg-black/60 dark:bg-black/85 z-[65]" onClick={() => setIsMobileTabMenuOpen(false)} />
+                    <div className="absolute top-full left-0 right-0 mt-2 glass-panel p-3 sm:p-4 grid grid-cols-2 gap-2 sm:gap-3 z-[70] animate-in fade-in zoom-in-95 duration-200 max-h-[70vh] overflow-y-auto custom-scrollbar">
                         {visibleTabs.map((tab) => {
                             const isActive = activeTab === tab;
                             // Discrepancy Logic
@@ -72,12 +74,12 @@ export const MobileTabSelector: React.FC<TabSelectorProps> = ({
                                         setActiveTab(tab);
                                         setIsMobileTabMenuOpen(false);
                                     }}
-                                    className={`p-4 rounded-2xl flex flex-col items-center justify-center gap-2 transition-all border relative ${isActive
+                                    className={`p-3.5 min-h-[48px] rounded-2xl flex flex-col items-center justify-center gap-1.5 transition-colors active:scale-95 border relative ${isActive
                                         ? 'bg-[#2C5E3B] dark:bg-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24] border-[#2C5E3B] dark:border-[#EAE5D9] shadow-sm'
                                         : 'bg-stone-50/50 dark:bg-[#18201B]/50 text-stone-700 dark:text-stone-400 border-[#E2DCCE]/50 dark:border-[#A9CBA2]/[0.04] hover:bg-stone-100/50 dark:hover:bg-[#EAE5D9]/10 hover:text-[#1E3F27] dark:hover:text-white'
                                         }`}
                                  >
-                                    <span className="text-[10px] font-black uppercase tracking-widest leading-tight text-center">{t(`warehouse.tabs.${tab.toLowerCase()}`)}</span>
+                                    <span className="text-[10px] font-black uppercase tracking-widest leading-tight text-center truncate max-w-full px-1">{t(`warehouse.tabs.${tab.toLowerCase()}`)}</span>
                                     {hasTransferDiscrepancies && (
                                         <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-red-500 animate-pulse" />
                                     )}
@@ -101,6 +103,10 @@ export const DesktopTabSelector: React.FC<DesktopTabSelectorProps> = ({
     setShowPointsPopup,
     earnedPoints
 }) => {
+    const { user } = useStore();
+    const { getWorkerPoints } = useGamification();
+    const userPoints = user ? getWorkerPoints(user.id) : undefined;
+
     return (
         <div className="hidden md:flex items-center gap-2 overflow-x-auto pb-0 -mx-0 px-0 bg-transparent rounded-xl shrink-0 no-scrollbar touch-pan-x">
             <div className="flex gap-2 min-w-max">
@@ -146,8 +152,11 @@ export const DesktopTabSelector: React.FC<DesktopTabSelectorProps> = ({
             </div>
 
             {/* Worker Points Widget */}
-            <div className="hidden md:flex items-center gap-3 pl-2">
-            </div>
+            {userPoints && (
+                <div className="hidden md:flex items-center gap-3 pl-2 shrink-0">
+                    <WorkerPointsDisplay points={userPoints} compact={true} />
+                </div>
+            )}
 
             {/* Points Earned Popup */}
             {showPointsPopup && (

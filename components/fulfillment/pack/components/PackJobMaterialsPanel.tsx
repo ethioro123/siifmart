@@ -65,7 +65,7 @@ export const PackJobMaterialsPanel: React.FC<PackJobMaterialsPanelProps> = ({
                                 key={opt.size}
                                 type="button"
                                 onClick={() => setBoxSize(opt.size)}
-                                className={`p-2 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
+                                className={`min-h-[48px] p-2.5 rounded-xl border text-left transition-colors cursor-pointer flex flex-col justify-between ${
                                     isSelected
                                         ? 'bg-[#2C5E3B] text-white border-[#2C5E3B] shadow-sm'
                                         : 'bg-stone-50/80 dark:bg-white/[0.03] border-stone-200/80 dark:border-white/10 text-stone-700 dark:text-stone-300 hover:border-[#2C5E3B]/40'
@@ -101,7 +101,7 @@ export const PackJobMaterialsPanel: React.FC<PackJobMaterialsPanelProps> = ({
                     <button
                         type="button"
                         onClick={() => setPackingMaterials({ ...packingMaterials, fragileStickers: !packingMaterials.fragileStickers })}
-                        className={`w-full p-2.5 rounded-xl border flex items-center justify-between transition-all cursor-pointer ${
+                        className={`w-full min-h-[48px] p-2.5 rounded-xl border flex items-center justify-between transition-colors cursor-pointer ${
                             packingMaterials.fragileStickers
                                 ? 'bg-red-500/10 border-red-500/30 text-red-900 dark:text-red-300'
                                 : 'bg-stone-50/60 dark:bg-white/[0.02] border-stone-200/60 dark:border-white/5 text-stone-600 dark:text-stone-400 hover:border-stone-300'
@@ -129,7 +129,7 @@ export const PackJobMaterialsPanel: React.FC<PackJobMaterialsPanelProps> = ({
                     <button
                         type="button"
                         onClick={() => setPackingMaterials({ ...packingMaterials, bubbleWrap: !packingMaterials.bubbleWrap })}
-                        className={`w-full p-2.5 rounded-xl border flex items-center justify-between transition-all cursor-pointer ${
+                        className={`w-full min-h-[48px] p-2.5 rounded-xl border flex items-center justify-between transition-colors cursor-pointer ${
                             packingMaterials.bubbleWrap
                                 ? 'bg-amber-500/10 border-amber-500/30 text-amber-900 dark:text-amber-300'
                                 : 'bg-stone-50/60 dark:bg-white/[0.02] border-stone-200/60 dark:border-white/5 text-stone-600 dark:text-stone-400 hover:border-stone-300'
@@ -157,7 +157,7 @@ export const PackJobMaterialsPanel: React.FC<PackJobMaterialsPanelProps> = ({
                     <button
                         type="button"
                         onClick={() => setPackingMaterials({ ...packingMaterials, thisSideUp: !packingMaterials.thisSideUp })}
-                        className={`w-full p-2.5 rounded-xl border flex items-center justify-between transition-all cursor-pointer ${
+                        className={`w-full min-h-[48px] p-2.5 rounded-xl border flex items-center justify-between transition-colors cursor-pointer ${
                             packingMaterials.thisSideUp
                                 ? 'bg-blue-500/10 border-blue-500/30 text-blue-900 dark:text-blue-300'
                                 : 'bg-stone-50/60 dark:bg-white/[0.02] border-stone-200/60 dark:border-white/5 text-stone-600 dark:text-stone-400 hover:border-stone-300'
@@ -185,7 +185,7 @@ export const PackJobMaterialsPanel: React.FC<PackJobMaterialsPanelProps> = ({
                     <button
                         type="button"
                         onClick={() => setPackingMaterials({ ...packingMaterials, securitySeal: !packingMaterials.securitySeal })}
-                        className={`w-full p-2.5 rounded-xl border flex items-center justify-between transition-all cursor-pointer ${
+                        className={`w-full min-h-[48px] p-2.5 rounded-xl border flex items-center justify-between transition-colors cursor-pointer ${
                             packingMaterials.securitySeal
                                 ? 'bg-purple-500/10 border-purple-500/30 text-purple-900 dark:text-purple-300'
                                 : 'bg-stone-50/60 dark:bg-white/[0.02] border-stone-200/60 dark:border-white/5 text-stone-600 dark:text-stone-400 hover:border-stone-300'
@@ -213,7 +213,7 @@ export const PackJobMaterialsPanel: React.FC<PackJobMaterialsPanelProps> = ({
                     <button
                         type="button"
                         onClick={() => setHasIcePack(!hasIcePack)}
-                        className={`w-full p-2.5 rounded-xl border flex items-center justify-between transition-all cursor-pointer ${
+                        className={`w-full min-h-[48px] p-2.5 rounded-xl border flex items-center justify-between transition-colors cursor-pointer ${
                             hasIcePack || boxSize === 'Thermal Cool Box'
                                 ? 'bg-cyan-500/10 border-cyan-500/30 text-cyan-900 dark:text-cyan-300'
                                 : 'bg-stone-50/60 dark:bg-white/[0.02] border-stone-200/60 dark:border-white/5 text-stone-600 dark:text-stone-400 hover:border-stone-300'

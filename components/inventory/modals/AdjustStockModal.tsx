@@ -72,7 +72,8 @@ export const AdjustStockModal: React.FC<AdjustStockModalProps> = ({
                         onChange={(e) => setAdjustQty(e.target.value)} 
                         className="w-full bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 text-lg font-bold outline-none focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:ring-4 focus:ring-[#2C5E3B]/10 dark:focus:ring-[#A9CBA2]/10 transition-all" 
                         placeholder="0" 
-                        min="1" 
+                        min="0.01"
+                        step="any" 
                         autoFocus 
                     />
                 </div>
@@ -96,7 +97,7 @@ export const AdjustStockModal: React.FC<AdjustStockModalProps> = ({
                     <Button 
                         variant={adjustType === 'IN' ? 'success' : 'danger'} 
                         onClick={onConfirm} 
-                        disabled={!adjustQty || parseInt(adjustQty) <= 0 || isSubmitting} 
+                        disabled={!adjustQty || parseFloat(adjustQty) <= 0 || isSubmitting} 
                         loading={isSubmitting}
                     >
                         Confirm Adjustment

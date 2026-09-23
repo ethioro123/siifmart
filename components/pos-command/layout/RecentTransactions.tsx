@@ -37,6 +37,16 @@ export const RecentTransactions: React.FC = () => {
                     </thead>
                     <tbody className="divide-y divide-[#E2DCCE]/40 dark:divide-emerald-950/20">
                         {(() => {
+                            if (filteredSales.length === 0) {
+                                return (
+                                    <tr>
+                                        <td colSpan={4} className="px-5 py-8 text-center text-xs text-stone-400 dark:text-stone-500 font-bold">
+                                            {t('posCommand.noTransactionsFound') || 'No transactions found in this period.'}
+                                        </td>
+                                    </tr>
+                                );
+                            }
+
                             const startIndex = (txPage - 1) * TX_PER_PAGE;
                             const paginatedTx = filteredSales.slice(startIndex, startIndex + TX_PER_PAGE);
 
@@ -68,7 +78,7 @@ export const RecentTransactions: React.FC = () => {
             {/* Pagination footer */}
             <div className="px-5 py-4 bg-[#FAF8F5]/60 dark:bg-black/10 border-t border-[#E2DCCE]/60 dark:border-emerald-950/20 flex items-center justify-between">
                 <div className="text-[10px] text-[#4D6E56] dark:text-[#7A9E83] font-black uppercase tracking-wider select-none">
-                    {t('common.page')} {txPage} {t('common.of')} {Math.max(1, Math.ceil(sales.length / TX_PER_PAGE))}
+                    {t('common.page')} {txPage} {t('common.of')} {Math.max(1, Math.ceil(filteredSales.length / TX_PER_PAGE))}
                 </div>
                 <div className="flex gap-2">
                     <button
@@ -79,8 +89,8 @@ export const RecentTransactions: React.FC = () => {
                         {t('common.previous')}
                     </button>
                     <button
-                        onClick={() => setTxPage(p => Math.min(Math.ceil(sales.length / TX_PER_PAGE), p + 1))}
-                        disabled={txPage >= Math.ceil(sales.length / TX_PER_PAGE)}
+                        onClick={() => setTxPage(p => Math.min(Math.ceil(filteredSales.length / TX_PER_PAGE), p + 1))}
+                        disabled={txPage >= Math.ceil(filteredSales.length / TX_PER_PAGE)}
                         className="px-3.5 py-1.5 bg-[#224429] dark:bg-[#2C5E3B] hover:bg-[#1B3520] dark:hover:bg-[#3a7a4d] text-white text-[10px] font-bold rounded-xl border border-transparent disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-sm"
                     >
                         {t('common.next')}

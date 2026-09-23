@@ -76,7 +76,7 @@ export const ReceiveHeader: React.FC<ReceiveHeaderProps> = ({
                             aria-label={t('warehouse.scanBarcodeOrSku')}
                             title={t('warehouse.scanBarcodeOrSku')}
                             placeholder={t('warehouse.scanBarcodeOrSku')}
-                            className="w-full h-12 pl-12 pr-4 bg-white/90 dark:bg-black/25 border border-[#E2DCCE] dark:border-emerald-950/20 hover:border-[#CFC6B4] dark:hover:border-emerald-900/15 rounded-xl text-[#1E3F27] dark:text-[#EAE5D9] font-mono text-sm focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:ring-4 focus:ring-[#2C5E3B]/10 dark:focus:ring-[#A9CBA2]/10 focus:outline-none transition-all placeholder:text-stone-400 dark:placeholder:text-stone-500 shadow-sm"
+                            className="w-full h-12 pl-12 pr-4 bg-white/90 dark:bg-black/25 border border-[#E2DCCE] dark:border-emerald-950/20 hover:border-[#CFC6B4] dark:hover:border-emerald-900/15 rounded-xl text-[#1E3F27] dark:text-[#EAE5D9] font-mono text-sm focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:ring-4 focus:ring-[#2C5E3B]/10 dark:focus:ring-[#A9CBA2]/10 focus:outline-none transition-colors placeholder:text-stone-400 dark:placeholder:text-stone-500 shadow-sm"
                         />
                     </div>
                     <button
@@ -89,7 +89,7 @@ export const ReceiveHeader: React.FC<ReceiveHeaderProps> = ({
                             }
                         }}
                         disabled={isSubmitting}
-                        className="h-12 px-8 bg-[#224429] dark:bg-[#EAE5D9] hover:bg-[#1B3520] dark:hover:bg-[#DFD9CA] text-[#FAF8F5] dark:text-[#1E3B24] font-black uppercase tracking-widest text-[10px] rounded-xl transition-all shadow-sm active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 border border-transparent dark:border-[#EAE5D9]/20">
+                        className="h-12 px-6 sm:px-8 bg-[#224429] dark:bg-[#EAE5D9] hover:bg-[#1B3520] dark:hover:bg-[#DFD9CA] text-[#FAF8F5] dark:text-[#1E3B24] font-black uppercase tracking-widest text-[10px] rounded-xl transition-colors shadow-sm active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 border border-transparent dark:border-[#EAE5D9]/20 shrink-0 min-w-[80px]">
                         {isSubmitting ? (
                             <Loader2 size={16} className="animate-spin" />
                         ) : (
@@ -130,7 +130,7 @@ export const ReceiveHeader: React.FC<ReceiveHeaderProps> = ({
                             {unresolvedScans.map((scan, idx) => (
                                 <div
                                     key={idx}
-                                    className="glass-panel-pushed px-4 py-2.5 flex items-center gap-3 group hover:border-[#2C5E3B]/40 dark:hover:border-[#A9CBA2]/30 hover:bg-[#FAF8F5]/80 dark:hover:bg-[#1C2620]/40 cursor-pointer transition-all shadow-sm"
+                                    className="glass-panel-pushed px-3 sm:px-4 py-2.5 flex items-center gap-2 sm:gap-3 group hover:border-[#2C5E3B]/40 dark:hover:border-[#A9CBA2]/30 hover:bg-[#FAF8F5]/80 dark:hover:bg-[#1C2620]/40 cursor-pointer transition-colors shadow-sm min-h-[48px] max-w-full overflow-hidden"
                                     onClick={() => {
                                         if (filteredReceiveOrders.length === 1) {
                                             setReceivingPO(filteredReceiveOrders[0]);
@@ -144,7 +144,7 @@ export const ReceiveHeader: React.FC<ReceiveHeaderProps> = ({
                                     aria-label={`Resolve barcode ${scan.barcode}`}
                                 >
                                     <div className="flex flex-col">
-                                        <span className="text-[10px] font-black text-slate-900 dark:text-white uppercase tracking-widest font-mono">{scan.barcode}</span>
+                                        <span className="text-[10px] font-black text-slate-900 dark:text-white uppercase tracking-widest font-mono truncate max-w-[120px] sm:max-w-none">{scan.barcode}</span>
                                         <span className="text-[9px] text-slate-500 dark:text-zinc-500 font-black uppercase tracking-tighter mt-1 bg-slate-100 dark:bg-white/5 px-1.5 rounded self-start">{t('warehouse.qtyLabel')} {scan.qty}</span>
                                     </div>
                                     <div className="flex items-center gap-2">
@@ -153,7 +153,7 @@ export const ReceiveHeader: React.FC<ReceiveHeaderProps> = ({
                                                 e.stopPropagation();
                                                 // Decrease logic would go here if implemented in main ReceiveTab
                                             }}
-                                            className="w-8 h-8 rounded-lg bg-slate-50 dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 flex items-center justify-center transition-all text-slate-900 dark:text-white border border-slate-200 dark:border-white/10"
+                                            className="w-9 h-9 sm:w-8 sm:h-8 rounded-lg bg-slate-50 dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 flex items-center justify-center transition-colors text-slate-900 dark:text-white border border-slate-200 dark:border-white/10"
                                             title={t('warehouse.decreaseQuantity')}
                                             aria-label={`${t('warehouse.decreaseQuantity')} ${scan.barcode}`}
                                         >
@@ -167,7 +167,7 @@ export const ReceiveHeader: React.FC<ReceiveHeaderProps> = ({
                                                 e.stopPropagation();
                                                 // Increase logic
                                             }}
-                                            className="w-8 h-8 rounded-lg bg-slate-50 dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 flex items-center justify-center transition-all text-slate-900 dark:text-white border border-slate-200 dark:border-white/10"
+                                            className="w-9 h-9 sm:w-8 sm:h-8 rounded-lg bg-slate-50 dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 flex items-center justify-center transition-colors text-slate-900 dark:text-white border border-slate-200 dark:border-white/10"
                                             title={t('warehouse.increaseQuantity')}
                                             aria-label={`${t('warehouse.increaseQuantity')} ${scan.barcode}`}
                                         >
@@ -179,7 +179,7 @@ export const ReceiveHeader: React.FC<ReceiveHeaderProps> = ({
                                             e.stopPropagation();
                                             setUnresolvedScans(prev => prev.filter((_, i) => i !== idx));
                                         }}
-                                        className="p-1.5 hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg transition-colors group/close"
+                                        className="p-2 min-w-[36px] min-h-[36px] hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg transition-colors group/close flex items-center justify-center"
                                         title={t('warehouse.removeScan')}
                                     >
                                         <X size={14} className="text-slate-400 dark:text-gray-600 group-hover/close:text-red-500" />

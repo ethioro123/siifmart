@@ -268,7 +268,7 @@ export const InventoryDesktopTable: React.FC<InventoryDesktopTableProps> = ({
                                 {(() => {
                                     const stockVal = product.stock || 0;
                                     const threshold = product.minStock !== undefined && product.minStock !== null && product.minStock > 0 ? product.minStock : 10;
-                                    const isOutOfStock = stockVal === 0;
+                                    const isOutOfStock = stockVal <= 0;
                                     const isLowStock = stockVal < threshold;
                                     const colorClasses = isOutOfStock
                                         ? 'bg-red-500/10 text-red-500 border border-red-500/30'

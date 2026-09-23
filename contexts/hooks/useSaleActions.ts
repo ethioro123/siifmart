@@ -3,6 +3,7 @@ import type {
     CartItem, SaleRecord, Site, Product, Customer, SystemConfig,
     PaymentMethod, ReturnItem, SystemLog, StorePoints
 } from '../../types';
+import { DEFAULT_STORE_POINT_RULES } from '../../types';
 import { customersService, productsService, salesService } from '../../services/supabase.service';
 import { posDB } from '../../services/db/pos.db';
 import { CURRENCY_SYMBOL } from '../../constants';
@@ -109,8 +110,11 @@ export function useSaleActions(deps: UseSaleActionsDeps) {
 
             // 4. Gamification Logic
             let pointsResult = null;
-            if (settings.posBonusEnabled !== false && activeSite?.id) {
-                const storeRules = settings.posPointRules || [];
+            const siteBonusAllowed = activeSite?.bonusEnabled !== false && (activeSite as any)?.bonus_enabled !== false;
+            if (settings.posBonusEnabled !== false && siteBonusAllowed && activeSite?.id) {
+                const storeRules = (settings.posPointRules && settings.posPointRules.length > 0)
+                    ? settings.posPointRules
+                    : DEFAULT_STORE_POINT_RULES;
                 let totalStorePoints = 0;
                 const pointsBreakdown: { item: string; rule: string; points: number }[] = [];
 

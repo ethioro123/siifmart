@@ -39,7 +39,7 @@ export const ROLE_PERMISSIONS: Record<string, string[]> = {
 
     // ═══ LEVEL 3 - SITE MANAGERS ═══
     store_manager: [
-        'dashboard', 'pos', 'inventory', 'procurement', 'sales', 'customers', 'employees', 'profile'
+        'dashboard', 'pos', 'inventory', 'sales', 'customers', 'employees', 'profile'
     ],
     warehouse_manager: [
         'dashboard', 'inventory', 'warehouse', 'procurement', 'employees', 'profile'
@@ -77,9 +77,9 @@ export const ROLE_PERMISSIONS: Record<string, string[]> = {
     // admin: stripped to read-only — no active users should have this role.
     // Use super_admin (CEO) or regional_manager instead.
     admin: ['dashboard', 'profile'],
-    manager: ['dashboard', 'pos', 'inventory', 'sales', 'customers', 'pricing', 'profile'],
-    hr: ['dashboard', 'employees', 'finance', 'profile'],
-    pos: ['dashboard', 'pos', 'customers', 'inventory', 'profile'],
+    manager: ['dashboard', 'pos', 'inventory', 'sales', 'customers', 'profile'],
+    hr: ['dashboard', 'employees', 'profile'],
+    pos: ['dashboard', 'pos', 'profile'],
     dispatcher: ['dashboard', 'inventory', 'warehouse', 'profile'],
     cs_manager: ['dashboard', 'customers', 'sales', 'profile'],
     store_supervisor: ['dashboard', 'pos', 'inventory', 'sales', 'customers', 'profile'],

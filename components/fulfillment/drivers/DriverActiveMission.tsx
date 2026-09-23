@@ -63,8 +63,8 @@ export const DriverActiveMission: React.FC<DriverActiveMissionProps> = ({
                     {paginatedJobs.map((job, idx) => {
                         const destSite = sites.find(s => s.id === job.destSiteId); const isPending = job.status === 'Pending'; const isFirst = idx === 0 && !isPending;
                         return (
-                            <div key={job.id} className={`group rounded-3xl transition-all border shadow-sm ${isPending ? 'bg-gray-100 dark:bg-black/30 border-gray-200 dark:border-white/5 opacity-60' : isFirst ? 'bg-[#2C5E3B]/5 dark:bg-[#2C5E3B]/10 border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20 shadow-[#2C5E3B]/5' : 'bg-gray-50 dark:bg-white/5 border-gray-200 dark:border-white/10'}`}>
-                                <div className="p-4 flex flex-col gap-2.5">
+                            <div key={job.id} className={`group rounded-2xl sm:rounded-3xl transition-colors border shadow-sm ${isPending ? 'bg-gray-100 dark:bg-black/30 border-gray-200 dark:border-white/5 opacity-60' : isFirst ? 'bg-[#2C5E3B]/5 dark:bg-[#2C5E3B]/10 border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20 shadow-[#2C5E3B]/5' : 'bg-gray-50 dark:bg-white/5 border-gray-200 dark:border-white/10'}`}>
+                                <div className="p-3 sm:p-4 flex flex-col gap-2.5">
                                     {/* Stop Header */}
                                     <div className="flex justify-between items-center">
                                         <div className="flex items-center gap-2">
@@ -79,11 +79,11 @@ export const DriverActiveMission: React.FC<DriverActiveMissionProps> = ({
                                     </div>
  
                                     {/* Destination & Address */}
-                                    <div onClick={() => { setSelectedJob(job); setIsDetailsOpen(true); }} className="cursor-pointer hover:opacity-80 transition-opacity">
-                                        <h3 className="text-base font-bold text-gray-900 dark:text-white leading-tight tracking-tight">{destSite?.name || t('warehouse.driverHub.customer')}</h3>
+                                    <div onClick={() => { setSelectedJob(job); setIsDetailsOpen(true); }} className="cursor-pointer hover:opacity-80 transition-opacity min-w-0">
+                                        <h3 className="text-sm sm:text-base font-bold text-gray-900 dark:text-white leading-tight tracking-tight truncate">{destSite?.name || t('warehouse.driverHub.customer')}</h3>
                                         <div className="flex items-start gap-1 text-gray-500 dark:text-gray-400 mt-0.5">
                                             <MapPin size={11} className="mt-0.5 shrink-0 text-[#2C5E3B] dark:text-[#A9CBA2]" />
-                                            <p className="text-[9px] font-bold uppercase tracking-wider leading-relaxed truncate max-w-[90%]">
+                                            <p className="text-[9px] font-bold uppercase tracking-wider leading-relaxed truncate">
                                                 {destSite?.address || t('warehouse.driverHub.addressPending')}{job.location ? ` • ${job.location}` : ''}
                                             </p>
                                         </div>
@@ -99,7 +99,7 @@ export const DriverActiveMission: React.FC<DriverActiveMissionProps> = ({
                                                     {lineItems.slice(0, 3).map((item: any, idx: number) => {
                                                         const qty = item.pickedQty || item.quantity || item.expectedQty || 0;
                                                         return (
-                                                            <span key={idx} className="inline-flex items-center gap-1 bg-gray-100 dark:bg-white/5 px-2 py-0.5 rounded text-[9px] text-gray-700 dark:text-gray-300 font-medium max-w-[150px] truncate">
+                                                            <span key={idx} className="inline-flex items-center gap-1 bg-gray-100 dark:bg-white/5 px-2 py-0.5 rounded text-[9px] text-gray-700 dark:text-gray-300 font-medium max-w-[130px] sm:max-w-[150px] truncate">
                                                                 <span className="truncate">{item.name || item.sku}</span>
                                                                 <span className="font-bold text-gray-900 dark:text-white shrink-0">x{qty}</span>
                                                             </span>
@@ -116,7 +116,7 @@ export const DriverActiveMission: React.FC<DriverActiveMissionProps> = ({
                                     })()}
 
                                     {/* Actions & Driver Info */}
-                                    <div className="flex items-center justify-between gap-2 pt-2 border-t border-gray-100 dark:border-white/5">
+                                    <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-gray-100 dark:border-white/5">
                                         {(() => {
                                             const canSeeGlobalQueue = ['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher'].includes((user?.role || '').toLowerCase());
                                             if (canSeeGlobalQueue && job.assignedTo) {
@@ -130,9 +130,9 @@ export const DriverActiveMission: React.FC<DriverActiveMissionProps> = ({
                                             return <div />;
                                         })()}
 
-                                        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 shrink-0">
+                                        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
                                             {(job.transferStatus === 'In-Transit' || job.transferStatus === 'Shipped') && (
-                                                <button onClick={(e) => { e.stopPropagation(); if (destSite?.address) window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(destSite.address)}`, '_blank'); else addNotification('info', t('warehouse.driverHub.addressPending')); }} className="px-3 py-1.5 bg-gray-200 dark:bg-white/10 hover:bg-gray-300 dark:hover:bg-white/20 rounded-lg text-[9px] font-black text-gray-900 dark:text-white uppercase flex items-center justify-center gap-1.5 transition-all shadow-sm active:scale-95">
+                                                <button onClick={(e) => { e.stopPropagation(); if (destSite?.address) window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(destSite.address)}`, '_blank'); else addNotification('info', t('warehouse.driverHub.addressPending')); }} className="px-3 py-2 min-h-[40px] bg-gray-200 dark:bg-white/10 hover:bg-gray-300 dark:hover:bg-white/20 rounded-lg text-[9px] font-black text-gray-900 dark:text-white uppercase flex items-center justify-center gap-1.5 transition-colors shadow-sm active:scale-95">
                                                     <Navigation size={11} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />{t('warehouse.driverHub.nav')}
                                                 </button>
                                             )}
@@ -160,7 +160,7 @@ export const DriverActiveMission: React.FC<DriverActiveMissionProps> = ({
                                                     return (
                                                         <button
                                                             onClick={(e) => { e.stopPropagation(); setPartialDeliveryJob(job); }}
-                                                            className="px-4 py-1.5 bg-[#224429] dark:bg-[#EAE5D9] hover:bg-[#1B3520] dark:hover:bg-[#DFD9CA] text-[#FAF8F5] dark:text-[#1E3B24] rounded-lg text-[9px] font-black uppercase flex items-center justify-center gap-1.5 shadow-md active:scale-95 transition-all"
+                                                            className="px-3 sm:px-4 py-2 min-h-[40px] bg-[#224429] dark:bg-[#EAE5D9] hover:bg-[#1B3520] dark:hover:bg-[#DFD9CA] text-[#FAF8F5] dark:text-[#1E3B24] rounded-lg text-[9px] font-black uppercase flex items-center justify-center gap-1.5 shadow-md active:scale-95 transition-colors"
                                                         >
                                                             <CheckCircle size={11} /> {(t('warehouse.driverHub.completeDeliveryBtn') || 'Complete Delivery').toUpperCase()}
                                                         </button>

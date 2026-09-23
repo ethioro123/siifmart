@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
     Building, Store, AlertTriangle, CheckCircle2, XCircle, ArrowRight,
     MapPin, Package, Shield, Truck, ChevronRight
@@ -24,6 +25,7 @@ export const ProductNetworkStockModal: React.FC<ProductNetworkStockModalProps> =
     allProducts,
     sites
 }) => {
+    const navigate = useNavigate();
     if (!product) return null;
 
     const targetSku = (product.sku || '').trim().toUpperCase();
@@ -148,16 +150,29 @@ export const ProductNetworkStockModal: React.FC<ProductNetworkStockModalProps> =
 
                 {/* Smart Transfer Recommendation Alert (if warehouses have surplus and stores are low) */}
                 {distribution.bestSourceWarehouse && distribution.lowStoreCount > 0 && (
-                    <div className="bg-amber-50/70 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/30 rounded-2xl p-4 flex items-start gap-3">
-                        <Truck size={18} className="text-amber-700 dark:text-amber-400 shrink-0 mt-0.5" />
-                        <div>
-                            <h5 className="text-xs font-black text-amber-800 dark:text-amber-300">
-                                Rebalance Opportunity Detected
-                            </h5>
-                            <p className="text-[11px] text-amber-700/90 dark:text-amber-400/80 mt-0.5">
-                                {distribution.lowStoreCount} store(s) are low on stock. <strong>{distribution.bestSourceWarehouse.site.name}</strong> currently holds a surplus of {distribution.bestSourceWarehouse.stock} units available for inter-site transfer.
-                            </p>
+                    <div className="bg-amber-50/70 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/30 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div className="flex items-start gap-3">
+                            <Truck size={18} className="text-amber-700 dark:text-amber-400 shrink-0 mt-0.5" />
+                            <div>
+                                <h5 className="text-xs font-black text-amber-800 dark:text-amber-300">
+                                    Rebalance Opportunity Detected
+                                </h5>
+                                <p className="text-[11px] text-amber-700/90 dark:text-amber-400/80 mt-0.5">
+                                    {distribution.lowStoreCount} store(s) are low on stock. <strong>{distribution.bestSourceWarehouse.site.name}</strong> currently holds a surplus of {distribution.bestSourceWarehouse.stock} units available for inter-site transfer.
+                                </p>
+                            </div>
                         </div>
+                        <button
+                            type="button"
+                            onClick={() => {
+                                onClose();
+                                navigate(`/wms-ops?tab=transfers&source=${distribution.bestSourceWarehouse?.site.id}&sku=${encodeURIComponent(product.sku || product.name)}`);
+                            }}
+                            className="shrink-0 px-3.5 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
+                        >
+                            <span>Initiate Transfer</span>
+                            <ArrowRight size={13} />
+                        </button>
                     </div>
                 )}
 

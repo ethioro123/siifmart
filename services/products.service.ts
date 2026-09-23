@@ -80,14 +80,14 @@ export const productsService = {
                 query = query.or('barcode.is.null,barcode.eq.');
             }
             if (filters.stockHealth && filters.stockHealth !== 'All') {
-                if (filters.stockHealth === 'out_of_stock') query = query.eq('stock', 0);
+                if (filters.stockHealth === 'out_of_stock') query = query.lte('stock', 0);
                 else if (filters.stockHealth === 'low_stock') query = query.or('status.eq.low_stock,and(stock.gt.0,stock.lte.10)');
                 else if (filters.stockHealth === 'in_stock') query = query.gt('stock', 0);
                 else if (filters.stockHealth === 'overstocked') query = query.gte('stock', 100);
             } else if (filters.status && filters.status !== 'All') {
                 if (filters.status === 'Active' || filters.status === 'In Stock') query = query.gt('stock', 0);
                 else if (filters.status === 'Low Stock') query = query.or('status.eq.low_stock,and(stock.gt.0,stock.lte.10)');
-                else if (filters.status === 'Out of Stock') query = query.eq('stock', 0);
+                else if (filters.status === 'Out of Stock') query = query.lte('stock', 0);
                 else if (filters.status === 'Archived') query = query.eq('status', 'archived');
             } else if (!filters.includeArchived) {
                 query = query.neq('status', 'archived');

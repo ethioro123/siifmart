@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
-import { Menu, Search, Sun, Moon, RefreshCw, LayoutDashboard } from 'lucide-react';
+import { Menu, Search, Sun, Moon, RefreshCw } from 'lucide-react';
 import { useStore } from '../contexts/CentralStore';
 import { useData } from '../contexts/DataContext';
 import { useGamification } from '../contexts/GamificationContext';
@@ -43,7 +43,7 @@ export default function TopBar() {
    const { user, toggleSidebar, theme, toggleTheme, logout } = useStore();
    const { language, setLanguage } = useLanguage();
    const {
-      activeSite, sites, notifications, markNotificationsRead,
+      activeSite, sites, setActiveSite, notifications, markNotificationsRead,
       addNotification, clearNotification, clearAllNotifications, employees, allProducts, customers, allOrders, allSales,
       tasks, setTasks, refreshData
    } = useData();
@@ -203,8 +203,17 @@ export default function TopBar() {
       const isJobIdPattern = /^(JOB|J|T)-\d{1,8}$/i.test(query.trim());
 
       // 1. Navigation & Command Search
+      const siteType = activeSite?.type || '';
+      const isStore = ['Store', 'Dark Store', 'Retail', 'POS'].includes(siteType);
+      const isWarehouse = ['Warehouse', 'Distribution Center', 'WMS', 'Fulfillment Center'].includes(siteType);
+      const isCeo = userRole === 'super_admin' || (userRole as string) === 'CEO';
+
       const navigation = NAVIGATION_TARGETS.filter(nav => {
          if (!canAccessModule(userRole, nav.module)) return false;
+         if (!isCeo) {
+            if (isWarehouse && ['admin', 'pricing', 'finance', 'settings', 'pos', 'customers'].includes(nav.module)) return false;
+            if (isStore && ['admin', 'warehouse', 'pricing', 'finance', 'settings', 'procurement'].includes(nav.module)) return false;
+         }
          return nav.title.toLowerCase().includes(query) || nav.keywords.some(k => k.toLowerCase().includes(query));
       }).slice(0, 4); // Max 4 nav results
 
@@ -245,7 +254,7 @@ export default function TopBar() {
          employees: employeesResults,
          total: navigation.length + deepLinks.length + products.length + customersResults.length + orders.length + sales.length + employeesResults.length
       };
-   }, [searchValue, allProducts, customers, allOrders, allSales, employees, user]);
+   }, [searchValue, allProducts, customers, allOrders, allSales, employees, user, activeSite]);
 
    // Handlers
    const handleSearch = (e: React.FormEvent) => {
@@ -266,7 +275,7 @@ export default function TopBar() {
          case 'product': navigate('/inventory'); break;
          case 'customer': navigate('/customers'); break;
          case 'order': navigate('/procurement'); break;
-         case 'sale': navigate('/sales-history'); break;
+         case 'sale': navigate('/sales'); break;
          case 'employee': navigate('/employees'); break;
       }
    };
@@ -329,23 +338,18 @@ export default function TopBar() {
    if (!user) return null;
 
    return (
-      <header className="h-14 md:h-16 sticky top-0 z-[100] px-2 sm:px-4 md:px-6 flex items-center justify-between transition-colors duration-500">
-         <div className="flex items-center space-x-2 sm:space-x-4">
+      <header
+         className="sticky top-0 z-[100] px-2 sm:px-4 md:px-6 flex items-center justify-between transition-colors duration-300 min-h-[56px] h-14 sm:h-16 bg-[#FDFBF7] dark:bg-[#151D18] border-b border-[#E2DCCE] dark:border-[#223326] shadow-xs"
+         style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}
+      >
+         <div className="flex items-center space-x-2 sm:space-x-3 min-w-0 flex-1 sm:flex-initial">
             <button
                onClick={toggleSidebar}
-               className="text-[#4D6E56] dark:text-[#A9CBA2] hover:text-[#1E3F27] dark:hover:text-white p-2 min-w-[44px] min-h-[44px] flex items-center justify-center cursor-pointer transition-colors rounded-lg active:bg-black/10 dark:active:bg-white/10"
+               className="text-[#4D6E56] dark:text-[#A9CBA2] hover:text-[#1E3F27] dark:hover:text-white p-2 min-w-[40px] min-h-[40px] flex items-center justify-center cursor-pointer transition-colors rounded-lg active:bg-black/10 dark:active:bg-white/10 flex-shrink-0"
                aria-label="Toggle sidebar"
             >
                <Menu size={22} className="md:w-6 md:h-6" />
             </button>
-            
-            {/* Logo / Brand */}
-            <div className="flex items-center gap-2 mr-2 cursor-pointer group" onClick={() => navigate('/')}>
-               <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-[#1E3F27] via-[#2C5E3B] to-amber-700 flex items-center justify-center shadow-[0_3px_10px_rgba(44,94,59,0.15)] group-hover:scale-105 transition-transform duration-300">
-                  <LayoutDashboard size={16} className="text-white" />
-               </div>
-               <span className="hidden sm:inline font-black text-lg text-[#1E3F27] dark:text-[#EAE5D9] tracking-tighter select-none">SIIF<span className="bg-clip-text text-transparent bg-gradient-to-r from-[#2C5E3B] to-amber-600 dark:from-[#A9CBA2] dark:to-[#DFD5C6] font-black">MART</span></span>
-            </div>
 
             <DesktopSearch 
                searchValue={searchValue}
@@ -363,23 +367,24 @@ export default function TopBar() {
                sites={sites}
                employees={employees}
                activeSite={activeSite}
+               setActiveSite={setActiveSite}
             />
          </div>
 
-         <div className="flex items-center space-x-1 sm:space-x-2 md:space-x-4">
+         <div className="flex items-center space-x-1 sm:space-x-2 md:space-x-3 flex-shrink-0 ml-2">
             {/* Mobile Search Trigger */}
             <button
                onClick={() => setIsMobileSearchVisible(true)}
-               className="lg:hidden p-2 text-[#4D6E56] dark:text-[#A9CBA2] hover:text-[#1E3F27] dark:hover:text-white transition-colors cursor-pointer"
+               className="lg:hidden p-2 text-[#4D6E56] dark:text-[#A9CBA2] hover:text-[#1E3F27] dark:hover:text-white transition-colors cursor-pointer min-w-[36px] min-h-[36px] flex items-center justify-center"
                aria-label="Search"
             >
-               <Search size={20} />
+               <Search size={18} />
             </button>
 
             {/* Refresh Button */}
             <button 
                onClick={handleRefresh}
-               className={`flex p-2 rounded-xl border border-[#E2DCCE] dark:border-emerald-950/20 bg-white/50 dark:bg-black/10 text-[#4D6E56] dark:text-[#A9CBA2] hover:text-[#2C5E3B] dark:hover:text-white hover:border-[#2C5E3B]/30 dark:hover:border-emerald-800/30 transition-all cursor-pointer ${isRefreshing ? 'animate-spin text-[#2C5E3B] dark:text-[#A9CBA2]' : ''}`}
+               className={`hidden sm:flex p-2 rounded-xl border border-[#E2DCCE] dark:border-emerald-950/20 bg-white/50 dark:bg-black/10 text-[#4D6E56] dark:text-[#A9CBA2] hover:text-[#2C5E3B] dark:hover:text-white hover:border-[#2C5E3B]/30 dark:hover:border-emerald-800/30 transition-all cursor-pointer ${isRefreshing ? 'animate-spin text-[#2C5E3B] dark:text-[#A9CBA2]' : ''}`}
                title="Reload Page"
                aria-label="Reload Page"
             >
@@ -389,7 +394,7 @@ export default function TopBar() {
             {/* Dark/Light Toggle */}
             <button
                onClick={toggleTheme}
-               className="p-2 rounded-xl border border-[#E2DCCE] dark:border-emerald-950/20 bg-white/50 dark:bg-black/10 text-[#4D6E56] dark:text-[#A9CBA2] hover:text-amber-600 dark:hover:text-amber-500 hover:border-amber-600/30 dark:hover:border-amber-500/20 transition-all cursor-pointer"
+               className="hidden sm:flex p-2 rounded-xl border border-[#E2DCCE] dark:border-emerald-950/20 bg-white/50 dark:bg-black/10 text-[#4D6E56] dark:text-[#A9CBA2] hover:text-amber-600 dark:hover:text-amber-500 hover:border-amber-600/30 dark:hover:border-amber-500/20 transition-all cursor-pointer"
                aria-label="Toggle Theme"
             >
                {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
@@ -434,6 +439,9 @@ export default function TopBar() {
                navigate={navigate}
                language={language}
                setLanguage={setLanguage}
+               theme={theme}
+               toggleTheme={toggleTheme}
+               onRefresh={handleRefresh}
             />
          </div>
 

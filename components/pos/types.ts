@@ -92,6 +92,10 @@ export interface POSContextType {
     isPriceUpdatesModalOpen: boolean;
     setIsPriceUpdatesModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
 
+    isStartShiftModalOpen: boolean;
+    setIsStartShiftModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
+    handleStartShift: (openingFloat: number) => void;
+
     isShiftModalOpen: boolean;
     setIsShiftModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
     closingStep: number;

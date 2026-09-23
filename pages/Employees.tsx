@@ -132,8 +132,24 @@ export default function Employees() {
                <EmployeePagination currentPage={currentPage} totalPages={totalPages} totalCount={totalCount} ITEMS_PER_PAGE={20} setCurrentPage={setCurrentPage} />
             </div>
          )}
-         {viewMode === 'org' && <OrgChart employees={employees} sites={sites} />}
-         {viewMode === 'shifts' && <ShiftPlanner employees={employees} canEdit={hasPermission(user?.role, 'MANAGE_SHIFTS')} />}
+         {viewMode === 'org' && (
+            <OrgChart
+               employees={employees && employees.length > 0 ? employees : (displayedEmployees || [])}
+               sites={sites}
+               isLoading={isLoadingEmployees}
+               onlineIds={onlineIds}
+               onSelectEmployee={setSelectedEmployee}
+               onOpenAddEmployee={wizard.handleOpenWizard}
+               onOpenIdCard={setIdCardEmployee}
+            />
+         )}
+         {viewMode === 'shifts' && (
+            <ShiftPlanner
+               employees={employees}
+               canEdit={hasPermission(user?.role, 'MANAGE_SHIFTS')}
+               initialSiteFilter={filterSite !== 'All' ? filterSite : (activeSite?.id || 'All')}
+            />
+         )}
 
          <EmployeeModals 
             selectedEmployee={selectedEmployee} 

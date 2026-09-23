@@ -86,7 +86,7 @@ export const POSCartPanel: React.FC = () => {
                         aria-label={t('pos.backToProducts')}
                     >
                         <ArrowLeft size={18} />
-                        <span>Catalog</span>
+                        <span>Products</span>
                     </button>
 
                     <div className="flex items-center gap-2">
@@ -323,7 +323,22 @@ export const POSCartPanel: React.FC = () => {
                             {showActions && (
                                 <>
                                     <div className="fixed inset-0 z-10" onClick={() => setShowActions(false)} />
-                                    <div className="absolute bottom-full mb-2 right-0 w-48 bg-white dark:bg-[#18201B] border border-[#E2DCCE] dark:border-emerald-950/40 rounded-2xl shadow-2xl p-2 z-20 space-y-1 animate-in slide-in-from-bottom-2">
+                                    <div className="absolute bottom-full mb-2 right-0 w-52 bg-white dark:bg-[#18201B] border border-[#E2DCCE] dark:border-emerald-950/40 rounded-2xl shadow-2xl p-2 z-20 space-y-1 animate-in slide-in-from-bottom-2">
+                                        <button
+                                            type="button"
+                                            onClick={() => { setIsPriceUpdatesModalOpen(true); setShowActions(false); native.haptic(); }}
+                                            className="w-full flex items-center justify-between px-3 py-2 rounded-xl hover:bg-stone-100 dark:hover:bg-white/5 text-left text-xs font-bold text-stone-700 dark:text-gray-300"
+                                        >
+                                            <div className="flex items-center gap-2">
+                                                <Tag size={14} className="text-blue-600" />
+                                                <span>Price Updates</span>
+                                            </div>
+                                            {unseenPriceUpdatesCount > 0 && (
+                                                <span className="px-1.5 py-0.2 bg-blue-600 text-white text-[9px] font-black rounded-full">
+                                                    {unseenPriceUpdatesCount}
+                                                </span>
+                                            )}
+                                        </button>
                                         <button
                                             type="button"
                                             onClick={() => { setIsRecallModalOpen(true); setShowActions(false); }}

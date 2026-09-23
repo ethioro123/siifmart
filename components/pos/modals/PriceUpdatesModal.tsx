@@ -6,7 +6,8 @@ import Modal from '../../Modal';
 import Button from '../../shared/Button';
 import { CURRENCY_SYMBOL } from '../../../constants';
 import { getSellUnit } from '../../../utils/units';
-import { CheckCircle, CheckCheck } from 'lucide-react';
+import { native } from '../../../utils/native';
+import { CheckCircle, CheckCheck, Plus } from 'lucide-react';
 
 export const PriceUpdatesModal: React.FC = () => {
     const { t } = useLanguage();
@@ -15,10 +16,11 @@ export const PriceUpdatesModal: React.FC = () => {
         setIsPriceUpdatesModalOpen,
         priceUpdatedProducts,
         lastSeenPriceUpdate,
-        markPriceUpdatesAsRead
+        markPriceUpdatesAsRead,
+        addToCart
     } = usePOS();
 
-    const { products } = useData();
+    const { products, addNotification } = useData();
 
     // Filter products with price changes that are unseen
     const cutoff = Date.now() - 7 * 24 * 60 * 60 * 1000;
@@ -30,8 +32,11 @@ export const PriceUpdatesModal: React.FC = () => {
     });
 
     const handleAcknowledge = () => {
+        const count = priceUpdatedProducts.length;
         markPriceUpdatesAsRead();
         setIsPriceUpdatesModalOpen(false);
+        native.haptic();
+        addNotification('success', count > 0 ? `Confirmed ${count} product price update${count !== 1 ? 's' : ''}` : 'Price updates confirmed');
     };
 
     return (
@@ -41,7 +46,7 @@ export const PriceUpdatesModal: React.FC = () => {
                 markPriceUpdatesAsRead();
                 setIsPriceUpdatesModalOpen(false);
             }}
-            title="Recent Price Changes (7 Days)"
+            title="Product Price Updates & Confirmation"
             size="lg"
         >
             <div className="p-4 space-y-4">
@@ -52,7 +57,11 @@ export const PriceUpdatesModal: React.FC = () => {
                         {unseenPriceChanges.length > 0 && (
                             <button
                                 type="button"
-                                onClick={markPriceUpdatesAsRead}
+                                onClick={() => {
+                                    markPriceUpdatesAsRead();
+                                    native.haptic();
+                                    addNotification('info', 'Marked price updates as read');
+                                }}
                                 className="px-2.5 py-1 bg-amber-500 hover:bg-amber-600 text-white text-[10px] font-black uppercase tracking-wider rounded-lg transition-all flex items-center gap-1 shadow-sm cursor-pointer"
                             >
                                 <CheckCheck size={13} />
@@ -77,6 +86,7 @@ export const PriceUpdatesModal: React.FC = () => {
                                     <th className="p-3 text-right">Old Price</th>
                                     <th className="p-3 text-right">New Price</th>
                                     <th className="p-3 text-right">Update Time</th>
+                                    <th className="p-3 text-center">Action</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-[#E2DCCE] dark:divide-white/5">
@@ -111,6 +121,21 @@ export const PriceUpdatesModal: React.FC = () => {
                                             <td className="p-3 text-right text-xs text-[#2C5E3B] dark:text-[#A9CBA2] font-semibold">
                                                 {priceTime ? new Date(priceTime).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—'}
                                             </td>
+                                            <td className="p-3 text-center">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        addToCart(p);
+                                                        native.haptic();
+                                                        addNotification('info', `Added ${p.name} at updated price ${CURRENCY_SYMBOL} ${p.price}`);
+                                                    }}
+                                                    className="px-2.5 py-1 bg-[#2C5E3B]/10 hover:bg-[#2C5E3B] text-[#2C5E3B] hover:text-white dark:bg-white/5 dark:hover:bg-[#2C5E3B] dark:text-[#A9CBA2] dark:hover:text-white rounded-lg text-xs font-bold transition-colors inline-flex items-center gap-1 cursor-pointer"
+                                                    title="Add to cart at new price"
+                                                >
+                                                    <Plus size={12} />
+                                                    <span>Add</span>
+                                                </button>
+                                            </td>
                                         </tr>
                                     );
                                 })}
@@ -140,3 +165,4 @@ export const PriceUpdatesModal: React.FC = () => {
         </Modal>
     );
 };
+export default PriceUpdatesModal;

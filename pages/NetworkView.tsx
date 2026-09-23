@@ -26,6 +26,9 @@ export default function NetworkInventory() {
     // Calculate inventory metrics per site (exclude Admin sites)
     const siteInventory = useMemo(() => {
         const inventorySites = sites.filter(s => {
+            const isOperationalType = ['Warehouse', 'Distribution Center', 'Store', 'Dark Store', 'Retail'].includes(s.type);
+            if (isOperationalType) return true;
+
             const isAdminByType = s.type === 'Administration' || s.type === 'Administrative';
             const isAdminByName = s.name?.toLowerCase().includes('admin') ||
                 s.name?.toLowerCase().includes('headquarters') ||
@@ -42,7 +45,7 @@ export default function NetworkInventory() {
             const totalValueCost = siteProducts.reduce((sum, p) => sum + (p.stock * (p.costPrice || p.price * 0.7)), 0);
             const totalItems = siteProducts.reduce((sum, p) => sum + p.stock, 0);
             const lowStockItems = siteProducts.filter(p => p.stock > 0 && p.stock <= (p.minStock || 10)).length;
-            const outOfStockItems = siteProducts.filter(p => p.stock === 0).length;
+            const outOfStockItems = siteProducts.filter(p => p.stock <= 0).length;
             const categories = [...new Set(siteProducts.map(p => p.category))];
 
             return {
@@ -68,6 +71,19 @@ export default function NetworkInventory() {
     const totalNetworkAssetValue = siteInventory.reduce((sum, inv) => sum + inv.metrics.totalValue, 0);
     const totalPotentialRevenue = siteInventory.reduce((sum, inv) => sum + inv.metrics.totalValueRetail, 0);
     const totalLowStockAlerts = siteInventory.reduce((sum, inv) => sum + inv.metrics.lowStockItems + inv.metrics.outOfStockItems, 0);
+    const totalNetworkUnits = siteInventory.reduce((sum, inv) => sum + inv.metrics.totalItems, 0);
+
+    // Unique catalog SKUs across the active network
+    const uniqueNetworkSKUs = useMemo(() => {
+        const skuSet = new Set<string>();
+        siteInventory.forEach(inv => {
+            inv.products.forEach(p => {
+                const key = (p.sku || p.name || '').trim();
+                if (key) skuSet.add(key);
+            });
+        });
+        return skuSet.size;
+    }, [siteInventory]);
 
     // Filter by search & location type
     const filteredInventory = useMemo(() => {
@@ -95,7 +111,7 @@ export default function NetworkInventory() {
     };
 
     const getStockStatusColor = (stock: number, minStock: number = 10) => {
-        if (stock === 0) return 'text-red-700 bg-red-50 dark:bg-red-950/30 dark:text-red-400 border-red-200 dark:border-red-900/30';
+        if (stock <= 0) return 'text-red-700 bg-red-50 dark:bg-red-950/30 dark:text-red-400 border-red-200 dark:border-red-900/30';
         if (stock <= minStock) return 'text-amber-800 bg-amber-50 dark:bg-amber-950/30 dark:text-amber-300 border-amber-200 dark:border-amber-900/30';
         if (stock < 50) return 'text-blue-700 bg-blue-50 dark:bg-blue-950/30 dark:text-blue-300 border-blue-200 dark:border-blue-900/30';
         return 'text-[#2C5E3B] bg-emerald-50 dark:bg-[#2C5E3B]/20 dark:text-[#A9CBA2] border-emerald-200 dark:border-emerald-950/30';
@@ -120,6 +136,8 @@ export default function NetworkInventory() {
                 totalNetworkProducts={totalNetworkProducts}
                 totalNetworkAssetValue={totalNetworkAssetValue}
                 totalPotentialRevenue={totalPotentialRevenue}
+                uniqueNetworkSKUs={uniqueNetworkSKUs}
+                totalNetworkUnits={totalNetworkUnits}
             />
 
             {/* Search & Location Filter Bar */}
@@ -304,6 +322,7 @@ export default function NetworkInventory() {
                         onPageChange={(page) => setPageForSite(site.id, page)}
                         onSelectProduct={(prod) => setSelectedProductForModal(prod)}
                         isLowStockFilterActive={typeFilter === 'LOW_STOCK'}
+                        searchTerm={searchTerm}
                     />
                 ))}
             </div>

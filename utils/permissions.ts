@@ -82,7 +82,7 @@ export const PERMISSIONS = {
     MANAGE_SUPPLIERS: ['super_admin', 'procurement_manager'],
 
     // Finance
-    ACCESS_FINANCE: ['super_admin', 'hr', 'auditor', 'finance_manager'],
+    ACCESS_FINANCE: ['super_admin', 'auditor', 'finance_manager'],
     VIEW_REVENUE: ['super_admin', 'auditor', 'finance_manager'],
     VIEW_EXPENSES: ['super_admin', 'auditor', 'finance_manager', 'procurement_manager'],
     ADD_EXPENSE: ['super_admin', 'finance_manager'],
@@ -93,7 +93,7 @@ export const PERMISSIONS = {
     // Pricing
     ACCESS_PRICING: ['super_admin', 'finance_manager', 'procurement_manager'],
     EDIT_PRICE: ['super_admin', 'finance_manager'],
-    CREATE_PROMOTION: ['super_admin', 'store_supervisor'],
+    CREATE_PROMOTION: ['super_admin'],
     APPROVE_PRICE_CHANGE: ['super_admin', 'finance_manager'],
 
     // Warehouse

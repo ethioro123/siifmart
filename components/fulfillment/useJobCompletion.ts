@@ -11,6 +11,7 @@ import {
 } from '../../services/supabase.service';
 import { QueryClient } from '@tanstack/react-query';
 import { logger } from '../../utils/logger';
+import { calculateWarehousePoints } from '../../utils/warehouseGamification';
 
 // Helper for translations
 const getTranslation = (path: string): string => {
@@ -190,12 +191,26 @@ export const useJobCompletion = (deps: UseJobCompletionDeps) => {
             addNotification('success', getTranslation('warehouse.jobCompletedSuccess').replace('{id}', job.jobNumber || jobId));
 
             // ═══════════════════════════════════════════════════════════════
-            // GAMIFICATION TRIGGER (Decoupled)
+            // GAMIFICATION TRIGGER (Decoupled & Returned)
             // ═══════════════════════════════════════════════════════════════
+            const totalCount = itemsToValidate.length;
+            const shortCount = itemsToValidate.filter((i: any) => i.status === 'Short').length;
+            const jobAccuracy = totalCount > 0 ? Math.round(((totalCount - shortCount) / totalCount) * 100) : 100;
+
+            const calculatedPoints = calculateWarehousePoints(
+                { ...job, items: totalCount, lineItems: itemsToValidate },
+                undefined,
+                jobAccuracy
+            );
+            pointsResult = calculatedPoints;
+
             const eventPayload = {
                 job: { ...job, status: 'Completed', completedBy: completedByValue, completedAt: completionTime },
                 userId: user?.id,
-                employeeId: user?.employeeId || (employees.find((e: any) => e.id === user?.id || e.name === user?.name || e.name === employeeName)?.id)
+                employeeId: user?.employeeId || (employees.find((e: any) => e.id === user?.id || e.name === user?.name || e.name === employeeName)?.id),
+                employeeName: employeeName || user?.name,
+                pointsResult,
+                accuracy: jobAccuracy
             };
 
             logger.debug('useJobCompletion', '📣 Dispatching fulfillment:job-completed event', eventPayload);

@@ -24,7 +24,7 @@ export const PickScannerSubmitButton: React.FC<PickScannerSubmitButtonProps> = (
         <button
             type="submit"
             disabled={(step === 'LOCATION' && !inputVal.trim() && !!currentItem) || isProcessing}
-            className={`mt-6 w-full py-6 rounded-2xl flex items-center justify-center gap-3 transition-all duration-500 active:scale-95 shadow-2xl border-2 relative z-30 pointer-events-auto ${((!inputVal.trim() && !isItemMatched && !!currentItem)) || isProcessing
+            className={`mt-4 sm:mt-6 w-full py-4 sm:py-5 px-3 min-h-[52px] rounded-2xl flex items-center justify-center gap-2 sm:gap-3 transition-colors active:scale-95 shadow-xl sm:shadow-2xl border-2 relative z-30 pointer-events-auto text-xs sm:text-sm md:text-base font-black uppercase tracking-wider ${((!inputVal.trim() && !isItemMatched && !!currentItem)) || isProcessing
                 ? 'bg-gray-200 dark:bg-[#1C2620]/50 border-gray-300 dark:border-white/5 text-gray-400 dark:text-gray-600 grayscale opacity-50 cursor-not-allowed'
                 : (!currentItem)
                     ? 'bg-gradient-to-r from-green-500 to-emerald-600 border-green-400 text-white font-black uppercase tracking-widest shadow-[0_0_40px_rgba(34,197,94,0.4)] scale-105'
@@ -36,21 +36,23 @@ export const PickScannerSubmitButton: React.FC<PickScannerSubmitButtonProps> = (
                 }`}
         >
             {isProcessing ? (
-                <RotateCcw size={24} className="animate-spin" />
+                <RotateCcw size={20} className="animate-spin shrink-0" />
             ) : (isItemMatched || !currentItem) ? (
-                <CheckCircle size={24} className="animate-bounce" />
+                <CheckCircle size={20} className="animate-bounce shrink-0" />
             ) : (
-                <CheckCircle size={24} />
+                <CheckCircle size={20} className="shrink-0" />
             )}
-            {isProcessing
-                ? t('warehouse.picking.validating')
-                : !currentItem
-                    ? 'Finalize Mission & Create Pack Job →'
-                    : step === 'QUANTITY'
-                        ? t('warehouse.picking.confirmPick')
-                        : isItemMatched
-                            ? t('warehouse.picking.completePick')
-                            : t('warehouse.picking.confirmScan')}
+            <span className="truncate">
+                {isProcessing
+                    ? t('warehouse.picking.validating')
+                    : !currentItem
+                        ? 'Finalize Mission & Create Pack Job →'
+                        : step === 'QUANTITY'
+                            ? t('warehouse.picking.confirmPick')
+                            : isItemMatched
+                                ? t('warehouse.picking.completePick')
+                                : t('warehouse.picking.confirmScan')}
+            </span>
         </button>
     );
 };

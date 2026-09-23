@@ -518,3 +518,22 @@
 ## `discrepancy_reports`
 
 > ⚠️ Table exists but RLS blocks all reads for the current user. Columns unknown — probe with a service-role key or check Supabase Dashboard.
+
+---
+
+## `system_config`
+
+| Column | Notes |
+|--------|-------|
+| `id` | PK |
+| `bonus_enabled` | boolean (Warehouse gamification toggle) |
+| `bonus_tiers` | jsonb (Warehouse bonus tiers) |
+| `bonus_payout_frequency` | text |
+| `warehouse_points_eligible_roles` | jsonb |
+| `warehouse_point_rules` | jsonb (Custom WMS point rules) |
+| `pos_bonus_enabled` | boolean (POS team bonus toggle) |
+| `pos_bonus_tiers` | jsonb (POS team bonus tiers) |
+| `pos_bonus_payout_frequency` | text |
+| `pos_role_distribution` | jsonb (Role percentage distribution) |
+| `pos_point_rules` | jsonb (Custom POS point rules) |
+

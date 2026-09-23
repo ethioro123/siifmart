@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabase';
 import type { WorkerPoints, PointsTransaction, StorePoints } from '../types';
+import { logger } from '../utils/logger';
 
 export const workerPointsService = {
     async getAll(siteId?: string) {
@@ -10,7 +11,7 @@ export const workerPointsService = {
         const { data, error } = await query;
 
         if (error) {
-            console.error('Error fetching worker points:', error);
+            logger.error('gamificationService', 'Error fetching worker points:', error);
             return [];
         }
 
@@ -98,7 +99,7 @@ export const workerPointsService = {
             longest_streak: points.longestStreak,
             last_job_completed_at: points.lastJobCompletedAt,
             last_updated: points.lastUpdated,
-            achievements: points.achievements,
+            achievements: points.achievements || [],
             rank: points.rank,
             level: points.level,
             level_title: points.levelTitle,
@@ -114,7 +115,6 @@ export const workerPointsService = {
             .single();
         if (error) throw error;
 
-        // Return mapped object or just assume it worked and return input with ID if new
         return { ...points, id: data.id };
     },
 
@@ -156,7 +156,7 @@ export const pointsTransactionsService = {
             description: transaction.description,
             created_at: transaction.timestamp
         };
-        const { data, error } = await supabase.from('points_transactions').insert(dbTxn).select().single();
+        const { data, error } = await supabase.from('points_transactions').insert(dbTxn).select('id').single();
         if (error) throw error;
         return { ...transaction, id: data.id };
     },
@@ -168,7 +168,7 @@ export const pointsTransactionsService = {
 
         const { data, error } = await query;
         if (error) {
-            console.error('Error fetching points transactions:', error);
+            logger.error('gamificationService', 'Error fetching points transactions:', error);
             return [];
         }
 
@@ -188,7 +188,7 @@ export const storePointsService = {
     async getAll() {
         const { data, error } = await supabase.from('store_points').select('*');
         if (error) {
-            console.error('Error fetching store points:', error);
+            logger.error('gamificationService', 'Error fetching store points:', error);
             return [];
         }
         return data.map((sp: any) => ({
@@ -206,11 +206,11 @@ export const storePointsService = {
             lastTransactionAt: sp.last_transaction_at,
             lastUpdated: sp.last_updated,
             currentTier: sp.current_tier,
-            estimated_bonus: sp.estimated_bonus
+            estimatedBonus: sp.estimated_bonus
         }));
     },
 
-    async create(points: StorePoints) {
+    async upsertBySite(points: StorePoints) {
         const dbPoints = {
             site_id: points.siteId,
             site_name: points.siteName,
@@ -222,14 +222,40 @@ export const storePointsService = {
             total_revenue: points.totalRevenue,
             average_ticket_size: points.averageTicketSize,
             customer_satisfaction: points.customerSatisfaction,
-            last_transaction_at: points.lastTransactionAt,
-            last_updated: points.lastUpdated,
-            current_tier: points.currentTier,
-            estimated_bonus: points.estimatedBonus
+            last_transaction_at: points.lastTransactionAt || new Date().toISOString(),
+            last_updated: points.lastUpdated || new Date().toISOString(),
+            current_tier: points.currentTier || null,
+            estimated_bonus: points.estimatedBonus || 0
         };
-        const { data, error } = await supabase.from('store_points').insert(dbPoints).select().single();
+
+        const { data, error } = await supabase
+            .from('store_points')
+            .upsert(dbPoints, { onConflict: 'site_id' })
+            .select()
+            .single();
+
         if (error) throw error;
-        return { ...points, id: data.id };
+        return {
+            id: data.id,
+            siteId: data.site_id,
+            siteName: data.site_name,
+            totalPoints: data.total_points,
+            weeklyPoints: data.weekly_points,
+            monthlyPoints: data.monthly_points,
+            todayPoints: data.today_points,
+            totalTransactions: data.total_transactions,
+            totalRevenue: data.total_revenue,
+            averageTicketSize: data.average_ticket_size,
+            customerSatisfaction: data.customer_satisfaction,
+            lastTransactionAt: data.last_transaction_at,
+            lastUpdated: data.last_updated,
+            currentTier: data.current_tier,
+            estimatedBonus: data.estimated_bonus
+        };
+    },
+
+    async create(points: StorePoints) {
+        return this.upsertBySite(points);
     },
 
     async update(id: string, updates: Partial<StorePoints>) {

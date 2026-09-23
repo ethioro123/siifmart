@@ -73,7 +73,11 @@ export function useEmployeeActions(deps: UseEmployeeActionsDeps) {
                 variance: 0,
                 discrepancyReason: ''
             };
-            setShifts(prev => [shift, ...prev]);
+            setShifts(prev => {
+                const updated = [shift, ...prev.filter(s => !(s.cashierId === cashierId && s.status === 'Open'))];
+                try { localStorage.setItem('siifmart_pos_shifts', JSON.stringify(updated)); } catch {}
+                return updated;
+            });
             addNotification('success', 'Shift started');
             logSystemEvent('Start Shift', `Started shift for ${staffName}`, staffName, 'HR');
         } catch (error) {
@@ -86,7 +90,11 @@ export function useEmployeeActions(deps: UseEmployeeActionsDeps) {
         try {
             const cashier = employees.find(e => e.id === shift.cashierId);
             const staffName = shift.cashierName || cashier?.name || 'Staff Member';
-            setShifts(prev => prev.map(s => s.id === shift.id ? { ...s, ...shift, status: 'Closed', endTime: new Date().toISOString() } : s));
+            setShifts(prev => {
+                const updated = prev.map(s => s.id === shift.id ? { ...s, ...shift, status: 'Closed' as const, endTime: new Date().toISOString() } : s);
+                try { localStorage.setItem('siifmart_pos_shifts', JSON.stringify(updated)); } catch {}
+                return updated;
+            });
             addNotification('success', 'Shift closed');
             logSystemEvent('Close Shift', `Closed shift for ${staffName}`, staffName, 'HR');
         } catch (error) {

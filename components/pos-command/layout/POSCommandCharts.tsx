@@ -13,11 +13,8 @@ export const POSCommandCharts: React.FC = () => {
     const { hourlyData, paymentChartData } = usePOSCommand();
     const [isMounted, setIsMounted] = React.useState(false);
 
-    const isManagerOrAdmin = [
+    const isCentralHQ = [
         'super_admin',
-        'admin',
-        'store_manager',
-        'operations_manager',
         'ceo'
     ].includes(user?.role?.toLowerCase() || '');
 
@@ -97,11 +94,11 @@ export const POSCommandCharts: React.FC = () => {
                 <div className="flex items-center justify-between mb-6">
                     <h3 className="text-xs font-black text-[#4D6E56] dark:text-[#7A9E83] uppercase tracking-widest flex items-center gap-2 select-none">
                         <PieChartIcon className="w-4 h-4 text-[#2C5E3B] dark:text-[#A9CBA2]" />
-                        {isManagerOrAdmin ? t('posCommand.paymentMethods') : "Shift Integrity & Security"}
+                        {isCentralHQ ? t('posCommand.paymentMethods') : "Shift Integrity & Security"}
                     </h3>
                 </div>
 
-                {isManagerOrAdmin ? (
+                {isCentralHQ ? (
                     <div className="h-[240px] w-full flex flex-col items-center justify-center">
                         <div className="h-[180px] w-full relative overflow-hidden min-h-[180px] flex items-center justify-center">
                             <ResponsiveContainer width="99%" height={180} minWidth={100} minHeight={160}>

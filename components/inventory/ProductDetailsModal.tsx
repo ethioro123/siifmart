@@ -89,7 +89,7 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
 
     if (!product) return null;
 
-    const isCEO = user?.role === 'super_admin';
+    const isCEO = user?.role === 'super_admin' || (user?.role as string)?.toLowerCase() === 'ceo';
     const isWarehouseManager = user?.role === 'warehouse_manager';
     const isStoreManager = user?.role === 'store_manager';
     const showDeleteButton = isCEO || isStoreManager || isWarehouseManager;

@@ -43,6 +43,7 @@ interface UsePOSCheckoutActionsProps {
     isPaymentValid: boolean;
     processSale: any;
     clearCart: () => void;
+    setShowCart?: React.Dispatch<React.SetStateAction<boolean>>;
     addNotification: (type: 'alert' | 'success' | 'info', message: string, userId?: string, isGlobal?: boolean) => void;
     sales: SaleRecord[];
     
@@ -99,6 +100,7 @@ export const usePOSCheckoutActions = ({
     isPaymentValid,
     processSale,
     clearCart,
+    setShowCart,
     addNotification,
     sales,
     cartDiscount,
@@ -157,10 +159,10 @@ export const usePOSCheckoutActions = ({
             addNotification('info', "Cart is empty. Add items to proceed to payment.");
             return;
         }
-        setAmountTendered('');
+        setAmountTendered(Math.ceil(total).toString());
         setSelectedPaymentMethod('Cash');
         setIsPaymentModalOpen(true);
-    }, [cart, addNotification, setAmountTendered, setSelectedPaymentMethod, setIsPaymentModalOpen]);
+    }, [cart, total, addNotification, setAmountTendered, setSelectedPaymentMethod, setIsPaymentModalOpen]);
 
     const handleProcessPayment = React.useCallback(async () => {
         if (!isPaymentValid) return;
@@ -223,13 +225,14 @@ export const usePOSCheckoutActions = ({
             setIsReceiptModalOpen(true);
             clearCart();
             setSelectedCustomer(null);
+            setShowCart?.(false);
         } catch (e) {
             addNotification('alert', "Error processing sale");
             setIsProcessing(false);
         }
     }, [
         isPaymentValid, selectedPaymentMethod, amountTendered, total, changeDue, activeSite, cart, user,
-        taxBreakdown, processSale, clearCart, setSelectedCustomer, setLastSale, setEarnedPointsData,
+        taxBreakdown, processSale, clearCart, setShowCart, setSelectedCustomer, setLastSale, setEarnedPointsData,
         setShowPointsPopup, setIsPaymentModalOpen, setIsReceiptModalOpen, addNotification, setIsProcessing
     ]);
 

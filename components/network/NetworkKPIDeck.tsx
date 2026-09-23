@@ -2,6 +2,8 @@ import React from 'react';
 import { Building, Store, Package, DollarSign, TrendingUp } from 'lucide-react';
 import { CURRENCY_SYMBOL } from '../../constants';
 import { formatCompactNumber } from '../../utils/formatting';
+import { useStore } from '../../contexts/CentralStore';
+import { hasPermission } from '../../utils/permissions';
 
 interface NetworkKPIDeckProps {
     totalWarehouses: number;
@@ -9,6 +11,8 @@ interface NetworkKPIDeckProps {
     totalNetworkProducts: number;
     totalNetworkAssetValue: number;
     totalPotentialRevenue: number;
+    uniqueNetworkSKUs?: number;
+    totalNetworkUnits?: number;
 }
 
 export const NetworkKPIDeck: React.FC<NetworkKPIDeckProps> = ({
@@ -16,8 +20,13 @@ export const NetworkKPIDeck: React.FC<NetworkKPIDeckProps> = ({
     totalStores,
     totalNetworkProducts,
     totalNetworkAssetValue,
-    totalPotentialRevenue
+    totalPotentialRevenue,
+    uniqueNetworkSKUs,
+    totalNetworkUnits
 }) => {
+    const { user } = useStore();
+    const canViewCost = hasPermission(user?.role, 'VIEW_COST_PRICE');
+
     return (
         <div className="grid grid-cols-2 md:grid-cols-5 gap-3.5 sm:gap-4">
             <div className="bg-white/85 dark:bg-[#18201B]/60 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-3xl p-4 sm:p-5 shadow-sm">
@@ -45,9 +54,14 @@ export const NetworkKPIDeck: React.FC<NetworkKPIDeckProps> = ({
                     <div className="p-2 bg-emerald-50 dark:bg-[#2C5E3B]/20 text-[#2C5E3B] dark:text-[#A9CBA2] rounded-xl border border-emerald-200 dark:border-emerald-950/30">
                         <Package size={18} />
                     </div>
-                    <span className="text-[10px] text-stone-500 dark:text-gray-400 font-bold uppercase tracking-wider">Total Products</span>
+                    <span className="text-[10px] text-stone-500 dark:text-gray-400 font-bold uppercase tracking-wider">Catalog SKUs</span>
                 </div>
-                <p className="text-2xl font-black font-mono text-[#1E3F27] dark:text-white">{totalNetworkProducts}</p>
+                <div className="flex items-baseline gap-1.5 flex-wrap">
+                    <p className="text-2xl font-black font-mono text-[#1E3F27] dark:text-white">{uniqueNetworkSKUs || totalNetworkProducts}</p>
+                    {totalNetworkUnits !== undefined && (
+                        <span className="text-[10px] text-stone-400 font-mono font-bold">({formatCompactNumber(totalNetworkUnits)} units)</span>
+                    )}
+                </div>
             </div>
 
             <div className="bg-white/85 dark:bg-[#18201B]/60 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-3xl p-4 sm:p-5 shadow-sm">
@@ -58,7 +72,7 @@ export const NetworkKPIDeck: React.FC<NetworkKPIDeckProps> = ({
                     <span className="text-[10px] text-stone-500 dark:text-gray-400 font-bold uppercase tracking-wider">Asset Value</span>
                 </div>
                 <p className="text-xl font-black font-mono text-[#2C5E3B] dark:text-[#A9CBA2] truncate">
-                    {formatCompactNumber(totalNetworkAssetValue, { currency: CURRENCY_SYMBOL })}
+                    {canViewCost ? formatCompactNumber(totalNetworkAssetValue, { currency: CURRENCY_SYMBOL }) : '••••••'}
                 </p>
             </div>
 

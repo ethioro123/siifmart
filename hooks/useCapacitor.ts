@@ -31,6 +31,7 @@ export function useCapacitor() {
         // 1. Configure Android / iOS Status Bar
         const setupStatusBar = async () => {
             try {
+                await StatusBar.setOverlaysWebView({ overlay: false });
                 await StatusBar.setStyle({ style: Style.Dark });
                 if (Capacitor.getPlatform() === 'android') {
                     await StatusBar.setBackgroundColor({ color: '#151D18' });

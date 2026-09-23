@@ -232,19 +232,48 @@ export const HIERARCHY_TREE: HierarchyNode[] = [
     }
 ];
 
-export interface OrgNode {
+export type OrgViewMode = 'tree' | 'matrix';
+
+export interface OrgTreeNode {
+    id: string;
+    employee?: Employee;
+    role: string;
+    label: string;
+    department: string;
+    siteId?: string;
+    siteName?: string;
+    level: number;
+    parentId?: string | null;
+    children: OrgTreeNode[];
+    directReportCount: number;
+    totalSubordinateCount: number;
+    isVacant?: boolean;
+}
+
+export interface OrgLayoutNode {
     id: string;
     x: number;
     y: number;
-    role: UserRole;
-    label: string;
-    employee?: Employee;
+    width: number;
+    height: number;
+    node: OrgTreeNode;
+    isCollapsed: boolean;
+    hasChildren: boolean;
+    isSearchMatch: boolean;
 }
 
-export interface Connection {
+export interface OrgConnectorPath {
     id: string;
-    from: string;
-    to: string;
-    fromHandle: 'top' | 'bottom' | 'left' | 'right';
-    toHandle: 'top' | 'bottom' | 'left' | 'right';
+    fromX: number;
+    fromY: number;
+    toX: number;
+    toY: number;
+    d: string;
+}
+
+export interface OrgChartFilterState {
+    searchTerm: string;
+    siteId: string;
+    department: string;
+    status: string;
 }

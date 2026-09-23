@@ -16,10 +16,11 @@ import DocumentsTab from './staff-profile/tabs/DocumentsTab';
 import PayrollTab from './staff-profile/tabs/PayrollTab';
 import SettingsTab from './staff-profile/tabs/SettingsTab';
 
-import Modal from './Modal';
 import ResetPasswordModal from './staff-profile/modals/ResetPasswordModal';
 import SendMessageModal from './staff-profile/modals/SendMessageModal';
 import AdjustSalaryModal from './staff-profile/modals/AdjustSalaryModal';
+import { RequestTimeOffModal } from './staff-profile/modals/RequestTimeOffModal';
+import { PayslipModal } from './staff-profile/modals/PayslipModal';
 import EmployeeIDCard from './EmployeeIDCard';
 import ImageEditorModal from './ImageEditorModal';
 import { Employee } from '../types';
@@ -55,8 +56,11 @@ export default function StaffProfileView(props: StaffProfileViewProps) {
     const canTerminate = (user?.role === 'super_admin' || user?.role === 'hr' || user?.role === 'hr_manager') && userRoleLevel > targetRoleLevel && !isOwnProfile;
     const canDelete = user?.role === 'super_admin' && userRoleLevel > targetRoleLevel && !isOwnProfile;
 
+    const siteName = sites.find(s => s.id === employee.siteId || s.id === (employee as any).site_id)?.name || 'Headquarters';
+    const currencySymbol = (employee as any).salaryCurrency || settings?.currency || 'ETB';
+
     return (
-        <div className="bg-white dark:bg-cyber-gray border border-gray-200 dark:border-white/5 rounded-2xl p-4 md:p-6 shadow-lg shadow-2xl animate-in fade-in duration-500">
+        <div className="bg-white dark:bg-cyber-gray border border-gray-200 dark:border-white/5 rounded-2xl p-4 md:p-6 shadow-xl animate-in fade-in duration-500">
             <StaffProfileHeader 
                 employee={employee} isOwnProfile={isOwnProfile} canManageEmployees={canManage} 
                 canResetPassword={userRoleLevel > targetRoleLevel} canTerminate={canTerminate} canDelete={canDelete}
@@ -75,20 +79,130 @@ export default function StaffProfileView(props: StaffProfileViewProps) {
             />
 
             <div className="min-h-[400px]">
-                {profile.activeProfileTab === 'overview' && <OverviewTab employee={employee} employeeTasks={allTasks.filter(t => t.assignedTo === employee.id)} sites={sites} isOwnProfile={isOwnProfile} />}
-                {profile.activeProfileTab === 'gamification' && <GamificationTab employee={employee} settings={settings} sites={sites} getWorkerPoints={getWorkerPoints} getStorePoints={getStorePoints} />}
-                {profile.activeProfileTab === 'tasks' && <TasksTab canManageEmployees={canManage} isOwnProfile={isOwnProfile} employeeTasks={allTasks.filter(t => t.assignedTo === employee.id)} newTaskTitle={''} setNewTaskTitle={() => {}} newTaskPriority="Medium" setNewTaskPriority={() => {}} handleAddTask={() => {}} handleCompleteTask={() => {}} />}
-                {profile.activeProfileTab === 'timeoff' && <TimeOffTab isOwnProfile={isOwnProfile} onRequestTimeOff={() => profile.setIsTimeOffModalOpen(true)} />}
-                {profile.activeProfileTab === 'docs' && <DocumentsTab documentInputRef={profile.documentInputRef} handleDocumentUpload={() => {}} />}
-                {profile.activeProfileTab === 'payroll' && <PayrollTab employee={employee} canManageEmployees={canManage && !isOwnProfile} handleEditSalary={() => profile.setIsSalaryModalOpen(true)} handleDownloadPayslip={() => {}} />}
-                {profile.activeProfileTab === 'settings' && <SettingsTab employee={employee} sites={sites} canEditStaff={canManage && !isOwnProfile && userRoleLevel > targetRoleLevel} currentUser={user} updateEmployee={updateEmployee} currentPasswordInput={''} setCurrentPasswordInput={() => {}} newPasswordInput={profile.newPasswordInput} setNewPasswordInput={profile.setNewPasswordInput} confirmPasswordInput={profile.confirmPasswordInput} setConfirmPasswordInput={profile.setConfirmPasswordInput} isChangingPassword={profile.isChangingPassword} handleUpdatePassword={profile.handleUpdatePassword} />}
+                {profile.activeProfileTab === 'overview' && (
+                    <OverviewTab
+                        employee={employee}
+                        employeeTasks={allTasks.filter(t => t.assignedTo === employee.id)}
+                        sites={sites}
+                        isOwnProfile={isOwnProfile}
+                    />
+                )}
+                {profile.activeProfileTab === 'gamification' && (
+                    <GamificationTab
+                        employee={employee}
+                        settings={settings}
+                        sites={sites}
+                        getWorkerPoints={getWorkerPoints}
+                        getStorePoints={getStorePoints}
+                    />
+                )}
+                {profile.activeProfileTab === 'tasks' && (
+                    <TasksTab
+                        canManageEmployees={canManage}
+                        isOwnProfile={isOwnProfile}
+                        employeeTasks={allTasks.filter(t => t.assignedTo === employee.id)}
+                        newTaskTitle={profile.newTaskTitle}
+                        setNewTaskTitle={profile.setNewTaskTitle}
+                        newTaskPriority={profile.newTaskPriority}
+                        setNewTaskPriority={profile.setNewTaskPriority}
+                        handleAddTask={profile.handleAddTask}
+                        handleCompleteTask={profile.handleCompleteTask}
+                    />
+                )}
+                {profile.activeProfileTab === 'timeoff' && (
+                    <TimeOffTab
+                        isOwnProfile={isOwnProfile}
+                        canManageEmployees={canManage}
+                        leaveRequests={profile.leaveRequests}
+                        onRequestTimeOff={() => profile.setIsTimeOffModalOpen(true)}
+                        onApproveRequest={profile.handleApproveLeave}
+                        onRejectRequest={profile.handleRejectLeave}
+                    />
+                )}
+                {profile.activeProfileTab === 'docs' && (
+                    <DocumentsTab
+                        documents={profile.documents}
+                        documentInputRef={profile.documentInputRef}
+                        handleDocumentUpload={profile.handleDocumentUpload}
+                        handleDeleteDocument={profile.handleDeleteDocument}
+                        canUpload={canManage || isOwnProfile}
+                    />
+                )}
+                {profile.activeProfileTab === 'payroll' && (
+                    <PayrollTab
+                        employee={employee}
+                        canManageEmployees={canManage && !isOwnProfile}
+                        handleEditSalary={() => profile.setIsSalaryModalOpen(true)}
+                        onViewPayslip={profile.handleViewPayslip}
+                    />
+                )}
+                {profile.activeProfileTab === 'settings' && (
+                    <SettingsTab
+                        employee={employee}
+                        sites={sites}
+                        canEditStaff={canManage && !isOwnProfile && userRoleLevel > targetRoleLevel}
+                        isOwnProfile={isOwnProfile}
+                        currentUser={user}
+                        updateEmployee={updateEmployee}
+                        currentPasswordInput={''}
+                        setCurrentPasswordInput={() => {}}
+                        newPasswordInput={profile.newPasswordInput}
+                        setNewPasswordInput={profile.setNewPasswordInput}
+                        confirmPasswordInput={profile.confirmPasswordInput}
+                        setConfirmPasswordInput={profile.setConfirmPasswordInput}
+                        isChangingPassword={profile.isChangingPassword}
+                        handleUpdatePassword={profile.handleUpdatePassword}
+                    />
+                )}
             </div>
 
             {/* ACTION MODALS */}
-            {profile.isMessageModalOpen && <SendMessageModal isOpen={profile.isMessageModalOpen} onClose={() => profile.setIsMessageModalOpen(false)} employee={employee} messageInput={profile.messageInput} setMessageInput={profile.setMessageInput} handleConfirmSendMessage={() => { profile.setIsMessageModalOpen(false); addNotification('success', 'Message sent.'); }} />}
-            {profile.isPasswordModalOpen && <ResetPasswordModal isOpen={profile.isPasswordModalOpen} onClose={() => profile.setIsPasswordModalOpen(false)} employee={employee} showResetPassword={true} setShowResetPassword={() => {}} passwordInput={profile.passwordInput} setPasswordInput={profile.setPasswordInput} handleConfirmResetPassword={profile.handleConfirmResetPassword} isResetting={profile.isResetting} />}
-            {profile.isSalaryModalOpen && <AdjustSalaryModal isOpen={profile.isSalaryModalOpen} onClose={() => profile.setIsSalaryModalOpen(false)} salaryInput={profile.salaryInput} setSalaryInput={profile.setSalaryInput} handleConfirmSalary={() => { updateEmployee({ ...employee, salary: parseFloat(profile.salaryInput) }, user?.name || 'Admin'); profile.setIsSalaryModalOpen(false); addNotification('success', 'Salary updated.'); }} />}
-            {profile.idCardOpen && <EmployeeIDCard employee={employee} siteCode={sites.find(s => s.id === employee.siteId)?.code || 'HQ'} onClose={() => profile.setIdCardOpen(false)} />}
+            {profile.isMessageModalOpen && (
+                <SendMessageModal
+                    isOpen={profile.isMessageModalOpen}
+                    onClose={() => profile.setIsMessageModalOpen(false)}
+                    employee={employee}
+                    messageInput={profile.messageInput}
+                    setMessageInput={profile.setMessageInput}
+                    handleConfirmSendMessage={() => {
+                        profile.setIsMessageModalOpen(false);
+                        addNotification('success', 'Message sent.');
+                    }}
+                />
+            )}
+            {profile.isPasswordModalOpen && (
+                <ResetPasswordModal
+                    isOpen={profile.isPasswordModalOpen}
+                    onClose={() => profile.setIsPasswordModalOpen(false)}
+                    employee={employee}
+                    showResetPassword={true}
+                    setShowResetPassword={() => {}}
+                    passwordInput={profile.passwordInput}
+                    setPasswordInput={profile.setPasswordInput}
+                    handleConfirmResetPassword={profile.handleConfirmResetPassword}
+                    isResetting={profile.isResetting}
+                />
+            )}
+            {profile.isSalaryModalOpen && (
+                <AdjustSalaryModal
+                    isOpen={profile.isSalaryModalOpen}
+                    onClose={() => profile.setIsSalaryModalOpen(false)}
+                    salaryInput={profile.salaryInput}
+                    setSalaryInput={profile.setSalaryInput}
+                    handleConfirmSalary={() => {
+                        updateEmployee({ ...employee, salary: parseFloat(profile.salaryInput) }, user?.name || 'Admin');
+                        profile.setIsSalaryModalOpen(false);
+                        addNotification('success', 'Salary updated.');
+                    }}
+                />
+            )}
+            {profile.idCardOpen && (
+                <EmployeeIDCard
+                    employee={employee}
+                    siteCode={sites.find(s => s.id === employee.siteId)?.code || 'HQ'}
+                    onClose={() => profile.setIdCardOpen(false)}
+                />
+            )}
             {profile.isEditorOpen && profile.pendingImageSrc && (
                 <ImageEditorModal
                     isOpen={profile.isEditorOpen}
@@ -100,6 +214,23 @@ export default function StaffProfileView(props: StaffProfileViewProps) {
                     onSave={(croppedResult) => {
                         profile.handleSaveEditedPhoto(croppedResult);
                     }}
+                />
+            )}
+            {profile.isTimeOffModalOpen && (
+                <RequestTimeOffModal
+                    isOpen={profile.isTimeOffModalOpen}
+                    onClose={() => profile.setIsTimeOffModalOpen(false)}
+                    onSubmit={profile.handleRequestTimeOff}
+                />
+            )}
+            {profile.isPayslipModalOpen && profile.selectedPayslip && (
+                <PayslipModal
+                    isOpen={profile.isPayslipModalOpen}
+                    onClose={() => profile.setIsPayslipModalOpen(false)}
+                    employee={employee}
+                    payslip={profile.selectedPayslip}
+                    siteName={siteName}
+                    currencySymbol={currencySymbol}
                 />
             )}
         </div>

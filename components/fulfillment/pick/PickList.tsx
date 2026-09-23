@@ -112,29 +112,40 @@ export const PickList: React.FC<PickListProps> = ({
                                 const pickedItems = lineItems.filter((i: any) => i.status === 'Picked').length;
                                 const progress = totalItems > 0 ? (pickedItems / totalItems) * 100 : 0;
 
-                                // ── Conditional render: only mount what the viewport needs ──
+                                // Conditional render: only mount what the viewport needs
                                 if (isMobile) {
                                     return (
                                         <div
                                             key={job.id}
-                                            className={`flex items-center gap-3 bg-[#FAF8F5]/80 dark:bg-[#1C2620]/60 border rounded-xl p-3 active:bg-stone-50 dark:active:bg-white/5 transition-colors cursor-pointer ${job.priority === 'Critical' ? 'border-red-500/30' : 'border-[#E2DCCE]/60 dark:border-[#A9CBA2]/10'}`}
+                                            className={`flex items-center gap-3 bg-[#FAF8F5]/85 dark:bg-[#1C2620]/70 border rounded-2xl p-3.5 min-h-[52px] active:scale-[0.98] transition-transform cursor-pointer shadow-sm ${job.priority === 'Critical' ? 'border-red-500/40' : job.status === 'In-Progress' ? 'border-[#2C5E3B]/50 dark:border-[#A9CBA2]/40 shadow-md' : 'border-[#E2DCCE]/70 dark:border-[#A9CBA2]/15'}`}
                                             onClick={() => handleStartJob(job)}
                                         >
-                                            <div className={`w-10 h-10 rounded-full flex items-center justify-center text-xs font-black flex-shrink-0 border ${
+                                            <div className={`w-11 h-11 rounded-xl flex items-center justify-center text-xs font-black flex-shrink-0 border ${
                                                 progress >= 100 ? 'bg-emerald-50 dark:bg-emerald-500/20 border-emerald-100 dark:border-emerald-500/30 text-emerald-600 dark:text-emerald-400' : 'bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20 text-[#2C5E3B] dark:text-[#A9CBA2]'
-                                            }}`}>
+                                            }`}>
                                                 {Math.round(progress)}%
                                             </div>
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex items-center gap-2">
-                                                    <span className="text-sm font-black text-slate-900 dark:text-white tracking-wider uppercase">{formatJobId(job)}</span>
+                                                    <span className="text-sm font-black text-slate-900 dark:text-white tracking-wider uppercase truncate">{formatJobId(job)}</span>
                                                     {job.priority === 'Critical' && (
-                                                        <span className="bg-red-500 text-white text-[8px] font-black px-1 py-0.5 rounded uppercase">!</span>
+                                                        <span className="bg-red-500 text-white text-[8px] font-black px-1.5 py-0.5 rounded uppercase shrink-0">!</span>
+                                                    )}
+                                                    {job.status === 'In-Progress' && (
+                                                        <span className="bg-[#2C5E3B]/15 text-[#2C5E3B] dark:text-[#A9CBA2] text-[8px] font-black px-1.5 py-0.5 rounded uppercase border border-[#2C5E3B]/20 shrink-0">● Active</span>
                                                     )}
                                                 </div>
-                                                <span className="text-[10px] text-zinc-500 dark:text-gray-400 font-bold uppercase tracking-widest">{totalItems} {t('warehouse.itemPlural')}</span>
+                                                <div className="flex items-center gap-2 text-[10px] text-zinc-500 dark:text-gray-400 font-bold uppercase tracking-wider truncate mt-0.5">
+                                                    <span>{totalItems} {t('warehouse.itemPlural')}</span>
+                                                    {lineItems[0]?.sku && (
+                                                        <>
+                                                            <span className="w-1 h-1 rounded-full bg-stone-300 dark:bg-stone-600 shrink-0" />
+                                                            <span className="truncate">{lineItems[0].sku}</span>
+                                                        </>
+                                                    )}
+                                                </div>
                                             </div>
-                                            <ChevronRight size={18} className="text-zinc-400 dark:text-gray-600 flex-shrink-0" />
+                                            <ChevronRight size={18} className="text-zinc-400 dark:text-gray-500 flex-shrink-0" />
                                         </div>
                                     );
                                 }

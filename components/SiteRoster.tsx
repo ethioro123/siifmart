@@ -40,7 +40,7 @@ export default function SiteRoster({
                 level: points?.level || 1,
                 levelTitle: points?.levelTitle || 'Rookie',
                 rank: points?.rank || 0,
-                isRostered: schedules.some(s => s.employeeId === emp.id && s.date === new Date().toISOString().split('T')[0] && (s.siteId === activeSite?.id || !s.siteId))
+                isRostered: schedules.some(s => s.employeeId === emp.id && s.date === new Date().toISOString().split('T')[0] && s.status !== 'Cancelled' && (s.siteId === activeSite?.id || !s.siteId))
             };
         }).sort((a, b) => b.points - a.points);
     }, [siteEmployees, getWorkerPoints, schedules, activeSite]);
@@ -120,12 +120,19 @@ export default function SiteRoster({
                                             </div>
                                         </div>
                                         <div className="text-right">
-                                            <div className={`text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-lg mb-1 inline-block ${
-                                                emp.status === 'Active'
-                                                    ? 'bg-emerald-50 text-[#2C5E3B] dark:bg-[#2C5E3B]/20 dark:text-[#A9CBA2] border border-emerald-200 dark:border-emerald-950/30'
-                                                    : 'bg-amber-50 text-amber-700 dark:bg-amber-950/30 dark:text-amber-400 border border-amber-200 dark:border-amber-900/30'
-                                            }`}>
-                                                {emp.status}
+                                            <div className="flex items-center justify-end gap-1 mb-1">
+                                                {emp.isRostered && (
+                                                    <span className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-lg inline-block bg-emerald-500/15 text-emerald-800 dark:text-emerald-200 border border-emerald-300 dark:border-emerald-700/40">
+                                                        On Duty
+                                                    </span>
+                                                )}
+                                                <div className={`text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-lg inline-block ${
+                                                    emp.status === 'Active'
+                                                        ? 'bg-emerald-50 text-[#2C5E3B] dark:bg-[#2C5E3B]/20 dark:text-[#A9CBA2] border border-emerald-200 dark:border-emerald-950/30'
+                                                        : 'bg-amber-50 text-amber-700 dark:bg-amber-950/30 dark:text-amber-400 border border-amber-200 dark:border-amber-900/30'
+                                                }`}>
+                                                    {emp.status}
+                                                </div>
                                             </div>
                                             <p className="text-[10px] text-stone-500 dark:text-stone-400 font-bold uppercase tracking-wider leading-none">
                                                 {emp.role.replace('_', ' ')}
@@ -199,7 +206,14 @@ export default function SiteRoster({
                                         <p className="text-[8px] text-stone-400 font-bold uppercase tracking-wider leading-none">Weekly</p>
                                     </div>
 
-                                    <div className={`w-2 h-2 rounded-full ${emp.status === 'Active' ? 'bg-[#2C5E3B]' : 'bg-amber-500'} ml-2`} />
+                                    <div className="flex items-center gap-1.5 ml-2">
+                                        {emp.isRostered && (
+                                            <span className="text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-800 dark:text-emerald-200 border border-emerald-300 dark:border-emerald-700/40">
+                                                On Duty
+                                            </span>
+                                        )}
+                                        <div className={`w-2 h-2 rounded-full ${emp.status === 'Active' ? 'bg-[#2C5E3B]' : 'bg-amber-500'}`} />
+                                    </div>
                                 </>
                             )}
                         </div>
